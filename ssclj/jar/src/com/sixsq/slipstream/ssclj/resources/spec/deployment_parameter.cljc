@@ -6,7 +6,7 @@
     [com.sixsq.slipstream.ssclj.util.spec :as su]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]))
 
-(s/def :cimi.deployment-parameter/deployment-href :cimi.core/nonblank-string)
+(s/def :cimi.deployment-parameter/deployment-href :cimi.common/resource-link)
 (s/def :cimi.deployment-parameter/name :cimi.core/nonblank-string)
 (s/def :cimi.deployment-parameter/value string?)
 (s/def :cimi.deployment-parameter/node-name :cimi.core/nonblank-string)

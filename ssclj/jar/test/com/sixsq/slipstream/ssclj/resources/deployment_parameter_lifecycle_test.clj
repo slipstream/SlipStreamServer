@@ -42,7 +42,7 @@
 
 (deftest create-deployment-parameter-xyz
   (let [deployment-href "deployment/abc34916-6ede-47f7-aaeb-a30ddecbba5b"
-        valid-entry {:deployment-href deployment-href :node-name "machine" :node-index 1 :type "node-instance"
+        valid-entry {:deployment-href {:href deployment-href} :node-name "machine" :node-index 1 :type "node-instance"
                      :name            "xyz" :value "XYZ" :acl resource-acl-jane}
         znode-path (zdu/deployment-parameter-path valid-entry)
         deployment-parameter-href (-> valid-entry
@@ -83,39 +83,3 @@
         (is "type should not be updated")))
 
   )
-
-
-; TODO move deployment parameter with special behavior to deployment lifecycle test
-#_(deftest deployment-parameter-state-complete
-  (let [deployment-href "deployment/abc34916-6ede-47f7-aaeb-a30ddecbba5b"
-        valid-entry {:deployment-href deployment-href :node-name "machine" :node-index 1 :type "node-instance"
-                     :name     "state-complete" :value "executing" :acl resource-acl-jane}
-        znode-path (zdu/deployment-parameter-path valid-entry)
-        deployment-parameter-id (->
-                                  (->> {:params   {:resource-name resource-url}
-                                        :identity identity-admin
-                                        :body     valid-entry}
-                                       (du/add-deployment-parameter-impl)
-                                       (assoc {} :response))
-                                  (t/is-status 201)
-                                  (t/location))
-        abs-uri (str p/service-context (u/de-camelcase deployment-parameter-id))
-        created-deployment-parameter (-> session-user-jane
-                                         (request abs-uri)
-                                         (t/body->edn)
-                                         (t/is-status 200))]
-    (is (uzk/exists "/deployment/abc34916-6ede-47f7-aaeb-a30ddecbba5b/state/machine_1_state-complete"))
-
-    (is (= "executing" (uzk/get-data znode-path)))
-
-
-
-    (-> session-user-jane
-        (request abs-uri :request-method :put
-                 :body (json/write-str {:value ""}))
-        (t/body->edn)
-        (t/is-status 200))
-
-    (is (not (uzk/exists "/deployment/abc34916-6ede-47f7-aaeb-a30ddecbba5b/state/machine_1_state-complete")))))
-
-

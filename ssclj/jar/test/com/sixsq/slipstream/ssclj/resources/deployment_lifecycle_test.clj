@@ -21,8 +21,6 @@
 
 (def base-uri (str p/service-context resource-url))
 
-
-
 (defn ring-app []
   (t/make-ring-app (t/concat-routes routes/final-routes)))
 
@@ -141,7 +139,8 @@
                               (t/is-status 201)
                               (t/location))
           abs-uri (str p/service-context (u/de-camelcase deployment-href))
-          abs-uri-deployment-parameter-state (str p/service-context dp/resource-url "/" valid-entry-deployment-uuid "_state")
+          abs-uri-deployment-parameter-state (str p/service-context dp/resource-url
+                                                  "/" valid-entry-deployment-uuid "_state")
           created-deployment (-> session-user
                                  (request abs-uri)
                                  (t/body->edn)
@@ -165,9 +164,9 @@
               (t/body->edn)
               (t/is-status 200))
           provisioning-deployment (-> session-user
-                                 (request start-uri)
-                                 (t/body->edn)
-                                 (t/is-status 200))]
+                                      (request start-uri)
+                                      (t/body->edn)
+                                      (t/is-status 200))]
 
       (is (= "provisioning" (get-in provisioning-deployment [:response :body :state])))
 
@@ -191,7 +190,8 @@
                               (t/body->edn)
                               (t/location))
           abs-uri (str p/service-context (u/de-camelcase deployment-href))
-          abs-uri-deployment-parameter-state (str p/service-context dp/resource-url "/" valid-entry-deployment-uuid "_state")
+          abs-uri-deployment-parameter-state (str p/service-context dp/resource-url
+                                                  "/" valid-entry-deployment-uuid "_state")
           created-deployment (-> session-user
                                  (request abs-uri)
                                  (t/body->edn))
@@ -217,23 +217,26 @@
 
       (-> session-admin-json
           (request (str p/service-context (du/deployment-parameter-href
-                     {:deployment-href deployment-href :node-name "node1" :node-index 1 :name "state-complete"}))
+                                            {:deployment-href {:href deployment-href} :node-name "node1"
+                                             :node-index      1 :name "state-complete"}))
                    :request-method :put :body (json/write-str {:value "provisioning"}))
           (t/body->edn)
           (t/is-status 200))
       (-> session-admin-json
           (request (str p/service-context (du/deployment-parameter-href
-                     {:deployment-href deployment-href :node-name "node1" :node-index 2 :name "state-complete"}))
+                                            {:deployment-href {:href deployment-href} :node-name "node1"
+                                             :node-index      2 :name "state-complete"}))
                    :request-method :put :body (json/write-str {:value "provisioning"}))
           (t/body->edn)
           (t/is-status 200))
 
       (is (= 1 (count (uzk/children
-                   (zdu/deployment-state-path deployment-href)))))
+                        (zdu/deployment-state-path deployment-href)))))
 
       (-> session-admin-json
           (request (str p/service-context (du/deployment-parameter-href
-                     {:deployment-href deployment-href :node-name "node2" :node-index 1 :name "state-complete"}))
+                                            {:deployment-href {:href deployment-href} :node-name "node2"
+                                             :node-index      1 :name "state-complete"}))
                    :request-method :put :body (json/write-str {:value "provisioning"}))
           (t/body->edn)
           (t/is-status 200))
@@ -250,28 +253,30 @@
 
       (-> session-admin-json
           (request (str p/service-context (du/deployment-parameter-href
-                                            {:deployment-href deployment-href :node-name "node1" :node-index 1 :name "state-complete"}))
+                                            {:deployment-href {:href deployment-href} :node-name "node1"
+                                             :node-index      1 :name "state-complete"}))
                    :request-method :put :body (json/write-str {:value "executing"}))
           (t/body->edn)
           (t/is-status 200))
       (-> session-admin-json
           (request (str p/service-context (du/deployment-parameter-href
-                                            {:deployment-href deployment-href :node-name "node1" :node-index 2 :name "state-complete"}))
+                                            {:deployment-href {:href deployment-href} :node-name "node1"
+                                             :node-index      2 :name "state-complete"}))
                    :request-method :put :body (json/write-str {:value "executing"}))
           (t/body->edn)
           (t/is-status 200))
 
       (-> session-admin-json
           (request (str p/service-context (du/deployment-parameter-href
-                                            {:deployment-href deployment-href :node-name "node2" :node-index 1 :name "state-complete"}))
+                                            {:deployment-href {:href deployment-href} :node-name "node2"
+                                             :node-index      1 :name "state-complete"}))
                    :request-method :put :body (json/write-str {:value "executing"}))
           (t/body->edn)
           (t/is-status 200))
 
       (is (= "sending report" (-> session-user
-                             (request (str p/service-context deployment-href))
-                             (t/body->edn)
-                             (get-in [:response :body :state]))))
-
+                                  (request (str p/service-context deployment-href))
+                                  (t/body->edn)
+                                  (get-in [:response :body :state]))))
 
       )))

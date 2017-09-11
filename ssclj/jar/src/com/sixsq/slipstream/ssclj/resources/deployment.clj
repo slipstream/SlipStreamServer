@@ -81,15 +81,11 @@
   [request]
   (retrieve-impl request))
 
-(defmethod crud/edit resource-name
-  [request]
-  (du/edit-deployment-impl request))
-
 (def delete-impl (std-crud/delete-fn resource-name))
 
 (defmethod crud/delete resource-name
   [request]
-  (delete-impl request)) ;TODO cleanup of deployment parameter and in zk should also be done
+  (delete-impl request))                                    ;TODO cleanup of deployment parameter and in zk should also be done
 
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
 
@@ -108,8 +104,7 @@
       (a/can-modify? resource request)
       (let [ops (if (.endsWith resourceURI "Collection")
                   [{:rel (:add c/action-uri) :href id}]
-                  [{:rel (:edit c/action-uri) :href id}
-                   {:rel (:delete c/action-uri) :href id}
+                  [{:rel (:delete c/action-uri) :href id}
                    {:rel (:start c/action-uri) :href href}])]
         (assoc resource :operations ops))
       (catch Exception e
