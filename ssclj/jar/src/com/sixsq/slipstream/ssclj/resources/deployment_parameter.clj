@@ -54,7 +54,7 @@
 
 (defmethod crud/new-identifier resource-name
   [json resource-name]
-  (let [new-id (str resource-url "/" (du/deployment-parameter-id json))]
+  (let [new-id (du/deployment-parameter-href json)]
     (assoc json :id new-id)))
 
 (defn deployment-parameter-watch-fn [is-transiant]

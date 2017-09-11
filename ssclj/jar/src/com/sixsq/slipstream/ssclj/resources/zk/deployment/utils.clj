@@ -22,11 +22,15 @@
          deployment-href name)
        (str (deployment-path deployment-href) separator)))
 
+
+
 (defn deployment-parameter-node-instance-complete-state-path
-  [{deployment-href :deployment-href node-name :node-name node-index :node-index name :name :as deployment-parameter}]
-  (let [node-instance-complete-state-znode-id (string/join "_" [node-name node-index name])]
-    (str separator
-         (string/join separator [deployment-href "state" node-instance-complete-state-znode-id]))))
+  ([deployment-href node-name node-index parameter-name]
+   (let [node-instance-complete-state-znode-id (string/join "_" [node-name node-index name])]
+     (str separator
+          (string/join separator [deployment-href "state" node-instance-complete-state-znode-id]))))
+  ([{deployment-href :deployment-href node-name :node-name node-index :node-index name :name :as deployment-parameter}]
+   (deployment-parameter-node-instance-complete-state-path deployment-href node-name node-index name)))
 
 (defn lock-deployment
   "Create a lock for the deployment. This should be used each time multi-operations on zookeeper are needed to complete

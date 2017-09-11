@@ -45,15 +45,10 @@
         valid-entry {:deployment-href deployment-href :node-name "machine" :node-index 1 :type "node-instance"
                      :name     "xyz" :value "XYZ" :acl resource-acl-jane}
         znode-path (zdu/deployment-parameter-path valid-entry)
-        deployment-parameter-id (->
-                           (->> {:params   {:resource-name resource-url}
-                                 :identity identity-admin
-                                 :body     valid-entry}
-                                (du/add-deployment-parameter-impl)
-                                (assoc {} :response))
-                           (t/is-status 201)
-                           (t/location))
-        abs-uri (str p/service-context (u/de-camelcase deployment-parameter-id))
+        deployment-parameter-href (-> valid-entry
+                                    du/create-deployment-parameter
+                                    :resource-id)
+        abs-uri (str p/service-context (u/de-camelcase deployment-parameter-href))
         created-deployment-parameter (-> session-user-jane
                                   (request abs-uri)
                                   (t/body->edn)
@@ -75,7 +70,19 @@
         (t/body->edn)
         (t/is-status 403))
 
-    (is (not (= "newvalue-albert" (uzk/get-data znode-path))) "deployment parameter can be updated")))
+    (is (not (= "newvalue-albert" (uzk/get-data znode-path))) "deployment parameter can be updated")
+
+
+    (-> session-user-jane
+        (request abs-uri :request-method :put
+                 :body (json/write-str {:type "deployment"}))
+        (t/body->edn)
+        (t/is-status 200)
+        (get-in [:response :body :type])
+        (= "node-instance")
+        (is "type should not be updated")))
+
+  )
 
 
 ; TODO move deployment parameter with special behavior to deployment lifecycle test

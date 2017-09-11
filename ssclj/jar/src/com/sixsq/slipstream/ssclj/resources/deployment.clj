@@ -8,7 +8,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.deployment-parameter :as dp]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [create-identity-map]]
-    [com.sixsq.slipstream.ssclj.resources.zk.deployment.state-machine :as zdsm]
+    [com.sixsq.slipstream.ssclj.resources.deployment.state-machine :as dsm]
     [com.sixsq.slipstream.ssclj.resources.deployment.utils :as du]
     [com.sixsq.slipstream.auth.acl :as a]
     [superstring.core :as str]
@@ -67,7 +67,7 @@
                            (assoc :resourceURI resource-uri)
                            u/update-timestamps
                            (crud/add-acl request)
-                           (assoc :state zdsm/initial-state))
+                           (assoc :state dsm/initial-state))
         response (db/add resource-name (crud/validate new-deployment) {})]
     response))
 
