@@ -98,9 +98,17 @@
 
 (defmethod crud/retrieve resource-name
   [{{accept :accept} :headers :as request}]
-  (case accept
-    "text/event-stream" retrieve-sse-impl
-    retrieve-json-impl))
+  (let [accept (if accept (-> accept
+                              (string/replace #"\s" "")
+                              (string/split #",")
+                              set) #{})
+        accept-json? (contains? accept "application/json")
+        accept-sse? (contains? accept "text/event-stream")]
+    (cond
+      (and accept-json? accept-sse?) retrieve-sse-impl
+      accept-json? retrieve-json-impl
+      accept-sse? retrieve-sse-impl
+      :else retrieve-json-impl)))
 
 (defmethod crud/edit resource-name
   [request]

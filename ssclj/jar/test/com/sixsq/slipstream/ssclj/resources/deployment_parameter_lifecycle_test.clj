@@ -43,16 +43,16 @@
 (deftest create-deployment-parameter-xyz
   (let [deployment-href "deployment/abc34916-6ede-47f7-aaeb-a30ddecbba5b"
         valid-entry {:deployment-href deployment-href :node-name "machine" :node-index 1 :type "node-instance"
-                     :name     "xyz" :value "XYZ" :acl resource-acl-jane}
+                     :name            "xyz" :value "XYZ" :acl resource-acl-jane}
         znode-path (zdu/deployment-parameter-path valid-entry)
         deployment-parameter-href (-> valid-entry
-                                    du/create-deployment-parameter
-                                    :resource-id)
+                                      du/create-deployment-parameter
+                                      :resource-id)
         abs-uri (str p/service-context (u/de-camelcase deployment-parameter-href))
         created-deployment-parameter (-> session-user-jane
-                                  (request abs-uri)
-                                  (t/body->edn)
-                                  (t/is-status 200))]
+                                         (request abs-uri)
+                                         (t/body->edn)
+                                         (t/is-status 200))]
 
     (is (= "XYZ" (uzk/get-data znode-path)))
 
