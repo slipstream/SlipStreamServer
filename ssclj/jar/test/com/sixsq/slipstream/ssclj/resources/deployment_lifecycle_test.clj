@@ -13,7 +13,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
     [com.sixsq.slipstream.ssclj.resources.zk.deployment.utils :as zdu]
-    [com.sixsq.slipstream.ssclj.resources.deployment.utils :as du]))
+    [com.sixsq.slipstream.ssclj.resources.deployment.utils :as du]
+    [com.sixsq.slipstream.ssclj.resources.deployment.state-machine :as dsm]))
 
 (use-fixtures :once t/setup-embedded-zk)
 
@@ -113,13 +114,13 @@
       (is (not (get-in created-deployment [:body :start-time])))
       (is (get-in started-deployment [:response :body :start-time]))
 
-      (is (= "init" (get-in started-deployment [:response :body :state])))
+      (is (= dsm/init-state (get-in started-deployment [:response :body :state])))
 
       (are [expected value]
         (= expected value)
-        "init" (uzk/get-data (str zdu/separator deployment-href "/state"))
-        "init" (uzk/get-data
-                 (str zdu/separator deployment-href "/" zdu/nodes-name "/node2/1/" "vmstate"))))))
+        dsm/init-state (uzk/get-data (str zdu/separator deployment-href "/state"))
+        "unknown" (uzk/get-data
+                    (str zdu/separator deployment-href "/" zdu/nodes-name "/node2/1/" "vmstate"))))))
 
 (deftest create-deployment-update-deployment-state
 
@@ -154,13 +155,13 @@
           update-deployment-parameter-state
           (-> session-user
               (request abs-uri-deployment-parameter-state :request-method :put
-                       :body (json/write-str {:value "provisioning"}))
+                       :body (json/write-str {:value dsm/provisioning-state}))
               (t/body->edn)
               (t/is-status 403))
           update-deployment-parameter-state
           (-> session-admin-json
               (request abs-uri-deployment-parameter-state :request-method :put
-                       :body (json/write-str {:value "provisioning"}))
+                       :body (json/write-str {:value dsm/provisioning-state}))
               (t/body->edn)
               (t/is-status 200))
           provisioning-deployment (-> session-user
@@ -168,9 +169,9 @@
                                       (t/body->edn)
                                       (t/is-status 200))]
 
-      (is (= "provisioning" (get-in provisioning-deployment [:response :body :state])))
+      (is (= dsm/provisioning-state (get-in provisioning-deployment [:response :body :state])))
 
-      (is (= "provisioning" (uzk/get-data (str zdu/separator deployment-href "/state"))))
+      (is (= dsm/provisioning-state (uzk/get-data (str zdu/separator deployment-href "/state"))))
       )))
 
 (deftest create-deployment-move-states
@@ -203,7 +204,7 @@
           update-deployment-parameter-state
           (-> session-admin-json
               (request abs-uri-deployment-parameter-state :request-method :put
-                       :body (json/write-str {:value "provisioning"}))
+                       :body (json/write-str {:value dsm/provisioning-state}))
               (t/body->edn)
               (t/is-status 200))
 
@@ -211,22 +212,22 @@
                                       (request start-uri)
                                       (t/body->edn)
                                       (t/is-status 200))]
-      (is (= "provisioning" (get-in provisioning-deployment [:response :body :state])))
+      (is (= dsm/provisioning-state (get-in provisioning-deployment [:response :body :state])))
 
-      (is (= "provisioning" (uzk/get-data (str zdu/separator deployment-href "/state"))))
+      (is (= dsm/provisioning-state (uzk/get-data (str zdu/separator deployment-href "/state"))))
 
       (-> session-admin-json
           (request (str p/service-context (du/deployment-parameter-href
-                                            {:deployment-href {:href deployment-href} :node-name "node1"
-                                             :node-index      1 :name "state-complete"}))
-                   :request-method :put :body (json/write-str {:value "provisioning"}))
+                                            {:deployment {:href deployment-href} :node-name "node1"
+                                             :node-index 1 :name "state-complete"}))
+                   :request-method :put :body (json/write-str {:value dsm/provisioning-state}))
           (t/body->edn)
           (t/is-status 200))
       (-> session-admin-json
           (request (str p/service-context (du/deployment-parameter-href
-                                            {:deployment-href {:href deployment-href} :node-name "node1"
-                                             :node-index      2 :name "state-complete"}))
-                   :request-method :put :body (json/write-str {:value "provisioning"}))
+                                            {:deployment {:href deployment-href} :node-name "node1"
+                                             :node-index 2 :name "state-complete"}))
+                   :request-method :put :body (json/write-str {:value dsm/provisioning-state}))
           (t/body->edn)
           (t/is-status 200))
 
@@ -235,48 +236,48 @@
 
       (-> session-admin-json
           (request (str p/service-context (du/deployment-parameter-href
-                                            {:deployment-href {:href deployment-href} :node-name "node2"
-                                             :node-index      1 :name "state-complete"}))
-                   :request-method :put :body (json/write-str {:value "provisioning"}))
+                                            {:deployment {:href deployment-href} :node-name "node2"
+                                             :node-index 1 :name "state-complete"}))
+                   :request-method :put :body (json/write-str {:value dsm/provisioning-state}))
           (t/body->edn)
           (t/is-status 200))
 
-      (is (= "executing" (uzk/get-data (str zdu/separator deployment-href "/state"))))
+      (is (= dsm/executing-state (uzk/get-data (str zdu/separator deployment-href "/state"))))
 
-      (is (= "executing" (-> session-user
-                             (request (str p/service-context deployment-href))
-                             (t/body->edn)
-                             (get-in [:response :body :state]))))
+      (is (= dsm/executing-state (-> session-user
+                                     (request (str p/service-context deployment-href))
+                                     (t/body->edn)
+                                     (get-in [:response :body :state]))))
 
       (is (= 3 (count (uzk/children
                         (zdu/deployment-state-path deployment-href)))))
 
       (-> session-admin-json
           (request (str p/service-context (du/deployment-parameter-href
-                                            {:deployment-href {:href deployment-href} :node-name "node1"
-                                             :node-index      1 :name "state-complete"}))
-                   :request-method :put :body (json/write-str {:value "executing"}))
+                                            {:deployment {:href deployment-href} :node-name "node1"
+                                             :node-index 1 :name "state-complete"}))
+                   :request-method :put :body (json/write-str {:value dsm/executing-state}))
           (t/body->edn)
           (t/is-status 200))
       (-> session-admin-json
           (request (str p/service-context (du/deployment-parameter-href
-                                            {:deployment-href {:href deployment-href} :node-name "node1"
-                                             :node-index      2 :name "state-complete"}))
-                   :request-method :put :body (json/write-str {:value "executing"}))
+                                            {:deployment {:href deployment-href} :node-name "node1"
+                                             :node-index 2 :name "state-complete"}))
+                   :request-method :put :body (json/write-str {:value dsm/executing-state}))
           (t/body->edn)
           (t/is-status 200))
 
       (-> session-admin-json
           (request (str p/service-context (du/deployment-parameter-href
-                                            {:deployment-href {:href deployment-href} :node-name "node2"
-                                             :node-index      1 :name "state-complete"}))
-                   :request-method :put :body (json/write-str {:value "executing"}))
+                                            {:deployment {:href deployment-href} :node-name "node2"
+                                             :node-index 1 :name "state-complete"}))
+                   :request-method :put :body (json/write-str {:value dsm/executing-state}))
           (t/body->edn)
           (t/is-status 200))
 
-      (is (= "sending report" (-> session-user
-                                  (request (str p/service-context deployment-href))
-                                  (t/body->edn)
-                                  (get-in [:response :body :state]))))
+      (is (= dsm/sending-report-state (-> session-user
+                                          (request (str p/service-context deployment-href))
+                                          (t/body->edn)
+                                          (get-in [:response :body :state]))))
 
       )))

@@ -67,7 +67,7 @@
                            (assoc :resourceURI resource-uri)
                            u/update-timestamps
                            (crud/add-acl request)
-                           (assoc :state dsm/initial-state))
+                           (assoc :state dsm/init-state))
         response (db/add resource-name (crud/validate new-deployment) {})]
     response))
 

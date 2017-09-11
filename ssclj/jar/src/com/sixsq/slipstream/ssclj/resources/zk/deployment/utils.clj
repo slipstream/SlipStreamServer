@@ -14,7 +14,7 @@
   (str (deployment-path deployment-href) separator lock-name))
 
 (defn deployment-parameter-path
-  [{{deployment-href :href} :deployment-href node-name :node-name node-index :node-index name :name :as deployment-parameter}]
+  [{{deployment-href :href} :deployment node-name :node-name node-index :node-index name :name :as deployment-parameter}]
   (->> (cond
          (and node-name node-index)
          (string/join separator [nodes-name node-name node-index name])
@@ -30,7 +30,8 @@
    (let [node-instance-complete-state-znode-id (string/join "_" [node-name node-index name])]
      (str separator
           (string/join separator [deployment-href "state" node-instance-complete-state-znode-id]))))
-  ([{{deployment-href :href} :deployment-href node-name :node-name node-index :node-index name :name :as deployment-parameter}]
+  ([{{deployment-href :href} :deployment node-name :node-name node-index :node-index name :name
+     :as                     deployment-parameter}]
    (deployment-parameter-node-instance-complete-state-path deployment-href node-name node-index name)))
 
 (defn lock-deployment
@@ -61,7 +62,7 @@
     (uzk/get-data (deployment-parameter-path deployment-parameter))))
 
 (defn deployment-state-path [deployment-href]
-  (deployment-parameter-path {:deployment-href {:href deployment-href} :name "state"}))
+  (deployment-parameter-path {:deployment {:href deployment-href} :name "state"}))
 
 (defn get-deployment-state [deployment-href]
   (uzk/get-data (deployment-state-path deployment-href)))

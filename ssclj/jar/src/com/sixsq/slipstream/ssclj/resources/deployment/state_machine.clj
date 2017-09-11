@@ -16,23 +16,27 @@
      coordination required.
 
   The topology of the run is persisted as an edn structure inside the ./topology znode.  This can be changed as nodes
-  come and go, for scalable deployments."
-  (:require [zookeeper :as zk]))
+  come and go, for scalable deployments.")
 
-;; State machine states
-(def initial-state "init")
+(def init-state           "init")
+(def provisioning-state   "provisioning")
+(def executing-state      "executing")
+(def sending-report-state "sending report")
+(def ready-state          "ready")
+(def finalyzing-state     "finalyzing")
+(def terminated-state     "terminated")
 
 (def valid-transitions
-  {initial-state ["provisioning"]
-   "provisioning" ["executing"]
-   "executing" ["sending report"]
-   "sending report" ["ready"]
-   "ready" ["provisioning"]
-   "finalyzing" ["terminated"]
-   "terminated" []})
+  {init-state           [provisioning-state]
+   provisioning-state   [executing-state]
+   executing-state      [sending-report-state]
+   sending-report-state [ready-state]
+   ready-state          [provisioning-state]
+   finalyzing-state     [terminated-state]
+   terminated-state     []})
 
 
 (defn get-next-state [current-state]
   (->> current-state
-      (get valid-transitions)
-      first))
+       (get valid-transitions)
+       first))

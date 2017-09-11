@@ -36,8 +36,8 @@
 (defn deployment-href-to-uuid [href] (string/replace-first href #"^deployment/" ""))
 
 (defn deployment-parameter-href
-  [{{deployment-href :href} :deployment-href node-name :node-name node-index
-                            :node-index name :name :as deployment-parameter}]
+  [{{deployment-href :href} :deployment node-name :node-name node-index
+                       :node-index name :name :as deployment-parameter}]
   (let [deployment-uuid (deployment-href-to-uuid deployment-href)
         deployment-parameter-element (cond
                                        (and deployment-uuid node-name node-index) [deployment-uuid node-name
@@ -50,9 +50,9 @@
 (defn set-global-deployment-parameter
   [deployment-href parameter-name value]
   (try
-    (let [deployment-parameter {:deployment-href {:href deployment-href}
-                                :name            parameter-name
-                                :value           value}
+    (let [deployment-parameter {:deployment {:href deployment-href}
+                                :name       parameter-name
+                                :value      value}
           current (db/retrieve (deployment-parameter-href deployment-parameter) {})
           merged (-> current
                      (merge deployment-parameter)
@@ -118,11 +118,11 @@
   (let [current (-> (str deployment-parameter-resource-url "/" uuid)
                     (db/retrieve request)
                     (a/can-modify? request))
-        merged (->> (dissoc body :type :deployment-href :node-name :node-index)
+        merged (->> (dissoc body :type :deployment :node-name :node-index)
                     (merge current))
         value (:value merged)
         parameter-name (:name merged)
-        deployment-href (get-in merged [:deployment-href :href])
+        deployment-href (get-in merged [:deployment :href])
         deployment-parameter (-> merged
                                  (u/update-timestamps)
                                  (crud/validate))]
@@ -142,27 +142,27 @@
 (defn create-parameters [identity {nodes :nodes deployment-href :id state :state}]
   (let [user (:current identity)]
     (create-deployment-parameter
-      {:deployment-href {:href deployment-href} :name "state" :value state :type "deployment"
-       :acl             {:owner {:principal "ADMIN"
-                                 :type      "ROLE"}
-                         :rules [{:principal user
-                                  :type      "USER"
-                                  :right     "VIEW"}]}})
+      {:deployment {:href deployment-href} :name "state" :value state :type "deployment"
+       :acl        {:owner {:principal "ADMIN"
+                            :type      "ROLE"}
+                    :rules [{:principal user
+                             :type      "USER"
+                             :right     "VIEW"}]}})
     (doseq [n nodes]
       (let [node-name (name (key n))
             multiplicity (read-string (get-in (val n) [:parameters :multiplicity :default-value] "1"))]
         (doseq [i (range 1 (inc multiplicity))]
           (create-deployment-parameter
-            {:deployment-href {:href deployment-href} :node-name node-name :node-index i :type "node-instance"
-             :name            "state-complete" :value "" :acl {:owner {:principal "ADMIN"
-                                                                       :type      "ROLE"}
-                                                               :rules [{:principal user
-                                                                        :type      "USER"
-                                                                        :right     "MODIFY"}]}})
+            {:deployment {:href deployment-href} :node-name node-name :node-index i :type "node-instance"
+             :name       "state-complete" :value "" :acl {:owner {:principal "ADMIN"
+                                                                  :type      "ROLE"}
+                                                          :rules [{:principal user
+                                                                   :type      "USER"
+                                                                   :right     "MODIFY"}]}})
           (create-deployment-parameter
-            {:deployment-href {:href deployment-href} :node-name node-name :node-index i :type "node-instance"
-             :name            "vmstate" :value "init" :acl {:owner {:principal "ADMIN"
-                                                                    :type      "ROLE"}
-                                                            :rules [{:principal user
-                                                                     :type      "USER"
-                                                                     :right     "MODIFY"}]}}))))))
+            {:deployment {:href deployment-href} :node-name node-name :node-index i :type "node-instance"
+             :name       "vmstate" :value "unknown" :acl {:owner {:principal "ADMIN"
+                                                                  :type      "ROLE"}
+                                                          :rules [{:principal user
+                                                                   :type      "USER"
+                                                                   :right     "MODIFY"}]}}))))))

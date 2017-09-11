@@ -42,7 +42,7 @@
 
 (deftest create-deployment-parameter-xyz
   (let [deployment-href "deployment/abc34916-6ede-47f7-aaeb-a30ddecbba5b"
-        valid-entry {:deployment-href {:href deployment-href} :node-name "machine" :node-index 1 :type "node-instance"
+        valid-entry {:deployment {:href deployment-href} :node-name "machine" :node-index 1 :type "node-instance"
                      :name            "xyz" :value "XYZ" :acl resource-acl-jane}
         znode-path (zdu/deployment-parameter-path valid-entry)
         deployment-parameter-href (-> valid-entry
