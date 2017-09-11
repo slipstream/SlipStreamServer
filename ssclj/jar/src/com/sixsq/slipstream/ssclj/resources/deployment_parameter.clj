@@ -18,7 +18,7 @@
     [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
     [com.sixsq.slipstream.ssclj.resources.zk.deployment.utils :as zdu]
     [com.sixsq.slipstream.ssclj.resources.deployment.utils :as du]
-    )
+    [cheshire.core :as json])
   (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-name du/deployment-parameter-resource-name)
@@ -67,14 +67,14 @@
                       deployment-parameter :watcher
                       (partial (deployment-parameter-watch-fn is-transiant) event-ch id name)))
             deployment-parameter (assoc deployment-parameter :value value)]
-        (sse/send-event id name deployment-parameter event-ch)
+        (sse/send-event id name (json/generate-string deployment-parameter) event-ch)
         (when is-transiant (async/close! event-ch))))))
 
 (defn send-event-and-set-watcher
   [event-ch watch-fn {id :id name :name :as deployment-parameter}]
   (let [value (zdu/get-deployment-parameter-value deployment-parameter :watcher (partial watch-fn event-ch id name))
         deployment-parameter (assoc deployment-parameter :value value)]
-    (sse/send-event id name deployment-parameter event-ch)))
+    (sse/send-event id name (json/generate-string deployment-parameter) event-ch)))
 
 (defn retrieve-deployment-parameter
   [{{uuid :uuid} :params :as request}]
