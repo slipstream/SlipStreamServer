@@ -96,14 +96,14 @@
                    :type        "string"
                    :mandatory   true
                    :readOnly    true
-                   :order       0}
+                   :order       10}
           :method {:displayName "Credential Creation Method"
                    :category    "general"
                    :description "method for creating credential"
                    :type        "string"
                    :mandatory   true
                    :readOnly    true
-                   :order       1}}))
+                   :order       11}}))
 ;;
 ;; multimethods for validation
 ;;

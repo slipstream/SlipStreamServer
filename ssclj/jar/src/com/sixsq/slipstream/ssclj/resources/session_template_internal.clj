@@ -31,14 +31,14 @@
                      :type        "string"
                      :mandatory   true
                      :readOnly    false
-                     :order       3}
+                     :order       20}
           :password {:displayName "Password"
                      :category    "general"
                      :description "password"
                      :type        "password"
                      :mandatory   true
                      :readOnly    false
-                     :order       4}}))
+                     :order       21}}))
 
 ;;
 ;; initialization: register this Session template and create internal authentication template

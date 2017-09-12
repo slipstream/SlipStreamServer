@@ -51,7 +51,8 @@ public class SscljProxy {
     public enum Method {
         GET,
         PUT,
-        POST;
+        POST,
+        DELETE;
     }
 
     public static final String BASE_RESOURCE = "api/";
@@ -73,7 +74,7 @@ public class SscljProxy {
     }
 
     public static Response get(String resource, String username, Form queryParameters, Boolean throwException) {
-        return request(Method.GET, resource, null, username, queryParameters, null,  throwException);
+        return request(Method.GET, resource, null, username, queryParameters, null, throwException);
     }
 
     public static Response get(String resource, String username, Boolean throwException) {
@@ -100,9 +101,28 @@ public class SscljProxy {
         return request(Method.POST, resource, null, null, queryParameters, mediaType, throwException);
     }
 
+    public static Response delete(String resource, String username) {
+        return request(Method.DELETE, resource, null, username, null, null, null);
+    }
+
+
+
+    public static Response delete(String resource, String username, Form queryParameters) {
+        return request(Method.DELETE, resource, null, username, queryParameters, null, null);
+    }
+
+    public static Response delete(String resource, String username, Form queryParameters, Boolean throwException) {
+        return request(Method.DELETE, resource, null, username, queryParameters, null, throwException);
+    }
+
+    public static Response delete(String resource, String username, Boolean throwException) {
+        return request(Method.DELETE, resource, null, username, null, null, throwException);
+    }
+
+
     private static Response request(Method method, String resource, Object obj, String username,
-                                          Iterable<Parameter> queryParameters, MediaType mediaType,
-                                          Boolean throwExceptions) {
+                                    Iterable<Parameter> queryParameters, MediaType mediaType,
+                                    Boolean throwExceptions) {
         if (isMuted) {
             return new Response(new org.restlet.Request());
         }
@@ -135,6 +155,7 @@ public class SscljProxy {
 
             if (queryParameters != null) {
                 client.addQueryParameters(queryParameters);
+
             }
 
             if (username != null) {
@@ -154,6 +175,10 @@ public class SscljProxy {
                     responseEntity = client.post(content, mediaType);
                     logger.fine("POST content : " + content.getText());
                     break;
+                case DELETE:
+                    responseEntity = client.delete(mediaType);
+                    logger.fine("DELETE content : " + content.getText());
+                    break;
                 default:
                     throw new UnsupportedOperationException("Method " + method.toString() + "not supported");
             }
@@ -162,7 +187,8 @@ public class SscljProxy {
             // Without this hack it will not be available once this function returns.
             try {
                 responseEntity.getText();
-            } catch (IOException ignored) {}
+            } catch (IOException ignored) {
+            }
 
         } catch (ResourceException re) {
             String message = "ResourceException: " + re.getMessage();
@@ -170,7 +196,8 @@ public class SscljProxy {
                 Response resp = client.getResponse();
                 message += "\n\twith status: " + resp.getStatus().toString();
                 message += "\n\twith content: " + resp.getEntityAsText();
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
             logger.warning(message);
             if (shouldThrow(throwExceptions)) {
                 throw re;
@@ -231,7 +258,7 @@ public class SscljProxy {
 
     @SuppressWarnings("unchecked")
     public static Series<Header> getHeaders(Resource resource) {
-        Series<Header> headers = (Series<Header>)resource.getRequestAttributes().get(HeaderConstants.ATTRIBUTE_HEADERS);
+        Series<Header> headers = (Series<Header>) resource.getRequestAttributes().get(HeaderConstants.ATTRIBUTE_HEADERS);
         if (headers == null) {
             headers = new Series<Header>(Header.class);
             resource.getRequestAttributes().put(HeaderConstants.ATTRIBUTE_HEADERS, headers);

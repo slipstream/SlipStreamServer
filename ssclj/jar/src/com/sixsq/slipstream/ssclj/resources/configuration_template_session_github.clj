@@ -28,13 +28,13 @@
                      :description "client identifier assigned to the GitHub OAuth application"
                      :mandatory   true
                      :readOnly    false
-                     :order       1}
+                     :order       20}
           :baseURL  {:displayName "Client Secret"
                      :type        "password"
                      :description "client secret assigned to the GitHub OAuth application"
                      :mandatory   true
                      :readOnly    false
-                     :order       2}}))
+                     :order       21}}))
 
 ;;
 ;; initialization: register this Configuration template
