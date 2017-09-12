@@ -24,6 +24,7 @@
                  '[[org.clojure/clojure]
 
                    [aleph]
+                   [cc.qbits/spandex]
                    [cheshire] ;; newer version needed for ring-json
                    [compojure]
                    [com.jcraft/jsch]
