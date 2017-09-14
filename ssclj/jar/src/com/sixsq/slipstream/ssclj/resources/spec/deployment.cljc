@@ -18,6 +18,7 @@
 (s/def :cimi.deployment/tags (s/coll-of string?))
 (s/def :cimi.deployment/state #{"Initializing" "Provisioning" "Executing" "SendingReports" "Ready" "Finalizing" "Done"
                                 "Cancelled" "Aborted" "Unknown"})
+(s/def :cimi.deployment/abort string?)
 
 (s/def :cimi.deployment.parameter/description string?)
 (s/def :cimi.deployment.parameter/value string?)
@@ -67,6 +68,7 @@
                        :opt-un [:cimi.deployment/start-time
                                 :cimi.deployment/end-time
                                 :cimi.deployment/last-state-change-time
-                                :cimi.deployment/tags]})
+                                :cimi.deployment/tags
+                                :cimi.deployment/abort]})
 
 (s/def :cimi/deployment (su/only-keys-maps c/common-attrs deployment-attrs))
