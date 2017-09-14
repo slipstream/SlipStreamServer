@@ -34,16 +34,15 @@
    :category            "Deployment"
    :type                "Orchestration"
    :mutable             false
-   :nodes               {:node1 {:parameters         {:cloudservice {:description       "p1 description" ;TODO only node name and  multiplicity are being used for now from all these parameters
-                                                                     :default-value     "abc"
-                                                                     :user-choice-value "ABC"}
-                                                      :multiplicity {:default-value "2"}}
-                                 :runtime-parameters {:p1 {:description       "p1 description"
-                                                           :default-value     "abc"
-                                                           :user-choice-value "ABC"
-                                                           :mapped-to         "a"}}}
-                         :node2 {:parameters {:cloudservice {:description   "param1 description"
-                                                             :default-value "abc"}}}}})
+   :keep-running        true
+   :nodes               {:node1 {:parameters         {:cloudservice {:description "p1 description" ;TODO only node name and  multiplicity are being used for now from all these parameters
+                                                                     :value       "abc"}
+                                                      :multiplicity {:value "2"}}
+                                 :runtime-parameters {:p1 {:description "p1 description"
+                                                           :value       "abc"
+                                                           :mapped-to   "a"}}}
+                         :node2 {:parameters {:cloudservice {:description "param1 description"
+                                                             :value       "abc"}}}}})
 
 (deftest create-deployment
 
@@ -279,5 +278,75 @@
                                           (request (str p/service-context deployment-href))
                                           (t/body->edn)
                                           (get-in [:response :body :state]))))
+
+      )))
+
+
+(deftest create-deployment-move-states-abort
+
+  (let [session-admin-json (-> (session (ring-app))
+                               (content-type "application/json")
+                               (header authn-info-header "super ADMIN USER ANON"))
+        session-user (-> (session (ring-app))
+                         (content-type "application/json")
+                         (header authn-info-header "jane USER ANON"))]
+
+    ;; adding, retrieving and  deleting entry as user should succeed
+    (let [deployment-href (-> session-user
+                              (request base-uri
+                                       :request-method :post
+                                       :body (json/write-str valid-entry))
+                              (t/body->edn)
+                              (t/location))
+          abs-uri (str p/service-context (u/de-camelcase deployment-href))
+          abs-uri-deployment-parameter-state (str p/service-context dp/resource-url
+                                                  "/" valid-entry-deployment-uuid "_state")
+          created-deployment (-> session-user
+                                 (request abs-uri)
+                                 (t/body->edn))
+          start-uri (str p/service-context
+                         (t/get-op created-deployment "http://schemas.dmtf.org/cimi/2/action/start"))
+          started-deployment (-> session-user
+                                 (request start-uri)
+                                 (t/body->edn))
+          update-deployment-parameter-state
+          (-> session-admin-json
+              (request abs-uri-deployment-parameter-state :request-method :put
+                       :body (json/write-str {:value dsm/provisioning-state}))
+              (t/body->edn)
+              (t/is-status 200))]
+
+      (-> session-admin-json
+          (request (str p/service-context (du/deployment-parameter-href
+                                            {:deployment {:href deployment-href} :node-name "node1"
+                                             :node-index 1 :name "state-complete"}))
+                   :request-method :put :body (json/write-str {:value dsm/provisioning-state}))
+          (t/body->edn)
+          (t/is-status 200))
+      (-> session-admin-json
+          (request (str p/service-context (du/deployment-parameter-href
+                                            {:deployment {:href deployment-href} :node-name "node1"
+                                             :node-index 2 :name "state-complete"}))
+                   :request-method :put :body (json/write-str {:value dsm/provisioning-state}))
+          (t/body->edn)
+          (t/is-status 200))
+
+      (-> session-admin-json
+          (request (str p/service-context (du/deployment-parameter-href
+                                            {:deployment {:href deployment-href} :node-name "node2"
+                                             :node-index 1 :name "abort"}))
+                   :request-method :put :body (json/write-str {:value "Error in node 1 abort the run"}))
+          (t/body->edn)
+          (t/is-status 200))
+
+      (is (= 1 (count (uzk/children
+                        (zdu/deployment-state-path deployment-href)))))
+
+      (is (= dsm/aborted-state (uzk/get-data (str zdu/separator deployment-href "/state"))))
+
+      (is (= dsm/aborted-state (-> session-user
+                                   (request (str p/service-context deployment-href))
+                                   (t/body->edn)
+                                   (get-in [:response :body :state]))))
 
       )))

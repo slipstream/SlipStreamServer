@@ -34,6 +34,8 @@ import javax.persistence.OptimisticLockException;
 import javax.persistence.RollbackException;
 
 import com.sixsq.slipstream.dashboard.DashboardResource;
+import com.sixsq.slipstream.persistence.*;
+import com.sixsq.slipstream.util.*;
 import org.hibernate.StaleObjectStateException;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
@@ -55,24 +57,7 @@ import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
-import com.sixsq.slipstream.persistence.Module;
-import com.sixsq.slipstream.persistence.ModuleCategory;
-import com.sixsq.slipstream.persistence.ModuleParameter;
-import com.sixsq.slipstream.persistence.NodeParameter;
-import com.sixsq.slipstream.persistence.Parameter;
-import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RunParameter;
-import com.sixsq.slipstream.persistence.RunType;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.persistence.ServiceConfiguration;
-import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.UserParameter;
-import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.resource.BaseResource;
-import com.sixsq.slipstream.util.ConfigurationUtil;
-import com.sixsq.slipstream.util.HtmlUtil;
-import com.sixsq.slipstream.util.RequestUtil;
-import com.sixsq.slipstream.util.SerializationUtil;
 
 /**
  * Unit test:
@@ -188,6 +173,9 @@ public class RunListResource extends BaseResource {
 			launch(run);
 
 			setLastExecute(user);
+
+			Deployment deployment = new Deployment(run);
+			Deployment.post(deployment);
 
 			run.postEventCreated();
 

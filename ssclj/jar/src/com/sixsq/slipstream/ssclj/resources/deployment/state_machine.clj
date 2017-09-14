@@ -18,13 +18,17 @@
   The topology of the run is persisted as an edn structure inside the ./topology znode.  This can be changed as nodes
   come and go, for scalable deployments.")
 
-(def init-state           "init")
-(def provisioning-state   "provisioning")
-(def executing-state      "executing")
-(def sending-report-state "sending report")
-(def ready-state          "ready")
-(def finalyzing-state     "finalyzing")
-(def terminated-state     "terminated")
+(def init-state           "Initializing")
+(def provisioning-state   "Provisioning")
+(def executing-state      "Executing")
+(def sending-report-state "SendingReports")
+(def ready-state          "Ready")
+(def finalyzing-state     "Finalizing")
+(def done-state           "Done")
+
+(def cancelled-state      "Cancelled")
+(def aborted-state        "Aborted")
+(def unknown-state        "Unknown")
 
 (def valid-transitions
   {init-state           [provisioning-state]
@@ -32,9 +36,14 @@
    executing-state      [sending-report-state]
    sending-report-state [ready-state]
    ready-state          [provisioning-state]
-   finalyzing-state     [terminated-state]
-   terminated-state     []})
+   finalyzing-state     [done-state]
+   done-state           []})
 
+(defn is-completed? [current-state]
+  (contains? #{cancelled-state aborted-state done-state unknown-state} current-state))
+
+(defn can-terminate? [current-state]
+  (contains? #{cancelled-state aborted-state done-state ready-state} current-state))
 
 (defn get-next-state [current-state]
   (->> current-state

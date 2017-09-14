@@ -87,11 +87,18 @@
         deployment (set-deployment-attribute deployment-href "state" next-state)]
     (doseq [n (:nodes deployment)]
       (let [node-name (name (key n))
-            multiplicity (read-string (get-in (val n) [:parameters :multiplicity :default-value] "1"))]
+            multiplicity (read-string (get-in (val n) [:parameters :multiplicity :value] "1"))]
         (doseq [i (range 1 (inc multiplicity))]
           (uzk/create-all
             (zdu/deployment-parameter-node-instance-complete-state-path
               deployment-href node-name i "state-complete") :persistent? true)))))
+  (zdu/unlock-deployment deployment-href))
+
+(defn abort-deployment [deployment-href current-state]
+  (zdu/check-deployment-lock-and-throw! deployment-href)
+  (zdu/lock-deployment-path deployment-href)
+  (set-deployment-attribute deployment-href "abort" current-state)
+  (set-deployment-attribute deployment-href "state" dsm/aborted-state)
   (zdu/unlock-deployment deployment-href))
 
 (defn create-deployment-parameter [deployment-parameter]
@@ -136,6 +143,10 @@
                                              (zdu/complete-node-instance-state merged)
                                              (when (zdu/all-nodes-completed-current-state? deployment-href)
                                                (move-deployment-next-state deployment-href value)))
+                          "abort" (do
+                                    (zdu/check-deployment-lock-and-throw! deployment-href)
+                                    (uzk/set-data (zdu/deployment-parameter-path deployment-parameter) value)
+                                    (abort-deployment deployment-href value))
                           (uzk/set-data (zdu/deployment-parameter-path deployment-parameter) value))))
     (db/edit deployment-parameter request)))
 
@@ -148,13 +159,27 @@
                     :rules [{:principal user
                              :type      "USER"
                              :right     "VIEW"}]}})
+    (create-deployment-parameter
+      {:deployment {:href deployment-href} :name "abort" :value state :type "deployment"
+       :acl        {:owner {:principal "ADMIN"
+                            :type      "ROLE"}
+                    :rules [{:principal user
+                             :type      "USER"
+                             :right     "VIEW"}]}})
     (doseq [n nodes]
       (let [node-name (name (key n))
-            multiplicity (read-string (get-in (val n) [:parameters :multiplicity :default-value] "1"))]
+            multiplicity (read-string (get-in (val n) [:parameters :multiplicity :value] "1"))]
         (doseq [i (range 1 (inc multiplicity))]
           (create-deployment-parameter
             {:deployment {:href deployment-href} :node-name node-name :node-index i :type "node-instance"
              :name       "state-complete" :value "" :acl {:owner {:principal "ADMIN"
+                                                                  :type      "ROLE"}
+                                                          :rules [{:principal user
+                                                                   :type      "USER"
+                                                                   :right     "MODIFY"}]}})
+          (create-deployment-parameter
+            {:deployment {:href deployment-href} :node-name node-name :node-index i :type "node-instance"
+             :name       "abort" :value "" :acl {:owner {:principal "ADMIN"
                                                                   :type      "ROLE"}
                                                           :rules [{:principal user
                                                                    :type      "USER"
