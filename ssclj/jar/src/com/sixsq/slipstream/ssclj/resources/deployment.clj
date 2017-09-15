@@ -17,7 +17,8 @@
     [com.sixsq.slipstream.db.impl :as db]
     [clojure.tools.logging :as log]
     [clojure.core.async :as async]
-    [clj-time.core :as time])
+    [clj-time.core :as time]
+    [com.sixsq.slipstream.ssclj.util.log :as logu])
   (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-name du/deployment-resource-name)
@@ -31,6 +32,8 @@
 (def ^:const resource-uri (str c/slipstream-schema-uri resource-name))
 
 (def ^:const collection-uri (str c/slipstream-schema-uri collection-name))
+
+(def ^:const create-uri (str c/slipstream-schema-uri resource-name "Create"))
 
 (def collection-acl {:owner {:principal "ADMIN"
                              :type      "ROLE"}
@@ -50,10 +53,42 @@
 (defmethod crud/add-acl resource-uri
   [resource request]
   (a/add-acl resource request))
+
+;;
+;; validate create requests for subclasses of users
+;; different create (registration) requests may take different inputs
+;;
+(defn dispatch-on-registration-method [resource]
+  (get-in resource [:deploymentTemplate :method]))
+
+(defmulti create-validate-subtype dispatch-on-registration-method)
+
+(defmethod create-validate-subtype :default
+  [resource]
+  (logu/log-and-throw-400 "missing or invalid DeploymentTemplate reference"))
+
+(defmethod crud/validate create-uri
+  [resource]
+  (create-validate-subtype resource))
+
+;;
+;; template processing
+;;
+
+(defn dispatch-conversion
+  [resource _]
+  (:method resource))
+
+(defmulti tpl->deployment dispatch-conversion)
+
+;; default implementation throws if the registration method is unknown
+(defmethod tpl->deployment :default
+  [resource request]
+  (logu/log-and-throw-400 "missing or invalid DeploymentTemplate reference"))
+
 ;;
 ;; CRUD operations
 ;;
-
 
 (defmethod crud/new-identifier resource-name
   [json _]
@@ -71,9 +106,21 @@
         response (db/add resource-name (crud/validate new-deployment) {})]
     response))
 
+
 (defmethod crud/add resource-name
-  [request]
-  (add-impl request))
+  [{:keys [body] :as request}]
+  (let [idmap {:identity (:identity request)}
+        desc-attrs (u/select-desc-keys body)
+        {:keys [id] :as body} (-> body
+                                  (assoc :resourceURI create-uri)
+                                  (update-in [:deploymentTemplate] dissoc :method) ;; forces use of template reference
+                                  (std-crud/resolve-hrefs idmap)
+                                  (update-in [:deploymentTemplate] merge desc-attrs) ;; validate desc attrs
+                                  (crud/validate)
+                                  (:deploymentTemplate)
+                                  (tpl->deployment request)
+                                  (merge desc-attrs))]      ;; ensure desc attrs are added
+    (add-impl (assoc request :id id :body body))))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 

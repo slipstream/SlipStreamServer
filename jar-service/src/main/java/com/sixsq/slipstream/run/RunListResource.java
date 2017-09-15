@@ -37,6 +37,8 @@ import com.sixsq.slipstream.dashboard.DashboardResource;
 import com.sixsq.slipstream.persistence.*;
 import com.sixsq.slipstream.util.*;
 import org.hibernate.StaleObjectStateException;
+import org.json.JSONObject;
+import org.json.XML;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
@@ -170,12 +172,7 @@ public class RunListResource extends BaseResource {
 
 			run.store();
 
-			launch(run);
-
 			setLastExecute(user);
-
-			Deployment deployment = new Deployment(run);
-			Deployment.post(deployment);
 
 			run.postEventCreated();
 
@@ -348,13 +345,6 @@ public class RunListResource extends BaseResource {
 		} catch (IllegalArgumentException e) {
 			throw (new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, "Unknown run type: " + type));
 		}
-	}
-
-	private Run launch(Run run) throws SlipStreamException {
-		User user = getUser();
-		user.addSystemParametersIntoUser(Configuration.getInstance().getParameters());
-		slipstream.async.Launcher.launch(run, user);
-		return run;
 	}
 
 	private Run addCredentials(Run run) throws ConfigurationException,

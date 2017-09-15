@@ -4,7 +4,8 @@
     [clojure.spec.gen.alpha :as gen]
     [clojure.string :as str]
     [com.sixsq.slipstream.ssclj.util.spec :as su]
-    [com.sixsq.slipstream.ssclj.resources.spec.common :as c]))
+    [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
+    [clojure.spec.alpha :as s]))
 
 (s/def :cimi.deployment/id :cimi.core/resource-href)
 (s/def :cimi.deployment/module-resource-uri :cimi.core/uri)
@@ -21,7 +22,7 @@
 (s/def :cimi.deployment/abort string?)
 
 (s/def :cimi.deployment.parameter/description string?)
-(s/def :cimi.deployment.parameter/value string?)
+(s/def :cimi.deployment.parameter/value (s/nilable string?))
 
 (s/def :cimi.deployment/parameter (su/only-keys-maps {:opt-un [:cimi.deployment.parameter/description
                                                                :cimi.deployment.parameter/value]}))
@@ -32,6 +33,7 @@
 (s/def :cimi.deployment.node/multiplicity :cimi.deployment/parameter)
 (s/def :cimi.deployment.node/max-provisioning-failures :cimi.deployment/parameter)
 (s/def :cimi.deployment.node/cloudservice :cimi.deployment/parameter)
+(s/def :cimi.deployment.node/run-build-recipes :cimi.deployment/parameter)
 
 (s/def :cimi.deployment/parameters
   (su/only-keys-maps
@@ -40,9 +42,10 @@
               :cimi.deployment.node/max-provisioning-failures
               :cimi.deployment.node/cpu.nb
               :cimi.deployment.node/ram.GB
-              :cimi.deployment.node/disk.GB]}))
+              :cimi.deployment.node/disk.GB
+              :cimi.deployment.node/run-build-recipes]}))
 
-(s/def :cimi.deployment.runtime-parameter/mapped-to :cimi.core/nonblank-string)
+(s/def :cimi.deployment.runtime-parameter/mapped-to (s/coll-of string?))
 
 (s/def :cimi.deployment.node/runtime-parameter (su/only-keys-maps
                                                  {:opt-un [:cimi.deployment.parameter/description
@@ -62,13 +65,13 @@
                                 :cimi.deployment/type
                                 :cimi.deployment/category
                                 :cimi.deployment/mutable
-                                :cimi.deployment/keep-running
                                 :cimi.deployment/nodes
                                 :cimi.deployment/state]
                        :opt-un [:cimi.deployment/start-time
                                 :cimi.deployment/end-time
                                 :cimi.deployment/last-state-change-time
                                 :cimi.deployment/tags
-                                :cimi.deployment/abort]})
+                                :cimi.deployment/abort
+                                :cimi.deployment/keep-running]})
 
 (s/def :cimi/deployment (su/only-keys-maps c/common-attrs deployment-attrs))
