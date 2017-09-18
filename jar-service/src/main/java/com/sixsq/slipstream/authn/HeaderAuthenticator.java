@@ -49,18 +49,19 @@ public class HeaderAuthenticator extends AuthenticatorBase {
 
     @Override
     protected boolean authenticate(Request request, Response response) {
-
-        //Form headers = (Form) request.getAttributes().get("org.restlet.http.headers");
-        //String username = headers.getFirstValue("slipstream-authn-info");
+        if (request.getClientInfo().isAuthenticated()) {
+            return true;
+        }
 
         Series<Header> series = (Series<Header>) request.getAttributes().get("org.restlet.http.headers");
-        String username = series.getFirst("slipstream-authn-info").getValue();
-
-        if (username != null && !username.isEmpty()) {
-            return handleValid(request, username);
-        } else {
-            return handleNotValid(request, response);
+        Header authnInfo = series.getFirst("slipstream-authn-info");
+        if (authnInfo != null) {
+            String username = series.getFirst("slipstream-authn-info").getValue();
+            if (username != null && !username.isEmpty()) {
+                return handleValid(request, username);
+            }
         }
+        return handleNotValid(request, response);
     }
 
     private boolean handleValid(Request request, String username) {
@@ -85,7 +86,6 @@ public class HeaderAuthenticator extends AuthenticatorBase {
     }
 
     private boolean handleNotValid(Request request, Response response) {
-        CookieUtils.removeAuthnCookie(response);
 
         List<MediaType> supported = new ArrayList<MediaType>();
         supported.add(MediaType.APPLICATION_XML);
