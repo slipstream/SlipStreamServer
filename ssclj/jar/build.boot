@@ -69,6 +69,7 @@
                    [org.clojure/test.check]
                    [org.slf4j/slf4j-log4j12 :scope "test"]
                    [org.apache.curator/curator-test :scope "test"]
+                   [clj-http-fake/clj-http-fake :scope "test"]
 
                    ;; boot tasks
                    [boot-environ]

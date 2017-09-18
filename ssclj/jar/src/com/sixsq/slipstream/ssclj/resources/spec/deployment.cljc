@@ -15,7 +15,7 @@
 (s/def :cimi.deployment/end-time :cimi.core/timestamp)
 (s/def :cimi.deployment/last-state-change-time :cimi.core/timestamp)
 (s/def :cimi.deployment/mutable boolean?)
-(s/def :cimi.deployment/keep-running boolean?)
+(s/def :cimi.deployment/keep-running (s/nilable string?))
 (s/def :cimi.deployment/tags (s/coll-of string?))
 (s/def :cimi.deployment/state #{"Initializing" "Provisioning" "Executing" "SendingReports" "Ready" "Finalizing" "Done"
                                 "Cancelled" "Aborted" "Unknown"})
@@ -34,6 +34,8 @@
 (s/def :cimi.deployment.node/max-provisioning-failures :cimi.deployment/parameter)
 (s/def :cimi.deployment.node/cloudservice :cimi.deployment/parameter)
 (s/def :cimi.deployment.node/run-build-recipes :cimi.deployment/parameter)
+(s/def :cimi.deployment.node/node.increment :cimi.deployment/parameter)
+(s/def :cimi.deployment.node/service-offer :cimi.deployment/parameter)
 
 (s/def :cimi.deployment/parameters
   (su/only-keys-maps
@@ -43,7 +45,9 @@
               :cimi.deployment.node/cpu.nb
               :cimi.deployment.node/ram.GB
               :cimi.deployment.node/disk.GB
-              :cimi.deployment.node/run-build-recipes]}))
+              :cimi.deployment.node/run-build-recipes
+              :cimi.deployment.node/node.increment
+              :cimi.deployment.node/service-offer]}))
 
 (s/def :cimi.deployment.runtime-parameter/mapped-to (s/coll-of string?))
 

@@ -17,12 +17,28 @@
     [com.sixsq.slipstream.ssclj.resources.deployment.utils :as du]
     [com.sixsq.slipstream.ssclj.resources.deployment.state-machine :as dsm]
     [com.sixsq.slipstream.ssclj.resources.deployment-template-std :as std]
+    [com.sixsq.slipstream.ssclj.resources.deployment-std :as dstd]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]))
+    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
+    [clj-http.fake :refer [with-fake-routes]]))
 
 (use-fixtures :once t/setup-embedded-zk)
 
-(use-fixtures :each (join-fixtures [t/with-test-es-client-fixture t/cleanup-all-zk-nodes]))
+(defn fake-http-java-server [f]
+  (with-fake-routes
+    {"http://localhost:8182/run" (fn
+                                   [request]
+                                   {:status 201
+                                    :headers
+                                            {"Location"
+                                             "http://localhost:8182/run/97089b96-5d99-4ccd-9bfe-99ba3ca21ae2"}})
+     "http://localhost:8182/run/97089b96-5d99-4ccd-9bfe-99ba3ca21ae2"
+                                 (fn [request] {:status 200
+                                                :body   (slurp "test-resources/deployment-service-testing.json")})
+     }
+    (f)))
+
+(use-fixtures :each (join-fixtures [t/with-test-es-client-fixture t/cleanup-all-zk-nodes fake-http-java-server]))
 
 (def base-uri (str p/service-context resource-url))
 
@@ -62,10 +78,10 @@
         template-url (str p/service-context dt/resource-url "/" std/method)
         session-admin (-> (session (ring-app))
                           (content-type "application/json")
-                          (header authn-info-header "root ADMIN"))
+                          (header authn-info-header "super ADMIN"))
         session-user (-> (session (ring-app))
                          (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
+                         (header authn-info-header "test USER ANON"))
         session-anon (-> (session (ring-app))
                          (content-type "application/json")
                          (header authn-info-header "unknown ANON"))
@@ -75,57 +91,16 @@
                      (ltu/is-status 200)
                      (get-in [:response :body]))
 
-        no-href-create {:deploymentTemplate (strip-unwanted-attrs (assoc template
-                                                              :module "nom/module"))}
-        href-create {:deploymentTemplate {:href         href
-                                    :module "nom/module"}}
+        no-href-create {:deploymentTemplate (strip-unwanted-attrs
+                                              (assoc template
+                                                :module "module/examples/tutorials/service-testing/system/1940"))}
+        href-create {:deploymentTemplate {:href   href
+                                          :module "module/examples/tutorials/service-testing/system/1940"}}
         invalid-create (assoc-in href-create [:deploymentTemplate :href] "deployment-template/unknown-template")]
 
-    ;; admin user collection query should succeed but be empty (no deployments created yet)
-    ;(-> session-admin
-    ;    (request base-uri)
-    ;    (ltu/body->edn)
-    ;    (ltu/is-status 200)
-    ;    (ltu/is-count zero?)
-    ;    (ltu/is-operation-present "add")
-    ;    (ltu/is-operation-absent "delete")
-    ;    (ltu/is-operation-absent "edit"))
-    ;
-    ;;; create a new deployment as administrator; fail without reference
-    ;(-> session-admin
-    ;    (request base-uri
-    ;             :request-method :post
-    ;             :body (json/write-str no-href-create))
-    ;    (ltu/body->edn)
-    ;    (ltu/is-status 400))
-    ;
-    ;;; anonymous create must fail
-    ;(-> session-anon
-    ;    (request base-uri
-    ;             :request-method :post
-    ;             :body (json/write-str href-create))
-    ;    (ltu/body->edn)
-    ;    (ltu/is-status 403))
-    ;
-    ;;; anonymous create without template reference fails
-    ;(-> session-anon
-    ;    (request base-uri
-    ;             :request-method :post
-    ;             :body (json/write-str no-href-create))
-    ;    (ltu/body->edn)
-    ;    (ltu/is-status 400))
-    ;
-    ;;; admin create with invalid template fails
-    ;(-> session-admin
-    ;    (request base-uri
-    ;             :request-method :post
-    ;             :body (json/write-str invalid-create))
-    ;    (ltu/body->edn)
-    ;    (ltu/is-status 400))
-
-    ;; create a deployment via admin
+    ;; create a deployment via user
     (let [create-req href-create
-          resp (-> session-admin
+          resp (-> session-user
                    (request base-uri
                             :request-method :post
                             :body (json/write-str create-req))
@@ -137,18 +112,11 @@
           abs-uri (str p/service-context (u/de-camelcase uri))]
 
       ;; admin should be able to see, edit, and delete deployment
-      (-> session-admin
+      (-> session-user
           (request abs-uri)
           (ltu/body->edn)
           (ltu/is-status 200)
           (ltu/is-operation-present "delete")
-          (ltu/is-operation-absent "edit"))
-
-      (-> session-user
-          (request abs-uri)
-          (ltu/body->edn)
-          (ltu/is-status 403)
-          (ltu/is-operation-absent "delete")
           (ltu/is-operation-absent "edit"))
 
       ;; admin can delete resource
@@ -169,7 +137,7 @@
                   (ltu/location))
           abs-uri (str p/service-context (u/de-camelcase uri))]
 
-      ;; admin should be able to see, edit, and delete deployment
+      ;; admin should be able to see, and delete deployment
       (-> session-admin
           (request abs-uri)
           (ltu/body->edn)
@@ -190,6 +158,7 @@
                    :request-method :delete)
           (ltu/body->edn)
           (ltu/is-status 200)))
+
     ))
 
 ;
