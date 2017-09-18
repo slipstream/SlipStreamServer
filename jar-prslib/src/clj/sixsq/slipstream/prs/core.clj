@@ -5,7 +5,7 @@
   {:doc/format :markdown}
   (:require
     [clojure.data.json :as json]
-    [sixsq.slipstream.client.api.utils.http-sync :as http]
+    [sixsq.slipstream.client.impl.utils.http-sync :as http]
     [clojure.tools.logging :as log]))
 
 (defn call-prs
