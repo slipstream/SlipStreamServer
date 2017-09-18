@@ -3,7 +3,8 @@
     [environ.core :as e]
     [clojure.tools.logging :as log]
     [sixsq.slipstream.client.api.cimi :as cimi]
-    [sixsq.slipstream.client.api.cimi.sync :as sync]))
+    [sixsq.slipstream.client.api.authn :as authn]
+    [sixsq.slipstream.client.sync :as sync]))
 
 (defn- mandatory-env-value
   [env-var-name]
@@ -26,9 +27,9 @@
   []
   (log/info "updating cimi server token for user" @cimi-username)
   (let [context (sync/instance @cimi-cloud-entry-point)]
-    (cimi/login context {:href "session-template/internal"
-                         :username @cimi-username
-                         :password @cimi-password})
+    (authn/login context {:href     "session-template/internal"
+                          :username @cimi-username
+                          :password @cimi-password})
     (reset! cached-cimi-context {:context   context
                                  :timestamp (System/currentTimeMillis)})))
 
