@@ -251,7 +251,7 @@ public class RunListResource extends BaseResource {
 	private void setTags(Run run, Form form) {
 		RuntimeParameter rp = run.getRuntimeParameters().get(RuntimeParameter.GLOBAL_TAGS_KEY);
 		if (rp != null){
-			rp.setValue(form.getFirstValue(TAGS_KEY, ""));
+			rp.setInitValue(form.getFirstValue(TAGS_KEY, ""));
 		}
 	}
 

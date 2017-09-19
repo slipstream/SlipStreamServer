@@ -59,10 +59,17 @@
     (-> session-user-jane
         (request abs-uri :request-method :put
                  :body (json/write-str {:value "newvalue"}))
-        (t/body->edn)
+        (t/body->edn
         (t/is-status 200))
 
     (is (= "newvalue" (uzk/get-data znode-path)) "deployment parameter can be updated")
+
+    (-> session-user-jane
+        (request abs-uri :request-method :get)
+        (t/body->edn)
+        (t/is-status 200)
+        (t/is-key-value :value "newvalue")
+        )
 
     (-> session-user-albert
         (request abs-uri :request-method :put
@@ -73,13 +80,10 @@
     (is (not (= "newvalue-albert" (uzk/get-data znode-path))) "deployment parameter can be updated")
 
 
+    ;type should not be updated
     (-> session-user-jane
         (request abs-uri :request-method :put
                  :body (json/write-str {:type "deployment"}))
         (t/body->edn)
         (t/is-status 200)
-        (get-in [:response :body :type])
-        (= "node-instance")
-        (is "type should not be updated")))
-
-  )
+        (t/is-key-value :type "node-instance"))))

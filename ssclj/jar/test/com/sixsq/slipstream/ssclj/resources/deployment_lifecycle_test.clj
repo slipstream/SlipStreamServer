@@ -191,7 +191,7 @@
       (are [expected value]
         (= expected value)
         dsm/init-state (uzk/get-data (str zdu/separator uri "/state"))
-        "unknown" (uzk/get-data
+        "Unknown" (uzk/get-data
                     (str zdu/separator uri "/" zdu/nodes-name "/apache/1/" "vmstate"))))))
 
 
@@ -325,14 +325,14 @@
       (-> session-admin
           (request (str p/service-context (du/deployment-parameter-href
                                             {:deployment {:href uri} :node-name "testclient"
-                                             :node-index 1 :name "state-complete"}))
+                                             :node-index 1 :name "complete"}))
                    :request-method :put :body (json/write-str {:value dsm/provisioning-state}))
           (t/body->edn)
           (t/is-status 200))
       (-> session-admin
           (request (str p/service-context (du/deployment-parameter-href
                                             {:deployment {:href uri} :node-name "apache"
-                                             :node-index 1 :name "state-complete"}))
+                                             :node-index 1 :name "complete"}))
                    :request-method :put :body (json/write-str {:value dsm/provisioning-state}))
           (t/body->edn)
           (t/is-status 200))

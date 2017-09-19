@@ -1135,7 +1135,7 @@ public class Run extends Parameterized<Run, RunParameter> {
     @Attribute
     @Column(length = 1024)
     public String getGroups() {
-        getRuntimeParameters().get(RuntimeParameter.GLOBAL_NODE_GROUPS_KEY).setValue(groups);
+        getRuntimeParameters().get(RuntimeParameter.GLOBAL_NODE_GROUPS_KEY).setInitValue(groups);
         return groups;
     }
 
