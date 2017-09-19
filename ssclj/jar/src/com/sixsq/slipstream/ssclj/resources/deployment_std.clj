@@ -6,11 +6,9 @@
     [com.sixsq.slipstream.ssclj.resources.deployment :as d]
     [com.sixsq.slipstream.ssclj.resources.deployment-template-std :as dtpl]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [environ.core :as env]
     [clj-http.client :as http]
-    [clojure.data.json :as json]))
-
-(def slipstream-java-endpoint (or (env/env :slipstream-java-endpoint) "http://localhost:8182"))
+    [clojure.data.json :as json]
+    [com.sixsq.slipstream.ssclj.resources.deployment.utils :as du]))
 
 ;;
 ;; validate the create resource
@@ -26,14 +24,13 @@
 ;;
 (defmethod d/tpl->deployment dtpl/method
   [{module :module :as resource} {username :user-name :as request}]
-  (let [java-deployment-location (-> (http/post (str slipstream-java-endpoint "/run")
+  (let [java-deployment-location (-> (http/post (str du/slipstream-java-endpoint "/run")
                                                 {:headers     {"slipstream-authn-info" username}
                                                  :form-params {:refqname module :bypass-ssh-check true}})
                                      (get-in [:headers "Location"]))
         java-deployment-json (-> (http/get java-deployment-location {:headers {"slipstream-authn-info" username
                                                                                "Accept" "application/json"}})
                                  :body
-                                 (json/read-str :key-fn keyword))
-        ]
+                                 (json/read-str :key-fn keyword))]
     (java-to-clj-deployment/transform java-deployment-json)))
 

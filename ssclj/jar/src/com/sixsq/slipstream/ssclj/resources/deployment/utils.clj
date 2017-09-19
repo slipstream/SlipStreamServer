@@ -12,7 +12,8 @@
     [com.sixsq.slipstream.ssclj.resources.zk.deployment.utils :as zdu]
     [com.sixsq.slipstream.ssclj.resources.deployment.state-machine :as dsm]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
-    [clojure.string :as string])
+    [clojure.string :as string]
+    [environ.core :as env])
   (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const deployment-resource-name "Deployment")
@@ -30,6 +31,8 @@
                                           :rules [{:principal "USER"
                                                    :type      "ROLE"
                                                    :right     "MODIFY"}]})
+
+(def slipstream-java-endpoint (or (env/env :slipstream-java-endpoint) "http://localhost:8182"))
 
 (def deployment-parameter-id-separator "_")
 

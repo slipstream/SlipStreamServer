@@ -18,7 +18,8 @@
     [clojure.tools.logging :as log]
     [clojure.core.async :as async]
     [clj-time.core :as time]
-    [com.sixsq.slipstream.ssclj.util.log :as logu])
+    [com.sixsq.slipstream.ssclj.util.log :as logu]
+    [clj-http.client :as http])
   (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-name du/deployment-resource-name)
@@ -168,7 +169,7 @@
     (assoc deployment :start-time now)))
 
 (defmethod crud/do-action [resource-url "start"]
-  [{{uuid :uuid} :params identity :identity :as request}]
+  [{{uuid :uuid} :params identity :identity username :user-name :as request}]
   (try
     (let [current (-> (str (u/de-camelcase resource-name) "/" uuid)
                       (db/retrieve request)
@@ -178,6 +179,7 @@
                          (u/update-timestamps)
                          (crud/validate))]
       (du/create-parameters identity current)
+      (http/post (str du/slipstream-java-endpoint "/run/" uuid) {:headers {"slipstream-authn-info" username}})
       (db/edit deployment request))
     (catch ExceptionInfo ei
       (ex-data ei))))
