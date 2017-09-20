@@ -93,9 +93,19 @@
             multiplicity (read-string (get-in (val n) [:parameters :multiplicity :value] "1"))]
         (doseq [i (range 1 (inc multiplicity))]
           (uzk/create-all
-            (zdu/deployment-parameter-node-instance-complete-state-path
+            (zdu/deployment-parameter-node-instance-state-path
               deployment-href node-name i "complete") :persistent? true)))))
   (zdu/unlock-deployment deployment-href))
+
+(defn cancel-deployment [deployment-href]
+  (zdu/check-deployment-lock-and-throw! deployment-href)
+  (zdu/lock-deployment-path deployment-href)
+  (set-global-deployment-parameter deployment-href "state" dsm/cancelled-state)
+  ()
+  (let [deployment (set-deployment-attribute deployment-href "state" dsm/cancelled-state)]
+    (zdu/unlock-deployment deployment-href)
+    deployment
+    ))
 
 (defn abort-deployment [deployment-href current-state]
   (zdu/check-deployment-lock-and-throw! deployment-href)
@@ -119,7 +129,7 @@
     (when (and (= "complete" (:name deployment-parameter))
                (= "node-instance" (:type deployment-parameter)))
       (uzk/create-all
-        (zdu/deployment-parameter-node-instance-complete-state-path deployment-parameter) :persistent? true))
+        (zdu/deployment-parameter-node-instance-state-path deployment-parameter) :persistent? true))
     (-> (db/add deployment-parameter-resource-name deployment-parameter {})
         :body)))
 

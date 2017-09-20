@@ -103,7 +103,7 @@
                            (assoc :resourceURI resource-uri)
                            u/update-timestamps
                            (crud/add-acl request)
-                           (assoc :state dsm/init-state))
+                           (assoc :state dsm/initializing-state))
         response (db/add resource-name (crud/validate new-deployment) {})]
     response))
 
@@ -147,18 +147,22 @@
 
 (defmethod crud/set-operations resource-uri
   [{:keys [id resourceURI] :as resource} request]
-  (let [href (str id "/start")]
+  (let [href-start (str id "/start")
+        href-terminate (str id "/terminate")
+        start-op {:rel (:start c/action-uri) :href href-start}
+        terminate-op {:rel (:terminate c/action-uri) :href href-terminate}]
     (try
       (a/can-modify? resource request)
       (let [ops (if (.endsWith resourceURI "Collection")
                   [{:rel (:add c/action-uri) :href id}]
                   [{:rel (:delete c/action-uri) :href id}
-                   {:rel (:start c/action-uri) :href href}])]
+                   start-op
+                   terminate-op])]
         (assoc resource :operations ops))
       (catch Exception e
         (if (.endsWith resourceURI "Collection")
           (dissoc resource :operations)
-          (assoc resource :operations [{:rel (:start c/action-uri) :href href}]))))))
+          (assoc resource :operations [start-op terminate-op]))))))
 
 ;;
 ;; actions
@@ -167,6 +171,10 @@
 (defn add-start-time [deployment]
   (let [now (u/time-now)]
     (assoc deployment :start-time now)))
+
+(defn add-end-time [deployment]
+  (let [now (u/time-now)]
+    (assoc deployment :end-time now)))
 
 (defmethod crud/do-action [resource-url "start"]
   [{{uuid :uuid} :params identity :identity username :user-name :as request}]
@@ -179,7 +187,28 @@
                          (u/update-timestamps)
                          (crud/validate))]
       (du/create-parameters identity current)
-      (http/post (str du/slipstream-java-endpoint "/run/" uuid) {:headers {"slipstream-authn-info" username}})
+      (http/post (str du/slipstream-java-endpoint "/run/" uuid) {:headers {"slipstream-authn-info" username}
+                                                                 "Accept" "application/json"})
+      (db/edit deployment request))
+    (catch ExceptionInfo ei
+      (ex-data ei))))
+
+(defmethod crud/do-action [resource-url "terminate"]
+  [{{uuid :uuid} :params identity :identity username :user-name :as request}]
+  (try
+    (let [{current-state :state :as current} (-> (str (u/de-camelcase resource-name) "/" uuid)
+                                                 (db/retrieve request)
+                                                 (a/can-modify? request))
+          {id :id new-state :state :as deployment} (-> current
+                                                       (add-end-time)
+                                                       (update :state (constantly dsm/cancelled-state))
+                                                       (u/update-timestamps)
+                                                       (crud/validate))]
+      (http/delete (str du/slipstream-java-endpoint "/run/" uuid) {:headers {"slipstream-authn-info" username
+                                                                             "Accept" "application/json"}})
+      (if (dsm/can-terminate? current-state)
+        (du/move-deployment-next-state id new-state)
+        (du/set-global-deployment-parameter id "state" dsm/cancelled-state)) ;TODO delete znode of deployment, to be done also for done state, fetch runtime-param of old run should not fetch from zookeeper
       (db/edit deployment request))
     (catch ExceptionInfo ei
       (ex-data ei))))

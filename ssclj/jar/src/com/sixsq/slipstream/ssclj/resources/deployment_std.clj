@@ -25,7 +25,8 @@
 (defmethod d/tpl->deployment dtpl/method
   [{module :module :as resource} {username :user-name :as request}]
   (let [java-deployment-location (-> (http/post (str du/slipstream-java-endpoint "/run")
-                                                {:headers     {"slipstream-authn-info" username}
+                                                {:headers     {"slipstream-authn-info" username
+                                                               "Accept" "application/json"}
                                                  :form-params {:refqname module :bypass-ssh-check true}})
                                      (get-in [:headers "Location"]))
         java-deployment-json (-> (http/get java-deployment-location {:headers {"slipstream-authn-info" username

@@ -164,7 +164,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 
 		validateCredentials(user);
 
-		List<String> instanceIds = getCloudNodeInstanceIds(run);
+		List<String> instanceIds = getCloudNodeInstanceIds(run); //TODO KB extract ids for each cloud service for terminate
 		if(instanceIds.isEmpty()){
 			throw new SlipStreamClientException("There is no instances to terminate");
 		}

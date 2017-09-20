@@ -25,14 +25,14 @@
 
 
 
-(defn deployment-parameter-node-instance-complete-state-path
+(defn deployment-parameter-node-instance-state-path
   ([deployment-href node-name node-index parameter-name]
-   (let [node-instance-complete-state-znode-id (string/join "_" [node-name node-index name])]
+   (let [node-instance-state-znode-id (string/join "_" [node-name node-index name])]
      (str separator
-          (string/join separator [deployment-href "state" node-instance-complete-state-znode-id]))))
+          (string/join separator [deployment-href "state" node-instance-state-znode-id]))))
   ([{{deployment-href :href} :deployment node-name :node-name node-index :node-index name :name
      :as                     deployment-parameter}]
-   (deployment-parameter-node-instance-complete-state-path deployment-href node-name node-index name)))
+   (deployment-parameter-node-instance-state-path deployment-href node-name node-index name)))
 
 (defn lock-deployment
   "Create a lock for the deployment. This should be used each time multi-operations on zookeeper are needed to complete
@@ -68,15 +68,15 @@
   (uzk/get-data (deployment-state-path deployment-href)))
 
 (defn check-same-state-and-throw!
-  [deployment-href node-complete-state]
+  [deployment-href node-state]
   (let [current-deployment-state (get-deployment-state deployment-href)]
-    (when-not (= node-complete-state current-deployment-state)
+    (when-not (= node-state current-deployment-state)
       (throw (Exception.
-               (str "State machine (complete-state = " node-complete-state
+               (str "State machine (state = " node-state
                     ") in different state from deployment state = " current-deployment-state "!"))))))
 
 (defn complete-node-instance-state [{state :value :as deployment-parameter}]
-  (uzk/delete (deployment-parameter-node-instance-complete-state-path deployment-parameter))
+  (uzk/delete (deployment-parameter-node-instance-state-path deployment-parameter))
   (uzk/set-data (deployment-parameter-path deployment-parameter) state))
 
 (defn all-nodes-completed-current-state? [deployment-href]

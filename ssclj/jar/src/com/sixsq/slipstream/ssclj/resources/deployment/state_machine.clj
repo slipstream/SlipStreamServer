@@ -18,26 +18,32 @@
   The topology of the run is persisted as an edn structure inside the ./topology znode.  This can be changed as nodes
   come and go, for scalable deployments.")
 
-(def init-state           "Initializing")
-(def provisioning-state   "Provisioning")
-(def executing-state      "Executing")
+(def initializing-state "Initializing")
+(def provisioning-state "Provisioning")
+(def executing-state "Executing")
 (def sending-report-state "SendingReports")
-(def ready-state          "Ready")
-(def finalyzing-state     "Finalizing")
-(def done-state           "Done")
+(def ready-state "Ready")
+(def finalyzing-state "Finalizing")
+(def done-state "Done")
 
-(def cancelled-state      "Cancelled")
-(def aborted-state        "Aborted")
-(def unknown-state        "Unknown")
+(def cancelled-state "Cancelled")
+(def aborted-state "Aborted")
+(def unknown-state "Unknown")
 
-(def valid-transitions
-  {init-state           [provisioning-state]
-   provisioning-state   [executing-state]
-   executing-state      [sending-report-state]
-   sending-report-state [ready-state]
-   ready-state          [provisioning-state]
-   finalyzing-state     [done-state]
-   done-state           []})
+(def state-machine
+  {initializing-state   {:next-state       provisioning-state
+                         :valid-transition #{provisioning-state cancelled-state}}
+   provisioning-state   {:next-state       executing-state
+                         :valid-transition #{executing-state cancelled-state}}
+   executing-state      {:next-state       sending-report-state
+                         :valid-transition #{sending-report-state cancelled-state}}
+   sending-report-state {:next-state       ready-state
+                         :valid-transition #{ready-state cancelled-state}}
+   ready-state          {:next-state       provisioning-state
+                         :valid-transition #{provisioning-state}}
+   finalyzing-state     {:next-state       done-state
+                         :valid-transition #{done-state}}
+   done-state           {:valid-transition #{done-state}}})
 
 (defn is-completed? [current-state]
   (contains? #{cancelled-state aborted-state done-state unknown-state} current-state))
@@ -46,6 +52,11 @@
   (contains? #{cancelled-state aborted-state done-state ready-state} current-state))
 
 (defn get-next-state [current-state]
-  (->> current-state
-       (get valid-transitions)
-       first))
+  (-> (get state-machine current-state)
+      :next-state))
+
+(defn is-valid-transition? [current-state next-state]
+  (-> (get state-machine current-state)
+      :valid-transition
+      (contains? next-state)))
+

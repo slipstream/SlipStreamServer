@@ -59,7 +59,7 @@
     (-> session-user-jane
         (request abs-uri :request-method :put
                  :body (json/write-str {:value "newvalue"}))
-        (t/body->edn
+        (t/body->edn)
         (t/is-status 200))
 
     (is (= "newvalue" (uzk/get-data znode-path)) "deployment parameter can be updated")
@@ -73,7 +73,7 @@
 
     (-> session-user-albert
         (request abs-uri :request-method :put
-                 :body (json/write-str {:value "newvalue"}))
+                 :body (json/write-str {:value "newvalue-albert"}))
         (t/body->edn)
         (t/is-status 403))
 

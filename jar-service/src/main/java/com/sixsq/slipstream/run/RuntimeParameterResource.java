@@ -137,7 +137,7 @@ public class RuntimeParameterResource extends RunBaseResource {
 	}
 
 	@Get
-	public String represent() throws ResourceException, NotFoundException,
+	public String represent() throws ResourceException, NotFoundException, //TODO kb should no more be used
 			ValidationException {
 		getMetricsTimer().start();
 		try {
@@ -166,7 +166,7 @@ public class RuntimeParameterResource extends RunBaseResource {
 	}
 
 	@Put
-	public void update(Representation entity) throws ResourceException,
+	public void update(Representation entity) throws ResourceException, //TODO kb should no more be used
 			NotFoundException, ValidationException {
 
 		EntityManager em = PersistenceUtil.createEntityManager();

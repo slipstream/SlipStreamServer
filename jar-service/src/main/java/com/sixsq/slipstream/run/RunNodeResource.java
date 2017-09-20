@@ -144,7 +144,7 @@ public class RunNodeResource extends RunBaseResource {
 			run.postEventScaleUp(nodename, instanceNames, noOfInst);
 
 			incrementNodeMultiplicityOnRun(noOfInst, run);
-			StateMachine.createStateMachine(run).tryAdvanceToProvisionning();
+			StateMachine.createStateMachine(run).tryAdvanceToProvisionning(); //TODO kb
 
 			if (Configuration.isQuotaEnabled()) {
 				User user = User.loadByName(run.getUser());
@@ -223,7 +223,7 @@ public class RunNodeResource extends RunBaseResource {
 			}
 
 			if (!deleteOnly) {
-				StateMachine.createStateMachine(run).tryAdvanceToProvisionning();
+				StateMachine.createStateMachine(run).tryAdvanceToProvisionning(); //TODO kb
 			}
 
 			transaction.commit();

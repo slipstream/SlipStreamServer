@@ -15,3 +15,8 @@
   (is (can-terminate? aborted-state))
   (is (can-terminate? cancelled-state))
   (is (not (can-terminate? executing-state))))
+
+(deftest is-valid-transition
+  (is (is-valid-transition? initializing-state cancelled-state))
+  (is (is-valid-transition? executing-state cancelled-state))
+  (is (not (is-valid-transition? done-state cancelled-state))))
