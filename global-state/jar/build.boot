@@ -57,7 +57,7 @@
 
 (set-env!
   :source-paths #{"test" "test-resources"}
-  :resource-paths #{"src"})
+  :resource-paths #{"src" "resources"})
 
 (task-options!
   pom {:project (get-env :project)
