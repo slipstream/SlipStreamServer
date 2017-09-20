@@ -1,0 +1,44 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>global-state-pom</artifactId>
+  <version>3.37-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>SlipStream Global State (POM)</name>
+  <url>http://sixsq.com/</url>
+
+  <parent>
+    <groupId>com.sixsq.slipstream</groupId>
+    <artifactId>SlipStream</artifactId>
+    <version>3.37-SNAPSHOT</version>
+  </parent>
+
+  <modules>
+    <module>jar</module>
+  </modules>
+
+  <profiles>
+    <profile>
+      <id>build-rpm</id>
+      <activation>
+        <file>
+          <exists>/usr/bin/rpmbuild</exists>
+        </file>
+      </activation>
+      <modules>
+        <module>rpm</module>
+      </modules>
+    </profile>
+  </profiles>
+  <repositories>
+    <repository>
+      <id>maven-restlet</id>
+      <name>Public online Restlet repository</name>
+      <url>http://maven.restlet.org</url>
+    </repository>
+  </repositories>
+
+  <properties>
+    <server.jre.version>1.8.0</server.jre.version>
+  </properties>
+</project>

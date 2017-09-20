@@ -24,7 +24,6 @@
                  '[[org.clojure/clojure]
 
                    [aleph]
-                   [cc.qbits/spandex]
                    [cheshire] ;; newer version needed for ring-json
                    [compojure]
                    [com.jcraft/jsch]
@@ -158,9 +157,7 @@
                             #"log4j.properties"}
                  :invert true)
            (aot :namespace #{'com.sixsq.slipstream.ssclj.app.main
-                             'com.sixsq.slipstream.ssclj.usage.summarizer
-                             'com.sixsq.slipstream.ssclj.globalstate.inserter
-                            })
+                             'com.sixsq.slipstream.ssclj.usage.summarizer})
            #_(uber :exclude #{ #"(?i)^META-INF/INDEX.LIST$"
                              #"(?i)^META-INF/[^/]*\.(MF|SF|RSA|DSA)$"
                              #".*log4j\.properties" })

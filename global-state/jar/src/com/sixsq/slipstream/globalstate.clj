@@ -1,11 +1,16 @@
-(ns com.sixsq.slipstream.ssclj.globalstate.inserter-impl
+(ns com.sixsq.slipstream.globalstate
+  "SlipStream  global state project."
+
+
   (:require
     [clj-time.core :as t]
     [qbits.spandex :as spandex]
     [clojure.core.async :as async]
-    [com.sixsq.slipstream.ssclj.globalstate.scheduler :as scheduler])
-  (:gen-class)
+    [com.sixsq.slipstream.scheduler :as scheduler])
   )
+
+
+
 
 
 ;;define the target index for the global state
@@ -16,6 +21,7 @@
 (def ^:const every-minute (* 60 1000))
 ;;global ES query to search every virtual-machine documents
 (def ^:const search-all-virtual-machines-url "resources-index/virtual-machine/_search")
+
 
 (defn bulk-insert
   "Translate the snapshots (current global state) into ES bulk instructions"
@@ -31,9 +37,9 @@
   "work on a subset of documents returned by the global query search"
   [client page timestamp]
   (let [read-vms (-> page
-                  :body
-                  :hits
-                  :hits)
+                     :body
+                     :hits
+                     :hits)
         source-vms (map :_source read-vms)
         snapshots (map #(assoc % :snapshot-time timestamp) source-vms)]
     (bulk-insert client snapshots)
@@ -53,17 +59,28 @@
       (loop []
         (when-let [page (async/<! ch)]
           (use-pagination client page timestamp)
-          (recur))))))
+          (recur)))
+      )
+    :finished
+    )
 
+  )
 
-(defn start []
-  (scheduler/periodically #(fetch-global-state) immediately every-minute))
+(defn handler [request]
+  {:status  200
+   :headers {"Content-Type" "text/plain"}
+   :body    "Global State Running!"})
 
-
-(defn stop []
+(defn cleanup []
   (scheduler/shutdown))
 
-(defn -main [& args]
-  (start))
+(defn init []
+  (scheduler/periodically #(async/<!! (fetch-global-state)) immediately every-minute)
+  [handler cleanup]
+  )
+
+
+
+
 
 
