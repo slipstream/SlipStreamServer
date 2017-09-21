@@ -8,6 +8,9 @@
     [environ.core :as env]
     [com.sixsq.slipstream.scheduler :as scheduler]))
 
+(defn str->int [s]
+  (if (and (string? s) (re-matches #"^\d+$" s))
+    (read-string s)))
 
 ;;define the target index for the metering
 (def ^:const index-action {:index {:_index (or (env/env :metering-es-index) "resources-index") :_type "metering-snapshot"}})
@@ -71,7 +74,7 @@
 
 (defn init []
   (let [search-url (or (env/env :metering-search-url) "resources-index/virtual-machine/_search")]
-    (scheduler/periodically #(async/<!! (fetch-global-state search-url)) immediately interval-ms)
+    (scheduler/periodically #(async/<!! (fetch-global-state search-url)) (str->int immediately) (str->int interval-ms))
     [handler cleanup]))
 
 
