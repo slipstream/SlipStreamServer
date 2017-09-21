@@ -139,7 +139,7 @@
             </mapping>
 
             <mapping>
-              <directory>/var/log/slipstream/ssproxy</directory>
+              <directory>/var/log/slipstream/metering</directory>
               <directoryIncluded>true</directoryIncluded>
             </mapping>
 
