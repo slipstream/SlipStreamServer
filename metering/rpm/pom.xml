@@ -10,7 +10,7 @@
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
-    <artifactId>meteringe-pom</artifactId>
+    <artifactId>metering-pom</artifactId>
     <version>3.37-SNAPSHOT</version>
   </parent>
 
@@ -68,8 +68,8 @@
         <configuration>
           <classifier>${package.os}</classifier>
           <release>${BUILD_NUMBER}.${package.os}</release>
-          <summary>SlipStream Global State</summary>
-          <name>slipstream-global-state</name>
+          <summary>SlipStream Metering</summary>
+          <name>slipstream-metering</name>
           <group>System</group>
           <vendor>SlipStream</vendor>
           <packager>SlipStream</packager>
@@ -77,7 +77,7 @@
           <url>http://sixsq.com</url>
           <needarch>noarch</needarch>
           <description>
-            SlipStream Global State
+            SlipStream Metering
           </description>
           <requires>
             <require>jre-headless &gt;= ${server.jre.version}</require>
@@ -107,7 +107,7 @@
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
-                  <location>src/scripts/globalstate.service</location>
+                  <location>src/scripts/metering.service</location>
                 </source>
               </sources>
             </mapping>
@@ -118,13 +118,13 @@
               <configuration>noreplace</configuration>
               <sources>
                 <source>
-                  <location>src/scripts/globalstate</location>
+                  <location>src/scripts/metering</location>
                 </source>
               </sources>
             </mapping>
 
             <mapping>
-              <directory>/opt/slipstream/globalstate/resources</directory>
+              <directory>/opt/slipstream/metering/resources</directory>
               <directoryIncluded>true</directoryIncluded>
               <sources>
                 <source>
@@ -134,7 +134,7 @@
             </mapping>
 
             <mapping>
-              <directory>/opt/slipstream/globalstate/lib</directory>
+              <directory>/opt/slipstream/metering/lib</directory>
               <directoryIncluded>true</directoryIncluded>
             </mapping>
 
