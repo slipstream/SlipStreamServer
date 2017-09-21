@@ -1,7 +1,5 @@
 (ns com.sixsq.slipstream.scheduler
-  (:import (java.util.concurrent  ScheduledThreadPoolExecutor TimeUnit))
-  )
-
+  (:import (java.util.concurrent  ScheduledThreadPoolExecutor TimeUnit)))
 
 (def ^:private num-threads 1)
 (def ^:private pool (atom nil))
