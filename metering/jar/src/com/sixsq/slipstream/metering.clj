@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.globalstate
+(ns com.sixsq.slipstream.metering
   "SlipStream  global state project."
   (:require
     [clojure.tools.logging :as log]
@@ -9,14 +9,13 @@
     [com.sixsq.slipstream.scheduler :as scheduler]))
 
 
-;;define the target index for the global state
-(def ^:const index-action {:index {:_index "resources-index" :_type "global-state-snapshot"}})
+;;define the target index for the metering
+(def ^:const index-action {:index {:_index (or (env/env :metering-es-index) "resources-index") :_type "metering-snapshot"}})
 ;;initial delay
 (def ^:const immediately 0)
 ;;task interval
-(def ^:const every-minute (* 60 1000))
-;;global ES query to search every virtual-machine documents
-(def ^:const search-all-virtual-machines-url "resources-index/virtual-machine/_search")
+(def ^:const interval-ms (or (env/env :metering-interval) 60000))
+
 
 (defn bulk-insert
   "Translate the snapshots (current global state) into ES bulk instructions"
@@ -43,38 +42,37 @@
 
 (defn fetch-global-state
   "Retrieves all virtual-machine records ."
-  []
+  [search-url]
   (async/go
     (let [
           timestamp (str (t/now))                           ;; common timestamp for all snapshots
           es-host (or (env/env :es-host) "127.0.0.1")
-          es-port (or (env/env :es-port-http) 9200)
+          es-port (or (env/env :es-port) 9200)
           client (spandex/client {:hosts [(str "http://" es-host ":" es-port)]})
           ch (spandex/scroll-chan client
-                                  {:url search-all-virtual-machines-url :body {:query {:match_all {}}}})]
-      (log/info "global state snapshots at " timestamp)
+                                  {:url search-url :body {:query {:match_all {}}}})]
+      (log/info "metering snapshot taken at " timestamp " from " search-url)
       (loop []
         (when-let [page (async/<! ch)]
           (use-pagination client page timestamp)
           (recur)))
       )
-    :finished ;;don't return nil
+    :finished                                               ;;don't return nil
     ))
 
 (defn handler [request]
   {:status  200
    :headers {"Content-Type" "text/plain"}
-   :body    "Global State service is running!"})
+   :body    "Metering service is running!"})
 
 (defn cleanup []
   (log/debug "Shutting down scheduler")
   (scheduler/shutdown))
 
 (defn init []
-  (log/debug "Starting global state insertions")
-  (scheduler/periodically #(async/<!! (fetch-global-state)) immediately every-minute)
-  [handler cleanup]
-  )
+  (let [search-url (or (env/env :metering-search-url) "resources-index/virtual-machine/_search")]
+    (scheduler/periodically #(async/<!! (fetch-global-state search-url)) immediately interval-ms)
+    [handler cleanup]))
 
 
 

@@ -1,10 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>global-state-pom</artifactId>
+  <artifactId>metering-pom</artifactId>
   <version>3.37-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>SlipStream Global State (POM)</name>
+  <name>SlipStream Metering (POM)</name>
   <url>http://sixsq.com/</url>
 
   <parent>

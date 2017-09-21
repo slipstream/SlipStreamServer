@@ -2,33 +2,33 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>global-state-rpm</artifactId>
+  <artifactId>metering-rpm</artifactId>
  
-  <name>SlipStream Global State (RPM)</name>
+  <name>SlipStream Metering (RPM)</name>
 
   <packaging>pom</packaging>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
-    <artifactId>global-state-pom</artifactId>
+    <artifactId>meteringe-pom</artifactId>
     <version>3.37-SNAPSHOT</version>
   </parent>
 
   <properties>
-    <installation.dir>/opt/slipstream/global-state</installation.dir>
+    <installation.dir>/opt/slipstream/metering</installation.dir>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>global-state-dep</artifactId>
+      <artifactId>metering-dep</artifactId>
       <version>${project.version}</version>
       <type>pom</type>
     </dependency>
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>global-state</artifactId>
+      <artifactId>metering</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>

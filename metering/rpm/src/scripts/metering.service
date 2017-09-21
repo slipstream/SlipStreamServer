@@ -1,16 +1,16 @@
 [Unit]
-Description=SlipStream Global State
+Description=SlipStream Metering 
 After=syslog.target
 After=network.target
 
 [Service]
-EnvironmentFile=-/etc/default/globalstate
+EnvironmentFile=-/etc/default/metering
 
 User=slipstream
 
-WorkingDirectory=/opt/slipstream/globalstate
+WorkingDirectory=/opt/slipstream/metering
 
-ExecStart=/usr/bin/java \
+ExecStari=/usr/bin/java \
             -cp "/opt/slipstream/ring-container/lib/*:resources:lib/*" \
             sixsq.slipstream.server.ring_container
 ExecStop=/bin/kill -TERM $MAINPID

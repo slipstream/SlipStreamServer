@@ -1,7 +1,7 @@
 (def +version+ "3.37-SNAPSHOT")
 
 (set-env!
-  :project 'com.sixsq.slipstream/globalstate
+  :project 'com.sixsq.slipstream/metering
 
   :version +version+
   :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}

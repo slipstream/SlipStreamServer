@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>global-state-dep</artifactId>
+  <artifactId>metering-dep</artifactId>
   <packaging>pom</packaging>
   <version>3.37-SNAPSHOT</version>
-  <name>global-state-dep</name>
-  <description>SlipStream Global State (DEP)</description>
+  <name>metering-dep</name>
+  <description>SlipStream Metering (DEP)</description>
   <url>http://sixsq.com</url>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
-    <artifactId>global-state-pom</artifactId>
+    <artifactId>metering-pom</artifactId>
     <version>3.37-SNAPSHOT</version>
   </parent>
 

@@ -1,0 +1,6 @@
+SLIPSTREAM_RING_CONTAINER_INIT=com.sixsq.slipstream.metering/init
+SLIPSTREAM_RING_CONTAINER_PORT=5001
+ES_PORT=9200
+METERING_ES_INDEX=resources-index
+METERING_INTERVAL=60000
+METERING_SEARCH_URL=resources-index/virtual-machine/_search
