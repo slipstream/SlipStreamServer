@@ -192,7 +192,7 @@ public class Run extends Parameterized<Run, RunParameter> {
         if (!globalAbort.isSet()) {
             setGlobalAbortState(abortMessage, globalAbort);
         }
-        if (run.state == States.Provisioning) {  //TODO kb
+        if (run.state == States.Provisioning) {  //TODO kb recovery mode
             setRecoveryMode(run);
         }
         em.close();
@@ -331,7 +331,7 @@ public class Run extends Parameterized<Run, RunParameter> {
         return views;
     }
 
-    private static RunView convertRunToRunView(Run run, Map<String, Long> vmCountPerRun) {  //TODO kb
+    private static RunView convertRunToRunView(Run run, Map<String, Long> vmCountPerRun) {  //TODO kb UI
 
         if (run == null) {
             return null;
@@ -480,7 +480,7 @@ public class Run extends Parameterized<Run, RunParameter> {
     }
 
     @SuppressWarnings("unchecked")
-    public static List<Run> listOldTransient(User user, int timeout) throws ConfigurationException, //TODO kb
+    public static List<Run> listOldTransient(User user, int timeout) throws ConfigurationException, //TODO kb search for old  transient deployment on ssclj
             ValidationException {
         if (timeout <= 0) {
             timeout = DEFAULT_TIMEOUT;

@@ -122,7 +122,7 @@ public class RunNodeResource extends RunBaseResource {
 		return result;
 	}
 
-	private Representation addNodeInstancesInTransaction(Representation entity)
+	private Representation addNodeInstancesInTransaction(Representation entity) //TODO kb scaling
 			throws Exception {
 
 		EntityManager em = PersistenceUtil.createEntityManager();
@@ -144,7 +144,7 @@ public class RunNodeResource extends RunBaseResource {
 			run.postEventScaleUp(nodename, instanceNames, noOfInst);
 
 			incrementNodeMultiplicityOnRun(noOfInst, run);
-			StateMachine.createStateMachine(run).tryAdvanceToProvisionning(); //TODO kb
+			StateMachine.createStateMachine(run).tryAdvanceToProvisionning();
 
 			if (Configuration.isQuotaEnabled()) {
 				User user = User.loadByName(run.getUser());
@@ -180,7 +180,7 @@ public class RunNodeResource extends RunBaseResource {
 		}
 	}
 
-	private void deleteNodeInstancesInTransaction(Representation entity) throws Exception {
+	private void deleteNodeInstancesInTransaction(Representation entity) throws Exception { //TODO kb scaling
 		EntityManager em = PersistenceUtil.createEntityManager();
 		EntityTransaction transaction = em.getTransaction();
 
@@ -223,7 +223,7 @@ public class RunNodeResource extends RunBaseResource {
 			}
 
 			if (!deleteOnly) {
-				StateMachine.createStateMachine(run).tryAdvanceToProvisionning(); //TODO kb
+				StateMachine.createStateMachine(run).tryAdvanceToProvisionning();
 			}
 
 			transaction.commit();

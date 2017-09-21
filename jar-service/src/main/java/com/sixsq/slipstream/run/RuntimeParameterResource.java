@@ -114,7 +114,7 @@ public class RuntimeParameterResource extends RunBaseResource {
 	}
 
 	@Delete
-	public void resetRuntimeParameter() throws ResourceException {
+	public void resetRuntimeParameter() throws ResourceException { //TODO kb should no more be used with new client
 
 		runtimeParameter.setValue("");
 		runtimeParameter.setIsSet(false);
@@ -137,7 +137,7 @@ public class RuntimeParameterResource extends RunBaseResource {
 	}
 
 	@Get
-	public String represent() throws ResourceException, NotFoundException, //TODO kb should no more be used
+	public String represent() throws ResourceException, NotFoundException, //TODO kb should no more be used with new client
 			ValidationException {
 		getMetricsTimer().start();
 		try {
@@ -166,7 +166,7 @@ public class RuntimeParameterResource extends RunBaseResource {
 	}
 
 	@Put
-	public void update(Representation entity) throws ResourceException, //TODO kb should no more be used
+	public void update(Representation entity) throws ResourceException, //TODO kb should no more be used with new client
 			NotFoundException, ValidationException {
 
 		EntityManager em = PersistenceUtil.createEntityManager();
@@ -281,7 +281,7 @@ public class RuntimeParameterResource extends RunBaseResource {
 
 
 	@Post
-	public void completeCurrentNodeStateOrChangeGlobalState(Representation entity) {
+	public void completeCurrentNodeStateOrChangeGlobalState(Representation entity) { //TODO kb should be no more used, new client will talk to ssclj deployment
 		String nodeName = runtimeParameter.getNodeName();
 		States newState = attemptCompleteCurrentNodeState(nodeName);
 		getResponse().setEntity(newState.toString(), MediaType.TEXT_PLAIN);

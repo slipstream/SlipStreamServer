@@ -436,8 +436,7 @@ public class RuntimeParameter extends Metadata {
 		this.value = value;
 
 		Map<String, String> mapValue = new HashMap<String, String>();
-		mapValue.put("value", value);
-		SscljProxy.put(getSScljDeploymentParameterUri(this),
+ 		mapValue.put("value", value);SscljProxy.put(getSScljDeploymentParameterUri(this),
 				"super ADMIN", mapValue, true);
 		processValue();
 	}

@@ -44,7 +44,7 @@ public class Terminator {
 				u = User.loadByName(u.getName());
 				int timeout = u.getTimeout();
 
-				List<Run> old = Run.listOldTransient(u, timeout); //TODO kb
+				List<Run> old = Run.listOldTransient(u, timeout); //TODO kb search for timeout on ssclj deployment
 				for (Run r : old) {
 					EntityManager em = PersistenceUtil.createEntityManager();
 					try {
@@ -68,7 +68,7 @@ public class Terminator {
 	public static void purgeRun(Run run) throws SlipStreamException {
 		Run.abort("The run has timed out", run.getUuid());
 
-		boolean isGarbageCollected = Run.isGarbageCollected(run); //TODO kb
+		boolean isGarbageCollected = Run.isGarbageCollected(run); //TODO kb Garbage collected run
 		Run.setGarbageCollected(run);
 		run = run.store();
 
