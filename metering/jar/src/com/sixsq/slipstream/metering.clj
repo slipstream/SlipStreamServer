@@ -10,7 +10,8 @@
 
 (defn str->int [s]
   (if (and (string? s) (re-matches #"^\d+$" s))
-    (read-string s)))
+    (read-string s)
+    s))
 
 ;;define the target index for the metering
 (def ^:const index-action {:index {:_index (or (env/env :metering-es-index) "resources-index") :_type "metering-snapshot"}})
@@ -58,8 +59,7 @@
       (loop []
         (when-let [page (async/<! ch)]
           (use-pagination client page timestamp)
-          (recur)))
-      )
+          (recur))))
     :finished                                               ;;don't return nil
     ))
 
