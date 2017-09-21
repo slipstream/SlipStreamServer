@@ -10,7 +10,7 @@ User=slipstream
 
 WorkingDirectory=/opt/slipstream/metering
 
-ExecStari=/usr/bin/java \
+ExecStart=/usr/bin/java \
             -cp "/opt/slipstream/ring-container/lib/*:resources:lib/*" \
             sixsq.slipstream.server.ring_container
 ExecStop=/bin/kill -TERM $MAINPID
