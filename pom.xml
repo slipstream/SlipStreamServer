@@ -30,6 +30,7 @@
     <module>db-binding</module>
     <module>db-serializers</module>
     <module>ring-container</module>
+    <module>metering</module>
     <module>static-content</module>
     <module>war</module>
   </modules>
