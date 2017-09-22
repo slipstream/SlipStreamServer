@@ -71,6 +71,9 @@
                      (bulk-insert client)
                      handle-results)
                 (recur)))
+
+            (Thread/sleep 10000)
+
             (log/info "finished metering snapshot " timestamp " from " search-url)
             (finally
               (async/close! ch))))))
