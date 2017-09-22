@@ -7,23 +7,30 @@
     [clojure.data.json :as json]
     [clojure.java.io :as io]))
 
-(deftest check-str->int
-  (are [expected arg] (= expected (t/str->int arg))
-                      nil nil
-                      {:a :b} {:a :b}
-                      "bad" "bad"
-                      "123bad" "123bad"
-                      1 1
-                      1 "1"
-                      1000 1000
-                      -10 -10))
-
-(deftest check-assoc-snapshot-timestamp
+(deftest check-assoc-snapshot-timestamp-xf
   (let [doc (-> (io/resource "virtual-machines.json")
                 slurp
                 (json/read-str :key-fn keyword))
         timestamp (time/now)
-        results (t/assoc-snapshot-timestamp timestamp doc)]
-    (is (= 10 (count results)))
-    (doseq [result results]
-      (is (= timestamp (:snapshot-time result))))))
+        xf (t/insert-action-xf timestamp)]
+
+    ;; check transform with a sequence
+    (let [results (sequence xf [doc])]
+      (is (= 10 (count results)))
+      (doseq [result results]
+        (is (= t/index-action (first result)))
+        (is (= timestamp (:snapshot-time (second result))))))
+
+    ;; check transform on channel
+    (let [ch (async/chan 1 xf)]
+      (async/>!! ch doc)
+      (async/close! ch)
+      (let [n (loop [n 0]
+                (let [result (async/<!! ch)]
+                  (if (nil? result)
+                    n
+                    (do
+                      (is (= t/index-action (first result)))
+                      (is (= timestamp (:snapshot-time (second result))))
+                      (recur (inc n))))))]
+        (is (= 10 n))))))

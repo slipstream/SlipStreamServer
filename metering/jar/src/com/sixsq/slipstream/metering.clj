@@ -6,75 +6,63 @@
     [qbits.spandex :as spandex]
     [clojure.core.async :as async]
     [environ.core :as env]
-    [com.sixsq.slipstream.scheduler :as scheduler]))
+    [com.sixsq.slipstream.scheduler :as scheduler]
+    [com.sixsq.slipstream.utils :as utils]))
 
-(defn str->int [s]
-  (if (and (string? s) (re-matches #"^\d+$" s))
-    (read-string s)
-    s))
+(def
+  ^{:const true
+    :doc   "endpoints for elasticsearch nodes"}
+  es-hosts [(format "http://%s:%s"
+                    (or (env/env :es-host) "127.0.0.1")
+                    (or (env/env :es-port) 9200))])
 
 ;;define the target index for the metering
-(def ^:const index-action {:index {:_index (or (env/env :metering-es-index) "resources-index") :_type "metering-snapshot"}})
+(def ^:const index-action {:index {:_index (or (env/env :metering-es-index) "resources-index")
+                                   :_type "metering-snapshot"}})
 ;;initial delay
 (def ^:const immediately 0)
 ;;task interval
 (def ^:const interval-ms (or (env/env :metering-interval) 60000))
 
-
-(defn bulk-insert
-  "Translate the snapshots (current global state) into ES bulk instructions"
-  [client snapshots]
-  (let [{:keys [input-ch output-ch]} (spandex/bulk-chan client {:flush-threshold         100
-                                                                :flush-interval          1000
-                                                                :max-concurrent-requests 3})
-        bulk-instructions (vec (interleave (repeat index-action) snapshots))]
-    (log/info "starting bulk insert for " (count snapshots) " resources")
-    (async/put! input-ch bulk-instructions)
-    output-ch))
-
-
-(defn assoc-snapshot-timestamp
-  "work on a subset of documents returned by the global query search"
-  [timestamp page]
-  (->> page
-       :body
-       :hits
-       :hits
-       (map :_source)
-       (map #(assoc % :snapshot-time timestamp))))
-
+(defn insert-action-xf
+  "This function returns a transducer that will extract the results of an
+   Elasticsearch query and provide a sequence modified documents wrapped in an
+   Elasticsearch insert action."
+  [timestamp]
+  (comp (map :body)
+        (map :hits)
+        (map :hits)
+        (utils/unwrap)
+        (map :_source)
+        (map #(assoc % :snapshot-time timestamp))
+        (map (fn [v] [index-action v]))))
 
 (defn handle-results
   [ch]
-  (future (loop []
-            (async/<!! ch)
-            (recur))))
+  (loop []
+    (when-let [[job responses] (async/<!! ch)]
+      (recur)))
+  ::exit)
 
 (defn fetch-global-state
   "Retrieves all virtual-machine records."
   [search-url]
   (async/go
-    (let [timestamp (str (t/now))                           ;; common timestamp for all snapshots
-          es-host (or (env/env :es-host) "127.0.0.1")
-          es-port (or (env/env :es-port) 9200)
-          hosts [(str "http://" es-host ":" es-port)]]
-      (with-open [client (spandex/client {:hosts hosts})]
-        (let [ch (spandex/scroll-chan client
-                                      {:url  search-url
-                                       :body {:query {:match_all {}}}})]
-          (try
-            (log/info "starting metering snapshot " timestamp " from " search-url)
-            (loop []
-              (when-let [page (async/<! ch)]
-                (->> page
-                     (assoc-snapshot-timestamp timestamp)
-                     (bulk-insert client)
-                     handle-results)
-                (recur)))
-            (log/info "finished metering snapshot " timestamp " from " search-url)
-            (finally
-              (async/close! ch))))))
-    :finished                                               ;; don't return nil
+    (with-open [client (spandex/client {:hosts es-hosts})]
+      (let [timestamp (str (t/now))                         ;; common timestamp for all snapshots
+            ch (async/chan 100 (insert-action-xf timestamp))
+            ch (spandex/scroll-chan client
+                                    {:ch   ch
+                                     :url  search-url
+                                     :body {:query {:match_all {}}}})
+            {:keys [output-ch]} (spandex/bulk-chan client {:input-ch                ch
+                                                           :flush-threshold         100
+                                                           :flush-interval          1000
+                                                           :max-concurrent-requests 3})]
+        (log/info "starting metering snapshot " timestamp " from " search-url)
+        (handle-results output-ch)
+        (log/info "finished metering snapshot " timestamp " from " search-url)))
+    ::exit                                                  ;; don't return nil
     ))
 
 (defn handler [request]
@@ -88,11 +76,7 @@
 
 (defn init []
   (let [search-url (or (env/env :metering-search-url) "resources-index/virtual-machine/_search")]
-    (scheduler/periodically #(async/<!! (fetch-global-state search-url)) (str->int immediately) (str->int interval-ms))
+    (scheduler/periodically #(async/<!! (fetch-global-state search-url))
+                            (utils/str->int immediately)
+                            (utils/str->int interval-ms))
     [handler cleanup]))
-
-
-
-
-
-
