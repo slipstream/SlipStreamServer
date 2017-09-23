@@ -22,6 +22,7 @@
       ([result] (rf result))
       ([result coll]
        (if (not (coll? coll))
+         (reduced )
          (rf result coll)
          (loop [result result, coll coll]
            (if (empty? coll)

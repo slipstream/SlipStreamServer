@@ -10,9 +10,7 @@
   :dependencies '[[org.clojure/clojure "1.9.0-alpha17"]
                   [sixsq/build-utils "0.1.4" :scope "test"]])
 
-(require '[sixsq.build-fns :refer [merge-defaults
-                                   sixsq-nexus-url
-                                   lein-generate]])
+(require '[sixsq.build-fns :refer [merge-defaults sixsq-nexus-url]])
 
 (set-env!
   :repositories

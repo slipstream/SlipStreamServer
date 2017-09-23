@@ -1,5 +1,5 @@
 (ns com.sixsq.slipstream.scheduler
-  (:import (java.util.concurrent  ScheduledThreadPoolExecutor TimeUnit)))
+  (:import (java.util.concurrent ScheduledThreadPoolExecutor TimeUnit)))
 
 (def ^:private num-threads 1)
 (def ^:private pool (atom nil))
@@ -11,9 +11,9 @@
   "Schedules function f to run every 'delay' milliseconds after a
   delay of 'initial-delay'."
   [f initial-delay delay]
-  (.scheduleWithFixedDelay (thread-pool)
-                           f
-                           initial-delay delay TimeUnit/MILLISECONDS))
+  (.scheduleAtFixedRate (thread-pool)
+                        f
+                        initial-delay delay TimeUnit/MILLISECONDS))
 
 (defn shutdown
   "Terminates all periodic tasks."

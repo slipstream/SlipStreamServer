@@ -18,7 +18,7 @@
 
 ;;define the target index for the metering
 (def ^:const index-action {:index {:_index (or (env/env :metering-es-index) "resources-index")
-                                   :_type "metering-snapshot"}})
+                                   :_type  "metering-snapshot"}})
 ;;initial delay
 (def ^:const immediately 0)
 ;;task interval
@@ -32,6 +32,7 @@
   (comp (map :body)
         (map :hits)
         (map :hits)
+        (map first)
         (utils/unwrap)
         (map :_source)
         (map #(assoc % :snapshot-time timestamp))
@@ -40,7 +41,9 @@
 (defn handle-results
   [ch]
   (loop []
+    (log/debug "starting handling of results")
     (when-let [[job responses] (async/<!! ch)]
+      (log/debug "got responses: " (with-out-str (clojure.pprint/pprint responses)))
       (recur)))
   ::exit)
 
