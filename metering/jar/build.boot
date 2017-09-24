@@ -42,6 +42,7 @@
                     [boot-environ]
                     [adzerk/boot-test]
                     [adzerk/boot-reload]
+                    [degree9/boot-exec]
                     [onetom/boot-lein-generate]
                     [tolitius/boot-check]]))))
 
@@ -53,7 +54,8 @@
                                 with-eastwood
                                 with-kibit
                                 with-bikeshed]]
-  '[boot.lein :refer [generate]])
+  '[boot.lein :refer [generate]]
+  '[degree9.boot-exec :refer [exec]])
 
 (set-env!
   :source-paths #{"test" "test-resources"}
@@ -66,6 +68,16 @@
   install {:pom (str (get-env :project))}
   push {:pom (str (get-env :project))}
   )
+
+(deftask start-es
+         []
+         (exec :process "docker"
+               :arguments ["run"
+                           "-p" "9200:9200"
+                           "-p" "9300:9300"
+                           "-e" "discovery.type=single-node"
+                           "-e" "xpack.security.enabled=false"
+                           "docker.elastic.co/elasticsearch/elasticsearch:5.6.1"]))
 
 (deftask build []
          (comp
