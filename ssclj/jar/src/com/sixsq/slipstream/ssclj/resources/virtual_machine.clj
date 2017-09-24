@@ -64,7 +64,7 @@
     (let [user-id (:identity (a/current-authentication request))
           run-owner (subs (-> request
                               :body
-                              :run
+                              :deployment
                               :user
                               :href
                               )
