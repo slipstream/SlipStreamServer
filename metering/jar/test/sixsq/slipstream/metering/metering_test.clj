@@ -7,8 +7,8 @@
 
 
 (deftest check-es-hosts
-  (is (= "http://a:1234" (t/es-hosts "a" 1234)))
-  (is (= "http://a:1234" (t/es-hosts "a" "1234"))))
+  (is (= ["http://a:1234"] (t/es-hosts "a" 1234)))
+  (is (= ["http://a:1234"] (t/es-hosts "a" "1234"))))
 
 
 (deftest check-index-action
@@ -29,13 +29,13 @@
         (t/process-options {})]
 
     (is (= 4 (count options)))
-    (is (= "http://127.0.0.1:9200" hosts))
+    (is (= ["http://127.0.0.1:9200"] hosts))
     (is (= "resources-index/virtual-machine/_search" resource-search-url))
     (is (= "resources-index" (-> metering-action :index :_index)))
     (is (= "metering-snapshot" (-> metering-action :index :_type)))
     (is (= 1 metering-period-minutes)))
 
-  (is (= "http://elasticsearch:1234" (:hosts (t/process-options {:es-host "elasticsearch"
+  (is (= ["http://elasticsearch:1234"] (:hosts (t/process-options {:es-host "elasticsearch"
                                                                  :es-port 1234}))))
   (is (= 2 (:metering-period-minutes (t/process-options {:metering-period-minutes 2}))))
   (is (= "alpha/vms/_search" (:resource-search-url (t/process-options {:resources-index "alpha"

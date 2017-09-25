@@ -29,6 +29,10 @@
                 metering-action
                 metering-period-minutes]}
         (metering/process-options env/env)]
+    (log/info "starting service"
+              "\nhosts:" hosts
+              "\nresource-search-url: " resource-search-url
+              "\nmetering-action:" metering-action)
     (scheduler/periodically #(meter-resources-sync hosts
                                                    resource-search-url
                                                    metering-action)

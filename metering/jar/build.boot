@@ -26,7 +26,7 @@
                     [org.clojure/tools.logging]
                     [org.clojure/data.json]
                     [log4j]
-                    [org.slf4j/slf4j-log4j12]
+                    [org.slf4j/slf4j-log4j12 :scope "provided"]
 
                     [com.sixsq.slipstream/slipstream-ring-container :scope "test"]
                     [com.sixsq.slipstream/SlipStreamClientAPI-jar]

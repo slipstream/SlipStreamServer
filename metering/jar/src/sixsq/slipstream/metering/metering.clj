@@ -9,8 +9,9 @@
     [qbits.spandex :as spandex]))
 
 
-(defn es-hosts [host port]
-  (format "http://%s:%s" host port))
+(defn es-hosts
+  [host port]
+  [(format "http://%s:%s" host port)])
 
 
 (defn index-action [index type]
