@@ -32,7 +32,7 @@
     (is (= ["http://127.0.0.1:9200"] hosts))
     (is (= "resources-index/virtual-machine/_search" resource-search-url))
     (is (= "resources-index" (-> metering-action :index :_index)))
-    (is (= "metering-snapshot" (-> metering-action :index :_type)))
+    (is (= "metering" (-> metering-action :index :_type)))
     (is (= 1 metering-period-minutes)))
 
   (is (= ["http://elasticsearch:1234"] (:hosts (t/process-options {:es-host "elasticsearch"

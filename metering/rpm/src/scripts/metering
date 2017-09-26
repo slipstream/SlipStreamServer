@@ -5,5 +5,5 @@ ES_PORT=9200
 RESOURCES_INDEX=resources-index
 RESOURCES_TYPE=virtual-machine
 METERING_INDEX=resources-index
-METERING_TYPE=metering-snapshot
+METERING_TYPE=metering
 METERING_PERIOD_MINUTES=1
