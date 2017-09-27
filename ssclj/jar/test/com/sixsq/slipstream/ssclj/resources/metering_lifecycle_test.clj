@@ -12,7 +12,8 @@
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [clj-time.core :as time]
-    [clojure.spec.alpha :as s]))
+    [clojure.spec.alpha :as s]
+    [clj-time.core :as t]))
 
 (use-fixtures :each ltu/with-test-es-client-fixture)
 
@@ -41,7 +42,20 @@
         (ltu/is-operation-absent "delete")
         (ltu/is-operation-absent "edit"))
 
-
+    (def valid-acl {:owner {:principal "ADMIN",
+                            :type      "ROLE"},
+                    :rules [{:principal "realm:accounting_manager",
+                             :type      "ROLE",
+                             :right     "VIEW"},
+                            {:principal "test",
+                             :type      "USER",
+                             :right     "VIEW"},
+                            {:principal "cern:cern",
+                             :type      "ROLE",
+                             :right     "VIEW"},
+                            {:principal "cern:my-accounting-group",
+                             :type      "ROLE",
+                             :right     "VIEW"}]})
 
 
     ;; create a metering
@@ -50,6 +64,7 @@
                                 :resourceURI   m/resource-uri
                                 :created       timestamp
                                 :updated       timestamp
+                                :acl           valid-acl
 
                                 :name          "short name"
                                 :description   "short description",
@@ -57,16 +72,15 @@
                                                 :b "two"}
 
                                 :instanceID    "aaa-bbb-111"
+                                :connector     {:href "connector/0123-4567-8912"}
                                 :state         "Running"
                                 :ip            "127.0.0.1"
 
-
-                                :credentials   [{:href  "connector/0123-4567-8912",
+                                :credentials   [{:href  "credential/0123-4567-8912",
                                                  :roles ["realm:cern", "realm:my-accounting-group"]
-                                                 :users ["long-user-id-1", "long-user-id-2"]}]
-
-
-                                :run           {:href "run/aaa-bbb-ccc",
+                                                 :users ["long-user-id-1", "long-user-id-2"]}
+                                                ]
+                                :deployment    {:href "run/aaa-bbb-ccc",
                                                 :user {:href "user/test"}}
 
                                 :serviceOffer  {:href                  "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
@@ -75,11 +89,11 @@
                                                 :resource:disk         10
                                                 :resource:instanceType "Large"}
 
-                                :snapshot-time (str (time/now))
+                                :snapshot-time timestamp
                                 }
 
-          create-jane-vm (assoc create-test-metering :run {:href "run/444-555-666"
-                                                           :user {:href "user/jane"}})
+          create-jane-vm (assoc create-test-metering :deployment {:href "run/444-555-666"
+                                                                  :user {:href "user/jane"}})
 
           resp-test (-> session-admin
                         (request base-uri
@@ -189,3 +203,69 @@
                      :request-method method
                      :body (json/write-str {:dummy "value"}))
             (ltu/is-status 405))))))
+
+
+(defn insert-meter
+  [session uri doc]
+  (-> session
+      (request uri
+               :request-method :post
+               :body (json/write-str doc))))
+
+(deftest insertions
+  (let [session-admin (-> (session (ring-app))
+                          (content-type "application/json")
+                          (header authn-info-header "root ADMIN USER ANON"))
+
+        timestamp (time/now)
+
+        vm-template {:id           (str m/resource-url "/uuid")
+                     :resourceURI  m/resource-uri
+                     :created      (str timestamp)
+                     :updated      (str timestamp)
+                     :acl          valid-acl
+
+                     :name         "short name"
+                     :description  "short description",
+                     :properties   {:a "one",
+                                    :b "two"}
+
+                     :instanceID   "aaa-bbb-111"
+                     :connector    {:href "connector/0123-4567-8912"}
+                     :state        "Running"
+                     :ip           "127.0.0.1"
+
+                     :credentials  [{:href  "credential/0123-4567-8912",
+                                     :roles ["realm:cern", "realm:my-accounting-group"]
+                                     :users ["long-user-id-1", "long-user-id-2"]}
+                                    ]
+                     :deployment   {:href "run/aaa-bbb-ccc",
+                                    :user {:href "user/test"}}
+
+                     :serviceOffer {:href                  "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
+                                    :resource:vcpu         1
+                                    :resource:ram          4096
+                                    :resource:disk         10
+                                    :resource:instanceType "Large"}}
+        nb-record 10
+        snaps (map #(assoc vm-template :snapshot-time (str (time/plus timestamp (time/minutes %)))) (range 1 (inc nb-record)))
+
+        ]
+
+
+
+
+    (doall (map (partial insert-meter session-admin base-uri) snaps))
+
+    (-> session-admin
+        (request base-uri)
+        (ltu/body->edn)
+        (ltu/dump)
+        (ltu/is-count nb-record)
+        (ltu/is-status 200))
+
+    ))
+
+
+
+
