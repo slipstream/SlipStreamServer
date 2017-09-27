@@ -35,14 +35,15 @@
                                :b "two"}
 
                 :instanceID   "aaa-bbb-111"
+                :connector    {:href "connector/0123-4567-8912"}
                 :state        "Running"
                 :ip           "127.0.0.1"
 
-                :credentials  [{:href  "connector/0123-4567-8912",
+                :credentials  [{:href  "credential/0123-4567-8912",
                                 :roles ["realm:cern", "realm:my-accounting-group"]
                                 :users ["long-user-id-1", "long-user-id-2"]}
                                ]
-                :run          {:href "run/aaa-bbb-ccc",
+                :deployment   {:href "run/aaa-bbb-ccc",
                                :user {:href "user/test"}}
 
                 :serviceOffer {:href                  "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
@@ -61,13 +62,13 @@
                        false? (assoc vm-sample :bad-attr {})
                        false? (assoc vm-sample :bad-attr "test")
 
-                       true? (assoc vm-sample :run {:href "run/fff-42"})
+                       true? (assoc vm-sample :deployment {:href "run/fff-42"})
                        true? (assoc vm-sample :name "name"))
 
   ;; mandatory keywords
-  (doseq [k #{:credentials :state :instanceID}]
+  (doseq [k #{:credentials :state :instanceID :connector}]
     (is (not (s/valid? :cimi/virtual-machine (dissoc vm-sample k)))))
 
   ;; optional keywords
-  (doseq [k #{:run :serviceOffer :ip}]
+  (doseq [k #{:deployment :serviceOffer :ip}]
     (is (s/valid? :cimi/virtual-machine (dissoc vm-sample k)))))

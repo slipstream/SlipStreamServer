@@ -14,8 +14,12 @@ import java.net.URLEncoder;
 import java.util.List;
 import java.util.logging.Logger;
 
+import static com.sixsq.slipstream.util.SscljProxy.BASE_RESOURCE;
+import static com.sixsq.slipstream.acl.TypePrincipal.PrincipalType.USER;
+import static com.sixsq.slipstream.acl.TypePrincipalRight.Right.VIEW;
+
 public class VirtualMachineHandler {
-    protected static final String VIRTUAL_MACHINE_RESOURCE = "api/virtual-machine";
+    protected static final String VIRTUAL_MACHINE_RESOURCE = BASE_RESOURCE + "virtual-machine";
     private static final String USERNAME = "internal ADMIN";
     private static final Logger logger = Logger.getLogger(VirtualMachineHandler.class.getName());
 
@@ -31,45 +35,55 @@ public class VirtualMachineHandler {
     }
 
     private static void update(VirtualMachine virtualMachine, String id) {
-        SscljProxy.put("api/" + id, USERNAME, virtualMachine);
+        SscljProxy.put(BASE_RESOURCE + id, USERNAME, virtualMachine);
     }
 
     private static void delete(String id) {
-        SscljProxy.delete("api/" + id, USERNAME);
+        SscljProxy.delete(BASE_RESOURCE + id, USERNAME);
     }
 
     public static void handleVM(Vm vm) {
         VirtualMachine vmRecord = VirtualMachineHandler.getResourceFromPojo(vm);
         VirtualMachine vmDb = fetchVirtualMachine(vm.getCloud(), vm.getInstanceId());
 
-        if (vmDb == null) {
-            add(vmRecord);
-            return;
+        ACL acl = (vmDb != null) ? vmDb.getAcl() : new ACL(new TypePrincipal(USER, USERNAME));
+
+        // TODO : update code below when the credential resource is available
+
+        // Update ACL so that any runOwner can view the resource
+        String runOwner = vm.getRunOwner();
+        if (runOwner != null) {
+            acl.addRule(new TypePrincipalRight(USER, runOwner, VIEW));
         }
 
-        ACL acl = vmDb.getAcl();
-
-        //Update ACL so that any runOwner can view the resource
-        //TODO : update code when the credential resource is available
-        String runUuid = vm.getRunUuid();
-
-        if (runUuid != null) {
-            String runOwner = vm.getRunOwner();
-            acl.addRule(new TypePrincipalRight(TypePrincipal.PrincipalType.USER, runOwner, TypePrincipalRight.Right.VIEW));
+        // Update ACL so that the user who did the describe can view the resource
+        String user = vm.getUser();
+        if (user != null) {
+            acl.addRule(new TypePrincipalRight(USER, user, VIEW));
         }
 
-        //ACL may have been updated
+        // ACL may have been updated
         vmRecord.setAcl(acl);
 
-        update(vmRecord, vmDb.getId());
+        if (vmDb != null) {
+            for (VirtualMachine.CredentialRef credential : vmDb.getCredentials()) {
+                vmRecord.addCredential(credential);
+            }
+        }
+
+        if (vmDb == null) {
+            add(vmRecord);
+        } else {
+            update(vmRecord, vmDb.getId());
+        }
     }
 
     //Identify a VirtualMachine document in ES from its cloud and instanceID
     public static VirtualMachine fetchVirtualMachine(String cloud, String instanceID) {
 
-        StringBuffer sb = new StringBuffer("instanceID='").append(instanceID).append("'");
-        sb.append(" and credential/href='").append("connector/").append(cloud).append("'");
-        String cimiQuery = sb.toString();
+        String cimiQuery = new StringBuffer()
+                .append("connector/href='connector/").append(cloud)
+                .append("' and instanceID='").append(instanceID).append("'").toString();
         VirtualMachine virtualMachine = null;
 
         try {
@@ -87,18 +101,18 @@ public class VirtualMachineHandler {
 
             switch (nbRecords) {
                 case 0: //  no corresponding record was found
-                    logger.warning("Loading ressource with Query " + resource + " did not return any  record");
+                    logger.warning("Loading ressource with Query " + resource + " did not return any record");
                     break;
 
                 case 1: //happy case : a corresponding record was found in ES
                     virtualMachine = machines.get(0);
-                    logger.info("Found  record" + SscljProxy.toJson(virtualMachine));
+                    logger.finest("Found record: " + SscljProxy.toJson(virtualMachine));
                     break;
 
                 default:
                     // more than one record found, we expect to identify a single document
 
-                    logger.warning("Loading ressource with Query " + resource + " did  return too many (" + nbRecords + ")  records");
+                    logger.warning("Loading ressource with Query " + resource + " did return too many (" + nbRecords + ") records");
                     for (VirtualMachine vmToDelete : machines) {
                         delete(vmToDelete.getId());
                     }
@@ -114,12 +128,12 @@ public class VirtualMachineHandler {
         VirtualMachine resource = new VirtualMachine();
 
         resource.setInstanceID(vm.getInstanceId());
+        resource.setConnector(new VirtualMachine.CloudRef(vm.getCloud()));
         resource.setState(vm.getState());
         resource.setIp(vm.getIp());
 
-        String cloudHref = "connector/" + vm.getCloud();
-        VirtualMachine.CredentialRef cloudref = new VirtualMachine.CredentialRef(cloudHref);
-        resource.setCredential(cloudref);
+        VirtualMachine.UserRef userHref = new VirtualMachine.UserRef(vm.getUser());
+        resource.addCredential(new VirtualMachine.CredentialRef(userHref.href));
 
         //the VM may have a runUuid which will be the run reference of the Virtual Machine CIMI resource
         if (vm.getRunUuid() != null) {
@@ -128,8 +142,8 @@ public class VirtualMachineHandler {
             VirtualMachine.UserRef userRef = new VirtualMachine.UserRef(runOwner);
 
             String runHref = "run/" + vm.getRunUuid();
-            VirtualMachine.RunRef runRef = new VirtualMachine.RunRef(runHref, userRef);
-            resource.setRun(runRef);
+            VirtualMachine.DeploymentRef runRef = new VirtualMachine.DeploymentRef(runHref, userRef);
+            resource.setDeployment(runRef);
 
         }
 

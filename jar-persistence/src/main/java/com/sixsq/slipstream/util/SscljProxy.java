@@ -105,8 +105,6 @@ public class SscljProxy {
         return request(Method.DELETE, resource, null, username, null, null, null);
     }
 
-
-
     public static Response delete(String resource, String username, Form queryParameters) {
         return request(Method.DELETE, resource, null, username, queryParameters, null, null);
     }
@@ -118,7 +116,6 @@ public class SscljProxy {
     public static Response delete(String resource, String username, Boolean throwException) {
         return request(Method.DELETE, resource, null, username, null, null, throwException);
     }
-
 
     private static Response request(Method method, String resource, Object obj, String username,
                                     Iterable<Parameter> queryParameters, MediaType mediaType,
@@ -169,15 +166,15 @@ public class SscljProxy {
                     break;
                 case PUT:
                     responseEntity = client.put(content, mediaType);
-                    logger.fine("PUT content : " + content.getText());
+                    logger.finest("PUT content : " + content.getText());
                     break;
                 case POST:
                     responseEntity = client.post(content, mediaType);
-                    logger.fine("POST content : " + content.getText());
+                    logger.finest("POST content : " + content.getText());
                     break;
                 case DELETE:
                     responseEntity = client.delete(mediaType);
-                    logger.fine("DELETE content : " + content.getText());
+                    logger.finest("DELETE content : " + content.getText());
                     break;
                 default:
                     throw new UnsupportedOperationException("Method " + method.toString() + "not supported");
