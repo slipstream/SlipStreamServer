@@ -32,16 +32,28 @@
                               :type      "ROLE"
                               :right     "MODIFY"}]})
 
+
 ;;
 ;; multimethods for validation and operations
 ;;
 
+(defn- validate-attributes
+  [resource]
+  (let [valid-prefixes (sn/all-prefixes)
+        resource-payload (dissoc resource :acl :id :resourceURI :name :description
+                                 :created :updated :properties :operations :credentials :serviceOffer)
+        validator (partial sc/valid-attribute-name? valid-prefixes)]
+    (if (sc/valid-attributes? validator resource-payload)
+      resource
+      (throw-wrong-namespace))))
+
+;
 (def validate-fn (u/create-spec-validation-fn :cimi/service-benchmark))
 (defmethod crud/validate resource-uri
   [resource]
   (-> resource
       validate-fn
-      sc/validate-attributes))
+      validate-attributes))
 
 (defmethod crud/add-acl resource-uri
   [resource request]

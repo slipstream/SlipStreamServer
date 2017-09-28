@@ -28,13 +28,3 @@
                      sr/json-response
                      (r/status code))]
     (throw (ex-info msg response))))
-
-(defn validate-attributes
-  [resource]
-  (let [valid-prefixes (sn/all-prefixes)
-        resource-payload (dissoc resource :acl :id :resourceURI :name :description
-                                 :created :updated :properties :operations :connector)
-        validator (partial valid-attribute-name? valid-prefixes)]
-    (if (valid-attributes? validator resource-payload)
-      resource
-      (throw-wrong-namespace))))

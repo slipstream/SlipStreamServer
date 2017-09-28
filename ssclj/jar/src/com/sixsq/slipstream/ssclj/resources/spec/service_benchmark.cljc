@@ -10,6 +10,7 @@
 (s/def :cimi.service-benchmark/serviceOffer :cimi.common/resource-link)
 
 (s/def :cimi/service-benchmark
-  (su/only-keys-maps c/common-attrs
+  (su/constrained-map keyword? any?
+                      c/common-attrs
                     {:req-un [:cimi.service-benchmark/credentials
                               :cimi.service-benchmark/serviceOffer]}))

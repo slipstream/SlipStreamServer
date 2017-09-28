@@ -21,17 +21,17 @@
 
 (def valid-entry
   {:serviceOffer    {:href "service-offer/a3db10f4-ad81-4b3e-8c04-4994450da9e3"}
-   :credentials     {:href "credential/aceceb2c-c662-4dde-b6af-8837182c1069"}
+   :credentials     [{:href "credential/aceceb2c-c662-4dde-b6af-8837182c1069"}]
    :schema-org:att1 "123.456"})
 
 (def valid-nested-2-levels
   {:serviceOffer    {:href "service-offer/b3db10f4-ad81-4b3e-8c04-4994450da9e3"}
-   :credentials     {:href "credential/bceceb2c-c662-4dde-b6af-8837182c1069"}
+   :credentials     [{:href "credential/bceceb2c-c662-4dde-b6af-8837182c1069"}]
    :schema-org:att1 {:schema-org:att2 "456"}})
 
 (def valid-nested-entry
   {:serviceOffer    {:href "service-offer/c3db10f4-ad81-4b3e-8c04-4994450da9e3"}
-   :credentials     {:href "credential/cceceb2c-c662-4dde-b6af-8837182c1069"}
+   :credentials     [{:href "credential/cceceb2c-c662-4dde-b6af-8837182c1069"}]
    :schema-org:att1 "hi"
    :schema-org:attnested
                     {:schema-com:subnested
@@ -52,7 +52,7 @@
 ; only schema-org and schema-com are valid and existing (see below)
 (def entry-wrong-namespace
   {:serviceOffer    {:href "service-offer/a3db10f4-ad81-4b3e-8c04-4994450da9e3"}
-   :credentials     {:href "credential/aceceb2c-c662-4dde-b6af-8837182c1069"}
+   :credentials     [{:href "credential/aceceb2c-c662-4dde-b6af-8837182c1069"}]
    :wrong:att1 "123.456"})
 
 (def valid-namespace {:prefix "schema-org"
@@ -234,8 +234,8 @@
         (t/is-status 201))
 
     (let [with-namespaced-key
-          (str          "{\"serviceOffer\":{\"href\":\"service-offer/d3db10f4-ad81-4b3e-8c04-4994450da9e3\"},"
-               "{\"credentials\":{\"href\":\"credential/dceceb2c-c662-4dde-b6af-8837182c1069\"},"
+          (str "{\"serviceOffer\":{\"href\":\"service-offer/d3db10f4-ad81-4b3e-8c04-4994450da9e3\"},"
+               "\"credentials\":[{\"href\":\"credential/dceceb2c-c662-4dde-b6af-8837182c1069\"}],"
                "\"schema-org:attr-name\":\"123.456\"}")
 
           uri-of-posted (-> session-user
