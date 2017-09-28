@@ -3,6 +3,7 @@
     [clojure.test :refer :all]
     [clojure.data.json :as json]
     [peridot.core :refer :all]
+    [cemerick.url :as url]
     [com.sixsq.slipstream.ssclj.resources.metering :as m]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
@@ -247,8 +248,8 @@
                                     :resource:ram          4096
                                     :resource:disk         10
                                     :resource:instanceType "Large"}}
-        nb-record 10
-        snaps (map #(assoc vm-template :snapshot-time (str (time/plus timestamp (time/minutes %)))) (range 1 (inc nb-record)))
+        n 10
+        snaps (map #(assoc vm-template :snapshot-time (str (time/plus timestamp (time/minutes %)))) (range 1 (inc n)))
 
         ]
 
@@ -261,7 +262,19 @@
         (request base-uri)
         (ltu/body->edn)
         (ltu/dump)
-        (ltu/is-count nb-record)
+        (ltu/is-count n)
+        (ltu/is-status 200))
+
+    ;;check aggregations
+
+    (-> session-admin
+        (content-type "application/x-www-form-urlencoded")
+        (request base-uri
+                 :request-method :put
+                 :body (url/map->query {:$first 1, :$last 0, :$aggregation "count:id"}))
+        (ltu/body->edn)
+        (ltu/dump)
+        (ltu/is-count n)
         (ltu/is-status 200))
 
     ))
