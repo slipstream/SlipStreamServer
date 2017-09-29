@@ -28,6 +28,21 @@
                    :created :updated :name :description}]
     (into {} (remove #(unwanted (first %)) m))))
 
+(def valid-acl {:owner {:principal "ADMIN",
+                        :type      "ROLE"},
+                :rules [{:principal "realm:accounting_manager",
+                         :type      "ROLE",
+                         :right     "VIEW"},
+                        {:principal "test",
+                         :type      "USER",
+                         :right     "VIEW"},
+                        {:principal "cern:cern",
+                         :type      "ROLE",
+                         :right     "VIEW"},
+                        {:principal "cern:my-accounting-group",
+                         :type      "ROLE",
+                         :right     "VIEW"}]})
+
 (deftest lifecycle
   (let [session-admin (-> (session (ring-app))
                           (content-type "application/json")
@@ -42,22 +57,6 @@
         (ltu/is-operation-present "add")
         (ltu/is-operation-absent "delete")
         (ltu/is-operation-absent "edit"))
-
-    (def valid-acl {:owner {:principal "ADMIN",
-                            :type      "ROLE"},
-                    :rules [{:principal "realm:accounting_manager",
-                             :type      "ROLE",
-                             :right     "VIEW"},
-                            {:principal "test",
-                             :type      "USER",
-                             :right     "VIEW"},
-                            {:principal "cern:cern",
-                             :type      "ROLE",
-                             :right     "VIEW"},
-                            {:principal "cern:my-accounting-group",
-                             :type      "ROLE",
-                             :right     "VIEW"}]})
-
 
     ;; create a metering
     (let [timestamp "1964-08-25T10:00:00.0Z"
@@ -244,6 +243,7 @@
                                     :resource:ram          4096
                                     :resource:disk         10
                                     :resource:instanceType "Large"}}
+
         n 10
         snaps-minutes (map #(assoc vm-template :snapshot-time (str (time/plus timestamp (time/minutes %)))) (range 1 (inc n)))
         snaps-days (map #(assoc vm-template :snapshot-time (str (time/plus timestamp (time/days %)))) (range 1 (inc n)))]
@@ -269,40 +269,37 @@
         (ltu/is-status 200))
 
 
-    (defn- agg-meter
-      [agg-query & [from to]]
-      (let [query-map {:$first 1, :$last 0, :$aggregation agg-query}]
-        (-> session-admin
-            (content-type "application/x-www-form-urlencoded")
-            (request base-uri
-                     :request-method :put
-                     :body (url/map->query
-                             (if (and from to)
-                               (assoc query-map :$filter (str "snapshot-time >= " from " and snapshot-time <= " to))
-                               query-map)))
-            (ltu/body->edn)
-            :response
-            :body
-            :aggregations
-            ((keyword agg-query))
-            :value)))
+    (let [agg-meter (fn agg-meter
+                      [agg-query & [from to]]
+                      (let [query-map {:$first 1, :$last 0, :$aggregation agg-query}]
+                        (-> session-admin
+                            (content-type "application/x-www-form-urlencoded")
+                            (request base-uri
+                                     :request-method :put
+                                     :body (url/map->query
+                                             (if (and from to)
+                                               (assoc query-map :$filter (str "snapshot-time >= " from " and snapshot-time <= " to))
+                                               query-map)))
+                            (ltu/body->edn)
+                            :response
+                            :body
+                            :aggregations
+                            ((keyword agg-query))
+                            :value)))]
 
+      (are [query v] (is (= v (agg-meter query)))
+                     "avg:serviceOffer/resource:ram" (double 4096)
+                     "avg:serviceOffer/resource:disk" (double 10)
+                     "count:id" (* 2 n)
+                     "sum:serviceOffer/resource:vcpu" (double (* 2 n)))
 
-    (are [query v] (is (= v (agg-meter query)))
-                   "avg:serviceOffer/resource:ram" (double 4096)
-                   "avg:serviceOffer/resource:disk" (double 10)
-                   "count:id" (* 2 n)
-                   "sum:serviceOffer/resource:vcpu" (double (* 2 n)))
+      (let [after-15mn (time/plus timestamp (time/minutes 15))
+            after-3days (time/plus timestamp (time/days 3))
+            after-1day (time/plus timestamp (time/days 1))]
 
-
-    (def after-15mn (time/plus timestamp (time/minutes 15)))
-    (def after-3days (time/plus timestamp (time/days 3)))
-    (def after-1day (time/plus timestamp (time/days 1)))
-
-
-    (are [query from to v] (is (= v (agg-meter query from to)))
-                           "count:id" after-1day after-3days 3
-                           "count:id" after-1day nil 20     ;; 'from' without 'to' is ignored
-                           "count:id" (time/now) after-1day 11
-                           "count:id" (time/now) after-3days 13
-                           "sum:serviceOffer/resource:disk" after-1day after-3days (double 30))))
+        (are [query from to v] (is (= v (agg-meter query from to)))
+                               "count:id" after-1day after-3days 3
+                               "count:id" after-1day nil 20 ;; 'from' without 'to' is ignored
+                               "count:id" (time/now) after-1day 11
+                               "count:id" (time/now) after-3days 13
+                               "sum:serviceOffer/resource:disk" after-1day after-3days (double 30))))))

@@ -3,9 +3,7 @@
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.util.spec :as su]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
-    [com.sixsq.slipstream.ssclj.resources.spec.virtual-machine :as vm]
-    ))
-
+    [com.sixsq.slipstream.ssclj.resources.spec.virtual-machine :as vm]))
 
 
 (s/def :cimi.metering/snapshot-time :cimi.core/timestamp)
