@@ -1,11 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.service-catalog.utils
   (:require
-    [superstring.core :as str]
+    [clojure.string :as str]
     [ring.util.response :as r]
     [com.sixsq.slipstream.util.response :as sr]))
 
-
-;;
 
 (defn valid-attribute-name?
   [valid-prefixes attr-name]
@@ -23,7 +21,7 @@
   []
   (let [code 406
         msg "resource attributes do not satisfy defined namespaces"
-        response (-> {:status code :message msg}
+        response (-> {:status code, :message msg}
                      sr/json-response
                      (r/status code))]
     (throw (ex-info msg response))))

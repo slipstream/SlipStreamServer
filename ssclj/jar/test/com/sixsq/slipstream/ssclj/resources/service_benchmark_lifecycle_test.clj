@@ -51,9 +51,9 @@
 ; it will not exist thus should be rejected
 ; only schema-org and schema-com are valid and existing (see below)
 (def entry-wrong-namespace
-  {:serviceOffer    {:href "service-offer/a3db10f4-ad81-4b3e-8c04-4994450da9e3"}
-   :credentials     [{:href "credential/aceceb2c-c662-4dde-b6af-8837182c1069"}]
-   :wrong:att1 "123.456"})
+  {:serviceOffer {:href "service-offer/a3db10f4-ad81-4b3e-8c04-4994450da9e3"}
+   :credentials  [{:href "credential/aceceb2c-c662-4dde-b6af-8837182c1069"}]
+   :wrong:att1   "123.456"})
 
 (def valid-namespace {:prefix "schema-org"
                       :uri    "https://schema-org/a/b/c.md"})
