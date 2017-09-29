@@ -99,7 +99,7 @@
            if the current user has the MODIFY right."
           :resourceURI)
 
-(defmethod set-operations :default
+(defn set-standard-operations
   [{:keys [id resourceURI] :as resource} request]
   (try
     (a/can-modify? resource request)
@@ -110,6 +110,10 @@
       (assoc resource :operations ops))
     (catch Exception e
       (dissoc resource :operations))))
+
+(defmethod set-operations :default
+  [resource request]
+  (set-standard-operations resource request))
 
 ;;
 ;; Determine the identifier for a new resource.
