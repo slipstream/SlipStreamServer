@@ -249,19 +249,21 @@
                                     :resource:disk         10
                                     :resource:instanceType "Large"}}
         n 10
-        snaps (map #(assoc vm-template :snapshot-time (str (time/plus timestamp (time/minutes %)))) (range 1 (inc n)))
-
+        snaps-minutes (map #(assoc vm-template :snapshot-time (str (time/plus timestamp (time/minutes %)))) (range 1 (inc n)))
+        snaps-days (map #(assoc vm-template :snapshot-time (str (time/plus timestamp (time/days %)))) (range 1 (inc n)))
         ]
 
 
 
 
-    (doall (map (partial insert-meter session-admin base-uri) snaps))
+
+    (doall (map (partial insert-meter session-admin base-uri) snaps-minutes))
+    (doall (map (partial insert-meter session-admin base-uri) snaps-days))
 
     (-> session-admin
         (request base-uri)
         (ltu/body->edn)
-        (ltu/is-count n)
+        (ltu/is-count (* 2 n))
         (ltu/is-status 200))
 
     ;;check aggregations
@@ -272,32 +274,47 @@
                  :request-method :put
                  :body (url/map->query {:$first 1, :$last 0, :$aggregation "count:id"}))
         (ltu/body->edn)
-        (ltu/is-count n)
+        (ltu/is-count (* 2 n))
         (ltu/is-status 200))
 
 
     (defn- agg-meter
-      [cimi-query]
-      (-> session-admin
-          (content-type "application/x-www-form-urlencoded")
-          (request base-uri
-                   :request-method :put
-                   :body (url/map->query {:$first 1, :$last 0, :$aggregation cimi-query}))
-          (ltu/body->edn)
-          :response
-          :body
-          :aggregations
-          ((keyword cimi-query))
-          :value))
+      [agg-query & [from to]]
+      (let [query-map {:$first 1, :$last 0, :$aggregation agg-query}]
+        (-> session-admin
+            (content-type "application/x-www-form-urlencoded")
+            (request base-uri
+                     :request-method :put
+                     :body (url/map->query
+                             (if (and from to)
+                               (assoc query-map :$filter (str "snapshot-time >= " from " and snapshot-time <= " to))
+                               query-map)))
+            (ltu/body->edn)
+            :response
+            :body
+            :aggregations
+            ((keyword agg-query))
+            :value)))
 
 
     (are [query v] (is (= v (agg-meter query)))
                    "avg:serviceOffer/resource:ram" (double 4096)
                    "avg:serviceOffer/resource:disk" (double 10)
-                   "count:id" n
-                   "sum:serviceOffer/resource:vcpu" (double n)
-                   )))
+                   "count:id" (* 2 n)
+                   "sum:serviceOffer/resource:vcpu" (double (* 2 n))
+                   )
 
 
+    (def after-15mn (time/plus timestamp (time/minutes 15)))
+    (def after-3days (time/plus timestamp (time/days 3)))
+    (def after-1day (time/plus timestamp (time/days 1)))
 
+
+    (are [query from to v] (is (= v (agg-meter query from to)))
+                           "count:id" after-1day after-3days 3
+                           "count:id" after-1day nil 20     ;; 'from' without 'to' is ignored
+                           "count:id" (time/now) after-1day 11
+                           "count:id" (time/now) after-3days 13
+                           "sum:serviceOffer/resource:disk" after-1day after-3days (double 30)
+                           )))
 
