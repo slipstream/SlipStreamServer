@@ -11,7 +11,8 @@
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [clojure.spec.alpha :as s]))
+    [clojure.spec.alpha :as s]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]))
 
 (use-fixtures :each ltu/with-test-es-client-fixture)
 
@@ -24,6 +25,32 @@
   (let [unwanted #{:id :resourceURI :acl :operations
                    :created :updated :name :description}]
     (into {} (remove #(unwanted (first %)) m))))
+
+(defn random-virtual-machine
+  []
+  (let [resource-type "virtual-machine"
+        doc-id (str resource-type "/" (cu/random-uuid))
+        instance-id (cu/random-uuid)
+        cloud (rand-nth ["connector/cloud-1" "connector/cloud-2" "connector/cloud-3"])
+        user (rand-nth ["user-1" "user-2" "user-3"])]
+    {:id          doc-id
+     :resourceURI "http://sixsq.com/slipstream/1/VirtualMachine"
+     :updated     "2017-09-04T09:39:35.679Z"
+     :credential  {:href cloud}
+     :created     "2017-09-04T09:39:35.651Z"
+     :state       "Running"
+     :instanceID  instance-id
+     :run         {:href "run/4824efe2-59e9-4db6-be6b-fc1c8b3edf40"
+                   :user {:href (str "user/" user)}}
+     :acl         {:owner {:type      "USER"
+                           :principal "ADMIN"}
+                   :rules [{:principal "ADMIN"
+                            :right     "ALL"
+                            :type      "USER"}
+                           {:principal user
+                            :right     "VIEW"
+                            :type      "USER"}]}}))
+
 
 (deftest lifecycle
   (let [session-admin (-> (session (ring-app))

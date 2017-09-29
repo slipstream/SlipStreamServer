@@ -8,8 +8,10 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.quota.utils :as quota-utils]
     [com.sixsq.slipstream.auth.acl :as a]
-    [ring.util.response :as r]))
+    [ring.util.response :as r])
+  (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-name "Quota")
 
@@ -86,18 +88,28 @@
 
 
 ;;
-;; provide an action that allows anyone who can
-;; see the quota to evaluate it; the returned map
-;; gives the 1) current usage, 2) defined limit, and
-;; 3) the user's contribution to the current usage.
+;; provide an action that allows the quota to be evaluated
+;; returns the quota resource augmented with the keys
+;; :current-all (for all usage of the quota) and :current-user
+;; (for all usage of the quota by that user).
 ;;
+
+
+(defmethod crud/set-operations resource-uri
+  [{:keys [id resourceURI username] :as resource} request]
+  (let [href (str id "/evaluate")
+        evaluate-op {:rel (:evaluate c/action-uri) :href href}]
+    (-> (crud/set-standard-operations resource request)
+        (update-in [:operations] conj evaluate-op))))
+
+
 (defmethod crud/do-action [resource-url "evaluate"]
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
       (-> (crud/retrieve-by-id id {:user-name  "INTERNAL"
-                                   :user-roles [id]})       ;; Essentially turn off authz by spoofing owner of resource.
-          (validate-callback request)))
+                                   :user-roles ["ADMIN"]})
+          (quota-utils/evaluate request)))
     (catch ExceptionInfo ei
       (ex-data ei))))
 
