@@ -40,7 +40,7 @@
          (extract-aggregation aggregation))))
 
 
-(defn evaluate
+(defn collect
   [quota request]
   (let [current-all (quota-metric quota request)
         current-user (quota-metric-user quota request)]

@@ -97,19 +97,19 @@
 
 (defmethod crud/set-operations resource-uri
   [{:keys [id resourceURI username] :as resource} request]
-  (let [href (str id "/evaluate")
-        evaluate-op {:rel (:evaluate c/action-uri) :href href}]
+  (let [href (str id "/collect")
+        collect-op {:rel (:collect c/action-uri) :href href}]
     (-> (crud/set-standard-operations resource request)
-        (update-in [:operations] conj evaluate-op))))
+        (update-in [:operations] conj collect-op))))
 
 
-(defmethod crud/do-action [resource-url "evaluate"]
+(defmethod crud/do-action [resource-url "collect"]
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
       (-> (crud/retrieve-by-id id {:user-name  "INTERNAL"
                                    :user-roles ["ADMIN"]})
-          (quota-utils/evaluate request)))
+          (quota-utils/collect request)))
     (catch ExceptionInfo ei
       (ex-data ei))))
 

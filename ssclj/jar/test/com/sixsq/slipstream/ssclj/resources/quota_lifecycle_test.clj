@@ -92,30 +92,27 @@
             (ltu/is-count zero?))
 
         ;; user view: OK
-        (let [evaluate-op (-> session-jane
-                              (request abs-uri)
-                              (ltu/body->edn)
-                              (ltu/is-status 200)
-                              (ltu/is-operation-absent "edit")
-                              (ltu/is-operation-absent "delete")
-                              (ltu/is-operation-present (:evaluate c/action-uri))
-                              (ltu/get-op "evaluate"))
-              abs-evaluate-uri (str p/service-context (u/de-camelcase evaluate-op))
+        (let [collect-op (-> session-jane
+                             (request abs-uri)
+                             (ltu/body->edn)
+                             (ltu/is-status 200)
+                             (ltu/is-operation-absent "edit")
+                             (ltu/is-operation-absent "delete")
+                             (ltu/is-operation-present (:collect c/action-uri))
+                             (ltu/get-op "collect"))
+              abs-collect-uri (str p/service-context (u/de-camelcase collect-op))
 
-              eval-resp (-> session-jane
-                            (request abs-evaluate-uri
-                                     :request-method :post)
-                            (ltu/body->edn)
-                            (ltu/is-status 200)
-                            :response)]
+              collect-resp (-> session-jane
+                               (request abs-collect-uri
+                                        :request-method :post)
+                               (ltu/body->edn)
+                               (ltu/is-status 200)
+                               :response)]
 
-          ;; check that the evaluate action returns the correct response
-          (is (= n-vm (:current-all eval-resp)))
-          (is (= (get freq "jane") (:current-user eval-resp)))
-          (is (= 100 (:limit eval-resp))))
-
-        ;; check that the evaluate action returns the correct response
-        (-> session-jane)
+          ;; check that the collect action returns the correct response
+          (is (= n-vm (:current-all collect-resp)))
+          (is (= (get freq "jane") (:current-user collect-resp)))
+          (is (= 100 (:limit collect-resp))))
 
         ;; other user view: FAIL
         (-> session-tarzan
@@ -124,27 +121,27 @@
             (ltu/is-status 403))
 
         ;; admin view: OK
-        (let [evaluate-op (-> session-admin
-                              (request abs-uri)
-                              (ltu/body->edn)
-                              (ltu/is-status 200)
-                              (ltu/is-operation-present "edit")
-                              (ltu/is-operation-present "delete")
-                              (ltu/is-operation-present (:evaluate c/action-uri))
-                              (ltu/get-op "evaluate"))
-              abs-evaluate-uri (str p/service-context (u/de-camelcase evaluate-op))
+        (let [collect-op (-> session-admin
+                             (request abs-uri)
+                             (ltu/body->edn)
+                             (ltu/is-status 200)
+                             (ltu/is-operation-present "edit")
+                             (ltu/is-operation-present "delete")
+                             (ltu/is-operation-present (:collect c/action-uri))
+                             (ltu/get-op "collect"))
+              abs-collect-uri (str p/service-context (u/de-camelcase collect-op))
 
-              eval-resp (-> session-admin
-                            (request abs-evaluate-uri
-                                     :request-method :post)
-                            (ltu/body->edn)
-                            (ltu/is-status 200)
-                            :response)]
+              collect-resp (-> session-admin
+                               (request abs-collect-uri
+                                        :request-method :post)
+                               (ltu/body->edn)
+                               (ltu/is-status 200)
+                               :response)]
 
-          ;; check that the evaluate action returns the correct response
-          (is (= n-vm (:current-all eval-resp)))
-          (is (= n-vm (:current-user eval-resp)))
-          (is (= 100 (:limit eval-resp))))
+          ;; check that the collect action returns the correct response
+          (is (= n-vm (:current-all collect-resp)))
+          (is (= n-vm (:current-user collect-resp)))
+          (is (= 100 (:limit collect-resp))))
 
         ;; admin edit: OK
         (let [old-quota (-> session-admin
@@ -183,18 +180,18 @@
         (-> session-admin
             (request abs-uri :request-method :delete)
             (ltu/body->edn)
-            (ltu/is-status 200)))))
+            (ltu/is-status 200))))))
 
-  (deftest bad-methods
-    (let [resource-uri (str p/service-context (u/new-resource-id resource-name))]
-      (doall
-        (for [[uri method] [[base-uri :options]
-                            [base-uri :delete]
-                            [resource-uri :options]
-                            [resource-uri :post]]]
-          (do
-            (-> (session (ring-app))
-                (request uri
-                         :request-method method
-                         :body (json/write-str {:dummy "value"}))
-                (ltu/is-status 405))))))))
+(deftest bad-methods
+  (let [resource-uri (str p/service-context (u/new-resource-id resource-name))]
+    (doall
+      (for [[uri method] [[base-uri :options]
+                          [base-uri :delete]
+                          [resource-uri :options]
+                          [resource-uri :post]]]
+        (do
+          (-> (session (ring-app))
+              (request uri
+                       :request-method method
+                       :body (json/write-str {:dummy "value"}))
+              (ltu/is-status 405)))))))
