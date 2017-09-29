@@ -90,11 +90,10 @@
                                                 :resource:disk         10
                                                 :resource:instanceType "Large"}
 
-                                :snapshot-time timestamp
-                                }
+                                :snapshot-time timestamp}
 
-          create-jane-vm (assoc create-test-metering :deployment {:href "run/444-555-666"
-                                                                  :user {:href "user/jane"}})
+          create-jane-metering (assoc create-test-metering :deployment {:href "run/444-555-666"
+                                                                        :user {:href "user/jane"}})
 
           resp-test (-> session-admin
                         (request base-uri
@@ -106,7 +105,7 @@
           resp-jane (-> session-admin
                         (request base-uri
                                  :request-method :post
-                                 :body (json/write-str create-jane-vm))
+                                 :body (json/write-str create-jane-metering))
                         (ltu/body->edn)
                         (ltu/is-status 201))
 
@@ -217,9 +216,7 @@
   (let [session-admin (-> (session (ring-app))
                           (content-type "application/json")
                           (header authn-info-header "root ADMIN USER ANON"))
-
         timestamp (time/now)
-
         vm-template {:id           (str m/resource-url "/uuid")
                      :resourceURI  m/resource-uri
                      :created      (str timestamp)
@@ -238,8 +235,7 @@
 
                      :credentials  [{:href  "credential/0123-4567-8912",
                                      :roles ["realm:cern", "realm:my-accounting-group"]
-                                     :users ["long-user-id-1", "long-user-id-2"]}
-                                    ]
+                                     :users ["long-user-id-1", "long-user-id-2"]}]
                      :deployment   {:href "run/aaa-bbb-ccc",
                                     :user {:href "user/test"}}
 
@@ -250,12 +246,7 @@
                                     :resource:instanceType "Large"}}
         n 10
         snaps-minutes (map #(assoc vm-template :snapshot-time (str (time/plus timestamp (time/minutes %)))) (range 1 (inc n)))
-        snaps-days (map #(assoc vm-template :snapshot-time (str (time/plus timestamp (time/days %)))) (range 1 (inc n)))
-        ]
-
-
-
-
+        snaps-days (map #(assoc vm-template :snapshot-time (str (time/plus timestamp (time/days %)))) (range 1 (inc n)))]
 
     (doall (map (partial insert-meter session-admin base-uri) snaps-minutes))
     (doall (map (partial insert-meter session-admin base-uri) snaps-days))
@@ -301,8 +292,7 @@
                    "avg:serviceOffer/resource:ram" (double 4096)
                    "avg:serviceOffer/resource:disk" (double 10)
                    "count:id" (* 2 n)
-                   "sum:serviceOffer/resource:vcpu" (double (* 2 n))
-                   )
+                   "sum:serviceOffer/resource:vcpu" (double (* 2 n)))
 
 
     (def after-15mn (time/plus timestamp (time/minutes 15)))
@@ -315,6 +305,4 @@
                            "count:id" after-1day nil 20     ;; 'from' without 'to' is ignored
                            "count:id" (time/now) after-1day 11
                            "count:id" (time/now) after-3days 13
-                           "sum:serviceOffer/resource:disk" after-1day after-3days (double 30)
-                           )))
-
+                           "sum:serviceOffer/resource:disk" after-1day after-3days (double 30))))

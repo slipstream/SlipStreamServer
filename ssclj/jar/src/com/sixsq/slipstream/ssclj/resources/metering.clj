@@ -47,15 +47,11 @@
             :type      "USER"
             :right     "VIEW"}]})
 
-
-
-
 (def validate-fn (u/create-spec-validation-fn :cimi/metering))
 (defmethod crud/validate
   resource-uri
   [resource]
   (validate-fn resource))
-
 
 (defmethod crud/add-acl resource-uri
   [{:keys [acl] :as resource} request]
@@ -68,17 +64,10 @@
                               :user
                               :href
                               )
-                          (count "/user"))
-
-          ]
+                          (count "/user"))]
       (if run-owner
         (assoc resource :acl (create-acl run-owner))
-        (assoc resource :acl (create-acl user-id))
-        )
-
-      )
-    )
-  )
+        (assoc resource :acl (create-acl user-id))))))
 
 ;;
 ;; CRUD operations
@@ -92,8 +81,6 @@
 (defmethod crud/edit resource-name
   [request]
   (edit-impl request))
-
-
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 (defmethod crud/retrieve resource-name
