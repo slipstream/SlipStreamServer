@@ -9,9 +9,7 @@
     [com.sixsq.slipstream.ssclj.resources.service-catalog.utils :as sc]
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.service-attribute-namespace :as sn]
-    [ring.util.response :as r]
-    [superstring.core :as str]
-    [com.sixsq.slipstream.util.response :as sr]))
+    [superstring.core :as str]))
 
 
 (def ^:const resource-name "ServiceBenchmark")
@@ -45,7 +43,7 @@
         validator (partial sc/valid-attribute-name? valid-prefixes)]
     (if (sc/valid-attributes? validator resource-payload)
       resource
-      (throw-wrong-namespace))))
+      (sc/throw-wrong-namespace))))
 
 ;
 (def validate-fn (u/create-spec-validation-fn :cimi/service-benchmark))

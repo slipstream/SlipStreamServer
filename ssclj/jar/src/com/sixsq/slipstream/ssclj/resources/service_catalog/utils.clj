@@ -2,7 +2,6 @@
   (:require
     [superstring.core :as str]
     [ring.util.response :as r]
-    [com.sixsq.slipstream.ssclj.resources.service-attribute-namespace :as sn]
     [com.sixsq.slipstream.util.response :as sr]))
 
 
