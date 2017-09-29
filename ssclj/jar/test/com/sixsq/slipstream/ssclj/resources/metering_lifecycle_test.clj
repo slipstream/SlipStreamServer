@@ -261,7 +261,6 @@
     (-> session-admin
         (request base-uri)
         (ltu/body->edn)
-        (ltu/dump)
         (ltu/is-count n)
         (ltu/is-status 200))
 
@@ -273,11 +272,31 @@
                  :request-method :put
                  :body (url/map->query {:$first 1, :$last 0, :$aggregation "count:id"}))
         (ltu/body->edn)
-        (ltu/dump)
         (ltu/is-count n)
         (ltu/is-status 200))
 
-    ))
+
+    (defn- agg-meter
+      [cimi-query]
+      (-> session-admin
+          (content-type "application/x-www-form-urlencoded")
+          (request base-uri
+                   :request-method :put
+                   :body (url/map->query {:$first 1, :$last 0, :$aggregation cimi-query}))
+          (ltu/body->edn)
+          :response
+          :body
+          :aggregations
+          ((keyword cimi-query))
+          :value))
+
+
+    (are [query v] (is (= v (agg-meter query)))
+                   "avg:serviceOffer/resource:ram" (double 4096)
+                   "avg:serviceOffer/resource:disk" (double 10)
+                   "count:id" n
+                   "sum:serviceOffer/resource:vcpu" (double n)
+                   )))
 
 
 
