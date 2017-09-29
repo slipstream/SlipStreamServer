@@ -32,7 +32,7 @@
            resources-index         "resources-index"
            resources-type          "virtual-machine"
            metering-index          "resources-index"
-           metering-type           "metering-snapshot"
+           metering-type           "metering"
            metering-period-minutes 1}}]
   {:hosts                   (es-hosts es-host es-port)
    :resource-search-url     (search-url resources-index resources-type)
