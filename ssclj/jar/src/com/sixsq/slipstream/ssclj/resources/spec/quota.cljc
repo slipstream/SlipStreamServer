@@ -14,7 +14,7 @@
     (catch Throwable _ false)))
 
 
-(s/def :cimi.quota/collection :cimi.core/nonblank-string)
+(s/def :cimi.quota/resource :cimi.core/nonblank-string)
 (s/def :cimi.quota/selection valid-cimi-filter?)
 (s/def :cimi.quota/aggregation :cimi.core/nonblank-string)
 (s/def :cimi.quota/limit pos-int?)
@@ -22,7 +22,7 @@
 
 (s/def :cimi/quota
   (su/only-keys-maps c/common-attrs
-                     {:req-un [:cimi.quota/collection
+                     {:req-un [:cimi.quota/resource
                                :cimi.quota/selection
                                :cimi.quota/aggregation
                                :cimi.quota/limit]}))

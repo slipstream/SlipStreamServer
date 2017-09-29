@@ -39,7 +39,7 @@
      :updated     timestamp
      :acl         valid-acl
 
-     :collection  "VirtualMachine"
+     :resource  "VirtualMachine"
      :selection   "id!=null"
      :aggregation aggregation
      :limit       limit}))

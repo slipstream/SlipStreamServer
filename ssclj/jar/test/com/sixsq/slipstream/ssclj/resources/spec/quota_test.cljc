@@ -23,7 +23,7 @@
                :updated     timestamp
                :acl         valid-acl
 
-               :collection  "virtualMachines"
+               :resource    "VirtualMachine"
                :selection   "organization='cern'"
                :aggregation "count:id"
                :limit       100}]
@@ -37,9 +37,9 @@
                          invalid? (dissoc quota :updated)
                          invalid? (dissoc quota :acl)
 
-                         invalid? (dissoc quota :collection)
-                         invalid? (assoc quota :collection 0)
-                         invalid? (assoc quota :collection "")
+                         invalid? (dissoc quota :resource)
+                         invalid? (assoc quota :resource 0)
+                         invalid? (assoc quota :resource "")
 
                          invalid? (dissoc quota :selection)
                          invalid? (assoc quota :selection 0)

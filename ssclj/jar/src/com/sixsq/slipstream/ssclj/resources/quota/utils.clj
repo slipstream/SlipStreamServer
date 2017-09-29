@@ -22,21 +22,21 @@
      :aggregation {func [param]}}))
 
 
-(defn quota-metric [{:keys [collection aggregation] :as quota} request]
+(defn quota-metric [{:keys [resource aggregation] :as quota} request]
   (let [options {:user-name   "INTERNAL"
                  :user-roles  ["ADMIN"]
                  :cimi-params (get-cimi-params quota)}]
     (->> options
-         (db/query collection)
+         (db/query resource)
          (extract-aggregation aggregation))))
 
 
-(defn quota-metric-user [{:keys [collection aggregation] :as quota} request]
+(defn quota-metric-user [{:keys [resource aggregation] :as quota} request]
   (let [options (merge
                   (select-keys request [:identity :user-name :user-roles])
                   {:cimi-params (get-cimi-params quota)})]
     (->> options
-         (db/query collection)
+         (db/query resource)
          (extract-aggregation aggregation))))
 
 
