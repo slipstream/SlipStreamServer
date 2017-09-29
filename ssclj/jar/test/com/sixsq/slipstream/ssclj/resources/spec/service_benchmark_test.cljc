@@ -49,5 +49,4 @@
                        false? (dissoc service-bmk :credentials)
                        false? (dissoc service-bmk :serviceOffer)
                        true? (dissoc service-bmk :bmkname:score)
-                       true? (dissoc service-bmk :other))
-  )
+                       true? (dissoc service-bmk :other)))
