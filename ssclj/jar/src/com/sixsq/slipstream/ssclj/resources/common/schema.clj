@@ -16,7 +16,7 @@
 ;; additional resource actions have a URI prefix
 (def ^:const action-prefix (str cimi-schema-uri "action/"))
 (def ^:const prefixed-actions
-  #{:start :stop :restart :pause :suspend
+  #{:start :stop :restart :pause :suspend :terminate
     :export :import :capture :snapshot
     :forceSync :swapBackup :restore :enable :disable})
 

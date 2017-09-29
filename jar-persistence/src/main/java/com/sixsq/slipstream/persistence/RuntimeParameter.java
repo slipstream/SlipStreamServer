@@ -20,9 +20,7 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,10 +34,17 @@ import javax.persistence.NamedQuery;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
+import com.google.gson.JsonObject;
+import org.restlet.Response;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Text;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
+
+
+import com.sixsq.slipstream.util.SscljProxy;
+
+import static com.sixsq.slipstream.util.ServiceOffersUtil.parseJson;
 
 /**
  * Unit tests:
@@ -349,7 +354,7 @@ public class RuntimeParameter extends Metadata {
 		if (GLOBAL_NAMESPACE.equals(group_)) {
 			group_ = "Global";
 		}
-		setValue(value);
+		setInitValue(value);
 	}
 
 	public boolean isMappedValue() {
@@ -390,13 +395,49 @@ public class RuntimeParameter extends Metadata {
 		return resourceUri;
 	}
 
+	public static String getSScljDeploymentParameterUri(RuntimeParameter rp) {
+		String deploymentParameterId = "deployment-parameter/" + rp.container.getUuid() + "_";
+		String paramName = rp.name_.replace(".", "-");
+		if (!rp.group_.equals("Global")) {
+			String nodeIndex = rp.key_.replaceAll("^" + rp.group_ + ":", "");
+			nodeIndex = nodeIndex.replaceAll(":" + paramName +"$", "");
+			if (!nodeIndex.isEmpty()) {
+				deploymentParameterId = deploymentParameterId + String.join("_", rp.group_, "1",  paramName);
+			} else {
+				deploymentParameterId = deploymentParameterId +
+						String.join("_",  rp.group_, nodeIndex,  paramName);
+			}
+		} else {
+			paramName = paramName.replaceAll("^ss:", "");
+			deploymentParameterId = deploymentParameterId + paramName;
+		}
+		return SscljProxy.BASE_RESOURCE + deploymentParameterId;
+	}
+
 	public String getValue() {
+		/*Response response;
+		JsonObject res = new JsonObject();
+		response = SscljProxy.get(getSScljDeploymentParameterUri(this), "super ADMIN");
+		if (response != null && response.getStatus().getCode() == 200) {
+			res = parseJson(response.getEntityAsText());
+			return res.get("value").toString();
+		}*/
 		return value;
+	}
+
+	public void setInitValue(String value) {
+		setIsSet(!isNullOrEmpty(value));
+		this.value = value;
+		processValue();
 	}
 
 	public void setValue(String value) {
 		setIsSet(!isNullOrEmpty(value));
 		this.value = value;
+
+		Map<String, String> mapValue = new HashMap<String, String>();
+ 		mapValue.put("value", value);SscljProxy.put(getSScljDeploymentParameterUri(this),
+				"super ADMIN", mapValue, true);
 		processValue();
 	}
 

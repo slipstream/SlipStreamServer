@@ -24,12 +24,7 @@ package com.sixsq.slipstream.application;
 
 import com.sixsq.slipstream.action.ActionRouter;
 import com.sixsq.slipstream.attribute.AttributeRouter;
-import com.sixsq.slipstream.authn.BasicAuthenticator;
-import com.sixsq.slipstream.authn.CookieAuthenticator;
-import com.sixsq.slipstream.authn.LoginResource;
-import com.sixsq.slipstream.authn.LogoutResource;
-import com.sixsq.slipstream.authn.RegistrationResource;
-import com.sixsq.slipstream.authn.ResetPasswordResource;
+import com.sixsq.slipstream.authn.*;
 import com.sixsq.slipstream.authz.SuperEnroler;
 import com.sixsq.slipstream.cloudusage.CloudUsageRouter;
 import com.sixsq.slipstream.configuration.Configuration;
@@ -61,6 +56,7 @@ import com.sixsq.slipstream.resource.ServiceCatalogRouter;
 import com.sixsq.slipstream.resource.configuration.ServiceConfigurationResource;
 import com.sixsq.slipstream.resource.NuvlaboxAdminRouter;
 import com.sixsq.slipstream.resource.NuvlaboxAdminResource;
+import com.sixsq.slipstream.run.RunResource;
 import com.sixsq.slipstream.run.RunRouter;
 import com.sixsq.slipstream.run.VmsRouter;
 import com.sixsq.slipstream.serviceinfo.ServiceInfoRouter;
@@ -381,14 +377,21 @@ public class RootApplication extends Application {
 		Authenticator basicAuthenticator = new BasicAuthenticator(getContext());
 		basicAuthenticator.setEnroler(new SuperEnroler(application));
 
+		Authenticator headerAuthenticator = new HeaderAuthenticator(getContext());
+		headerAuthenticator.setEnroler(new SuperEnroler(application));
+
 		Authenticator cookieAuthenticator = new CookieAuthenticator(getContext());
 		cookieAuthenticator.setOptional(true);
 
 		cookieAuthenticator.setNext(basicAuthenticator);
 		cookieAuthenticator.setEnroler(new SuperEnroler(application));
 
+		basicAuthenticator.setOptional(true);
+		basicAuthenticator.setNext(headerAuthenticator);
+
 		authenticators.add(cookieAuthenticator);
 		authenticators.add(basicAuthenticator);
+		authenticators.add(headerAuthenticator);
 
 		return authenticators;
 	}

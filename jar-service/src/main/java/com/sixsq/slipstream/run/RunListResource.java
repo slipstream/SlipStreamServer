@@ -34,7 +34,11 @@ import javax.persistence.OptimisticLockException;
 import javax.persistence.RollbackException;
 
 import com.sixsq.slipstream.dashboard.DashboardResource;
+import com.sixsq.slipstream.persistence.*;
+import com.sixsq.slipstream.util.*;
 import org.hibernate.StaleObjectStateException;
+import org.json.JSONObject;
+import org.json.XML;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
@@ -55,24 +59,7 @@ import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
-import com.sixsq.slipstream.persistence.Module;
-import com.sixsq.slipstream.persistence.ModuleCategory;
-import com.sixsq.slipstream.persistence.ModuleParameter;
-import com.sixsq.slipstream.persistence.NodeParameter;
-import com.sixsq.slipstream.persistence.Parameter;
-import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.RunParameter;
-import com.sixsq.slipstream.persistence.RunType;
-import com.sixsq.slipstream.persistence.RuntimeParameter;
-import com.sixsq.slipstream.persistence.ServiceConfiguration;
-import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.UserParameter;
-import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.resource.BaseResource;
-import com.sixsq.slipstream.util.ConfigurationUtil;
-import com.sixsq.slipstream.util.HtmlUtil;
-import com.sixsq.slipstream.util.RequestUtil;
-import com.sixsq.slipstream.util.SerializationUtil;
 
 /**
  * Unit test:
@@ -185,8 +172,6 @@ public class RunListResource extends BaseResource {
 
 			run.store();
 
-			launch(run);
-
 			setLastExecute(user);
 
 			run.postEventCreated();
@@ -266,7 +251,7 @@ public class RunListResource extends BaseResource {
 	private void setTags(Run run, Form form) {
 		RuntimeParameter rp = run.getRuntimeParameters().get(RuntimeParameter.GLOBAL_TAGS_KEY);
 		if (rp != null){
-			rp.setValue(form.getFirstValue(TAGS_KEY, ""));
+			rp.setInitValue(form.getFirstValue(TAGS_KEY, ""));
 		}
 	}
 
@@ -360,13 +345,6 @@ public class RunListResource extends BaseResource {
 		} catch (IllegalArgumentException e) {
 			throw (new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, "Unknown run type: " + type));
 		}
-	}
-
-	private Run launch(Run run) throws SlipStreamException {
-		User user = getUser();
-		user.addSystemParametersIntoUser(Configuration.getInstance().getParameters());
-		slipstream.async.Launcher.launch(run, user);
-		return run;
 	}
 
 	private Run addCredentials(Run run) throws ConfigurationException,

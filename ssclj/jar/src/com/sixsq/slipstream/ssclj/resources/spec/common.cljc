@@ -50,6 +50,8 @@
 
 (s/def :cimi.core/resource-type :cimi.core/kebab-identifier)
 
+(s/def :cimi.core/zero-or-pos-int #(and (int? %) (> % -1)))
+
 ;;
 ;; A resource href is the concatenation of a resource type and resource identifier separated
 ;; with a slash.  The later part is optional for singleton resources like the cloud-entry-point.

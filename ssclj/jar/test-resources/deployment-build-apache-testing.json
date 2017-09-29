@@ -1,0 +1,3242 @@
+{
+  "run": {
+    "cloudServiceNamesList": {
+      "string": "nuvlabox-stanley-cohen",
+      "length": 1
+    },
+    "module": {
+      "outputParametersExpanded": {
+        "entry": [
+          {
+            "string": "hostname",
+            "parameter": {
+              "readonly": false,
+              "isSet": false,
+              "name": "hostname",
+              "description": "hostname/ip of the image",
+              "category": "Output",
+              "type": "String",
+              "mandatory": true,
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "instanceid",
+            "parameter": {
+              "readonly": false,
+              "isSet": false,
+              "name": "instanceid",
+              "description": "Cloud instance id",
+              "category": "Output",
+              "type": "String",
+              "mandatory": true,
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "port",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "8080",
+              "name": "port",
+              "description": "Port",
+              "category": "Output",
+              "type": "String",
+              "mandatory": false,
+              "value": "8080",
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "ready",
+            "parameter": {
+              "readonly": false,
+              "isSet": false,
+              "name": "ready",
+              "description": "Server ready to recieve connections",
+              "category": "Output",
+              "type": "String",
+              "mandatory": false,
+              "order_": 0,
+              "order": 0
+            }
+          }
+        ],
+        "class": "java.util.HashMap"
+      },
+      "cloudImageIdentifiers": {
+        "cloudImageIdentifier": {
+          "cloudImageIdentifier": 17,
+          "resourceUri": "module/examples/tutorials/service-testing/apache/5071/nuvlabox-stanley-cohen",
+          "cloudServiceName": "nuvlabox-stanley-cohen"
+        },
+        "class": "org.hibernate.collection.internal.PersistentSet"
+      },
+      "notes": {
+        "length": 0
+      },
+      "parentUri": "module/examples/tutorials/service-testing",
+      "commit": {
+        "author": "sixsq",
+        "comment": "Allow to \"Build or run single image\" for public."
+      },
+      "recipe": "#!/bin/sh -xe\r\n\r\napt-get update -y\r\napt-get install -y apache2",
+      "packagesExpanded": {
+        "class": "java.util.HashSet"
+      },
+      "description": "Apache web server appliance with custom landing page.",
+      "moduleReferenceUri": "module/examples/images/ubuntu-14.04",
+      "targets": {
+        "class": "org.hibernate.collection.internal.PersistentSet",
+        "target": [
+          {
+            "name": "onvmadd"
+          },
+          {
+            "name": "report",
+            "content": "#!/bin/sh -x\r\ncp /var/log/apache2/access.log $SLIPSTREAM_REPORT_DIR\r\ncp /var/log/apache2/error.log $SLIPSTREAM_REPORT_DIR"
+          },
+          {
+            "name": "execute",
+            "content": "#!/bin/sh -xe\r\n\r\ndefault_site_location='/etc/apache2/sites-available/default'\r\nif [ ! -f $default_site_location ]; then\r\n  default_site_location='/etc/apache2/sites-available/000-default.conf'\r\nfi\r\n\r\nhttp_root_location='/var/www/html'\r\nif [ ! -d $http_root_location ]; then\r\n  http_root_location='/var/www'\r\nfi\r\n\r\necho 'Hello from Apache deployed by SlipStream!' > $http_root_location/data.txt\r\n\r\nservice apache2 stop\r\nport=$(ss-get port)\r\n\r\nsed -i -e 's/^Listen.*$/Listen '$port'/' /etc/apache2/ports.conf\r\nsed -i -e 's/^NameVirtualHost.*$/NameVirtualHost *:'$port'/' /etc/apache2/ports.conf\r\nsed -i -e 's/^<VirtualHost.*$/<VirtualHost *:'$port'>/' $default_site_location\r\nservice apache2 start\r\nss-set ready true\r\nurl=\"http://$(ss-get hostname):$port\"\r\nss-set url.service $url\r\nss-set ss:url.service $url\r\n"
+          },
+          {
+            "name": "onvmremove"
+          }
+        ]
+      },
+      "platform": "ubuntu",
+      "loginUser": "root",
+      "logoLink": "https://nuv.la/images/modules-logos/apache-httpd.svg",
+      "targetsExpanded": {
+        "targetExpanded": [
+          {
+            "name": "report",
+            "subTarget": [
+              {
+                "moduleShortName": "apache",
+                "name": "report",
+                "moduleUri": "module/examples/tutorials/service-testing/apache/5071",
+                "content": "#!/bin/sh -x\r\ncp /var/log/apache2/access.log $SLIPSTREAM_REPORT_DIR\r\ncp /var/log/apache2/error.log $SLIPSTREAM_REPORT_DIR",
+                "order": 2
+              },
+              {
+                "moduleShortName": "ubuntu-14.04",
+                "name": "report",
+                "moduleUri": "module/examples/images/ubuntu-14.04/13947",
+                "order": 1
+              }
+            ]
+          },
+          {
+            "name": "onvmremove",
+            "subTarget": [
+              {
+                "moduleShortName": "ubuntu-14.04",
+                "name": "onvmremove",
+                "moduleUri": "module/examples/images/ubuntu-14.04/13947",
+                "order": 1
+              },
+              {
+                "moduleShortName": "apache",
+                "name": "onvmremove",
+                "moduleUri": "module/examples/tutorials/service-testing/apache/5071",
+                "order": 2
+              }
+            ]
+          },
+          {
+            "name": "prerecipe",
+            "subTarget": [
+              {
+                "moduleShortName": "ubuntu-14.04",
+                "name": "prerecipe",
+                "moduleUri": "module/examples/images/ubuntu-14.04/13947",
+                "order": 1
+              },
+              {
+                "moduleShortName": "apache",
+                "name": "prerecipe",
+                "moduleUri": "module/examples/tutorials/service-testing/apache/5071",
+                "order": 2
+              }
+            ]
+          },
+          {
+            "name": "recipe",
+            "subTarget": [
+              {
+                "moduleShortName": "apache",
+                "name": "recipe",
+                "moduleUri": "module/examples/tutorials/service-testing/apache/5071",
+                "content": "#!/bin/sh -xe\r\n\r\napt-get update -y\r\napt-get install -y apache2",
+                "order": 2
+              },
+              {
+                "moduleShortName": "ubuntu-14.04",
+                "name": "recipe",
+                "moduleUri": "module/examples/images/ubuntu-14.04/13947",
+                "order": 1
+              }
+            ]
+          },
+          {
+            "name": "onvmadd",
+            "subTarget": [
+              {
+                "moduleShortName": "ubuntu-14.04",
+                "name": "onvmadd",
+                "moduleUri": "module/examples/images/ubuntu-14.04/13947",
+                "order": 1
+              },
+              {
+                "moduleShortName": "apache",
+                "name": "onvmadd",
+                "moduleUri": "module/examples/tutorials/service-testing/apache/5071",
+                "order": 2
+              }
+            ]
+          },
+          {
+            "name": "execute",
+            "subTarget": [
+              {
+                "moduleShortName": "apache",
+                "name": "execute",
+                "moduleUri": "module/examples/tutorials/service-testing/apache/5071",
+                "content": "#!/bin/sh -xe\r\n\r\ndefault_site_location='/etc/apache2/sites-available/default'\r\nif [ ! -f $default_site_location ]; then\r\n  default_site_location='/etc/apache2/sites-available/000-default.conf'\r\nfi\r\n\r\nhttp_root_location='/var/www/html'\r\nif [ ! -d $http_root_location ]; then\r\n  http_root_location='/var/www'\r\nfi\r\n\r\necho 'Hello from Apache deployed by SlipStream!' > $http_root_location/data.txt\r\n\r\nservice apache2 stop\r\nport=$(ss-get port)\r\n\r\nsed -i -e 's/^Listen.*$/Listen '$port'/' /etc/apache2/ports.conf\r\nsed -i -e 's/^NameVirtualHost.*$/NameVirtualHost *:'$port'/' /etc/apache2/ports.conf\r\nsed -i -e 's/^<VirtualHost.*$/<VirtualHost *:'$port'>/' $default_site_location\r\nservice apache2 start\r\nss-set ready true\r\nurl=\"http://$(ss-get hostname):$port\"\r\nss-set url.service $url\r\nss-set ss:url.service $url\r\n",
+                "order": 2
+              },
+              {
+                "moduleShortName": "ubuntu-14.04",
+                "name": "execute",
+                "moduleUri": "module/examples/images/ubuntu-14.04/13947",
+                "content": "#!/bin/bash -xe\r\n\r\n# set the service url to SSH url\r\nurl=$(ss-get --timeout=180 url.ssh)\r\nss-set url.service \"${url}\"\r\nss-set ss:url.service \"${url}\"\r\n\r\n",
+                "order": 1
+              }
+            ]
+          }
+        ],
+        "class": "java.util.HashSet"
+      },
+      "class": "com.sixsq.slipstream.persistence.ImageModule",
+      "creation": "2013-12-03 16:04:03.426 UTC",
+      "authz": {
+        "owner": "sixsq",
+        "groupMembers": {
+          "string": [
+            "elegoff",
+            "khaled",
+            "konstan",
+            "lionel",
+            "loomis",
+            "meb",
+            "cjdcsixsq"
+          ],
+          "class": "java.util.ArrayList"
+        },
+        "ownerGet": true,
+        "ownerDelete": true,
+        "groupPost": true,
+        "publicPost": true,
+        "publicCreateChildren": false,
+        "ownerCreateChildren": true,
+        "publicGet": true,
+        "inheritedGroupMembers": true,
+        "ownerPost": true,
+        "groupCreateChildren": false,
+        "publicPut": false,
+        "groupGet": true,
+        "groupDelete": false,
+        "ownerPut": true,
+        "publicDelete": false,
+        "groupPut": true
+      },
+      "buildStates": {
+        "class": "java.util.HashSet",
+        "buildState": [
+          {
+            "builtOn": "",
+            "moduleUri": "module/examples/images/ubuntu-14.04/13947"
+          },
+          {
+            "builtOn": "nuvlabox-stanley-cohen",
+            "moduleUri": "module/examples/tutorials/service-testing/apache/5071"
+          }
+        ]
+      },
+      "isLatestVersion": false,
+      "prerecipe": "",
+      "resourceUri": "module/examples/tutorials/service-testing/apache/5071",
+      "packages": {
+        "class": "org.hibernate.collection.internal.PersistentSet"
+      },
+      "version": 5071,
+      "inputParametersExpanded": {
+        "class": "java.util.HashMap"
+      },
+      "deleted": false,
+      "name": "examples/tutorials/service-testing/apache",
+      "lastModified": "2016-08-05 08:32:47.92 UTC",
+      "isBase": false,
+      "category": "Image",
+      "shortName": "apache",
+      "parameters": {
+        "entry": [
+          {
+            "string": "nuvlabox-albert-einstein.is.firewall",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "false",
+              "name": "nuvlabox-albert-einstein.is.firewall",
+              "description": "If this flag is set, the instance will be started on the internal network and on the natted network so it can act as a firewall for instances on the internal network.",
+              "category": "nuvlabox-albert-einstein",
+              "type": "Boolean",
+              "mandatory": true,
+              "value": "false",
+              "order_": 20,
+              "order": 20
+            }
+          },
+          {
+            "string": "nuvlabox-demo.ram",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "0.5",
+              "name": "nuvlabox-demo.ram",
+              "description": "Amount of RAM, in GB",
+              "category": "nuvlabox-demo",
+              "type": "String",
+              "mandatory": true,
+              "value": "0.5",
+              "order_": 11,
+              "order": 11
+            }
+          },
+          {
+            "string": "nuvlabox-albert-einstein.ram",
+            "parameter": {
+              "readonly": false,
+              "isSet": false,
+              "name": "nuvlabox-albert-einstein.ram",
+              "description": "Amount of RAM, in GB",
+              "category": "nuvlabox-albert-einstein",
+              "type": "String",
+              "mandatory": true,
+              "order_": 11,
+              "order": 11
+            }
+          },
+          {
+            "string": "cyclone-de1.security.groups",
+            "parameter": {
+              "instructions": "If you don't know what is a security group or if you don't want to take care of them, you can use the special value <code>slipstream_managed<\/code> to let SlipStream generate a security group with everything allowed.",
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "slipstream_managed",
+              "name": "cyclone-de1.security.groups",
+              "description": "Security Groups (comma separated list)",
+              "category": "cyclone-de1",
+              "type": "String",
+              "mandatory": true,
+              "value": "slipstream_managed",
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "hostname",
+            "parameter": {
+              "readonly": false,
+              "isSet": false,
+              "name": "hostname",
+              "description": "hostname/ip of the image",
+              "category": "Output",
+              "type": "String",
+              "mandatory": true,
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "cyclone-fr1.disks.bus.type",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "virtio",
+              "name": "cyclone-fr1.disks.bus.type",
+              "description": "VM disks bus type",
+              "category": "cyclone-fr1",
+              "type": "Enum",
+              "mandatory": true,
+              "value": "virtio",
+              "order_": 0,
+              "order": 0,
+              "enumValues": {
+                "string": [
+                  "virtio",
+                  "scsi"
+                ],
+                "length": 2
+              }
+            }
+          },
+          {
+            "string": "nuvlabox-arthur-harden.custom.vm.template",
+            "parameter": {
+              "readonly": false,
+              "isSet": false,
+              "name": "nuvlabox-arthur-harden.custom.vm.template",
+              "description": "Additional custom VM template",
+              "category": "nuvlabox-arthur-harden",
+              "type": "String",
+              "mandatory": true,
+              "order_": 100,
+              "order": 100
+            }
+          },
+          {
+            "string": "exoscale-ch-gva.disk",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "10G",
+              "name": "exoscale-ch-gva.disk",
+              "description": "Size of the root disk",
+              "category": "exoscale-ch-gva",
+              "type": "Enum",
+              "mandatory": true,
+              "value": "10G",
+              "order_": 0,
+              "order": 0,
+              "enumValues": {
+                "string": [
+                  "10G",
+                  "50G",
+                  "100G",
+                  "200G",
+                  "400G"
+                ],
+                "length": 5
+              }
+            }
+          },
+          {
+            "string": "nuvlabox-demo.custom.vm.template",
+            "parameter": {
+              "readonly": false,
+              "isSet": false,
+              "name": "nuvlabox-demo.custom.vm.template",
+              "description": "Additional custom VM template",
+              "category": "nuvlabox-demo",
+              "type": "String",
+              "mandatory": true,
+              "order_": 100,
+              "order": 100
+            }
+          },
+          {
+            "string": "nuvlabox-max-born.custom.vm.template",
+            "parameter": {
+              "readonly": false,
+              "isSet": false,
+              "name": "nuvlabox-max-born.custom.vm.template",
+              "description": "Additional custom VM template",
+              "category": "nuvlabox-max-born",
+              "type": "String",
+              "mandatory": true,
+              "order_": 100,
+              "order": 100
+            }
+          },
+          {
+            "string": "nuvlabox-arthur-harden.is.firewall",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "false",
+              "name": "nuvlabox-arthur-harden.is.firewall",
+              "description": "If this flag is set, the instance will be started on the internal network and on the natted network so it can act as a firewall for instances on the internal network.",
+              "category": "nuvlabox-arthur-harden",
+              "type": "Boolean",
+              "mandatory": true,
+              "value": "false",
+              "order_": 20,
+              "order": 20
+            }
+          },
+          {
+            "string": "cyclone-fr1.instance.type",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "m1.small",
+              "name": "cyclone-fr1.instance.type",
+              "description": "Cloud instance type",
+              "category": "cyclone-fr1",
+              "type": "Enum",
+              "mandatory": true,
+              "value": "m1.small",
+              "order_": 0,
+              "order": 0,
+              "enumValues": {
+                "string": [
+                  "m1.small",
+                  "c1.medium",
+                  "m1.large",
+                  "m1.xlarge",
+                  "c1.xlarge",
+                  "t1.micro",
+                  "standard.xsmall"
+                ],
+                "length": 7
+              }
+            }
+          },
+          {
+            "string": "ec2-ap-northeast-1.instance.type",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "t2.micro",
+              "name": "ec2-ap-northeast-1.instance.type",
+              "description": "Cloud instance type",
+              "category": "ec2-ap-northeast-1",
+              "type": "Enum",
+              "mandatory": true,
+              "value": "t2.micro",
+              "order_": 0,
+              "order": 0,
+              "enumValues": {
+                "string": [
+                  "t2.micro",
+                  "t2.small",
+                  "t2.medium",
+                  "m3.medium",
+                  "m3.large",
+                  "m3.xlarge",
+                  "m3.2xlarge",
+                  "c4.large",
+                  "c4.xlarge",
+                  "c4.2xlarge",
+                  "c4.4xlarge",
+                  "c4.8xlarge",
+                  "c3.large",
+                  "c3.xlarge",
+                  "c3.2xlarge",
+                  "c3.4xlarge",
+                  "c3.8xlarge",
+                  "r3.large",
+                  "r3.xlarge",
+                  "r3.2xlarge",
+                  "r3.4xlarge",
+                  "r3.8xlarge",
+                  "i2.xlarge",
+                  "i2.2xlarge",
+                  "i2.4xlarge",
+                  "i2.8xlarge",
+                  "d2.xlarge",
+                  "d2.2xlarge",
+                  "d2.4xlarge",
+                  "d2.8xlarge",
+                  "g2.2xlarge",
+                  "g2.8xlarge",
+                  "t1.micro",
+                  "m1.small",
+                  "m1.large",
+                  "m1.xlarge",
+                  "c1.medium",
+                  "c1.xlarge",
+                  "m2.xlarge",
+                  "m2.2xlarge",
+                  "m2.4xlarge",
+                  "cc1.4xlarge"
+                ],
+                "length": 42
+              }
+            }
+          },
+          {
+            "string": "ec2-us-west-1.security.groups",
+            "parameter": {
+              "instructions": "If you don't know what is a security group or if you don't want to take care of them, you can use the special value <code>slipstream_managed<\/code> to let SlipStream generate a security group with everything allowed.",
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "slipstream_managed",
+              "name": "ec2-us-west-1.security.groups",
+              "description": "Security Groups (comma separated list)",
+              "category": "ec2-us-west-1",
+              "type": "String",
+              "mandatory": true,
+              "value": "slipstream_managed",
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "ec2-ap-southeast-2.security.groups",
+            "parameter": {
+              "instructions": "If you don't know what is a security group or if you don't want to take care of them, you can use the special value <code>slipstream_managed<\/code> to let SlipStream generate a security group with everything allowed.",
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "slipstream_managed",
+              "name": "ec2-ap-southeast-2.security.groups",
+              "description": "Security Groups (comma separated list)",
+              "category": "ec2-ap-southeast-2",
+              "type": "String",
+              "mandatory": true,
+              "value": "slipstream_managed",
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "nuvlabox-arthur-harden.ram",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "0.5",
+              "name": "nuvlabox-arthur-harden.ram",
+              "description": "Amount of RAM, in GB",
+              "category": "nuvlabox-arthur-harden",
+              "type": "String",
+              "mandatory": true,
+              "value": "0.5",
+              "order_": 11,
+              "order": 11
+            }
+          },
+          {
+            "string": "nuvlabox-cecil-powell.custom.vm.template",
+            "parameter": {
+              "readonly": false,
+              "isSet": false,
+              "name": "nuvlabox-cecil-powell.custom.vm.template",
+              "description": "Additional custom VM template",
+              "category": "nuvlabox-cecil-powell",
+              "type": "String",
+              "mandatory": true,
+              "order_": 100,
+              "order": 100
+            }
+          },
+          {
+            "string": "nuvlabox-stanley-cohen.custom.vm.template",
+            "parameter": {
+              "readonly": false,
+              "isSet": false,
+              "name": "nuvlabox-stanley-cohen.custom.vm.template",
+              "description": "Additional custom VM template",
+              "category": "nuvlabox-stanley-cohen",
+              "type": "String",
+              "mandatory": true,
+              "order_": 100,
+              "order": 100
+            }
+          },
+          {
+            "string": "ec2-sa-east-1.instance.type",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "t2.micro",
+              "name": "ec2-sa-east-1.instance.type",
+              "description": "Cloud instance type",
+              "category": "ec2-sa-east-1",
+              "type": "Enum",
+              "mandatory": true,
+              "value": "t2.micro",
+              "order_": 0,
+              "order": 0,
+              "enumValues": {
+                "string": [
+                  "t2.micro",
+                  "t2.small",
+                  "t2.medium",
+                  "m3.medium",
+                  "m3.large",
+                  "m3.xlarge",
+                  "m3.2xlarge",
+                  "c4.large",
+                  "c4.xlarge",
+                  "c4.2xlarge",
+                  "c4.4xlarge",
+                  "c4.8xlarge",
+                  "c3.large",
+                  "c3.xlarge",
+                  "c3.2xlarge",
+                  "c3.4xlarge",
+                  "c3.8xlarge",
+                  "r3.large",
+                  "r3.xlarge",
+                  "r3.2xlarge",
+                  "r3.4xlarge",
+                  "r3.8xlarge",
+                  "i2.xlarge",
+                  "i2.2xlarge",
+                  "i2.4xlarge",
+                  "i2.8xlarge",
+                  "d2.xlarge",
+                  "d2.2xlarge",
+                  "d2.4xlarge",
+                  "d2.8xlarge",
+                  "g2.2xlarge",
+                  "g2.8xlarge",
+                  "t1.micro",
+                  "m1.small",
+                  "m1.large",
+                  "m1.xlarge",
+                  "c1.medium",
+                  "c1.xlarge",
+                  "m2.xlarge",
+                  "m2.2xlarge",
+                  "m2.4xlarge",
+                  "cc1.4xlarge"
+                ],
+                "length": 42
+              }
+            }
+          },
+          {
+            "string": "ultimum-cz1.security.groups",
+            "parameter": {
+              "instructions": "If you don't know what is a security group or if you don't want to take care of them, you can use the special value <code>slipstream_managed<\/code> to let SlipStream generate a security group with everything allowed.",
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "slipstream_managed",
+              "name": "ultimum-cz1.security.groups",
+              "description": "Security Groups (comma separated list)",
+              "category": "ultimum-cz1",
+              "type": "String",
+              "mandatory": true,
+              "value": "slipstream_managed",
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "ec2-ap-northeast-1.security.groups",
+            "parameter": {
+              "instructions": "If you don't know what is a security group or if you don't want to take care of them, you can use the special value <code>slipstream_managed<\/code> to let SlipStream generate a security group with everything allowed.",
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "slipstream_managed",
+              "name": "ec2-ap-northeast-1.security.groups",
+              "description": "Security Groups (comma separated list)",
+              "category": "ec2-ap-northeast-1",
+              "type": "String",
+              "mandatory": true,
+              "value": "slipstream_managed",
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "nuvlabox-carl-cori.ram",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "0.5",
+              "name": "nuvlabox-carl-cori.ram",
+              "description": "Amount of RAM, in GB",
+              "category": "nuvlabox-carl-cori",
+              "type": "String",
+              "mandatory": true,
+              "value": "0.5",
+              "order_": 11,
+              "order": 11
+            }
+          },
+          {
+            "string": "nuvlabox-bertil-ohlin.ram",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "0.5",
+              "name": "nuvlabox-bertil-ohlin.ram",
+              "description": "Amount of RAM, in GB",
+              "category": "nuvlabox-bertil-ohlin",
+              "type": "String",
+              "mandatory": true,
+              "value": "0.5",
+              "order_": 11,
+              "order": 11
+            }
+          },
+          {
+            "string": "nuvlabox-cecil-powell.ram",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "0.5",
+              "name": "nuvlabox-cecil-powell.ram",
+              "description": "Amount of RAM, in GB",
+              "category": "nuvlabox-cecil-powell",
+              "type": "String",
+              "mandatory": true,
+              "value": "0.5",
+              "order_": 11,
+              "order": 11
+            }
+          },
+          {
+            "string": "nuvlabox-stanley-cohen.cpu",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "1",
+              "name": "nuvlabox-stanley-cohen.cpu",
+              "description": "Number of CPUs (i.e. virtual cores)",
+              "category": "nuvlabox-stanley-cohen",
+              "type": "String",
+              "mandatory": true,
+              "value": "1",
+              "order_": 10,
+              "order": 10
+            }
+          },
+          {
+            "string": "nuvlabox-max-planck.is.firewall",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "false",
+              "name": "nuvlabox-max-planck.is.firewall",
+              "description": "If this flag is set, the instance will be started on the internal network and on the natted network so it can act as a firewall for instances on the internal network.",
+              "category": "nuvlabox-max-planck",
+              "type": "Boolean",
+              "mandatory": true,
+              "value": "false",
+              "order_": 20,
+              "order": 20
+            }
+          },
+          {
+            "string": "nuvlabox-christiane-nusslein-volhard.ram",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "0.5",
+              "name": "nuvlabox-christiane-nusslein-volhard.ram",
+              "description": "Amount of RAM, in GB",
+              "category": "nuvlabox-christiane-nusslein-volhard",
+              "type": "String",
+              "mandatory": true,
+              "value": "0.5",
+              "order_": 11,
+              "order": 11
+            }
+          },
+          {
+            "string": "cyclone-fr2.security.groups",
+            "parameter": {
+              "instructions": "If you don't know what is a security group or if you don't want to take care of them, you can use the special value <code>slipstream_managed<\/code> to let SlipStream generate a security group with everything allowed.",
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "slipstream_managed",
+              "name": "cyclone-fr2.security.groups",
+              "description": "Security Groups (comma separated list)",
+              "category": "cyclone-fr2",
+              "type": "String",
+              "mandatory": true,
+              "value": "slipstream_managed",
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "nuvlabox-henry-dunant.custom.vm.template",
+            "parameter": {
+              "readonly": false,
+              "isSet": false,
+              "name": "nuvlabox-henry-dunant.custom.vm.template",
+              "description": "Additional custom VM template",
+              "category": "nuvlabox-henry-dunant",
+              "type": "String",
+              "mandatory": true,
+              "order_": 100,
+              "order": 100
+            }
+          },
+          {
+            "string": "ec2-ap-southeast-1.security.groups",
+            "parameter": {
+              "instructions": "If you don't know what is a security group or if you don't want to take care of them, you can use the special value <code>slipstream_managed<\/code> to let SlipStream generate a security group with everything allowed.",
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "slipstream_managed",
+              "name": "ec2-ap-southeast-1.security.groups",
+              "description": "Security Groups (comma separated list)",
+              "category": "ec2-ap-southeast-1",
+              "type": "String",
+              "mandatory": true,
+              "value": "slipstream_managed",
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "nuvlabox-james-chadwick.cpu",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "1",
+              "name": "nuvlabox-james-chadwick.cpu",
+              "description": "Number of CPUs (i.e. virtual cores)",
+              "category": "nuvlabox-james-chadwick",
+              "type": "String",
+              "mandatory": true,
+              "value": "1",
+              "order_": 10,
+              "order": 10
+            }
+          },
+          {
+            "string": "nuvlabox-henry-dunant.ram",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "0.5",
+              "name": "nuvlabox-henry-dunant.ram",
+              "description": "Amount of RAM, in GB",
+              "category": "nuvlabox-henry-dunant",
+              "type": "String",
+              "mandatory": true,
+              "value": "0.5",
+              "order_": 11,
+              "order": 11
+            }
+          },
+          {
+            "string": "nuvlabox-bertil-ohlin.is.firewall",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "false",
+              "name": "nuvlabox-bertil-ohlin.is.firewall",
+              "description": "If this flag is set, the instance will be started on the internal network and on the natted network so it can act as a firewall for instances on the internal network.",
+              "category": "nuvlabox-bertil-ohlin",
+              "type": "Boolean",
+              "mandatory": true,
+              "value": "false",
+              "order_": 20,
+              "order": 20
+            }
+          },
+          {
+            "string": "ec2-us-east-1.security.groups",
+            "parameter": {
+              "instructions": "If you don't know what is a security group or if you don't want to take care of them, you can use the special value <code>slipstream_managed<\/code> to let SlipStream generate a security group with everything allowed.",
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "slipstream_managed",
+              "name": "ec2-us-east-1.security.groups",
+              "description": "Security Groups (comma separated list)",
+              "category": "ec2-us-east-1",
+              "type": "String",
+              "mandatory": true,
+              "value": "slipstream_managed",
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "nuvlabox-max-born.cpu",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "1",
+              "name": "nuvlabox-max-born.cpu",
+              "description": "Number of CPUs (i.e. virtual cores)",
+              "category": "nuvlabox-max-born",
+              "type": "String",
+              "mandatory": true,
+              "value": "1",
+              "order_": 10,
+              "order": 10
+            }
+          },
+          {
+            "string": "cyclone-fr1.cpu",
+            "parameter": {
+              "readonly": false,
+              "isSet": false,
+              "name": "cyclone-fr1.cpu",
+              "description": "Number of CPUs (i.e. virtual cores)",
+              "category": "cyclone-fr1",
+              "type": "String",
+              "mandatory": true,
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "nuvlabox-christiane-nusslein-volhard.custom.vm.template",
+            "parameter": {
+              "readonly": false,
+              "isSet": false,
+              "name": "nuvlabox-christiane-nusslein-volhard.custom.vm.template",
+              "description": "Additional custom VM template",
+              "category": "nuvlabox-christiane-nusslein-volhard",
+              "type": "String",
+              "mandatory": true,
+              "order_": 100,
+              "order": 100
+            }
+          },
+          {
+            "string": "exoscale-ch-gva.security.groups",
+            "parameter": {
+              "instructions": "If you don't know what is a security group or if you don't want to take care of them, you can use the special value <code>slipstream_managed<\/code> to let SlipStream generate a security group with everything allowed.",
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "slipstream_managed",
+              "name": "exoscale-ch-gva.security.groups",
+              "description": "Security Groups (comma separated list)",
+              "category": "exoscale-ch-gva",
+              "type": "String",
+              "mandatory": true,
+              "value": "slipstream_managed",
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "nuvlabox-max-planck.instance.type",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "micro",
+              "name": "nuvlabox-max-planck.instance.type",
+              "description": "Instance type",
+              "category": "nuvlabox-max-planck",
+              "type": "Enum",
+              "mandatory": true,
+              "value": "micro",
+              "order_": 0,
+              "order": 0,
+              "enumValues": {
+                "string": [
+                  "micro",
+                  "small",
+                  "medium",
+                  "large"
+                ],
+                "length": 4
+              }
+            }
+          },
+          {
+            "string": "nuvlabox-james-chadwick.disks.bus.type",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "virtio",
+              "name": "nuvlabox-james-chadwick.disks.bus.type",
+              "description": "VM disks bus type",
+              "category": "nuvlabox-james-chadwick",
+              "type": "Enum",
+              "mandatory": true,
+              "value": "virtio",
+              "order_": 0,
+              "order": 0,
+              "enumValues": {
+                "string": [
+                  "virtio",
+                  "scsi"
+                ],
+                "length": 2
+              }
+            }
+          },
+          {
+            "string": "nuvlabox-max-born.is.firewall",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "false",
+              "name": "nuvlabox-max-born.is.firewall",
+              "description": "If this flag is set, the instance will be started on the internal network and on the natted network so it can act as a firewall for instances on the internal network.",
+              "category": "nuvlabox-max-born",
+              "type": "Boolean",
+              "mandatory": true,
+              "value": "false",
+              "order_": 20,
+              "order": 20
+            }
+          },
+          {
+            "string": "ec2-eu-central-1.security.groups",
+            "parameter": {
+              "instructions": "If you don't know what is a security group or if you don't want to take care of them, you can use the special value <code>slipstream_managed<\/code> to let SlipStream generate a security group with everything allowed.",
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "slipstream_managed",
+              "name": "ec2-eu-central-1.security.groups",
+              "description": "Security Groups (comma separated list)",
+              "category": "ec2-eu-central-1",
+              "type": "String",
+              "mandatory": true,
+              "value": "slipstream_managed",
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "nuvlabox-james-chadwick.instance.type",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "micro",
+              "name": "nuvlabox-james-chadwick.instance.type",
+              "description": "Instance type",
+              "category": "nuvlabox-james-chadwick",
+              "type": "Enum",
+              "mandatory": true,
+              "value": "micro",
+              "order_": 0,
+              "order": 0,
+              "enumValues": {
+                "string": [
+                  "micro",
+                  "small",
+                  "medium",
+                  "large"
+                ],
+                "length": 4
+              }
+            }
+          },
+          {
+            "string": "nuvlabox-max-planck.ram",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "0.5",
+              "name": "nuvlabox-max-planck.ram",
+              "description": "Amount of RAM, in GB",
+              "category": "nuvlabox-max-planck",
+              "type": "String",
+              "mandatory": true,
+              "value": "0.5",
+              "order_": 11,
+              "order": 11
+            }
+          },
+          {
+            "string": "ultimum-cz1.instance.type",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "Basic",
+              "name": "ultimum-cz1.instance.type",
+              "description": "Instance type (flavor)",
+              "category": "ultimum-cz1",
+              "type": "String",
+              "mandatory": true,
+              "value": "Basic",
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "nuvlabox-bertil-ohlin.custom.vm.template",
+            "parameter": {
+              "readonly": false,
+              "isSet": false,
+              "name": "nuvlabox-bertil-ohlin.custom.vm.template",
+              "description": "Additional custom VM template",
+              "category": "nuvlabox-bertil-ohlin",
+              "type": "String",
+              "mandatory": true,
+              "order_": 100,
+              "order": 100
+            }
+          },
+          {
+            "string": "nuvlabox-carl-cori.is.firewall",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "false",
+              "name": "nuvlabox-carl-cori.is.firewall",
+              "description": "If this flag is set, the instance will be started on the internal network and on the natted network so it can act as a firewall for instances on the internal network.",
+              "category": "nuvlabox-carl-cori",
+              "type": "Boolean",
+              "mandatory": true,
+              "value": "false",
+              "order_": 20,
+              "order": 20
+            }
+          },
+          {
+            "string": "nuvlabox-henry-dunant.is.firewall",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "false",
+              "name": "nuvlabox-henry-dunant.is.firewall",
+              "description": "If this flag is set, the instance will be started on the internal network and on the natted network so it can act as a firewall for instances on the internal network.",
+              "category": "nuvlabox-henry-dunant",
+              "type": "Boolean",
+              "mandatory": true,
+              "value": "false",
+              "order_": 20,
+              "order": 20
+            }
+          },
+          {
+            "string": "nuvlabox-james-chadwick.custom.vm.template",
+            "parameter": {
+              "readonly": false,
+              "isSet": false,
+              "name": "nuvlabox-james-chadwick.custom.vm.template",
+              "description": "Additional custom VM template",
+              "category": "nuvlabox-james-chadwick",
+              "type": "String",
+              "mandatory": true,
+              "order_": 100,
+              "order": 100
+            }
+          },
+          {
+            "string": "ec2-sa-east-1.security.groups",
+            "parameter": {
+              "instructions": "If you don't know what is a security group or if you don't want to take care of them, you can use the special value <code>slipstream_managed<\/code> to let SlipStream generate a security group with everything allowed.",
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "slipstream_managed",
+              "name": "ec2-sa-east-1.security.groups",
+              "description": "Security Groups (comma separated list)",
+              "category": "ec2-sa-east-1",
+              "type": "String",
+              "mandatory": true,
+              "value": "slipstream_managed",
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "nuvlabox-james-chadwick.is.firewall",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "false",
+              "name": "nuvlabox-james-chadwick.is.firewall",
+              "description": "If this flag is set, the instance will be started on the internal network and on the natted network so it can act as a firewall for instances on the internal network.",
+              "category": "nuvlabox-james-chadwick",
+              "type": "Boolean",
+              "mandatory": true,
+              "value": "false",
+              "order_": 20,
+              "order": 20
+            }
+          },
+          {
+            "string": "nuvlabox-carl-cori.custom.vm.template",
+            "parameter": {
+              "readonly": false,
+              "isSet": false,
+              "name": "nuvlabox-carl-cori.custom.vm.template",
+              "description": "Additional custom VM template",
+              "category": "nuvlabox-carl-cori",
+              "type": "String",
+              "mandatory": true,
+              "order_": 100,
+              "order": 100
+            }
+          },
+          {
+            "string": "nuvlabox-albert-einstein.cpu",
+            "parameter": {
+              "readonly": false,
+              "isSet": false,
+              "name": "nuvlabox-albert-einstein.cpu",
+              "description": "Number of CPUs (i.e. virtual cores)",
+              "category": "nuvlabox-albert-einstein",
+              "type": "String",
+              "mandatory": true,
+              "order_": 10,
+              "order": 10
+            }
+          },
+          {
+            "string": "ec2-us-west-1.instance.type",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "t2.micro",
+              "name": "ec2-us-west-1.instance.type",
+              "description": "Cloud instance type",
+              "category": "ec2-us-west-1",
+              "type": "Enum",
+              "mandatory": true,
+              "value": "t2.micro",
+              "order_": 0,
+              "order": 0,
+              "enumValues": {
+                "string": [
+                  "t2.micro",
+                  "t2.small",
+                  "t2.medium",
+                  "m3.medium",
+                  "m3.large",
+                  "m3.xlarge",
+                  "m3.2xlarge",
+                  "c4.large",
+                  "c4.xlarge",
+                  "c4.2xlarge",
+                  "c4.4xlarge",
+                  "c4.8xlarge",
+                  "c3.large",
+                  "c3.xlarge",
+                  "c3.2xlarge",
+                  "c3.4xlarge",
+                  "c3.8xlarge",
+                  "r3.large",
+                  "r3.xlarge",
+                  "r3.2xlarge",
+                  "r3.4xlarge",
+                  "r3.8xlarge",
+                  "i2.xlarge",
+                  "i2.2xlarge",
+                  "i2.4xlarge",
+                  "i2.8xlarge",
+                  "d2.xlarge",
+                  "d2.2xlarge",
+                  "d2.4xlarge",
+                  "d2.8xlarge",
+                  "g2.2xlarge",
+                  "g2.8xlarge",
+                  "t1.micro",
+                  "m1.small",
+                  "m1.large",
+                  "m1.xlarge",
+                  "c1.medium",
+                  "c1.xlarge",
+                  "m2.xlarge",
+                  "m2.2xlarge",
+                  "m2.4xlarge",
+                  "cc1.4xlarge"
+                ],
+                "length": 42
+              }
+            }
+          },
+          {
+            "string": "nuvlabox-demo.instance.type",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "micro",
+              "name": "nuvlabox-demo.instance.type",
+              "description": "Instance type",
+              "category": "nuvlabox-demo",
+              "type": "Enum",
+              "mandatory": true,
+              "value": "micro",
+              "order_": 0,
+              "order": 0,
+              "enumValues": {
+                "string": [
+                  "micro",
+                  "small",
+                  "medium",
+                  "large"
+                ],
+                "length": 4
+              }
+            }
+          },
+          {
+            "string": "azure-west-europe.forwarded.ports",
+            "parameter": {
+              "instructions": "Ports that will be forwarded from the public IP of the Azure cloud service. The port 22 (SSH) on Linux machines and the port 3389 (RDP) on Windows machines are already forwarded",
+              "readonly": false,
+              "isSet": false,
+              "name": "azure-west-europe.forwarded.ports",
+              "description": "Forwarded ports (comma separated list)",
+              "category": "azure-west-europe",
+              "type": "String",
+              "mandatory": true,
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "nuvlabox-stanley-cohen.is.firewall",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "false",
+              "name": "nuvlabox-stanley-cohen.is.firewall",
+              "description": "If this flag is set, the instance will be started on the internal network and on the natted network so it can act as a firewall for instances on the internal network.",
+              "category": "nuvlabox-stanley-cohen",
+              "type": "Boolean",
+              "mandatory": true,
+              "value": "false",
+              "order_": 20,
+              "order": 20
+            }
+          },
+          {
+            "string": "exoscale-ch-gva.instance.type",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "Small",
+              "name": "exoscale-ch-gva.instance.type",
+              "description": "Cloud instance type",
+              "category": "exoscale-ch-gva",
+              "type": "Enum",
+              "mandatory": true,
+              "value": "Small",
+              "order_": 0,
+              "order": 0,
+              "enumValues": {
+                "string": [
+                  "Micro",
+                  "Tiny",
+                  "Small",
+                  "Medium",
+                  "Large",
+                  "Extra-large",
+                  "Huge",
+                  "Mega",
+                  "Titan"
+                ],
+                "length": 9
+              }
+            }
+          },
+          {
+            "string": "extra.disk.volatile",
+            "parameter": {
+              "readonly": false,
+              "isSet": false,
+              "name": "extra.disk.volatile",
+              "description": "Volatile extra disk in GB",
+              "category": "Cloud",
+              "type": "String",
+              "mandatory": true,
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "nuvlabox-arthur-harden.cpu",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "1",
+              "name": "nuvlabox-arthur-harden.cpu",
+              "description": "Number of CPUs (i.e. virtual cores)",
+              "category": "nuvlabox-arthur-harden",
+              "type": "String",
+              "mandatory": true,
+              "value": "1",
+              "order_": 10,
+              "order": 10
+            }
+          },
+          {
+            "string": "instanceid",
+            "parameter": {
+              "readonly": false,
+              "isSet": false,
+              "name": "instanceid",
+              "description": "Cloud instance id",
+              "category": "Output",
+              "type": "String",
+              "mandatory": true,
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "port",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "8080",
+              "name": "port",
+              "description": "Port",
+              "category": "Output",
+              "type": "String",
+              "mandatory": false,
+              "value": "8080",
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "nuvlabox-demo.is.firewall",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "false",
+              "name": "nuvlabox-demo.is.firewall",
+              "description": "If this flag is set, the instance will be started on the internal network and on the natted network so it can act as a firewall for instances on the internal network.",
+              "category": "nuvlabox-demo",
+              "type": "Boolean",
+              "mandatory": true,
+              "value": "false",
+              "order_": 20,
+              "order": 20
+            }
+          },
+          {
+            "string": "nuvlabox-albert-einstein.instance.type",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "micro",
+              "name": "nuvlabox-albert-einstein.instance.type",
+              "description": "Instance type",
+              "category": "nuvlabox-albert-einstein",
+              "type": "Enum",
+              "mandatory": true,
+              "value": "micro",
+              "order_": 0,
+              "order": 0,
+              "enumValues": {
+                "string": [
+                  "micro",
+                  "small",
+                  "medium",
+                  "large"
+                ],
+                "length": 4
+              }
+            }
+          },
+          {
+            "string": "cyclone-fr2.instance.type",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "m1.small",
+              "name": "cyclone-fr2.instance.type",
+              "description": "Instance type (flavor)",
+              "category": "cyclone-fr2",
+              "type": "String",
+              "mandatory": true,
+              "value": "m1.small",
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "nuvlabox-demo.cpu",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "1",
+              "name": "nuvlabox-demo.cpu",
+              "description": "Number of CPUs (i.e. virtual cores)",
+              "category": "nuvlabox-demo",
+              "type": "String",
+              "mandatory": true,
+              "value": "1",
+              "order_": 10,
+              "order": 10
+            }
+          },
+          {
+            "string": "nuvlabox-christiane-nusslein-volhard.cpu",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "1",
+              "name": "nuvlabox-christiane-nusslein-volhard.cpu",
+              "description": "Number of CPUs (i.e. virtual cores)",
+              "category": "nuvlabox-christiane-nusslein-volhard",
+              "type": "String",
+              "mandatory": true,
+              "value": "1",
+              "order_": 10,
+              "order": 10
+            }
+          },
+          {
+            "string": "nuvlabox-albert-einstein.custom.vm.template",
+            "parameter": {
+              "readonly": false,
+              "isSet": false,
+              "name": "nuvlabox-albert-einstein.custom.vm.template",
+              "description": "Additional custom VM template",
+              "category": "nuvlabox-albert-einstein",
+              "type": "String",
+              "mandatory": true,
+              "order_": 100,
+              "order": 100
+            }
+          },
+          {
+            "string": "nuvlabox-stanley-cohen.ram",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "0.5",
+              "name": "nuvlabox-stanley-cohen.ram",
+              "description": "Amount of RAM, in GB",
+              "category": "nuvlabox-stanley-cohen",
+              "type": "String",
+              "mandatory": true,
+              "value": "0.5",
+              "order_": 11,
+              "order": 11
+            }
+          },
+          {
+            "string": "nuvlabox-cecil-powell.is.firewall",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "false",
+              "name": "nuvlabox-cecil-powell.is.firewall",
+              "description": "If this flag is set, the instance will be started on the internal network and on the natted network so it can act as a firewall for instances on the internal network.",
+              "category": "nuvlabox-cecil-powell",
+              "type": "Boolean",
+              "mandatory": true,
+              "value": "false",
+              "order_": 20,
+              "order": 20
+            }
+          },
+          {
+            "string": "nuvlabox-max-born.ram",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "0.5",
+              "name": "nuvlabox-max-born.ram",
+              "description": "Amount of RAM, in GB",
+              "category": "nuvlabox-max-born",
+              "type": "String",
+              "mandatory": true,
+              "value": "0.5",
+              "order_": 11,
+              "order": 11
+            }
+          },
+          {
+            "string": "cyclone-fr1.ram",
+            "parameter": {
+              "readonly": false,
+              "isSet": false,
+              "name": "cyclone-fr1.ram",
+              "description": "Amount of RAM, in GB",
+              "category": "cyclone-fr1",
+              "type": "String",
+              "mandatory": true,
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "exoscale-ch-dk.security.groups",
+            "parameter": {
+              "instructions": "If you don't know what is a security group or if you don't want to take care of them, you can use the special value <code>slipstream_managed<\/code> to let SlipStream generate a security group with everything allowed.",
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "slipstream_managed",
+              "name": "exoscale-ch-dk.security.groups",
+              "description": "Security Groups (comma separated list)",
+              "category": "exoscale-ch-dk",
+              "type": "String",
+              "mandatory": true,
+              "value": "slipstream_managed",
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "cyclone-de1.instance.type",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "m1.small_Linux",
+              "name": "cyclone-de1.instance.type",
+              "description": "Instance type (flavor)",
+              "category": "cyclone-de1",
+              "type": "String",
+              "mandatory": true,
+              "value": "m1.small_Linux",
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "nuvlabox-carl-cori.cpu",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "1",
+              "name": "nuvlabox-carl-cori.cpu",
+              "description": "Number of CPUs (i.e. virtual cores)",
+              "category": "nuvlabox-carl-cori",
+              "type": "String",
+              "mandatory": true,
+              "value": "1",
+              "order_": 10,
+              "order": 10
+            }
+          },
+          {
+            "string": "ec2-ap-southeast-2.instance.type",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "t2.micro",
+              "name": "ec2-ap-southeast-2.instance.type",
+              "description": "Cloud instance type",
+              "category": "ec2-ap-southeast-2",
+              "type": "Enum",
+              "mandatory": true,
+              "value": "t2.micro",
+              "order_": 0,
+              "order": 0,
+              "enumValues": {
+                "string": [
+                  "t2.micro",
+                  "t2.small",
+                  "t2.medium",
+                  "m3.medium",
+                  "m3.large",
+                  "m3.xlarge",
+                  "m3.2xlarge",
+                  "c4.large",
+                  "c4.xlarge",
+                  "c4.2xlarge",
+                  "c4.4xlarge",
+                  "c4.8xlarge",
+                  "c3.large",
+                  "c3.xlarge",
+                  "c3.2xlarge",
+                  "c3.4xlarge",
+                  "c3.8xlarge",
+                  "r3.large",
+                  "r3.xlarge",
+                  "r3.2xlarge",
+                  "r3.4xlarge",
+                  "r3.8xlarge",
+                  "i2.xlarge",
+                  "i2.2xlarge",
+                  "i2.4xlarge",
+                  "i2.8xlarge",
+                  "d2.xlarge",
+                  "d2.2xlarge",
+                  "d2.4xlarge",
+                  "d2.8xlarge",
+                  "g2.2xlarge",
+                  "g2.8xlarge",
+                  "t1.micro",
+                  "m1.small",
+                  "m1.large",
+                  "m1.xlarge",
+                  "c1.medium",
+                  "c1.xlarge",
+                  "m2.xlarge",
+                  "m2.2xlarge",
+                  "m2.4xlarge",
+                  "cc1.4xlarge"
+                ],
+                "length": 42
+              }
+            }
+          },
+          {
+            "string": "cyfronet-pl1.security.groups",
+            "parameter": {
+              "instructions": "If you don't know what is a security group or if you don't want to take care of them, you can use the special value <code>slipstream_managed<\/code> to let SlipStream generate a security group with everything allowed.",
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "slipstream_managed",
+              "name": "cyfronet-pl1.security.groups",
+              "description": "Security Groups (comma separated list)",
+              "category": "cyfronet-pl1",
+              "type": "String",
+              "mandatory": true,
+              "value": "slipstream_managed",
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "network",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "Public",
+              "name": "network",
+              "description": "Network type",
+              "category": "Cloud",
+              "type": "Enum",
+              "mandatory": true,
+              "value": "Public",
+              "order_": 0,
+              "order": 0,
+              "enumValues": {
+                "string": [
+                  "Public",
+                  "Private"
+                ],
+                "length": 2
+              }
+            }
+          },
+          {
+            "string": "nuvlabox-henry-dunant.cpu",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "1",
+              "name": "nuvlabox-henry-dunant.cpu",
+              "description": "Number of CPUs (i.e. virtual cores)",
+              "category": "nuvlabox-henry-dunant",
+              "type": "String",
+              "mandatory": true,
+              "value": "1",
+              "order_": 10,
+              "order": 10
+            }
+          },
+          {
+            "string": "azure-west-europe.instance.type",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "Basic_A0",
+              "name": "azure-west-europe.instance.type",
+              "description": "Machine size",
+              "category": "azure-west-europe",
+              "type": "Enum",
+              "mandatory": true,
+              "value": "Basic_A0",
+              "order_": 0,
+              "order": 0,
+              "enumValues": {
+                "string": [
+                  "Basic_A0",
+                  "Basic_A1",
+                  "Basic_A2",
+                  "Basic_A3",
+                  "Basic_A4",
+                  "ExtraSmall",
+                  "Small",
+                  "Medium",
+                  "Large",
+                  "ExtraLarge",
+                  "A5",
+                  "A6",
+                  "A7",
+                  "A8",
+                  "A9",
+                  "A10",
+                  "A11",
+                  "Standard_D1",
+                  "Standard_D2",
+                  "Standard_D3",
+                  "Standard_D4",
+                  "Standard_D11",
+                  "Standard_D12",
+                  "Standard_D13",
+                  "Standard_D14"
+                ],
+                "length": 25
+              }
+            }
+          },
+          {
+            "string": "ready",
+            "parameter": {
+              "readonly": false,
+              "isSet": false,
+              "name": "ready",
+              "description": "Server ready to recieve connections",
+              "category": "Output",
+              "type": "String",
+              "mandatory": false,
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "nuvlabox-christiane-nusslein-volhard.is.firewall",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "false",
+              "name": "nuvlabox-christiane-nusslein-volhard.is.firewall",
+              "description": "If this flag is set, the instance will be started on the internal network and on the natted network so it can act as a firewall for instances on the internal network.",
+              "category": "nuvlabox-christiane-nusslein-volhard",
+              "type": "Boolean",
+              "mandatory": true,
+              "value": "false",
+              "order_": 20,
+              "order": 20
+            }
+          },
+          {
+            "string": "ec2-us-east-1.instance.type",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "t2.micro",
+              "name": "ec2-us-east-1.instance.type",
+              "description": "Cloud instance type",
+              "category": "ec2-us-east-1",
+              "type": "Enum",
+              "mandatory": true,
+              "value": "t2.micro",
+              "order_": 0,
+              "order": 0,
+              "enumValues": {
+                "string": [
+                  "t2.micro",
+                  "t2.small",
+                  "t2.medium",
+                  "m3.medium",
+                  "m3.large",
+                  "m3.xlarge",
+                  "m3.2xlarge",
+                  "c4.large",
+                  "c4.xlarge",
+                  "c4.2xlarge",
+                  "c4.4xlarge",
+                  "c4.8xlarge",
+                  "c3.large",
+                  "c3.xlarge",
+                  "c3.2xlarge",
+                  "c3.4xlarge",
+                  "c3.8xlarge",
+                  "r3.large",
+                  "r3.xlarge",
+                  "r3.2xlarge",
+                  "r3.4xlarge",
+                  "r3.8xlarge",
+                  "i2.xlarge",
+                  "i2.2xlarge",
+                  "i2.4xlarge",
+                  "i2.8xlarge",
+                  "d2.xlarge",
+                  "d2.2xlarge",
+                  "d2.4xlarge",
+                  "d2.8xlarge",
+                  "g2.2xlarge",
+                  "g2.8xlarge",
+                  "t1.micro",
+                  "m1.small",
+                  "m1.large",
+                  "m1.xlarge",
+                  "c1.medium",
+                  "c1.xlarge",
+                  "m2.xlarge",
+                  "m2.2xlarge",
+                  "m2.4xlarge",
+                  "cc1.4xlarge"
+                ],
+                "length": 42
+              }
+            }
+          },
+          {
+            "string": "nuvlabox-bertil-ohlin.cpu",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "1",
+              "name": "nuvlabox-bertil-ohlin.cpu",
+              "description": "Number of CPUs (i.e. virtual cores)",
+              "category": "nuvlabox-bertil-ohlin",
+              "type": "String",
+              "mandatory": true,
+              "value": "1",
+              "order_": 10,
+              "order": 10
+            }
+          },
+          {
+            "string": "nuvlabox-cecil-powell.cpu",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "1",
+              "name": "nuvlabox-cecil-powell.cpu",
+              "description": "Number of CPUs (i.e. virtual cores)",
+              "category": "nuvlabox-cecil-powell",
+              "type": "String",
+              "mandatory": true,
+              "value": "1",
+              "order_": 10,
+              "order": 10
+            }
+          },
+          {
+            "string": "nuvlabox-james-chadwick.ram",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "0.5",
+              "name": "nuvlabox-james-chadwick.ram",
+              "description": "Amount of RAM, in GB",
+              "category": "nuvlabox-james-chadwick",
+              "type": "String",
+              "mandatory": true,
+              "value": "0.5",
+              "order_": 11,
+              "order": 11
+            }
+          },
+          {
+            "string": "ec2-eu-west.instance.type",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "t2.micro",
+              "name": "ec2-eu-west.instance.type",
+              "description": "Cloud instance type",
+              "category": "ec2-eu-west",
+              "type": "Enum",
+              "mandatory": true,
+              "value": "t2.micro",
+              "order_": 0,
+              "order": 0,
+              "enumValues": {
+                "string": [
+                  "t2.micro",
+                  "t2.small",
+                  "t2.medium",
+                  "m3.medium",
+                  "m3.large",
+                  "m3.xlarge",
+                  "m3.2xlarge",
+                  "c4.large",
+                  "c4.xlarge",
+                  "c4.2xlarge",
+                  "c4.4xlarge",
+                  "c4.8xlarge",
+                  "c3.large",
+                  "c3.xlarge",
+                  "c3.2xlarge",
+                  "c3.4xlarge",
+                  "c3.8xlarge",
+                  "r3.large",
+                  "r3.xlarge",
+                  "r3.2xlarge",
+                  "r3.4xlarge",
+                  "r3.8xlarge",
+                  "i2.xlarge",
+                  "i2.2xlarge",
+                  "i2.4xlarge",
+                  "i2.8xlarge",
+                  "d2.xlarge",
+                  "d2.2xlarge",
+                  "d2.4xlarge",
+                  "d2.8xlarge",
+                  "g2.2xlarge",
+                  "g2.8xlarge",
+                  "t1.micro",
+                  "m1.small",
+                  "m1.large",
+                  "m1.xlarge",
+                  "c1.medium",
+                  "c1.xlarge",
+                  "m2.xlarge",
+                  "m2.2xlarge",
+                  "m2.4xlarge",
+                  "cc1.4xlarge"
+                ],
+                "length": 42
+              }
+            }
+          },
+          {
+            "string": "exoscale-ch-dk.instance.type",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "Micro",
+              "name": "exoscale-ch-dk.instance.type",
+              "description": "Cloud instance type",
+              "category": "exoscale-ch-dk",
+              "type": "Enum",
+              "mandatory": true,
+              "value": "Micro",
+              "order_": 0,
+              "order": 0,
+              "enumValues": {
+                "string": [
+                  "Micro",
+                  "Tiny",
+                  "Small",
+                  "Medium",
+                  "Large",
+                  "Extra-large",
+                  "Huge",
+                  "Mega",
+                  "Titan"
+                ],
+                "length": 9
+              }
+            }
+          },
+          {
+            "string": "nuvlabox-max-planck.custom.vm.template",
+            "parameter": {
+              "readonly": false,
+              "isSet": false,
+              "name": "nuvlabox-max-planck.custom.vm.template",
+              "description": "Additional custom VM template",
+              "category": "nuvlabox-max-planck",
+              "type": "String",
+              "mandatory": true,
+              "order_": 100,
+              "order": 100
+            }
+          },
+          {
+            "string": "softlayer-it-mil01.instance.type",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "2 CPU, 2GB ram, 100GB",
+              "name": "softlayer-it-mil01.instance.type",
+              "description": "Instance type (flavor)",
+              "category": "softlayer-it-mil01",
+              "type": "String",
+              "mandatory": true,
+              "value": "2 CPU, 2GB ram, 100GB",
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "ec2-ap-southeast-1.instance.type",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "t2.micro",
+              "name": "ec2-ap-southeast-1.instance.type",
+              "description": "Cloud instance type",
+              "category": "ec2-ap-southeast-1",
+              "type": "Enum",
+              "mandatory": true,
+              "value": "t2.micro",
+              "order_": 0,
+              "order": 0,
+              "enumValues": {
+                "string": [
+                  "t2.micro",
+                  "t2.small",
+                  "t2.medium",
+                  "m3.medium",
+                  "m3.large",
+                  "m3.xlarge",
+                  "m3.2xlarge",
+                  "c4.large",
+                  "c4.xlarge",
+                  "c4.2xlarge",
+                  "c4.4xlarge",
+                  "c4.8xlarge",
+                  "c3.large",
+                  "c3.xlarge",
+                  "c3.2xlarge",
+                  "c3.4xlarge",
+                  "c3.8xlarge",
+                  "r3.large",
+                  "r3.xlarge",
+                  "r3.2xlarge",
+                  "r3.4xlarge",
+                  "r3.8xlarge",
+                  "i2.xlarge",
+                  "i2.2xlarge",
+                  "i2.4xlarge",
+                  "i2.8xlarge",
+                  "d2.xlarge",
+                  "d2.2xlarge",
+                  "d2.4xlarge",
+                  "d2.8xlarge",
+                  "g2.2xlarge",
+                  "g2.8xlarge",
+                  "t1.micro",
+                  "m1.small",
+                  "m1.large",
+                  "m1.xlarge",
+                  "c1.medium",
+                  "c1.xlarge",
+                  "m2.xlarge",
+                  "m2.2xlarge",
+                  "m2.4xlarge",
+                  "cc1.4xlarge"
+                ],
+                "length": 42
+              }
+            }
+          },
+          {
+            "string": "cyfronet-pl1.instance.type",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "CPU-1.RAM-512MB.DISK-10GB",
+              "name": "cyfronet-pl1.instance.type",
+              "description": "Instance type (flavor)",
+              "category": "cyfronet-pl1",
+              "type": "String",
+              "mandatory": true,
+              "value": "CPU-1.RAM-512MB.DISK-10GB",
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "ec2-eu-west.security.groups",
+            "parameter": {
+              "instructions": "If you don't know what is a security group or if you don't want to take care of them, you can use the special value <code>slipstream_managed<\/code> to let SlipStream generate a security group with everything allowed.",
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "slipstream_managed",
+              "name": "ec2-eu-west.security.groups",
+              "description": "Security Groups (comma separated list)",
+              "category": "ec2-eu-west",
+              "type": "String",
+              "mandatory": true,
+              "value": "slipstream_managed",
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "nuvlabox-max-planck.cpu",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "1",
+              "name": "nuvlabox-max-planck.cpu",
+              "description": "Number of CPUs (i.e. virtual cores)",
+              "category": "nuvlabox-max-planck",
+              "type": "String",
+              "mandatory": true,
+              "value": "1",
+              "order_": 10,
+              "order": 10
+            }
+          },
+          {
+            "string": "ec2-eu-central-1.instance.type",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "t2.micro",
+              "name": "ec2-eu-central-1.instance.type",
+              "description": "Cloud instance type",
+              "category": "ec2-eu-central-1",
+              "type": "Enum",
+              "mandatory": true,
+              "value": "t2.micro",
+              "order_": 0,
+              "order": 0,
+              "enumValues": {
+                "string": [
+                  "t2.micro",
+                  "t2.small",
+                  "t2.medium",
+                  "m3.medium",
+                  "m3.large",
+                  "m3.xlarge",
+                  "m3.2xlarge",
+                  "c4.large",
+                  "c4.xlarge",
+                  "c4.2xlarge",
+                  "c4.4xlarge",
+                  "c4.8xlarge",
+                  "c3.large",
+                  "c3.xlarge",
+                  "c3.2xlarge",
+                  "c3.4xlarge",
+                  "c3.8xlarge",
+                  "r3.large",
+                  "r3.xlarge",
+                  "r3.2xlarge",
+                  "r3.4xlarge",
+                  "r3.8xlarge",
+                  "i2.xlarge",
+                  "i2.2xlarge",
+                  "i2.4xlarge",
+                  "i2.8xlarge",
+                  "d2.xlarge",
+                  "d2.2xlarge",
+                  "d2.4xlarge",
+                  "d2.8xlarge",
+                  "g2.2xlarge",
+                  "g2.8xlarge",
+                  "t1.micro",
+                  "m1.small",
+                  "m1.large",
+                  "m1.xlarge",
+                  "c1.medium",
+                  "c1.xlarge",
+                  "m2.xlarge",
+                  "m2.2xlarge",
+                  "m2.4xlarge",
+                  "cc1.4xlarge"
+                ],
+                "length": 42
+              }
+            }
+          },
+          {
+            "string": "exoscale-ch-dk.disk",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "10G",
+              "name": "exoscale-ch-dk.disk",
+              "description": "Size of the root disk",
+              "category": "exoscale-ch-dk",
+              "type": "Enum",
+              "mandatory": true,
+              "value": "10G",
+              "order_": 0,
+              "order": 0,
+              "enumValues": {
+                "string": [
+                  "10G",
+                  "50G",
+                  "100G",
+                  "200G",
+                  "400G"
+                ],
+                "length": 5
+              }
+            }
+          },
+          {
+            "string": "ec2-us-west-2.security.groups",
+            "parameter": {
+              "instructions": "If you don't know what is a security group or if you don't want to take care of them, you can use the special value <code>slipstream_managed<\/code> to let SlipStream generate a security group with everything allowed.",
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "slipstream_managed",
+              "name": "ec2-us-west-2.security.groups",
+              "description": "Security Groups (comma separated list)",
+              "category": "ec2-us-west-2",
+              "type": "String",
+              "mandatory": true,
+              "value": "slipstream_managed",
+              "order_": 0,
+              "order": 0
+            }
+          },
+          {
+            "string": "ec2-us-west-2.instance.type",
+            "parameter": {
+              "readonly": false,
+              "isSet": true,
+              "defaultValue": "t2.micro",
+              "name": "ec2-us-west-2.instance.type",
+              "description": "Cloud instance type",
+              "category": "ec2-us-west-2",
+              "type": "Enum",
+              "mandatory": true,
+              "value": "t2.micro",
+              "order_": 0,
+              "order": 0,
+              "enumValues": {
+                "string": [
+                  "t2.micro",
+                  "t2.small",
+                  "t2.medium",
+                  "m3.medium",
+                  "m3.large",
+                  "m3.xlarge",
+                  "m3.2xlarge",
+                  "c4.large",
+                  "c4.xlarge",
+                  "c4.2xlarge",
+                  "c4.4xlarge",
+                  "c4.8xlarge",
+                  "c3.large",
+                  "c3.xlarge",
+                  "c3.2xlarge",
+                  "c3.4xlarge",
+                  "c3.8xlarge",
+                  "r3.large",
+                  "r3.xlarge",
+                  "r3.2xlarge",
+                  "r3.4xlarge",
+                  "r3.8xlarge",
+                  "i2.xlarge",
+                  "i2.2xlarge",
+                  "i2.4xlarge",
+                  "i2.8xlarge",
+                  "d2.xlarge",
+                  "d2.2xlarge",
+                  "d2.4xlarge",
+                  "d2.8xlarge",
+                  "g2.2xlarge",
+                  "g2.8xlarge",
+                  "t1.micro",
+                  "m1.small",
+                  "m1.large",
+                  "m1.xlarge",
+                  "c1.medium",
+                  "c1.xlarge",
+                  "m2.xlarge",
+                  "m2.2xlarge",
+                  "m2.4xlarge",
+                  "cc1.4xlarge"
+                ],
+                "length": 42
+              }
+            }
+          }
+        ],
+        "class": "org.hibernate.collection.internal.PersistentMap"
+      }
+    },
+    "lastStateChangeTime": "2017-03-20 13:38:17.66 UTC",
+    "groups": "nuvlabox-stanley-cohen:machine",
+    "resourceUri": "run/380798cb-bb04-41e4-8498-d8ee090e1643",
+    "type": "Machine",
+    "uuid": "380798cb-bb04-41e4-8498-d8ee090e1643",
+    "nodeNames": "machine,orchestrator-nuvlabox-stanley-cohen",
+    "deleted": false,
+    "moduleResourceUri": "module/examples/tutorials/service-testing/apache/5071",
+    "mutable": false,
+    "runtimeParameters": {
+      "entry": [
+        {
+          "string": "machine:disk.detach.device",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": false,
+            "name": "disk.detach.device",
+            "description": "Name of the block device to detach from the VM during vertical scaling",
+            "type": "String",
+            "key": "machine:disk.detach.device",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "group": "machine",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "orchestrator-nuvlabox-stanley-cohen:instanceid",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "instanceid",
+            "description": "Cloud instance id",
+            "type": "String",
+            "key": "orchestrator-nuvlabox-stanley-cohen:instanceid",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "119",
+            "group": "orchestrator-nuvlabox-stanley-cohen",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "machine:cloudservice",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "cloudservice",
+            "description": "Cloud Service where the node resides",
+            "type": "String",
+            "key": "machine:cloudservice",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "nuvlabox-stanley-cohen",
+            "group": "machine",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "machine:ready",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": false,
+            "name": "ready",
+            "description": "Server ready to recieve connections",
+            "type": "String",
+            "key": "machine:ready",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "group": "machine",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "ss:abort",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": false,
+            "name": "abort",
+            "description": "Run abort flag, set when aborting",
+            "type": "String",
+            "key": "ss:abort",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "group": "Global",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "machine:nuvlabox-stanley-cohen.custom.vm.template",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": false,
+            "name": "nuvlabox-stanley-cohen.custom.vm.template",
+            "description": "Additional custom VM template",
+            "type": "String",
+            "key": "machine:nuvlabox-stanley-cohen.custom.vm.template",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "group": "machine",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "machine:scale.state",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "scale.state",
+            "description": "Defined scalability state",
+            "type": "String",
+            "key": "machine:scale.state",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "creating",
+            "group": "machine",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "orchestrator-nuvlabox-stanley-cohen:cloudservice",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "cloudservice",
+            "description": "Cloud Service where the node resides",
+            "type": "String",
+            "key": "orchestrator-nuvlabox-stanley-cohen:cloudservice",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "nuvlabox-stanley-cohen",
+            "group": "orchestrator-nuvlabox-stanley-cohen",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "machine:disk.attached.device",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": false,
+            "name": "disk.attached.device",
+            "description": "Attached device name after the VM's vertical scaling",
+            "type": "String",
+            "key": "machine:disk.attached.device",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "group": "machine",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "machine:scale.iaas.done",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "scale.iaas.done",
+            "description": "Orchestrator sets to 'true' after scaling the node instance",
+            "type": "String",
+            "key": "machine:scale.iaas.done",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "false",
+            "group": "machine",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "machine:vmstate",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "vmstate",
+            "description": "State of the VM, according to the cloud layer",
+            "type": "String",
+            "key": "machine:vmstate",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "Unknown",
+            "group": "machine",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "orchestrator-nuvlabox-stanley-cohen:vmstate",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "vmstate",
+            "description": "State of the VM, according to the cloud layer",
+            "type": "String",
+            "key": "orchestrator-nuvlabox-stanley-cohen:vmstate",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "Unknown",
+            "group": "orchestrator-nuvlabox-stanley-cohen",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "machine:complete",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "complete",
+            "description": "'true' when current state is completed",
+            "type": "String",
+            "key": "machine:complete",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "false",
+            "group": "machine",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "machine:port",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "port",
+            "description": "Port",
+            "type": "String",
+            "key": "machine:port",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "8080",
+            "group": "machine",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "ss:complete",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": false,
+            "name": "complete",
+            "description": "Global complete flag, set when run completed",
+            "type": "String",
+            "key": "ss:complete",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "group": "Global",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "ss:url.service",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": false,
+            "name": "url.service",
+            "description": "Optional service URL for the deployment",
+            "type": "String",
+            "key": "ss:url.service",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "group": "Global",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "machine:url.service",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": false,
+            "name": "url.service",
+            "description": "Optional service URL for virtual machine",
+            "type": "String",
+            "key": "machine:url.service",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "group": "machine",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "machine:image.platform",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "image.platform",
+            "description": "Platform (eg: ubuntu, windows)",
+            "type": "String",
+            "key": "machine:image.platform",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "ubuntu",
+            "group": "machine",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "orchestrator-nuvlabox-stanley-cohen:complete",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "complete",
+            "description": "'true' when current state is completed",
+            "type": "String",
+            "key": "orchestrator-nuvlabox-stanley-cohen:complete",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "false",
+            "group": "orchestrator-nuvlabox-stanley-cohen",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "orchestrator-nuvlabox-stanley-cohen:url.service",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": false,
+            "name": "url.service",
+            "description": "Optional service URL for virtual machine",
+            "type": "String",
+            "key": "orchestrator-nuvlabox-stanley-cohen:url.service",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "group": "orchestrator-nuvlabox-stanley-cohen",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "machine:nuvlabox-stanley-cohen.cpu",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "nuvlabox-stanley-cohen.cpu",
+            "description": "Number of CPUs (i.e. virtual cores)",
+            "type": "String",
+            "key": "machine:nuvlabox-stanley-cohen.cpu",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "1",
+            "group": "machine",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "machine:url.ssh",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "url.ssh",
+            "description": "SSH URL to connect to virtual machine",
+            "type": "String",
+            "key": "machine:url.ssh",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "ssh://root@172.16.0.15",
+            "group": "machine",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "ss:state",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "state",
+            "description": "Global execution state",
+            "type": "String",
+            "key": "ss:state",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "Done",
+            "group": "Global",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "machine:is.orchestrator",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "is.orchestrator",
+            "description": "True if it's an orchestrator",
+            "type": "String",
+            "key": "machine:is.orchestrator",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "false",
+            "group": "machine",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "ss:groups",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "groups",
+            "description": "Comma separated node groups",
+            "type": "String",
+            "key": "ss:groups",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "nuvlabox-stanley-cohen:machine",
+            "group": "Global",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "ss:tags",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": false,
+            "name": "tags",
+            "description": "Comma separated tag values",
+            "type": "String",
+            "key": "ss:tags",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "group": "Global",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "orchestrator-nuvlabox-stanley-cohen:url.ssh",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "url.ssh",
+            "description": "SSH URL to connect to virtual machine",
+            "type": "String",
+            "key": "orchestrator-nuvlabox-stanley-cohen:url.ssh",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "ssh://root@172.16.0.14",
+            "group": "orchestrator-nuvlabox-stanley-cohen",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "orchestrator-nuvlabox-stanley-cohen:is.orchestrator",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "is.orchestrator",
+            "description": "True if it's an orchestrator",
+            "type": "String",
+            "key": "orchestrator-nuvlabox-stanley-cohen:is.orchestrator",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "true",
+            "group": "orchestrator-nuvlabox-stanley-cohen",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "ss:category",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "category",
+            "description": "Module category",
+            "type": "String",
+            "key": "ss:category",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "Image",
+            "group": "Global",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "machine:nuvlabox-stanley-cohen.is.firewall",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "nuvlabox-stanley-cohen.is.firewall",
+            "description": "If this flag is set, the instance will be started on the internal network and on the natted network so it can act as a firewall for instances on the internal network.",
+            "type": "String",
+            "key": "machine:nuvlabox-stanley-cohen.is.firewall",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "false",
+            "group": "machine",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "machine:statecustom",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "statecustom",
+            "description": "Custom state",
+            "type": "String",
+            "key": "machine:statecustom",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "Image saved !",
+            "group": "machine",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "orchestrator-nuvlabox-stanley-cohen:hostname",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "hostname",
+            "description": "hostname/ip of the image",
+            "type": "String",
+            "key": "orchestrator-nuvlabox-stanley-cohen:hostname",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "172.16.0.14",
+            "group": "orchestrator-nuvlabox-stanley-cohen",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "machine:nuvlabox-stanley-cohen.network.specific.name",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": false,
+            "name": "nuvlabox-stanley-cohen.network.specific.name",
+            "description": "Network name",
+            "type": "String",
+            "key": "machine:nuvlabox-stanley-cohen.network.specific.name",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "group": "machine",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "ss:recovery.mode",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "recovery.mode",
+            "description": "Run abort flag, set when aborting",
+            "type": "String",
+            "key": "ss:recovery.mode",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "false",
+            "group": "Global",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "machine:disk.attach.size",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": false,
+            "name": "disk.attach.size",
+            "description": "Size of the extra disk to attach to the VM during vertical scaling",
+            "type": "String",
+            "key": "machine:disk.attach.size",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "group": "machine",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "machine:pre.scale.done",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "pre.scale.done",
+            "description": "Node instance sets to 'true' after running pre-scale script",
+            "type": "String",
+            "key": "machine:pre.scale.done",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "false",
+            "group": "machine",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "machine:instanceid",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "instanceid",
+            "description": "Cloud instance id",
+            "type": "String",
+            "key": "machine:instanceid",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "120",
+            "group": "machine",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "machine:network",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "network",
+            "description": "Network type",
+            "type": "String",
+            "key": "machine:network",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "Public",
+            "group": "machine",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "machine:nuvlabox-stanley-cohen.ram",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "nuvlabox-stanley-cohen.ram",
+            "description": "Amount of RAM, in GB",
+            "type": "String",
+            "key": "machine:nuvlabox-stanley-cohen.ram",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "0.5",
+            "group": "machine",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "orchestrator-nuvlabox-stanley-cohen:max.iaas.workers",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "max.iaas.workers",
+            "description": "Max number of concurrently provisioned VMs by orchestrator",
+            "type": "String",
+            "key": "orchestrator-nuvlabox-stanley-cohen:max.iaas.workers",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "7",
+            "group": "orchestrator-nuvlabox-stanley-cohen",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "orchestrator-nuvlabox-stanley-cohen:abort",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": false,
+            "name": "abort",
+            "description": "Machine abort flag, set when aborting",
+            "type": "String",
+            "key": "orchestrator-nuvlabox-stanley-cohen:abort",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "group": "orchestrator-nuvlabox-stanley-cohen",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "machine:hostname",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "hostname",
+            "description": "hostname/ip of the image",
+            "type": "String",
+            "key": "machine:hostname",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "172.16.0.15",
+            "group": "machine",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "machine:abort",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": false,
+            "name": "abort",
+            "description": "Machine abort flag, set when aborting",
+            "type": "String",
+            "key": "machine:abort",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "group": "machine",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "machine:extra.disk.volatile",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": false,
+            "name": "extra.disk.volatile",
+            "description": "Volatile extra disk in GB",
+            "type": "String",
+            "key": "machine:extra.disk.volatile",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "group": "machine",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "machine:image.id",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "image.id",
+            "description": "Cloud image id",
+            "type": "String",
+            "key": "machine:image.id",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "d88f85a9489e5c05aa2f06a4a878826f",
+            "group": "machine",
+            "mapsOthers": false
+          }
+        },
+        {
+          "string": "orchestrator-nuvlabox-stanley-cohen:statecustom",
+          "runtimeParameter": {
+            "mappedRuntimeParameterNames": "",
+            "deleted": false,
+            "isMappedValue": false,
+            "isSet": true,
+            "name": "statecustom",
+            "description": "Custom state",
+            "type": "String",
+            "key": "orchestrator-nuvlabox-stanley-cohen:statecustom",
+            "creation": "2017-03-20 13:36:04.970 UTC",
+            "content": "Provisioning of node instances requested [2017-03-20T13:37:01Z]. Time took to provision 0h00m10s.",
+            "group": "orchestrator-nuvlabox-stanley-cohen",
+            "mapsOthers": false
+          }
+        }
+      ],
+      "class": "org.hibernate.collection.internal.PersistentMap"
+    },
+    "cloudServiceNames": "nuvlabox-stanley-cohen",
+    "startTime": "2017-03-20 13:36:04.904 UTC",
+    "state": "Done",
+    "endTime": "2017-03-20 13:38:17.66 UTC",
+    "category": "Image",
+    "user": "khaled",
+    "parameters": {
+      "entry": [
+        {
+          "string": "machine:cloudservice",
+          "parameter": {
+            "readonly": false,
+            "name": "machine:cloudservice",
+            "description": "",
+            "category": "General",
+            "type": "String",
+            "mandatory": false,
+            "value": "nuvlabox-stanley-cohen",
+            "order_": 0,
+            "order": 0
+          }
+        },
+        {
+          "string": "General.keep-running",
+          "parameter": {
+            "readonly": false,
+            "name": "General.keep-running",
+            "description": "Keep running after deployment",
+            "category": "General",
+            "type": "String",
+            "mandatory": false,
+            "value": "always",
+            "order_": 0,
+            "order": 0
+          }
+        },
+        {
+          "string": "garbage_collected",
+          "parameter": {
+            "readonly": false,
+            "name": "garbage_collected",
+            "description": "true if the Run was already garbage collected",
+            "category": "General",
+            "type": "String",
+            "mandatory": false,
+            "value": "false",
+            "order_": 0,
+            "order": 0
+          }
+        }
+      ],
+      "class": "org.hibernate.collection.internal.PersistentMap"
+    },
+    "creation": "2017-03-20 13:36:04.904 UTC"
+  }
+}

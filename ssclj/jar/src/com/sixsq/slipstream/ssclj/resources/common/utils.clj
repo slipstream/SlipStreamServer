@@ -62,6 +62,17 @@
   [m]
   (dissoc m :id :created :updated :resourceURI :operations))
 
+(defn time-now [] (time-fmt/unparse (:date-time time-fmt/formatters) (time/now)))
+
+(defn update-timestamps
+  "Sets the updated attribute and optionally the created attribute
+   in the request.  The created attribute is only set if the existing value
+   is missing or evaluates to false."
+  [data]
+  (let [updated (time-now)
+        created (or (:created data) updated)]
+    (assoc data :created created :updated updated)))
+
 (defn unparse-timestamp-datetime
   "Returns the string representation of the given timestamp."
   [^DateTime timestamp]

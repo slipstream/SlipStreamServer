@@ -22,7 +22,9 @@ package com.sixsq.slipstream.run;
 
 import javax.persistence.EntityManager;
 
+import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.*;
+import com.sixsq.slipstream.persistence.User;
 import org.json.JSONObject;
 import org.json.XML;
 import org.restlet.data.MediaType;
@@ -31,6 +33,7 @@ import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
+import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
 
 import com.sixsq.slipstream.factory.RunFactory;
@@ -160,6 +163,18 @@ public class RunResource extends RunBaseResource {
 		run.setModule(module);
 
 		return run;
+	}
+
+	private Run launch(Run run) throws SlipStreamException {
+		User user = getUser();
+		user.addSystemParametersIntoUser(Configuration.getInstance().getParameters());
+		slipstream.async.Launcher.launch(run, user);
+		return run;
+	}
+
+	@Post
+	public void startRun() throws SlipStreamException {
+		launch(this.run);
 	}
 
 	@Delete

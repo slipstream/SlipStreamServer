@@ -24,6 +24,7 @@
                  '[[org.clojure/clojure]
 
                    [aleph]
+                   [manifold]
                    [cheshire] ;; newer version needed for ring-json
                    [compojure]
                    [com.jcraft/jsch]
@@ -37,6 +38,8 @@
                    [metrics-clojure-jvm]
                    [metrics-clojure-graphite]
                    [me.raynes/fs]
+                   [org.clojure/core.async :exclusions []]
+                   [org.clojure/tools.reader "1.0.0-beta4"]
                    [org.clojure/data.json]
                    [org.clojure/java.classpath]
                    [org.clojure/tools.cli]
@@ -46,6 +49,7 @@
                    [ring/ring-core]
                    [ring/ring-json]
                    [superstring]
+                   [zookeeper-clj]
 
                    [com.sixsq.slipstream/utils]
                    [com.sixsq.slipstream/auth]
@@ -64,6 +68,8 @@
                    [honeysql]
                    [org.clojure/test.check]
                    [org.slf4j/slf4j-log4j12 :scope "test"]
+                   [org.apache.curator/curator-test :scope "test"]
+                   [clj-http-fake/clj-http-fake :scope "test"]
 
                    ;; boot tasks
                    [boot-environ]

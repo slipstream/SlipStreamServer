@@ -122,7 +122,7 @@ public class RunNodeResource extends RunBaseResource {
 		return result;
 	}
 
-	private Representation addNodeInstancesInTransaction(Representation entity)
+	private Representation addNodeInstancesInTransaction(Representation entity) //TODO kb scaling
 			throws Exception {
 
 		EntityManager em = PersistenceUtil.createEntityManager();
@@ -180,7 +180,7 @@ public class RunNodeResource extends RunBaseResource {
 		}
 	}
 
-	private void deleteNodeInstancesInTransaction(Representation entity) throws Exception {
+	private void deleteNodeInstancesInTransaction(Representation entity) throws Exception { //TODO kb scaling
 		EntityManager em = PersistenceUtil.createEntityManager();
 		EntityTransaction transaction = em.getTransaction();
 

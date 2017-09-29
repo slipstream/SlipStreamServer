@@ -128,7 +128,7 @@ public class Run extends Parameterized<Run, RunParameter> {
     private static final Set<States> STOP_ACCOUNTING_STATES = new HashSet<States>(Arrays.asList(STOP_VALUES));
 
 
-    public static Run abortOrReset(String abortMessage, String nodename,
+    public static Run abortOrReset(String abortMessage, String nodename, //TODO kb
                                    String uuid) {
         EntityManager em = PersistenceUtil.createEntityManager();
         EntityTransaction transaction = em.getTransaction();
@@ -142,7 +142,7 @@ public class Run extends Parameterized<Run, RunParameter> {
         return run;
     }
 
-    public static Run abortOrReset(String abortMessage, String nodename,
+    public static Run abortOrReset(String abortMessage, String nodename,  //TODO kb
                                    EntityManager em, String uuid) {
 
         Run run = Run.loadFromUuid(uuid, em);
@@ -177,7 +177,7 @@ public class Run extends Parameterized<Run, RunParameter> {
         return run;
     }
 
-    private static void setGlobalAbortState(String abortMessage,
+    private static void setGlobalAbortState(String abortMessage,  //TODO kb
                                             RuntimeParameter globalAbort) {
         globalAbort.setValue(abortMessage);
         globalAbort.store();
@@ -192,7 +192,7 @@ public class Run extends Parameterized<Run, RunParameter> {
         if (!globalAbort.isSet()) {
             setGlobalAbortState(abortMessage, globalAbort);
         }
-        if (run.state == States.Provisioning) {
+        if (run.state == States.Provisioning) {  //TODO kb recovery mode
             setRecoveryMode(run);
         }
         em.close();
@@ -210,7 +210,7 @@ public class Run extends Parameterized<Run, RunParameter> {
                 + RuntimeParameter.ABORT_KEY;
     }
 
-    private static RuntimeParameter getRecoveryModeParameter(Run run) {
+    private static RuntimeParameter getRecoveryModeParameter(Run run) {  //TODO kb
         return run.getRuntimeParameters().get(
                 RuntimeParameter.GLOBAL_RECOVERY_MODE_KEY);
     }
@@ -331,7 +331,7 @@ public class Run extends Parameterized<Run, RunParameter> {
         return views;
     }
 
-    private static RunView convertRunToRunView(Run run, Map<String, Long> vmCountPerRun) {
+    private static RunView convertRunToRunView(Run run, Map<String, Long> vmCountPerRun) {  //TODO kb UI
 
         if (run == null) {
             return null;
@@ -480,7 +480,7 @@ public class Run extends Parameterized<Run, RunParameter> {
     }
 
     @SuppressWarnings("unchecked")
-    public static List<Run> listOldTransient(User user, int timeout) throws ConfigurationException,
+    public static List<Run> listOldTransient(User user, int timeout) throws ConfigurationException, //TODO kb search for old  transient deployment on ssclj
             ValidationException {
         if (timeout <= 0) {
             timeout = DEFAULT_TIMEOUT;
@@ -1135,7 +1135,7 @@ public class Run extends Parameterized<Run, RunParameter> {
     @Attribute
     @Column(length = 1024)
     public String getGroups() {
-        getRuntimeParameters().get(RuntimeParameter.GLOBAL_NODE_GROUPS_KEY).setValue(groups);
+        getRuntimeParameters().get(RuntimeParameter.GLOBAL_NODE_GROUPS_KEY).setInitValue(groups);
         return groups;
     }
 

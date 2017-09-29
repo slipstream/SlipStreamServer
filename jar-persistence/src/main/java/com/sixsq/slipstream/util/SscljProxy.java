@@ -85,6 +85,10 @@ public class SscljProxy {
         return request(Method.PUT, resource, obj, username, null, null, null);
     }
 
+    public static Response put(String resource, String username, Object obj, Boolean throwException) {
+        return request(Method.PUT, resource, obj, username, null, null, throwException);
+    }
+
     public static Response post(String resource, Object obj) {
         return request(Method.POST, resource, obj, null, null, null, null);
     }
