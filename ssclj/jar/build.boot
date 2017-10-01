@@ -30,6 +30,7 @@
                    [clj-stacktrace]
                    [clj-time]
                    [environ]
+                   [expound]
                    [instaparse]
                    [log4j]
                    [metrics-clojure]
