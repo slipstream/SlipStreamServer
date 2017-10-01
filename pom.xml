@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>SlipStreamServer</artifactId>
-  <version>3.37-SNAPSHOT</version>
+  <version>3.37</version>
   <packaging>pom</packaging>
   <name>SlipStreamServer</name>
   <url>http://sixsq.com/</url>
@@ -10,7 +10,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamCommunity</artifactId>
-    <version>3.37-SNAPSHOT</version>
+    <version>3.37</version>
     <relativePath>../SlipStream/community</relativePath>
   </parent>
 
