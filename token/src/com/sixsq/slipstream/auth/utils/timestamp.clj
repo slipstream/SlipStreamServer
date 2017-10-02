@@ -6,8 +6,7 @@
     [clj-time.coerce :as c]
     [clj-time.format :as f]))
 
-;; FIXME: Reduce this time to a resonable value.
-(def default-lifetime-minutes (* 7 24 60))                  ;; 1 week
+(def default-lifetime-minutes (* 24 60))                  ;; 1 day
 
 (def cookie-date-formatter (f/formatter "EEE, dd MMM yyyy HH:mm:ss z"))
 

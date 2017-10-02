@@ -1,4 +1,4 @@
-(def +version+ "3.37-SNAPSHOT")
+(def +version+ "3.38-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamCljResources-jar
@@ -30,6 +30,7 @@
                    [clj-stacktrace]
                    [clj-time]
                    [environ]
+                   [expound]
                    [instaparse]
                    [log4j]
                    [metrics-clojure]
@@ -64,6 +65,7 @@
                    [honeysql]
                    [org.clojure/test.check]
                    [org.slf4j/slf4j-log4j12 :scope "test"]
+                   [com.cemerick/url nil :scope "test"]
 
                    ;; boot tasks
                    [boot-environ]

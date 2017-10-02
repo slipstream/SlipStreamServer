@@ -28,23 +28,17 @@
                 :created      timestamp
                 :updated      timestamp
                 :acl          valid-acl
-
                 :name         "short name"
                 :description  "short description",
-                :properties   {:a "one",
-                               :b "two"}
-
+                :properties   {:a "one", :b "two"}
                 :instanceID   "aaa-bbb-111"
+                :connector    {:href "connector/0123-4567-8912"}
                 :state        "Running"
                 :ip           "127.0.0.1"
-
                 :credentials  [{:href  "connector/0123-4567-8912",
                                 :roles ["realm:cern", "realm:my-accounting-group"]
-                                :users ["long-user-id-1", "long-user-id-2"]}
-                               ]
-                :run          {:href "run/aaa-bbb-ccc",
-                               :user {:href "user/test"}}
-
+                                :users ["long-user-id-1", "long-user-id-2"]}]
+                :deployment   {:href "run/aaa-bbb-ccc", :user {:href "user/test"}}
                 :serviceOffer {:href                  "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
                                :resource:vcpu         1
                                :resource:ram          4096
@@ -52,25 +46,22 @@
                                :resource:instanceType "Large"}})
 
 (deftest test-schema-check
-
   #_(s/explain-data :cimi/virtual-machine vm-sample)
 
   (are [expect-fn arg] (expect-fn (s/valid? :cimi/virtual-machine arg))
                        true? vm-sample
-
                        false? (assoc vm-sample :bad-attr {})
                        false? (assoc vm-sample :bad-attr "test")
-
-                       true? (assoc vm-sample :run {:href "run/fff-42"})
+                       true? (assoc vm-sample :deployment {:href "run/fff-42"})
                        true? (assoc vm-sample :name "name"))
 
                        ; TODO: Remove when credential resource is being used
                        true? (assoc vm-sample :credentials [{:href "user/123456789@toto-aai.chhttps://aai-login.toto-aai.com/idp/shibboleth!https://fed-id.nuv.la/samlbridge/module.php/saml/sp/metadata.php/sixsq-saml-bridge!qwertyuiopasdfghjklzxcvbnm1234567890="}])
 
   ;; mandatory keywords
-  (doseq [k #{:credentials :state :instanceID}]
+  (doseq [k #{:credentials :state :instanceID :connector}]
     (is (not (s/valid? :cimi/virtual-machine (dissoc vm-sample k)))))
 
   ;; optional keywords
-  (doseq [k #{:run :serviceOffer :ip}]
+  (doseq [k #{:deployment :serviceOffer :ip}]
     (is (s/valid? :cimi/virtual-machine (dissoc vm-sample k)))))

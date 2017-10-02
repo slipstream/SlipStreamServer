@@ -68,7 +68,7 @@ public class VirtualMachineHandlerTest {
 
         VirtualMachine virtualMachine = VirtualMachineHandler.fetchVirtualMachine(cloud, instanceID);
         if (virtualMachine != null) {
-            Assert.assertEquals(runOwner, virtualMachine.getRun().getUserName());
+            Assert.assertEquals(runOwner, virtualMachine.getDeployment().user);
             List<TypePrincipalRight> rules = virtualMachine.getAcl().getRules();
             Assert.assertNotNull(rules);
 

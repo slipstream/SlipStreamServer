@@ -1,5 +1,6 @@
 package com.sixsq.slipstream.acl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ACL {
@@ -25,12 +26,12 @@ public class ACL {
 	public void addRule(TypePrincipalRight rule){
 
 		TypePrincipal.PrincipalType type = rule.getType();
-		String principal =rule.getPrincipal();
+		String principal = rule.getPrincipal();
 
 		//ignore new rule if type and principal already exists
 		boolean duplicate = false;
 		for(TypePrincipalRight r : rules){
-			if ((r.getType() == type) && (r.getPrincipal() == principal)){
+			if ((r.getType() == type) && (r.getPrincipal().equals(principal))) {
 				duplicate = true;
 				break;
 			}
@@ -39,6 +40,11 @@ public class ACL {
 		if (!duplicate){
 			rules.add(rule);
 		}
+	}
+
+	public ACL(TypePrincipal owner) {
+		this.owner = owner;
+		this.rules = new ArrayList<>();
 	}
 
 	public ACL(TypePrincipal owner, List<TypePrincipalRight> rules) {

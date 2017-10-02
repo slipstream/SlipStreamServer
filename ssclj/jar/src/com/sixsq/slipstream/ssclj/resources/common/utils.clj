@@ -6,6 +6,7 @@
     [clj-time.format :as time-fmt]
     [clojure.spec.alpha :as s]
     [clj-time.coerce :as c]
+    [expound.alpha :as expound]
     [com.sixsq.slipstream.ssclj.util.log :as logu])
   (:import
     (java.util UUID Date)
@@ -125,10 +126,10 @@
    OK, then the resource itself is returned."
   [spec]
   (let [ok? (partial s/valid? spec)
-        explain (partial s/explain-str spec)]
+        explain (partial expound/expound-str spec)]
     (fn [resource]
       (if-not (ok? resource)
-        (logu/log-and-throw-400 (str "resource does not satisfy defined schema: " (explain resource)))
+        (logu/log-and-throw-400 (str "resource does not satisfy defined schema:\n" (explain resource)))
         resource))))
 
 (defn into-vec-without-nil

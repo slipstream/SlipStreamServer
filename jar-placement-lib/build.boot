@@ -1,4 +1,4 @@
-(def +version+ "3.37-SNAPSHOT")
+(def +version+ "3.38-SNAPSHOT")
  
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamPlacementLib-jar
@@ -25,6 +25,7 @@
                    [environ]
                    [com.sixsq.slipstream/SlipStreamPricingLib-jar]
                    [com.sixsq.slipstream/SlipStreamClientAPI-jar]
+                   [onetom/boot-lein-generate]
                    [adzerk/boot-test]
                    [adzerk/boot-reload]
                    [tolitius/boot-check]]))))
@@ -32,6 +33,7 @@
 (require
   '[adzerk.boot-test :refer [test]]
   '[adzerk.boot-reload :refer [reload]]
+  '[boot.lein :refer [generate]]
   '[tolitius.boot-check :refer [with-yagni with-eastwood with-kibit with-bikeshed]])
 
 (set-env!

@@ -9,13 +9,15 @@
 (s/def :cimi.virtual-machine/instanceID :cimi.core/identifier)
 (s/def :cimi.virtual-machine/state :cimi.core/nonblank-string)
 (s/def :cimi.virtual-machine/ip :cimi.core/nonblank-string)
+(s/def :cimi.virtual-machine/connector :cimi.common/resource-link)
 (s/def :cimi.virtual-machine/serviceOffer :cimi.common/resource-link)
-(s/def :cimi.virtual-machine/run :cimi.common/resource-link)
+(s/def :cimi.virtual-machine/deployment :cimi.common/resource-link)
 
 (def virtual-machine-specs {:req-un [:cimi.virtual-machine/credentials
                                      :cimi.virtual-machine/instanceID
+                                     :cimi.virtual-machine/connector
                                      :cimi.virtual-machine/state]
-                            :opt-un [:cimi.virtual-machine/run
+                            :opt-un [:cimi.virtual-machine/deployment
                                      :cimi.virtual-machine/serviceOffer
                                      :cimi.virtual-machine/ip]})
 

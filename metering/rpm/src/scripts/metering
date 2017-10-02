@@ -1,0 +1,9 @@
+SLIPSTREAM_RING_CONTAINER_INIT=sixsq.slipstream.metering.service/init
+SLIPSTREAM_RING_CONTAINER_PORT=5001
+ES_HOST=localhost
+ES_PORT=9200
+RESOURCES_INDEX=resources-index
+RESOURCES_TYPE=virtual-machine
+METERING_INDEX=resources-index
+METERING_TYPE=metering
+METERING_PERIOD_MINUTES=1
