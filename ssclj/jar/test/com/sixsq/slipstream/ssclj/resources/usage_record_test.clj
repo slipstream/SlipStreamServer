@@ -140,7 +140,9 @@
                 (get-in [:response :body :usage-records]))]
 
     (is (= 1 (count urs)))
-    (is (tu/submap? closed-usage-record (first urs))))
+
+    ;; acl may be different after editing (admin role added)
+    (is (tu/submap? (dissoc closed-usage-record :acl) (-> urs first (dissoc :acl)))))
 
   ; try edit non-existing usage-record
   (-> (session (ring-app))
