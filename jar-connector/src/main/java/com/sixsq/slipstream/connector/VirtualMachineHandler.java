@@ -20,7 +20,9 @@ import static com.sixsq.slipstream.acl.TypePrincipalRight.Right.VIEW;
 
 public class VirtualMachineHandler {
     protected static final String VIRTUAL_MACHINE_RESOURCE = BASE_RESOURCE + "virtual-machine";
-    private static final String USERNAME = "internal ADMIN";
+    private static final String USERNAME = "internal";
+    private static final String ROLE = "ADMIN";
+    private static final String USERNAME_ROLE = USERNAME + " " + ROLE;
     private static final Logger logger = Logger.getLogger(VirtualMachineHandler.class.getName());
 
     public static void removeVM(Vm vm) {
@@ -31,15 +33,15 @@ public class VirtualMachineHandler {
     }
 
     private static void add(VirtualMachine virtualMachine) {
-        SscljProxy.post(VIRTUAL_MACHINE_RESOURCE, USERNAME, virtualMachine);
+        SscljProxy.post(VIRTUAL_MACHINE_RESOURCE, USERNAME_ROLE, virtualMachine);
     }
 
     private static void update(VirtualMachine virtualMachine, String id) {
-        SscljProxy.put(BASE_RESOURCE + id, USERNAME, virtualMachine);
+        SscljProxy.put(BASE_RESOURCE + id, USERNAME_ROLE, virtualMachine);
     }
 
     private static void delete(String id) {
-        SscljProxy.delete(BASE_RESOURCE + id, USERNAME);
+        SscljProxy.delete(BASE_RESOURCE + id, USERNAME_ROLE);
     }
 
     public static void handleVM(Vm vm) {
