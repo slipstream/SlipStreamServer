@@ -23,11 +23,13 @@ package com.sixsq.slipstream.util;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
 import com.sixsq.slipstream.exceptions.ValidationException;
+
 import org.restlet.Response;
 import org.restlet.resource.ResourceException;
+import org.restlet.data.Form;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ServiceOffersUtil {
@@ -110,6 +112,52 @@ public class ServiceOffersUtil {
             }
         } catch (ValidationException ignored) { }
         return null;
+    }
+
+    public static Integer getServiceOfferAttributeAsIntegerOrNull(JsonObject serviceOffer, String serviceOfferAttributeName) {
+        try {
+            JsonElement serviceOfferAttribute = getServiceOfferAttribute(serviceOffer, serviceOfferAttributeName);
+            if (serviceOfferAttribute != null) {
+                return serviceOfferAttribute.getAsInt();
+            }
+        } catch (ValidationException ignored) { }
+        return null;
+    }
+
+    public static Float getServiceOfferAttributeAsFloatOrNull(JsonObject serviceOffer, String serviceOfferAttributeName) {
+        try {
+            JsonElement serviceOfferAttribute = getServiceOfferAttribute(serviceOffer, serviceOfferAttributeName);
+            if (serviceOfferAttribute != null) {
+                return serviceOfferAttribute.getAsFloat();
+            }
+        } catch (ValidationException ignored) { }
+        return null;
+    }
+
+    public static JsonObject getServiceOffer(String cloud, Integer cpu, Float ram, Float disk, String instanceType) {
+        String filter = "connector/href=\"" + cloud + "\" ";
+        if (cpu != null){
+            filter += " and " + cpuAttributeName + "=" + cpu;
+        }
+        if (ram != null){
+            filter += " and " + ramAttributeName + "=" + (int) ram.floatValue();
+        }
+        if (disk != null && disk > 0){
+            filter += " and " + diskAttributeName + "=" + (int) disk.floatValue();
+        }
+        if (instanceType != null){
+            filter += " and " + instanceTypeAttributeName + "=\"" + instanceType + "\"";
+        }
+        Form queryParameters = new Form();
+        queryParameters.add("$filter", filter);
+        queryParameters.add("$orderby", "price:unitCost");
+
+        Response response = SscljProxy.get(SscljProxy.SERVICE_OFFER_RESOURCE, "super ADMIN", queryParameters);
+
+        if (response == null) {
+            return null;
+        }
+        return parseJson(response.getEntityAsText());
     }
 
 }

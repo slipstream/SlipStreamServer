@@ -1,12 +1,16 @@
 package com.sixsq.slipstream.connector;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.sixsq.slipstream.acl.ACL;
 import com.sixsq.slipstream.acl.TypePrincipal;
 import com.sixsq.slipstream.acl.TypePrincipalRight;
 import com.sixsq.slipstream.persistence.VirtualMachine;
 import com.sixsq.slipstream.persistence.VirtualMachines;
 import com.sixsq.slipstream.persistence.Vm;
+import com.sixsq.slipstream.util.ServiceOffersUtil;
 import com.sixsq.slipstream.util.SscljProxy;
+
 import org.restlet.Response;
 
 import java.io.UnsupportedEncodingException;
@@ -14,9 +18,11 @@ import java.net.URLEncoder;
 import java.util.List;
 import java.util.logging.Logger;
 
+import static com.sixsq.slipstream.util.ServiceOffersUtil.*;
 import static com.sixsq.slipstream.util.SscljProxy.BASE_RESOURCE;
 import static com.sixsq.slipstream.acl.TypePrincipal.PrincipalType.USER;
 import static com.sixsq.slipstream.acl.TypePrincipalRight.Right.VIEW;
+import static com.sixsq.slipstream.persistence.VirtualMachine.ServiceOfferRef;
 
 public class VirtualMachineHandler {
     protected static final String VIRTUAL_MACHINE_RESOURCE = BASE_RESOURCE + "virtual-machine";
@@ -132,6 +138,8 @@ public class VirtualMachineHandler {
         resource.setState(vm.getState());
         resource.setIp(vm.getIp());
 
+        resource.setServiceOffer(findServiceOffer(vm));
+
         VirtualMachine.UserRef userHref = new VirtualMachine.UserRef(vm.getUser());
         resource.addCredential(new VirtualMachine.CredentialRef(userHref.href));
 
@@ -148,6 +156,29 @@ public class VirtualMachineHandler {
         }
 
         return resource;
+    }
+
+    private static ServiceOfferRef findServiceOffer(Vm vm) {
+        JsonObject response = ServiceOffersUtil.getServiceOffer(vm.getCloud(), vm.getCpu(), vm.getRam(),
+                vm.getDisk(), vm.getInstanceType());
+
+        JsonArray serviceOffers = response.getAsJsonArray("serviceOffers");
+        if (serviceOffers.size() == 0) {
+            return null;
+        }
+
+        JsonObject serviceOffer = (JsonObject) serviceOffers.get(0);
+
+        return new ServiceOfferRef(getServiceOfferAttributeAsStringOrNull(serviceOffer, "id"),
+                getServiceOfferAttributeAsIntegerOrNull(serviceOffer, cpuAttributeName),
+                getServiceOfferAttributeAsFloatOrNull(serviceOffer, ramAttributeName),
+                getServiceOfferAttributeAsFloatOrNull(serviceOffer, diskAttributeName),
+                getServiceOfferAttributeAsStringOrNull(serviceOffer, instanceTypeAttributeName),
+                getServiceOfferAttributeAsStringOrNull(serviceOffer, "price:currency"),
+                getServiceOfferAttributeAsFloatOrNull(serviceOffer, "price:unitCost"),
+                getServiceOfferAttributeAsStringOrNull(serviceOffer, "price:billingPeriodCode"),
+                getServiceOfferAttributeAsFloatOrNull(serviceOffer, "price:freeUnits"),
+                getServiceOfferAttributeAsStringOrNull(serviceOffer, "price:unitCode"));
     }
 
 }
