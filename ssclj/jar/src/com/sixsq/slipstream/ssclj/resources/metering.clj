@@ -13,9 +13,9 @@
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.ssclj.util.log :as logu]))
 
-(def ^:const resource-tag :metering)
-
 (def ^:const resource-name "Metering")
+
+(def ^:const resource-tag (keyword (str (u/camel-case resource-name) "s")))
 
 (def ^:const resource-url (u/de-camelcase resource-name))
 
