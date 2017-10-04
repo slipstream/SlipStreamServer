@@ -44,5 +44,5 @@
   [quota request]
   (let [current-all (quota-metric quota request)
         current-user (quota-metric-user quota request)]
-    (assoc quota :current-all current-all
-                 :current-user current-user)))
+    (assoc quota :currentAll current-all
+                 :currentUser current-user)))
