@@ -107,7 +107,8 @@
                                         :request-method :post)
                                (ltu/body->edn)
                                (ltu/is-status 200)
-                               :response)]
+                               :response
+                               :body)]
 
           ;; check that the collect action returns the correct response
           (is (= n-vm (:current-all collect-resp)))
@@ -136,7 +137,8 @@
                                         :request-method :post)
                                (ltu/body->edn)
                                (ltu/is-status 200)
-                               :response)]
+                               :response
+                               :body)]
 
           ;; check that the collect action returns the correct response
           (is (= n-vm (:current-all collect-resp)))
