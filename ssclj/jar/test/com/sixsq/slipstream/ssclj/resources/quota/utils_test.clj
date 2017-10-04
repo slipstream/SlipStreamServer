@@ -196,7 +196,7 @@
                   n-jane (t/quota-metric-user quota-jane request)]
               (is (> n-vm n-jane 0))
 
-              (let [{:keys [current-all current-user limit]} (t/collect quota-jane request)]
-                (is (= n-vm current-all))
-                (is (= n-jane current-user))
+              (let [{:keys [currentAll currentUser limit]} (t/collect quota-jane request)]
+                (is (= n-vm currentAll))
+                (is (= n-jane currentUser))
                 (is (= 100 limit))))))))))

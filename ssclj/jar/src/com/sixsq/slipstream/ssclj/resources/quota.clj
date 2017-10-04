@@ -90,7 +90,7 @@
 ;;
 ;; provide an action that allows the quota to be evaluated
 ;; returns the quota resource augmented with the keys
-;; :current-all (for all usage of the quota) and :current-user
+;; :currentAll (for all usage of the quota) and :currentUser
 ;; (for all usage of the quota by that user).
 ;;
 
