@@ -3,7 +3,8 @@
     [clojure.test :refer [deftest is are]]
     [sixsq.slipstream.metering.metering :as t]
     [clojure.data.json :as json]
-    [clojure.java.io :as io]))
+    [clojure.java.io :as io]
+    [clojure.string :as str]))
 
 
 (deftest check-es-hosts
@@ -46,6 +47,26 @@
                             :metering-type  "vms"})]
     (is (= "metering" (-> metering-action :index :_index)))
     (is (= "vms" (-> metering-action :index :_type)))))
+
+
+(deftest check-assoc-snapshot-time
+  (let [ts "2017-09-10T16:50:00.360Z"]
+    (is (= {:snapshot-time ts} (t/assoc-snapshot-time ts {})))
+    (is (= {:snapshot-time ts} (t/assoc-snapshot-time ts {:snapshot-time "BAD!"})))))
+
+
+(deftest check-update-id
+  (let [uuid "5b24caac-e87c-4446-96bc-a20b21450a1"
+        vm-id (str "virtual-machine/" uuid)
+        ts "2017-09-10T16:50:00.360Z"
+        metering-id (str "metering/" uuid "-" (str/replace ts #"[:\.]" "-"))]
+    (is (not (nil? (:id (t/update-id ts {})))))
+    (is (= {:id metering-id} (t/update-id ts {:id vm-id})))))
+
+
+(deftest check-replace-resource-uri
+  (is (= {:resourceURI t/metering-resource-uri} (t/replace-resource-uri {})))
+  (is (= {:resourceURI t/metering-resource-uri} (t/replace-resource-uri {:resourceURI "BAD!"}))))
 
 
 (deftest check-create-actions
