@@ -6,8 +6,10 @@
     [clojure.string :as str]
     [clojure.core.async :as async]
     [clj-time.core :as time]
-    [qbits.spandex :as spandex]))
+    [qbits.spandex :as spandex]
+    [sixsq.slipstream.metering.utils :as utils]))
 
+(def ^:const metering-resource-uri "http://sixsq.com/slipstream/1/Metering")
 
 (defn es-hosts
   [host port]
@@ -40,6 +42,24 @@
    :metering-period-minutes metering-period-minutes})
 
 
+(defn assoc-snapshot-time
+  [timestamp m]
+  (assoc m :snapshot-time timestamp))
+
+
+(defn update-id
+  [timestamp {:keys [id] :as m}]
+  (let [uuid (second (str/split (or id (utils/random-uuid)) #"/"))
+        ts (str/replace timestamp #"[:\.]" "-")
+        new-id (str "metering/" uuid "-" ts)]
+    (assoc m :id new-id)))
+
+
+(defn replace-resource-uri
+  [m]
+  (assoc m :resourceURI metering-resource-uri))
+
+
 (defn create-actions
   "work on a subset of documents returned by the global query search"
   [timestamp index-action page]
@@ -48,7 +68,9 @@
        :hits
        :hits
        (map :_source)
-       (map #(assoc % :snapshot-time timestamp))
+       (map (partial assoc-snapshot-time timestamp))
+       (map (partial update-id timestamp))
+       (map replace-resource-uri)
        (map (fn [v] [index-action v]))))
 
 
