@@ -86,14 +86,11 @@ public class ServiceOffersUtil {
             try {
                 JsonElement jsonElement = serviceOffer.get("id");
                 serviceOfferId = jsonElement.getAsString();
-
             } catch (Exception ignored) {
                 logger.warning("ServiceOffer exception: " + ignored);
-
-                throw new ValidationException("Failed to find the attribute '" + serviceOfferAttributeName +
-                        "' in the service offer '" + serviceOfferId + "'");
             }
-
+            throw new ValidationException("Failed to find the attribute '" + serviceOfferAttributeName +
+                    "' in the service offer '" + serviceOfferId + "'");
         }
 
         return serviceOfferAttribute;
@@ -105,32 +102,26 @@ public class ServiceOffersUtil {
     }
 
     public static String getServiceOfferAttributeAsStringOrNull(JsonObject serviceOffer, String serviceOfferAttributeName) {
-        try {
-            JsonElement serviceOfferAttribute = getServiceOfferAttribute(serviceOffer, serviceOfferAttributeName);
-            if (serviceOfferAttribute != null) {
-                return serviceOfferAttribute.getAsString();
-            }
-        } catch (ValidationException ignored) { }
+        JsonElement serviceOfferAttribute = getServiceOfferAttributeOrNull(serviceOffer, serviceOfferAttributeName);
+        if (serviceOfferAttribute != null) {
+            return serviceOfferAttribute.getAsString();
+        }
         return null;
     }
 
     public static Integer getServiceOfferAttributeAsIntegerOrNull(JsonObject serviceOffer, String serviceOfferAttributeName) {
-        try {
-            JsonElement serviceOfferAttribute = getServiceOfferAttribute(serviceOffer, serviceOfferAttributeName);
-            if (serviceOfferAttribute != null) {
-                return serviceOfferAttribute.getAsInt();
-            }
-        } catch (ValidationException ignored) { }
+        JsonElement serviceOfferAttribute = getServiceOfferAttributeOrNull(serviceOffer, serviceOfferAttributeName);
+        if (serviceOfferAttribute != null) {
+            return serviceOfferAttribute.getAsInt();
+        }
         return null;
     }
 
     public static Float getServiceOfferAttributeAsFloatOrNull(JsonObject serviceOffer, String serviceOfferAttributeName) {
-        try {
-            JsonElement serviceOfferAttribute = getServiceOfferAttribute(serviceOffer, serviceOfferAttributeName);
-            if (serviceOfferAttribute != null) {
-                return serviceOfferAttribute.getAsFloat();
-            }
-        } catch (ValidationException ignored) { }
+        JsonElement serviceOfferAttribute = getServiceOfferAttributeOrNull(serviceOffer, serviceOfferAttributeName);
+        if (serviceOfferAttribute != null) {
+            return serviceOfferAttribute.getAsFloat();
+        }
         return null;
     }
 

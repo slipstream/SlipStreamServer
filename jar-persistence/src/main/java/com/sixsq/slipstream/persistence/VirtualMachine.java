@@ -95,9 +95,16 @@ public class VirtualMachine {
 
     public static class UserRef {
         public final String href;
+        public final String organization;
 
         public UserRef(String username){
             this.href = "user/" + username;
+            this.organization = null;
+        }
+
+        public UserRef(String username, String organization){
+            this.href = "user/" + username;
+            this.organization = organization;
         }
 
     }

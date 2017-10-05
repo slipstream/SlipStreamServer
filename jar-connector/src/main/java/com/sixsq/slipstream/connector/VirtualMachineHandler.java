@@ -160,22 +160,33 @@ public class VirtualMachineHandler {
         return resource;
     }
 
+    private static Object defaultIfNull(Object value, Object defaultValue) {
+        return (value != null) ? value : defaultValue;
+    }
+
     private static ServiceOfferRef findServiceOffer(Vm vm) {
-        JsonObject response = ServiceOffersUtil.getServiceOffer(vm.getCloud(), vm.getCpu(), vm.getRam(),
-                vm.getDisk(), vm.getInstanceType());
+        String cloud = vm.getCloud();
+        Integer cpu = vm.getCpu();
+        Float ram = vm.getRam();
+        Float disk = vm.getDisk();
+        String instanceType = vm.getInstanceType();
+
+        JsonObject response = ServiceOffersUtil.getServiceOffer(cloud, cpu, ram, disk, instanceType);
 
         JsonArray serviceOffers = response.getAsJsonArray("serviceOffers");
-        if (serviceOffers.size() == 0) {
-            return null;
+        JsonObject serviceOffer = null;
+        if (serviceOffers != null && serviceOffers.size() > 0) {
+            serviceOffer = (JsonObject) serviceOffers.get(0);
         }
 
-        JsonObject serviceOffer = (JsonObject) serviceOffers.get(0);
+        String serviceOfferId = getServiceOfferAttributeAsStringOrNull(serviceOffer, "id");
 
-        return new ServiceOfferRef(getServiceOfferAttributeAsStringOrNull(serviceOffer, "id"),
-                getServiceOfferAttributeAsIntegerOrNull(serviceOffer, cpuAttributeName),
-                getServiceOfferAttributeAsFloatOrNull(serviceOffer, ramAttributeName),
-                getServiceOfferAttributeAsFloatOrNull(serviceOffer, diskAttributeName),
-                getServiceOfferAttributeAsStringOrNull(serviceOffer, instanceTypeAttributeName),
+        return new ServiceOfferRef(
+                (serviceOfferId == null) ? "service-offer/unknown" : serviceOfferId,
+                (cpu == null) ? getServiceOfferAttributeAsIntegerOrNull(serviceOffer, cpuAttributeName) : cpu,
+                (ram == null) ? getServiceOfferAttributeAsFloatOrNull(serviceOffer, ramAttributeName) : ram,
+                (disk == null) ? getServiceOfferAttributeAsFloatOrNull(serviceOffer, diskAttributeName) : disk,
+                (instanceType == null) ? getServiceOfferAttributeAsStringOrNull(serviceOffer, instanceTypeAttributeName) : instanceType,
                 getServiceOfferAttributeAsStringOrNull(serviceOffer, "price:currency"),
                 getServiceOfferAttributeAsFloatOrNull(serviceOffer, "price:unitCost"),
                 getServiceOfferAttributeAsStringOrNull(serviceOffer, "price:billingPeriodCode"),
