@@ -4,6 +4,7 @@
     [sixsq.slipstream.metering.metering :as t]
     [clojure.data.json :as json]
     [clojure.java.io :as io]
+    [sixsq.slipstream.metering.utils :as utils]
     [clojure.string :as str]))
 
 
@@ -37,7 +38,7 @@
     (is (= 1 metering-period-minutes)))
 
   (is (= ["http://elasticsearch:1234"] (:hosts (t/process-options {:es-host "elasticsearch"
-                                                                 :es-port 1234}))))
+                                                                   :es-port 1234}))))
   (is (= 2 (:metering-period-minutes (t/process-options {:metering-period-minutes 2}))))
   (is (= "alpha/vms/_search" (:resource-search-url (t/process-options {:resources-index "alpha"
                                                                        :resources-type  "vms"}))))
@@ -54,6 +55,81 @@
     (is (= {:snapshot-time ts} (t/assoc-snapshot-time ts {})))
     (is (= {:snapshot-time ts} (t/assoc-snapshot-time ts {:snapshot-time "BAD!"})))))
 
+
+
+(deftest check-assoc-price
+  (let [timestamp "1964-08-25T10:00:00.0Z"
+        base-vm {:id          (str "metering/" (utils/random-uuid))
+                 :resourceURI "http://sixsq.com/slipstream/1/VirtualMachine"
+                 :created     timestamp
+                 :updated     timestamp
+
+                 :name        "short name"
+                 :description "short description",
+                 :properties  {:a "one",
+                               :b "two"}
+
+                 :instanceID  "aaa-bbb-111"
+                 :connector   {:href "connector/0123-4567-8912"}
+                 :state       "Running"
+                 :ip          "127.0.0.1"
+
+
+                 :credentials [{:href  "credential/0123-4567-8912",
+                                :roles ["realm:cern", "realm:my-accounting-group"]
+                                :users ["long-user-id-1", "long-user-id-2"]}]
+
+
+                 :deployment  {:href "run/aaa-bbb-ccc",
+                               :user {:href "user/test"}}
+
+                 }
+
+        so-no-price {:href                  "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
+                     :resource:vcpu         1
+                     :resource:ram          4096
+                     :resource:disk         10
+                     :resource:instanceType "Large"}
+        so-minute {
+                   :price:currency          "EUR"
+                   :resource:vcpu           8
+                   :price:unitCost          0.4686389
+                   :price:billingPeriodCode "MIN"
+                   :price:freeUnits         0.0
+                   :price:unitCode          "C62"
+                   :resource:instanceType   "s1.2xlarge"
+                   :resource:ram            32768.0
+                   :resource:disk           0.0
+                   :href                    " service-offer/a4953f05-affe-46d0-a5ac-a4c8f1af810b "
+                   }
+        so-hour {
+                 :price:currency          "EUR"
+                 :resource:vcpu           2
+                 :price:unitCost          0.09122021
+                 :price:billingPeriodCode "HUR"
+                 :price:freeUnits         0.0
+                 :price:unitCode          "C62"
+                 :resource:instanceType   "t2.large"
+                 :resource:ram            8192.0
+                 :resource:disk           10.0
+                 :href                    "service-offer/cc87133e-343b-40f1-8094-46f80a1b3042"
+                 }
+        so-unknown {
+                    :href          "service-offer/unknown"
+                    :resource:vcpu 1
+                    :resource:ram  512.0
+                    :resource:disk 10.0
+                    }
+
+        ]
+    (is (= {:price nil} (t/assoc-price {})))
+    (is (= nil (:price (t/assoc-price {::bad " BAD! "}))))
+    (is (= nil (:price (t/assoc-price {:serviceOffer " BAD! "}))))
+    (is (= nil (:price (t/assoc-price base-vm))))
+    (is (= nil (:price (t/assoc-price (assoc base-vm :serviceOffer so-no-price)))))
+    (is (= (:price:unitCost so-minute) (:price (t/assoc-price (assoc base-vm :serviceOffer so-minute)))))
+    (is (= (/ (:price:unitCost so-hour) 60) (:price (t/assoc-price (assoc base-vm :serviceOffer so-hour)))))
+    (is (= nil (:price (t/assoc-price (assoc base-vm :serviceOffer so-unknown)))))))
 
 (deftest check-update-id
   (let [uuid "5b24caac-e87c-4446-96bc-a20b21450a1"
@@ -102,3 +178,4 @@
   (is (= [13 {200 10, 400 3}] (t/merge-stats [13 {200 10, 400 3}])))
   (is (= [15 {200 7, 300 5, 400 3}] (t/merge-stats [5 {200 2, 400 3}]
                                                    [10 {200 5, 300 5}]))))
+

@@ -46,6 +46,12 @@
   [timestamp m]
   (assoc m :snapshot-time timestamp))
 
+(defn assoc-price
+  [m]
+  (let [so (:serviceOffer m)
+        billingPeriod (:price:billingPeriodCode so)]
+    ;;TODO quantization for hour period, i.e apply the full hour price to first minute then zero for the rest of the hour
+    (assoc m :price (if billingPeriod (/ (:price:unitCost so) ((keyword billingPeriod) {:MIN 1 :HUR 60})) nil))))
 
 (defn update-id
   [timestamp {:keys [id] :as m}]
@@ -69,6 +75,7 @@
        :hits
        (map :_source)
        (map (partial assoc-snapshot-time timestamp))
+       (map assoc-price)
        (map (partial update-id timestamp))
        (map replace-resource-uri)
        (map (fn [v] [index-action v]))))
