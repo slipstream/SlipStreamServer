@@ -49,18 +49,7 @@ public class VirtualMachine {
         public final String priceUnitCode;
 
         public ServiceOfferRef(String href) {
-            this.href = href;
-
-            this.resourceVcpu = null;
-            this.resourceRam = null;
-            this.resourceDisk = null;
-            this.resourceInstanceType = null;
-
-            this.priceCurrency = null;
-            this.priceUnitCost = null;
-            this.priceBillingPeriodCode = null;
-            this.priceFreeUnits = null;
-            this.priceUnitCode = null;
+            this(href, null, null, null, null, null, null, null, null, null);
         }
 
         public ServiceOfferRef(String href, Integer resourceVcpu, Float resourceRam, Float resourceDisk,
@@ -98,8 +87,7 @@ public class VirtualMachine {
         public final String organization;
 
         public UserRef(String username){
-            this.href = "user/" + username;
-            this.organization = null;
+            this(username, null);
         }
 
         public UserRef(String username, String organization){
