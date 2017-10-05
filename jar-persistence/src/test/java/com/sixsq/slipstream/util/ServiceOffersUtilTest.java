@@ -111,13 +111,16 @@ public class ServiceOffersUtilTest {
         try {
             obj = ServiceOffersUtil.getServiceOfferAttribute(aServiceOffer, null);
 
-            assertNull(obj);
-        } catch (ValidationException e) {
             fail();
+        } catch (ValidationException e) {
+            assertTrue(true);
         }
 
+        {
+            obj = ServiceOffersUtil.getServiceOfferAttributeOrNull(aServiceOffer, null);
 
-
+            assertNull(obj);
+        }
 
     }
 }

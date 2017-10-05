@@ -79,7 +79,7 @@ public class MeteringTest extends RunTestBase {
 	}
 
 	private static Vm createVm(String instanceid, String cloud, String state, String user, String runId) {
-		Vm vm = new Vm(instanceid, cloud, state, user, new LocalConnector().isVmUsable(state), null, null, null, null);
+		Vm vm = new Vm(instanceid, cloud, state, user, new LocalConnector().isVmUsable(state));
 		vm.setRunUuid(runId);
 		vm.setRunOwner(user);
 		return vm;

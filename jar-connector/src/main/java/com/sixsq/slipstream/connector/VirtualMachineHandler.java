@@ -1,12 +1,16 @@
 package com.sixsq.slipstream.connector;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.sixsq.slipstream.acl.ACL;
 import com.sixsq.slipstream.acl.TypePrincipal;
 import com.sixsq.slipstream.acl.TypePrincipalRight;
 import com.sixsq.slipstream.persistence.VirtualMachine;
 import com.sixsq.slipstream.persistence.VirtualMachines;
 import com.sixsq.slipstream.persistence.Vm;
+import com.sixsq.slipstream.util.ServiceOffersUtil;
 import com.sixsq.slipstream.util.SscljProxy;
+
 import org.restlet.Response;
 
 import java.io.UnsupportedEncodingException;
@@ -14,9 +18,11 @@ import java.net.URLEncoder;
 import java.util.List;
 import java.util.logging.Logger;
 
+import static com.sixsq.slipstream.util.ServiceOffersUtil.*;
 import static com.sixsq.slipstream.util.SscljProxy.BASE_RESOURCE;
 import static com.sixsq.slipstream.acl.TypePrincipal.PrincipalType.USER;
 import static com.sixsq.slipstream.acl.TypePrincipalRight.Right.VIEW;
+import static com.sixsq.slipstream.persistence.VirtualMachine.ServiceOfferRef;
 
 public class VirtualMachineHandler {
     protected static final String VIRTUAL_MACHINE_RESOURCE = BASE_RESOURCE + "virtual-machine";
@@ -134,6 +140,8 @@ public class VirtualMachineHandler {
         resource.setState(vm.getState());
         resource.setIp(vm.getIp());
 
+        resource.setServiceOffer(findServiceOffer(vm));
+
         VirtualMachine.UserRef userHref = new VirtualMachine.UserRef(vm.getUser());
         resource.addCredential(new VirtualMachine.CredentialRef(userHref.href));
 
@@ -150,6 +158,40 @@ public class VirtualMachineHandler {
         }
 
         return resource;
+    }
+
+    private static Object defaultIfNull(Object value, Object defaultValue) {
+        return (value != null) ? value : defaultValue;
+    }
+
+    private static ServiceOfferRef findServiceOffer(Vm vm) {
+        String cloud = vm.getCloud();
+        Integer cpu = vm.getCpu();
+        Float ram = vm.getRam();
+        Float disk = vm.getDisk();
+        String instanceType = vm.getInstanceType();
+
+        JsonObject response = ServiceOffersUtil.getServiceOffer(cloud, cpu, ram, disk, instanceType);
+
+        JsonArray serviceOffers = response.getAsJsonArray("serviceOffers");
+        JsonObject serviceOffer = null;
+        if (serviceOffers != null && serviceOffers.size() > 0) {
+            serviceOffer = (JsonObject) serviceOffers.get(0);
+        }
+
+        String serviceOfferId = getServiceOfferAttributeAsStringOrNull(serviceOffer, "id");
+
+        return new ServiceOfferRef(
+                (serviceOfferId == null) ? "service-offer/unknown" : serviceOfferId,
+                (cpu == null) ? getServiceOfferAttributeAsIntegerOrNull(serviceOffer, cpuAttributeName) : cpu,
+                (ram == null) ? getServiceOfferAttributeAsFloatOrNull(serviceOffer, ramAttributeName) : ram,
+                (disk == null) ? getServiceOfferAttributeAsFloatOrNull(serviceOffer, diskAttributeName) : disk,
+                (instanceType == null) ? getServiceOfferAttributeAsStringOrNull(serviceOffer, instanceTypeAttributeName) : instanceType,
+                getServiceOfferAttributeAsStringOrNull(serviceOffer, "price:currency"),
+                getServiceOfferAttributeAsFloatOrNull(serviceOffer, "price:unitCost"),
+                getServiceOfferAttributeAsStringOrNull(serviceOffer, "price:billingPeriodCode"),
+                getServiceOfferAttributeAsFloatOrNull(serviceOffer, "price:freeUnits"),
+                getServiceOfferAttributeAsStringOrNull(serviceOffer, "price:unitCode"));
     }
 
 }
