@@ -63,28 +63,19 @@
                  :resourceURI "http://sixsq.com/slipstream/1/VirtualMachine"
                  :created     timestamp
                  :updated     timestamp
-
                  :name        "short name"
                  :description "short description",
                  :properties  {:a "one",
                                :b "two"}
-
                  :instanceID  "aaa-bbb-111"
                  :connector   {:href "connector/0123-4567-8912"}
                  :state       "Running"
                  :ip          "127.0.0.1"
-
-
                  :credentials [{:href  "credential/0123-4567-8912",
                                 :roles ["realm:cern", "realm:my-accounting-group"]
                                 :users ["long-user-id-1", "long-user-id-2"]}]
-
-
                  :deployment  {:href "run/aaa-bbb-ccc",
-                               :user {:href "user/test"}}
-
-                 }
-
+                               :user {:href "user/test"}}}
         so-no-price {:href                  "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
                      :resource:vcpu         1
                      :resource:ram          4096
@@ -118,10 +109,7 @@
                     :href          "service-offer/unknown"
                     :resource:vcpu 1
                     :resource:ram  512.0
-                    :resource:disk 10.0
-                    }
-
-        ]
+                    :resource:disk 10.0}]
     (is (= {:price nil} (t/assoc-price {})))
     (is (= nil (:price (t/assoc-price {::bad " BAD! "}))))
     (is (= nil (:price (t/assoc-price {:serviceOffer " BAD! "}))))
@@ -178,4 +166,3 @@
   (is (= [13 {200 10, 400 3}] (t/merge-stats [13 {200 10, 400 3}])))
   (is (= [15 {200 7, 300 5, 400 3}] (t/merge-stats [5 {200 2, 400 3}]
                                                    [10 {200 5, 300 5}]))))
-
