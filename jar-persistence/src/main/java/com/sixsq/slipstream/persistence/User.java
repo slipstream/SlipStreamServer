@@ -56,6 +56,7 @@ import java.util.regex.Pattern;
 public class User extends Parameterized<User, UserParameter> {
 
 	public static final String REQUEST_KEY = "authenticated_user";
+	public static final String REQUEST_ROLES_KEY = "roles";
 
 	public static final String RESOURCE_URL_PREFIX = "user/";
 

@@ -35,6 +35,7 @@ import org.junit.Test;
 
 import java.util.*;
 
+import static com.sixsq.slipstream.util.SscljProxy.parseJson;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 
@@ -81,7 +82,7 @@ public class RunFactoryTest extends RunTest {
 			fail();
 		}
 
-		serviceOffer = ServiceOffersUtil.parseJson(serviceOfferJson);
+		serviceOffer = parseJson(serviceOfferJson);
 	}
 
 	private static void create2ElementCircularDependentImages()

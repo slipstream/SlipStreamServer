@@ -8,6 +8,7 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import static com.sixsq.slipstream.util.SscljProxy.parseJson;
 import static org.junit.Assert.*;
 
 public class ServiceOffersUtilTest {
@@ -36,18 +37,18 @@ public class ServiceOffersUtilTest {
 
     @Test
     public void parseNull() {
-        JsonObject obj = ServiceOffersUtil.parseJson(null);
+        JsonObject obj = parseJson(null);
     }
 
     @Test(expected = IllegalStateException.class)
     public void parseEmptyString() {
-        JsonObject obj = ServiceOffersUtil.parseJson("");
+        JsonObject obj = parseJson("");
     }
 
 
     @Test
     public void parseEmptyJson() {
-        JsonObject obj = ServiceOffersUtil.parseJson(EMPTY_JSON);
+        JsonObject obj = parseJson(EMPTY_JSON);
         assertNotNull(obj);
         assertTrue(obj.toString().equalsIgnoreCase(EMPTY_JSON));
     }

@@ -148,7 +148,7 @@ public class RunNodeResource extends RunBaseResource {
 
 			if (Configuration.isQuotaEnabled()) {
 				User user = User.loadByName(run.getUser());
-				Quota.validate(user, run.getCloudServiceUsage(), Vm.usage(user.getName()));
+				Quota.validate(user, run, Vm.usage(user.getName()));
 			}
 
 			transaction.commit();
