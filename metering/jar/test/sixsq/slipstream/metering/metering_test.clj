@@ -105,18 +105,31 @@
                  :resource:disk           10.0
                  :href                    "service-offer/cc87133e-343b-40f1-8094-46f80a1b3042"
                  }
+        so-unknown-period {
+                           :price:currency          "EUR"
+                           :resource:vcpu           2
+                           :price:unitCost          0.09122021
+                           :price:billingPeriodCode "XXX"
+                           :price:freeUnits         0.0
+                           :price:unitCode          "C62"
+                           :resource:instanceType   "t2.large"
+                           :resource:ram            8192.0
+                           :resource:disk           10.0
+                           :href                    "service-offer/cc87133e-343b-40f1-8094-46f80a1b3042"
+                           }
         so-unknown {
                     :href          "service-offer/unknown"
                     :resource:vcpu 1
                     :resource:ram  512.0
                     :resource:disk 10.0}]
-    (is (= {:price nil} (t/assoc-price {})))
+    (is (= {} (t/assoc-price {})))
     (is (= nil (:price (t/assoc-price {::bad " BAD! "}))))
     (is (= nil (:price (t/assoc-price {:serviceOffer " BAD! "}))))
     (is (= nil (:price (t/assoc-price base-vm))))
     (is (= nil (:price (t/assoc-price (assoc base-vm :serviceOffer so-no-price)))))
     (is (= (:price:unitCost so-minute) (:price (t/assoc-price (assoc base-vm :serviceOffer so-minute)))))
     (is (= (/ (:price:unitCost so-hour) 60) (:price (t/assoc-price (assoc base-vm :serviceOffer so-hour)))))
+    (is (= nil (:price (t/assoc-price (assoc base-vm :serviceOffer so-unknown-period)))))
     (is (= nil (:price (t/assoc-price (assoc base-vm :serviceOffer so-unknown)))))))
 
 (deftest check-update-id

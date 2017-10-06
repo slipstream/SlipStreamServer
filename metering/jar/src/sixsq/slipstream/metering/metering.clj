@@ -11,6 +11,8 @@
 
 (def ^:const metering-resource-uri "http://sixsq.com/slipstream/1/Metering")
 
+(def ^:const price-divisor {"MIN" 1, "HUR" 60})
+
 (defn es-hosts
   [host port]
   [(format "http://%s:%s" host port)])
@@ -46,12 +48,15 @@
   [timestamp m]
   (assoc m :snapshot-time timestamp))
 
+;; TODO: quantization for hour period, i.e apply the full hour price to first minute then zero for the rest of the hour
 (defn assoc-price
-  [m]
-  (let [so (:serviceOffer m)
-        billingPeriod (:price:billingPeriodCode so)]
-    ;;TODO quantization for hour period, i.e apply the full hour price to first minute then zero for the rest of the hour
-    (assoc m :price (if billingPeriod (/ (:price:unitCost so) ((keyword billingPeriod) {:MIN 1 :HUR 60})) nil))))
+  [{:keys [serviceOffer] :as m}]
+  (let [price-map (some->> serviceOffer
+                           :price:billingPeriodCode
+                           (get price-divisor)
+                           (/ (:price:unitCost serviceOffer))
+                           (assoc {} :price))]
+    (merge m price-map)))
 
 (defn update-id
   [timestamp {:keys [id] :as m}]
