@@ -85,9 +85,9 @@
                    :price:currency          "EUR"
                    :resource:vcpu           8
                    :price:unitCost          0.4686389
+                   :price:unitCode          "MIN"
                    :price:billingPeriodCode "MIN"
                    :price:freeUnits         0.0
-                   :price:unitCode          "C62"
                    :resource:instanceType   "s1.2xlarge"
                    :resource:ram            32768.0
                    :resource:disk           0.0
@@ -97,9 +97,9 @@
                  :price:currency          "EUR"
                  :resource:vcpu           2
                  :price:unitCost          0.09122021
+                 :price:unitCode          "HUR"
                  :price:billingPeriodCode "HUR"
                  :price:freeUnits         0.0
-                 :price:unitCode          "C62"
                  :resource:instanceType   "t2.large"
                  :resource:ram            8192.0
                  :resource:disk           10.0
@@ -109,9 +109,9 @@
                            :price:currency          "EUR"
                            :resource:vcpu           2
                            :price:unitCost          0.09122021
+                           :price:unitCode          "XXX"
                            :price:billingPeriodCode "XXX"
                            :price:freeUnits         0.0
-                           :price:unitCode          "C62"
                            :resource:instanceType   "t2.large"
                            :resource:ram            8192.0
                            :resource:disk           10.0

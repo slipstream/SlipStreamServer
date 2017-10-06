@@ -11,9 +11,9 @@
 
 (def ^:const metering-resource-uri "http://sixsq.com/slipstream/1/Metering")
 
-;;https://github.com/SixSq/SlipStreamPricing/blob/master/Schema.md
-;;per Year = ANN, per Month = MON, per Week = WEE, per Day = DAY, per Hour = HUR, per Minute = MIN, per Second = SEC.
-(def ^:const price-divisor {"SEC" (/ 1 60), "MIN" 1, "HUR" 60, "DAY" (* 60 24), "WEE" (* 60 24 7)}
+;; https://github.com/SixSq/SlipStreamPricing/blob/master/Schema.md
+;; per Year = ANN, per Month = MON, per Week = WEE, per Day = DAY, per Hour = HUR, per Minute = MIN, per Second = SEC.
+(def ^:const price-divisor {"SEC" (/ 1. 60), "MIN" 1, "HUR" 60, "DAY" (* 60 24), "WEE" (* 60 24 7)})
 
 (defn es-hosts
   [host port]
