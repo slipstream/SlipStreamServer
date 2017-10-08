@@ -38,6 +38,7 @@ import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.statemachine.StateMachine;
 import com.sixsq.slipstream.statemachine.States;
+import com.sixsq.slipstream.util.RequestUtil;
 import org.apache.commons.lang.StringUtils;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
@@ -148,7 +149,7 @@ public class RunNodeResource extends RunBaseResource {
 
 			if (Configuration.isQuotaEnabled()) {
 				User user = User.loadByName(run.getUser());
-				Quota.validate(user, run, Vm.usage(user.getName()));
+				Quota.validate(user, run, Vm.usage(user.getName()), RequestUtil.getRolesFromRequest(getRequest()));
 			}
 
 			transaction.commit();

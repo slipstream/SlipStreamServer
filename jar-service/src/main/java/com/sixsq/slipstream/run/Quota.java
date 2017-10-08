@@ -95,7 +95,7 @@ public class Quota {
 		//Set<String> serviceOffersIds = new HashSet<>();
 		Map<String, JsonObject> serviceOffersById = new HashMap<>();
 		Map<String, String> serviceOffersIdsByNode = new HashMap<>();
-		//Map<String, Integer> multiplicityByNode = new HashMap<>();
+		Map<String, Integer> multiplicityByNode = new HashMap<>();
 
 		switch (module.getCategory() ) {
 			case Deployment:
@@ -112,7 +112,7 @@ public class Quota {
 
 					key = RuntimeParameter.constructParamName(nodeName, RuntimeParameter.MULTIPLICITY_PARAMETER_NAME);
 					Integer multiplicity = Integer.valueOf(run.getRuntimeParameterValueOrDefaultIgnoreAbort(key, "0"));
-					//multiplicityByNode.put(nodeName, multiplicity);
+					multiplicityByNode.put(nodeName, multiplicity);
 					nbVms += multiplicity;
 				}
 
@@ -126,7 +126,7 @@ public class Quota {
 					//serviceOffersIds.add(serviceOfferId);
 					serviceOffersIdsByNode.put(Run.MACHINE_NAME, serviceOfferId);
 				}
-				//multiplicityByNode.put(Run.MACHINE_NAME, 1);
+				multiplicityByNode.put(Run.MACHINE_NAME, 1);
 				nbVms ++;
 				break;
 		}
@@ -140,19 +140,20 @@ public class Quota {
 			}
 		}
 
-		for (Map.Entry<String, String> entry: serviceOffersIdsByNode.entrySet()) {
+		for (Map.Entry<String, Integer> entry: multiplicityByNode.entrySet()) {
 			String nodename = entry.getKey();
-			String serviceOfferId = entry.getValue();
+			Integer multiplicity = entry.getValue();
+			String serviceOfferId = serviceOffersIdsByNode.get(nodename);
 			JsonObject serviceOffer = serviceOffersById.get(serviceOfferId);
 
 			Integer cpu = getServiceOfferAttributeAsIntegerOrNull(serviceOffer, cpuAttributeName);
-			if (cpu != null) nbCpu += cpu;
+			if (cpu != null) nbCpu += cpu * multiplicity;
 
 			Integer ram = getServiceOfferAttributeAsIntegerOrNull(serviceOffer, ramAttributeName);
-			if (ram != null) nbRam += ram;
+			if (ram != null) nbRam += ram * multiplicity;
 
 			Integer disk = getServiceOfferAttributeAsIntegerOrNull(serviceOffer, diskAttributeName);
-			if (disk != null) nbDisk += disk;
+			if (disk != null) nbDisk += disk * multiplicity;
 		}
 
 
@@ -169,30 +170,36 @@ public class Quota {
 			} else {
 				for (int i = 0; i < quotas.size(); i++) {
 					JsonObject quota = (JsonObject) quotas.get(i);
-					String resourceCollect = quota.get("id").getAsString() + "/collect";
-					JsonObject quotaCollect = parseJson(SscljProxy.post(resourceCollect, nameRoles).getEntityAsText());
+					String resourceCollect = SscljProxy.BASE_RESOURCE + quota.get("id").getAsString() + "/collect";
+					Response collectResponse = SscljProxy.post(resourceCollect, nameRoles);
+					JsonObject quotaCollect = parseJson(collectResponse.getEntityAsText());
+					Integer collectStatusCode = collectResponse.getStatus().getCode();
 
-					String aggregation = quotaCollect.get("aggregation").getAsString();
-					Integer limit = quotaCollect.get("limit").getAsInt();
-					Integer currentAll = quotaCollect.get("currentAll").getAsInt();
-					Integer quotaLeft = limit - currentAll;
-					Integer requested = 0;
+					if (collectStatusCode < 200 || collectStatusCode >= 300) {
+						logger.warning("Failed to compute quotas: " + collectResponse.getEntityAsText());
+					} else {
+						String aggregation = quotaCollect.get("aggregation").getAsString();
+						Integer limit = quotaCollect.get("limit").getAsInt();
+						Integer currentAll = quotaCollect.get("currentAll").getAsInt();
+						Integer quotaLeft = limit - currentAll;
+						Integer requested = 0;
 
-					if ("count:id".equals(aggregation)) {
-						requested = nbVms;
-					} else if ("sum:serviceOffer/resource:vcpu".equals(aggregation)) {
-						requested = nbCpu;
-					} else if ("sum:serviceOffer/resource:ram".equals(aggregation)) {
-						requested = nbRam;
-					} else if ("sum:serviceOffer/resource:disk".equals(aggregation)) {
-						requested = nbDisk;
-					}
+						if ("count:id".equals(aggregation)) {
+							requested = nbVms;
+						} else if ("sum:serviceOffer/resource:vcpu".equals(aggregation)) {
+							requested = nbCpu;
+						} else if ("sum:serviceOffer/resource:ram".equals(aggregation)) {
+							requested = nbRam;
+						} else if ("sum:serviceOffer/resource:disk".equals(aggregation)) {
+							requested = nbDisk;
+						}
 
-					if ((quotaLeft - requested) < 0) {
-						String name = quotaCollect.get("name").getAsString();
-						String msg = String.format("Quota '%s' exceeded (quota=%d, current=%d, requested=%d)",
-								name, limit, currentAll, requested);
-						throw new QuotaException(msg);
+						if ((quotaLeft - requested) < 0) {
+							String name = quotaCollect.get("name").getAsString();
+							String msg = String.format("Quota '%s' exceeded (quota=%d, current=%d, requested=%d)",
+									name, limit, currentAll, requested);
+							throw new QuotaException(msg);
+						}
 					}
 				}
 			}

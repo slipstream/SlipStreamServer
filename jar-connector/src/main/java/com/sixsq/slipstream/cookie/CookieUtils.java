@@ -65,7 +65,7 @@ public class CookieUtils {
 	private static final String COOKIE_IDTYPE = "com.sixsq.idtype";
 	private static final String COOKIE_IDENTIFIER = "com.sixsq.identifier";
 	public static final String COOKIE_USERNAME = "username";
-	public static final String COOKIE_ROLES = "com.sixsq.roles";
+	public static final String COOKIE_ROLES = "roles";
 	private static final String COOKIE_SIGNATURE = "com.sixsq.signature";
 	private static final String COOKIE_DEFAULT_IDTYPE = "local";
 
