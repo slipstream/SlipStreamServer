@@ -56,7 +56,7 @@ public class Quota {
 			throws ValidationException, QuotaException {
 		Map<String, Integer> request = run.getCloudServiceUsage();
 		validate_old(user, request, usage);
-		validate_new(user, run);
+		validate_new(user, roles, run);
 	}
 
 	private static void validate_old(User user, Map<String, Integer> request, Map<String, CloudUsage> usage)
@@ -81,7 +81,7 @@ public class Quota {
 		}
 	}
 
-	private static void validate_new(User user, Run run) throws QuotaException {
+	private static void validate_new(User user,  String roles, Run run) throws QuotaException {
 
 		int nbVms = 0;
 		int nbCpu = 0;
@@ -90,11 +90,7 @@ public class Quota {
 
 		Module module = run.getModule();
 
-		try {
-			user.setRoles("USER");
-		} catch (ValidationException ignore) {}
-
-		String nameRoles = SscljProxy.getNameRoles(user); //CookieUtils.claimsInToken()
+		String nameRoles = user.getName() + " " + roles;
 
 		//Set<String> serviceOffersIds = new HashSet<>();
 		Map<String, JsonObject> serviceOffersById = new HashMap<>();

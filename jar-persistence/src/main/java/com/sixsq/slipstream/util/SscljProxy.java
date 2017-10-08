@@ -264,21 +264,6 @@ public class SscljProxy {
         return new JsonParser().parse(json).getAsJsonObject();
     }
 
-    public static String getNameRoles(User user) {
-
-        List<String> nameRoles = new ArrayList<>();
-
-        nameRoles.add(user.getName());
-        if (user.isSuper()) {
-            nameRoles.add("ADMIN");
-        }
-        if (user.getRoles() != null) {
-            nameRoles.addAll(Arrays.asList(StringUtils.split(user.getRoles(), ",")));
-        }
-
-        return StringUtils.join(nameRoles, " ");
-    }
-
     @SuppressWarnings("unchecked")
     public static Series<Header> getHeaders(Resource resource) {
         Series<Header> headers = (Series<Header>) resource.getRequestAttributes().get(HeaderConstants.ATTRIBUTE_HEADERS);

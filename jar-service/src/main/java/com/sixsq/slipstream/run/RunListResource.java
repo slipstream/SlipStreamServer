@@ -179,7 +179,7 @@ public class RunListResource extends BaseResource {
 			setTags(run, form);
 
 			if (Configuration.isQuotaEnabled()) {
-				Quota.validate(user, run, Vm.usage(user.getName(), );
+				Quota.validate(user, run, Vm.usage(user.getName()), RequestUtil.getRolesFromRequest(getRequest()));
 			}
 
 			createRepositoryResource(run);
