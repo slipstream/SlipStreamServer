@@ -27,6 +27,7 @@ import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.util.SscljProxy;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,6 +51,7 @@ public class CollectorTest {
 	public void setup() throws ValidationException {
 		UsageRecorder.muteForTests();
 		Event.muteForTests();
+		SscljProxy.muteForTests();
 		connector = new LocalConnector("localCloud");
 
 		user = new User(username);
