@@ -18,6 +18,19 @@
   (is (= ["a:a"] (t/extract-roles {:realm "a" :roles ["a"]})))
   (is (= ["a:a" "a:b"] (t/extract-roles {:realm "a" :roles ["a" "b"]}))))
 
+(deftest check-extract-entitlements
+  (is (= [] (t/extract-entitlements nil)))
+  (is (= [] (t/extract-entitlements {})))
+  (is (= [] (t/extract-entitlements {:realm "a"})))
+  (is (= [] (t/extract-entitlements {:entitlement []})))
+  (is (= [] (t/extract-entitlements {:realm "a" :entitlement []})))
+  (is (= ["a:a"] (t/extract-entitlements {:realm "a" :entitlement "a"})))
+  (is (= ["a:alpha"] (t/extract-entitlements {:realm "a" :entitlement "alpha"})))
+  (is (= ["a:a"] (t/extract-entitlements {:realm "a" :entitlement ["a"]})))
+  (is (= ["a:alpha"] (t/extract-entitlements {:realm "a" :entitlement ["alpha"]})))
+  (is (= ["a:a" "a:b"] (t/extract-entitlements {:realm "a" :entitlement ["a" "b"]})))
+  (is (= ["a:alpha" "a:beta"] (t/extract-entitlements {:realm "a" :entitlement ["alpha" "beta"]}))))
+
 (deftest check-group-hierarchy
   (is (= [] (t/group-hierarchy nil)))
   (is (= [] (t/group-hierarchy "")))
