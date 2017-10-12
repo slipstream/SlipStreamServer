@@ -2,9 +2,9 @@
   (:require
     [clojure.test :refer :all]
     [clojure.data.json :as json]
+    [clojure.string :as str]
     [peridot.core :refer :all]
     [ring.util.codec :as codec]
-
     [com.sixsq.slipstream.auth.cyclone :as auth-oidc]
     [com.sixsq.slipstream.auth.external :as ex]
     [com.sixsq.slipstream.auth.internal :as auth-internal]
@@ -21,8 +21,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-    [com.sixsq.slipstream.ssclj.resources.session-template :as st]
-    [clojure.string :as str]))
+    [com.sixsq.slipstream.ssclj.resources.session-template :as st]))
 
 (use-fixtures :each ltu/with-test-es-client-fixture)
 
