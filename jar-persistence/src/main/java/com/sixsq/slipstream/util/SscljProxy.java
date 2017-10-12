@@ -58,7 +58,7 @@ public class SscljProxy {
     public static final String BASE_RESOURCE = "api/";
     public static final String SERVICE_OFFER_RESOURCE = BASE_RESOURCE + "service-offer";
 
-    private static final String SSCLJ_SERVER = "http://localhost:8201";
+    private static final String SSCLJ_ENDPOINT_PROPERTY_NAME = "ssclj.endpoint";
     private static final String ISO_8601_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
     private static final Logger logger = Logger.getLogger(SscljProxy.class.getName());
@@ -117,6 +117,14 @@ public class SscljProxy {
         return request(Method.DELETE, resource, null, username, null, null, throwException);
     }
 
+    public static String getSscljEndpoint() {
+        String sscljEndpoint = System.getenv(SSCLJ_ENDPOINT_PROPERTY_NAME);
+        if (sscljEndpoint == null || sscljEndpoint.isEmpty()) {
+            sscljEndpoint = "http://localhost:8201";
+        }
+        return sscljEndpoint;
+    }
+
     private static Response request(Method method, String resource, Object obj, String username,
                                     Iterable<Parameter> queryParameters, MediaType mediaType,
                                     Boolean throwExceptions) {
@@ -129,7 +137,9 @@ public class SscljProxy {
         Representation responseEntity = null;
         StringRepresentation content = new StringRepresentation("");
 
-        logger.fine("Calling SSCLJ via HTTP with: "
+        String sscljEndpoint = getSscljEndpoint();
+
+        logger.info("Calling SSCLJ " + sscljEndpoint + " with: "
                 + "method=" + String.valueOf(method)
                 + ", resource=" + resource
                 + ", object=" + String.valueOf(obj)
@@ -146,7 +156,7 @@ public class SscljProxy {
                 content.setMediaType(mediaType);
             }
 
-            client = new ClientResource(createContext(), SSCLJ_SERVER + "/" + resource);
+            client = new ClientResource(createContext(), sscljEndpoint + "/" + resource);
             client.setRetryOnError(false);
             client.setEntityBuffering(true);
 
