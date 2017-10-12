@@ -18,15 +18,21 @@
 
 (defn extract-roles
   [{:keys [realm roles] :as claims}]
-  (if (and realm roles)
-    (vec (map (partial prefix realm) roles))
+  (if (and (not (str/blank? realm)) roles)
+    (->> roles
+         (remove str/blank?)
+         (map (partial prefix realm))
+         vec)
     []))
 
 (defn extract-entitlements
   [{:keys [realm entitlement] :as claims}]
-  (if (and realm entitlement)
+  (if (and (not (str/blank? realm)) entitlement)
     (let [entitlement (if (instance? String entitlement) [entitlement] entitlement)]
-      (vec (map (partial prefix realm) entitlement)))
+      (->> entitlement
+           (remove str/blank?)
+           (map (partial prefix realm))
+           vec))
     []))
 
 (defn group-hierarchy
