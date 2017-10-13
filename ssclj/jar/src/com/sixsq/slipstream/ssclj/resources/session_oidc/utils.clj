@@ -1,15 +1,16 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-oidc.utils
-  (:require [ring.util.codec :as codec]
-            [com.sixsq.slipstream.ssclj.resources.session :as p]
-            [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
-            [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-            [com.sixsq.slipstream.auth.utils.http :as uh]
-            [clojure.tools.logging :as log]
-            [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-            [com.sixsq.slipstream.util.response :as r]
-            [clojure.string :as str]
-            [com.sixsq.slipstream.ssclj.util.log :as logu]
-            [environ.core :as environ]))
+  (:require
+    [clojure.string :as str]
+    [clojure.tools.logging :as log]
+    [ring.util.codec :as codec]
+    [environ.core :as environ]
+    [com.sixsq.slipstream.ssclj.resources.session :as p]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.auth.utils.http :as uh]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.util.response :as r]
+    [com.sixsq.slipstream.ssclj.util.log :as logu]))
 
 (defn prefix
   [realm attr]
@@ -18,8 +19,21 @@
 
 (defn extract-roles
   [{:keys [realm roles] :as claims}]
-  (if (and realm roles)
-    (vec (map (partial prefix realm) roles))
+  (if (and (not (str/blank? realm)) roles)
+    (->> roles
+         (remove str/blank?)
+         (map (partial prefix realm))
+         vec)
+    []))
+
+(defn extract-entitlements
+  [{:keys [realm entitlement] :as claims}]
+  (if (and (not (str/blank? realm)) entitlement)
+    (let [entitlement (if (instance? String entitlement) [entitlement] entitlement)]
+      (->> entitlement
+           (remove str/blank?)
+           (map (partial prefix realm))
+           vec))
     []))
 
 (defn group-hierarchy

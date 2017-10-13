@@ -95,7 +95,8 @@
         (try
           (let [{:keys [sub email given_name family_name realm] :as claims} (sign/unsign-claims access-token public-key)
                 roles (concat (oidc-utils/extract-roles claims)
-                              (oidc-utils/extract-groups claims))]
+                              (oidc-utils/extract-groups claims)
+                              (oidc-utils/extract-entitlements claims))]
             (log/debug "oidc access token claims for" instance ":" (pr-str claims))
             (if sub
               (if-let [matched-user (ex/create-user-when-missing! {:authn-login  sub
