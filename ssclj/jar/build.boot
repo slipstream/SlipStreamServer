@@ -47,6 +47,7 @@
                    [ring/ring-core]
                    [ring/ring-json]
                    [superstring]
+                   [zookeeper-clj]
 
                    [com.sixsq.slipstream/utils]
                    [com.sixsq.slipstream/auth]
@@ -66,6 +67,7 @@
                    [org.clojure/test.check]
                    [org.slf4j/slf4j-log4j12 :scope "test"]
                    [com.cemerick/url nil :scope "test"]
+                   [org.apache.curator/curator-test :scope "test"]
 
                    ;; boot tasks
                    [boot-environ]

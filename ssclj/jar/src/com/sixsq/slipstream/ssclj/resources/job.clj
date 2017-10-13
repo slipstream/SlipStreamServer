@@ -33,6 +33,9 @@
                               :type      "ROLE"
                               :right     "VIEW"}]})
 
+(defn initialize []
+  (ju/create-job-queue))
+
 ;;
 ;; multimethods for validation and operations
 ;;
@@ -56,18 +59,20 @@
 
 (defn add-impl [{:keys [body] :as request}]
   (a/can-modify? {:acl collection-acl} request)
-  (db/add
-    resource-name
-    (-> body
-        u/strip-service-attrs
-        (crud/new-identifier resource-name)
-        (assoc :resourceURI resource-uri)
-        (assoc :state "QUEUED")
-        (ju/status-changed?)
-        u/update-timestamps
-        (crud/add-acl request)
-        crud/validate)
-    {}))
+  (let [{id :id :as new-job} (-> body
+                                 u/strip-service-attrs
+                                 (crud/new-identifier resource-name)
+                                 (assoc :resourceURI resource-uri)
+                                 (assoc :state "QUEUED")
+                                 (ju/status-changed?)
+                                 u/update-timestamps
+                                 (crud/add-acl request)
+                                 crud/validate)]
+    (ju/add-job-to-queue id)
+    (db/add
+      resource-name
+      new-job
+      {})))
 
 (defmethod crud/add resource-name
   [request]

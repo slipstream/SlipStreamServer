@@ -9,9 +9,14 @@
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]))
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
+    [com.sixsq.slipstream.ssclj.resources.job.utils :as ju]
+    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]))
 
 (use-fixtures :each t/with-test-es-client-fixture)
+
+(use-fixtures :once t/setup-embedded-zk)
 
 (def base-uri (str p/service-context resource-url))
 
@@ -37,6 +42,10 @@
                          (header authn-info-header "jane USER ANON"))
         session-anon (-> (session (ring-app))
                          (content-type "application/json"))]
+
+    (initialize)
+
+    (is (uzk/exists ju/locking-queue-path))
 
     ;; anonymous create should fail
     (-> session-anon
@@ -70,6 +79,8 @@
                   (get-in [:response :body]))]
 
       (is (= "QUEUED" (:state job)))
+
+      (is (= (uzk/get-data "/job/entries/entry-100-0000000000") uri))
 
       (-> session-user
           (request "/api/job")

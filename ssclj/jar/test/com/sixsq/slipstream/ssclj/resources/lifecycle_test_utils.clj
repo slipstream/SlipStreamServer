@@ -19,7 +19,11 @@
     [com.sixsq.slipstream.ssclj.middleware.exception-handler :refer [wrap-exceptions]]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [wrap-authn-info-header]]
     [com.sixsq.slipstream.db.es.binding :as esb]
-    [com.sixsq.slipstream.db.es.utils :as esu]))
+    [com.sixsq.slipstream.db.es.utils :as esu]
+    [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
+    [zookeeper :as zk]
+    [zookeeper.server :as zks])
+  (:import [org.apache.curator.test TestingServer]))
 
 (defn serialize-cookie-value
   "replaces the map cookie value with a serialized string"
@@ -212,3 +216,15 @@
   [f]
   (with-test-es-client
     (f)))
+
+
+(defn setup-embedded-zk [f]
+  (let [port 21810
+        server (TestingServer. port)]
+    (uzk/set-client! (zk/connect (str "127.0.0.1:" port)))
+    (try
+      (f)
+      (uzk/close-client) ; in case server already closed ignore exceptions
+      (catch Exception e)
+      (finally
+        (.close server)))))
