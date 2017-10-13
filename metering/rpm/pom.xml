@@ -11,7 +11,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>metering-pom</artifactId>
-    <version>3.38</version>
+    <version>3.39-SNAPSHOT</version>
   </parent>
 
   <properties>
