@@ -2,9 +2,9 @@
   (:require
     [clojure.test :refer :all]
     [clojure.data.json :as json]
+    [clojure.string :as str]
     [peridot.core :refer :all]
     [ring.util.codec :as codec]
-
     [com.sixsq.slipstream.auth.cyclone :as auth-oidc]
     [com.sixsq.slipstream.auth.external :as ex]
     [com.sixsq.slipstream.auth.internal :as auth-internal]
@@ -147,8 +147,11 @@
                          (ltu/location))
 
             public-key (:auth-public-key environ.core/env)
-            good-claims {:sub   "OIDC_USER"
-                         :email "user@oidc.example.com"}
+            good-claims {:sub         "OIDC_USER"
+                         :email       "user@oidc.example.com"
+                         :entitlement ["alpha-entitlement"]
+                         :groups      ["/organization/group-1"]
+                         :realm       "my-realm"}
             good-token (sign/sign-claims good-claims)
             bad-claims {}
             bad-token (sign/sign-claims bad-claims)]
@@ -394,7 +397,10 @@
                     claims (if token (sign/unsign-claims token) {})]
                 (is (= location id))
                 (is (= "OIDC_USER" (:username claims)))
-                (is (re-matches (re-pattern (str ".*" id ".*")) (or (:roles claims) ""))))
+                (let [claim-roles (set (str/split (or (:roles claims) "") #"\s+"))]
+                  (is (= claim-roles #{id "USER" "ANON" "alpha"
+                                       "my-realm:/organization" "my-realm:/organization/group-1"
+                                       "my-realm:alpha-entitlement"}))))
 
               (let [ring-info (-> session-anon
                                   (request (str validate-url2 "?code=GOOD")
@@ -407,7 +413,10 @@
                     claims (if token (sign/unsign-claims token) {})]
                 (is (= location redirect-uri))
                 (is (= "OIDC_USER" (:username claims)))
-                (is (re-matches (re-pattern (str ".*" id2 ".*")) (or (:roles claims) ""))))
+                (let [claim-roles (set (str/split (or (:roles claims) "") #"\s+"))]
+                  (is (= claim-roles #{id2 "USER" "ANON" "alpha"
+                                       "my-realm:/organization" "my-realm:/organization/group-1"
+                                       "my-realm:alpha-entitlement"}))))
 
               (let [ring-info (-> session-anon
                                   (request (str validate-url3 "?code=GOOD")
@@ -420,7 +429,10 @@
                     claims (if token (sign/unsign-claims token) {})]
                 (is (= location redirect-uri))
                 (is (= "OIDC_USER" (:username claims)))
-                (is (re-matches (re-pattern (str ".*" id3 ".*")) (or (:roles claims) ""))))))
+                (let [claim-roles (set (str/split (or (:roles claims) "") #"\s+"))]
+                  (is (= claim-roles #{id3 "USER" "ANON" "alpha"
+                                       "my-realm:/organization" "my-realm:/organization/group-1"
+                                       "my-realm:alpha-entitlement"}))))))
 
           ;; check that the session has been updated
           (let [ring-info (-> session-user
