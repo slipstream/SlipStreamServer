@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import com.sixsq.slipstream.util.SscljProxy;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -59,6 +60,7 @@ public class VmRuntimeParameterMappingTest {
 
 	@Before
 	public void setup() {
+		SscljProxy.muteForTests();
 	}
 
 	@After

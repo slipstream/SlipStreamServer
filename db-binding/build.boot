@@ -1,4 +1,4 @@
-(def +version+ "3.38-SNAPSHOT")
+(def +version+ "3.39-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamDbBinding-jar
@@ -7,7 +7,7 @@
   :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
   :edition "community"
 
-  :dependencies '[[org.clojure/clojure "1.9.0-alpha17"]
+  :dependencies '[[org.clojure/clojure "1.9.0-beta2"]
                   [sixsq/build-utils "0.1.4" :scope "test"]])
 
 (require '[sixsq.build-fns :refer [merge-defaults
