@@ -1,11 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.job.utils
   (:require
-    [com.sixsq.slipstream.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.middleware.cimi-params.utils :as cimi-params-utils]
-    [com.sixsq.slipstream.ssclj.filter.parser :as parser]
+    [clj-time.core :as time]
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [clj-time.core :as time]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]))
 
 (defn stop [{state :state id :id :as job}]
@@ -16,9 +13,8 @@
     job))
 
 (defn status-changed? [{status :statusMessage :as job}]
-  (if status
-    (assoc job :timeOfStatusChange (u/unparse-timestamp-datetime (time/now)))
-    job))
+  (cond-> job
+          status (assoc :timeOfStatusChange (u/unparse-timestamp-datetime (time/now)))))
 
 (def kazoo-queue-prefix "entry-")
 (def kazoo-queue-priority "100")
@@ -31,5 +27,5 @@
               :data (uzk/string-to-byte job-id) :sequential? true :persistent? true))
 
 (defn create-job-queue []
-  (when (not (uzk/exists locking-queue-path))
+  (when-not (uzk/exists locking-queue-path)
     (uzk/create-all locking-queue-path :persistent? true)))

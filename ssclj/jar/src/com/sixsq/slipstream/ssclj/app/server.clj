@@ -89,4 +89,12 @@
     (and stop-fn (stop-fn))
     (log/info "shutdown application container")
     (catch Exception e
-      (log/warn "application container shutdown failed:" (.getMessage e)))))
+      (log/warn "application container shutdown failed:" (.getMessage e))))
+  (try
+    (zku/close-client!)
+    (catch Exception e
+      (log/warn "zookeeper client close failed:" (.getMessage e))))
+  (try
+    (esb/close-client!)
+    (catch Exception e
+      (log/warn "elasticsearch client close failed:" (.getMessage e)))))

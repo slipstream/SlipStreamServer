@@ -219,12 +219,12 @@
 
 
 (defn setup-embedded-zk [f]
-  (let [port 21810
-        server (TestingServer. port)]
-    (uzk/set-client! (zk/connect (str "127.0.0.1:" port)))
-    (try
-      (f)
-      (uzk/close-client) ; in case server already closed ignore exceptions
-      (catch Exception e)
-      (finally
-        (.close server)))))
+  (let [port 21810]
+    (with-open [server (TestingServer. port)]
+      (uzk/set-client! (zk/connect (str "127.0.0.1:" port)))
+      (try
+        (f)
+        (finally
+          (try
+            (uzk/close-client!)
+            (catch Exception _)))))))                       ; ignore exceptions when closing client

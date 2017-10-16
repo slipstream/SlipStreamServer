@@ -69,10 +69,7 @@
                                  (crud/add-acl request)
                                  crud/validate)]
     (ju/add-job-to-queue id)
-    (db/add
-      resource-name
-      new-job
-      {})))
+    (db/add resource-name new-job {})))
 
 (defmethod crud/add resource-name
   [request]

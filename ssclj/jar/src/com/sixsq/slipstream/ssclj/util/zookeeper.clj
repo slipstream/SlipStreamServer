@@ -15,12 +15,13 @@
   Parameters (host and port) are taken from environment variables."
   []
   (let [zk-endpoints (or (env/env :zk-endpoints) "localhost:2181")]
-
     (log/info "creating zookeeper client:" zk-endpoints)
     (zk/connect zk-endpoints :timeout-msec 60000)))
 
-(defn close-client []
-  (zk/close *client*))
+(defn close-client! []
+  (let [client *client*]
+    (alter-var-root #'*client* (constantly nil))
+    (zk/close client)))
 
 (defn string-to-byte [value]
   (.getBytes (str value) "UTF-8"))
