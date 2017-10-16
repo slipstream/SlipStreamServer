@@ -24,6 +24,7 @@
     [com.sixsq.slipstream.ssclj.app.graphite :as graphite]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.db.es.binding :as esb]
+    [com.sixsq.slipstream.ssclj.util.zookeeper :as zku]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as resources]))
 
 (defn- set-persistence-impl
@@ -72,6 +73,8 @@
 
    (esb/set-client! (esb/create-client))
 
+   (zku/set-client! (zku/create-client))
+
    (set-persistence-impl)
    (resources/initialize)
    (let [handler (create-ring-handler)]
@@ -86,4 +89,12 @@
     (and stop-fn (stop-fn))
     (log/info "shutdown application container")
     (catch Exception e
-      (log/warn "application container shutdown failed:" (.getMessage e)))))
+      (log/warn "application container shutdown failed:" (.getMessage e))))
+  (try
+    (zku/close-client!)
+    (catch Exception e
+      (log/warn "zookeeper client close failed:" (.getMessage e))))
+  (try
+    (esb/close-client!)
+    (catch Exception e
+      (log/warn "elasticsearch client close failed:" (.getMessage e)))))

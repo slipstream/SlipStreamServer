@@ -32,6 +32,12 @@
   [client]
   (alter-var-root #'*client* (constantly client)))
 
+(defn close-client!
+  []
+  (let [client *client*]
+    (alter-var-root #'*client* (constantly client))
+    (.close client)))
+
 (defn force-admin-role-right-all
   [data]
   (update-in data [:acl :rules] #(vec (set (conj % {:type "ROLE" :principal "ADMIN" :right "ALL"})))))
