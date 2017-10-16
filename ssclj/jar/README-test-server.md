@@ -18,9 +18,9 @@ You can then call the **static** methods `start` and `stop` to start
 and stop the server, respectively. The following services will be
 running on the ports:
 
- - 12001 zookeeper
- - 12002 elasticsearch
- - 12003 ssclj
+ - 12001: zookeeper
+ - 12002: elasticsearch
+ - 12003: ssclj
 
 You can test that the SSCLJ server is responding correctly by
 requesting the cloud entry point:
