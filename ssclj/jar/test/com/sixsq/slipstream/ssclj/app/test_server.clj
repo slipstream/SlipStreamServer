@@ -82,5 +82,6 @@
     (stop-clients)))
 
 
-
-
+(defn refresh-es-indices
+  []
+  (esu/refresh-all-indices (:es-client *service-clients*)))

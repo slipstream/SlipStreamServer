@@ -1,5 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.app.SscljTestServer
-  (:gen-class))
+  (:gen-class
+    :methods [^{:static true} [start [] void]
+              ^{:static true} [stop [] void]
+              ^{:static true} [refresh [] void]
+              ]))
 
 
 (def ^:const server-ns 'com.sixsq.slipstream.ssclj.app.test-server)
@@ -18,6 +22,14 @@
   []
   (require server-ns)
   (let [stop-fn (-> server-ns
-                     find-ns
-                     (ns-resolve 'stop))]
+                    find-ns
+                    (ns-resolve 'stop))]
+    (stop-fn)))
+
+(defn -refresh
+  []
+  (require server-ns)
+  (let [stop-fn (-> server-ns
+                    find-ns
+                    (ns-resolve 'refresh-es-indices))]
     (stop-fn)))

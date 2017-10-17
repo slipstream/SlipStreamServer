@@ -10,9 +10,27 @@ the classpath so that all the resource definitions can be found and
 loaded into the test server.  The test server should not need any
 other dependencies.
 
+The following dependencies should be added to the POM file of you module.
+
+	<dependency>
+		<groupId>com.sixsq.slipstream</groupId>
+		<artifactId>SlipStreamCljResourcesTestServer-jar</artifactId>
+		<scope>test</scope>
+		<classifier>tests</classifier>
+		<version>${project.version}</version>
+	</dependency>
+
+	<dependency>
+		<groupId>org.apache.curator</groupId>
+		<artifactId>curator-test</artifactId>
+		<version>2.8.0</version>
+		<scope>test</scope>
+	</dependency>
+
+
 To start the server, import the class:
 
-    ssclj.jar.test.com.sixsq.slipstream.ssclj.app.SscljTestServer
+    com.sixsq.slipstream.ssclj.app.SscljTestServer
 
 You can then call the **static** methods `start` and `stop` to start
 and stop the server, respectively. The following services will be
@@ -29,6 +47,28 @@ requesting the cloud entry point:
 
 It should respond with the typical cloud entry point document. Check
 that all the resources have been loaded into the server.
+
+Elasticsearch by default refreshes its indices each 200ms.  To force 
+refresh of all the indices (for example from unit tests), call 
+**static** `refresh` method.  E.g.:
+
+    Vm vm = new Vm(instanceID, "cloud", "Running", "user", true);
+    // add document
+    VirtualMachineHandler.handleVM(vm);
+    SscljTestServer.refresh();
+
+    // get document and assert
+    VirtualMachine vmResource = VirtualMachineHandler.fetchVirtualMachine("cloud", instanceID);
+    Assert.assertNotEquals(null, vmResource);
+    Assert.assertEquals(instanceID, vmResource.getInstanceID());
+
+    // remove document
+    VirtualMachineHandler.removeVM(vm);
+    SscljTestServer.refresh();
+
+    // get and assert no longer exists
+    vmResource = VirtualMachineHandler.fetchVirtualMachine("cloud", instanceID);
+    Assert.assertEquals(null, vmResource);
 
 **NOTE:** The hsqldb database is **not** started.  As long as you
 avoid username/password authentication with the server, this should
