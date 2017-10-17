@@ -41,8 +41,8 @@ requesting the cloud entry point:
 It should respond with the typical cloud entry point document. Check
 that all the resources have been loaded into the server.
 
-Elasticsearch by default refreshes its indices each 200ms.  To force 
-refresh of all the indices (for example from unit tests), call 
+Elasticsearch by default refreshes its indices each 200ms.  To force
+refresh of all the indices (for example from unit tests), call the
 **static** `refresh` method.  E.g.:
 
     Vm vm = new Vm(instanceID, "cloud", "Running", "user", true);
