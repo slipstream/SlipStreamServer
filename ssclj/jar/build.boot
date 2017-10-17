@@ -241,7 +241,6 @@
            (if (= "true" (System/getenv "BOOT_PUSH"))
              (push :pom tests-artef-pom-loc)
              identity)))
-<<<<<<< HEAD
 
 (deftask mvn-build-test-server-jar
          "build project"
@@ -253,8 +252,6 @@
            (if (= "true" (System/getenv "BOOT_PUSH"))
              (push :pom test-server-pom-location)
              identity)))
-=======
->>>>>>> master
 
 (deftask server-repl
          "start dev server repl"
