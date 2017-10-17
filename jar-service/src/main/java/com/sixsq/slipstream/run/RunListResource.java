@@ -161,6 +161,7 @@ public class RunListResource extends BaseResource {
 			module.validate();
 
 			User user = getUser();
+
 			user = User.loadByName(user.getName()); // ensure user is loaded from database
 
 			RunType type = parseType(form, module);
@@ -178,7 +179,7 @@ public class RunListResource extends BaseResource {
 			setTags(run, form);
 
 			if (Configuration.isQuotaEnabled()) {
-				Quota.validate(user, run.getCloudServiceUsage(), Vm.usage(user.getName()));
+				Quota.validate(user, run, Vm.usage(user.getName()), RequestUtil.getRolesFromRequest(getRequest()));
 			}
 
 			createRepositoryResource(run);

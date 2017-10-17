@@ -87,6 +87,7 @@ public class CookieAuthenticator extends AuthenticatorBase {
 
 		setCloudServiceName(request, cookie);
 		setUserInRequest(user, request);
+		setRolesInRequest(CookieUtils.getCookieRoles(cookie), request);
 
 		if (!CookieUtils.isMachine(cookie)) {
 			setLastOnline(user);

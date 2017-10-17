@@ -32,6 +32,8 @@ import org.restlet.data.Form;
 
 import java.util.logging.Logger;
 
+import static com.sixsq.slipstream.util.SscljProxy.parseJson;
+
 public class ServiceOffersUtil {
 
     public static String cpuAttributeName = "resource:vcpu";
@@ -40,13 +42,6 @@ public class ServiceOffersUtil {
     public static String instanceTypeAttributeName = "resource:instanceType";
 
     private static java.util.logging.Logger logger = Logger.getLogger(ServiceOffersUtil.class.getName());
-
-
-    public static JsonObject parseJson(String json) {
-        if (json == null) return new JsonObject();
-
-        return new JsonParser().parse(json).getAsJsonObject();
-    }
 
     public static JsonObject getServiceOffer(String serviceOfferId) {
         return getServiceOffer(serviceOfferId, false);
@@ -104,7 +99,9 @@ public class ServiceOffersUtil {
     public static String getServiceOfferAttributeAsStringOrNull(JsonObject serviceOffer, String serviceOfferAttributeName) {
         JsonElement serviceOfferAttribute = getServiceOfferAttributeOrNull(serviceOffer, serviceOfferAttributeName);
         if (serviceOfferAttribute != null) {
-            return serviceOfferAttribute.getAsString();
+            try {
+                return serviceOfferAttribute.getAsString();
+            } catch (UnsupportedOperationException ignore) {}
         }
         return null;
     }
@@ -112,7 +109,9 @@ public class ServiceOffersUtil {
     public static Integer getServiceOfferAttributeAsIntegerOrNull(JsonObject serviceOffer, String serviceOfferAttributeName) {
         JsonElement serviceOfferAttribute = getServiceOfferAttributeOrNull(serviceOffer, serviceOfferAttributeName);
         if (serviceOfferAttribute != null) {
-            return serviceOfferAttribute.getAsInt();
+            try {
+                return serviceOfferAttribute.getAsInt();
+            } catch (UnsupportedOperationException ignore) {}
         }
         return null;
     }
@@ -120,7 +119,9 @@ public class ServiceOffersUtil {
     public static Float getServiceOfferAttributeAsFloatOrNull(JsonObject serviceOffer, String serviceOfferAttributeName) {
         JsonElement serviceOfferAttribute = getServiceOfferAttributeOrNull(serviceOffer, serviceOfferAttributeName);
         if (serviceOfferAttribute != null) {
-            return serviceOfferAttribute.getAsFloat();
+            try {
+                return serviceOfferAttribute.getAsFloat();
+            } catch (UnsupportedOperationException ignore) {}
         }
         return null;
     }

@@ -21,6 +21,8 @@ package com.sixsq.slipstream.util;
  */
 
 import com.google.gson.*;
+import com.sixsq.slipstream.persistence.User;
+import org.apache.commons.lang.StringUtils;
 import org.restlet.Context;
 import org.restlet.Response;
 import org.restlet.data.Form;
@@ -40,11 +42,8 @@ import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.logging.Logger;
-
 
 public class SscljProxy {
 
@@ -56,7 +55,9 @@ public class SscljProxy {
     }
 
     public static final String BASE_RESOURCE = "api/";
+    public static final String QUOTA_RESOURCE = BASE_RESOURCE + "quota";
     public static final String SERVICE_OFFER_RESOURCE = BASE_RESOURCE + "service-offer";
+
 
     private static final String SSCLJ_SERVER = "http://localhost:8201";
     private static final String ISO_8601_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
@@ -91,6 +92,10 @@ public class SscljProxy {
 
     public static Response post(String resource, String username, Object obj) {
         return request(Method.POST, resource, obj, username, null, null, null);
+    }
+
+    public static Response post(String resource, String username, Boolean throwException) {
+        return request(Method.POST, resource, null, username, null, null, throwException);
     }
 
     public static Response post(String resource, MediaType mediaType, Boolean throwException) {
@@ -251,6 +256,12 @@ public class SscljProxy {
                 .setPrettyPrinting()
                 .create();
         return gson.toJson(obj);
+    }
+
+    public static JsonObject parseJson(String json) {
+        if (json == null) return new JsonObject();
+
+        return new JsonParser().parse(json).getAsJsonObject();
     }
 
     @SuppressWarnings("unchecked")
