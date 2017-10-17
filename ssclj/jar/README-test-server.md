@@ -20,13 +20,6 @@ The following dependencies should be added to the POM file of you module.
 		<version>${project.version}</version>
 	</dependency>
 
-	<dependency>
-		<groupId>org.apache.curator</groupId>
-		<artifactId>curator-test</artifactId>
-		<version>2.8.0</version>
-		<scope>test</scope>
-	</dependency>
-
 
 To start the server, import the class:
 
