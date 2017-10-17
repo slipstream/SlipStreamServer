@@ -176,7 +176,11 @@
          "build jar with test runtime dependencies for connectors."
          []
          (comp
-           (pom :project tests-artef-project-name :classifier "tests")
+           (pom :project tests-artef-project-name
+                :classifier "tests"
+                :dependencies (merge-defaults
+                                ['sixsq/default-deps (get-env :version)]
+                                [['org.apache.curator/curator-test :scope "compile"]]))
            (sift
              :to-resource #{#"lifecycle_test_utils\.clj"
                             #"connector_test_utils\.clj"}
@@ -197,7 +201,11 @@
          "build jar with classes required for running test ssclj server"
          []
          (comp
-           (pom :project test-server-project-name :classifier "tests")
+           (pom :project test-server-project-name
+                :classifier "tests"
+                :dependencies (merge-defaults
+                                ['sixsq/default-deps (get-env :version)]
+                                [['org.apache.curator/curator-test :scope "compile"]]))
            (sift
              :to-resource #{#"test_server\.clj"
                             #"SscljTestServer\.clj"}
@@ -233,6 +241,7 @@
            (if (= "true" (System/getenv "BOOT_PUSH"))
              (push :pom tests-artef-pom-loc)
              identity)))
+<<<<<<< HEAD
 
 (deftask mvn-build-test-server-jar
          "build project"
@@ -244,6 +253,8 @@
            (if (= "true" (System/getenv "BOOT_PUSH"))
              (push :pom test-server-pom-location)
              identity)))
+=======
+>>>>>>> master
 
 (deftask server-repl
          "start dev server repl"
