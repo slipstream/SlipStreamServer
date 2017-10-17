@@ -59,6 +59,11 @@ public class Quota {
 		validate_new(user, roles, run);
 	}
 
+	public static void validate(User user, Run run, Map<String, CloudUsage> usage)
+			throws ValidationException, QuotaException {
+		validate(user, run, usage, "");
+	}
+
 	private static void validate_old(User user, Map<String, Integer> request, Map<String, CloudUsage> usage)
 			throws ValidationException, QuotaException {
 

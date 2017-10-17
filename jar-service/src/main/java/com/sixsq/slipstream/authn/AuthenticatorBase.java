@@ -52,6 +52,8 @@ public abstract class AuthenticatorBase extends Authenticator {
 	}
 
 	static public void setRolesInRequest(String roles, Request request) {
-		request.getAttributes().put(User.REQUEST_ROLES_KEY, roles);
+		if (roles != null) {
+			request.getAttributes().put(User.REQUEST_ROLES_KEY, roles);
+		}
 	}
 }

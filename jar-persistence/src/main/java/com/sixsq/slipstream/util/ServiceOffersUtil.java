@@ -99,7 +99,9 @@ public class ServiceOffersUtil {
     public static String getServiceOfferAttributeAsStringOrNull(JsonObject serviceOffer, String serviceOfferAttributeName) {
         JsonElement serviceOfferAttribute = getServiceOfferAttributeOrNull(serviceOffer, serviceOfferAttributeName);
         if (serviceOfferAttribute != null) {
-            return serviceOfferAttribute.getAsString();
+            try {
+                return serviceOfferAttribute.getAsString();
+            } catch (UnsupportedOperationException ignore) {}
         }
         return null;
     }
@@ -107,7 +109,9 @@ public class ServiceOffersUtil {
     public static Integer getServiceOfferAttributeAsIntegerOrNull(JsonObject serviceOffer, String serviceOfferAttributeName) {
         JsonElement serviceOfferAttribute = getServiceOfferAttributeOrNull(serviceOffer, serviceOfferAttributeName);
         if (serviceOfferAttribute != null) {
-            return serviceOfferAttribute.getAsInt();
+            try {
+                return serviceOfferAttribute.getAsInt();
+            } catch (UnsupportedOperationException ignore) {}
         }
         return null;
     }
@@ -115,7 +119,9 @@ public class ServiceOffersUtil {
     public static Float getServiceOfferAttributeAsFloatOrNull(JsonObject serviceOffer, String serviceOfferAttributeName) {
         JsonElement serviceOfferAttribute = getServiceOfferAttributeOrNull(serviceOffer, serviceOfferAttributeName);
         if (serviceOfferAttribute != null) {
-            return serviceOfferAttribute.getAsFloat();
+            try {
+                return serviceOfferAttribute.getAsFloat();
+            } catch (UnsupportedOperationException ignore) {}
         }
         return null;
     }
