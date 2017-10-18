@@ -1,8 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.job.utils
   (:require
-    [clj-time.core :as time]
     [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]))
 
 (defn stop [{state :state id :id :as job}]
@@ -11,10 +9,6 @@
       (log/warn "Stopping job : " id)
       (assoc job :state "STOPPING"))
     job))
-
-(defn status-changed? [{status :statusMessage :as job}]
-  (cond-> job
-          status (assoc :timeOfStatusChange (u/unparse-timestamp-datetime (time/now)))))
 
 (def kazoo-queue-prefix "entry-")
 (def kazoo-queue-priority "100")

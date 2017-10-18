@@ -15,7 +15,7 @@
 
 (deftest check-job
   (let [timestamp "1964-08-25T10:00:00.0Z"
-        job {:id          (str sj/resource-url "/test-quota")
+        job {:id          (str sj/resource-url "/test-job")
              :resourceURI sj/resource-uri
              :created     timestamp
              :updated     timestamp
@@ -30,6 +30,8 @@
                          valid? (assoc job :parentJob "job/id")
                          valid? (assoc job :state "RUNNING")
                          valid? (assoc job :returnCode 10000)
+                         valid? (dissoc job :targetResource)
+                         valid? (dissoc job :affectedResources)
                          invalid? (assoc job :progress 101)
                          invalid? (assoc job :state "XY")
                          invalid? (assoc job :parentJob "notjob/id")

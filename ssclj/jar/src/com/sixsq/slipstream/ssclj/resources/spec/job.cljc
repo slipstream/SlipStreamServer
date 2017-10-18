@@ -23,12 +23,12 @@
 
 (s/def :cimi/job
   (su/only-keys-maps c/common-attrs
-                     {:req-un [:cimi.job/targetResource
-                               :cimi.job/affectedResources
-                               :cimi.job/state
+                     {:req-un [:cimi.job/state
                                :cimi.job/action
                                :cimi.job/progress]
-                      :opt-un [:cimi.job/returnCode
+                      :opt-un [:cimi.job/targetResource
+                               :cimi.job/affectedResources
+                               :cimi.job/returnCode
                                :cimi.job/statusMessage
                                :cimi.job/timeOfStatusChange
                                :cimi.job/parentJob

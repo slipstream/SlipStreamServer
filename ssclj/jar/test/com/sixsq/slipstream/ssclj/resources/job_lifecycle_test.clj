@@ -24,9 +24,7 @@
   (t/make-ring-app (t/concat-routes routes/final-routes)))
 
 (def valid-job
-  {:id          (str resource-url "/test-quota")
-   :resourceURI resource-uri
-   :progress    0
+  {:resourceURI resource-uri
    :action      "add"
    :targetResource {:href "abc/def"}
    :affectedResources [{:href "abc/def"}]

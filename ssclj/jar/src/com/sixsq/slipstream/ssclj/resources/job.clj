@@ -57,17 +57,19 @@
 ;; CRUD operations
 ;;
 
-(defn add-impl [{:keys [body] :as request}]
+(defn add-impl [{{:keys [progress statusMessage] :as body} :body :as request}]
   (a/can-modify? {:acl collection-acl} request)
-  (let [{id :id :as new-job} (-> body
-                                 u/strip-service-attrs
-                                 (crud/new-identifier resource-name)
-                                 (assoc :resourceURI resource-uri)
-                                 (assoc :state "QUEUED")
-                                 (ju/status-changed?)
-                                 u/update-timestamps
-                                 (crud/add-acl request)
-                                 crud/validate)]
+  (let [{:keys [id] :as new-job} (-> body
+                                     u/strip-service-attrs
+                                     (crud/new-identifier resource-name)
+                                     (assoc :resourceURI resource-uri)
+                                     (assoc :state "QUEUED")
+                                     (cond-> statusMessage (assoc :timeOfStatusChange
+                                                                  (u/unparse-timestamp-datetime (time/now)))
+                                             (not progress) (assoc :progress 0))
+                                     u/update-timestamps
+                                     (crud/add-acl request)
+                                     crud/validate)]
     (ju/add-job-to-queue id)
     (db/add resource-name new-job {})))
 
@@ -82,12 +84,13 @@
   [request]
   (retrieve-impl request))
 
-(defn edit-impl [{{uuid :uuid} :params body :body :as request}]
+(defn edit-impl [{{uuid :uuid} :params {:keys [statusMessage] :as body} :body :as request}]
   (try
     (let [current (-> (str (u/de-camelcase resource-name) "/" uuid)
                       (db/retrieve request)
                       (a/can-modify? request)
-                      (ju/status-changed?))
+                      (cond-> statusMessage (assoc :timeOfStatusChange
+                                                   (u/unparse-timestamp-datetime (time/now)))))
           merged (merge current body)]
       (-> merged
           (u/update-timestamps)
