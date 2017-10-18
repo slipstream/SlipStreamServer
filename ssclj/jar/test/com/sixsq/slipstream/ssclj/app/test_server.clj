@@ -4,6 +4,7 @@
     [com.sixsq.slipstream.db.es.utils :as esu]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as zku]
     [com.sixsq.slipstream.ssclj.app.server :as server]
+    [metrics.core :refer [remove-all-metrics]]
     [zookeeper :as zk])
   (:import (org.apache.curator.test TestingServer)))
 
@@ -79,7 +80,8 @@
     (try
       (stop-fn)
       (catch Exception _))
-    (stop-clients)))
+    (stop-clients)
+    (remove-all-metrics)))
 
 
 (defn refresh-es-indices
