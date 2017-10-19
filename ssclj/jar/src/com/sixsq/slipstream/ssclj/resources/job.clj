@@ -91,9 +91,10 @@
                       (a/can-modify? request)
                       (cond-> statusMessage (assoc :timeOfStatusChange
                                                    (u/unparse-timestamp-datetime (time/now)))))
-          merged (merge current body)]
+          {:keys [state] :as merged} (merge current body)]
       (-> merged
           (u/update-timestamps)
+          (cond-> (#{"FAILED" "SUCCESS" "STOPPED"} state) (assoc :progress 100))
           (crud/validate)
           (db/edit request)))
     (catch ExceptionInfo ei

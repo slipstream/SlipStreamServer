@@ -32,6 +32,7 @@
                          valid? (assoc job :returnCode 10000)
                          valid? (dissoc job :targetResource)
                          valid? (dissoc job :affectedResources)
+                         valid? (assoc job :progress 100)
                          invalid? (assoc job :progress 101)
                          invalid? (assoc job :state "XY")
                          invalid? (assoc job :parentJob "notjob/id")

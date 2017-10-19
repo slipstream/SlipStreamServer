@@ -86,6 +86,14 @@
           (t/is-status 200)
           (get-in [:response :body]))
 
+      ;; set state to a final state make progress to set 100 automatically
+      (is (= 100 (-> session-admin
+                     (request abs-uri :request-method :put
+                              :body (json/write-str {:state "SUCCESS"}))
+                     (t/body->edn)
+                     (t/is-status 200)
+                     (get-in [:response :body :progress]))))
+
       (-> session-admin
           (request abs-uri :request-method :delete)
           (t/body->edn)

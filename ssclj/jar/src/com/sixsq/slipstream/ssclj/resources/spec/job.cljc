@@ -13,7 +13,7 @@
 (s/def :cimi.job/targetResource :cimi.common/resource-link)
 (s/def :cimi.job/affectedResources :cimi.common/resource-links)
 (s/def :cimi.job/returnCode int?)
-(s/def :cimi.job/progress (s/int-in 0 100))
+(s/def :cimi.job/progress (s/int-in 0 101))
 (s/def :cimi.job/timeOfStatusChange :cimi.core/timestamp)
 (s/def :cimi.job/statusMessage string?)
 (s/def :cimi.job/action :cimi.common.operation/rel)
