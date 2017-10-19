@@ -64,4 +64,6 @@
   "Runs the initialize function for all resources that define it."
   []
   (doall
-    (map initialize-resource (resource-namespaces))))
+    (let [rn (resource-namespaces)
+          _ (log/info "resource-namespaces" rn)]
+      (map initialize-resource rn))))
