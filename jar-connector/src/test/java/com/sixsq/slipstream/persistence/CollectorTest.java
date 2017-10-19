@@ -66,6 +66,7 @@ public class CollectorTest {
 	public void tearDown() {
 		Collector.update(new ArrayList<Vm>(), username, firstCloud);
 		Collector.update(new ArrayList<Vm>(), username, secondCloud);
+		SscljProxy.unmuteForTests();
 	}
 
 	@Test

@@ -23,7 +23,6 @@ package com.sixsq.slipstream.connector;
 
 import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.connector.local.LocalUserParametersFactory;
-import com.sixsq.slipstream.es.CljElasticsearchHelper;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -31,6 +30,7 @@ import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.run.RunTestBase;
 import com.sixsq.slipstream.util.SscljProxy;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -42,13 +42,19 @@ public class CollectorTest extends RunTestBase {
 
 	@BeforeClass
 	public static void setupClass() throws ConfigurationException, SlipStreamException {
-		CljElasticsearchHelper.createAndInitTestDb();
+	    ConnectorTestBase.setupBackend();
 		UsageRecorder.muteForTests();
 		SscljProxy.muteForTests();
 		createUser();
 		for(Run r : Run.listAll()) {
 			r.remove();
 		}
+	}
+
+	@AfterClass
+	public static void teardownClass() {
+	    ConnectorTestBase.teardownBackend();
+		SscljProxy.unmuteForTests();
 	}
 
 	protected static void createUser() throws ConfigurationException, ValidationException {

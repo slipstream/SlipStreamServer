@@ -38,9 +38,8 @@
 
 (defn close-client!
   []
-  (let [client *client*]
-    (alter-var-root #'*client* (constantly client))
-    (.close client)))
+  (.close *client*)
+  (unset-client!))
 
 (defn force-admin-role-right-all
   [data]

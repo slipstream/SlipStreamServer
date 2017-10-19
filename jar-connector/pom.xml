@@ -142,6 +142,7 @@
 							</value>
 						</property>
 					</systemPropertyVariables>
+					<useSystemClassLoader>false</useSystemClassLoader>
 					<excludes>
 						<exclude>${slipstream.test.excludes}</exclude>
 					</excludes>

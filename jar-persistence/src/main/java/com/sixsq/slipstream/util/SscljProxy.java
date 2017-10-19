@@ -328,4 +328,8 @@ public class SscljProxy {
         logger.severe("You should NOT see this message in production: request to SSCLJ won't be made");
     }
 
+    public static void unmuteForTests() {
+        isMuted = false;
+    }
+
 }

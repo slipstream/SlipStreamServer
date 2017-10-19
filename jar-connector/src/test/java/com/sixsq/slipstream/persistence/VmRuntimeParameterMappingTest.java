@@ -32,6 +32,7 @@ import java.util.Set;
 
 import com.sixsq.slipstream.util.SscljProxy;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -54,17 +55,14 @@ public class VmRuntimeParameterMappingTest {
 
 	@BeforeClass
 	public static void setupClass() throws ValidationException {
+		SscljProxy.muteForTests();
 		user = new User("user");
 		load();
 	}
 
-	@Before
-	public void setup() {
-		SscljProxy.muteForTests();
-	}
-
-	@After
-	public void tearDown() {
+	@AfterClass
+	public static void teardownClass() {
+	    SscljProxy.unmuteForTests();
 	}
 
 	@Test

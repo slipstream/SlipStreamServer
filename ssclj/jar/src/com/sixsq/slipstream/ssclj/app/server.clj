@@ -76,9 +76,7 @@
    (zku/set-client! (zku/create-client))
 
    (set-persistence-impl)
-   (log/info "resources/initialize")
    (resources/initialize)
-   (log/info "resources/initialize --- initialized")
    (let [handler (create-ring-handler)]
      (graphite/start-graphite-reporter)
      (aleph/start-container handler port))))

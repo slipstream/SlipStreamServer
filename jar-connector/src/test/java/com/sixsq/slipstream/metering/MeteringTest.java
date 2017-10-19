@@ -44,8 +44,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import com.sixsq.slipstream.ssclj.app.SscljTestServer;
-
 public class MeteringTest extends RunTestBase {
 
 	private static String CLOUD_A = "local";
@@ -57,8 +55,7 @@ public class MeteringTest extends RunTestBase {
 	@BeforeClass
 	public static void setupClass() throws ConfigurationException, SlipStreamException {
 		UsageRecorder.muteForTests();
-		SscljTestServer.start();
-		ConnectorTestBase.setupElasticseach();
+		ConnectorTestBase.setupBackend();
 		createUser();
 		String username = user.getName();
 
@@ -84,7 +81,7 @@ public class MeteringTest extends RunTestBase {
 
 	@AfterClass
 	public static void teardownClass() {
-		SscljTestServer.stop();
+	    ConnectorTestBase.teardownBackend();
 	}
 
 	private static Vm createVm(String instanceid, String cloud, String state, String user, String runId) {

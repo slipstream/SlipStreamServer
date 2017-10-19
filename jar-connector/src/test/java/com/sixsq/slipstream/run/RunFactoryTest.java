@@ -28,7 +28,6 @@ import com.sixsq.slipstream.factory.RunFactory;
 import com.sixsq.slipstream.persistence.*;
 import com.sixsq.slipstream.util.CommonTestUtil;
 
-import com.sixsq.slipstream.util.ServiceOffersUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
