@@ -85,8 +85,8 @@
       (stop-fn)
       (catch Exception _))
     (stop-clients)
-    (esb/set-client! nil)
-    (db/set-impl! nil)
+    (esb/unset-client!)
+    (db/unset-impl!)
     (System/clearProperty "ssclj.endpoint")
     (remove-all-metrics)))
 

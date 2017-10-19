@@ -32,6 +32,10 @@
   [client]
   (alter-var-root #'*client* (constantly client)))
 
+(defn unset-client!
+  []
+  (.unbindRoot #'*client*))
+
 (defn close-client!
   []
   (let [client *client*]
