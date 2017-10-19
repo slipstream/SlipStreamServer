@@ -25,9 +25,7 @@
 
 (def valid-job
   {:resourceURI resource-uri
-   :action      "add"
-   :targetResource {:href "abc/def"}
-   :affectedResources [{:href "abc/def"}]
+   :action      "collect"
    :acl     {:owner {:type "USER" :principal "admin"}
              :rules [{:type "USER" :principal "jane" :right "VIEW"}]}})
 

@@ -57,17 +57,15 @@
 ;; CRUD operations
 ;;
 
-(defn add-impl [{{:keys [progress statusMessage] :as body} :body :as request}]
+(defn add-impl [{body :body :as request}]
   (a/can-modify? {:acl collection-acl} request)
   (let [{:keys [id] :as new-job} (-> body
                                      u/strip-service-attrs
                                      (crud/new-identifier resource-name)
                                      (assoc :resourceURI resource-uri)
-                                     (assoc :state "QUEUED")
-                                     (cond-> statusMessage (assoc :timeOfStatusChange
-                                                                  (u/unparse-timestamp-datetime (time/now)))
-                                             (not progress) (assoc :progress 0))
+                                     (assoc :state ju/state-queued)
                                      u/update-timestamps
+                                     ju/job-cond->addition
                                      (crud/add-acl request)
                                      crud/validate)]
     (ju/add-job-to-queue id)
@@ -89,13 +87,12 @@
     (let [current (-> (str (u/de-camelcase resource-name) "/" uuid)
                       (db/retrieve request)
                       (a/can-modify? request)
-                      (cond-> statusMessage (assoc :timeOfStatusChange
-                                                   (u/unparse-timestamp-datetime (time/now)))))
-          {:keys [state] :as merged} (merge current body)]
+                      (cond-> statusMessage ju/update-timeOfStatusChange))
+          merged (merge current body)]
       (-> merged
-          (u/update-timestamps)
-          (cond-> (#{"FAILED" "SUCCESS" "STOPPED"} state) (assoc :progress 100))
-          (crud/validate)
+          u/update-timestamps
+          ju/job-cond->edition
+          crud/validate
           (db/edit request)))
     (catch ExceptionInfo ei
       (ex-data ei))))
