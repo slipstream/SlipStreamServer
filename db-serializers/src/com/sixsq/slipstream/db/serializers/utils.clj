@@ -206,7 +206,7 @@
   "STRONGLY DEPRECATED. Used to set the database CRUD implementation from Java
    code if needed. This must never be called from native clojure code."
   []
-  (if (instance? clojure.lang.Var$Unbound db/*impl*)
+  (if (instance? clojure.lang.Var db/*impl*)
     (set-db-crud-impl-uncond)))
 
 ;; Connection to a remote ES.
@@ -243,7 +243,7 @@
   "STRONGLY DEPRECATED. Used to set up a test Elasticsearch client from Java
    code if needed. This must never be called from native clojure code."
   []
-  (if (instance? clojure.lang.Var$Unbound esb/*client*)
+  (if (instance? clojure.lang.Var esb/*client*)
     (create-test-es-db-uncond)))
 
 (defn ^{:deprecated "3.34"} test-db-client-and-crud-impl

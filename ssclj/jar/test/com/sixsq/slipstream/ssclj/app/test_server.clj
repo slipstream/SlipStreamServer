@@ -5,6 +5,7 @@
     [com.sixsq.slipstream.ssclj.util.zookeeper :as zku]
     [com.sixsq.slipstream.ssclj.app.server :as server]
     [metrics.core :refer [remove-all-metrics]]
+    [com.sixsq.slipstream.db.impl :as db]
     [zookeeper :as zk])
   (:import (org.apache.curator.test TestingServer)))
 
@@ -68,10 +69,13 @@
 (defn start []
   (start-clients)
   (let [ssclj-port 12003
-        {:keys [zk-create-client-fn es-create-client-fn]} *service-clients*]
+        {:keys [zk-create-client-fn es-create-client-fn es-client]} *service-clients*]
     (with-redefs [esb/create-client es-create-client-fn
                   zku/create-client zk-create-client-fn]
-      (set-stop-server-fn (server/start 12003)))))
+      (set-stop-server-fn (server/start ssclj-port)))
+    (esb/set-client! es-client)
+    (db/set-impl! (esb/get-instance))
+    (System/setProperty "ssclj.endpoint" (str "http://localhost:" ssclj-port))))
 
 
 (defn stop []
@@ -81,6 +85,9 @@
       (stop-fn)
       (catch Exception _))
     (stop-clients)
+    (esb/set-client! nil)
+    (db/set-impl! nil)
+    (System/clearProperty "ssclj.endpoint")
     (remove-all-metrics)))
 
 
