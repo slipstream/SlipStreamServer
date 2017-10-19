@@ -8,6 +8,10 @@
   [impl]
   (alter-var-root #'*impl* (constantly impl)))
 
+(defn unset-impl!
+  []
+  (.unbindRoot #'*impl*))
+
 (defn add [collection-id data options]
   (p/add *impl* collection-id data options))
 
