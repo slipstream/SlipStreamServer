@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -18,6 +19,11 @@ public class ServiceOffersUtilTest {
     @BeforeClass
     public static void setupClass() {
         SscljProxy.muteForTests();
+    }
+
+    @AfterClass
+    public static void teardownClass() {
+        SscljProxy.unmuteForTests();
     }
 
     @Test
@@ -55,7 +61,6 @@ public class ServiceOffersUtilTest {
 
     @Test
     public void serviceOfferAttributeName() {
-        JsonObject nullserviceOffer = null;
         JsonObject emptyServiceOffer = new JsonObject();
         String anAttributeName = "myAttribute";
         String valueName = "myValue";

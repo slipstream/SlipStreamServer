@@ -63,7 +63,7 @@
    Because `.close` will never be called on the generated node and client, THIS
    FUNCTION WILL LEAK MEMORY."
   []
-  (let [node (esu/create-test-node)
+  (let [node   (esu/create-test-node)
         client (-> node
                    esu/node-client
                    esb/wait-client-create-index)]
@@ -75,7 +75,7 @@
    client bound to the Elasticsearch client binding, and then clean up the
    allocated resources by closing both the client and the node."
   [& body]
-  `(with-open [node# (esu/create-test-node)
+  `(with-open [node#   (esu/create-test-node)
                client# (-> node#
                            esu/node-client
                            esb/wait-client-create-index)]
@@ -188,13 +188,27 @@
   []
   @dyn-init)
 
-
 ;;
 ;; Following code is used to setup the Elasticsearch database client
 ;; and database CRUD implementation from Java code.
 ;;
 ;; ALL OF THESE FUNCTIONS ARE VERY STRONGLY DEPRECATED.
 ;;
+
+(def ^:dynamic *es-server*)
+
+(defn set-es-server!
+  [server]
+  (alter-var-root #'*es-server* (constantly server)))
+
+(defn unset-es-server!
+  []
+  (.unbindRoot #'*es-server*))
+
+(defn close-es-server!
+  []
+  (.close *es-server*)
+  (unset-es-server!))
 
 (defn ^{:deprecated "3.34"} set-db-crud-impl-uncond
   "STRONGLY DEPRECATED. Used to set the database CRUD implementation from Java
@@ -233,10 +247,11 @@
    code unconditionally. This must never be called from native clojure code.
    Use of this function will cause a MEMORY LEAK."
   []
-  (let [node (esu/create-test-node)
+  (let [node   (esu/create-test-node)
         client (-> node
                    esu/node-client
                    esb/wait-client-create-index)]
+    (set-es-server! node)
     (esb/set-client! client)))
 
 (defn ^{:deprecated "3.34"} create-test-es-db
@@ -253,3 +268,10 @@
   []
   (set-db-crud-impl)
   (create-test-es-db))
+
+(defn ^{:deprecated "3.34"} test-db-unset-client-and-impl
+  "STRONGLY DEPRECATED."
+  []
+  (esb/close-client!)
+  (close-es-server!)
+  (db/unset-impl!))

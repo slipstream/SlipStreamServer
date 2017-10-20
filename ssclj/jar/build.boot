@@ -123,6 +123,8 @@
            (sift :include #{#".*_test\.clj"
                             #".*test_utils\.clj"
                             #"test_helper\.clj"
+                            #"test_server.clj"
+                            #"SscljTestServer.clj"
                             #".*seeds.*"
                             #".*example\.clj"}
                  :invert true)
@@ -152,6 +154,8 @@
            (sift :include #{#".*_test\.clj"
                             #".*test_utils\.clj"
                             #"test_helper\.clj"
+                            #"test_server.clj"
+                            #"SscljTestServer.clj"
                             #".*seeds.*"
                             #".*example\.clj"
                             #".*Test\.java"
