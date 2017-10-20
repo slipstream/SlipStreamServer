@@ -25,6 +25,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.BeforeClass;
 
@@ -38,8 +39,13 @@ import com.sixsq.slipstream.es.CljElasticsearchHelper;
 public class ServiceConfigurationTest {
 
 	@BeforeClass
-	public static void createTestElasticsearchDb(){
+	public static void setupClass(){
 		CljElasticsearchHelper.createAndInitTestDb();
+	}
+
+	@AfterClass
+	public static void teardownClass(){
+		CljElasticsearchHelper.stopAndUnbindTestDb();
 	}
 
 	@Test(expected = IllegalArgumentException.class)

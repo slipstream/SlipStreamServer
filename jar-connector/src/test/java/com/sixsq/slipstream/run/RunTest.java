@@ -68,6 +68,7 @@ public class RunTest extends RunTestBase {
 	public static void teardownClass() {
 		tearDownImages();
 		ConnectorTestBase.teardownBackend();
+		UsageRecorder.unmuteForTests();
 	}
 
 	@Test

@@ -27,7 +27,9 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.QuotaException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.*;
+import com.sixsq.slipstream.ssclj.app.SscljTestServer;
 import com.sixsq.slipstream.util.SscljProxy;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -43,11 +45,26 @@ import com.sixsq.slipstream.persistence.ServiceConfiguration;
 
 public class QuotaTest {
 
+	public static void setupBackend() {
+		SscljTestServer.start();
+		CljElasticsearchHelper.initTestDb();
+	}
+
+	public static void teardownBackend() {
+		SscljTestServer.stop();
+	}
+
 	@BeforeClass
 	public static void setupClass() {
 		Event.muteForTests();
 		SscljProxy.muteForTests();
-		CljElasticsearchHelper.createAndInitTestDb();
+		setupBackend();
+	}
+
+	@AfterClass
+	public static void teardownClass() {
+	    teardownBackend();
+		SscljProxy.unmuteForTests();
 	}
 
 	private Run testQuotaCreateRun(User user, String cloud)

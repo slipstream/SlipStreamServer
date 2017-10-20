@@ -47,6 +47,11 @@ public class UsageRecorder {
 		logger.severe("You should NOT see this message in production: usage will *not* be recorded");
 	}
 
+	public static void unmuteForTests() {
+		isMuted = false;
+	}
+
+
 	public static void insertStart(String instanceId, String user, String cloud, List<UsageMetric> metrics) {
 		try {
 

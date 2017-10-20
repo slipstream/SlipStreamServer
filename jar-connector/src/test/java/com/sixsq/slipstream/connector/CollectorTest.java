@@ -55,6 +55,7 @@ public class CollectorTest extends RunTestBase {
 	public static void teardownClass() {
 	    ConnectorTestBase.teardownBackend();
 		SscljProxy.unmuteForTests();
+		UsageRecorder.unmuteForTests();
 	}
 
 	protected static void createUser() throws ConfigurationException, ValidationException {
@@ -70,6 +71,6 @@ public class CollectorTest extends RunTestBase {
 	public void collect() {
 		localConnector.generateDummyVms();
 		int res = Collector.collect(user, localConnector, 0);
-		assertThat(res,  is(LocalConnector.MAX_VMS));
+		assertThat(res, is(LocalConnector.MAX_VMS));
 	}
 }
