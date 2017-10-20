@@ -21,12 +21,11 @@
 (dyn/initialize)
 
 (deftest bad-methods
-  (let [resource-uri (str p/service-context (u/new-resource-id credential/resource-name))]
+  (let [resource-uri (str p/service-context (u/new-resource-id (u/de-camelcase credential/resource-name)))]
     (doall
       (for [[uri method] [[base-uri :options]
                           [base-uri :delete]
                           [resource-uri :options]
-                          [resource-uri :put]
                           [resource-uri :post]]]
         (-> (session (ring-app))
             (request uri

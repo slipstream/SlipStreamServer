@@ -124,6 +124,13 @@
         add-impl
         (update-in [:body] merge create-resp))))
 
+
+(def edit-impl (std-crud/edit-fn resource-name))
+
+(defmethod crud/edit resource-name
+  [request]
+  (edit-impl request))
+
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 (defmethod crud/retrieve resource-name
   [request]
