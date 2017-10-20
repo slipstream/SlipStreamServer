@@ -11,8 +11,7 @@
                   [sixsq/build-utils "0.1.4" :scope "test"]])
 
 (require '[sixsq.build-fns :refer [merge-defaults
-                                   sixsq-nexus-url
-                                   lein-generate]])
+                                   sixsq-nexus-url]])
 
 (set-env!
   :repositories
