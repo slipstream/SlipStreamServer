@@ -20,7 +20,7 @@
 
 (defn close-client! []
   (let [client *client*]
-    (alter-var-root #'*client* (constantly nil))
+    (set-client! nil)
     (zk/close client)))
 
 (defn string-to-byte [value]

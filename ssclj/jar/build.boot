@@ -38,11 +38,14 @@
                     [metrics-clojure-jvm]
                     [metrics-clojure-graphite]
                     [me.raynes/fs]
+                    [org.apache.logging.log4j/log4j-core]
+                    [org.apache.logging.log4j/log4j-api]
                     [org.clojure/data.json]
                     [org.clojure/java.classpath]
                     [org.clojure/tools.cli]
                     [org.clojure/tools.logging]
                     [org.clojure/tools.namespace]
+                    [org.slf4j/slf4j-log4j12 :scope "provided"]
                     [potemkin]
                     [ring/ring-core]
                     [ring/ring-json]
@@ -51,10 +54,9 @@
 
                     [com.sixsq.slipstream/utils]
                     [com.sixsq.slipstream/auth]
-                    [com.sixsq.slipstream/token]
+                    [com.sixsq.slipstream/slipstream-ring-container :scope "test"]
                     [com.sixsq.slipstream/SlipStreamDbBinding-jar]
-                    [org.apache.logging.log4j/log4j-core]
-                    [org.apache.logging.log4j/log4j-api]
+                    [com.sixsq.slipstream/token]
 
                     ;; needed for migration scripts
                     [korma]
