@@ -2,10 +2,11 @@
   (:require
     [com.sixsq.slipstream.db.es.binding :as esb]
     [com.sixsq.slipstream.db.es.utils :as esu]
+    [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as zku]
     [com.sixsq.slipstream.ssclj.app.server :as server]
     [metrics.core :refer [remove-all-metrics]]
-    [com.sixsq.slipstream.db.impl :as db]
+    [sixsq.slipstream.server.ring-container :as rc]
     [zookeeper :as zk])
   (:import (org.apache.curator.test TestingServer)))
 
@@ -72,7 +73,7 @@
         {:keys [zk-create-client-fn es-create-client-fn es-client]} *service-clients*]
     (with-redefs [esb/create-client es-create-client-fn
                   zku/create-client zk-create-client-fn]
-      (set-stop-server-fn (server/start ssclj-port)))
+      (set-stop-server-fn (rc/start server/init ssclj-port)))
     (esb/set-client! es-client)
     (db/set-impl! (esb/get-instance))
     (System/setProperty "ssclj.endpoint" (str "http://localhost:" ssclj-port))))
