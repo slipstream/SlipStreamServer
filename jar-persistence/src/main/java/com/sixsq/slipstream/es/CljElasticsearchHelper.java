@@ -43,7 +43,7 @@ public class CljElasticsearchHelper {
      * Connection to a external Elasticsearch defined by ES_HOST and ES_PORT env vars.
      */
     public static void init() {
-        logger.info("Creating DB client and setting DB CRUD implementation.");
+        logger.info("Creating DB client and setting ES DB CRUD implementation.");
         requireNs(NS_SERIALIZERS_UTILS);
         Clojure.var(NS_SERIALIZERS_UTILS, "db-client-and-crud-impl").invoke();
         initializeConnectorTemplates();
@@ -58,22 +58,22 @@ public class CljElasticsearchHelper {
      * - resource templates (including connector templates).
      */
     public static void createAndInitTestDb() {
-        logger.info("Creating test DB node/client and setting DB CRUD implementation.");
+        logger.info("Creating test DB node/client and setting ES DB CRUD implementation.");
         requireNs(NS_SERIALIZERS_UTILS);
         Clojure.var(NS_SERIALIZERS_UTILS, "test-db-client-and-crud-impl").invoke();
+        initTestDb();
+    }
+
+    public static void initTestDb() {
         addDefaultServiceConfigToDb();
         initializeConnectorTemplates();
         pushServerConfig();
     }
 
-    public static void classpath () {
-        logger.info("-->>> Printing classpath.");
-        ClassLoader cl = ClassLoader.getSystemClassLoader();
-        URL[] urls = ((URLClassLoader)cl).getURLs();
-        logger.info("-->>> # of urls " + urls.length);
-        for(URL url: urls){
-            System.out.println(url.getFile());
-        }
+    public static void stopAndUnbindTestDb() {
+        logger.info("Stop and unbind test ES DB.");
+        requireNs(NS_SERIALIZERS_UTILS);
+        Clojure.var(NS_SERIALIZERS_UTILS, "test-db-unset-client-and-impl").invoke();
     }
 
     public static void initializeConnectorTemplates() {
@@ -88,7 +88,7 @@ public class CljElasticsearchHelper {
     }
 
     private static void addDefaultServiceConfigToDb() {
-        logger.info("Adding default service configuration to DB.");
+        logger.info("Adding default service configuration to ES DB.");
         setDbCrudImpl();
         requireNs(NS_SERIALIZERS_SERVICE_CONFIG_IMPL);
 		Clojure.var(NS_SERIALIZERS_SERVICE_CONFIG_IMPL, "db-add-default-config").invoke();

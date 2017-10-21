@@ -58,7 +58,7 @@ public class RunTest extends RunTestBase {
 			ClassNotFoundException {
 		UsageRecorder.muteForTests();
 		Event.muteForTests();
-		ConnectorTestBase.setupElasticseach();
+		ConnectorTestBase.setupBackend();
 		setupImages();
 		CommonTestUtil
 				.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
@@ -67,6 +67,8 @@ public class RunTest extends RunTestBase {
 	@AfterClass
 	public static void teardownClass() {
 		tearDownImages();
+		ConnectorTestBase.teardownBackend();
+		UsageRecorder.unmuteForTests();
 	}
 
 	@Test

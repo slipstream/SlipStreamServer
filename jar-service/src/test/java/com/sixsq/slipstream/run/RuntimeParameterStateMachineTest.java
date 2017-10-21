@@ -59,6 +59,7 @@ public class RuntimeParameterStateMachineTest extends
 	@After
 	public void tearDown() {
 		removeDeployments();
+		SscljProxy.unmuteForTests();
 	}
 
 	@Test

@@ -38,3 +38,10 @@
   (is (= false (u/as-boolean "false")))
   (is (= nil (u/as-boolean nil)))
   )
+
+(deftest test-start-stop-es
+  (is (instance? clojure.lang.Var$Unbound u/*es-server*))
+  (u/create-test-es-db-uncond)
+  (is (not (instance? clojure.lang.Var$Unbound u/*es-server*)))
+  (u/close-es-server!)
+  (is (instance? clojure.lang.Var$Unbound u/*es-server*)))
