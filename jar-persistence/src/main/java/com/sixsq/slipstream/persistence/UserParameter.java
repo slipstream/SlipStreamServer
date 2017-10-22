@@ -29,7 +29,6 @@ import javax.persistence.Id;
 import java.util.Arrays;
 import java.util.List;
 
-@Entity
 @Root(name = "parameter")
 @SuppressWarnings("serial")
 public class UserParameter extends Parameter<User> {

@@ -25,6 +25,9 @@ import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.user.Passwords;
 import com.sixsq.slipstream.user.UserView;
+import com.sixsq.slipstream.util.SscljProxy;
+import org.restlet.data.Form;
+import org.restlet.Response;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementMap;
 
@@ -35,16 +38,17 @@ import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 /**
  * Unit test:
  *
- * @see UserTest
  *
  */
 @SuppressWarnings("serial")
@@ -53,7 +57,7 @@ import java.util.regex.Pattern;
 		@NamedQuery(name = "allUsers", query = "SELECT u FROM User u"),
 		@NamedQuery(name = "activeUsers", query = "SELECT u FROM User u WHERE u.state = 'ACTIVE'"),
 		@NamedQuery(name = "userViewList", query = "SELECT NEW com.sixsq.slipstream.user.UserView(u.name, u.firstName, u.lastName, u.email, u.state, u.lastOnline, u.lastExecute, u.activeSince, u.organization, u.roles, u.isSuperUser) FROM User u") })
-public class User extends Parameterized<User, UserParameter> {
+public class User extends Metadata {
 
 	public static final String REQUEST_KEY = "authenticated_user";
 
@@ -124,6 +128,9 @@ public class User extends Parameterized<User, UserParameter> {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date activeSince = null;
 
+	@Transient
+	protected Map<String, UserParameter> parameters = null;
+
 	@SuppressWarnings("unused")
 	private User() {
 
@@ -140,19 +147,38 @@ public class User extends Parameterized<User, UserParameter> {
 		this.state = State.NEW;
 	}
 
-	@Override
 	@ElementMap(name = "parameters", required = false, valueType = UserParameter.class)
 	protected void setParameters(Map<String, UserParameter> parameters) {
 		this.parameters = parameters;
 	}
 
-	@Override
 	@ElementMap(name = "parameters", required = false, valueType = UserParameter.class)
 	public Map<String, UserParameter> getParameters() {
+	    if (null == parameters) {
+	    	parameters = loadParameters();
+		}
 		return parameters;
 	}
 
-	@Override
+	public Map<String, UserParameter> getParameters(String category) {
+		Map<String, UserParameter> filteredParameters = new HashMap<>();
+		for (UserParameter parameter : getParameters().values()) {
+			String pCategory = parameter.getCategory();
+			if (pCategory.equals(category)) {
+				filteredParameters.put(parameter.getName(), parameter);
+			}
+		}
+
+		return filteredParameters;
+	}
+
+	private void validateParameters() throws ValidationException {
+		for (Map.Entry<String, UserParameter> p : getParameters().entrySet
+				()) {
+			p.getValue().validateValue();
+		}
+	}
+
 	public void validate() throws ValidationException {
 		boolean isEmpty = (name == null) || ("".equals(name));
 		boolean isNewValue = User.NEW_NAME.equals(name);
@@ -212,17 +238,14 @@ public class User extends Parameterized<User, UserParameter> {
 		this.isSuperUser = isSuperUser;
 	}
 
-	@Override
 	public String getResourceUri() {
 		return resourceUri;
 	}
 
-	@Override
 	public String getName() {
 		return name;
 	}
 
-	@Override
 	public void setName(String name) {
 		this.name = name;
 		this.resourceUri = User.constructResourceUri(name);
@@ -351,6 +374,19 @@ public class User extends Parameterized<User, UserParameter> {
 		return parameter == null ? "" : parameter.getValue();
 	}
 
+	public UserParameter getParameter(String name) {
+		return getParameters().get(name);
+	}
+
+	public UserParameter getParameter(String name, String category) {
+		UserParameter parameter = getParameter(name);
+		if (parameter != null && parameter.getCategory().equals(category)) {
+			return parameter;
+		} else {
+			return null;
+		}
+	}
+
 	private UserParameter getDefaultCloudServiceParameter() {
 		return getParameter(constructCloudServiceKey());
 	}
@@ -358,6 +394,11 @@ public class User extends Parameterized<User, UserParameter> {
 	private String constructCloudServiceKey() {
 		return Parameter.constructKey(ParameterCategory.getDefault(),
 				UserParameter.DEFAULT_CLOUD_SERVICE_PARAMETER_NAME);
+	}
+
+	public void setParameter(UserParameter parameter) throws ValidationException {
+		parameters.put(parameter.getName(), parameter);
+		setContainer(parameter);
 	}
 
 	public void setDefaultCloudServiceName(String defaultCloudServiceName)
@@ -460,6 +501,24 @@ public class User extends Parameterized<User, UserParameter> {
 		return user;
 	}
 
+	private Map<String, UserParameter> loadParameters() {
+	    Logger log = Logger.getLogger("com.sixsq.slipstream.User");
+	    log.info("LOADING PARAMETERS ....");
+//		Form queryParameters = new Form();
+//		queryParameters.add("$filter", "");
+//		SscljProxy.get("", getName(), queryParameters);
+		Response response = SscljProxy.get("api/credential", getName() + " ADMIN");
+		log.info("response: " + response.getEntityAsText());
+		Map<String, UserParameter> params = new HashMap<>();
+		try {
+			params.put("my-parameter", new UserParameter("name", "value",
+					"description"));
+		} catch (ValidationException e) {
+			e.printStackTrace();
+		}
+		return params;
+	}
+
 	public void addSystemParametersIntoUser(ServiceConfiguration sc)
 			throws ConfigurationException, ValidationException {
 		for (ServiceConfigurationParameter p : sc.getParameters().values()) {
@@ -514,13 +573,17 @@ public class User extends Parameterized<User, UserParameter> {
 		return list;
 	}
 
-	@Override
 	public void setContainer(UserParameter parameter) {
 		parameter.setContainer(this);
 	}
 
+	private void storeParameters() {
+		System.out.println("STORING PARAMETERS....");
+	}
+
 	@Override
 	public User store() {
+		storeParameters();
 		return (User) super.store();
 	}
 
@@ -538,6 +601,12 @@ public class User extends Parameterized<User, UserParameter> {
 
 	public void setLastExecute() {
 		this.lastExecute = new Date();
+	}
+
+
+	public String getParameterValue(String name, String defaultValue) {
+		UserParameter parameter = getParameter(name);
+		return parameter == null ? defaultValue : parameter.getValue(defaultValue);
 	}
 
 	public int getTimeout() {
@@ -614,5 +683,4 @@ public class User extends Parameterized<User, UserParameter> {
 			checkNoForbiddenRoles(roles);
 		}
 	}
-
 }

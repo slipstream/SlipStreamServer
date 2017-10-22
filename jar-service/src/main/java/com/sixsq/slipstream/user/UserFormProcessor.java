@@ -40,7 +40,7 @@ import com.sixsq.slipstream.persistence.UserParameter;
  * @see UserFormProcessorTest
  *
  */
-public class UserFormProcessor extends FormProcessor<User, UserParameter> {
+public class UserFormProcessor extends UserParameterizedFormProcessor {
 
 	public UserFormProcessor(User user) {
 		super(user);
