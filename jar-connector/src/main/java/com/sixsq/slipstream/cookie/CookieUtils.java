@@ -65,6 +65,7 @@ public class CookieUtils {
 	private static final String COOKIE_IDTYPE = "com.sixsq.idtype";
 	private static final String COOKIE_IDENTIFIER = "com.sixsq.identifier";
 	public static final String COOKIE_USERNAME = "username";
+	public static final String COOKIE_ROLES = "roles";
 	private static final String COOKIE_SIGNATURE = "com.sixsq.signature";
 	private static final String COOKIE_DEFAULT_IDTYPE = "local";
 
@@ -360,6 +361,10 @@ public class CookieUtils {
 		} else {
 			return claimsInToken(cookie).get(COOKIE_USERNAME);
 		}
+	}
+
+	public static String getCookieRoles(Cookie cookie) {
+		return claimsInToken(cookie).get(COOKIE_ROLES);
 	}
 
 	public static Map<String, String> claimsInToken(Cookie cookie) {

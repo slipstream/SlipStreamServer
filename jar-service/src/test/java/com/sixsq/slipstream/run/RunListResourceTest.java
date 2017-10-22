@@ -30,6 +30,7 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.*;
 import com.sixsq.slipstream.util.CommonTestUtil;
 import com.sixsq.slipstream.util.ResourceTestBase;
+import com.sixsq.slipstream.util.SscljProxy;
 import com.sixsq.slipstream.util.XmlUtil;
 import org.junit.*;
 import org.restlet.Request;
@@ -78,6 +79,7 @@ public class RunListResourceTest extends ResourceTestBase {
 
 
 		Event.muteForTests();
+		SscljProxy.muteForTests();
 
 		CommonTestUtil.addSshKeys(user);
 
@@ -108,11 +110,9 @@ public class RunListResourceTest extends ResourceTestBase {
 	}
 
 	@AfterClass
-	public static void teardownClass() throws ConfigurationException,
-			ValidationException {
-
+	public static void teardownClass() throws ConfigurationException, ValidationException {
 		removeAllRuns();
-
+		SscljProxy.unmuteForTests();
 	}
 
 	@Before

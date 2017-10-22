@@ -5,9 +5,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import static com.sixsq.slipstream.util.SscljProxy.parseJson;
 import static org.junit.Assert.*;
 
 public class ServiceOffersUtilTest {
@@ -17,6 +19,11 @@ public class ServiceOffersUtilTest {
     @BeforeClass
     public static void setupClass() {
         SscljProxy.muteForTests();
+    }
+
+    @AfterClass
+    public static void teardownClass() {
+        SscljProxy.unmuteForTests();
     }
 
     @Test
@@ -36,25 +43,24 @@ public class ServiceOffersUtilTest {
 
     @Test
     public void parseNull() {
-        JsonObject obj = ServiceOffersUtil.parseJson(null);
+        JsonObject obj = parseJson(null);
     }
 
     @Test(expected = IllegalStateException.class)
     public void parseEmptyString() {
-        JsonObject obj = ServiceOffersUtil.parseJson("");
+        JsonObject obj = parseJson("");
     }
 
 
     @Test
     public void parseEmptyJson() {
-        JsonObject obj = ServiceOffersUtil.parseJson(EMPTY_JSON);
+        JsonObject obj = parseJson(EMPTY_JSON);
         assertNotNull(obj);
         assertTrue(obj.toString().equalsIgnoreCase(EMPTY_JSON));
     }
 
     @Test
     public void serviceOfferAttributeName() {
-        JsonObject nullserviceOffer = null;
         JsonObject emptyServiceOffer = new JsonObject();
         String anAttributeName = "myAttribute";
         String valueName = "myValue";

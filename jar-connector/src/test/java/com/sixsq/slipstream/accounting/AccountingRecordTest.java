@@ -15,6 +15,7 @@ import com.sixsq.slipstream.util.CommonTestUtil;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.*;
@@ -43,6 +44,8 @@ import static org.junit.Assert.fail;
  * -=================================================================-
  */
 
+// Ignored.  What is the point of running the same tests twice?
+@Ignore
 public class AccountingRecordTest extends RunFactoryTest {
 
 
