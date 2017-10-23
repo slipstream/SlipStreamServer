@@ -20,6 +20,7 @@
   :dependencies
   #(vec (concat %
                 (merge-defaults
+
                   ['sixsq/default-deps (get-env :version)]
                   '[[org.clojure/clojure]
 
@@ -78,6 +79,7 @@
                     [adzerk/boot-reload]
                     [onetom/boot-lein-generate]
                     [tolitius/boot-check]]))))
+
 
 (require
   '[environ.boot :refer [environ]]
@@ -167,6 +169,7 @@
                             #"config-hsqldb.edn"
                             #"log4j.properties"}
                  :invert true)
+
            (aot :namespace #{'com.sixsq.slipstream.ssclj.app.main
                              'com.sixsq.slipstream.ssclj.usage.summarizer
                              'com.sixsq.slipstream.ssclj.migrate.user-cred})
@@ -175,6 +178,7 @@
                               #".*log4j\.properties"})
            (jar                                             ;; :main 'com.sixsq.slipstream.ssclj.app.main
              )))
+
 
 (def tests-artef-name "SlipStreamCljResourcesTests-jar")
 (def tests-artef-pom-loc (str "com.sixsq.slipstream/" tests-artef-name))
