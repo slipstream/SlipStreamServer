@@ -56,6 +56,7 @@
                     [com.sixsq.slipstream/auth]
                     [com.sixsq.slipstream/slipstream-ring-container :scope "test"]
                     [com.sixsq.slipstream/SlipStreamDbBinding-jar]
+                    [com.sixsq.slipstream/SlipStreamClientAPI-jar]
                     [com.sixsq.slipstream/token]
 
                     ;; needed for migration scripts
@@ -167,7 +168,8 @@
                             #"log4j.properties"}
                  :invert true)
            (aot :namespace #{'com.sixsq.slipstream.ssclj.app.main
-                             'com.sixsq.slipstream.ssclj.usage.summarizer})
+                             'com.sixsq.slipstream.ssclj.usage.summarizer
+                             'com.sixsq.slipstream.ssclj.migrate.user-cred})
            #_(uber :exclude #{#"(?i)^META-INF/INDEX.LIST$"
                               #"(?i)^META-INF/[^/]*\.(MF|SF|RSA|DSA)$"
                               #".*log4j\.properties"})
