@@ -53,11 +53,12 @@
 ;; TODO: quantization for hour period, i.e apply the full hour price to first minute then zero for the rest of the hour
 (defn assoc-price
   [{:keys [serviceOffer] :as m}]
-  (let [price-map (some->> serviceOffer
-                           :price:unitCode
-                           (get price-divisor)
-                           (/ (:price:unitCost serviceOffer))
-                           (assoc {} :price))]
+  (let [price-map (if (:price:unitCost serviceOffer)
+                    (some->> serviceOffer
+                             :price:unitCode
+                             (get price-divisor)
+                             (/ (:price:unitCost serviceOffer))
+                             (assoc {} :price)))]
     (merge m price-map)))
 
 (defn update-id
@@ -153,17 +154,17 @@
                                                     [0 {}])
                                                   (->> page
                                                        (create-actions timestamp metering-action)
-                                                       (bulk-insert client)
-                                                       handle-results))]
-                                 (recur (merge-stats stats resp-stats)))
-                               stats))]
-          (let [treated (reduce + (vals freq))
-                created (get freq 201 0)
-                stats [total treated created]
-                msg (str "finish metering snapshot " timestamp
-                         " from " resource-search-url
-                         " - " stats)]
-            (if (apply not= stats)
-              (log/error msg)
-              (log/info msg))
-            stats))))))
+                                                                                 (bulk-insert client)
+                                                                                 handle-results))]
+                                                              (recur (merge-stats stats resp-stats)))
+                                                         stats))]
+                             (let [treated (reduce + (vals freq))
+                                   created (get freq 201 0)
+                                   stats [total treated created]
+                                   msg (str "finish metering snapshot " timestamp
+                                            " from " resource-search-url
+                                            " - " stats)]
+                                  (if (apply not= stats)
+                                    (log/error msg)
+                                    (log/info msg))
+                                  stats))))))
