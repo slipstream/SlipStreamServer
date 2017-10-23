@@ -8,7 +8,7 @@
     [ring.middleware.nested-params :refer [wrap-nested-params]]
     [ring.middleware.cookies :refer [wrap-cookies]]
 
-    [metrics.core :refer [default-registry]]
+    [metrics.core :refer [default-registry remove-all-metrics]]
     [metrics.ring.instrument :refer [instrument]]
     [metrics.ring.expose :refer [expose-metrics-as-json]]
     [metrics.jvm.core :refer [instrument-jvm]]
@@ -37,8 +37,6 @@
    header treatment, and message formatting."
   []
   (log/info "creating ring handler")
-
-  (instrument-jvm default-registry)
 
   (compojure.core/routes)
 
@@ -71,6 +69,8 @@
    (log/info "java version: " (System/getProperty "java.version"))
    (log/info "java classpath: " (System/getProperty "java.class.path"))
 
+   (instrument-jvm default-registry)
+
    (esb/set-client! (esb/create-client))
 
    (zku/set-client! (zku/create-client))
@@ -97,4 +97,9 @@
   (try
     (esb/close-client!)
     (catch Exception e
-      (log/warn "elasticsearch client close failed:" (.getMessage e)))))
+      (log/warn "elasticsearch client close failed:" (.getMessage e))))
+  (try
+    (remove-all-metrics)
+    (catch Exception e
+      (log/warn "failed removing all instrumentation metrics:" (.getMessage e)))))
+

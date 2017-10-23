@@ -91,6 +91,7 @@ public class StateMachinetTest {
 		removeRuns();
 		List<Run> runs = Run.listAll();
 		assertEquals(0, runs.size());
+		CljElasticsearchHelper.stopAndUnbindTestDb();
 	}
 
 	private static void removeRuns() throws ValidationException {
