@@ -154,17 +154,17 @@
                                                     [0 {}])
                                                   (->> page
                                                        (create-actions timestamp metering-action)
-                                                                                 (bulk-insert client)
-                                                                                 handle-results))]
-                                                              (recur (merge-stats stats resp-stats)))
-                                                         stats))]
-                             (let [treated (reduce + (vals freq))
-                                   created (get freq 201 0)
-                                   stats [total treated created]
-                                   msg (str "finish metering snapshot " timestamp
-                                            " from " resource-search-url
-                                            " - " stats)]
-                                  (if (apply not= stats)
-                                    (log/error msg)
-                                    (log/info msg))
-                                  stats))))))
+                                                       (bulk-insert client)
+                                                       handle-results))]
+                                 (recur (merge-stats stats resp-stats)))
+                               stats))]
+          (let [treated (reduce + (vals freq))
+                created (get freq 201 0)
+                stats [total treated created]
+                msg (str "finish metering snapshot " timestamp
+                         " from " resource-search-url
+                         " - " stats)]
+            (if (apply not= stats)
+              (log/error msg)
+              (log/info msg))
+            stats))))))
