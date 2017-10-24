@@ -25,6 +25,7 @@
     (doall
       (for [[uri method] [[base-uri :options]
                           [base-uri :delete]
+                          [resource-uri :put]
                           [resource-uri :options]
                           [resource-uri :put]
                           [resource-uri :post]]]
