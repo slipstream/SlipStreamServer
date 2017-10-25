@@ -11,11 +11,12 @@
     [com.sixsq.slipstream.db.impl :as db]
     [ring.util.response :as r]
     [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.ssclj.util.log :as logu]))
-
-(def ^:const resource-tag :metering)
+    [com.sixsq.slipstream.ssclj.util.log :as logu]
+    [superstring.core :as str]))
 
 (def ^:const resource-name "Metering")
+
+(def ^:const resource-tag (keyword (str (str/camel-case resource-name) "s")))
 
 (def ^:const resource-url (u/de-camelcase resource-name))
 
