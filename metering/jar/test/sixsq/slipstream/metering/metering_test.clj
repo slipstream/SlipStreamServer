@@ -117,6 +117,17 @@
                            :resource:disk           10.0
                            :href                    "service-offer/cc87133e-343b-40f1-8094-46f80a1b3042"
                            }
+        so-unitCode-but-no-cost {
+                                 :price:currency          "EUR"
+                                 :resource:vcpu           8
+                                 :price:unitCode          "MIN"
+                                 :price:billingPeriodCode "MIN"
+                                 :price:freeUnits         0.0
+                                 :resource:instanceType   "s1.2xlarge"
+                                 :resource:ram            32768.0
+                                 :resource:disk           0.0
+                                 :href                    " service-offer/a4953f05-affe-46d0-a5ac-a4c8f1af810b "
+                                 }
         so-unknown {
                     :href          "service-offer/unknown"
                     :resource:vcpu 1
@@ -130,6 +141,7 @@
     (is (= (:price:unitCost so-minute) (:price (t/assoc-price (assoc base-vm :serviceOffer so-minute)))))
     (is (= (/ (:price:unitCost so-hour) 60) (:price (t/assoc-price (assoc base-vm :serviceOffer so-hour)))))
     (is (= nil (:price (t/assoc-price (assoc base-vm :serviceOffer so-unknown-period)))))
+    (is (= nil (:price (t/assoc-price (assoc base-vm :serviceOffer so-unitCode-but-no-cost)))))
     (is (= nil (:price (t/assoc-price (assoc base-vm :serviceOffer so-unknown)))))))
 
 (deftest check-update-id

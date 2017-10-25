@@ -106,6 +106,23 @@
 
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
+;;
+;; available operations
+;;
+
+(defmethod crud/set-operations resource-uri
+  [resource request]
+  (try
+    (a/can-modify? resource request)
+    (let [href (:id resource)
+          ^String resourceURI (:resourceURI resource)
+          ops (if (.endsWith resourceURI "Collection")
+                [{:rel (:add c/action-uri) :href href}]
+                [{:rel (:delete c/action-uri) :href href}])]
+      (assoc resource :operations ops))
+    (catch Exception e
+      (dissoc resource :operations))))
+
 ;; requires a CredentialTemplate to create new Credential
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
