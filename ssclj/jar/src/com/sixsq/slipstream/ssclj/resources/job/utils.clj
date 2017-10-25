@@ -35,7 +35,7 @@
     (uzk/create-all locking-queue-path :persistent? true)))
 
 (defn is-final-state? [{:keys [state] :as job}]
-  (contains? #{state-failed state-success state-stopped} state))
+  (contains? #{state-failed state-success} state))
 
 (defn add-targetResource-in-affectedResources [{:keys [targetResource affectedResources] :as job}]
   (assoc job :affectedResources (conj affectedResources targetResource)))
