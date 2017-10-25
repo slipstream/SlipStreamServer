@@ -422,6 +422,7 @@ ${installation.dir}/bin/generate-auth-keys.sh
                     <include>create-daily-usage.sh</include>
                     <include>create-weekly-usage.sh</include>
                     <include>create-monthly-usage.sh</include>
+                    <include>create-usage.sh</include>
                   </includes>
                 </source>
               </sources>
