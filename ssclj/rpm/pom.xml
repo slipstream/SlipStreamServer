@@ -10,7 +10,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamCljResources</artifactId>
-    <version>3.38-SNAPSHOT</version>
+    <version>3.39-SNAPSHOT</version>
   </parent>
 
   <!-- NOTE: This project MUST have same version as proxy module. -->
@@ -422,6 +422,7 @@ ${installation.dir}/bin/generate-auth-keys.sh
                     <include>create-daily-usage.sh</include>
                     <include>create-weekly-usage.sh</include>
                     <include>create-monthly-usage.sh</include>
+                    <include>create-usage.sh</include>
                   </includes>
                 </source>
               </sources>

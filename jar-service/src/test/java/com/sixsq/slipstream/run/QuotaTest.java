@@ -27,6 +27,9 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.QuotaException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.*;
+import com.sixsq.slipstream.ssclj.app.SscljTestServer;
+import com.sixsq.slipstream.util.SscljProxy;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -42,10 +45,26 @@ import com.sixsq.slipstream.persistence.ServiceConfiguration;
 
 public class QuotaTest {
 
+	public static void setupBackend() {
+		SscljTestServer.start();
+		CljElasticsearchHelper.initTestDb();
+	}
+
+	public static void teardownBackend() {
+		SscljTestServer.stop();
+	}
+
 	@BeforeClass
 	public static void setupClass() {
 		Event.muteForTests();
-                CljElasticsearchHelper.createAndInitTestDb();
+		SscljProxy.muteForTests();
+		setupBackend();
+	}
+
+	@AfterClass
+	public static void teardownClass() {
+	    teardownBackend();
+		SscljProxy.unmuteForTests();
 	}
 
 	private Run testQuotaCreateRun(User user, String cloud)
@@ -85,7 +104,7 @@ public class QuotaTest {
 
 		run1.addNodeInstanceName("node1", cloud);
 
-		Quota.validate(user, run1.getCloudServiceUsage(), usage);
+		Quota.validate(user, run1, usage);
 	}
 
 	@Test(expected = QuotaException.class)
@@ -105,7 +124,7 @@ public class QuotaTest {
 		run1.addNodeInstanceName("node1", cloud);
 		run1.addNodeInstanceName("node2", cloud);
 
-		Quota.validate(user, run1.getCloudServiceUsage(), usage);
+		Quota.validate(user, run1, usage);
 	}
 
 	@Test
@@ -121,7 +140,7 @@ public class QuotaTest {
 		run1.addNodeInstanceName("node1", cloud);
 		run1.addNodeInstanceName("node2", cloud);
 
-		Quota.validate(user, run1.getCloudServiceUsage(), usage);
+		Quota.validate(user, run1, usage);
 	}
 
 	@Test
@@ -138,7 +157,7 @@ public class QuotaTest {
 		run1.addNodeInstanceName("node1", cloud);
 		run1.addNodeInstanceName("node2", cloud);
 
-		Quota.validate(user, run1.getCloudServiceUsage(), usage);
+		Quota.validate(user, run1, usage);
 	}
 
 	@Test(expected = QuotaException.class)
@@ -155,7 +174,7 @@ public class QuotaTest {
 		run1.addNodeInstanceName("node1", cloud);
 		run1.addNodeInstanceName("node2", cloud);
 
-		Quota.validate(user, run1.getCloudServiceUsage(), usage);
+		Quota.validate(user, run1, usage);
 	}
 
 	@Test

@@ -20,6 +20,7 @@
     (org.elasticsearch.action.admin.indices.create CreateIndexResponse)
     (org.elasticsearch.action.admin.indices.delete DeleteIndexRequest)
     (org.elasticsearch.action.admin.indices.exists.indices IndicesExistsRequest)
+    (org.elasticsearch.action.admin.indices.get GetIndexRequest)
     (org.elasticsearch.action.bulk BulkRequestBuilder BulkResponse)
     (org.elasticsearch.action.search SearchType SearchPhaseExecutionException SearchResponse SearchRequestBuilder)
     (org.elasticsearch.action.support WriteRequest$RefreshPolicy WriteRequest)
@@ -256,6 +257,43 @@
         (delete (DeleteIndexRequest. index-name))
         (get)))
   (create-index client index-name))
+
+(defn get-all-indices
+  "Returns array of index names as strings.  Useful with `refresh-all-indices`.
+  Based on
+  https://stackoverflow.com/questions/33134906/elasticsearch-find-all-indexes-using-the-java-client
+  "
+  [^Client client]
+  (.. client
+      (admin)
+      (indices)
+      (getIndex (GetIndexRequest.))
+      (actionGet)
+      (getIndices)))
+
+(defn refresh-all-indices
+  [^Client client]
+  (.. client
+      (admin)
+      (indices)
+      (prepareRefresh (get-all-indices client))
+      (get)))
+
+(defn refresh-indices
+  [^Client client indexes]
+  (.. client
+      (admin)
+      (indices)
+      (prepareRefresh (into-array String indexes))
+      (get)))
+
+(defn refresh-index
+  [^Client client index]
+   (.. client
+       (admin)
+       (indices)
+       (prepareRefresh (into-array String [index]))
+       (get)))
 
 (defn random-index-name
   "Creates a random value for an index name. The name is the string value of a

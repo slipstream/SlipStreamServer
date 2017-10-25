@@ -12,9 +12,10 @@
     [clojure.tools.logging :as log]
     [clojure.string :as str]
     [clojure.core.async :as async]
-    [sixsq.slipstream.placement.cimi-util :as cu]
     [sixsq.slipstream.pricing.lib.pricing :as pr]
-    [sixsq.slipstream.client.api.cimi :as cimi]))
+    [sixsq.slipstream.client.api.cimi :as cimi]
+    [sixsq.slipstream.client.sync :as sync]
+    [environ.core :as e]))
 
 (def no-price -1)
 
@@ -92,13 +93,15 @@
        smallest-service-offer))
 
 (defn- fetch-service-offers
-  [cimi-filter cimi-orderby cimi-first cimi-last]
+  [token cimi-filter cimi-orderby cimi-first cimi-last]
   (let [request-parameter (cond-> {}
                                   cimi-filter  (assoc :$filter cimi-filter)
                                   cimi-orderby (assoc :$orderby cimi-orderby)
                                   cimi-first   (assoc :$first cimi-first)
-                                  cimi-last    (assoc :$last cimi-last))
-        result (cimi/search (cu/context) "serviceOffers" request-parameter)]
+                                  cimi-last    (assoc :$last cimi-last)
+                                  token        (assoc :user-token token))
+        client (sync/instance (e/env :ss-cimi-cloud-entry-point))
+        result (cimi/search client "serviceOffers" request-parameter)]
     (if (instance? Exception result)
       (do
         (log/error "exception when querying service offers; status =" (:status (ex-data result)))
@@ -106,23 +109,6 @@
       (do
         (log/debug "selected service offers:" result)
         (:serviceOffers result)))))
-
-(defn- fetch-service-offers-rescue-reauthenticate
-  [cimi-filter cimi-orderby cimi-first cimi-last]
-  (try
-    (fetch-service-offers cimi-filter cimi-orderby cimi-first cimi-last)
-    (catch Exception ex
-      (if (#{401 403} (:status (ex-data ex)))
-        (try
-          (log/error "retrying query")
-          (cu/update-context)
-          (let [result (fetch-service-offers cimi-filter cimi-orderby cimi-first cimi-last)]
-            (log/error "retry succeeded")
-            result)
-          (catch Exception ex
-            (log/error "retry failed; sending nil result")
-            nil))
-        (log/error "got an HTTP error while querying service offers: " (ex-data ex))))))
 
 (defn- priceable?
        [service-offer]
@@ -238,7 +224,7 @@
               disk (conj (format "resource:disk>=%s" (parse-number disk)))))))
 
 (defn- fetch-service-offer-compatible-connector
-  [clause-placement
+  [token clause-placement
    {cpu :cpu.nb, ram :ram.GB, disk :disk.GB, os :operating-system,
     connector-instance-types :connector-instance-types :as component}
    connector]
@@ -257,29 +243,28 @@
         orderby           "price:unitCost:asc,resource:vcpu:asc,resource:ram:asc,resource:disk:asc"
         last              1]
     (log/debug "Module name: " (:module component) " Clause request: " clause-request)
-    (fetch-service-offers-rescue-reauthenticate clause-request orderby nil first)))
+    (fetch-service-offers token clause-request orderby nil first)))
 
 (defn- compute-service-offers
-  [number-threads clause-placement connectors component]
+  [token number-threads clause-placement connectors component]
   (let [result (map-async-multithreaded number-threads
-                                        (partial fetch-service-offer-compatible-connector clause-placement component)
+                                        (partial fetch-service-offer-compatible-connector token clause-placement component)
                                         connectors)]
     (->> result (apply concat))))
 
 (defn- place-rank-component
-  [number-threads placement-params connectors component]
+  [token number-threads placement-params connectors component]
   (log/debug "component:" component)
   (log/debug "connectors:" connectors)
   (let [module (:module component)
         clause-placement ((keyword module) placement-params)
-        filtered-service-offers (compute-service-offers number-threads clause-placement connectors component)]
+        filtered-service-offers (compute-service-offers token number-threads clause-placement connectors component)]
     (log/debug "filtered offers"
                (map display-service-offer filtered-service-offers) "for component" (:module component))
     (price-component connectors filtered-service-offers component)))
 
 (defn place-and-rank
-  [request]
-  (cu/context)
+  [token request]
   (let [components       (:components request)
         connectors       (:user-connectors request)
         placement-params (:placement-params request)
@@ -287,7 +272,7 @@
         number-threads-connectors (max 1 (min max-thread (count connectors)))
         number-threads-components (max 1 (min (int (/ max-thread number-threads-connectors)) (count components)))
         result (map-async-multithreaded number-threads-components
-                                        (partial place-rank-component number-threads-connectors
+                                        (partial place-rank-component token number-threads-connectors
                                                  placement-params connectors)
                                         components)]
     (log/info "Number of threads: "

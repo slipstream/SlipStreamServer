@@ -1,6 +1,7 @@
 package com.sixsq.slipstream.persistence;
 
 
+import com.google.gson.annotations.SerializedName;
 import com.sixsq.slipstream.acl.ACL;
 import com.sixsq.slipstream.acl.TypePrincipal;
 import com.sixsq.slipstream.acl.TypePrincipalRight;
@@ -20,8 +21,52 @@ public class VirtualMachine {
     public static class ServiceOfferRef{
         public final String href;
 
+        @SerializedName("resource:vcpu")
+        public final Integer resourceVcpu;
+
+        @SerializedName("resource:ram")
+        public final Float resourceRam;
+
+        @SerializedName("resource:disk")
+        public final Float resourceDisk;
+
+        @SerializedName("resource:instanceType")
+        public final String resourceInstanceType;
+
+        @SerializedName("price:currency")
+        public final String priceCurrency;
+
+        @SerializedName("price:unitCost")
+        public final Float priceUnitCost;
+
+        @SerializedName("price:billingPeriodCode")
+        public final String priceBillingPeriodCode;
+
+        @SerializedName("price:freeUnits")
+        public final Float priceFreeUnits;
+
+        @SerializedName("price:unitCode")
+        public final String priceUnitCode;
+
         public ServiceOfferRef(String href) {
+            this(href, null, null, null, null, null, null, null, null, null);
+        }
+
+        public ServiceOfferRef(String href, Integer resourceVcpu, Float resourceRam, Float resourceDisk,
+                               String resourceInstanceType, String priceCurrency, Float priceUnitCost,
+                               String priceBillingPeriodCode, Float priceFreeUnits, String priceUnitCode) {
             this.href = href;
+
+            this.resourceVcpu = resourceVcpu;
+            this.resourceRam = resourceRam;
+            this.resourceDisk = resourceDisk;
+            this.resourceInstanceType = resourceInstanceType;
+
+            this.priceCurrency = priceCurrency;
+            this.priceUnitCost = priceUnitCost;
+            this.priceBillingPeriodCode = priceBillingPeriodCode;
+            this.priceFreeUnits = priceFreeUnits;
+            this.priceUnitCode = priceUnitCode;
         }
     };
 
@@ -39,9 +84,15 @@ public class VirtualMachine {
 
     public static class UserRef {
         public final String href;
+        public final String organization;
 
         public UserRef(String username){
+            this(username, null);
+        }
+
+        public UserRef(String username, String organization){
             this.href = "user/" + username;
+            this.organization = organization;
         }
 
     }

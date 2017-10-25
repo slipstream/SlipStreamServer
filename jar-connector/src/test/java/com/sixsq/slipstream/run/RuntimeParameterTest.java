@@ -29,13 +29,13 @@ import static org.junit.Assert.fail;
 
 import java.lang.reflect.InvocationTargetException;
 
+import com.sixsq.slipstream.connector.ConnectorTestBase;
 import com.sixsq.slipstream.event.Event;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
-import com.sixsq.slipstream.es.CljElasticsearchHelper;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
@@ -57,7 +57,7 @@ public class RuntimeParameterTest {
 			InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
 
 		Event.muteForTests();
-                CljElasticsearchHelper.createAndInitTestDb();
+		ConnectorTestBase.setupBackend();
 
 		user = CommonTestUtil.createTestUser();
 
@@ -69,6 +69,7 @@ public class RuntimeParameterTest {
 	@AfterClass
 	public static void teardownClass() {
 		CommonTestUtil.deleteUser(user);
+		ConnectorTestBase.teardownBackend();
 	}
 
 	@Test(expected = ValidationException.class)

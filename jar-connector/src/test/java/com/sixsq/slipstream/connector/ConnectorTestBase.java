@@ -21,16 +21,28 @@ package com.sixsq.slipstream.connector;
  */
 
 import com.sixsq.slipstream.es.CljElasticsearchHelper;
+import com.sixsq.slipstream.ssclj.app.SscljTestServer;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 public class ConnectorTestBase {
 
     @BeforeClass
     public static void setupClass() {
-        setupElasticseach();
+        setupBackend();
     }
 
-    public static void setupElasticseach() {
-        CljElasticsearchHelper.createAndInitTestDb();
+    public static void setupBackend() {
+        SscljTestServer.start();
+        CljElasticsearchHelper.initTestDb();
+    }
+
+    @AfterClass
+    public static void teardownClass() {
+        teardownBackend();
+    }
+
+    public static void teardownBackend() {
+        SscljTestServer.stop();
     }
 }

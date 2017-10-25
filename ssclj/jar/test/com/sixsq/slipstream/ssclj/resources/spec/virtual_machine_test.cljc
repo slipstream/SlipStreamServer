@@ -55,6 +55,9 @@
                        true? (assoc vm-sample :deployment {:href "run/fff-42"})
                        true? (assoc vm-sample :name "name"))
 
+                       ; TODO: Remove when credential resource is being used
+                       true? (assoc vm-sample :credentials [{:href "user/123456789@toto-aai.chhttps://aai-login.toto-aai.com/idp/shibboleth!https://fed-id.nuv.la/samlbridge/module.php/saml/sp/metadata.php/sixsq-saml-bridge!qwertyuiopasdfghjklzxcvbnm1234567890="}])
+
   ;; mandatory keywords
   (doseq [k #{:credentials :state :instanceID :connector}]
     (is (not (s/valid? :cimi/virtual-machine (dissoc vm-sample k)))))

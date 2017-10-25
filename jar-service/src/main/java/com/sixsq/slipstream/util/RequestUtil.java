@@ -30,6 +30,11 @@ public class RequestUtil {
 		return (User) request.getAttributes().get(User.REQUEST_KEY);
 	}
 
+	public static String getRolesFromRequest(Request request)
+			throws ConfigurationException, ValidationException {
+		return (String) request.getAttributes().getOrDefault(User.REQUEST_ROLES_KEY,"USER");
+	}
+
 	public static void addServiceConfigurationToRequest(
 			AtomicReference<ServiceConfiguration> cfgReference, Request request) {
 		Map<String, Object> attributes = request.getAttributes();

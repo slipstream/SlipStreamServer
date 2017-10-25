@@ -32,6 +32,15 @@
   [client]
   (alter-var-root #'*client* (constantly client)))
 
+(defn unset-client!
+  []
+  (.unbindRoot #'*client*))
+
+(defn close-client!
+  []
+  (.close *client*)
+  (unset-client!))
+
 (defn force-admin-role-right-all
   [data]
   (update-in data [:acl :rules] #(vec (set (conj % {:type "ROLE" :principal "ADMIN" :right "ALL"})))))
@@ -44,19 +53,21 @@
   (let [[type docid] (str/split id #"/")]
     [type (or docid type)]))
 
+(defn- prepare-data
+  "Prepares the data by adding the ADMIN role with ALL rights, denormalizing
+   the ACL, and turning the document into JSON."
+  [data]
+  (-> data
+      force-admin-role-right-all
+      acl/denormalize-acl
+      esu/edn->json))
+
 (defn- data->doc
-  "Prepares data before insertion in index
-  That includes
-  - add ADMIN role with right ALL
-  - denormalize ACLs
-  - jsonify "
+  "Provides the tuple of id, uuid, and prepared JSON document. "
   [data]
   (let [id (:id data)
         uuid (second (split-id id))
-        json (-> data
-                 force-admin-role-right-all
-                 acl/denormalize-acl
-                 esu/edn->json)]
+        json (prepare-data data)]
     [id uuid json]))
 
 (defn doc->data
@@ -129,9 +140,10 @@
 
   (edit [_ {:keys [id] :as data} options]
     (find-data *client* index-name id options "MODIFY")
-    (let [[type docid] (split-id id)]
-      (if (esu/update *client* index-name type docid (esu/edn->json data))
-        (cu/json-response data)
+    (let [[type docid] (split-id id)
+          updated-doc (prepare-data data)]
+      (if (esu/update *client* index-name type docid updated-doc)
+        (cu/json-response data)                             ;; FIXME: return updated data from database?
         (response-conflict id))))
 
   (query [_ collection-id options]

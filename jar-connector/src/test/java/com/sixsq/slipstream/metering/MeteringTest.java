@@ -30,8 +30,11 @@ import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.run.RunTestBase;
 import com.sixsq.slipstream.util.CommonTestUtil;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.util.UUID;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +43,6 @@ import java.util.Map;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-
 
 public class MeteringTest extends RunTestBase {
 
@@ -53,7 +55,7 @@ public class MeteringTest extends RunTestBase {
 	@BeforeClass
 	public static void setupClass() throws ConfigurationException, SlipStreamException {
 		UsageRecorder.muteForTests();
-		ConnectorTestBase.setupElasticseach();
+		ConnectorTestBase.setupBackend();
 		createUser();
 		String username = user.getName();
 
@@ -65,21 +67,25 @@ public class MeteringTest extends RunTestBase {
 
 		List<Vm> vms = new ArrayList<Vm>();
 
-		vms.add(createVm("id_1", CLOUD_A, RUNNING_VM_STATE, username, runId));
-		vms.add(createVm("id_2", CLOUD_A, RUNNING_VM_STATE, username, runId));
-		vms.add(createVm("id_3", CLOUD_A, "Terminated", username, runId));
+		vms.add(createVm(UUID.randomUUID().toString(), CLOUD_A, RUNNING_VM_STATE, username, runId));
+		vms.add(createVm(UUID.randomUUID().toString(), CLOUD_A, RUNNING_VM_STATE, username, runId));
+		vms.add(createVm(UUID.randomUUID().toString(), CLOUD_A, "Terminated", username, runId));
 		Collector.update(vms, username, CLOUD_A);
 
 		vms.clear();
-		vms.add(createVm("id_1", CLOUD_B, "Pending", username, runId));
-		vms.add(createVm("id_2", CLOUD_B, RUNNING_VM_STATE, username, runId));
-		vms.add(createVm("id_3", CLOUD_B, "Terminated", username, runId));
+		vms.add(createVm(UUID.randomUUID().toString(), CLOUD_B, "Pending", username, runId));
+		vms.add(createVm(UUID.randomUUID().toString(), CLOUD_B, RUNNING_VM_STATE, username, runId));
+		vms.add(createVm(UUID.randomUUID().toString(), CLOUD_B, "Terminated", username, runId));
 		Collector.update(vms, username, CLOUD_B);
+	}
 
+	@AfterClass
+	public static void teardownClass() {
+	    ConnectorTestBase.teardownBackend();
 	}
 
 	private static Vm createVm(String instanceid, String cloud, String state, String user, String runId) {
-		Vm vm = new Vm(instanceid, cloud, state, user, new LocalConnector().isVmUsable(state), null, null, null, null);
+		Vm vm = new Vm(instanceid, cloud, state, user, new LocalConnector().isVmUsable(state));
 		vm.setRunUuid(runId);
 		vm.setRunOwner(user);
 		return vm;

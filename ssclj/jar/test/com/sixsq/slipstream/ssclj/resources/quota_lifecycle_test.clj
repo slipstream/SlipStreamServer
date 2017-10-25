@@ -107,11 +107,12 @@
                                         :request-method :post)
                                (ltu/body->edn)
                                (ltu/is-status 200)
-                               :response)]
+                               :response
+                               :body)]
 
           ;; check that the collect action returns the correct response
-          (is (= n-vm (:current-all collect-resp)))
-          (is (= (get freq "jane") (:current-user collect-resp)))
+          (is (= n-vm (:currentAll collect-resp)))
+          (is (= (get freq "jane") (:currentUser collect-resp)))
           (is (= 100 (:limit collect-resp))))
 
         ;; other user view: FAIL
@@ -136,11 +137,12 @@
                                         :request-method :post)
                                (ltu/body->edn)
                                (ltu/is-status 200)
-                               :response)]
+                               :response
+                               :body)]
 
           ;; check that the collect action returns the correct response
-          (is (= n-vm (:current-all collect-resp)))
-          (is (= n-vm (:current-user collect-resp)))
+          (is (= n-vm (:currentAll collect-resp)))
+          (is (= n-vm (:currentUser collect-resp)))
           (is (= 100 (:limit collect-resp))))
 
         ;; admin edit: OK
