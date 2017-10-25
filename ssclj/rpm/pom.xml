@@ -159,6 +159,7 @@
 
         <executions>
 
+          <!--
           <execution>
             <id>copy-jar</id>
             <goals>
@@ -178,6 +179,7 @@
               </artifactItems>
             </configuration>
           </execution>
+          -->
 
           <execution>
             <id>copy-dependencies</id>
@@ -279,6 +281,7 @@ ${installation.dir}/bin/generate-auth-keys.sh
               </sources>
             </mapping>
 
+            <!--
             <mapping>
               <directory>${installation.dir}/lib</directory>
               <directoryIncluded>false</directoryIncluded>
@@ -288,16 +291,19 @@ ${installation.dir}/bin/generate-auth-keys.sh
                 </source>
               </sources>
             </mapping>
+            -->
 
             <mapping>
-              <directory>${installation.dir}/lib/ext</directory>
+              <directory>${installation.dir}/lib</directory>
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
                   <location>target/dependency/lib/ext</location>
+                  <!--
                   <excludes>
                     <exclude>SlipStreamCljResources-jar.jar</exclude>
                   </excludes>
+                  -->
                 </source>
               </sources>
             </mapping>
