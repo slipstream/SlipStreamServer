@@ -13,7 +13,6 @@
     [metrics.ring.expose :refer [expose-metrics-as-json]]
     [metrics.jvm.core :refer [instrument-jvm]]
 
-    [com.sixsq.slipstream.ssclj.app.aleph-container :as aleph]
     [com.sixsq.slipstream.ssclj.middleware.logger :refer [wrap-logger]]
     [com.sixsq.slipstream.ssclj.middleware.base-uri :refer [wrap-base-uri]]
     [com.sixsq.slipstream.ssclj.middleware.exception-handler :refer [wrap-exceptions]]
@@ -27,9 +26,11 @@
     [com.sixsq.slipstream.ssclj.util.zookeeper :as zku]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as resources]))
 
+
 (defn- set-persistence-impl
   []
   (db/set-impl! (esb/get-instance)))
+
 
 (defn- create-ring-handler
   "Creates a ring handler that wraps all of the service routes
@@ -55,51 +56,64 @@
       (wrap-json-response {:pretty true :escape-non-ascii true})
       (instrument default-registry)
       wrap-logger
-      wrap-cookies
-      ))
+      wrap-cookies))
 
-(defn start
-  "Starts the server and returns a function that when called, will
-   stop the application server."
-  ([port]
-   (start port "aleph"))
-  ([port impl]
-   (log/info "=============== SSCLJ START" port "===============")
-   (log/info "java vendor: " (System/getProperty "java.vendor"))
-   (log/info "java version: " (System/getProperty "java.version"))
-   (log/info "java classpath: " (System/getProperty "java.class.path"))
-
-   (instrument-jvm default-registry)
-
-   (esb/set-client! (esb/create-client))
-
-   (zku/set-client! (zku/create-client))
-
-   (set-persistence-impl)
-   (resources/initialize)
-   (let [handler (create-ring-handler)]
-     (graphite/start-graphite-reporter)
-     (aleph/start-container handler port))))
 
 (defn stop
   "Stops the application server by calling the function that was
    created when the application server was started."
-  [stop-fn]
-  (try
-    (and stop-fn (stop-fn))
-    (log/info "shutdown application container")
-    (catch Exception e
-      (log/warn "application container shutdown failed:" (.getMessage e))))
+  []
+  (graphite/stop-graphite-reporter)
+
   (try
     (zku/close-client!)
+    (log/info "zookeeper client closed")
     (catch Exception e
-      (log/warn "zookeeper client close failed:" (.getMessage e))))
+      (log/warn "zookeeper client close failed:" (str e))))
+
   (try
     (esb/close-client!)
+    (log/info "elasticsearch client closed")
     (catch Exception e
-      (log/warn "elasticsearch client close failed:" (.getMessage e))))
+      (log/warn "elasticsearch client close failed:" (str e))))
+
   (try
     (remove-all-metrics)
+    (log/info "removed all instrumentation metrics")
     (catch Exception e
-      (log/warn "failed removing all instrumentation metrics:" (.getMessage e)))))
+      (log/warn "failed removing all instrumentation metrics:" (str e)))))
 
+
+(defn init
+  []
+
+  (try
+    (instrument-jvm default-registry)
+    (catch Exception e
+      (log/warn "error registering instrumentation metrics:" (str e))))
+
+  (try
+    (esb/set-client! (esb/create-client))
+    (catch Exception e
+      (log/warn "error creating elasticsearch client:" (str e))))
+
+  (try
+    (zku/set-client! (zku/create-client))
+    (catch Exception e
+      (log/warn "error creating zookeeper client:" (str e))))
+
+  (let [handler (create-ring-handler)]
+
+    (try
+      (set-persistence-impl)
+      (catch Exception e
+        (log/warn "error setting persistence implementation:" (str e))))
+
+    (try
+      (resources/initialize)
+      (catch Exception e
+        (log/warn "error initializing resources:" (str e))))
+
+    (graphite/start-graphite-reporter)
+
+    [handler stop]))

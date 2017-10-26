@@ -1,11 +1,12 @@
 [Unit]
-Description=SlipStream API
+Description=SlipStream CIMI API
 After=syslog.target
 After=network.target
+
+# remove this once the user resource has been migrated
 After=hsqldb.service
 
 [Service]
-Environment=SSCLJ_PORT=8201
 Environment=AUTH_PRIVATE_KEY=/etc/slipstream/auth/auth_privkey.pem
 Environment=AUTH_PUBLIC_KEY=/etc/slipstream/auth/auth_pubkey.pem
 Environment=AUTH_PUBLIC_KEY_CYCLONE=/etc/slipstream/auth/cyclone_pubkey.pem
@@ -18,8 +19,8 @@ WorkingDirectory=${installation.dir}
 ExecStart=/usr/bin/java \
             -Dconfig.name=db.spec \
             -Dlogfile.path=production \
-            -cp "resources:lib/ssclj.jar:lib/ext/*" \
-            com.sixsq.slipstream.ssclj.app.main $SSCLJ_PORT
+            -cp "/opt/slipstream/ring-container/lib/*:resources:lib/*" \
+            sixsq.slipstream.server.ring_container
 ExecStop=/bin/kill -TERM $MAINPID
 
 # When a JVM receives a SIGTERM signal it exits with code 143
