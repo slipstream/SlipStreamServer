@@ -22,14 +22,18 @@ package com.sixsq.slipstream.persistence;
 
 import com.sixsq.slipstream.connector.Collector;
 import com.sixsq.slipstream.connector.Connector;
+import com.sixsq.slipstream.connector.ConnectorTestBase;
 import com.sixsq.slipstream.connector.UsageRecorder;
 import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.util.SscljProxy;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -46,6 +50,20 @@ public class CollectorTest {
 	private static String secondCloud = "secondCloud";
 	private static String username = "user";
 	private static User user = null;
+
+	@BeforeClass
+	public static void setupClass() throws ConfigurationException, SlipStreamException {
+		ConnectorTestBase.setupBackend();
+		UsageRecorder.muteForTests();
+		SscljProxy.muteForTests();
+	}
+
+	@AfterClass
+	public static void teardownClass() {
+		ConnectorTestBase.teardownBackend();
+		SscljProxy.unmuteForTests();
+		UsageRecorder.unmuteForTests();
+	}
 
 	@Before
 	public void setup() throws ValidationException {
