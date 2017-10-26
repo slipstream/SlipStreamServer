@@ -32,13 +32,6 @@
         </dependency>
 
         <dependency>
-                <groupId>com.sixsq.slipstream</groupId>
-                <artifactId>SlipStreamDbSerializers-jar</artifactId>
-                <version>${project.version}</version>
-                <scope>test</scope>
-        </dependency>
-
-        <dependency>
                 <groupId>org.clojure</groupId>
                 <artifactId>clojure</artifactId>
         </dependency>
@@ -54,9 +47,6 @@
 		<resources>
 			<resource>
 				<directory>src</directory>
-			</resource>
-			<resource>
-				<directory>test</directory>
 			</resource>
 		</resources>
 		<plugins>
@@ -78,21 +68,11 @@
 							<goal>compile</goal>
 						</goals>
 					</execution>
-                                        <execution>
-						<id>test</id>
-						<phase>test</phase>
-						<goals>
-							<goal>test</goal>
-						</goals>
-					</execution>
                                 </executions>
 				<configuration>
 					<sourceDirectories>
 						<sourceDirectory>src</sourceDirectory>
 					</sourceDirectories>
-                                        <testSourceDirectories>
-						<testSourceDirectory>test</testSourceDirectory>
-					</testSourceDirectories>
 				</configuration>
 			</plugin>
 		</plugins>
