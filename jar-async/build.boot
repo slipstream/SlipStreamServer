@@ -26,28 +26,22 @@
                    [com.sixsq.slipstream/SlipStreamPersistence]
                    [com.sixsq.slipstream/SlipStreamConnector]
 
-                   [com.sixsq.slipstream/SlipStreamDbSerializers-jar nil :scope "test"]
-
-                   [adzerk/boot-test]
                    [adzerk/boot-reload]
                    [tolitius/boot-check]
                    [boot-codox]
                    [onetom/boot-lein-generate]]))))
 
 (require
-  '[adzerk.boot-test :refer [test]]
   '[adzerk.boot-reload :refer [reload]]
   '[tolitius.boot-check :refer [with-yagni with-eastwood with-kibit with-bikeshed]]
   '[codox.boot :refer [codox]]
   '[boot.lein :refer [generate]])
 
 (set-env!
-  :source-paths #{"test"}
   :resource-paths #{"src"})
 
 (task-options!
   pom {:project (get-env :project)
-       :version (get-env :version)}
-  test {:junit-output-to ""})
+       :version (get-env :version)})
 
 
