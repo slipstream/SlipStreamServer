@@ -60,43 +60,98 @@
              (kc/where (= :USERPARAMETER.CATEGORY category))))
 
 
-(defn extract-data
-  [category coll k]
-  (let [val (get coll k)
-        byname (group-by :NAME val)
-        key (:VALUE (first (get byname (str category ".username"))))
-        secret (:VALUE (first (get byname (str category ".password"))))
-        domain (:VALUE (first (get byname (str category ".domain.name"))))
-        templateHref (cond
-                       (= "exoscale-ch-gva" category) "credential-template/store-cloud-cred-exoscale"
-                       (= "exoscale-ch-dk" category) "credential-template/store-cloud-cred-exoscale"
-                       (= "open-telekom-de1" category) "credential-template/store-cloud-cred-otc")]
-    (if (and key secret domain (not (empty? key)))
-      {:credentialTemplate {:href        templateHref
-                            :key         key
-                            :secret      secret
-                            :domain-name domain}
-       :description        "Migration from database"
-       :name               k})))
+(defn check-exo-template
+  [t u]
+  (let [
+        {key :key secret :secret domain :domain-name connector :connector} (:credentialTemplate t)]
+    (if (and key secret domain connector (not (empty? key))) (assoc t :user u))))
 
-(defn do-credentials
+
+(defn check-otc-template
+  [t u]
+  (let [
+        {key :key secret :secret domain :domain-name tenant :tenant-name connector :connector} (:credentialTemplate t)]
+    (if (and key secret domain tenant connector (not (empty? key))) (assoc t :user u))))
+
+(defn extract-data
+  [category coll user]
+  (let [val (get coll user)
+        byfields (group-by :NAME val)
+        key (:VALUE (first (get byfields (str category ".username"))))
+        secret (:VALUE (first (get byfields (str category ".password"))))
+        domain (:VALUE (first (get byfields (str category ".domain.name"))))
+        tenant (:VALUE (first (get byfields (str category ".tenant.name"))))
+        exo-template {:credentialTemplate {:href        "credential-template/store-cloud-cred-exoscale"
+                                           :key         key
+                                           :secret      secret
+                                           :connector   (str "connector/" category)
+                                           :domain-name domain}}
+        otc-template {:credentialTemplate {:href        "credential-template/store-cloud-cred-otc"
+                                           :key         key
+                                           :secret      secret
+                                           :tenant-name tenant
+                                           :connector   (str "connector/" category)
+                                           :domain-name domain}}]
+    (cond
+      (= "exoscale-ch-gva" category) (check-exo-template exo-template user)
+      (= "exoscale-ch-dk" category) (check-exo-template exo-template user)
+      (= "open-telekom-de1" category) (check-otc-template otc-template user))))
+
+
+(defn merge-acl
+  [v]
+
+  (let [users (map :user v)
+        add-rule (fn [u] {:type      "USER"
+                          :principal u
+                          :right     "VIEW"
+                          })
+        rules (vec (map add-rule users))
+        base-acl {:owner {:principal "ADMIN"
+                          :type      "ROLE"}}
+        base-rule {
+                   :type      "ROLE",
+                   :principal "ADMIN",
+                   :right     "ALL"
+                   }
+        ]
+    (assoc base-acl :rules (conj rules base-rule))))
+
+
+(defn generate-records
+  [vt]
+  (let [header (dissoc (first (first vt)) :user)
+        gen-content (fn [v] (assoc-in header [:credentialTemplate :acl] (merge-acl v)))]
+    (map gen-content vt)))
+
+(defn add-credentials
   [client category]
   (let [
-        login (authn/login client {:href     "session-template/internal"
-                                   :username (environ/env :DBMIGRATION-USER)
-                                   :password (environ/env :DBMIGRATION-PASSWORD)})
-        get-grouped-data (fn [category] (group-by :CONTAINER_RESOURCEURI (fetch-users category)))
+
+        get-grouped-data (fn [c] (group-by :CONTAINER_RESOURCEURI (fetch-users c)))
         coll (get-grouped-data category)
-        templates (map (partial extract-data category coll) (keys coll))]
-    (map #(cimi/add client "credentials" %) templates)))
+        templates (filter (complement nil?) (map (partial extract-data category coll) (keys coll)))
+        templates-by-key (group-by #(:key (:credentialTemplate %)) templates)
+        records (generate-records (map second templates-by-key))
+        ]
 
-
+    (println (str "Collection for " category " : Adding " (count coll) " records"))
+    (println (str "Migrating category " category " : Adding " (count records) " credentials"))
+    (map (partial cimi/add client "credentials") records)))
 
 (defn -main
-  "Main function to migrate client data resources from DB to CIMI (Elastic Search)"
+  " Main function to migrate client data resources from DB to CIMI (Elastic Search) "
   []
   (let [init (do-korma-init)
-        categories ["open-telekom-de1", "exoscale-ch-gva", "exoscale-ch-dk"]
-        client (sync/instance)]
-    (map #(do-credentials client %) categories)))
+        categories #{"open-telekom-de1", "exoscale-ch-gva", "exoscale-ch-dk"}
+        cep-endpoint (or (environ/env :dbmigration-endpoint) "https://nuv.la/api/cloud-entry-point")
+        client (if (environ/env :dbmigration-options) (sync/instance cep-endpoint (read-string (environ/env :dbmigration-options))) (sync/instance cep-endpoint))
+            login (authn/login client {:href     "session-template/internal"
+                                       :username (environ/env :dbmigration-user) ;;export DBMIGRATION_USER="super"
+
+                                       :password (environ/env :dbmigration-password)})]
+
+           (map (partial add-credentials client) categories)
+
+           ))
 
