@@ -19,9 +19,9 @@
     (zk/connect zk-endpoints :timeout-msec 60000)))
 
 (defn close-client! []
-  (let [client *client*]
-    (set-client! nil)
-    (zk/close client)))
+  (when *client*
+    (zk/close *client*)
+    (set-client! nil)))
 
 (defn string-to-byte [value]
   (.getBytes (str value) "UTF-8"))
