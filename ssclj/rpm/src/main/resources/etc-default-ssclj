@@ -1,5 +1,7 @@
 # Defaults for the SlipStream API server.
-SSCLJ_PORT=8201
+SLIPSTREAM_RING_CONTAINER_INIT=com.sixsq.slipstream.ssclj.app.server/init
+SLIPSTREAM_RING_CONTAINER_PORT=8201
+
 SSCLJ_GRAPHITE_HOST=127.0.0.1
 
 # Elasticsearch 
