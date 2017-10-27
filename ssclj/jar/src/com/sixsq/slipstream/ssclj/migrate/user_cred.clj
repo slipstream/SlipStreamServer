@@ -2,7 +2,7 @@
 ;; To run this script:
 ;; java -cp .../ssclj-XXX-SNAPSHOT-standalone.jar com.sixsq.slipstream.ssclj.migrate.user-cred
 ;;
-(ns com.sixsq.slipstream.ssclj.migrate.user_cred
+(ns com.sixsq.slipstream.ssclj.migrate.user-cred
   (:require
     [korma.core :as kc]
     [korma.db :as kdb]
@@ -64,23 +64,23 @@
   [t u]
   (let [
         {key :key secret :secret domain :domain-name connector :connector} (:credentialTemplate t)]
-    (if (and key secret domain connector (not (empty? key))) (assoc t :user u))))
+    (when (and key secret domain connector (not (empty? key))) (assoc t :user u))))
 
 
 (defn check-otc-template
   [t u]
   (let [
         {key :key secret :secret domain :domain-name tenant :tenant-name connector :connector} (:credentialTemplate t)]
-    (if (and key secret domain tenant connector (not (empty? key))) (assoc t :user u))))
+    (when (and key secret domain tenant connector (not (empty? key))) (assoc t :user u))))
 
 (defn extract-data
   [category coll user]
-  (let [val (get coll user)
-        byfields (group-by :NAME val)
-        key (:VALUE (first (get byfields (str category ".username"))))
-        secret (:VALUE (first (get byfields (str category ".password"))))
-        domain (:VALUE (first (get byfields (str category ".domain.name"))))
-        tenant (:VALUE (first (get byfields (str category ".tenant.name"))))
+  (let [byfields (group-by :NAME (get coll user))
+        get-value (fn [field] (:VALUE (first (get byfields (str category field)))))
+        key (get-value ".username")
+        secret (get-value ".password")
+        domain (get-value ".domain.name")
+        tenant (get-value ".tenant.name")
         exo-template {:credentialTemplate {:href        "credential-template/store-cloud-cred-exoscale"
                                            :key         key
                                            :secret      secret
@@ -91,35 +91,43 @@
                                            :secret      secret
                                            :tenant-name tenant
                                            :connector   (str "connector/" category)
-                                           :domain-name domain}}]
-    (cond
-      (= "exoscale-ch-gva" category) (check-exo-template exo-template user)
-      (= "exoscale-ch-dk" category) (check-exo-template exo-template user)
-      (= "open-telekom-de1" category) (check-otc-template otc-template user))))
+                                           :domain-name domain}}
+        category-definition (fn [coll k] (get (first (filter #(get % k) coll)) k))
+        supported-categories #{{"exoscale-ch-gva" {:check-fn check-exo-template :template exo-template}},
+                               {"exoscale-ch-dk" {:check-fn check-exo-template :template exo-template}},
+                               {"open-telekom-de1" {:check-fn check-otc-template :template otc-template}}}
+        check-fn (:check-fn (category-definition supported-categories category))
+        template-tu-use (:template (category-definition supported-categories category))
+        ]
+
+    (when check-fn
+      (check-fn template-tu-use user))
+
+    ))
 
 
 (defn merge-acl
   [v]
-
   (let [users (map :user v)
-        add-rule (fn [u] {:type      "USER"
-                          :principal u
-                          :right     "VIEW"
-                          })
-        rules (vec (map add-rule users))
+        add-rule (fn [u] (when u {:type      "USER"
+                                  :principal u
+                                  :right     "VIEW"
+                                  }))
+        rules (vec (filter (complement nil?) (map add-rule users)))
         base-acl {:owner {:principal "ADMIN"
                           :type      "ROLE"}}
-        base-rule {
-                   :type      "ROLE",
+        base-rule {:type      "ROLE",
                    :principal "ADMIN",
-                   :right     "ALL"
-                   }
-        ]
+                   :right     "ALL"}]
     (assoc base-acl :rules (conj rules base-rule))))
 
 
 (defn generate-records
   [vt]
+  {:pre [(seq? vt)
+         (not (empty? vt))
+         (every? vector? vt)
+         ]}
   (let [header (dissoc (first (first vt)) :user)
         gen-content (fn [v] (assoc-in header [:credentialTemplate :acl] (merge-acl v)))]
     (map gen-content vt)))
@@ -145,13 +153,14 @@
   (let [init (do-korma-init)
         categories #{"open-telekom-de1", "exoscale-ch-gva", "exoscale-ch-dk"}
         cep-endpoint (or (environ/env :dbmigration-endpoint) "https://nuv.la/api/cloud-entry-point")
+        ;;e.g DBMIGRATION_OPTIONS={:insecure? true}
         client (if (environ/env :dbmigration-options) (sync/instance cep-endpoint (read-string (environ/env :dbmigration-options))) (sync/instance cep-endpoint))
-            login (authn/login client {:href     "session-template/internal"
-                                       :username (environ/env :dbmigration-user) ;;export DBMIGRATION_USER="super"
+        login (authn/login client {:href     "session-template/internal"
+                                   :username (environ/env :dbmigration-user) ;;export DBMIGRATION_USER="super"
 
-                                       :password (environ/env :dbmigration-password)})]
+                                   :password (environ/env :dbmigration-password)})]
 
-           (map (partial add-credentials client) categories)
+    (map (partial add-credentials client) categories)
 
-           ))
+    ))
 
