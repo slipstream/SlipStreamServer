@@ -16,6 +16,7 @@
   </parent>
 
   <modules>
+    <module>cimi</module>
     <module>jar</module>
     <module>tools</module>
   </modules>
