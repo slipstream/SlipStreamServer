@@ -18,6 +18,7 @@
     <module>utils</module>
     <module>token</module>
     <module>auth</module>
+    <module>cimi</module>
     <module>jar-persistence</module>
     <module>jar-connector</module>
     <module>jar-async</module>
