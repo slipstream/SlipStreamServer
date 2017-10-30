@@ -38,11 +38,14 @@
                     [metrics-clojure-jvm]
                     [metrics-clojure-graphite]
                     [me.raynes/fs]
+                    [org.apache.logging.log4j/log4j-core]
+                    [org.apache.logging.log4j/log4j-api]
                     [org.clojure/data.json]
                     [org.clojure/java.classpath]
                     [org.clojure/tools.cli]
                     [org.clojure/tools.logging]
                     [org.clojure/tools.namespace]
+                    [org.slf4j/slf4j-log4j12 :scope "provided"]
                     [potemkin]
                     [ring/ring-core]
                     [ring/ring-json]
@@ -51,10 +54,9 @@
 
                     [com.sixsq.slipstream/utils]
                     [com.sixsq.slipstream/auth]
-                    [com.sixsq.slipstream/token]
+                    [com.sixsq.slipstream/slipstream-ring-container :scope "test"]
                     [com.sixsq.slipstream/SlipStreamDbBinding-jar]
-                    [org.apache.logging.log4j/log4j-core]
-                    [org.apache.logging.log4j/log4j-api]
+                    [com.sixsq.slipstream/token]
 
                     ;; needed for migration scripts
                     [korma]
@@ -164,7 +166,8 @@
                             #"config-hsqldb.edn"
                             #"log4j.properties"}
                  :invert true)
-           (aot :namespace #{'com.sixsq.slipstream.ssclj.app.main 'com.sixsq.slipstream.ssclj.usage.summarizer})
+           (aot :namespace #{'com.sixsq.slipstream.ssclj.app.main
+                             'com.sixsq.slipstream.ssclj.usage.summarizer})
            #_(uber :exclude #{#"(?i)^META-INF/INDEX.LIST$"
                               #"(?i)^META-INF/[^/]*\.(MF|SF|RSA|DSA)$"
                               #".*log4j\.properties"})
@@ -184,7 +187,8 @@
                 :classifier "tests"
                 :dependencies (merge-defaults
                                 ['sixsq/default-deps (get-env :version)]
-                                [['org.apache.curator/curator-test :scope "compile"]]))
+                                [['org.apache.curator/curator-test :scope "compile"]
+                                 ['com.sixsq.slipstream/slipstream-ring-container :scope "compile"]]))
            (sift
              :to-resource #{#"lifecycle_test_utils\.clj"
                             #"connector_test_utils\.clj"}
@@ -209,14 +213,15 @@
                 :classifier "tests"
                 :dependencies (merge-defaults
                                 ['sixsq/default-deps (get-env :version)]
-                                [['org.apache.curator/curator-test :scope "compile"]]))
+                                [['org.apache.curator/curator-test :scope "compile"]
+                                 ['com.sixsq.slipstream/slipstream-ring-container :scope "compile"]]))
            (sift
              :to-resource #{#"test_server\.clj"
                             #"SscljTestServer\.clj"}
              :include #{#"test_server\.clj"
-                            #"SscljTestServer\.clj"
-                            #"pom.xml"
-                            #"pom.properties"})
+                        #"SscljTestServer\.clj"
+                        #"pom.xml"
+                        #"pom.properties"})
            (aot :namespace #{'com.sixsq.slipstream.ssclj.app.SscljTestServer})
            (jar :file test-server-jar-name)))
 
