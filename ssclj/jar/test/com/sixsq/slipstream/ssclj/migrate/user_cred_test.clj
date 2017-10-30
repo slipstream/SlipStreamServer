@@ -14,15 +14,12 @@
                                        :domain-name "domain"
                                        :connector   "href"}
                   :user               "user"}]
-
     (is (= expected (t/check-exo-template valid-template user)))
     (is (= (assoc expected :user "newuser") (t/check-exo-template valid-template "newuser")))
     (is (= (assoc-in expected [:credentialTemplate :key] "newkey")
            (t/check-exo-template (assoc-in expected [:credentialTemplate :key] "newkey") user)))
-
     ;;empty key
     (is (= nil (t/check-exo-template (assoc-in expected [:credentialTemplate :key] "") user)))
-
     ;; mandatory keywords
     (doseq [k #{:key :secret :domain-name :connector}]
       (is (= nil (t/check-exo-template (update-in valid-template [:credentialTemplate] dissoc k) user))))))
@@ -40,20 +37,19 @@
                                        :tenant-name "tenant"
                                        :connector   "href"}
                   :user               "user"}]
-
     (is (= expected (t/check-otc-template valid-template user)))
     (is (= (assoc expected :user "newuser") (t/check-exo-template valid-template "newuser")))
     (is (= (assoc-in expected [:credentialTemplate :key] "newkey")
            (t/check-otc-template (assoc-in expected [:credentialTemplate :key] "newkey") user)))
     ;;empty key
     (is (= nil (t/check-otc-template (assoc-in expected [:credentialTemplate :key] "") user)))
-
     ;; mandatory keywords
     (doseq [k #{:key :secret :domain-name :tenant-name :connector}]
       (is (= nil (t/check-otc-template (update-in valid-template [:credentialTemplate] dissoc k) user))))))
 
 (def user1 "user/user1")
 (def user2 "user/user2")
+
 (def coll {user1
            [{:ID                    103413,
              :VALUE                 "EXO0000000001",
@@ -154,9 +150,6 @@
              :NAME                  "exoscale-ch-gva.password"}]})
 
 
-
-
-
 (deftest extracting-data
   (let [category-exo-gva "exoscale-ch-gva"
         category-otc "open-telekom-de1"
@@ -166,18 +159,13 @@
                                         :secret      "secret"
                                         :connector   "connector/exoscale-ch-gva"
                                         :domain-name ""}
-                   :user               user1
-                   }
-
+                   :user               user1}
         expected2 {:credentialTemplate {:href        "credential-template/store-cloud-cred-exoscale"
                                         :key         "EXO0000000002"
                                         :secret      "secret"
                                         :connector   "connector/exoscale-ch-gva"
                                         :domain-name ""}
-                   :user               user2
-                   }
-        ]
-
+                   :user               user2}]
     (is (= nil (t/extract-data nil nil nil)))
     (is (= nil (t/extract-data category-exo-gva nil nil)))
     (is (= nil (t/extract-data nil coll nil)))
@@ -194,14 +182,13 @@
   (let [base-acl {:owner {:principal "ADMIN", :type "ROLE"},
                   :rules [{:type "ROLE", :principal "ADMIN", :right "ALL"}]}
         expect-user1 {:owner {:principal "ADMIN", :type "ROLE"},
-                      :rules [{:type "USER", :principal "user1", :right "VIEW"}
-                              {:type "ROLE", :principal "ADMIN", :right "ALL"}
+                      :rules [{:type "ROLE", :principal "ADMIN", :right "ALL"}
+                              {:type "USER", :principal "user1", :right "VIEW"}
                               ]}
         expect-2users {:owner {:principal "ADMIN", :type "ROLE"},
-                       :rules [{:type "USER", :principal "user1", :right "VIEW"}
-                               {:type "USER", :principal "user2", :right "VIEW"}
-                               {:type "ROLE", :principal "ADMIN", :right "ALL"}
-                               ]}]
+                       :rules [{:type "ROLE", :principal "ADMIN", :right "ALL"}
+                               {:type "USER", :principal "user1", :right "VIEW"}
+                               {:type "USER", :principal "user2", :right "VIEW"}]}]
     (is (= base-acl (t/merge-acl nil)))
     (is (= base-acl (t/merge-acl [])))
     (is (= base-acl (t/merge-acl {})))
@@ -214,11 +201,46 @@
     (is (= expect-2users (t/merge-acl [{:user "user1"} {:user "user2"}])))
     (is (= expect-2users (t/merge-acl [{:user "user1" :extra "extra1"} {:user "user2" :extra "extra2"}])))))
 
+
 (deftest records-generations
-
   (let [base-template {:credentialTemplate {:acl {:owner {:principal "ADMIN", :type "ROLE"},
-                                                  :rules [{:type "ROLE", :principal "ADMIN", :right "ALL"}]}}}]
+                                                  :rules [{:type "ROLE", :principal "ADMIN", :right "ALL"}]}}}
+        simple-valid-source (list [{:credentialTemplate {:href        "credential-template/store-cloud-cred-exoscale",
+                                                         :key         "aKey",
+                                                         :secret      "aSecret",
+                                                         :connector   "connector/exoscale-ch-gva",
+                                                         :domain-name ""},
+                                    :user               "user/user1"}])
+        simple-source (list [{:credentialTemplate {:href        "credential-template/store-cloud-cred-exoscale",
+                                                   :key         "aKey",
+                                                   :secret      "aSecret",
+                                                   :connector   "connector/exoscale-ch-gva",
+                                                   :domain-name ""},
+                              :user               "user/user1"}])
 
+        expect-simple (list {:credentialTemplate {:href        "credential-template/store-cloud-cred-exoscale",
+                                                  :key         "aKey",
+                                                  :secret      "aSecret",
+                                                  :connector   "connector/exoscale-ch-gva",
+                                                  :domain-name "",
+                                                  :acl         {:owner {:principal "ADMIN", :type "ROLE"},
+                                                                :rules [{:type "ROLE", :principal "ADMIN", :right "ALL"}
+                                                                        {:type "USER", :principal "user/user1", :right "VIEW"}]}}})
+        multiplicity 42
+        multi-source (map #(vector (conj {:credentialTemplate {:href        "credential-template/store-cloud-cred-exoscale",
+                                                               :key         "aKey",
+                                                               :secret      "aSecret",
+                                                               :connector   "connector/exoscale-ch-gva",
+                                                               :domain-name ""}} {:user (str "user/user" %)})) (range multiplicity))
+        base-expect {:credentialTemplate {:href        "credential-template/store-cloud-cred-exoscale",
+                                          :key         "aKey",
+                                          :secret      "aSecret",
+                                          :connector   "connector/exoscale-ch-gva",
+                                          :domain-name "",
+                                          :acl         {:owner {:principal "ADMIN", :type "ROLE"},
+                                                        :rules [{:type "ROLE", :principal "ADMIN", :right "ALL"}]}}}
+        add-user-rule (fn [x] (update-in base-expect [:credentialTemplate :acl :rules] conj {:type "USER" :principal (str "user/user" x) :right "VIEW"}))
+        expect-multi (map add-user-rule (range multiplicity))]
     (is (thrown? AssertionError (t/generate-records nil)))
     (is (thrown? AssertionError (t/generate-records [])))
     (is (thrown? AssertionError (t/generate-records {})))
@@ -229,8 +251,12 @@
     (is (thrown? AssertionError (t/generate-records [{:wrong "value"}])))
     (is (thrown? AssertionError (t/generate-records (list :wrong))))
     (is (= (list base-template) (t/generate-records (list []))))
-
-    ))
+    (is (thrown? AssertionError (t/generate-records (list [nil]))))
+    (is (thrown? AssertionError (t/generate-records (list [:test]))))
+    (is (= (list base-template) (t/generate-records (list [{}]))))
+    (is (thrown? AssertionError (t/generate-records (list ["value"]))))
+    (is (= expect-simple (t/generate-records simple-source)))
+    (is (= expect-multi (t/generate-records multi-source)))))
 
 
 

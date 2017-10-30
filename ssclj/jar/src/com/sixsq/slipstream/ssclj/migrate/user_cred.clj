@@ -16,8 +16,6 @@
     [clojure.edn :as edn])
   (:gen-class))
 
-
-
 (defn- find-resource
   [resource-path]
   (if-let [config-file (io/resource resource-path)]
@@ -69,8 +67,7 @@
 
 (defn check-otc-template
   [t u]
-  (let [
-        {key :key secret :secret domain :domain-name tenant :tenant-name connector :connector} (:credentialTemplate t)]
+  (let [{key :key secret :secret domain :domain-name tenant :tenant-name connector :connector} (:credentialTemplate t)]
     (when (and key secret domain tenant connector (not (empty? key))) (assoc t :user u))))
 
 (defn extract-data
@@ -97,13 +94,9 @@
                                {"exoscale-ch-dk" {:check-fn check-exo-template :template exo-template}},
                                {"open-telekom-de1" {:check-fn check-otc-template :template otc-template}}}
         check-fn (:check-fn (category-definition supported-categories category))
-        template-tu-use (:template (category-definition supported-categories category))
-        ]
-
+        template-tu-use (:template (category-definition supported-categories category))]
     (when check-fn
-      (check-fn template-tu-use user))
-
-    ))
+      (check-fn template-tu-use user))))
 
 
 (defn merge-acl
@@ -113,36 +106,35 @@
                                   :principal u
                                   :right     "VIEW"
                                   }))
-        rules (vec (filter (complement nil?) (map add-rule users)))
+        user-rules (filter (complement nil?) (map add-rule users))
         base-acl {:owner {:principal "ADMIN"
                           :type      "ROLE"}}
-        base-rule {:type      "ROLE",
-                   :principal "ADMIN",
-                   :right     "ALL"}]
-    (assoc base-acl :rules (conj rules base-rule))))
+        base-rule [{:type      "ROLE",
+                    :principal "ADMIN",
+                    :right     "ALL"}]]
+    (assoc base-acl :rules (reduce conj base-rule user-rules))))
 
 
 (defn generate-records
   [vt]
-  {:pre [(seq? vt)
+  {:pre [;; non empty sequence
+         (seq? vt)
          (not (empty? vt))
+         ;;containing only vectors
          (every? vector? vt)
-         ]}
+         ;;every of those vectors contain map
+         (every? true? (map #(every? map? %) vt))]}
   (let [header (dissoc (first (first vt)) :user)
         gen-content (fn [v] (assoc-in header [:credentialTemplate :acl] (merge-acl v)))]
     (map gen-content vt)))
 
 (defn add-credentials
   [client category]
-  (let [
-
-        get-grouped-data (fn [c] (group-by :CONTAINER_RESOURCEURI (fetch-users c)))
+  (let [get-grouped-data (fn [c] (group-by :CONTAINER_RESOURCEURI (fetch-users c)))
         coll (get-grouped-data category)
         templates (filter (complement nil?) (map (partial extract-data category coll) (keys coll)))
         templates-by-key (group-by #(:key (:credentialTemplate %)) templates)
-        records (generate-records (map second templates-by-key))
-        ]
-
+        records (generate-records (map second templates-by-key))]
     (println (str "Collection for " category " : Adding " (count coll) " records"))
     (println (str "Migrating category " category " : Adding " (count records) " credentials"))
     (map (partial cimi/add client "credentials") records)))
@@ -159,8 +151,5 @@
                                    :username (environ/env :dbmigration-user) ;;export DBMIGRATION_USER="super"
 
                                    :password (environ/env :dbmigration-password)})]
-
-    (map (partial add-credentials client) categories)
-
-    ))
+    (map (partial add-credentials client) categories)))
 
