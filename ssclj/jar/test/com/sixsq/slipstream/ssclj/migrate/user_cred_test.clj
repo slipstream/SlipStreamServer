@@ -19,10 +19,10 @@
     (is (= (assoc-in expected [:credentialTemplate :key] "newkey")
            (t/check-exo-template (assoc-in expected [:credentialTemplate :key] "newkey") user)))
     ;;empty key
-    (is (= nil (t/check-exo-template (assoc-in expected [:credentialTemplate :key] "") user)))
+    (is (nil? (t/check-exo-template (assoc-in expected [:credentialTemplate :key] "") user)))
     ;; mandatory keywords
     (doseq [k #{:key :secret :domain-name :connector}]
-      (is (= nil (t/check-exo-template (update-in valid-template [:credentialTemplate] dissoc k) user))))))
+      (is (nil? (t/check-exo-template (update-in valid-template [:credentialTemplate] dissoc k) user))))))
 
 (deftest otc-template
   (let [valid-template {:credentialTemplate {:key         "key"
@@ -42,10 +42,10 @@
     (is (= (assoc-in expected [:credentialTemplate :key] "newkey")
            (t/check-otc-template (assoc-in expected [:credentialTemplate :key] "newkey") user)))
     ;;empty key
-    (is (= nil (t/check-otc-template (assoc-in expected [:credentialTemplate :key] "") user)))
+    (is (nil? (t/check-otc-template (assoc-in expected [:credentialTemplate :key] "") user)))
     ;; mandatory keywords
     (doseq [k #{:key :secret :domain-name :tenant-name :connector}]
-      (is (= nil (t/check-otc-template (update-in valid-template [:credentialTemplate] dissoc k) user))))))
+      (is (nil? (t/check-otc-template (update-in valid-template [:credentialTemplate] dissoc k) user))))))
 
 (def user1 "user/user1")
 (def user2 "user/user2")
@@ -166,51 +166,45 @@
                                         :connector   "connector/exoscale-ch-gva"
                                         :domain-name ""}
                    :user               user2}]
-    (is (= nil (t/extract-data nil nil nil)))
-    (is (= nil (t/extract-data category-exo-gva nil nil)))
-    (is (= nil (t/extract-data nil coll nil)))
-    (is (= nil (t/extract-data nil nil user1)))
-    (is (= nil (t/extract-data category-exo-gva coll nil)))
-    (is (= nil (t/extract-data nil coll user1)))
-    (is (= nil (t/extract-data category-exo-gva nil user1)))
-    (is (= expected1 (t/extract-data category-exo-gva coll user1)))
-    (is (= expected2 (t/extract-data category-exo-gva coll user2)))
-    (is (= nil (t/extract-data wrong-category coll user1)))
-    (is (= nil (t/extract-data category-otc coll user1)))))
+
+    (are [expected category coll user] (= expected (t/extract-data category coll user))
+                                       nil nil nil nil
+                                       nil nil coll nil
+                                       nil nil nil user1
+                                       nil category-exo-gva coll nil
+                                       nil nil coll user1
+                                       nil category-exo-gva nil user1
+                                       expected1 category-exo-gva coll user1
+                                       expected2 category-exo-gva coll user2
+                                       nil wrong-category coll user1
+                                       nil category-otc coll user1)))
+
+
 
 (deftest acl-merging
   (let [base-acl {:owner {:principal "ADMIN", :type "ROLE"},
                   :rules [{:type "ROLE", :principal "ADMIN", :right "ALL"}]}
         expect-user1 {:owner {:principal "ADMIN", :type "ROLE"},
                       :rules [{:type "ROLE", :principal "ADMIN", :right "ALL"}
-                              {:type "USER", :principal "user1", :right "VIEW"}
-                              ]}
-        expect-2users {:owner {:principal "ADMIN", :type "ROLE"},
-                       :rules [{:type "ROLE", :principal "ADMIN", :right "ALL"}
-                               {:type "USER", :principal "user1", :right "VIEW"}
-                               {:type "USER", :principal "user2", :right "VIEW"}]}]
-    (is (= base-acl (t/merge-acl nil)))
-    (is (= base-acl (t/merge-acl [])))
-    (is (= base-acl (t/merge-acl {})))
-    (is (= base-acl (t/merge-acl {:wrong "value"})))
-    (is (= base-acl (t/merge-acl {:user "value"})))
-    (is (= base-acl (t/merge-acl [nil])))
-    (is (= base-acl (t/merge-acl ["foo"])))
-    (is (= base-acl (t/merge-acl [{:wrong "value"}])))
-    (is (= expect-user1 (t/merge-acl [{:user "user1"}])))
-    (is (= expect-2users (t/merge-acl [{:user "user1"} {:user "user2"}])))
-    (is (= expect-2users (t/merge-acl [{:user "user1" :extra "extra1"} {:user "user2" :extra "extra2"}])))))
+                              {:type "USER", :principal "user1", :right "VIEW"}]}
+        expect-2users (update-in expect-user1 [:rules] conj {:type "USER" :principal "user2" :right "VIEW"})]
+    (are [expected arg] (= expected (t/merge-acl arg))
+                        base-acl nil
+                        base-acl []
+                        base-acl {}
+                        base-acl {:wrong "value"}
+                        base-acl {:user "value"}
+                        base-acl [nil]
+                        base-acl ["foo"]
+                        base-acl [{:wrong "value"}]
+                        expect-user1 [{:user "user1"}]
+                        expect-2users [{:user "user1"} {:user "user2"}]
+                        expect-2users [{:user "user1" :extra "extra1"} {:user "user2" :extra "extra2"}])))
 
 
 (deftest records-generations
   (let [base-template {:credentialTemplate {:acl {:owner {:principal "ADMIN", :type "ROLE"},
                                                   :rules [{:type "ROLE", :principal "ADMIN", :right "ALL"}]}}}
-        simple-valid-source (list [{:credentialTemplate {:href        "credential-template/store-cloud-cred-exoscale",
-                                                         :key         "aKey",
-                                                         :secret      "aSecret",
-                                                         :connector   "connector/exoscale-ch-gva",
-                                                         :domain-name ""},
-                                    :user               "user/user1"}])
         simple-source (list [{:credentialTemplate {:href        "credential-template/store-cloud-cred-exoscale",
                                                    :key         "aKey",
                                                    :secret      "aSecret",
@@ -241,22 +235,27 @@
                                                         :rules [{:type "ROLE", :principal "ADMIN", :right "ALL"}]}}}
         add-user-rule (fn [x] (update-in base-expect [:credentialTemplate :acl :rules] conj {:type "USER" :principal (str "user/user" x) :right "VIEW"}))
         expect-multi (map add-user-rule (range multiplicity))]
-    (is (thrown? AssertionError (t/generate-records nil)))
-    (is (thrown? AssertionError (t/generate-records [])))
-    (is (thrown? AssertionError (t/generate-records {})))
-    (is (thrown? AssertionError (t/generate-records "wrong")))
-    (is (thrown? AssertionError (t/generate-records ["wrong"])))
-    (is (thrown? AssertionError (t/generate-records [nil])))
-    (is (thrown? AssertionError (t/generate-records [{}])))
-    (is (thrown? AssertionError (t/generate-records [{:wrong "value"}])))
-    (is (thrown? AssertionError (t/generate-records (list :wrong))))
-    (is (= (list base-template) (t/generate-records (list []))))
-    (is (thrown? AssertionError (t/generate-records (list [nil]))))
-    (is (thrown? AssertionError (t/generate-records (list [:test]))))
-    (is (= (list base-template) (t/generate-records (list [{}]))))
-    (is (thrown? AssertionError (t/generate-records (list ["value"]))))
-    (is (= expect-simple (t/generate-records simple-source)))
-    (is (= expect-multi (t/generate-records multi-source)))))
+    (are [arg] (thrown? AssertionError (t/generate-records arg))
+               nil
+               []
+               {}
+               "wrong"
+               ["wrong"]
+               [nil]
+               [{}]
+               [{:wrong "value"}]
+               (list :wrong)
+               (list [nil])
+               (list [:test])
+               (list ["value"]))
+    (are [expected arg] (= expected (t/generate-records arg))
+                        (list base-template) (list [{}])
+                        (list base-template) (list [])
+                        expect-simple simple-source
+                        expect-multi multi-source)))
+
+
+
 
 
 
