@@ -174,7 +174,7 @@ public class VmRuntimeParameterMapping implements Serializable {
 			VmMapping vmMapping = new VmMapping(cloud, instanceId, runUuid, runOwner, serviceOfferUuid);
 			vmMapping.create();
 		} catch (Throwable t) {
-			logger.warning("error creating vm mapping record: " +
+			logger.warning("error creating virtual machine mapping record: " +
 					cloud + " " + instanceId + " " +
 					runOwner + " " + runUuid + " " +
 					serviceOfferUuid);

@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 
 public class VmMapping {
 
-    private static final String USAGE_EVENT_RESOURCE = "api/vm-mapping";
+    private static final String USAGE_EVENT_RESOURCE = "api/virtual-machine-mapping";
 
     private static final Logger logger = Logger.getLogger(VmMapping.class.getName());
 
