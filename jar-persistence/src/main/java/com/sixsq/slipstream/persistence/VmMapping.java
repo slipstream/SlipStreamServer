@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 
 public class VmMapping {
 
-    private static final String USAGE_EVENT_RESOURCE = "api/virtual-machine-mapping";
+    private static final String VM_MAPPING_RESOURCE = "api/virtual-machine-mapping";
 
     private static final Logger logger = Logger.getLogger(VmMapping.class.getName());
 
@@ -40,7 +40,7 @@ public class VmMapping {
     }
 
     public void create() {
-        SscljProxy.post(USAGE_EVENT_RESOURCE, "internal ADMIN", this);
+        SscljProxy.post(VM_MAPPING_RESOURCE, "internal ADMIN", this);
     }
 
 }
