@@ -46,7 +46,8 @@
       </activation>
       <modules>
         <module>rpm</module>
-        <module>rpm-prs</module>
+        <module>cimi-rpm</module>
+        <module>prs-rpm</module>
         <module>ring-container-rpm</module>
       </modules>
     </profile>
@@ -59,7 +60,7 @@
       </activation>
       <modules>
         <module>rpm</module>
-        <module>rpm-prs</module>
+        <module>prs-rpm</module>
         <module>ring-container-rpm</module>
       </modules>
     </profile>
