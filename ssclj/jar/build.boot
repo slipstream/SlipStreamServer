@@ -57,6 +57,7 @@
                     [com.sixsq.slipstream/slipstream-ring-container :scope "test"]
                     [com.sixsq.slipstream/SlipStreamDbBinding-jar]
                     [com.sixsq.slipstream/token]
+                    [com.sixsq.slipstream/cimi-jar "3.39-SNAPSHOT" :scope "provided"]
 
                     ;; needed for migration scripts
                     [korma]
