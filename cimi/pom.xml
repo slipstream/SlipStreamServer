@@ -9,7 +9,7 @@
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
-    <artifactId>SlipStreamCljResources</artifactId>
+    <artifactId>SlipStreamServer</artifactId>
     <version>3.39-SNAPSHOT</version>
   </parent>
 

@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>cimi-rpm</artifactId>
+  <name>SlipStreamServer/cimi-rpm</name>
+
+  <packaging>pom</packaging>
+
+  <parent>
+    <groupId>com.sixsq.slipstream</groupId>
+    <artifactId>SlipStreamServer</artifactId>
+    <version>3.39-SNAPSHOT</version>
+  </parent>
+
+  <!-- NOTE: This project MUST have same version as proxy module. -->
+  <properties>
+    <installation.dir>/opt/slipstream/cimi</installation.dir>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>cimi-jar-dep</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>cimi-jar</artifactId>
+      <version>${project.version}</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+
+        <executions>
+
+          <execution>
+            <id>filter-service-configs</id>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <phase>process-resources</phase>
+            <configuration>
+              <outputDirectory>${basedir}/target/service-config</outputDirectory>
+              <nonFilteredFileExtensions>
+                <nonFilteredFileExtension>jks</nonFilteredFileExtension>
+              </nonFilteredFileExtensions>
+              <resources>
+                <resource>
+                  <directory>${basedir}/src/main/service-config</directory>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>copy-resources</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <overwrite>true</overwrite>
+              <resources>
+                <resource>
+                  <directory>${basedir}/src/main/resources/</directory>
+                  <includes>
+                    <include>etc-default-cimi</include>
+                  </includes>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-cimi.service</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <overwrite>true</overwrite>
+              <resources>
+                <resource>
+                  <directory>${basedir}/src/main/systemd</directory>
+                  <includes>
+                    <include>cimi.service</include>
+                  </includes>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+
+        <executions>
+
+          <execution>
+            <id>copy-dependencies</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/dependency/lib/ext</outputDirectory>
+              <excludeArtifactIds>SlipStreamToolsCli-jar</excludeArtifactIds>
+              <stripVersion>false</stripVersion>
+              <stripClassifier>true</stripClassifier>
+              <excludeTypes>pom</excludeTypes>
+              <includeScope>runtime</includeScope>
+            </configuration>
+          </execution>
+
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>rpm-maven-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <classifier>${package.os}</classifier>
+          <release>${BUILD_NUMBER}.${package.os}</release>
+          <summary>SlipStream CIMI Server</summary>
+          <name>slipstream-cimi</name>
+          <group>System</group>
+          <vendor>SlipStream</vendor>
+          <packager>SlipStream</packager>
+          <license>Apache 2.0</license>
+          <url>http://sixsq.com</url>
+          <needarch>noarch</needarch>
+          <description>
+            SlipStream CIMI server
+          </description>
+          <requires>
+            <require>jre-headless &gt;= ${server.jre.version}</require>
+            <require>slipstream-useradd</require>
+          </requires>
+
+          <postinstallScriptlet>
+            <script>
+/usr/bin/systemctl enable cimi.service
+            </script>
+          </postinstallScriptlet>
+
+          <preremoveScriptlet>
+            <script>
+/usr/bin/systemctl stop cimi.service || true
+/usr/bin/systemctl disable cimi.service || true
+            </script>
+          </preremoveScriptlet>
+
+          <defaultDirmode>755</defaultDirmode>
+          <defaultFilemode>644</defaultFilemode>
+          <defaultGroupname>slipstream</defaultGroupname>
+          <defaultUsername>slipstream</defaultUsername>
+
+          <mappings>
+
+            <mapping>
+              <directory>/var/log/slipstream/cimi</directory>
+              <directoryIncluded>true</directoryIncluded>
+              <filemode>755</filemode>
+              <username>slipstream</username>
+              <groupname>slipstream</groupname>
+            </mapping>
+
+            <mapping>
+              <directory>/etc/default</directory>
+              <directoryIncluded>false</directoryIncluded>
+              <configuration>noreplace</configuration>
+              <sources>
+                <source>
+                  <location>target/etc-default-cimi</location>
+                  <destination>cimi</destination>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>${installation.dir}/lib</directory>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>target/dependency/lib/ext</location>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>${installation.dir}/resources</directory>
+              <configuration>noreplace</configuration>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>src/main/resources</location>
+                  <includes>
+                    <include>log4j.properties</include>
+                  </includes>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>/usr/lib/systemd/system</directory>
+              <filemode>664</filemode>
+              <username>slipstream</username>
+              <groupname>slipstream</groupname>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>${project.build.directory}/cimi.service</location>
+                </source>
+              </sources>
+            </mapping>
+
+          </mappings>
+
+        </configuration>
+
+        <executions>
+          <execution>
+            <id>attach-rpm</id>
+            <phase>package</phase>
+            <goals>
+              <goal>attached-rpm</goal>
+            </goals>
+          </execution>
+        </executions>
+
+      </plugin>
+
+    </plugins>
+
+  </build>
+
+</project>

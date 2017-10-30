@@ -23,10 +23,10 @@
                   ['sixsq/default-deps (get-env :version)]
                   '[[org.clojure/clojure]
 
-                    [aleph]
-                    [cheshire]                              ;; newer version needed for ring-json
+                    ;[aleph]
+                    ;[cheshire]                              ;; newer version needed for ring-json
                     [compojure]
-                    [com.jcraft/jsch]
+                    ;[com.jcraft/jsch]
                     [clj-stacktrace]
                     [clj-time]
                     [environ]
@@ -37,19 +37,19 @@
                     [metrics-clojure-ring]
                     [metrics-clojure-jvm]
                     [metrics-clojure-graphite]
-                    [me.raynes/fs]
+                    ;[me.raynes/fs]
                     [org.apache.logging.log4j/log4j-core]
                     [org.apache.logging.log4j/log4j-api]
                     [org.clojure/data.json]
                     [org.clojure/java.classpath]
-                    [org.clojure/tools.cli]
+                    ;[org.clojure/tools.cli]
                     [org.clojure/tools.logging]
                     [org.clojure/tools.namespace]
                     [org.slf4j/slf4j-log4j12 :scope "provided"]
-                    [potemkin]
+                    ;[potemkin]
                     [ring/ring-core]
                     [ring/ring-json]
-                    [superstring]
+                    ;[superstring]
                     [zookeeper-clj]
 
                     [com.sixsq.slipstream/utils]
@@ -59,13 +59,13 @@
                     [com.sixsq.slipstream/token]
 
                     ;; needed for migration scripts
-                    [korma]
-                    [org.hsqldb/hsqldb]
-                    [org.clojure/java.jdbc]
+                    ;[korma]
+                    ;[org.hsqldb/hsqldb]
+                    ;[org.clojure/java.jdbc]
 
                     ;; test dependencies
                     [peridot]
-                    [honeysql]
+                    ;[honeysql]
                     [org.clojure/test.check]
                     [org.slf4j/slf4j-log4j12 :scope "test"]
                     [com.cemerick/url nil :scope "test"]
