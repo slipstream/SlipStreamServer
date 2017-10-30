@@ -114,38 +114,6 @@
               </arguments>
             </configuration>
           </execution>
-          <execution>
-            <id>boot-build-tests-jar</id>
-            <phase>install</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>boot</executable>
-              <environmentVariables>
-                <BOOT_PUSH>${boot.push}</BOOT_PUSH>
-              </environmentVariables>
-              <arguments>
-                <argument>mvn-build-tests-jar</argument>
-              </arguments>
-            </configuration>
-          </execution>
-          <execution>
-            <id>boot-build-test-server-jar</id>
-            <phase>install</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>boot</executable>
-              <environmentVariables>
-                <BOOT_PUSH>${boot.push}</BOOT_PUSH>
-              </environmentVariables>
-              <arguments>
-                <argument>mvn-build-test-server-jar</argument>
-              </arguments>
-            </configuration>
-          </execution>
         </executions>
       </plugin>
 

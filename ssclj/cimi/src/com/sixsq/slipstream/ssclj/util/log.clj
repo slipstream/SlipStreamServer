@@ -1,6 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.util.log
   (:require [clojure.tools.logging :as log]
-            [clojure.string :as str]
             [com.sixsq.slipstream.util.response :as r]
             [ring.util.response :as ring-resp]))
 
@@ -32,4 +31,3 @@
                      (ring-resp/status 400))]
     (log/warn msg)
     (throw (ex-info msg response))))
-

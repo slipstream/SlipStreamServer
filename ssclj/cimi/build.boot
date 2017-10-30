@@ -166,64 +166,8 @@
                             #"config-hsqldb.edn"
                             #"log4j.properties"}
                  :invert true)
-           (aot :namespace #{'com.sixsq.slipstream.ssclj.app.main
-                             'com.sixsq.slipstream.ssclj.usage.summarizer})
-           #_(uber :exclude #{#"(?i)^META-INF/INDEX.LIST$"
-                              #"(?i)^META-INF/[^/]*\.(MF|SF|RSA|DSA)$"
-                              #".*log4j\.properties"})
-           (jar                                             ;; :main 'com.sixsq.slipstream.ssclj.app.main
-             )))
-
-(def tests-artef-name "SlipStreamCljResourcesTests-jar")
-(def tests-artef-pom-loc (str "com.sixsq.slipstream/" tests-artef-name))
-(def tests-artef-project-name (symbol tests-artef-pom-loc))
-(def tests-artef-jar-name (str tests-artef-name "-" (get-env :version) "-tests.jar"))
-
-(deftask build-tests-jar
-         "build jar with test runtime dependencies for connectors."
-         []
-         (comp
-           (pom :project tests-artef-project-name
-                :classifier "tests"
-                :dependencies (merge-defaults
-                                ['sixsq/default-deps (get-env :version)]
-                                [['org.apache.curator/curator-test :scope "compile"]
-                                 ['com.sixsq.slipstream/slipstream-ring-container :scope "compile"]]))
-           (sift
-             :to-resource #{#"lifecycle_test_utils\.clj"
-                            #"connector_test_utils\.clj"}
-
-             :include #{#"lifecycle_test_utils\.clj"
-                        #"connector_test_utils\.clj"
-                        #"pom.xml"
-                        #"pom.properties"})
-
-           (jar :file tests-artef-jar-name)))
-
-(def test-server-artifact-name "SlipStreamCljResourcesTestServer-jar")
-(def test-server-pom-location (str "com.sixsq.slipstream/" test-server-artifact-name))
-(def test-server-project-name (symbol test-server-pom-location))
-(def test-server-jar-name (str test-server-artifact-name "-" (get-env :version) "-tests.jar"))
-
-(deftask build-test-server-jar
-         "build jar with classes required for running test ssclj server"
-         []
-         (comp
-           (pom :project test-server-project-name
-                :classifier "tests"
-                :dependencies (merge-defaults
-                                ['sixsq/default-deps (get-env :version)]
-                                [['org.apache.curator/curator-test :scope "compile"]
-                                 ['com.sixsq.slipstream/slipstream-ring-container :scope "compile"]]))
-           (sift
-             :to-resource #{#"test_server\.clj"
-                            #"SscljTestServer\.clj"}
-             :include #{#"test_server\.clj"
-                        #"SscljTestServer\.clj"
-                        #"pom.xml"
-                        #"pom.properties"})
-           (aot :namespace #{'com.sixsq.slipstream.ssclj.app.SscljTestServer})
-           (jar :file test-server-jar-name)))
+           (aot :namespace #{'com.sixsq.slipstream.ssclj.app.main})
+           (jar)))
 
 (deftask mvn-test
          "run all tests of project"
@@ -238,28 +182,6 @@
            (install)
            (if (= "true" (System/getenv "BOOT_PUSH"))
              (push)
-             identity)))
-
-(deftask mvn-build-tests-jar
-         "build project"
-         []
-         (comp
-           (dev-env)
-           (build-tests-jar)
-           (install :pom tests-artef-pom-loc)
-           (if (= "true" (System/getenv "BOOT_PUSH"))
-             (push :pom tests-artef-pom-loc)
-             identity)))
-
-(deftask mvn-build-test-server-jar
-         "build project"
-         []
-         (comp
-           (dev-env)
-           (build-test-server-jar)
-           (install :pom test-server-pom-location)
-           (if (= "true" (System/getenv "BOOT_PUSH"))
-             (push :pom test-server-pom-location)
              identity)))
 
 (deftask server-repl
