@@ -93,8 +93,7 @@
 
 (deftask dev-fixture-env
          []
-         (environ :env {:config-name      "config-hsqldb-mem.edn"
-                        :auth-private-key (str (clojure.java.io/resource "auth_privkey.pem"))
+         (environ :env {:auth-private-key (str (clojure.java.io/resource "auth_privkey.pem"))
                         :auth-public-key  (str (clojure.java.io/resource "auth_pubkey.pem"))}))
 
 (deftask run-tests-ns
@@ -143,14 +142,9 @@
            (sift :include #{#".*_test\.clj"
                             #".*test_utils\.clj"
                             #"test_helper\.clj"
-                            #"test_server.clj"
-                            #"SscljTestServer.clj"
-                            #".*seeds.*"
                             #".*example\.clj"
                             #".*Test\.java"
                             #".*simu_result.txt"
-                            #"config-hsqldb-mem.edn"
-                            #"config-hsqldb.edn"
                             #"log4j.properties"}
                  :invert true)
            (aot :namespace #{'com.sixsq.slipstream.ssclj.app.main})
