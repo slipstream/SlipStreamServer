@@ -1,5 +1,6 @@
 package com.sixsq.slipstream.persistence;
 
+import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import com.sixsq.slipstream.util.SscljProxy;
 
@@ -16,11 +17,11 @@ public class VmMapping {
     private String cloud;
 
     @SuppressWarnings("unused")
-    @SerializedName("instanceId")
+    @SerializedName("instanceID")
     private String instanceId;
 
     @SuppressWarnings("unused")
-    @SerializedName("runUuid")
+    @SerializedName("runUUID")
     private String runUuid;
 
     @SuppressWarnings("unused")
@@ -32,6 +33,9 @@ public class VmMapping {
     private String serviceOffer;
 
     public VmMapping(String cloud, String instanceId, String runUuid, String owner, String serviceOffer) {
+        if (cloud == null || instanceId == null) {
+            throw new IllegalArgumentException("cloud and instanceId cannot be null");
+        }
         this.cloud = cloud;
         this.instanceId = instanceId;
         this.runUuid = runUuid;
@@ -41,6 +45,21 @@ public class VmMapping {
 
     public void create() {
         SscljProxy.post(VM_MAPPING_RESOURCE, "internal ADMIN", this);
+    }
+
+    public String toJson() {
+        Gson gson = new Gson();
+        return gson.toJson(this);
+    }
+
+    public static VmMapping fromJson(String json) {
+        Gson gson = new Gson();
+        return gson.fromJson(json, VmMapping.class);
+    }
+
+    @Override
+    public String toString() {
+        return cloud + " " + instanceId + " " + runUuid + " " + owner + " " + serviceOffer;
     }
 
 }
