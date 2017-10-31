@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>ssclj-server-rpm</artifactId>
+  <artifactId>cimi-resources-rpm</artifactId>
   <name>SlipStreamServer/ssclj/rpm</name>
 
   <packaging>pom</packaging>
@@ -13,9 +13,8 @@
     <version>3.39-SNAPSHOT</version>
   </parent>
 
-  <!-- NOTE: This project MUST have same version as proxy module. -->
   <properties>
-    <installation.dir>/opt/slipstream/ssclj</installation.dir>
+    <installation.dir>/opt/slipstream/cimi</installation.dir>
   </properties>
 
   <dependencies>
@@ -90,26 +89,6 @@
             </configuration>
           </execution>
 
-          <execution>
-            <id>copy-resources</id>
-            <phase>package</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.directory}</outputDirectory>
-              <overwrite>true</overwrite>
-              <resources>
-                <resource>
-                  <directory>${basedir}/src/main/resources/</directory>
-                  <includes>
-                    <include>etc-default-ssclj</include>
-                  </includes>
-                  <filtering>true</filtering>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
           <execution>
             <id>copy-ssclj.service</id>
             <phase>package</phase>
@@ -211,6 +190,7 @@
           <requires>
             <require>jre-headless &gt;= ${server.jre.version}</require>
             <require>slipstream-useradd</require>
+            <require>slipstream-cimi</require>
           </requires>
           <obsoletes>
             <obsolete>slipstream-service-catalog</obsolete>
@@ -220,15 +200,14 @@
 
           <postinstallScriptlet>
             <script>
-${installation.dir}/bin/generate-auth-keys.sh
-/usr/bin/systemctl enable ssclj.service
+/usr/bin/systemctl enable cimi.service
             </script>
           </postinstallScriptlet>
 
           <preremoveScriptlet>
             <script>
-/usr/bin/systemctl stop ssclj.service || true
-/usr/bin/systemctl disable ssclj.service || true
+/usr/bin/systemctl stop cimi.service || true
+/usr/bin/systemctl disable cimi.service || true
             </script>
           </preremoveScriptlet>
 
@@ -245,18 +224,6 @@ ${installation.dir}/bin/generate-auth-keys.sh
               <filemode>755</filemode>
               <username>slipstream</username>
               <groupname>slipstream</groupname>
-            </mapping>
-
-            <mapping>
-              <directory>/etc/default</directory>
-              <directoryIncluded>false</directoryIncluded>
-              <configuration>noreplace</configuration>
-              <sources>
-                <source>
-                  <location>target/etc-default-ssclj</location>
-                  <destination>ssclj</destination>
-                </source>
-              </sources>
             </mapping>
 
             <mapping>
@@ -331,7 +298,6 @@ ${installation.dir}/bin/generate-auth-keys.sh
                 <source>
                   <location>src/main/resources</location>
                   <includes>
-                    <include>log4j.properties</include>
                     <include>db.spec</include>
                   </includes>
                 </source>
@@ -358,22 +324,6 @@ ${installation.dir}/bin/generate-auth-keys.sh
 
             <mapping>
               <directory>${installation.dir}/bin</directory>
-            </mapping>
-
-            <mapping>
-              <directory>${installation.dir}/bin</directory>
-              <directoryIncluded>false</directoryIncluded>
-              <filemode>755</filemode>
-              <username>slipstream</username>
-              <groupname>slipstream</groupname>
-              <sources>
-                <source>
-                  <location>src/main/scripts</location>
-                  <includes>
-                    <include>generate-auth-keys.sh</include>
-                  </includes>
-                </source>
-              </sources>
             </mapping>
 
             <mapping>
@@ -409,19 +359,6 @@ ${installation.dir}/bin/generate-auth-keys.sh
                     <include>create-weekly-usage</include>
                     <include>create-monthly-usage</include>
                   </includes>
-                </source>
-              </sources>
-            </mapping>
-
-            <mapping>
-              <directory>/usr/lib/systemd/system</directory>
-              <filemode>664</filemode>
-              <username>slipstream</username>
-              <groupname>slipstream</groupname>
-              <directoryIncluded>false</directoryIncluded>
-              <sources>
-                <source>
-                  <location>${project.build.directory}/ssclj.service</location>
                 </source>
               </sources>
             </mapping>

@@ -161,9 +161,13 @@
             <require>jre-headless &gt;= ${server.jre.version}</require>
             <require>slipstream-useradd</require>
           </requires>
+          <obsoletes>
+            <obsolete>slipstream-ssclj</obsolete>
+          </obsoletes>
 
           <postinstallScriptlet>
             <script>
+${installation.dir}/bin/generate-auth-keys.sh
 /usr/bin/systemctl enable cimi.service
             </script>
           </postinstallScriptlet>
@@ -188,6 +192,22 @@
               <filemode>755</filemode>
               <username>slipstream</username>
               <groupname>slipstream</groupname>
+            </mapping>
+
+            <mapping>
+              <directory>${installation.dir}/bin</directory>
+              <directoryIncluded>false</directoryIncluded>
+              <filemode>755</filemode>
+              <username>slipstream</username>
+              <groupname>slipstream</groupname>
+              <sources>
+                <source>
+                  <location>src/main/scripts</location>
+                  <includes>
+                    <include>generate-auth-keys.sh</include>
+                  </includes>
+                </source>
+              </sources>
             </mapping>
 
             <mapping>

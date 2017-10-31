@@ -36,7 +36,13 @@
 
                     [superstring]
                     [me.raynes/fs]
-                    [clj-http]]))))
+                    [clj-http]
+
+                    ;; needed for migration scripts
+                    [korma]
+                    [org.hsqldb/hsqldb]
+                    [org.clojure/java.jdbc]
+                    ]))))
 
 (require
   '[environ.boot :refer [environ]]

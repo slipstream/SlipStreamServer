@@ -21,48 +21,18 @@
   #(vec (concat %
                 (merge-defaults
                   ['sixsq/default-deps (get-env :version)]
-                  '[[org.clojure/clojure]
+                  '[[org.clojure/clojure :scope "provided"]
 
-                    [aleph]
-                    [cheshire]                              ;; newer version needed for ring-json
-                    [compojure]
                     [com.jcraft/jsch]
-                    [clj-stacktrace]
-                    [clj-time]
-                    [environ]
-                    [expound]
-                    [instaparse]
-                    [log4j]
-                    [metrics-clojure]
-                    [metrics-clojure-ring]
-                    [metrics-clojure-jvm]
-                    [metrics-clojure-graphite]
-                    [me.raynes/fs]
-                    [org.apache.logging.log4j/log4j-core]
-                    [org.apache.logging.log4j/log4j-api]
-                    [org.clojure/data.json]
-                    [org.clojure/java.classpath]
                     [org.clojure/tools.cli]
-                    [org.clojure/tools.logging]
-                    [org.clojure/tools.namespace]
                     [org.slf4j/slf4j-log4j12 :scope "provided"]
-                    [potemkin]
-                    [ring/ring-core]
-                    [ring/ring-json]
-                    [superstring]
-                    [zookeeper-clj]
 
-                    [com.sixsq.slipstream/utils]
-                    [com.sixsq.slipstream/auth]
+                    [com.sixsq.slipstream/utils :scope "provided"]
+                    [com.sixsq.slipstream/auth :scope "provided"]
                     [com.sixsq.slipstream/slipstream-ring-container :scope "test"]
-                    [com.sixsq.slipstream/SlipStreamDbBinding-jar]
-                    [com.sixsq.slipstream/token]
+                    [com.sixsq.slipstream/SlipStreamDbBinding-jar :scope "provided"]
+                    [com.sixsq.slipstream/token :scope "provided"]
                     [com.sixsq.slipstream/cimi-jar "3.39-SNAPSHOT" :scope "provided"]
-
-                    ;; needed for migration scripts
-                    [korma]
-                    [org.hsqldb/hsqldb]
-                    [org.clojure/java.jdbc]
 
                     ;; test dependencies
                     [peridot]
@@ -167,7 +137,7 @@
                             #"config-hsqldb.edn"
                             #"log4j.properties"}
                  :invert true)
-           (aot :namespace #{'com.sixsq.slipstream.ssclj.app.main
+           #_(aot :namespace #{'com.sixsq.slipstream.ssclj.app.main
                              'com.sixsq.slipstream.ssclj.usage.summarizer})
            #_(uber :exclude #{#"(?i)^META-INF/INDEX.LIST$"
                               #"(?i)^META-INF/[^/]*\.(MF|SF|RSA|DSA)$"
