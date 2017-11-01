@@ -120,12 +120,12 @@
   (and
     (not (nil? t))
     (not (nil? ks))
-    (not (empty? ks))
+    (seq ks)
     (vector? ks)
     (map? t)
     (contains? t :credentialTemplate)
     ;;every key is ks must have non nil values in template t
-    (every? (complement nil?) (map #(% (:credentialTemplate t)) (map #(keyword %) ks)))))
+    (every? (complement nil?) (map #(% (:credentialTemplate t)) (map keyword ks)))))
 
 (defn extract-data
   [category coll user]
@@ -175,7 +175,7 @@
          (every? vector? vt)
          ;;every of those vectors contain map
          (every? true? (map #(every? map? %) vt))]}
-  (let [header (dissoc (first (first vt)) :user)
+  (let [header (dissoc (ffirst vt) :user)
         gen-content (fn [v] (assoc-in header [:credentialTemplate :acl] (merge-acl v)))]
     (map gen-content vt)))
 
