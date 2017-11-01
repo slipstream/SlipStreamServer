@@ -31,8 +31,10 @@
                     [adzerk/boot-reload]
                     [tolitius/boot-check]
 
-                    [com.sixsq.slipstream/SlipStreamPersistence nil :scope "compile"]
+                    [com.sixsq.slipstream/SlipStreamPersistence nil :scope "compile" :exclusions [org.slf4j/slf4j-jdk14]]
                     [com.sixsq.slipstream/SlipStreamDbSerializers-jar nil :scope "compile"]
+
+                    [com.sixsq.slipstream/SlipStreamCljResourcesTests-jar nil :classifier "tests" :scope "test"]
 
                     [superstring]
                     [me.raynes/fs]
@@ -48,7 +50,6 @@
                                 with-bikeshed]])
 
 (set-env!
-  :source-paths #{"test"}
   :resource-paths #{"src"})
 
 (task-options!
@@ -58,10 +59,16 @@
   push {:pom (str (get-env :project))
         :repo "sixsq"})
 
+(deftask test-paths
+         []
+         (set-env! :source-paths #(set (concat % #{"test" "test-resources"})))
+         identity)
+
 (deftask run-tests
          "runs all tests and performs full compilation"
          []
          (comp
+           (test-paths)
            (test)
            (sift :include #{#".*_test\.clj"}
                  :invert true)
@@ -72,7 +79,8 @@
            (pom)
            (aot :namespace #{'com.sixsq.slipstream.tools.cli.ssconfig
                              'com.sixsq.slipstream.tools.cli.ssconfigdump
-                             'com.sixsq.slipstream.tools.cli.ssconfigmigrate})
+                             'com.sixsq.slipstream.tools.cli.ssconfigmigrate
+                             'com.sixsq.slipstream.ssclj.usage.summarizer})
            (jar)))
 
 (deftask build-uberjar []
@@ -80,7 +88,8 @@
            (pom)
            (aot :namespace #{'com.sixsq.slipstream.tools.cli.ssconfig
                              'com.sixsq.slipstream.tools.cli.ssconfigdump
-                             'com.sixsq.slipstream.tools.cli.ssconfigmigrate})
+                             'com.sixsq.slipstream.tools.cli.ssconfigmigrate
+                             'com.sixsq.slipstream.ssclj.usage.summarizer})
            (uber)
            (jar)))
 

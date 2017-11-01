@@ -8,7 +8,7 @@
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
-    <artifactId>SlipStreamCljResources</artifactId>
+    <artifactId>SlipStreamServer</artifactId>
     <version>3.39-SNAPSHOT</version>
   </parent>
 
@@ -35,6 +35,13 @@
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
       <artifactId>SlipStreamDbSerializers-jar-dep</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamCljResources-jar-dep</artifactId>
       <version>${project.version}</version>
       <type>pom</type>
       <scope>provided</scope>

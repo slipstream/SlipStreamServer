@@ -166,8 +166,7 @@
                             #"config-hsqldb.edn"
                             #"log4j.properties"}
                  :invert true)
-           (aot :namespace #{'com.sixsq.slipstream.ssclj.app.main
-                             'com.sixsq.slipstream.ssclj.usage.summarizer})
+           (aot :namespace #{'com.sixsq.slipstream.ssclj.app.main})
            #_(uber :exclude #{#"(?i)^META-INF/INDEX.LIST$"
                               #"(?i)^META-INF/[^/]*\.(MF|SF|RSA|DSA)$"
                               #".*log4j\.properties"})
