@@ -1,5 +1,5 @@
-(ns com.sixsq.slipstream.ssclj.resources.credential-cloud-lifecycle-test
-  (:require
+(ns com.sixsq.slipstream.ssclj.resources.credential-cloud-lifecycle-test-utils
+    (:require
     [clojure.test :refer [deftest is are use-fixtures]]
     [peridot.core :refer :all]
     [clojure.data.json :as json]
