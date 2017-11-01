@@ -21,8 +21,7 @@
     [com.sixsq.slipstream.db.es.binding :as esb]
     [com.sixsq.slipstream.db.es.utils :as esu]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
-    [zookeeper :as zk]
-    [zookeeper.server :as zks])
+    [zookeeper :as zk])
   (:import [org.apache.curator.test TestingServer]))
 
 (defn serialize-cookie-value
