@@ -2,8 +2,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>cimi-resources-rpm</artifactId>
-  <name>SlipStreamServer/ssclj/rpm</name>
+  <artifactId>cimi-tools-rpm</artifactId>
+  <name>SlipStreamServer/ssclj/tools-rpm</name>
 
   <packaging>pom</packaging>
 
@@ -31,7 +31,6 @@
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
-    <!--
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
       <artifactId>SlipStreamToolsCli-jar-dep</artifactId>
@@ -50,7 +49,6 @@
         </exclusion>
       </exclusions>
     </dependency>
-    -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
@@ -92,26 +90,6 @@
           </execution>
 
           <execution>
-            <id>copy-ssclj.service</id>
-            <phase>package</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.directory}</outputDirectory>
-              <overwrite>true</overwrite>
-              <resources>
-                <resource>
-                  <directory>${basedir}/src/main/systemd</directory>
-                  <includes>
-                    <include>ssclj.service</include>
-                  </includes>
-                  <filtering>true</filtering>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-          <execution>
             <id>copy-tools-config-resources</id>
             <phase>package</phase>
             <goals>
@@ -141,22 +119,6 @@
         <executions>
 
           <execution>
-            <id>copy-dependencies</id>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.directory}/dependency/lib/ext</outputDirectory>
-              <excludeArtifactIds>SlipStreamToolsCli-jar</excludeArtifactIds>
-              <stripVersion>false</stripVersion>
-              <stripClassifier>true</stripClassifier>
-              <excludeTypes>pom</excludeTypes>
-              <excludeScope>provided</excludeScope>
-              <includeScope>compile</includeScope>
-            </configuration>
-          </execution>
-<!--
-          <execution>
             <id>copy-ssclj-tools</id>
             <goals>
               <goal>copy-dependencies</goal>
@@ -169,7 +131,7 @@
               <includeScope>runtime</includeScope>
             </configuration>
           </execution>
--->
+
         </executions>
       </plugin>
 
@@ -180,8 +142,8 @@
         <configuration>
           <classifier>${package.os}</classifier>
           <release>${BUILD_NUMBER}.${package.os}</release>
-          <summary>SlipStream SSCLJ Server</summary>
-          <name>slipstream-ssclj</name>
+          <summary>SlipStream CIMI Tools</summary>
+          <name>slipstream-cimi-tools</name>
           <group>System</group>
           <vendor>SlipStream</vendor>
           <packager>SlipStream</packager>
@@ -189,31 +151,15 @@
           <url>http://sixsq.com</url>
           <needarch>noarch</needarch>
           <description>
-            SlipStream SSCLJ server
+            SlipStream CIMI tools
           </description>
           <requires>
             <require>jre-headless &gt;= ${server.jre.version}</require>
             <require>slipstream-useradd</require>
-            <require>slipstream-cimi</require>
           </requires>
           <obsoletes>
-            <obsolete>slipstream-service-catalog</obsolete>
-            <obsolete>slipstream-ssclj-community</obsolete>
-            <obsolete>slipstream-ssclj-enterprise</obsolete>
+            <obsolete>slipstream-ssclj</obsolete>
           </obsoletes>
-
-          <postinstallScriptlet>
-            <script>
-/usr/bin/systemctl enable cimi.service
-            </script>
-          </postinstallScriptlet>
-
-          <preremoveScriptlet>
-            <script>
-/usr/bin/systemctl stop cimi.service || true
-/usr/bin/systemctl disable cimi.service || true
-            </script>
-          </preremoveScriptlet>
 
           <defaultDirmode>755</defaultDirmode>
           <defaultFilemode>644</defaultFilemode>
@@ -223,40 +169,11 @@
           <mappings>
 
             <mapping>
-              <directory>/var/log/slipstream/ssclj</directory>
-              <directoryIncluded>true</directoryIncluded>
-              <filemode>755</filemode>
-              <username>slipstream</username>
-              <groupname>slipstream</groupname>
-            </mapping>
-
-            <mapping>
-              <directory>${installation.dir}/lib</directory>
-              <directoryIncluded>false</directoryIncluded>
-              <sources>
-                <source>
-                  <location>target/dependency/lib/ext</location>
-                </source>
-              </sources>
-            </mapping>
-<!--
-            <mapping>
               <directory>${installation.dir}/tools</directory>
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
                   <location>target/dependency/SlipStreamToolsCli-jar-${project.version}.jar</location>
-                </source>
-              </sources>
-            </mapping>
--->
-            <mapping>
-              <directory>/etc/default</directory>
-              <directoryIncluded>false</directoryIncluded>
-              <configuration>noreplace</configuration>
-              <sources>
-                <source>
-                  <location>target/ssclj-tools-cli</location>
                 </source>
               </sources>
             </mapping>
@@ -303,24 +220,6 @@
                   <location>src/main/resources</location>
                   <includes>
                     <include>db.spec</include>
-                  </includes>
-                </source>
-              </sources>
-            </mapping>
-
-            <mapping>
-              <directory>/etc/slipstream/auth</directory>
-            </mapping>
-
-            <mapping>
-              <directory>/etc/slipstream/auth</directory>
-              <configuration>noreplace</configuration>
-              <directoryIncluded>false</directoryIncluded>
-              <sources>
-                <source>
-                  <location>src/main/resources</location>
-                  <includes>
-                    <include>cyclone_pubkey.pem</include>
                   </includes>
                 </source>
               </sources>

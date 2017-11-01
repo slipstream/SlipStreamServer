@@ -7,7 +7,7 @@
   :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
   :edition "community"
 
-  :dependencies '[[org.clojure/clojure "1.9.0-beta2"]
+  :dependencies '[[org.clojure/clojure "1.9.0-beta2" :scope "provided"]
                   [sixsq/build-utils "0.1.4" :scope "test"]])
 
 (require '[sixsq.build-fns :refer [merge-defaults
@@ -24,7 +24,7 @@
                   '[[org.clojure/clojure :scope "provided"]
 
                     [com.jcraft/jsch]
-                    [org.clojure/tools.cli]
+                    [org.clojure/tools.cli :exclusions [org.clojure/clojure]]
                     [org.slf4j/slf4j-log4j12 :scope "provided"]
 
                     [com.sixsq.slipstream/utils :scope "provided"]
@@ -36,7 +36,6 @@
 
                     ;; test dependencies
                     [peridot]
-                    [honeysql]
                     [org.clojure/test.check]
                     [org.slf4j/slf4j-log4j12 :scope "test"]
                     [com.cemerick/url nil :scope "test"]
