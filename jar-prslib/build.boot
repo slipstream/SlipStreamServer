@@ -29,6 +29,8 @@
                    [org.clojure/data.json]
                    [org.clojure/tools.logging]
 
+                   [org.slf4j/slf4j-log4j12 :scope "provided"] ;; concrete implementation specified by container
+
                    [adzerk/boot-test]
                    [adzerk/boot-reload]
                    [tolitius/boot-check]

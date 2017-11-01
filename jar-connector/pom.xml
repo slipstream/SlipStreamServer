@@ -87,9 +87,11 @@
 			<scope>test</scope>
 		</dependency>
 
+                <!-- final concrete implementaion should be provided by the server packaging -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-jdk14</artifactId>
+                        <artifactId>slf4j-jdk14</artifactId>
+                        <scope>provided</scope>
 		</dependency>
 
 		<dependency>

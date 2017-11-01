@@ -51,6 +51,8 @@
                     [ring/ring-json]
                     [superstring]
                     [zookeeper-clj]
+                    [org.apache.zookeeper/zookeeper] ;; included so that exclusions are specified
+
 
                     [com.sixsq.slipstream/utils]
                     [com.sixsq.slipstream/auth]
