@@ -24,12 +24,8 @@
   (t/make-ring-app (t/concat-routes routes/final-routes)))
 
 (def valid-job
-  {:id          (str resource-url "/test-quota")
-   :resourceURI resource-uri
-   :progress    0
-   :action      "add"
-   :targetResource {:href "abc/def"}
-   :affectedResources [{:href "abc/def"}]
+  {:resourceURI resource-uri
+   :action      "collect"
    :acl     {:owner {:type "USER" :principal "admin"}
              :rules [{:type "USER" :principal "jane" :right "VIEW"}]}})
 
@@ -87,6 +83,14 @@
           (t/body->edn)
           (t/is-status 200)
           (get-in [:response :body]))
+
+      ;; set state to a final state make progress to set 100 automatically
+      (is (= 100 (-> session-admin
+                     (request abs-uri :request-method :put
+                              :body (json/write-str {:state "SUCCESS"}))
+                     (t/body->edn)
+                     (t/is-status 200)
+                     (get-in [:response :body :progress]))))
 
       (-> session-admin
           (request abs-uri :request-method :delete)

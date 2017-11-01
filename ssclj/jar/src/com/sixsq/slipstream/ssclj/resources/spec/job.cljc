@@ -13,7 +13,7 @@
 (s/def :cimi.job/targetResource :cimi.common/resource-link)
 (s/def :cimi.job/affectedResources :cimi.common/resource-links)
 (s/def :cimi.job/returnCode int?)
-(s/def :cimi.job/progress (s/int-in 0 100))
+(s/def :cimi.job/progress (s/int-in 0 101))
 (s/def :cimi.job/timeOfStatusChange :cimi.core/timestamp)
 (s/def :cimi.job/statusMessage string?)
 (s/def :cimi.job/action :cimi.common.operation/rel)
@@ -23,12 +23,12 @@
 
 (s/def :cimi/job
   (su/only-keys-maps c/common-attrs
-                     {:req-un [:cimi.job/targetResource
-                               :cimi.job/affectedResources
-                               :cimi.job/state
+                     {:req-un [:cimi.job/state
                                :cimi.job/action
                                :cimi.job/progress]
-                      :opt-un [:cimi.job/returnCode
+                      :opt-un [:cimi.job/targetResource
+                               :cimi.job/affectedResources
+                               :cimi.job/returnCode
                                :cimi.job/statusMessage
                                :cimi.job/timeOfStatusChange
                                :cimi.job/parentJob

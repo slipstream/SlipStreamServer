@@ -74,7 +74,6 @@ public class VmMappingTest {
         new VmMapping(cloud, instanceId, runUuid, "", serviceOffer);
     }
 
-
     @Test
     public void testJsonIdentifierMapping() {
         VmMapping vmMapping;
