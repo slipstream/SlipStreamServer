@@ -3,49 +3,8 @@
     [clojure.test :refer :all]
     [com.sixsq.slipstream.ssclj.migrate.user-cred :as t]))
 
-(deftest exo-template
-  (let [valid-template {:credentialTemplate {:key         "key"
-                                             :secret      "secret"
-                                             :domain-name "domain"
-                                             :connector   "href"}}
-        user "user"
-        expected {:credentialTemplate {:key         "key"
-                                       :secret      "secret"
-                                       :domain-name "domain"
-                                       :connector   "href"}
-                  :user               "user"}]
-    (is (= expected (t/check-exo-template valid-template user)))
-    (is (= (assoc expected :user "newuser") (t/check-exo-template valid-template "newuser")))
-    (is (= (assoc-in expected [:credentialTemplate :key] "newkey")
-           (t/check-exo-template (assoc-in expected [:credentialTemplate :key] "newkey") user)))
-    ;;empty key
-    (is (nil? (t/check-exo-template (assoc-in expected [:credentialTemplate :key] "") user)))
-    ;; mandatory keywords
-    (doseq [k #{:key :secret :domain-name :connector}]
-      (is (nil? (t/check-exo-template (update-in valid-template [:credentialTemplate] dissoc k) user))))))
 
-(deftest otc-template
-  (let [valid-template {:credentialTemplate {:key         "key"
-                                             :secret      "secret"
-                                             :domain-name "domain"
-                                             :tenant-name "tenant"
-                                             :connector   "href"}}
-        user "user"
-        expected {:credentialTemplate {:key         "key"
-                                       :secret      "secret"
-                                       :domain-name "domain"
-                                       :tenant-name "tenant"
-                                       :connector   "href"}
-                  :user               "user"}]
-    (is (= expected (t/check-otc-template valid-template user)))
-    (is (= (assoc expected :user "newuser") (t/check-exo-template valid-template "newuser")))
-    (is (= (assoc-in expected [:credentialTemplate :key] "newkey")
-           (t/check-otc-template (assoc-in expected [:credentialTemplate :key] "newkey") user)))
-    ;;empty key
-    (is (nil? (t/check-otc-template (assoc-in expected [:credentialTemplate :key] "") user)))
-    ;; mandatory keywords
-    (doseq [k #{:key :secret :domain-name :tenant-name :connector}]
-      (is (nil? (t/check-otc-template (update-in valid-template [:credentialTemplate] dissoc k) user))))))
+
 
 (def user1 "user/user1")
 (def user2 "user/user2")
@@ -253,6 +212,48 @@
                         (list base-template) (list [])
                         expect-simple simple-source
                         expect-multi multi-source)))
+
+(deftest mapped-connectors
+  (are [expect-fn arg] (expect-fn (t/mapped arg))
+                       nil? nil
+                       nil? :wrong
+                       nil? "wrong"
+                       #(contains? % :template-name) "exoscale-ch-gva"))
+
+(deftest template-validation
+  (are [tpl ks] (not (t/valid-template? tpl ks))
+                nil nil
+                nil :k
+                nil [:k1 :k2]
+                nil {}
+                {} nil
+                :t nil
+                ;;:t :t
+                {:k :v} nil
+                ;;{:k :v} :k
+                {:k :v} [:k]
+                {:credentialTemplate {:k1 :v1
+                                      :k2 :v2
+                                      }} [:k1 :k2 :k3])
+  (are [tpl ks] (t/valid-template? tpl ks)
+                {:credentialTemplate {:k :v}} [:k]
+                {:credentialTemplate {:k1 :v1
+                                      :k2 :v2
+                                      }} [:k1 :k2]
+                {:credentialTemplate {:href        "credential-template/store-cloud-cred-exoscale",
+                                      :key         "EXO0000000001",
+                                      :secret      "secret",
+                                      :domain-name "",
+                                      :connector   "connector/exoscale-ch-gva"}} [:href :key :secret :domain-name :connector]))
+
+(deftest mappings-size
+  (is (= (count t/mappings) (reduce + [(count t/mappings-nuvlabox)
+                                       (count t/mappings-stratuslabiter)
+                                       (count t/mappings-otc)
+                                       (count t/mappings-openstack)
+                                       (count t/mappings-opennebula)
+                                       (count t/mappings-exoscale)
+                                       (count t/mappings-ec2)]))))
 
 
 

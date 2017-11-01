@@ -16,6 +16,63 @@
     [clojure.edn :as edn])
   (:gen-class))
 
+(def ^:const keys-cred-full [:href :key :secret :connector :domain-name :tenant-name])
+(def ^:const keys-cred-nuvlabox (vec (remove #{:domain-name :tenant-name} keys-cred-full)))
+(def ^:const keys-cred-stratuslab (vec (remove #{:domain-name :tenant-name} keys-cred-full)))
+(def ^:const keys-cred-otc keys-cred-full)
+(def ^:const keys-cred-openstack keys-cred-full)
+(def ^:const keys-cred-opennebula (vec (remove #{:domain-name :tenant-name} keys-cred-full)))
+(def ^:const keys-cred-exoscale (vec (remove #{:tenant-name} keys-cred-full)))
+(def ^:const keys-cred-ec2 (vec (remove #{:domain-name :tenant-name} keys-cred-full)))
+
+
+(def ^:const cat-nuvlabox #{"nuvlabox-albert-einstein", "nuvlabox-arthur-harden", "nuvlabox-bertil-ohlin",
+                            "nuvlabox-carl-cori", "nuvlabox-cecil-powell", "nuvlabox-christiane-n-volhard",
+                            "nuvlabox-christiane-nusslein-volhard", "nuvlabox-demo", "nuvlabox-felix-bloch",
+                            "nuvlabox-henry-dunant", "nuvlabox-james-chadwick", "nuvlabox-joseph-e-murray",
+                            "nuvlabox-joseph-e-stiglitz", "nuvlabox-joseph-erlanger", "nuvlabox-joseph-h-taylor-jr",
+                            "nuvlabox-joseph-l-goldstein", "nuvlabox-jules-bordet", "nuvlabox-max-born",
+                            "nuvlabox-max-planck", "nuvlabox-scissor1", "nuvlabox-scissor2", "nuvlabox-stanley-cohen",
+                            "nuvlabox-yves-chauvin"})
+
+(def ^:const cat-stratuslabiter #{"atos-es1"})
+(def ^:const cat-otc #{"open-telekom-de1"})
+(def ^:const cat-openstack #{"advania-se1", "cyclone-de1", "cyclone-fr2", "cyclone-tb-it1", "ebi-embassy-uk1",
+                             "eo-cloudferro-pl1", "ifb-bird-stack", "ifb-bistro-iphc", "ifb-core-cloud", "ifb-core-pilot",
+                             "ifb-genouest-genostack"})
+(def ^:const cat-opennebula #{"eo-cesnet-cz1", "scissor-fr1", "scissor-fr2", "scissor-fr3", "teidehpc-es-tfs1"})
+(def ^:const cat-exoscale #{"exoscale-ch-dk", "exoscale-ch-gva"})
+(def ^:const cat-ec2 #{"ec2-ap-northeast-1", "ec2-ap-southeast-1", "ec2-ap-southeast-2", "ec2-eu-central-1",
+                       "ec2-eu-west", "ec2-eu-west-2", "ec2-sa-east-1", "ec2-us-east-1", "ec2-us-west-1", "ec2-us-west-2"})
+
+
+
+(def ^:const mappings-nuvlabox (set (map #(hash-map % {:ks keys-cred-nuvlabox :template-name "store-cloud-cred-nuvlabox"}) cat-nuvlabox)))
+(def ^:const mappings-stratuslabiter (set (map #(hash-map % {:ks keys-cred-stratuslab :template-name "store-cloud-cred-stratuslabiter"}) cat-stratuslabiter)))
+(def ^:const mappings-otc (set (map #(hash-map % {:ks keys-cred-otc :template-name "store-cloud-cred-otc"}) cat-otc)))
+(def ^:const mappings-openstack (set (map #(hash-map % {:ks keys-cred-openstack :template-name "store-cloud-cred-openstack"}) cat-openstack)))
+(def ^:const mappings-opennebula (set (map #(hash-map % {:ks keys-cred-opennebula :template-name "store-cloud-cred-opennebula"}) cat-opennebula)))
+(def ^:const mappings-exoscale (set (map #(hash-map % {:ks keys-cred-exoscale :template-name "store-cloud-cred-exoscale"}) cat-exoscale)))
+(def ^:const mappings-ec2 (set (map #(hash-map % {:ks keys-cred-ec2 :template-name "store-cloud-cred-ec2"}) cat-ec2)))
+
+
+(def ^:const mappings
+  (clojure.set/union mappings-nuvlabox
+                     mappings-stratuslabiter
+                     mappings-otc
+                     mappings-openstack
+                     mappings-opennebula
+                     mappings-exoscale
+                     mappings-ec2))
+
+
+(defn mapped
+  "Return characteristics of given category as defined in `mappings`"
+  [k]
+  (->> (map #(get % k) mappings)
+       (remove nil?)
+       first))
+
 (defn- find-resource
   [resource-path]
   (if-let [config-file (io/resource resource-path)]
@@ -57,18 +114,18 @@
              (kc/fields "USERPARAMETER.*")
              (kc/where (= :USERPARAMETER.CATEGORY category))))
 
-
-(defn check-exo-template
-  [t u]
-  (let [
-        {key :key secret :secret domain :domain-name connector :connector} (:credentialTemplate t)]
-    (when (and key secret domain connector (not (empty? key))) (assoc t :user u))))
-
-
-(defn check-otc-template
-  [t u]
-  (let [{key :key secret :secret domain :domain-name tenant :tenant-name connector :connector} (:credentialTemplate t)]
-    (when (and key secret domain tenant connector (not (empty? key))) (assoc t :user u))))
+(defn valid-template?
+  "return true if template t is valid"
+  [t ks]
+  (and
+    (not (nil? t))
+    (not (nil? ks))
+    (not (empty? ks))
+    (vector? ks)
+    (map? t)
+    (contains? t :credentialTemplate)
+    ;;every key is ks must have non nil values in template t
+    (every? (complement nil?) (map #(% (:credentialTemplate t)) (map #(keyword %) ks)))))
 
 (defn extract-data
   [category coll user]
@@ -78,25 +135,19 @@
         secret (get-value ".password")
         domain (get-value ".domain.name")
         tenant (get-value ".tenant.name")
-        exo-template {:credentialTemplate {:href        "credential-template/store-cloud-cred-exoscale"
-                                           :key         key
-                                           :secret      secret
-                                           :connector   (str "connector/" category)
-                                           :domain-name domain}}
-        otc-template {:credentialTemplate {:href        "credential-template/store-cloud-cred-otc"
-                                           :key         key
-                                           :secret      secret
-                                           :tenant-name tenant
-                                           :connector   (str "connector/" category)
-                                           :domain-name domain}}
-        category-definition (fn [coll k] (get (first (filter #(get % k) coll)) k))
-        supported-categories #{{"exoscale-ch-gva" {:check-fn check-exo-template :template exo-template}},
-                               {"exoscale-ch-dk" {:check-fn check-exo-template :template exo-template}},
-                               {"open-telekom-de1" {:check-fn check-otc-template :template otc-template}}}
-        check-fn (:check-fn (category-definition supported-categories category))
-        template-tu-use (:template (category-definition supported-categories category))]
-    (when check-fn
-      (check-fn template-tu-use user))))
+        base-template {:credentialTemplate {:href        (str "credential-template/" (-> (mapped category)
+                                                                                         :template-name))
+                                            :key         key
+                                            :secret      secret
+                                            :tenant-name tenant
+                                            :connector   (str "connector/" category)
+                                            :domain-name domain}}
+
+        template-keys (:ks (mapped category))
+        template-instance (update-in base-template [:credentialTemplate] select-keys template-keys)]
+
+    (when (valid-template? template-instance template-keys)
+      (assoc template-instance :user user))))
 
 
 (defn merge-acl
@@ -106,7 +157,7 @@
                                   :principal u
                                   :right     "VIEW"
                                   }))
-        user-rules (filter (complement nil?) (map add-rule users))
+        user-rules (remove nil? (map add-rule users))
         base-acl {:owner {:principal "ADMIN"
                           :type      "ROLE"}}
         base-rule [{:type      "ROLE",
@@ -132,18 +183,19 @@
   [client category]
   (let [get-grouped-data (fn [c] (group-by :CONTAINER_RESOURCEURI (fetch-users c)))
         coll (get-grouped-data category)
-        templates (filter (complement nil?) (map (partial extract-data category coll) (keys coll)))
+        templates (remove nil? (map (partial extract-data category coll) (keys coll)))
         templates-by-key (group-by #(:key (:credentialTemplate %)) templates)
         records (generate-records (map second templates-by-key))]
     (println (str "Collection for " category " : Adding " (count coll) " records"))
     (println (str "Migrating category " category " : Adding " (count records) " credentials"))
     (map (partial cimi/add client "credentials") records)))
 
+
 (defn -main
   " Main function to migrate client data resources from DB to CIMI (Elastic Search) "
   []
   (let [init (do-korma-init)
-        categories #{"open-telekom-de1", "exoscale-ch-gva", "exoscale-ch-dk"}
+        categories (keys mappings)
         cep-endpoint (or (environ/env :dbmigration-endpoint) "https://nuv.la/api/cloud-entry-point")
         ;;e.g DBMIGRATION_OPTIONS={:insecure? true}
         client (if (environ/env :dbmigration-options) (sync/instance cep-endpoint (read-string (environ/env :dbmigration-options))) (sync/instance cep-endpoint))
@@ -151,5 +203,5 @@
                                    :username (environ/env :dbmigration-user) ;;export DBMIGRATION_USER="super"
 
                                    :password (environ/env :dbmigration-password)})]
-    (map (partial add-credentials client) categories)))
+    (map (partial add-credentials client) (keys mappings))))
 
