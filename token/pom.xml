@@ -4,7 +4,7 @@
   <artifactId>token-dep</artifactId>
   <packaging>pom</packaging>
   <version>3.39-SNAPSHOT</version>
-  <name>token-dep</name>
+  <name>SlipStreamServer/token</name>
   <description>SlipStreamServer/token</description>
   <url>http://sixsq.com</url>
 

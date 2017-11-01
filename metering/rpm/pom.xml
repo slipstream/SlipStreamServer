@@ -4,7 +4,7 @@
 
   <artifactId>metering-rpm</artifactId>
  
-  <name>SlipStream Metering (RPM)</name>
+  <name>SlipStreamServer/metering/rpm</name>
 
   <packaging>pom</packaging>
 
