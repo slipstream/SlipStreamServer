@@ -3,9 +3,6 @@
     [clojure.test :refer :all]
     [com.sixsq.slipstream.ssclj.migrate.user-cred :as t]))
 
-
-
-
 (def user1 "user/user1")
 (def user2 "user/user2")
 
@@ -221,6 +218,7 @@
                        #(contains? % :template-name) "exoscale-ch-gva"))
 
 (deftest template-validation
+  ;; invalid scenario
   (are [tpl ks] (not (t/valid-template? tpl ks))
                 nil nil
                 nil :k
@@ -234,11 +232,19 @@
                 {:k :v} [:k]
                 {:credentialTemplate {:k1 :v1
                                       :k2 :v2
-                                      }} [:k1 :k2 :k3])
+                                      }} [:k1 :k2 :k3]
+                {:credentialTemplate {:href      "credential-template/store-cloud-cred-nuvlabox",
+                                      :key       "",
+                                      :secret    "",
+                                      :connector "connector/nuvlabox-carl-cori"}} t/keys-cred-nuvlabox
+                {:credentialTemplate {:key "key" :tenant-name ""}} [:tenant-name])
+
+  ;;valid scenario
   (are [tpl ks] (t/valid-template? tpl ks)
-                {:credentialTemplate {:k :v}} [:k]
-                {:credentialTemplate {:k1 :v1
-                                      :k2 :v2
+                {:credentialTemplate {:k :v :key "key"}} [:k]
+                {:credentialTemplate {:key "key"
+                                      :k1  :v1
+                                      :k2  :v2
                                       }} [:k1 :k2]
                 {:credentialTemplate {:href        "credential-template/store-cloud-cred-exoscale",
                                       :key         "EXO0000000001",

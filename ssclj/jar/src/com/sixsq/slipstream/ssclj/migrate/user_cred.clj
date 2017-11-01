@@ -124,6 +124,11 @@
     (vector? ks)
     (map? t)
     (contains? t :credentialTemplate)
+    ;; key is mandatory in any case
+    (contains? (:credentialTemplate t) :key)
+    ;; key shall not be empty
+    (seq (-> t :credentialTemplate :key))
+    (or (nil? (-> t :credentialTemplate :tenant-name)) (seq (-> t :credentialTemplate :tenant-name)))
     ;;every key is ks must have non nil values in template t
     (every? (complement nil?) (map #(% (:credentialTemplate t)) (map keyword ks)))))
 
@@ -131,8 +136,8 @@
   [category coll user]
   (let [byfields (group-by :NAME (get coll user))
         get-value (fn [field] (:VALUE (first (get byfields (str category field)))))
-        key (get-value ".username")
-        secret (get-value ".password")
+        key (or (get-value ".username") (get-value ".access.id"))
+        secret (or (get-value ".password") (get-value ".secret.key"))
         domain (get-value ".domain.name")
         tenant (get-value ".tenant.name")
         base-template {:credentialTemplate {:href        (str "credential-template/" (-> (mapped category)
@@ -185,7 +190,8 @@
         coll (get-grouped-data category)
         templates (remove nil? (map (partial extract-data category coll) (keys coll)))
         templates-by-key (group-by #(:key (:credentialTemplate %)) templates)
-        records (generate-records (map second templates-by-key))]
+        records (when (seq templates-by-key)
+                  (generate-records (map second templates-by-key)))]
     (println (str "Collection for " category " : Adding " (count coll) " records"))
     (println (str "Migrating category " category " : Adding " (count records) " credentials"))
     (map (partial cimi/add client "credentials") records)))
@@ -203,5 +209,5 @@
                                    :username (environ/env :dbmigration-user) ;;export DBMIGRATION_USER="super"
 
                                    :password (environ/env :dbmigration-password)})]
-    (map (partial add-credentials client) (keys mappings))))
+    (map (partial add-credentials client) (map #(first (keys %)) mappings))))
 
