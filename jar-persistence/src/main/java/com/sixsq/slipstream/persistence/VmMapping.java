@@ -33,14 +33,21 @@ public class VmMapping {
     private String serviceOffer;
 
     public VmMapping(String cloud, String instanceId, String runUuid, String owner, String serviceOffer) {
-        if (cloud == null || instanceId == null) {
-            throw new IllegalArgumentException("cloud and instanceId cannot be null");
+        if (cloud == null || cloud.isEmpty() ||
+                instanceId == null || instanceId.isEmpty() ||
+                runUuid == null || runUuid.isEmpty() ||
+                owner == null || owner.isEmpty()) {
+            throw new IllegalArgumentException("cloud, instanceId, runUuid and owner cannot be null or empty");
         }
         this.cloud = cloud;
         this.instanceId = instanceId;
         this.runUuid = runUuid;
         this.owner = owner;
-        this.serviceOffer = serviceOffer;
+        if ((serviceOffer != null) && (!serviceOffer.isEmpty())) {
+            this.serviceOffer = serviceOffer;
+        } else {
+            this.serviceOffer = null;
+        }
     }
 
     public void create() {

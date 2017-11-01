@@ -27,15 +27,11 @@ public class VmMappingTest {
         vmMapping = new VmMapping(cloud, instanceId, runUuid, owner, serviceOffer);
         jsonRoundtripAssert(vmMapping);
 
-        vmMapping = new VmMapping(cloud, instanceId, null, owner, serviceOffer);
+        vmMapping = new VmMapping(cloud, instanceId, runUuid, owner, null);
         jsonRoundtripAssert(vmMapping);
 
-        vmMapping = new VmMapping(cloud, instanceId, runUuid, null, serviceOffer);
+        vmMapping = new VmMapping(cloud, instanceId, runUuid, owner, "");
         jsonRoundtripAssert(vmMapping);
-
-        vmMapping = new VmMapping(cloud, instanceId, null, owner, null);
-        jsonRoundtripAssert(vmMapping);
-
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -44,13 +40,38 @@ public class VmMappingTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
+    public void testBadCloudBlank() {
+        new VmMapping("", instanceId, runUuid, owner, serviceOffer);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
     public void testBadInstanceId() {
         new VmMapping(cloud, null, runUuid, owner, serviceOffer);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testBadCloudAndInstanceId() {
-        new VmMapping(null, null, runUuid, owner, serviceOffer);
+    public void testBadInstanceIdBlank() {
+        new VmMapping(cloud, "", runUuid, owner, serviceOffer);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testBadRunUuid() {
+        new VmMapping(cloud, instanceId, null, owner, serviceOffer);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testBadRunUuidBlank() {
+        new VmMapping(cloud, instanceId, "", owner, serviceOffer);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testBadOwner() {
+        new VmMapping(cloud, instanceId, runUuid, null, serviceOffer);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testBadOwnerBlank() {
+        new VmMapping(cloud, instanceId, runUuid, "", serviceOffer);
     }
 
     @Test
@@ -67,13 +88,13 @@ public class VmMappingTest {
         Assert.assertTrue(json.contains("\"owner\""));
         Assert.assertTrue(json.contains("\"serviceOffer\""));
 
-        vmMapping = new VmMapping(cloud, instanceId, null, null, null);
+        vmMapping = new VmMapping(cloud, instanceId, runUuid, owner, null);
         json = vmMapping.toJson();
 
         Assert.assertTrue(json.contains("\"cloud\""));
         Assert.assertTrue(json.contains("\"instanceID\""));
-        Assert.assertFalse(json.contains("\"runUUID\""));
-        Assert.assertFalse(json.contains("\"owner\""));
+        Assert.assertTrue(json.contains("\"runUUID\""));
+        Assert.assertTrue(json.contains("\"owner\""));
         Assert.assertFalse(json.contains("\"serviceOffer\""));
     }
 }
