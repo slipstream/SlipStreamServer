@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.usage.state-machine-test
   (:require
     [clojure.test :refer :all]
-    [com.sixsq.slipstream.ssclj.usage.state-machine :refer :all]))
+    [com.sixsq.slipstream.ssclj.resources.usage.state-machine :refer :all]))
 
 (defn leads-to
   [state trigger expected-action]

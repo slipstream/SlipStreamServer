@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.usage.seeds.usages
   (:require
-    [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
+    [com.sixsq.slipstream.ssclj.resources.usage.record-keeper :as rc]
     [com.sixsq.slipstream.db.impl :as db]
     [clj-time.core :as time]
     [com.sixsq.slipstream.db.es.binding :as esb]

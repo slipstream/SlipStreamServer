@@ -2,8 +2,8 @@
   (:refer-clojure :exclude [update])
   (:require
     [com.sixsq.slipstream.ssclj.usage.summary :refer :all]
-    [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
-    [com.sixsq.slipstream.ssclj.usage.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.usage.record-keeper :as rc]
+    [com.sixsq.slipstream.ssclj.resources.usage.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as tu]
     [clojure.test :refer :all]
     [com.sixsq.slipstream.db.impl :as db]

@@ -4,7 +4,7 @@
     [superstring.core :as string]
     [clojure.tools.cli :as cli]
     [clj-time.core :as time]
-    [com.sixsq.slipstream.ssclj.usage.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.usage.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
     [com.sixsq.slipstream.ssclj.usage.summary :as s]
     [com.sixsq.slipstream.db.es.binding :as esb]
