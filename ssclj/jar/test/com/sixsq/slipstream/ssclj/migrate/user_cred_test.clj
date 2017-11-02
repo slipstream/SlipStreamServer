@@ -114,16 +114,32 @@
                                         :key         "EXO0000000001"
                                         :secret      "secret"
                                         :connector   "connector/exoscale-ch-gva"
-                                        :domain-name ""}
+                                        :domain-name ""
+                                        :acl         {:owner {:principal "user/user1"
+                                                              :type      "USER"}
+                                                      :rules [{:principal "ADMIN"
+                                                               :right     "ALL"
+                                                               :type      "ROLE"}
+                                                              {:principal "user/user1"
+                                                               :right     "MODIFY"
+                                                               :type      "USER"}]}
+                                        }
                    :name               "exoscale-ch-gva"
-                   :user               user1}
+                   }
         expected2 {:credentialTemplate {:href        "credential-template/store-cloud-cred-exoscale"
                                         :key         "EXO0000000002"
                                         :secret      "secret"
                                         :connector   "connector/exoscale-ch-gva"
-                                        :domain-name ""}
-                   :name               "exoscale-ch-gva"
-                   :user               user2}]
+                                        :domain-name ""
+                                        :acl         {:owner {:principal "user/user2"
+                                                              :type      "USER"}
+                                                      :rules [{:principal "ADMIN"
+                                                               :right     "ALL"
+                                                               :type      "ROLE"}
+                                                              {:principal "user/user2"
+                                                               :right     "MODIFY"
+                                                               :type      "USER"}]}}
+                   :name               "exoscale-ch-gva"}]
 
     (are [expected category coll user] (= expected (t/extract-data category coll user))
                                        nil nil nil nil
@@ -136,81 +152,6 @@
                                        expected2 category-exo-gva coll user2
                                        nil wrong-category coll user1
                                        nil category-otc coll user1)))
-
-
-
-(deftest acl-merging
-  (let [base-acl {:owner {:principal "ADMIN", :type "ROLE"},
-                  :rules [{:type "ROLE", :principal "ADMIN", :right "ALL"}]}
-        expect-user1 {:owner {:principal "ADMIN", :type "ROLE"},
-                      :rules [{:type "ROLE", :principal "ADMIN", :right "ALL"}
-                              {:type "USER", :principal "user1", :right "VIEW"}]}
-        expect-2users (update-in expect-user1 [:rules] conj {:type "USER" :principal "user2" :right "VIEW"})]
-    (are [expected arg] (= expected (t/merge-acl arg))
-                        base-acl nil
-                        base-acl []
-                        base-acl {}
-                        base-acl {:wrong "value"}
-                        base-acl {:user "value"}
-                        base-acl [nil]
-                        base-acl ["foo"]
-                        base-acl [{:wrong "value"}]
-                        expect-user1 [{:user "user1"}]
-                        expect-2users [{:user "user1"} {:user "user2"}]
-                        expect-2users [{:user "user1" :extra "extra1"} {:user "user2" :extra "extra2"}])))
-
-
-(deftest records-generations
-  (let [base-template {:credentialTemplate {:acl {:owner {:principal "ADMIN", :type "ROLE"},
-                                                  :rules [{:type "ROLE", :principal "ADMIN", :right "ALL"}]}}}
-        simple-source (list [{:credentialTemplate {:href        "credential-template/store-cloud-cred-exoscale",
-                                                   :key         "aKey",
-                                                   :secret      "aSecret",
-                                                   :connector   "connector/exoscale-ch-gva",
-                                                   :domain-name ""},
-                              :user               "user/user1"}])
-
-        expect-simple (list {:credentialTemplate {:href        "credential-template/store-cloud-cred-exoscale",
-                                                  :key         "aKey",
-                                                  :secret      "aSecret",
-                                                  :connector   "connector/exoscale-ch-gva",
-                                                  :domain-name "",
-                                                  :acl         {:owner {:principal "ADMIN", :type "ROLE"},
-                                                                :rules [{:type "ROLE", :principal "ADMIN", :right "ALL"}
-                                                                        {:type "USER", :principal "user/user1", :right "VIEW"}]}}})
-        multiplicity 42
-        multi-source (map #(vector (conj {:credentialTemplate {:href        "credential-template/store-cloud-cred-exoscale",
-                                                               :key         "aKey",
-                                                               :secret      "aSecret",
-                                                               :connector   "connector/exoscale-ch-gva",
-                                                               :domain-name ""}} {:user (str "user/user" %)})) (range multiplicity))
-        base-expect {:credentialTemplate {:href        "credential-template/store-cloud-cred-exoscale",
-                                          :key         "aKey",
-                                          :secret      "aSecret",
-                                          :connector   "connector/exoscale-ch-gva",
-                                          :domain-name "",
-                                          :acl         {:owner {:principal "ADMIN", :type "ROLE"},
-                                                        :rules [{:type "ROLE", :principal "ADMIN", :right "ALL"}]}}}
-        add-user-rule (fn [x] (update-in base-expect [:credentialTemplate :acl :rules] conj {:type "USER" :principal (str "user/user" x) :right "VIEW"}))
-        expect-multi (map add-user-rule (range multiplicity))]
-    (are [arg] (thrown? AssertionError (t/generate-records arg))
-               nil
-               []
-               {}
-               "wrong"
-               ["wrong"]
-               [nil]
-               [{}]
-               [{:wrong "value"}]
-               (list :wrong)
-               (list [nil])
-               (list [:test])
-               (list ["value"]))
-    (are [expected arg] (= expected (t/generate-records arg))
-                        (list base-template) (list [{}])
-                        (list base-template) (list [])
-                        expect-simple simple-source
-                        expect-multi multi-source)))
 
 (deftest mapped-connectors
   (are [expect-fn arg] (expect-fn (t/mapped arg))
@@ -243,10 +184,11 @@
 
   ;;valid scenario
   (are [tpl ks] (t/valid-template? tpl ks)
-                {:credentialTemplate {:k :v :key "key"}} [:k]
-                {:credentialTemplate {:key "key"
-                                      :k1  :v1
-                                      :k2  :v2
+                {:credentialTemplate {:k :v :key "key" :secret "secret"}} [:k]
+                {:credentialTemplate {:key    "key"
+                                      :secret "secret"
+                                      :k1     :v1
+                                      :k2     :v2
                                       }} [:k1 :k2]
                 {:credentialTemplate {:href        "credential-template/store-cloud-cred-exoscale",
                                       :key         "EXO0000000001",
@@ -262,9 +204,3 @@
                                        (count t/mappings-opennebula)
                                        (count t/mappings-exoscale)
                                        (count t/mappings-ec2)]))))
-
-
-
-
-
-

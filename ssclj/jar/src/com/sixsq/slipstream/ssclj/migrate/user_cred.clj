@@ -115,7 +115,7 @@
              (kc/where (= :USERPARAMETER.CATEGORY category))))
 
 (defn valid-template?
-  "return true if template t is valid"
+  "return true if template t is valid, ks is the list of mandatory keys"
   [t ks]
   (and
     (not (nil? t))
@@ -124,10 +124,13 @@
     (vector? ks)
     (map? t)
     (contains? t :credentialTemplate)
-    ;; key is mandatory in any case
+    ;; key and secret are mandatory in any case
     (contains? (:credentialTemplate t) :key)
-    ;; key shall not be empty
+    (contains? (:credentialTemplate t) :secret)
+    ;; key and secret shall not be empty
     (seq (-> t :credentialTemplate :key))
+    (seq (-> t :credentialTemplate :secret))
+    ;; either tenant is defined and not empty,or it is undefined
     (or (nil? (-> t :credentialTemplate :tenant-name)) (seq (-> t :credentialTemplate :tenant-name)))
     ;;every key is ks must have non nil values in template t
     (every? (complement nil?) (map #(% (:credentialTemplate t)) (map keyword ks)))))
@@ -149,50 +152,26 @@
                                             :domain-name domain}
                        :name               category}
 
+        add-acl-to-template (fn [t u] (assoc-in t [:credentialTemplate :acl] {:owner {:principal u
+                                                                                      :type      "USER"}
+                                                                              :rules [{:type      "ROLE",
+                                                                                       :principal "ADMIN",
+                                                                                       :right     "ALL"}
+                                                                                      {:type      "USER",
+                                                                                       :principal u,
+                                                                                       :right     "MODIFY"}
+                                                                                      ]}))
         template-keys (:ks (mapped category))
         template-instance (update-in base-template [:credentialTemplate] select-keys template-keys)]
-
-    (when (valid-template? template-instance template-keys)
-      (assoc template-instance :user user))))
-
-
-(defn merge-acl
-  [v]
-  (let [users (map :user v)
-        add-rule (fn [u] (when u {:type      "USER"
-                                  :principal u
-                                  :right     "VIEW"
-                                  }))
-        user-rules (remove nil? (map add-rule users))
-        base-acl {:owner {:principal "ADMIN"
-                          :type      "ROLE"}}
-        base-rule [{:type      "ROLE",
-                    :principal "ADMIN",
-                    :right     "ALL"}]]
-    (assoc base-acl :rules (reduce conj base-rule user-rules))))
-
-
-(defn generate-records
-  [vt]
-  {:pre [;; non empty sequence
-         (seq? vt)
-         (not (empty? vt))
-         ;;containing only vectors
-         (every? vector? vt)
-         ;;every of those vectors contain map
-         (every? true? (map #(every? map? %) vt))]}
-  (let [header (dissoc (ffirst vt) :user)
-        gen-content (fn [v] (assoc-in header [:credentialTemplate :acl] (merge-acl v)))]
-    (map gen-content vt)))
+    (when (valid-template? template-instance template-keys) (add-acl-to-template template-instance user))))
 
 (defn add-credentials
   [client category]
   (let [get-grouped-data (fn [c] (group-by :CONTAINER_RESOURCEURI (fetch-users c)))
         coll (get-grouped-data category)
-        templates (remove nil? (map (partial extract-data category coll) (keys coll)))
-        templates-by-key (group-by #(:key (:credentialTemplate %)) templates)
-        records (when (seq templates-by-key)
-                  (generate-records (map second templates-by-key)))]
+        users (keys coll)
+        records (remove nil? (map (partial extract-data category coll) users))
+        ]
     (println (str "Collection for " category " : Adding " (count coll) " records"))
     (println (str "Migrating category " category " : Adding " (count records) " credentials"))
     (map (partial cimi/add client "credentials") records)))
