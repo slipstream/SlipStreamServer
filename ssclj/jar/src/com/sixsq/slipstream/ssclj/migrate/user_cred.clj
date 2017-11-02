@@ -146,7 +146,8 @@
                                             :secret      secret
                                             :tenant-name tenant
                                             :connector   (str "connector/" category)
-                                            :domain-name domain}}
+                                            :domain-name domain}
+                       :name               category}
 
         template-keys (:ks (mapped category))
         template-instance (update-in base-template [:credentialTemplate] select-keys template-keys)]

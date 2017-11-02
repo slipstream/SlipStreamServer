@@ -115,12 +115,14 @@
                                         :secret      "secret"
                                         :connector   "connector/exoscale-ch-gva"
                                         :domain-name ""}
+                   :name               "exoscale-ch-gva"
                    :user               user1}
         expected2 {:credentialTemplate {:href        "credential-template/store-cloud-cred-exoscale"
                                         :key         "EXO0000000002"
                                         :secret      "secret"
                                         :connector   "connector/exoscale-ch-gva"
                                         :domain-name ""}
+                   :name               "exoscale-ch-gva"
                    :user               user2}]
 
     (are [expected category coll user] (= expected (t/extract-data category coll user))
