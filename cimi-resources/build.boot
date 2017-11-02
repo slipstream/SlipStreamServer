@@ -151,9 +151,11 @@
                                 [['org.apache.curator/curator-test :scope "compile"]
                                  ['com.sixsq.slipstream/slipstream-ring-container :scope "compile"]]))
            (sift
-             :to-resource #{#"connector_test_utils\.clj"}
+             :to-resource #{#"connector_test_utils\.clj"
+                            #"credential_cloud_lifecycle_test_utils\.clj"}
 
              :include #{#"connector_test_utils\.clj"
+                        #"credential_cloud_lifecycle_test_utils\.clj"
                         #"pom.xml"
                         #"pom.properties"})
 
