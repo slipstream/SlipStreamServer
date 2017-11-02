@@ -12,7 +12,7 @@
 ;; description
 ;;
 (def ^:const desc
-  (merge p/SessionTemplateDescription))
+  p/SessionTemplateDescription)
 
 ;;
 ;; initialization: register this Session template
