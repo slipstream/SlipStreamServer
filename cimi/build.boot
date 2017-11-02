@@ -192,10 +192,14 @@
                                  ['com.sixsq.slipstream/slipstream-ring-container :scope "compile"]]))
            (sift
              :to-resource #{#"lifecycle_test_utils\.clj"
-                            #"test_utils\.clj"}
+                            #"test_utils\.clj"
+                            #"auth_privkey\.pem"
+                            #"auth_pubkey\.pem"}
 
              :include #{#"lifecycle_test_utils\.clj"
                         #"test_utils\.clj"
+                        #"auth_privkey\.pem"
+                        #"auth_pubkey\.pem"
                         #"pom.xml"
                         #"pom.properties"})
 
