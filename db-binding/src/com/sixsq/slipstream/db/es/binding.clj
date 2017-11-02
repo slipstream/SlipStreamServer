@@ -50,6 +50,7 @@
   id is usually in the form type/docid.
   Exception for cloud-entry-point: in this case id is only type (there is only one cloud-entry-point)"
   [id]
+  ;; FIXME: this fails with NPE if `id` is `nil`.
   (let [[type docid] (str/split id #"/")]
     [type (or docid type)]))
 

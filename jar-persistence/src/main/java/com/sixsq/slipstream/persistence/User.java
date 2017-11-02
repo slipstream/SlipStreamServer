@@ -20,13 +20,15 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
+import com.sixsq.slipstream.exceptions.SlipStreamDatabaseException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.user.Passwords;
 import com.sixsq.slipstream.user.UserView;
 import com.sixsq.slipstream.util.SscljProxy;
-import org.restlet.data.Form;
 import org.restlet.Response;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementMap;
@@ -36,13 +38,13 @@ import javax.mail.internet.InternetAddress;
 import javax.persistence.*;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -52,48 +54,57 @@ import java.util.regex.Pattern;
  *
  */
 @SuppressWarnings("serial")
-@Entity(name="User")
-@NamedQueries({
-		@NamedQuery(name = "allUsers", query = "SELECT u FROM User u"),
-		@NamedQuery(name = "activeUsers", query = "SELECT u FROM User u WHERE u.state = 'ACTIVE'"),
-		@NamedQuery(name = "userViewList", query = "SELECT NEW com.sixsq.slipstream.user.UserView(u.name, u.firstName, u.lastName, u.email, u.state, u.lastOnline, u.lastExecute, u.activeSince, u.organization, u.roles, u.isSuperUser) FROM User u") })
+//@NamedQueries({
+//		@NamedQuery(name = "allUsers", query = "SELECT u FROM User u"),
+//		@NamedQuery(name = "activeUsers", query = "SELECT u FROM User u WHERE u.state = 'ACTIVE'"),
+//		@NamedQuery(name = "userViewList", query = "SELECT NEW com.sixsq.slipstream.user.UserView(u.name, u.firstName, u.lastName, u.email, u.state, u.lastOnline, u.lastExecute, u.activeSince, u.organization, u.roles, u.isSuperUser) FROM User u") })
 public class User extends Metadata {
+
+	private static final String USERNAME = "internal";
+	private static final String ROLE = "ADMIN";
+	private static final String USERNAME_ROLE = USERNAME + " " + ROLE;
 
 	public static final String REQUEST_KEY = "authenticated_user";
 	public static final String REQUEST_ROLES_KEY = "roles";
 
-	public static final String RESOURCE_URL_PREFIX = "user/";
+	public static final String RESOURCE_NAME = "user";
+	public static final String RESOURCE_URL_PREFIX = RESOURCE_NAME + "/";
 
 	public static final int ACTIVE_TIMEOUT_MINUTES = 1;
 
 	public static final String NEW_NAME = "new";
 
-	private static final Random rnd = new Random();
+	private static transient final Random rnd = new Random();
 
 	public enum State {
 		NEW, ACTIVE, DELETED, SUSPENDED
 	}
 
-	private static final List<String> FORBIDDEN_ROLES = Arrays.asList("ADMIN", "USER", "ROLE", "ANON");
+	private static transient final List<String> FORBIDDEN_ROLES = Arrays.asList("ADMIN", "USER", "ROLE", "ANON");
 
-	@Attribute(required = false)
-	@Column(length = 1000)
-	private String authnToken;
+	// FIXME: not used
+//	@Attribute(required = false)
+//	@Column(length = 1000)
+//	private String authnToken;
+//
+//	@Attribute(required = false)
+//	private String githubLogin;
+//
+//	@Attribute(required = false)
+//	private String cycloneLogin;
 
-	@Attribute(required = false)
-	private String githubLogin;
-
-	@Attribute(required = false)
-	private String cycloneLogin;
+	private String href;
 
 	@Attribute
-	@Id
+	@SerializedName("id")
 	private String resourceUri;
 
 	@Attribute
+	@SerializedName("username")
 	private String name;
 
 	@Attribute(required = false)
+	@SerializedName("emailAddress")
 	private String email;
 
 	@Attribute(required = false)
@@ -114,23 +125,19 @@ public class User extends Metadata {
 	private boolean isSuperUser = false;
 
 	@Attribute
-	@Enumerated(EnumType.STRING)
+//	@Enumerated(EnumType.STRING)
 	private State state;
 
 	@Attribute(required = false)
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date lastOnline = null;
 
 	@Attribute(required = false)
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date lastExecute = null;
 
 	@Attribute(required = false)
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date activeSince = null;
 
-	@Transient
-	protected Map<String, UserParameter> parameters = null;
+	protected transient Map<String, UserParameter> parameters;
 
 	@SuppressWarnings("unused")
 	private User() {
@@ -156,7 +163,7 @@ public class User extends Metadata {
 	@ElementMap(name = "parameters", required = false, valueType = UserParameter.class)
 	public Map<String, UserParameter> getParameters() {
 	    if (null == parameters) {
-	    	parameters = loadParameters();
+	    	parameters = loadParameters(this);
 		}
 		return parameters;
 	}
@@ -496,28 +503,30 @@ public class User extends Metadata {
 
 	public static User load(String resourceUrl) throws ConfigurationException,
 			ValidationException {
-		EntityManager em = PersistenceUtil.createEntityManager();
-		User user = em.find(User.class, resourceUrl);
-		em.close();
+		Response resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + resourceUrl, USERNAME_ROLE);
+		if (badResponse(resp)) return null;
+		User user = (new Gson()).fromJson(resp.getEntityAsText(), User.class);
+		user.parameters = loadParameters(user);
 		return user;
 	}
 
-	private Map<String, UserParameter> loadParameters() {
-	    Logger log = Logger.getLogger("com.sixsq.slipstream.User");
-	    log.info("LOADING PARAMETERS ....");
-//		Form queryParameters = new Form();
-//		queryParameters.add("$filter", "");
-//		SscljProxy.get("", getName(), queryParameters);
-		Response response = SscljProxy.get("api/credential", getName() + " ADMIN");
-		log.info("response: " + response.getEntityAsText());
-		Map<String, UserParameter> params = new HashMap<>();
-		try {
-			params.put("my-parameter", new UserParameter("name", "value",
-					"description"));
-		} catch (ValidationException e) {
-			e.printStackTrace();
-		}
-		return params;
+	private static Map<String, UserParameter> loadParameters(User user) {
+		return new HashMap<>();
+//	    Logger log = Logger.getLogger("com.sixsq.slipstream.User");
+//	    log.info("LOADING PARAMETERS ....");
+////		Form queryParameters = new Form();
+////		queryParameters.add("$filter", "");
+////		SscljProxy.get("", getName(), queryParameters);
+//		Response response = SscljProxy.get("api/credential", user.getName());
+//		log.info("response: " + response.getEntityAsText());
+//		Map<String, UserParameter> params = new HashMap<>();
+//		try {
+//			params.put("my-parameter", new UserParameter("name", "value",
+//					"description"));
+//		} catch (ValidationException e) {
+//			e.printStackTrace();
+//		}
+//		return params;
 	}
 
 	public void addSystemParametersIntoUser(ServiceConfiguration sc)
@@ -533,17 +542,28 @@ public class User extends Metadata {
 		}
 	}
 
+	public void remove() {
+	    if (resourceUri != null) {
+			SscljProxy.delete(SscljProxy.BASE_RESOURCE + resourceUri, USERNAME_ROLE, true);
+		}
+	}
+
 	public static void removeNamedUser(String name) {
-		remove(User.constructResourceUri(name), User.class);
+		SscljProxy.delete(SscljProxy.BASE_RESOURCE + User.constructResourceUri(name),
+				USERNAME_ROLE, true);
 	}
 
 	@SuppressWarnings("unchecked")
 	public static List<User> list() {
-		EntityManager em = PersistenceUtil.createEntityManager();
-		Query q = em.createNamedQuery("allUsers");
-		List<User> list = q.getResultList();
-		em.close();
-		return list;
+		Response resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + RESOURCE_NAME, USERNAME_ROLE);
+
+		if (badResponse(resp)) return new ArrayList<>();
+
+		Users records = Users.fromJson(resp.getEntityAsText());
+
+		if (records == null) return new ArrayList<>();
+
+		return records.getUsers();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -582,10 +602,29 @@ public class User extends Metadata {
 		System.out.println("STORING PARAMETERS....");
 	}
 
-	@Override
+	private static class UserTemplate {
+		private User userTemplate;
+		public UserTemplate(User user) {
+			userTemplate = user;
+		}
+	}
+
+//	@Override
 	public User store() {
 		storeParameters();
-		return (User) super.store();
+		Response resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + resourceUri, USERNAME_ROLE);
+		if (badResponse(resp)) {
+		    href = "user-template/auto";
+			resp = SscljProxy.post(SscljProxy.BASE_RESOURCE + RESOURCE_NAME, USERNAME_ROLE, new UserTemplate(this));
+			href = null;
+		} else {
+			resp = SscljProxy.put(SscljProxy.BASE_RESOURCE + resourceUri, USERNAME_ROLE, this);
+		}
+		if (badResponse(resp)) {
+			throw new SlipStreamDatabaseException("Failed to persist User: "
+					+ resp.toString());
+		}
+		return this;
 	}
 
 	public Date getLastOnline() {
@@ -683,5 +722,9 @@ public class User extends Metadata {
 		} else {
 			checkNoForbiddenRoles(roles);
 		}
+	}
+
+	private static boolean badResponse(Response resp) {
+		return resp == null || resp.getStatus().isError();
 	}
 }

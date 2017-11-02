@@ -22,10 +22,13 @@ package com.sixsq.slipstream.persistence;
 
 import com.sixsq.slipstream.exceptions.*;
 import com.sixsq.slipstream.persistence.User.State;
+import com.sixsq.slipstream.ssclj.app.SscljTestServer;
 import com.sixsq.slipstream.user.UserView;
 import com.sixsq.slipstream.util.SerializationUtil;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
@@ -40,6 +43,16 @@ public class UserTest {
 	protected static User user;
 
 	public static final String PASSWORD = "password";
+
+	@BeforeClass
+	public static void setupClass() {
+		SscljTestServer.start();
+	}
+
+	@AfterClass
+	public static void teardownClass() {
+		SscljTestServer.stop();
+	}
 
 	@Before
 	public void setup() {

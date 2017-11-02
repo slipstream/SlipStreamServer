@@ -25,7 +25,27 @@
 		<dependency>
 			<groupId>org.clojure</groupId>
 			<artifactId>clojure</artifactId>
-			<version>1.9.0-alpha14</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
+			<artifactId>SlipStreamCljResourcesTestServer-jar</artifactId>
+			<scope>test</scope>
+			<classifier>tests</classifier>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
+			<artifactId>SlipStreamDbBinding-jar</artifactId>
+			<scope>test</scope>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
+			<artifactId>SlipStreamDbSerializers-jar</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 		<!-- Needs to be before junit -->

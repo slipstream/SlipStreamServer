@@ -10,7 +10,9 @@
     [com.sixsq.slipstream.db.impl :as db]
     [ring.util.response :as r]
     [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.ssclj.util.log :as logu]))
+    [com.sixsq.slipstream.ssclj.util.log :as logu])
+  (:import
+    (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-tag :users)
 
@@ -49,14 +51,18 @@
 (def ^:const desc UserDescription)
 
 ;;
-;; validate the created user resource
-;; all create (registration) requests produce user resources with the same schema
+;; validate subclasses of user
 ;;
-(def validate-fn (u/create-spec-validation-fn :cimi/user))
-(defmethod crud/validate
-  resource-uri
+
+(defmulti validate-subtype :method)
+
+(defmethod validate-subtype :default
   [resource]
-  (validate-fn resource))
+  (throw (ex-info (str "unknown User type: '" (:method resource) "'") resource)))
+
+(defmethod crud/validate resource-uri
+  [resource]
+  (validate-subtype resource))
 
 ;;
 ;; validate create requests for subclasses of users
@@ -123,18 +129,29 @@
 ;; CRUD operations
 ;;
 
-(def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
+;; FIXME:
+(defn dump [d t]
+  (println "==>>" t) (clojure.pprint/pprint d) (println t "<<==") d)
+(defn dump-log
+  [d t]
+  (log/info "==>>" t) (log/info d) (log/info t "<<==") d)
 
+(def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 ;; requires a UserTemplate to create new User
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
-  (let [idmap {:identity (:identity request)}
+  (let [idmap      {:identity (:identity request)}
         desc-attrs (u/select-desc-keys body)
         {:keys [id] :as body} (-> body
+                                  (dump-log ".... body")
                                   (assoc :resourceURI create-uri)
-                                  (update-in [:userTemplate] dissoc :method) ;; forces use of template reference
+                                  (dump-log ".... added :resourceURI")
+                                  (update-in [:userTemplate] dissoc :method :id) ;; forces use of template reference
+                                  (dump-log ".... removed :method")
                                   (std-crud/resolve-hrefs idmap)
+                                  (dump-log ".... resolved hrefs")
                                   (update-in [:userTemplate] merge desc-attrs) ;; validate desc attrs
+                                  (dump-log ".... validating")
                                   (crud/validate)
                                   (:userTemplate)
                                   (tpl->user request)
@@ -156,3 +173,28 @@
   [request]
   (query-impl request))
 
+(defn admin?
+  [request]
+  (contains? (get-in request [:sixsq.slipstream.authn/claims :roles]) "ADMIN"))
+
+(defn filter-for-regular-user
+  [user-resource request]
+  (if (admin? request)
+    user-resource
+    (dissoc user-resource :isSuperUser)))
+
+(defn edit-impl [{body :body :as request}]
+  (try
+    (let [current (-> (:id body)
+                      (db/retrieve request)
+                      (a/can-modify? request))
+          merged  (merge current (filter-for-regular-user body request))]
+      (-> merged
+          (u/update-timestamps)
+          (crud/validate)
+          (db/edit request)))
+    (catch ExceptionInfo ei
+      (ex-data ei))))
+(defmethod crud/edit resource-name
+  [request]
+  (edit-impl request))

@@ -23,7 +23,6 @@
 (defn ring-app []
   (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
 
-;; initialize must to called to pull in SessionTemplate test examples
 (dyn/initialize)
 
 (deftest bad-methods

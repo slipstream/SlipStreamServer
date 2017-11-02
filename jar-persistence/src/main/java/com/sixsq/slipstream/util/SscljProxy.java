@@ -158,7 +158,7 @@ public class SscljProxy {
 
         String sscljEndpoint = getSscljEndpoint();
 
-        logger.fine("Calling SSCLJ " + sscljEndpoint + " with: "
+        logger.info("Calling SSCLJ " + sscljEndpoint + " with: "
                 + "method=" + String.valueOf(method)
                 + ", resource=" + resource
                 + ", object=" + String.valueOf(obj)
@@ -195,16 +195,16 @@ public class SscljProxy {
                     responseEntity = client.get(mediaType);
                     break;
                 case PUT:
+                    logger.info("PUT content : " + content.getText());
                     responseEntity = client.put(content, mediaType);
-                    logger.finest("PUT content : " + content.getText());
                     break;
                 case POST:
+                    logger.info("POST content : " + content.getText());
                     responseEntity = client.post(content, mediaType);
-                    logger.finest("POST content : " + content.getText());
                     break;
                 case DELETE:
+                    logger.info("DELETE content : " + content.getText());
                     responseEntity = client.delete(mediaType);
-                    logger.finest("DELETE content : " + content.getText());
                     break;
                 default:
                     throw new UnsupportedOperationException("Method " + method.toString() + "not supported");

@@ -30,6 +30,7 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.PersistenceException;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import com.google.gson.annotations.SerializedName;
 
 import org.simpleframework.xml.Attribute;
 
@@ -40,25 +41,27 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 @SuppressWarnings("serial")
 public abstract class Metadata implements Serializable {
 
-	protected Date creation = new Date();
+	@SerializedName("created")
+	protected transient Date creation = new Date();
 
 	@Attribute(required = false)
 	@Temporal(TemporalType.TIMESTAMP)
-	protected Date lastModified;
+	@SerializedName("updated")
+	protected transient Date lastModified;
 
 	@SuppressWarnings("unused")
 	@Deprecated
-	private int jpaVersion;
+	private transient int jpaVersion;
 
 	@Attribute(required = false)
-	protected ModuleCategory category;
+	protected transient ModuleCategory category;
 
 	@Attribute(required = false)
 	@Column(length=1024)
-	protected String description;
+	protected transient String description;
 
 	@Attribute(required = false)
-	protected boolean deleted;
+	protected transient boolean deleted;
 
 	protected Metadata() {
 	}
