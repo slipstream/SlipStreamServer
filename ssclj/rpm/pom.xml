@@ -160,26 +160,6 @@
         <executions>
 
           <execution>
-            <id>copy-jar</id>
-            <goals>
-              <goal>copy</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.directory}/dependency/fatjar</outputDirectory>
-              <stripVersion>true</stripVersion>
-              <stripClassifier>true</stripClassifier>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>com.sixsq.slipstream</groupId>
-                  <artifactId>SlipStreamCljResources-jar</artifactId>
-                  <type>jar</type>
-                  <destFileName>ssclj.jar</destFileName>
-                </artifactItem>
-              </artifactItems>
-            </configuration>
-          </execution>
-
-          <execution>
             <id>copy-dependencies</id>
             <goals>
               <goal>copy-dependencies</goal>
@@ -284,20 +264,7 @@ ${installation.dir}/bin/generate-auth-keys.sh
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
-                  <location>target/dependency/fatjar</location>
-                </source>
-              </sources>
-            </mapping>
-
-            <mapping>
-              <directory>${installation.dir}/lib/ext</directory>
-              <directoryIncluded>false</directoryIncluded>
-              <sources>
-                <source>
                   <location>target/dependency/lib/ext</location>
-                  <excludes>
-                    <exclude>SlipStreamCljResources-jar.jar</exclude>
-                  </excludes>
                 </source>
               </sources>
             </mapping>
@@ -422,6 +389,7 @@ ${installation.dir}/bin/generate-auth-keys.sh
                     <include>create-daily-usage.sh</include>
                     <include>create-weekly-usage.sh</include>
                     <include>create-monthly-usage.sh</include>
+                    <include>create-usage.sh</include>
                   </includes>
                 </source>
               </sources>

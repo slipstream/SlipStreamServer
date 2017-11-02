@@ -53,11 +53,12 @@
 ;; TODO: quantization for hour period, i.e apply the full hour price to first minute then zero for the rest of the hour
 (defn assoc-price
   [{:keys [serviceOffer] :as m}]
-  (let [price-map (some->> serviceOffer
-                           :price:unitCode
-                           (get price-divisor)
-                           (/ (:price:unitCost serviceOffer))
-                           (assoc {} :price))]
+  (let [price-map (when (:price:unitCost serviceOffer)
+                    (some->> serviceOffer
+                             :price:unitCode
+                             (get price-divisor)
+                             (/ (:price:unitCost serviceOffer))
+                             (assoc {} :price)))]
     (merge m price-map)))
 
 (defn update-id

@@ -139,9 +139,12 @@ public class VmRuntimeParameterMapping implements Serializable {
 		String cloud = getRuntimeParameterValue(runUuid, nodeInstanceName, RuntimeParameter.CLOUD_SERVICE_NAME);
 		String nodeName = getRuntimeParameterValue(runUuid, nodeInstanceName, RuntimeParameter.NODE_NAME_KEY);
 		String nodeInstanceid = getRuntimeParameterValue(runUuid, nodeInstanceName, RuntimeParameter.NODE_ID_KEY);
+		String serviceOfferUuid = getRuntimeParameterValue(runUuid, nodeInstanceName, RuntimeParameter.SERVICE_OFFER);
 
 		RuntimeParameter vmstate = getRuntimeParameter(runUuid, nodeInstanceName, RuntimeParameter.STATE_VM_KEY);
 		RuntimeParameter hostname = getRuntimeParameter(runUuid, nodeInstanceName, RuntimeParameter.HOSTNAME_KEY);
+
+		insertElasticsearchVmMapping(cloud, instanceId, runUuid, runOwner, serviceOfferUuid);
 
 		List<VmRuntimeParameterMapping> mappings = getMappings(runUuid, name);
 		int mappingsSize = mappings.size();
@@ -161,6 +164,20 @@ public class VmRuntimeParameterMapping implements Serializable {
 
 			logger.info("Created VMRtpMap for instanceId=" + instanceId + ", owner=" + runOwner + ", name=" + name
 					+ " vmstate=" + vmstate + ", m.id=" + m.id);
+		}
+	}
+
+	private static void insertElasticsearchVmMapping(String cloud, String instanceId,
+													 String runUuid, String runOwner,
+													 String serviceOfferUuid) {
+		try {
+			VmMapping vmMapping = new VmMapping(cloud, instanceId, runUuid, runOwner, serviceOfferUuid);
+			vmMapping.create();
+		} catch (Throwable t) {
+			logger.warning("error creating virtual machine mapping record: " +
+					cloud + " " + instanceId + " " +
+					runOwner + " " + runUuid + " " +
+					serviceOfferUuid);
 		}
 	}
 

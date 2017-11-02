@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.user-auto-lifecycle-test
+(ns com.sixsq.slipstream.ssclj.resources.user-lifecycle-test
   (:require
     [clojure.test :refer :all]
     [clojure.data.json :as json]

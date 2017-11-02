@@ -12,7 +12,7 @@
 
 (use-fixtures :each ltu/with-test-es-client-fixture)
 
-(def base-uri (str p/service-context (u/de-camelcase credential/resource-url)))
+(def base-uri (str p/service-context credential/resource-url))
 
 (defn ring-app []
   (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
@@ -21,12 +21,12 @@
 (dyn/initialize)
 
 (deftest bad-methods
-  (let [resource-uri (str p/service-context (u/new-resource-id credential/resource-name))]
+  (let [resource-uri (str p/service-context (u/new-resource-id credential/resource-url))]
     (doall
       (for [[uri method] [[base-uri :options]
                           [base-uri :delete]
-                          [resource-uri :options]
                           [resource-uri :put]
+                          [resource-uri :options]
                           [resource-uri :post]]]
         (-> (session (ring-app))
             (request uri

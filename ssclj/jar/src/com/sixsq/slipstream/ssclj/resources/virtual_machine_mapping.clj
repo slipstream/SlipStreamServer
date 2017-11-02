@@ -1,74 +1,92 @@
-(ns com.sixsq.slipstream.ssclj.resources.metering
+(ns com.sixsq.slipstream.ssclj.resources.virtual-machine-mapping
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.resources.spec.metering]
+    [com.sixsq.slipstream.ssclj.resources.spec.virtual-machine-mapping]
 
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.auth.acl :as a]
-    [com.sixsq.slipstream.db.impl :as db]
     [ring.util.response :as r]
     [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.ssclj.util.log :as logu]
-    [superstring.core :as str]))
+    [com.sixsq.slipstream.ssclj.util.log :as logu]))
 
-(def ^:const resource-name "Metering")
+(def ^:const resource-tag :virtualMachineMappings)
 
-(def ^:const resource-tag (keyword (str (str/camel-case resource-name) "s")))
+(def ^:const resource-name "VirtualMachineMapping")
 
 (def ^:const resource-url (u/de-camelcase resource-name))
 
-(def ^:const collection-name "MeteringCollection")
+(def ^:const collection-name "VirtualMachineMappingCollection")
 
 (def ^:const resource-uri (str c/slipstream-schema-uri resource-name))
 
 (def ^:const collection-uri (str c/slipstream-schema-uri collection-name))
 
-;; only authenticated users can view and create credentials
+;; only the administrator can create and view these resources
 (def collection-acl {:owner {:principal "ADMIN"
                              :type      "ROLE"}
                      :rules [{:principal "ADMIN"
                               :type      "ROLE"
-                              :right     "MODIFY"}
-                             {:principal "USER"
-                              :type      "ROLE"
-                              :right     "VIEW"}]})
+                              :right     "MODIFY"}]})
+
+(def resource-acl {:owner {:principal "ADMIN"
+                           :type      "ROLE"}
+                   :rules [{:principal "ADMIN"
+                            :type      "ROLE"
+                            :right     "ALL"}]})
+
 
 ;;
 ;; multimethod for ACLs
 ;;
-
 (defn create-acl
   [id]
   {:owner {:principal "ADMIN"
            :type      "ROLE"}
-   :rules [{:principal id
+   :rules [{:principal "ADMIN"
             :type      "USER"
             :right     "VIEW"}]})
 
-(def validate-fn (u/create-spec-validation-fn :cimi/metering))
+
+;; unconditionally set the ACL to allow only the administrator access
+(defmethod crud/add-acl resource-uri
+  [{:keys [acl] :as resource} request]
+  (assoc resource :acl resource-acl))
+
+
+;;
+;; resource validation
+;;
+(def validate-fn (u/create-spec-validation-fn :cimi/virtual-machine-mapping))
 (defmethod crud/validate
   resource-uri
   [resource]
   (validate-fn resource))
 
-(defmethod crud/add-acl resource-uri
-  [{:keys [acl] :as resource} request]
-  (if acl
-    resource
-    (let [user-id (:identity (a/current-authentication request))
-          run-owner (subs (-> request
-                              :body
-                              :run
-                              :user
-                              :href
-                              )
-                          (count "/user"))]
-      (if run-owner
-        (assoc resource :acl (create-acl run-owner))
-        (assoc resource :acl (create-acl user-id))))))
+
+;;
+;; identifier is always cloud-instanceID to ensure uniqueness
+;;
+(defmethod crud/new-identifier
+  resource-name
+  [{:keys [cloud instanceID] :as resource} _]
+  (assoc resource :id (str resource-url "/" cloud "-" instanceID)))
+
+
+;;
+;; remove the edit operation from resource
+;;
+(defmethod crud/set-operations resource-uri
+  [resource request]
+  (try
+    (a/can-modify? resource request)
+    (let [ops [{:rel (:delete c/action-uri) :href resource-url}]]
+      (assoc resource :operations ops))
+    (catch Exception e
+      (dissoc resource :operations))))
+
 
 ;;
 ;; CRUD operations
@@ -78,20 +96,18 @@
   [request]
   (add-impl request))
 
-(def edit-impl (std-crud/edit-fn resource-name))
-(defmethod crud/edit resource-name
-  [request]
-  (edit-impl request))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 (defmethod crud/retrieve resource-name
   [request]
   (retrieve-impl request))
 
+
 (def delete-impl (std-crud/delete-fn resource-name))
 (defmethod crud/delete resource-name
   [request]
   (delete-impl request))
+
 
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
 (defmethod crud/query resource-name

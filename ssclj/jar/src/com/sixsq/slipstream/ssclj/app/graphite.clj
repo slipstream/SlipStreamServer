@@ -7,15 +7,25 @@
     [java.util.concurrent TimeUnit]
     [com.codahale.metrics MetricFilter]))
 
+
+(def ^:dynamic *reporter* nil)
+
+
+(defn set-reporter!
+  [reporter]
+  (alter-var-root #'*reporter* (constantly reporter)))
+
+
 (defn create-reporter
   [host]
-  (graphite/reporter {:host          host
-                      :prefix        "ssclj"
-                      :rate-unit     TimeUnit/SECONDS
-                      :duration-unit TimeUnit/MILLISECONDS
-                      :filter        MetricFilter/ALL}))
+  (when-not *reporter*
+    (set-reporter! (graphite/reporter {:host          host
+                                       :prefix        "ssclj"
+                                       :rate-unit     TimeUnit/SECONDS
+                                       :duration-unit TimeUnit/MILLISECONDS
+                                       :filter        MetricFilter/ALL})))
+  *reporter*)
 
-;; TODO: add a stop function for clean shutdown
 
 (defn start-graphite-reporter
   []
@@ -26,5 +36,17 @@
           (graphite/start 10))
       (log/info "graphite metrics reporter started for" host)
       (catch Exception e
-        (log/error "graphite metrics reporter error:" (.getMessage e))))
+        (log/error "graphite metrics reporter start error:" (str e))))
     (log/info "graphite metrics reporter NOT started")))
+
+
+(defn stop-graphite-reporter
+  []
+  (if-let [reporter *reporter*]
+    (try
+      (set-reporter! nil)
+      (graphite/stop reporter)
+      (log/info "graphite metrics reporter stopped")
+      (catch Exception e
+        (log/error "graphite metrics reporter stop error:" (str e))))
+    (log/info "graphite metrics reporter NOT stopped")))

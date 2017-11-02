@@ -6,8 +6,6 @@
     [peridot.core :refer :all]
     [ring.util.codec :as codec]
     [com.sixsq.slipstream.auth.cyclone :as auth-oidc]
-    [com.sixsq.slipstream.auth.external :as ex]
-    [com.sixsq.slipstream.auth.internal :as auth-internal]
     [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.auth.utils.sign :as sign]
     [com.sixsq.slipstream.ssclj.app.params :as p]

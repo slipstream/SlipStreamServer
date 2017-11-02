@@ -126,14 +126,14 @@
       ;; the secret key must be returned as part of the 201 response
       (is secret-key)
 
-      ;; admin/user should be able to see, edit, and delete credential
+      ;; admin/user should be able to see and delete credential
       (doseq [session [session-admin session-user]]
         (-> session
             (request abs-uri)
             (ltu/body->edn)
             (ltu/is-status 200)
             (ltu/is-operation-present "delete")
-            (ltu/is-operation-present "edit")))
+            (ltu/is-operation-absent "edit")))
 
       ;; ensure credential contains correct information
       (let [{:keys [name description properties
@@ -177,14 +177,14 @@
       ;; the secret key must be returned as part of the 201 response
       (is secret-key)
 
-      ;; admin/user should be able to see, edit, and delete credential
+      ;; admin/user should be able to see and delete credential
       (doseq [session [session-admin session-user]]
         (-> session
             (request abs-uri)
             (ltu/body->edn)
             (ltu/is-status 200)
             (ltu/is-operation-present "delete")
-            (ltu/is-operation-present "edit")))
+            (ltu/is-operation-absent "edit")))
 
       ;; ensure credential contains correct information
       (let [{:keys [digest expiry claims]} (-> session-user
@@ -224,14 +224,14 @@
       ;; the secret key must be returned as part of the 201 response
       (is secret-key)
 
-      ;; admin/user should be able to see, edit, and delete credential
+      ;; admin/user should be able to see and delete credential
       (doseq [session [session-admin session-user]]
         (-> session
             (request abs-uri)
             (ltu/body->edn)
             (ltu/is-status 200)
             (ltu/is-operation-present "delete")
-            (ltu/is-operation-present "edit")))
+            (ltu/is-operation-absent "edit")))
 
       ;; ensure credential contains correct information
       (let [{:keys [digest expiry claims]} (-> session-user
