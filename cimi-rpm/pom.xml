@@ -32,14 +32,6 @@
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-    </dependency>
   </dependencies>
 
   <build>
@@ -120,14 +112,13 @@
         <artifactId>maven-dependency-plugin</artifactId>
 
         <executions>
-
           <execution>
             <id>copy-dependencies</id>
             <goals>
               <goal>copy-dependencies</goal>
             </goals>
             <configuration>
-              <outputDirectory>${project.build.directory}/dependency/lib/ext</outputDirectory>
+              <outputDirectory>${project.build.directory}/dependency/lib</outputDirectory>
               <stripVersion>false</stripVersion>
               <stripClassifier>true</stripClassifier>
               <excludeTypes>pom</excludeTypes>
@@ -212,7 +203,7 @@ ${installation.dir}/bin/generate-auth-keys.sh
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
-                  <location>target/dependency/lib/ext</location>
+                  <location>target/dependency/lib</location>
                 </source>
               </sources>
             </mapping>

@@ -7,7 +7,7 @@
   :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
   :edition "community"
 
-  :dependencies '[[org.clojure/clojure "1.9.0-beta2"]
+  :dependencies '[[org.clojure/clojure "1.9.0-beta2" :scope "provided"]
                   [sixsq/build-utils "0.1.4" :scope "test"]])
 
 (require '[sixsq.build-fns :refer [merge-defaults
@@ -21,56 +21,32 @@
   #(vec (concat %
                 (merge-defaults
                   ['sixsq/default-deps (get-env :version)]
-                  '[[org.clojure/clojure]
+                  '[[org.clojure/clojure :scope "provided"]
 
-                    [aleph]
-                    [cheshire]                              ;; newer version needed for ring-json
                     [compojure]
-                    [com.jcraft/jsch]
                     [clj-stacktrace]
-                    [clj-time]
-                    [environ]
                     [expound]
                     [instaparse]
-                    [log4j]
                     [metrics-clojure]
                     [metrics-clojure-ring]
                     [metrics-clojure-jvm]
                     [metrics-clojure-graphite]
-                    [me.raynes/fs]
-                    [org.apache.logging.log4j/log4j-core]
-                    [org.apache.logging.log4j/log4j-api]
-                    [org.clojure/data.json]
                     [org.clojure/java.classpath]
-                    [org.clojure/tools.cli]
-                    [org.clojure/tools.logging]
                     [org.clojure/tools.namespace]
-                    [org.slf4j/slf4j-log4j12 :scope "provided"]
-                    [potemkin]
-                    [ring/ring-core]
-                    [ring/ring-json]
-                    [superstring]
                     [zookeeper-clj]
                     [org.apache.zookeeper/zookeeper] ;; included so that exclusions are specified
 
-
-                    [com.sixsq.slipstream/utils]
                     [com.sixsq.slipstream/auth]
-                    [com.sixsq.slipstream/slipstream-ring-container :scope "test"]
-                    [com.sixsq.slipstream/SlipStreamDbBinding-jar]
                     [com.sixsq.slipstream/token]
-
-                    ;; needed for migration scripts
-                    [korma]
-                    [org.hsqldb/hsqldb]
-                    [org.clojure/java.jdbc]
+                    [com.sixsq.slipstream/utils]
+                    [com.sixsq.slipstream/slipstream-ring-container :scope "provided"]
+                    [com.sixsq.slipstream/SlipStreamDbBinding-jar]
 
                     ;; test dependencies
                     [peridot]
-                    [honeysql]
                     [org.clojure/test.check]
                     [org.slf4j/slf4j-log4j12 :scope "test"]
-                    [com.cemerick/url nil :scope "test"]
+                    [com.cemerick/url :scope "test"]
                     [org.apache.curator/curator-test :scope "test"]
 
                     ;; boot tasks
@@ -168,12 +144,11 @@
                             #"config-hsqldb.edn"
                             #"log4j.properties"}
                  :invert true)
-           (aot :namespace #{'com.sixsq.slipstream.ssclj.app.main})
+           #_(aot :namespace #{'com.sixsq.slipstream.ssclj.app.main})
            #_(uber :exclude #{#"(?i)^META-INF/INDEX.LIST$"
                               #"(?i)^META-INF/[^/]*\.(MF|SF|RSA|DSA)$"
                               #".*log4j\.properties"})
-           (jar                                             ;; :main 'com.sixsq.slipstream.ssclj.app.main
-             )))
+           (jar)))
 
 (def tests-artef-name "SlipStreamCljResourcesTests-jar")
 (def tests-artef-pom-loc (str "com.sixsq.slipstream/" tests-artef-name))

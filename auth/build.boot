@@ -34,7 +34,6 @@
                     [org.clojure/java.jdbc]
                     [org.hsqldb/hsqldb]
                     [ring/ring-core]
-                    [superstring]
 
                     [com.sixsq.slipstream/token]
                     [com.sixsq.slipstream/utils]

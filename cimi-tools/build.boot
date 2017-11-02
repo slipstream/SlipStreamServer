@@ -25,6 +25,11 @@
                     [org.clojure/data.xml]
                     [org.clojure/tools.cli]
 
+                    ;; needed for migration scripts
+                    [korma]
+                    [org.hsqldb/hsqldb]
+                    [org.clojure/java.jdbc]
+
                     ;; boot tasks
                     [boot-environ]
                     [adzerk/boot-test]
