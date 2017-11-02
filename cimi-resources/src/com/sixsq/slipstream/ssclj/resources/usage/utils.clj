@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.usage.utils
+(ns com.sixsq.slipstream.ssclj.resources.usage.utils
   (:require
     [clojure.tools.logging :as log]
     [clojure.data.json :as json]

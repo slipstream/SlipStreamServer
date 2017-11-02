@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.usage.state-machine)
+(ns com.sixsq.slipstream.ssclj.resources.usage.state-machine)
 
 ;;
 ;; simplistic finish state machine

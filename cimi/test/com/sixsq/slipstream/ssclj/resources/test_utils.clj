@@ -15,7 +15,6 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
     [peridot.core :refer :all]
     [clojure.data.json :as json]
-    [com.sixsq.slipstream.ssclj.usage.utils :as u]
     [clj-time.core :as time]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
@@ -87,19 +86,3 @@
        (t/is-status 200)
        (t/is-key-value :count expected-count)
        (t/is-key-value count key-to-count expected-paginated-count))))
-
-(def not-before? (complement time/before?))
-
-(defn ordered-desc?
-  [timestamps]
-  (every? (fn [[a b]] (not-before? (u/to-time a) (u/to-time b))) (partition 2 1 timestamps)))
-
-(defn submap?
-  "True if a is a submap of b
-  (submap? {:a 1 :b 2} {:a 1 :b 2 :c 3})  => true
-  (submap? {:a 1 :b 2} {:a 8 :b 2 :c 3})  => false
-  (submap? {:a 1 :b 2} {:a 1 :c 3})       => false
-  "
-  [a b]
-  (every? (fn [[k v]] (= (b k) v)) a))
-

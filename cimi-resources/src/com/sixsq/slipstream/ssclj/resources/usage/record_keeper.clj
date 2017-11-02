@@ -1,12 +1,12 @@
-(ns com.sixsq.slipstream.ssclj.usage.record-keeper
+(ns com.sixsq.slipstream.ssclj.resources.usage.record-keeper
   (:require
     [clojure.tools.logging :as log]
     [superstring.core :as s]
-    [com.sixsq.slipstream.ssclj.usage.state-machine :as sm]
+    [com.sixsq.slipstream.ssclj.resources.usage.state-machine :as sm]
     [com.sixsq.slipstream.ssclj.resources.usage-record :as ur]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
     [com.sixsq.slipstream.util.convert :as convert-utils]
-    [com.sixsq.slipstream.ssclj.usage.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.usage.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
     [com.sixsq.slipstream.db.impl :as db]))
 

@@ -10,7 +10,8 @@
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.test-utils :as tu :refer [ring-app urlencode-params is-count exec-request]]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.usage.test-utils :as uutils]))
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
@@ -58,13 +59,13 @@
 (deftest events-are-retrieved-most-recent-first
   (->> valid-events
        (map :timestamp)
-       tu/ordered-desc?
+       uutils/ordered-desc?
        false?
        is)
 
   (->> (get-in (exec-request base-uri "" "joe") [:response :body :events])
        (map :timestamp)
-       tu/ordered-desc?
+       uutils/ordered-desc?
        is))
 
 (defn timestamp-paginate-single
@@ -77,7 +78,7 @@
 ;; Here, timestamps are retrieved one by one (due to pagination)
 (deftest events-are-retrieved-most-recent-first-when-paginated
   (-> (map timestamp-paginate-single (range 1 (inc nb-events)))
-      tu/ordered-desc?
+      uutils/ordered-desc?
       is))
 
 (deftest resources-pagination

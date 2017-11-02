@@ -17,8 +17,9 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.usage-record :as ur]
     [com.sixsq.slipstream.db.es.binding :as esb]
-    [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
-    [com.sixsq.slipstream.db.es.utils :as esu]))
+    [com.sixsq.slipstream.ssclj.resources.usage.record-keeper :as rc]
+    [com.sixsq.slipstream.db.es.utils :as esu]
+    [com.sixsq.slipstream.ssclj.resources.usage.test-utils :as uutils]))
 
 (use-fixtures :each ltu/with-test-es-client-fixture)
 
@@ -142,7 +143,7 @@
     (is (= 1 (count urs)))
 
     ;; acl may be different after editing (admin role added)
-    (is (tu/submap? (dissoc closed-usage-record :acl) (-> urs first (dissoc :acl)))))
+    (is (uutils/submap? (dissoc closed-usage-record :acl) (-> urs first (dissoc :acl)))))
 
   ; try edit non-existing usage-record
   (-> (session (ring-app))
@@ -176,7 +177,7 @@
 
     ;(clojure.pprint/pprint (last-record ur5))
 
-    (is (tu/submap? (dissoc ur3 :acl) (dissoc (last-record ur5) :acl)))
+    (is (uutils/submap? (dissoc ur3 :acl) (dissoc (last-record ur5) :acl)))
     (is (nil? (last-record ur4)))
     ))
 

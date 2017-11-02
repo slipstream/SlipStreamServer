@@ -5,7 +5,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.usage.record-keeper :as rk]
+    [com.sixsq.slipstream.ssclj.resources.usage.record-keeper :as rk]
     [com.sixsq.slipstream.util.response :as r]))
 
 (def ^:const resource-tag :usage-events)

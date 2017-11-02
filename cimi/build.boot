@@ -192,10 +192,10 @@
                                  ['com.sixsq.slipstream/slipstream-ring-container :scope "compile"]]))
            (sift
              :to-resource #{#"lifecycle_test_utils\.clj"
-                            #"connector_test_utils\.clj"}
+                            #"test_utils\.clj"}
 
              :include #{#"lifecycle_test_utils\.clj"
-                        #"connector_test_utils\.clj"
+                        #"test_utils\.clj"
                         #"pom.xml"
                         #"pom.properties"})
 

@@ -57,7 +57,8 @@
                     [com.sixsq.slipstream/utils]
                     [com.sixsq.slipstream/auth]
                     [com.sixsq.slipstream/slipstream-ring-container :scope "test"]
-                    [com.sixsq.slipstream/SlipStreamDbBinding-jar]
+                    [com.sixsq.slipstream/SlipStreamCljResources-jar :scope "provided"]
+                    [com.sixsq.slipstream/SlipStreamCljResourcesTests-jar :classifier "tests" :scope "test"]
                     [com.sixsq.slipstream/token]
 
                     ;; needed for migration scripts

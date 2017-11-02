@@ -10,7 +10,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
     [com.sixsq.slipstream.ssclj.filter.parser :as parser]
-    [com.sixsq.slipstream.ssclj.usage.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.usage.utils :as u]))
 
 (def ^:const resource-tag :usage-records)
 (def ^:const resource-name "UsageRecord")

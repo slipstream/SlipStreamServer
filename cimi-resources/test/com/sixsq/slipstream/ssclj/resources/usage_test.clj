@@ -3,15 +3,16 @@
     [clojure.test :refer :all]
     [peridot.core :refer :all]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-    [com.sixsq.slipstream.ssclj.usage.record-keeper :as rc]
-    [com.sixsq.slipstream.ssclj.usage.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.usage.record-keeper :as rc]
+    [com.sixsq.slipstream.ssclj.resources.usage.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.usage :refer :all]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.test-utils :as tu :refer [exec-request is-count]]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
+    [com.sixsq.slipstream.ssclj.resources.usage.test-utils :as uutils]))
 
 
 (defn- summary
@@ -50,7 +51,7 @@
   [m]
   (->> (get-in m [:response :body :usages])
        (map :start-timestamp)
-       tu/ordered-desc?
+       uutils/ordered-desc?
        is)
   m)
 
