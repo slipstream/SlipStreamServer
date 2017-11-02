@@ -133,8 +133,31 @@
            #_(uber :exclude #{#"(?i)^META-INF/INDEX.LIST$"
                               #"(?i)^META-INF/[^/]*\.(MF|SF|RSA|DSA)$"
                               #".*log4j\.properties"})
-           (jar                                             ;; :main 'com.sixsq.slipstream.ssclj.app.main
-             )))
+           (jar)))
+
+(def tests-artef-name "cimi-resources-tests-jar")
+(def tests-artef-pom-loc (str "com.sixsq.slipstream/" tests-artef-name))
+(def tests-artef-project-name (symbol tests-artef-pom-loc))
+(def tests-artef-jar-name (str tests-artef-name "-" (get-env :version) "-tests.jar"))
+
+(deftask build-tests-jar
+         "build jar with test runtime dependencies for connectors."
+         []
+         (comp
+           (pom :project tests-artef-project-name
+                :classifier "tests"
+                :dependencies (merge-defaults
+                                ['sixsq/default-deps (get-env :version)]
+                                [['org.apache.curator/curator-test :scope "compile"]
+                                 ['com.sixsq.slipstream/slipstream-ring-container :scope "compile"]]))
+           (sift
+             :to-resource #{#"connector_test_utils\.clj"}
+
+             :include #{#"connector_test_utils\.clj"
+                        #"pom.xml"
+                        #"pom.properties"})
+
+           (jar :file tests-artef-jar-name)))
 
 (deftask mvn-test
          "run all tests of project"
@@ -149,6 +172,17 @@
            (install)
            (if (= "true" (System/getenv "BOOT_PUSH"))
              (push)
+             identity)))
+
+(deftask mvn-build-tests-jar
+         "build project"
+         []
+         (comp
+           (dev-env)
+           (build-tests-jar)
+           (install :pom tests-artef-pom-loc)
+           (if (= "true" (System/getenv "BOOT_PUSH"))
+             (push :pom tests-artef-pom-loc)
              identity)))
 
 (deftask server-repl
