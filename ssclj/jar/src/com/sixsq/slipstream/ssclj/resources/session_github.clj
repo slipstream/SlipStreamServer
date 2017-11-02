@@ -66,10 +66,11 @@
 (defn github-client-info
   [redirectURI instance]
   (let [client-id (environ/env (keyword (str "github-client-id-" instance)))
-        client-secret (environ/env (keyword (str "github-client-secret-" instance)))]
+        client-secret (environ/env (keyword (str "github-client-secret-" instance)))
+        cfg-id (str "configuration/session-github-" instance)]
     (if (and client-id client-secret)
       [client-id client-secret]
-      (throw-bad-client-config redirectURI))))
+      (throw-bad-client-config cfg-id redirectURI))))
 
 (defn config-params
   [redirectURI instance]
