@@ -52,6 +52,7 @@
         <module>cimi-rpm</module>
         <module>cimi-resources-rpm</module>
         <module>cimi-tools-rpm</module>
+        <module>metering-rpm</module>
       </modules>
     </profile>
     <profile>
@@ -68,6 +69,7 @@
         <module>cimi-rpm</module>
         <module>cimi-resources-rpm</module>
         <module>cimi-tools-rpm</module>
+        <module>metering-rpm</module>
       </modules>
     </profile>
   </profiles>

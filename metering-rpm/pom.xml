@@ -4,13 +4,13 @@
 
   <artifactId>metering-rpm</artifactId>
  
-  <name>SlipStreamServer/metering/rpm</name>
+  <name>SlipStreamServer/metering-rpm</name>
 
   <packaging>pom</packaging>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
-    <artifactId>metering-pom</artifactId>
+    <artifactId>SlipStreamServer</artifactId>
     <version>3.39-SNAPSHOT</version>
   </parent>
 
