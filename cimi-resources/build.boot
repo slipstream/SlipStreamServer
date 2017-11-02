@@ -23,6 +23,8 @@
                   ['sixsq/default-deps (get-env :version)]
                   '[[org.clojure/clojure :scope "provided"]
 
+                    [com.jcraft/jsch]
+                    
                     [com.sixsq.slipstream/slipstream-ring-container :scope "test"]
                     [com.sixsq.slipstream/SlipStreamCljResources-jar :scope "provided"]
                     [com.sixsq.slipstream/SlipStreamCljResourcesTests-jar :classifier "tests" :scope "test"]
