@@ -27,14 +27,8 @@
                     [com.sixsq.slipstream/SlipStreamCljResources-jar :scope "provided"]
                     [com.sixsq.slipstream/SlipStreamCljResourcesTests-jar :classifier "tests" :scope "test"]
 
-                    ;; needed for migration scripts
-                    [korma]
-                    [org.hsqldb/hsqldb]
-                    [org.clojure/java.jdbc]
-
                     ;; test dependencies
                     [peridot]
-                    [honeysql]
                     [org.clojure/test.check]
                     [org.slf4j/slf4j-log4j12 :scope "test"]
                     [com.cemerick/url nil :scope "test"]
