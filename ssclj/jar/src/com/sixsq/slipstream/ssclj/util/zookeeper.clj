@@ -34,7 +34,7 @@
        (set-client! (create-client)))
      (~zk-func *client* ~path ~@options)
      (catch KeeperException$SessionExpiredException e#
-       (log/warn "zookeeper session expired exception occured!")
+       (log/warn "zookeeper session expired exception occurred!")
        (close-client!)
        (set-client! (create-client))
        (~zk-func *client* ~path ~options))))
