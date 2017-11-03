@@ -26,20 +26,19 @@
 (def ^:const keys-cred-ec2 (vec (remove #{:domain-name :tenant-name} keys-cred-full)))
 
 
-(def ^:const cat-nuvlabox #{"nuvlabox-albert-einstein", "nuvlabox-arthur-harden", "nuvlabox-bertil-ohlin",
+(def ^:const cat-nuvlabox #{"nuvlabox-arthur-harden", "nuvlabox-bertil-ohlin",
                             "nuvlabox-carl-cori", "nuvlabox-cecil-powell", "nuvlabox-christiane-n-volhard",
-                            "nuvlabox-christiane-nusslein-volhard", "nuvlabox-demo", "nuvlabox-felix-bloch",
-                            "nuvlabox-henry-dunant", "nuvlabox-james-chadwick", "nuvlabox-joseph-e-murray",
+                            "nuvlabox-felix-bloch", "nuvlabox-henry-dunant", "nuvlabox-joseph-e-murray",
                             "nuvlabox-joseph-e-stiglitz", "nuvlabox-joseph-erlanger", "nuvlabox-joseph-h-taylor-jr",
                             "nuvlabox-joseph-l-goldstein", "nuvlabox-jules-bordet", "nuvlabox-max-born",
-                            "nuvlabox-max-planck", "nuvlabox-scissor1", "nuvlabox-scissor2", "nuvlabox-stanley-cohen",
-                            "nuvlabox-yves-chauvin"})
+                            "nuvlabox-scissor1", "nuvlabox-scissor2", "nuvlabox-stanley-cohen",
+                            "nuvlabox-yves-chauvin", "nuvlabox-louis-neel"})
 
 (def ^:const cat-stratuslabiter #{"atos-es1"})
 (def ^:const cat-otc #{"open-telekom-de1"})
 (def ^:const cat-openstack #{"advania-se1", "cyclone-de1", "cyclone-fr2", "cyclone-tb-it1", "ebi-embassy-uk1",
                              "eo-cloudferro-pl1", "ifb-bird-stack", "ifb-bistro-iphc", "ifb-core-cloud", "ifb-core-pilot",
-                             "ifb-genouest-genostack"})
+                             "ifb-genouest-genostack", "ifb-prabi-girofle"})
 (def ^:const cat-opennebula #{"eo-cesnet-cz1", "scissor-fr1", "scissor-fr2", "scissor-fr3", "teidehpc-es-tfs1"})
 (def ^:const cat-exoscale #{"exoscale-ch-dk", "exoscale-ch-gva"})
 (def ^:const cat-ec2 #{"ec2-ap-northeast-1", "ec2-ap-southeast-1", "ec2-ap-southeast-2", "ec2-eu-central-1",
@@ -176,7 +175,6 @@
     (println (str "Migrating category " category " : Adding " (count records) " credentials"))
     (map (partial cimi/add client "credentials") records)))
 
-
 (defn -main
   " Main function to migrate client data resources from DB to CIMI (Elastic Search) "
   []
@@ -190,4 +188,3 @@
 
                                    :password (environ/env :dbmigration-password)})]
     (map (partial add-credentials client) (map #(first (keys %)) mappings))))
-
