@@ -2,7 +2,8 @@
   (:require
     [environ.core :as env]
     [clojure.tools.logging :as log]
-    [zookeeper :as zk]))
+    [zookeeper :as zk])
+  (:import (org.apache.zookeeper KeeperException$SessionExpiredException)))
 
 (def ^:dynamic *client*)
 
@@ -16,7 +17,7 @@
   []
   (let [zk-endpoints (or (env/env :zk-endpoints) "localhost:2181")]
     (log/info "creating zookeeper client:" zk-endpoints)
-    (zk/connect zk-endpoints :timeout-msec 60000)))
+    (zk/connect zk-endpoints)))
 
 (defn close-client! []
   (when *client*
@@ -26,44 +27,55 @@
 (defn string-to-byte [value]
   (.getBytes (str value) "UTF-8"))
 
-(defn create-all [path & options]
-  (apply zk/create-all *client* path options))
+(defmacro retry-zk-client [zk-func path & options]
+  `(try
+     (when (or (nil? *client*)
+               (instance? clojure.lang.Var$Unbound *client*))
+       (set-client! (create-client)))
+     (~zk-func *client* ~path ~@options)
+     (catch KeeperException$SessionExpiredException e#
+       (log/warn "zookeeper session expired exception occured!")
+       (close-client!)
+       (set-client! (create-client))
+       (~zk-func *client* ~path ~options))))
 
-(defn create [path & options]
-  (apply zk/create *client* path options))
+(defmacro create-all [path & options]
+  `(retry-zk-client zk/create-all ~path ~@options))
 
-(defn get-znode [path & options]
-  (let [result (apply zk/data *client* path options)
-        data (:data result)
-        value (when (-> data nil? not) (String. data))]
-    (assoc result :data value)))
+(defmacro create [path & options]
+  `(retry-zk-client zk/create ~path ~@options))
 
-(defn get-data [path & options]
-  (-> (apply get-znode path options)
-      :data))
+(defmacro get-znode [path & options]
+  `(let [result# (retry-zk-client zk/data ~path ~@options)
+         data# (:data result#)
+         value# (when (-> data# nil? not) (String. data#))]
+     (assoc result# :data value#)))
 
-(defn get-stat [path & options]
-  (-> (apply get-znode path options)
-      :stat))
+(defmacro get-data [path & options]
+  `(-> (get-znode ~path ~@options)
+       :data))
+
+(defmacro get-stat [path & options]
+  `(-> (retry-zk-client get-znode ~path ~@options)
+       :stat))
 
 (defn get-version
   [path]
   (-> (get-znode path) :stat :version))
 
-(defn set-data [path value & options]
-  (let [version (get-version path)
-        data (string-to-byte value)]
-    (apply zk/set-data *client* path data version options)))
+(defmacro set-data [path value & options]
+  `(let [version# (get-version ~path)
+         data# (string-to-byte ~value)]
+     (retry-zk-client zk/set-data ~path data# version# ~@options)))
 
-(defn exists [path & options]
-  (apply zk/exists *client* path options))
+(defmacro exists [path & options]
+  `(retry-zk-client zk/exists ~path ~@options))
 
-(defn children [path & options]
-  (apply zk/children *client* path options))
+(defmacro children [path & options]
+  `(retry-zk-client zk/children ~path ~@options))
 
-(defn delete-all [path & options]
-  (apply zk/delete-all *client* path options))
+(defmacro delete-all [path & options]
+  `(retry-zk-client zk/delete-all ~path ~@options))
 
-(defn delete [path & options]
-  (apply zk/delete *client* path options))
-
+(defmacro delete [path & options]
+  `(retry-zk-client zk/delete ~path ~@options))
