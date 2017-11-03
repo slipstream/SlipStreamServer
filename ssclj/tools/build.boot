@@ -30,6 +30,7 @@
                     [adzerk/boot-test]
                     [adzerk/boot-reload]
                     [tolitius/boot-check]
+                    [onetom/boot-lein-generate]
 
                     [com.sixsq.slipstream/SlipStreamPersistence nil :scope "compile"]
                     [com.sixsq.slipstream/SlipStreamDbSerializers-jar nil :scope "compile"]
@@ -45,7 +46,8 @@
   '[tolitius.boot-check :refer [with-yagni
                                 with-eastwood
                                 with-kibit
-                                with-bikeshed]])
+                                with-bikeshed]]
+  '[boot.lein :refer [generate]])
 
 (set-env!
   :source-paths #{"test"}
