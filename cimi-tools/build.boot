@@ -1,4 +1,4 @@
-(def +version+ "3.39-SNAPSHOT")
+(def +version+ "3.40-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamToolsCli-jar
@@ -35,6 +35,7 @@
                     [adzerk/boot-test]
                     [adzerk/boot-reload]
                     [tolitius/boot-check]
+                    [onetom/boot-lein-generate]
 
                     [com.sixsq.slipstream/SlipStreamPersistence nil :scope "compile" :exclusions [org.slf4j/slf4j-jdk14]]
                     [com.sixsq.slipstream/SlipStreamDbSerializers-jar nil :scope "compile"]
@@ -52,7 +53,8 @@
   '[tolitius.boot-check :refer [with-yagni
                                 with-eastwood
                                 with-kibit
-                                with-bikeshed]])
+                                with-bikeshed]]
+  '[boot.lein :refer [generate]])
 
 (set-env!
   :resource-paths #{"src"})

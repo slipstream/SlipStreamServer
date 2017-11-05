@@ -1,4 +1,4 @@
-(def +version+ "3.39-SNAPSHOT")
+(def +version+ "3.40-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamCljResources-jar
@@ -20,6 +20,7 @@
   :dependencies
   #(vec (concat %
                 (merge-defaults
+
                   ['sixsq/default-deps (get-env :version)]
                   '[[org.clojure/clojure :scope "provided"]
 
@@ -55,6 +56,7 @@
                     [adzerk/boot-reload]
                     [onetom/boot-lein-generate]
                     [tolitius/boot-check]]))))
+
 
 (require
   '[environ.boot :refer [environ]]
@@ -149,6 +151,7 @@
                               #"(?i)^META-INF/[^/]*\.(MF|SF|RSA|DSA)$"
                               #".*log4j\.properties"})
            (jar)))
+
 
 (def tests-artef-name "SlipStreamCljResourcesTests-jar")
 (def tests-artef-pom-loc (str "com.sixsq.slipstream/" tests-artef-name))
