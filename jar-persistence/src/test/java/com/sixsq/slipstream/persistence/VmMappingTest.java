@@ -20,7 +20,7 @@ public class VmMappingTest {
     }
 
     @Test
-    public void parseVMRecords() {
+    public void parseVmMapping() {
 
         VmMapping vmMapping;
 
@@ -87,6 +87,7 @@ public class VmMappingTest {
         Assert.assertTrue(json.contains("\"runUUID\""));
         Assert.assertTrue(json.contains("\"owner\""));
         Assert.assertTrue(json.contains("\"serviceOffer\""));
+        Assert.assertTrue(json.contains("\"href\""));
 
         vmMapping = new VmMapping(cloud, instanceId, runUuid, owner, null);
         json = vmMapping.toJson();
@@ -96,5 +97,6 @@ public class VmMappingTest {
         Assert.assertTrue(json.contains("\"runUUID\""));
         Assert.assertTrue(json.contains("\"owner\""));
         Assert.assertFalse(json.contains("\"serviceOffer\""));
+        Assert.assertFalse(json.contains("\"href\""));
     }
 }

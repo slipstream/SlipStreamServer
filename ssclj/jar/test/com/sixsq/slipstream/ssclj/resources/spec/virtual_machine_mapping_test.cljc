@@ -27,9 +27,9 @@
                 :cloud        "mycloud"
                 :instanceID   "aaa-bbb-111"
 
-                :runUUID "run/b836e665-74df-4800-89dc-c746c335a6a9"
-                :owner "user/jane"
-                :serviceOffer "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"})
+                :runUUID      "run/b836e665-74df-4800-89dc-c746c335a6a9"
+                :owner        "user/jane"
+                :serviceOffer {:href "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"}})
 
 (deftest test-schema-check
   (are [expect-fn arg] (expect-fn (s/valid? :cimi/virtual-machine-mapping arg))
