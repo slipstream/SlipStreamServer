@@ -71,7 +71,7 @@
 
                           :runUUID      "run/b836e665-74df-4800-89dc-c746c335a6a9"
                           :owner        "user/janedoe"
-                          :serviceOffer "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"}]
+                          :serviceOffer {:href "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"}}]
 
       (-> session-jane
           (request base-uri
@@ -93,7 +93,7 @@
 
                           :runUUID      "run/b836e665-74df-4800-89dc-c746c335a6a9"
                           :owner        "user/janedoe"
-                          :serviceOffer "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"}
+                          :serviceOffer {:href "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"}}
 
           resp-admin (-> session-admin
                          (request base-uri

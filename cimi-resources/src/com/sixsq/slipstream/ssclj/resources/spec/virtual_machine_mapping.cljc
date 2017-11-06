@@ -9,7 +9,7 @@
 
 (s/def :cimi.virtual-machine-mapping/runUUID :cimi.core/nonblank-string)
 (s/def :cimi.virtual-machine-mapping/owner :cimi.core/nonblank-string)
-(s/def :cimi.virtual-machine-mapping/serviceOffer :cimi.core/nonblank-string)
+(s/def :cimi.virtual-machine-mapping/serviceOffer :cimi.common/resource-link)
 
 (def virtual-machine-mapping-specs {:req-un [:cimi.virtual-machine-mapping/cloud
                                              :cimi.virtual-machine-mapping/instanceID]

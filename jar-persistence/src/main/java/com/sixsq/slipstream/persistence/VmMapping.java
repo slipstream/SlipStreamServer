@@ -30,7 +30,7 @@ public class VmMapping {
 
     @SuppressWarnings("unused")
     @SerializedName("serviceOffer")
-    private String serviceOffer;
+    private VmMappingServiceOffer serviceOffer;
 
     public VmMapping(String cloud, String instanceId, String runUuid, String owner, String serviceOffer) {
         if (cloud == null || cloud.isEmpty() ||
@@ -44,7 +44,7 @@ public class VmMapping {
         this.runUuid = runUuid;
         this.owner = owner;
         if ((serviceOffer != null) && (!serviceOffer.isEmpty())) {
-            this.serviceOffer = serviceOffer;
+            this.serviceOffer = new VmMappingServiceOffer(serviceOffer);
         } else {
             this.serviceOffer = null;
         }
