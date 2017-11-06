@@ -8,7 +8,7 @@
 
 (s/def :cimi.credential-template.cloud/key :cimi.core/nonblank-string)
 (s/def :cimi.credential-template.cloud/secret :cimi.core/nonblank-string)
-(s/def :cimi.credential-template.cloud/connector :cimi.core/nonblank-string)
+(s/def :cimi.credential-template.cloud/connector :cimi.common/resource-link)
 
 (def credential-template-cloud-keys-spec
   {:req-un [:cimi.credential-template.cloud/key

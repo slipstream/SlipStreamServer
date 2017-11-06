@@ -2,6 +2,7 @@
   "Standard CRUD functions for resources."
   (:require
     [clojure.walk :as w]
+    [clojure.string :as str]
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
@@ -95,7 +96,7 @@
    If a referenced document doesn't exist or if the user doesn't have read
    access to the document, then the method will throw."
   [{:keys [href] :as resource} idmap]
-  (if href
+  (if (not (str/blank? href))
     (let [refdoc (crud/retrieve-by-id href)]
       (a/can-view? refdoc idmap)
       (-> refdoc
