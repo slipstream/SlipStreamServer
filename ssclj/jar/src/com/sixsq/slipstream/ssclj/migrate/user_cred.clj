@@ -173,13 +173,13 @@
         ]
     (println (str "Collection for " category " : Adding " (count coll) " records"))
     (println (str "Migrating category " category " : Adding " (count records) " credentials"))
-    (map (partial cimi/add client "credentials") records)))
+    (doall (map (partial cimi/add client "credentials") records))))
 
 (defn -main
   " Main function to migrate client data resources from DB to CIMI (Elastic Search) "
   []
   (let [init (do-korma-init)
-        categories (keys mappings)
+        ;categories (keys mappings)
         cep-endpoint (or (environ/env :dbmigration-endpoint) "https://nuv.la/api/cloud-entry-point")
         ;;e.g DBMIGRATION_OPTIONS={:insecure? true}
         client (if (environ/env :dbmigration-options) (sync/instance cep-endpoint (read-string (environ/env :dbmigration-options))) (sync/instance cep-endpoint))
@@ -187,4 +187,5 @@
                                    :username (environ/env :dbmigration-user) ;;export DBMIGRATION_USER="super"
 
                                    :password (environ/env :dbmigration-password)})]
-    (map (partial add-credentials client) (map #(first (keys %)) mappings))))
+    (doall (map (partial add-credentials client) (map #(first (keys %)) mappings-exoscale ;mappings
+                                                      )))))
