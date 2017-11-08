@@ -135,10 +135,12 @@
 
 (defn resolve-hrefs
   [body idmap]
-  (let [connector-href {:connector (get-in body [:credentialTemplate :connector])}] ;; to put back unexpanded href after
+  (let [connector-href (if (contains? (:credentialTemplate body) :connector)
+                         {:connector (get-in body [:credentialTemplate :connector])}
+                         {})] ;; to put back the unexpanded href after
     (-> body
         (check-connector-exists idmap)
-        ;; remove connector href; regular user doesn't have rights to see them
+        ;; remove connector href (if any); regular user doesn't have rights to see them
         (update-in [:credentialTemplate] dissoc :connector)
         (std-crud/resolve-hrefs idmap)
         ;; put back unexpanded connector href

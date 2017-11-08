@@ -22,7 +22,12 @@
    :name         "Direct"
    :description  "Direct creation of user by the administrator"
    :username     "username"
+   :password     "password"
+   :firstName    "John"
+   :lastName     "Doe"
    :emailAddress "user@example.com"
+   :organization ""
+   :roles        ""
    :acl          resource-acl})
 
 ;;

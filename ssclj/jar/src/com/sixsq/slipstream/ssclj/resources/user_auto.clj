@@ -1,6 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.resources.user-auto
   (:require
-    [clj-time.core :as t]
     [com.sixsq.slipstream.ssclj.resources.spec.user-template-auto]
     [com.sixsq.slipstream.ssclj.resources.user :as p]
     [com.sixsq.slipstream.ssclj.resources.user-template-auto :as tpl]
@@ -24,21 +23,9 @@
 ;; transform template into user resource
 ;; strips method attribute and updates the resource URI
 ;;
-(def epoch (u/unparse-timestamp-datetime (t/date-time 1970)))
-
-(def ^:const initial-state "NEW")
-
-(def user-auto-defaults
-  {:isSuperUser false
-   :state       initial-state
-   :deleted     false
-   :lastOnline  epoch
-   :activeSince epoch
-   :lastExecute epoch})
 
 (defmethod p/tpl->user tpl/registration-method
   [resource request]
   (-> resource
       (assoc :resourceURI p/resource-uri)
-      (merge user-auto-defaults)))
-
+      (assoc :isSuperUser false)))

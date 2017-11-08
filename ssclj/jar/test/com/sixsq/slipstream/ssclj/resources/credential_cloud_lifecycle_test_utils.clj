@@ -3,6 +3,7 @@
     [clojure.test :refer [deftest is are use-fixtures]]
     [peridot.core :refer :all]
     [clojure.data.json :as json]
+    [clojure.string :as str]
     [com.sixsq.slipstream.ssclj.resources.credential :as credential]
     [com.sixsq.slipstream.ssclj.resources.credential-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
@@ -11,7 +12,9 @@
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.credential.key-utils :as key-utils]))
+    [com.sixsq.slipstream.ssclj.resources.credential.key-utils :as key-utils]
+    [com.sixsq.slipstream.ssclj.resources.connector :as con]
+    [com.sixsq.slipstream.ssclj.resources.connector-template :as cont]))
 
 
 (defn strip-unwanted-attrs [m]
@@ -24,7 +27,43 @@
 
 (def base-uri (str p/service-context (u/de-camelcase credential/resource-url)))
 
-(defn cloud-cred-lifecycle [{cloud-method-href :href :as credential-template-data}]
+; create connector instance
+(defn get-connector-template
+  [cloud-service-type connector-instance-name]
+  (let [template-url (str p/service-context cont/resource-url "/" cloud-service-type)
+        resp         (-> (session (ring-app))
+                         (content-type "application/json")
+                         (header authn-info-header "internal ADMIN")
+                         (request template-url)
+                         (ltu/body->edn)
+                         (ltu/is-status 200))
+        template     (get-in resp [:response :body])]
+    {:connectorTemplate (-> template
+                            strip-unwanted-attrs
+                            (assoc :instanceName connector-instance-name))}))
+
+(defn create-connector-instance
+  [cloud-service-type connector-instance-name]
+  (let [connector-create-uri (str p/service-context con/resource-url)
+        href                 (str cont/resource-url "/" cloud-service-type)
+        href-create          (get-connector-template cloud-service-type connector-instance-name)]
+    (-> (session (ring-app))
+        (content-type "application/json")
+        (header authn-info-header "internal ADMIN")
+        (request connector-create-uri
+                 :request-method :post
+                 :body (json/write-str href-create))
+        (ltu/body->edn)
+        (ltu/is-status 201)
+        (ltu/location))))
+
+(defn cloud-cred-lifecycle
+  [{cloud-method-href :href :as credential-template-data} cloud-service-type]
+  (let [connector-instance-name (-> credential-template-data
+                                    (get-in [:connector :href])
+                                    (str/split #"/")
+                                    (second))]
+    (create-connector-instance cloud-service-type connector-instance-name))
   (let [session-admin         (-> (session (ring-app))
                                   (content-type "application/json")
                                   (header authn-info-header "root ADMIN USER ANON"))

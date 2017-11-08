@@ -4,7 +4,6 @@
     [clojure.data.json :as json]
     [peridot.core :refer :all]
     [com.sixsq.slipstream.ssclj.resources.user :as user]
-    [com.sixsq.slipstream.ssclj.resources.user-auto :as uauto]
     [com.sixsq.slipstream.ssclj.resources.user-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.user-template-auto :as auto]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
@@ -168,9 +167,9 @@
         (is (= description description-attr))
         (is (= properties properties-attr))
         (is (false? isSuperUser))
-        (is (= uauto/initial-state state))
+        (is (= user/initial-state state))
         (is (false? deleted))
-        (is (= uauto/epoch lastOnline activeSince lastExecute)))
+        (is (= user/epoch lastOnline activeSince lastExecute)))
 
       ;; edit
       (let [body      (-> session-admin

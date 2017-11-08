@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.user
   (:require
     [clojure.spec.alpha :as s]
+    [clj-time.core :as t]
     [com.sixsq.slipstream.ssclj.resources.user-template-direct :as tpl]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
@@ -129,6 +130,18 @@
 ;; CRUD operations
 ;;
 
+;; Some defaults for the optional attributes.
+(def ^:const epoch (u/unparse-timestamp-datetime (t/date-time 1970)))
+
+(def ^:const initial-state "NEW")
+
+(def user-attrs-defaults
+  {:state       initial-state
+   :deleted     false
+   :lastOnline  epoch
+   :activeSince epoch
+   :lastExecute epoch})
+
 ;; FIXME:
 (defn dump [d t]
   (println "==>>" t) (clojure.pprint/pprint d) (println t "<<==") d)
@@ -143,17 +156,13 @@
   (let [idmap      {:identity (:identity request)}
         desc-attrs (u/select-desc-keys body)
         {:keys [id] :as body} (-> body
-                                  (dump-log ".... body")
                                   (assoc :resourceURI create-uri)
-                                  (dump-log ".... added :resourceURI")
                                   (update-in [:userTemplate] dissoc :method :id) ;; forces use of template reference
-                                  (dump-log ".... removed :method")
                                   (std-crud/resolve-hrefs idmap)
-                                  (dump-log ".... resolved hrefs")
                                   (update-in [:userTemplate] merge desc-attrs) ;; validate desc attrs
-                                  (dump-log ".... validating")
                                   (crud/validate)
                                   (:userTemplate)
+                                  (merge user-attrs-defaults)
                                   (tpl->user request)
                                   (merge desc-attrs))]      ;; ensure desc attrs are added
     (add-impl (assoc request :id id :body body))))

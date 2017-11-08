@@ -29,12 +29,6 @@
    :emailAddress "user@example.com"
    :organization ""
    :roles        ""
-   ;:isSuperUser  false
-   ;:state        "NEW"
-   ;:creation     ""
-   ;:lastOnline   ""
-   ;:lastExecute  ""
-   ;:activeSince  ""
    :acl          resource-acl})
 
 ;;
