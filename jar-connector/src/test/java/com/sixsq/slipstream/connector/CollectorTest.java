@@ -44,7 +44,6 @@ public class CollectorTest extends RunTestBase {
 	public static void setupClass() throws ConfigurationException, SlipStreamException {
 	    ConnectorTestBase.setupBackend();
 		UsageRecorder.muteForTests();
-		SscljProxy.muteForTests();
 		createUser();
 		for(Run r : Run.listAll()) {
 			r.remove();
@@ -54,7 +53,6 @@ public class CollectorTest extends RunTestBase {
 	@AfterClass
 	public static void teardownClass() {
 	    ConnectorTestBase.teardownBackend();
-		SscljProxy.unmuteForTests();
 		UsageRecorder.unmuteForTests();
 	}
 

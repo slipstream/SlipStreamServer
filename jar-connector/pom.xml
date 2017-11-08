@@ -59,17 +59,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamUI-dep</artifactId>
-			<type>pom</type>
-		</dependency>
-
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamUI</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>org.restlet.jee</groupId>
 			<artifactId>org.restlet</artifactId>
 		</dependency>

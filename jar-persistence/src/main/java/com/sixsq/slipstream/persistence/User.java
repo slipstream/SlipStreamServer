@@ -509,8 +509,9 @@ public class User extends Metadata {
 	public static User load(String resourceUrl) throws ConfigurationException,
 			ValidationException {
 		Response resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + resourceUrl, USERNAME_ROLE);
-		if (SscljProxy.isError(resp)) return null;
+		if (SscljProxy.isError(resp)) { return null; }
 		User user = (new Gson()).fromJson(resp.getEntityAsText(), User.class);
+		if (null == user) { return user; }
 		user.parameters = loadParameters(user);
 		return user;
 	}
@@ -521,6 +522,9 @@ public class User extends Metadata {
     }
 
 	private static CloudCredentials findCloudCredentials(User user, String cimiQuery) {
+		if (null == user) {
+			return new CloudCredentials();
+		}
 	    String query;
 		try {
 			query = URLEncoder.encode(new StringBuffer().append("type^='cloud-cred' ")
@@ -538,6 +542,9 @@ public class User extends Metadata {
 	private static Map<String, UserParameter> loadCloudCredentials
 			(List<CloudCredential> creds, User user) {
 		Map<String, UserParameter> cloudCredParams = new HashMap<>();
+		if (null == user || creds.isEmpty()) {
+			return cloudCredParams;
+		}
 		for (CloudCredential cred : creds) {
 			Response resp;
 			try {
@@ -569,9 +576,8 @@ public class User extends Metadata {
 	}
 
 	private static Map<String, UserParameter> loadCloudCredentials(User user) {
-		Map<String, UserParameter> cloudCredParams = new HashMap<>();
 		CloudCredentials creds = User.findCloudCredentials(user);
-		if (null != creds && creds.getCount() >= 1) {
+		if (null != creds && creds.getCount() >= 1 && null != user) {
 			return loadCloudCredentials(creds.getCloudCredentials(), user);
 		} else {
 			logger.warning("No cloud credentials for user.");
@@ -591,7 +597,10 @@ public class User extends Metadata {
 
 	private static Map<String, UserParameter> loadParameters(User user) {
 		Map<String, UserParameter> params = new HashMap<>();
-		params.putAll(loadCloudCredentials(user));
+		if (null == user) {
+			return params;
+		}
+ 		params.putAll(loadCloudCredentials(user));
 		params.putAll(loadSshCredentials(user));
 		params.putAll(loadGeneralParameters(user));
 		return params;
@@ -753,8 +762,12 @@ public class User extends Metadata {
 					+ resp.toString());
 		}
 		User user = (new Gson()).fromJson(resp.getEntityAsText(), User.class);
-		if (null == user.name) {
+		if (null == user || null == user.name) {
 			resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + resourceUri, USERNAME_ROLE);
+			if (SscljProxy.isError(resp)) {
+				throw new SlipStreamDatabaseException("Failed to persist User: "
+						+ resp.toString());
+			}
 			user = (new Gson()).fromJson(resp.getEntityAsText(), User.class);
 		}
 		user.parameters = loadParameters(user);
