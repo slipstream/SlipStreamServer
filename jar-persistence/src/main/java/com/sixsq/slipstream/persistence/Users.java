@@ -33,8 +33,7 @@ public class Users {
     }
 
     public static Users fromJson(String jsonRecords) {
-        Gson gson = new Gson();
-        return gson.fromJson(jsonRecords, Users.class);
+        return (new Gson()).fromJson(jsonRecords, Users.class);
     }
 
 

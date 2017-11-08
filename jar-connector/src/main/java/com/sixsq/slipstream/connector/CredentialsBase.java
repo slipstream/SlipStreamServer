@@ -22,10 +22,13 @@ package com.sixsq.slipstream.connector;
 
 import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
+import com.sixsq.slipstream.exceptions.NotImplementedException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
+
+import java.util.Map;
 
 public abstract class CredentialsBase implements Credentials {
 
@@ -75,4 +78,36 @@ public abstract class CredentialsBase implements Credentials {
 				+ user.getName() + "'>user account</a>"));
 	}
 
+	/**
+	 *
+	 * When mapping is not known, null should be returned.
+	 * @param pName parameter name of the UserParameter.
+	 * @param cloudCredsJSON JSON with cloud cred definition document.
+	 * @return value for the parameter or null
+	 * @throws ValidationException
+	 */
+	protected String getCloudCredParamValue(String pName, String cloudCredsJSON) throws ValidationException {
+		return null;
+	}
+
+	public Map<String, UserParameter> setUserParametersValues(
+			String cloudCredsJSON) throws ValidationException {
+		Map<String, UserParameter> paramsMap = cloudParametersFactory.getParameters();
+		for (UserParameter p: paramsMap.values()) {
+			String paramName = p.getName();
+			String name = paramName.replace(p.getCategory() + ".", "");
+			// the type of the value of any parameter is String.
+			String value = getCloudCredParamValue(name, cloudCredsJSON);
+			if (null != value) {
+				p.setValue(value);
+				paramsMap.put(paramName, p);
+			}
+		}
+		return paramsMap;
+	}
+
+	public Object genCloudCredsDoc(Map<String, UserParameter> params, String
+			connInstanceName) {
+		throw new NotImplementedException();
+	}
 }

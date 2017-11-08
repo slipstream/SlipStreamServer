@@ -20,12 +20,12 @@ package com.sixsq.slipstream.factory;
  * -=================================================================-
  */
 
-import java.util.List;
-import java.util.Map;
-
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ParameterType;
+
+import java.util.List;
+import java.util.Map;
 
 public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 
@@ -36,6 +36,42 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 
 	protected abstract void initReferenceParameters()
 			throws ValidationException;
+
+	protected void initReferenceParameters(Map<String, Map> paramsDesc)
+			throws ValidationException {
+		for (String key : paramsDesc.keySet()) {
+			Map desc = paramsDesc.get(key);
+
+			String name = key.replaceAll("-", ".");
+			String description = (String) desc.get("displayName");
+			String instructions = (String) desc.get("description");
+			int order = ((Long) desc.get("order")).intValue();
+
+			String type = (String) desc.get("type");
+			ParameterType ptype;
+			switch (type) {
+				case "password":
+					ptype = ParameterType.Password;
+					break;
+				default:
+					ptype = ParameterType.String;
+					break;
+			}
+			Boolean mandatory = (Boolean) desc.get("mandatory");
+			if (mandatory) {
+				String value = "";
+				putMandatoryParameter(
+						name,
+						description,
+						value,
+						ptype,
+						instructions,
+						order);
+			} else {
+				putParameter(name, description, instructions, ptype, false);
+			}
+		}
+	};
 
 	public ParametersFactoryBase(String category) {
 		this.category = category;

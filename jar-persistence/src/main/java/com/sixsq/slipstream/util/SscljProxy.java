@@ -158,7 +158,7 @@ public class SscljProxy {
 
         String sscljEndpoint = getSscljEndpoint();
 
-        logger.info("Calling SSCLJ " + sscljEndpoint + " with: "
+        logger.finest("Calling SSCLJ " + sscljEndpoint + " with: "
                 + "method=" + String.valueOf(method)
                 + ", resource=" + resource
                 + ", object=" + String.valueOf(obj)
@@ -195,15 +195,15 @@ public class SscljProxy {
                     responseEntity = client.get(mediaType);
                     break;
                 case PUT:
-                    logger.info("PUT content : " + content.getText());
+                    logger.finest("PUT content : " + content.getText());
                     responseEntity = client.put(content, mediaType);
                     break;
                 case POST:
-                    logger.info("POST content : " + content.getText());
+                    logger.finest("POST content : " + content.getText());
                     responseEntity = client.post(content, mediaType);
                     break;
                 case DELETE:
-                    logger.info("DELETE content : " + content.getText());
+                    logger.finest("DELETE content : " + content.getText());
                     responseEntity = client.delete(mediaType);
                     break;
                 default:
@@ -332,4 +332,7 @@ public class SscljProxy {
         isMuted = false;
     }
 
+    public static boolean isError(Response resp) {
+        return resp == null || resp.getStatus().isError();
+    }
 }

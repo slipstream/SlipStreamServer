@@ -26,10 +26,15 @@ import java.util.List;
  */
 public class CloudCredentials {
 
-    private List<CloudCredential> cloudCredentials = new ArrayList<>();
+    private List<CloudCredential> credentials = new ArrayList<>();
+    private Integer count;
 
     public List<CloudCredential> getCloudCredentials() {
-        return cloudCredentials;
+        return credentials;
+    }
+
+    public Integer getCount() {
+        return count;
     }
 
     public static CloudCredentials fromJson(String jsonRecords) {

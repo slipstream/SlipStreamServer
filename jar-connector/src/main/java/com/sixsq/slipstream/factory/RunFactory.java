@@ -23,7 +23,6 @@ package com.sixsq.slipstream.factory;
 import java.util.*;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.*;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -33,8 +32,6 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.*;
 import com.sixsq.slipstream.util.FileUtil;
 import com.sixsq.slipstream.util.ServiceOffersUtil;
-import com.sixsq.slipstream.util.SscljProxy;
-import org.restlet.Response;
 
 import static com.sixsq.slipstream.util.ServiceOffersUtil.getServiceOfferAttribute;
 import static com.sixsq.slipstream.util.ServiceOffersUtil.getServiceOfferAttributeAsString;

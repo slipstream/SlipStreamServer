@@ -20,14 +20,6 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
@@ -38,10 +30,19 @@ import com.sixsq.slipstream.persistence.ServiceCatalogs;
 import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.User;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 public class ConnectorFactory {
 
     private static final String CONNECTOR_CLASS_SEPARATOR = ",";
 	private static Map<String, Connector> connectors = null;
+	private static boolean serviceCatalogue = true;
 
     public static Connector getCurrentConnector(User user) throws ConfigurationException, ValidationException {
         String cloudServiceName = getDefaultCloudServiceName(user);
@@ -97,11 +98,11 @@ public class ConnectorFactory {
     }
 
     @SuppressWarnings("unused")
-    private static Connector loadConnector(String cloudServiceName) throws ConfigurationException {
+    public static Connector loadConnector(String cloudServiceName) throws ConfigurationException {
         return loadConnector(cloudServiceName, null);
     }
 
-    private static Connector loadConnector(String cloudServiceName, String instanceName) throws ConfigurationException {
+    public static Connector loadConnector(String cloudServiceName, String instanceName) throws ConfigurationException {
         try {
 
             DiscoverableConnectorService svc = DiscoverableConnectorServiceLoader.getConnectorService(cloudServiceName);
@@ -151,7 +152,9 @@ public class ConnectorFactory {
 
         setConnectors(connectors);
 
-        updateServiceCatalog(connectors.keySet());
+        if (serviceCatalogue) {
+            updateServiceCatalog(connectors.keySet());
+        }
     }
 
     private static Map<String, String> processConnectorInstanceConfig(String[] instances) {
@@ -260,4 +263,33 @@ public class ConnectorFactory {
         return names.toArray(new String[names.size()]);
     }
 
+    public static void dontUseServiceCatalogue() {
+        serviceCatalogue = false;
+    }
+
+    public static void useServiceCatalogue() {
+        serviceCatalogue = true;
+    }
+
+    public static String cloudNameFromInstanceName(String connInstName) {
+        Map<String, String> connInstNameToCloudMap = new HashMap<>();
+        try {
+            for (String c : ConnectorFactory.getConnectorClassNames()) {
+                String instName;
+                String cloudName;
+                if (c.contains(":")) {
+                    String[] parts = c.split(":");
+                    instName = parts[0];
+                    cloudName = parts[1];
+                } else {
+                    instName = c;
+                    cloudName = instName;
+                }
+                connInstNameToCloudMap.put(instName, cloudName);
+            }
+        } catch (ValidationException e) {
+            return null;
+        }
+        return connInstNameToCloudMap.get(connInstName);
+    }
 }

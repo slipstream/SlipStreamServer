@@ -20,39 +20,30 @@ package com.sixsq.slipstream.configuration;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.connector.ConnectorFactory;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.factory.ParametersFactory;
+import com.sixsq.slipstream.persistence.ParameterType;
+import com.sixsq.slipstream.persistence.ServiceConfiguration;
+import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
+import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
+import org.restlet.data.Protocol;
+import org.restlet.data.Reference;
+import slipstream.ui.views.Representation;
+
+import javax.persistence.NoResultException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-
-import javax.persistence.NoResultException;
-
-import org.restlet.data.Protocol;
-import org.restlet.data.Reference;
-
-import slipstream.ui.views.Representation;
-
-import com.sixsq.slipstream.connector.ConnectorFactory;
-import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.factory.ParametersFactory;
-import com.sixsq.slipstream.persistence.Parameter;
-import com.sixsq.slipstream.persistence.ParameterType;
-import com.sixsq.slipstream.persistence.ServiceConfiguration;
-import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
-import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 
 /**
  * This singleton class is the interface to the service configuration. It

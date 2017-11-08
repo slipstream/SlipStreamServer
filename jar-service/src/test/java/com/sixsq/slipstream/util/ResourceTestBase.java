@@ -55,7 +55,7 @@ import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.run.RunTestBase;
-import com.sixsq.slipstream.persistence.UserTest;
+import com.sixsq.slipstream.persistence.UserCloudCredentialsTest;
 
 public class ResourceTestBase extends RunTestBase {
 
@@ -76,7 +76,7 @@ public class ResourceTestBase extends RunTestBase {
 	public static String cloudServiceName = new LocalConnector()
 			.getCloudServiceName();
 
-	protected static User user = UserTest.createUser("test", UserTest.PASSWORD);
+	protected static User user = UserCloudCredentialsTest.createUser("test", UserCloudCredentialsTest.PASSWORD);
 
 	public static void resetAndLoadConnector(
 			Class<? extends Connector> connectorClass)

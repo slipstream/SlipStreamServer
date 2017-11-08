@@ -20,11 +20,6 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.ParametersFactoryBase;
@@ -32,6 +27,11 @@ import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ParameterCategory;
 import com.sixsq.slipstream.persistence.QuotaParameter;
 import com.sixsq.slipstream.persistence.UserParameter;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public abstract class UserParametersFactoryBase extends
 		ParametersFactoryBase<UserParameter> {

@@ -20,12 +20,6 @@ package com.sixsq.slipstream.factory;
  * -=================================================================-
  */
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
@@ -40,6 +34,12 @@ import com.sixsq.slipstream.persistence.ParameterCategory;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class ParametersFactory {
 

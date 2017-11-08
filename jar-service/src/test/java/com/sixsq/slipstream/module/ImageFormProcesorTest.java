@@ -35,24 +35,24 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.UserTest;
+import com.sixsq.slipstream.persistence.UserCloudCredentialsTest;
 import com.sixsq.slipstream.util.ResourceTestBase;
 
 public class ImageFormProcesorTest {
 
 	protected static final String PASSWORD = "password";
-	protected static User user = UserTest.createUser("test", PASSWORD);
+	protected static User user = UserCloudCredentialsTest.createUser("test", PASSWORD);
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		UserTest.storeUser(user);
+		UserCloudCredentialsTest.storeUser(user);
 		ResourceTestBase.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
 	}
 
 	@Test
 	public void newNameIllegal() throws BadlyFormedElementException,
 			SlipStreamClientException {
-		User user = UserTest.createUser("test");
+		User user = UserCloudCredentialsTest.createUser("test");
 
 		String imageName = "newNameIllegal";
 		Module image = new ImageModule(imageName);
@@ -76,7 +76,7 @@ public class ImageFormProcesorTest {
 	@Test
 	public void saveNativeWithImageIdsImage() throws BadlyFormedElementException,
 			SlipStreamClientException {
-		User user = UserTest.createUser("test");
+		User user = UserCloudCredentialsTest.createUser("test");
 		String cloudServiceName = LocalConnector.CLOUD_SERVICE_NAME;
 
 		String imageName = "imageWithIds";
@@ -105,7 +105,7 @@ public class ImageFormProcesorTest {
 	@Test
 	public void saveTemplateImageWithChangedCreateStuffCleansImageIds() throws BadlyFormedElementException,
 			SlipStreamClientException {
-		User user = UserTest.createUser("test");
+		User user = UserCloudCredentialsTest.createUser("test");
 		String cloudServiceName = LocalConnector.CLOUD_SERVICE_NAME;
 
 		String imageName = "imageWithIds";
@@ -135,7 +135,7 @@ public class ImageFormProcesorTest {
 	@Test
 	public void saveTemplateImageWithoutChangedCreateStuffKeepsOldImageIds() throws BadlyFormedElementException,
 			SlipStreamClientException {
-		User user = UserTest.createUser("test");
+		User user = UserCloudCredentialsTest.createUser("test");
 		String cloudServiceName = LocalConnector.CLOUD_SERVICE_NAME;
 
 		String imageName = "imageWithIds";

@@ -337,6 +337,11 @@ public abstract class ConnectorBase implements Connector {
         return ids;
     }
 
+    public Map<String, UserParameter> setUserParametersValues(String cloudCredsJSON)
+            throws ValidationException {
+        throw (new NotImplementedException());
+    }
+
     public Map<String, UserParameter> getUserParametersTemplate() throws ValidationException {
         throw (new NotImplementedException());
     }

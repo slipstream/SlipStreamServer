@@ -25,28 +25,34 @@ import com.google.gson.annotations.SerializedName;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.exceptions.SlipStreamDatabaseException;
+import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.user.Passwords;
 import com.sixsq.slipstream.user.UserView;
 import com.sixsq.slipstream.util.SscljProxy;
+import com.sixsq.slipstream.connector.ConnectorFactory;
+import com.sixsq.slipstream.connector.Connector;
+import com.sixsq.slipstream.credentials.Credentials;
 import org.restlet.Response;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementMap;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.persistence.*;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.logging.Logger;
+import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.logging.Logger;
 
 /**
  * Unit test:
@@ -54,10 +60,6 @@ import java.util.regex.Pattern;
  *
  */
 @SuppressWarnings("serial")
-//@NamedQueries({
-//		@NamedQuery(name = "allUsers", query = "SELECT u FROM User u"),
-//		@NamedQuery(name = "activeUsers", query = "SELECT u FROM User u WHERE u.state = 'ACTIVE'"),
-//		@NamedQuery(name = "userViewList", query = "SELECT NEW com.sixsq.slipstream.user.UserView(u.name, u.firstName, u.lastName, u.email, u.state, u.lastOnline, u.lastExecute, u.activeSince, u.organization, u.roles, u.isSuperUser) FROM User u") })
 public class User extends Metadata {
 
 	private static final String USERNAME = "internal";
@@ -75,6 +77,8 @@ public class User extends Metadata {
 	public static final String NEW_NAME = "new";
 
 	private static transient final Random rnd = new Random();
+
+	private static final Logger logger = Logger.getLogger("com.sixsq.slipstream.persistence.User");
 
 	public enum State {
 		NEW, ACTIVE, DELETED, SUSPENDED
@@ -153,6 +157,7 @@ public class User extends Metadata {
 	public User(String name) throws ValidationException {
 		setName(name);
 		this.state = State.NEW;
+		this.parameters = new HashMap<>();
 	}
 
 	@ElementMap(name = "parameters", required = false, valueType = UserParameter.class)
@@ -162,7 +167,7 @@ public class User extends Metadata {
 
 	@ElementMap(name = "parameters", required = false, valueType = UserParameter.class)
 	public Map<String, UserParameter> getParameters() {
-	    if (null == parameters) {
+	    if (null == parameters || parameters.size() == 0) {
 	    	parameters = loadParameters(this);
 		}
 		return parameters;
@@ -504,29 +509,92 @@ public class User extends Metadata {
 	public static User load(String resourceUrl) throws ConfigurationException,
 			ValidationException {
 		Response resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + resourceUrl, USERNAME_ROLE);
-		if (badResponse(resp)) return null;
+		if (SscljProxy.isError(resp)) return null;
 		User user = (new Gson()).fromJson(resp.getEntityAsText(), User.class);
 		user.parameters = loadParameters(user);
 		return user;
 	}
 
+
+	private static CloudCredentials findCloudCredentials(User user) {
+		return User.findCloudCredentials(user, "");
+    }
+
+	private static CloudCredentials findCloudCredentials(User user, String cimiQuery) {
+	    String query;
+		try {
+			query = URLEncoder.encode(new StringBuffer().append("type^='cloud-cred' ")
+					.append(cimiQuery).toString(), "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			throw new SlipStreamRuntimeException("Failed to build search " +
+					"query to find user cloud credentials.", e);
+		}
+		String resource = SscljProxy.BASE_RESOURCE + "credential?$filter=" + query;
+		Response resp = SscljProxy.get(resource, user.getName() + " USER", true);
+		return CloudCredentials.fromJson(resp.getEntityAsText());
+	}
+
+	private static Map<String, UserParameter> loadCloudCredentials
+			(List<CloudCredential> creds, User user) {
+		Map<String, UserParameter> cloudCredParams = new HashMap<>();
+		for (CloudCredential cred : creds) {
+			Response resp;
+			try {
+				resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + cred.connector.href, "super ADMIN", true);
+			} catch (Exception e) {
+				logger.warning("Failed to get connector document " + cred.connector.href + " with: " + e.getMessage());
+				continue;
+			}
+			CloudConnector conn = CloudConnector.fromJson(resp.getEntityAsText());
+			Connector connector;
+			try {
+				connector = ConnectorFactory.loadConnector(conn.cloudServiceType, conn.instanceName);
+			} catch (Exception e) {
+				e.printStackTrace();
+				logger.warning("Failed to load connector " + conn.instanceName + " with: " + e.getMessage());
+				continue;
+			}
+			resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + cred.id, user.getName() + " USER");
+			try {
+				Credentials cloudCredTmpl = connector.getCredentials(user);
+				cloudCredParams.putAll(cloudCredTmpl.setUserParametersValues(resp.getEntityAsText()));
+			} catch (ValidationException e) {
+				e.printStackTrace();
+				logger.warning("Failed to transform user cloud credentials " +
+						conn.instanceName + " with: " + e.getMessage());
+			}
+		}
+		return cloudCredParams;
+	}
+
+	private static Map<String, UserParameter> loadCloudCredentials(User user) {
+		Map<String, UserParameter> cloudCredParams = new HashMap<>();
+		CloudCredentials creds = User.findCloudCredentials(user);
+		if (null != creds && creds.getCount() >= 1) {
+			return loadCloudCredentials(creds.getCloudCredentials(), user);
+		} else {
+			logger.warning("No cloud credentials for user.");
+			return new HashMap<>();
+		}
+	}
+
+	private static Map<String, UserParameter> loadSshCredentials(User user) {
+		Map<String, UserParameter> params = new HashMap<>();
+		return params;
+	}
+
+	private static Map<String, UserParameter> loadGeneralParameters(User user) {
+		Map<String, UserParameter> params = new HashMap<>();
+		return params;
+	}
+
 	private static Map<String, UserParameter> loadParameters(User user) {
-		return new HashMap<>();
-//	    Logger log = Logger.getLogger("com.sixsq.slipstream.User");
-//	    log.info("LOADING PARAMETERS ....");
-////		Form queryParameters = new Form();
-////		queryParameters.add("$filter", "");
-////		SscljProxy.get("", getName(), queryParameters);
-//		Response response = SscljProxy.get("api/credential", user.getName());
-//		log.info("response: " + response.getEntityAsText());
-//		Map<String, UserParameter> params = new HashMap<>();
-//		try {
-//			params.put("my-parameter", new UserParameter("name", "value",
-//					"description"));
-//		} catch (ValidationException e) {
-//			e.printStackTrace();
-//		}
-//		return params;
+		Map<String, UserParameter> params = new HashMap<>();
+		params.putAll(loadCloudCredentials(user));
+		params.putAll(loadSshCredentials(user));
+		params.putAll(loadGeneralParameters(user));
+		return params;
 	}
 
 	public void addSystemParametersIntoUser(ServiceConfiguration sc)
@@ -557,7 +625,7 @@ public class User extends Metadata {
 	public static List<User> list() {
 		Response resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + RESOURCE_NAME, USERNAME_ROLE);
 
-		if (badResponse(resp)) return new ArrayList<>();
+		if (SscljProxy.isError(resp)) return new ArrayList<>();
 
 		Users records = Users.fromJson(resp.getEntityAsText());
 
@@ -568,30 +636,32 @@ public class User extends Metadata {
 
 	@SuppressWarnings("unchecked")
 	public static boolean isSuperAlone() {
-		EntityManager em = PersistenceUtil.createEntityManager();
-		Query q = em.createNamedQuery("allUsers");
-		q.setMaxResults(1);
-		List<User> list = q.getResultList();
-		em.close();
+		List<User> list = list();
 		return list.size() == 1 && list.get(0).getName().equals("super");
 	}
 
 	@SuppressWarnings("unchecked")
 	public static List<User> listActive() {
-		EntityManager em = PersistenceUtil.createEntityManager();
-		Query q = em.createNamedQuery("activeUsers");
-		List<User> list = q.getResultList();
-		em.close();
+		List<User> list = new ArrayList<>();
+		for (User u : list()) {
+		    if (State.ACTIVE.equals(u.getState())) {
+				list.add(u);
+			}
+		}
 		return list;
 	}
 
 	@SuppressWarnings("unchecked")
 	public static List<UserView> viewList() {
-		EntityManager em = PersistenceUtil.createEntityManager();
-		Query q = em.createNamedQuery("userViewList");
-		List<UserView> list = q.getResultList();
-		em.close();
-		return list;
+		Response resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + RESOURCE_NAME, USERNAME_ROLE);
+
+		if (SscljProxy.isError(resp)) return new ArrayList<>();
+
+		UsersView records = UsersView.fromJson(resp.getEntityAsText());
+
+		if (records == null) return new ArrayList<>();
+
+		return records.getUsers();
 	}
 
 	public void setContainer(UserParameter parameter) {
@@ -600,31 +670,95 @@ public class User extends Metadata {
 
 	private void storeParameters() {
 		System.out.println("STORING PARAMETERS....");
+		storeGeneralParameters();
+		storeSshCredentials();
+		storeCloudCredentials();
+	}
+
+	private void storeGeneralParameters() {
+		System.out.println("Storing General params.");
+		Map<String, UserParameter> globalParams = getParameters(ParameterCategory.General.toString());
+	}
+
+	private void storeSshCredentials() {
+		System.out.println("Storing Ssh Credentials params.");
+		Map<String, UserParameter> globalParams = getParameters(ParameterCategory.General.toString());
+	}
+
+	private boolean isCredentialCategory(String category) {
+		return !(category.equals(ParameterCategory.General.toString()) ||
+                    category.equals(ParameterCategory.Execution_Parameters.toString()));
+	}
+
+	private Set<String> getCloudCredentialCategories() {
+		Set<String> categories = new HashSet<>();
+		for (UserParameter p: parameters.values()) {
+			String category = p.getCategory();
+			if (isCredentialCategory(category)) {
+				categories.add(category);
+			}
+		}
+		return categories;
+	}
+
+	private void addCloudCred(Object credObj) {
+		SscljProxy.post(SscljProxy.BASE_RESOURCE + "credential", this.getName() + " USER", credObj);
+	}
+
+	private void updateCloudCred(CloudCredential cred, Object credObj) {
+		SscljProxy.delete(SscljProxy.BASE_RESOURCE + cred.id, this.getName() + " USER", true);
+		addCloudCred(credObj);
+	}
+
+	private void storeCloudCredentials() {
+		Set<String> credCats = getCloudCredentialCategories();
+		for (String connInstName: credCats) {
+			String cloudName = ConnectorFactory.cloudNameFromInstanceName(connInstName);
+			if (null == cloudName) {
+				continue;
+			}
+			Connector connector = ConnectorFactory.loadConnector(cloudName, connInstName);
+			Credentials cloudCredTmpl = connector.getCredentials(this);
+			Object credObj = cloudCredTmpl.genCloudCredsDoc(getParameters (connInstName), connInstName);
+			CloudCredentials creds = User.findCloudCredentials(this,
+					"and connector/href='connector/" + connInstName + "'");
+			if (null == creds || creds.getCount() == 0) {
+				addCloudCred(credObj);
+			} else if (creds.getCount() == 1) {
+				updateCloudCred(creds.getCloudCredentials().get(0), credObj);
+			} else {
+				logger.warning("");
+			}
+		}
 	}
 
 	private static class UserTemplate {
 		private User userTemplate;
-		public UserTemplate(User user) {
+		private UserTemplate(User user) {
 			userTemplate = user;
+			userTemplate.href = "user-template/auto";
 		}
 	}
 
-//	@Override
 	public User store() {
 		storeParameters();
 		Response resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + resourceUri, USERNAME_ROLE);
-		if (badResponse(resp)) {
-		    href = "user-template/auto";
+		if (SscljProxy.isError(resp)) {
 			resp = SscljProxy.post(SscljProxy.BASE_RESOURCE + RESOURCE_NAME, USERNAME_ROLE, new UserTemplate(this));
-			href = null;
 		} else {
 			resp = SscljProxy.put(SscljProxy.BASE_RESOURCE + resourceUri, USERNAME_ROLE, this);
 		}
-		if (badResponse(resp)) {
+		if (SscljProxy.isError(resp)) {
 			throw new SlipStreamDatabaseException("Failed to persist User: "
 					+ resp.toString());
 		}
-		return this;
+		User user = (new Gson()).fromJson(resp.getEntityAsText(), User.class);
+		if (null == user.name) {
+			resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + resourceUri, USERNAME_ROLE);
+			user = (new Gson()).fromJson(resp.getEntityAsText(), User.class);
+		}
+		user.parameters = loadParameters(user);
+		return user;
 	}
 
 	public Date getLastOnline() {
@@ -723,8 +857,5 @@ public class User extends Metadata {
 			checkNoForbiddenRoles(roles);
 		}
 	}
-
-	private static boolean badResponse(Response resp) {
-		return resp == null || resp.getStatus().isError();
-	}
 }
+

@@ -20,10 +20,6 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
 import com.google.gson.JsonObject;
 import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
@@ -34,6 +30,10 @@ import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Interface providing cloud back-end interactions as well as connector
@@ -98,6 +98,15 @@ public interface Connector {
 	 * @throws ValidationException
 	 */
 	Map<String, UserParameter> getUserParametersTemplate()
+			throws ValidationException;
+
+	/**
+	 * @param cloudCredsJSON raw JSON of the cloud credential document from
+	 *                          CIMI server.
+	 * @return map of user parameters representing user cloud
+	 *         credentials and extra configuration.
+	 */
+	Map<String, UserParameter> setUserParametersValues(String cloudCredsJSON)
 			throws ValidationException;
 
 	/**

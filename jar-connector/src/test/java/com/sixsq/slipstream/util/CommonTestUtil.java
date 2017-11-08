@@ -221,7 +221,12 @@ public abstract class CommonTestUtil {
 		updateServiceConfigurationParameters(systemConfigurationFactory);
 
 		// return the loaded connector
-		return ConnectorFactory.getConnector(cloudServiceName);
+		String connectorInstanceName = cloudServiceName;
+		if (configConnectorName.contains(":")) {
+			String[] parts = configConnectorName.split(":");
+			connectorInstanceName = parts[0];
+		}
+		return ConnectorFactory.getConnector(connectorInstanceName);
 	}
 
 	// FIXME: duplicate from ResourceTestBase

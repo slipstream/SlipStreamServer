@@ -38,23 +38,23 @@ import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.NodeParameter;
 import com.sixsq.slipstream.persistence.ParameterCategory;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.UserTest;
+import com.sixsq.slipstream.persistence.UserCloudCredentialsTest;
 
 public class DeploymentFormProcesorTest {
 
 	private static final String PASSWORD = "password";
-	private static User user = UserTest.createUser("test", PASSWORD);
+	private static User user = UserCloudCredentialsTest.createUser("test", PASSWORD);
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		UserTest.storeUser(user);
+		UserCloudCredentialsTest.storeUser(user);
 	}
 
 	@Test
 	public void processDeploymentMapping() throws ConfigurationException,
 			SlipStreamClientException {
 
-		User user = UserTest.createUser("test");
+		User user = UserCloudCredentialsTest.createUser("test");
 
 		String imageName = "processDeploymentMappingImage";
 		Module image = new ImageModule(imageName);
@@ -101,7 +101,7 @@ public class DeploymentFormProcesorTest {
 	public void deploymentWithIllegalSelfReferencingNode()
 			throws ConfigurationException, SlipStreamClientException {
 
-		User user = UserTest.createUser("test");
+		User user = UserCloudCredentialsTest.createUser("test");
 
 		String imageName = "deploymentWithIllegalSelfReferencingNode";
 		Module image = new ImageModule(imageName);
@@ -132,7 +132,7 @@ public class DeploymentFormProcesorTest {
 	public void deploymentWithMissingMappingAndNoDefaultValue()
 			throws ConfigurationException, SlipStreamClientException {
 
-		User user = UserTest.createUser("test");
+		User user = UserCloudCredentialsTest.createUser("test");
 
 		String imageName = "deploymentWithMissingMappingAndNoDefaultValue";
 		Module image = new ImageModule(imageName);
@@ -159,7 +159,7 @@ public class DeploymentFormProcesorTest {
 	public void deploymentWithMissingMappingAndDefaultValue()
 			throws ConfigurationException, SlipStreamClientException {
 
-		User user = UserTest.createUser("test");
+		User user = UserCloudCredentialsTest.createUser("test");
 
 		String imageName = "deploymentWithMissingMappingAndDefaultValue";
 		Module image = new ImageModule(imageName);

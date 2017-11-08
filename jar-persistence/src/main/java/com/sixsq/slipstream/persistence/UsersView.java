@@ -1,4 +1,10 @@
-package com.sixsq.slipstream.credentials;
+package com.sixsq.slipstream.persistence;
+
+import com.google.gson.Gson;
+import com.sixsq.slipstream.user.UserView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /*
  * +=================================================================+
@@ -9,9 +15,9 @@ package com.sixsq.slipstream.credentials;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,27 +25,17 @@ package com.sixsq.slipstream.credentials;
  * limitations under the License.
  * -=================================================================-
  */
+public class UsersView {
 
-import com.sixsq.slipstream.exceptions.InvalidElementException;
-import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.UserParameter;
-import java.util.Map;
+    private List<UserView> users = new ArrayList<>();
+
+    public List<UserView> getUsers() {
+        return users;
+    }
+
+    public static UsersView fromJson(String jsonRecords) {
+        return (new Gson()).fromJson(jsonRecords, UsersView.class);
+    }
 
 
-public interface Credentials {
-
-	public String getKey() throws InvalidElementException;
-	
-	public String getSecret() throws InvalidElementException;
-	
-	public void validate() throws ValidationException;
-
-	public Map<String, UserParameter> setUserParametersValues(String cloudCredsJSON)
-			throws ValidationException;
-
-	/**
-	 * @param connInstanceName category of the provided parameter set.
-	 */
-	public Object genCloudCredsDoc(Map<String, UserParameter> prams, String
-			connInstanceName);
 }
