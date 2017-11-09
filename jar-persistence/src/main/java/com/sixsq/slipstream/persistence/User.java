@@ -728,7 +728,7 @@ public class User extends Metadata {
 			}
 			Connector connector = ConnectorFactory.loadConnector(cloudName, connInstName);
 			Credentials cloudCredTmpl = connector.getCredentials(this);
-			Object credObj = cloudCredTmpl.genCloudCredsDoc(getParameters (connInstName), connInstName);
+			Object credObj = cloudCredTmpl.getCloudCredCreateTmpl(getParameters(connInstName), connInstName);
 			CloudCredentials creds = User.findCloudCredentials(this,
 					"and connector/href='connector/" + connInstName + "'");
 			if (null == creds || creds.getCount() == 0) {

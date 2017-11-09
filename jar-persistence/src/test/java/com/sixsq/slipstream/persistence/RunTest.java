@@ -32,7 +32,9 @@ import java.util.List;
 import java.util.Set;
 
 import com.sixsq.slipstream.event.Event;
+import com.sixsq.slipstream.ssclj.app.SscljTestServer;
 import org.hibernate.LazyInitializationException;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -48,7 +50,13 @@ public class RunTest {
 
 	@BeforeClass
 	public static void setupClass() {
+		SscljTestServer.start();
 		Event.muteForTests();
+	}
+
+	@AfterClass
+	public static void teardownClass() {
+		SscljTestServer.stop();
 	}
 
 	@Test

@@ -42,6 +42,8 @@ import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
+import com.sixsq.slipstream.ssclj.app.SscljTestServer;
+import org.restlet.Response;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
@@ -227,6 +229,26 @@ public abstract class CommonTestUtil {
 			connectorInstanceName = parts[0];
 		}
 		return ConnectorFactory.getConnector(connectorInstanceName);
+	}
+
+	public static void createConnector(String cloudServiceName, String
+			connectorName, SystemConfigurationParametersFactoryBase systemParamsFactory) {
+		ConnectorFactory.dontUseServiceCatalogue();
+		try {
+			CommonTestUtil.lockAndLoadConnector(connectorName + ":" + cloudServiceName, cloudServiceName,
+					systemParamsFactory);
+			SscljTestServer.refresh();
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Failed to create connector " + connectorName + " with: " +
+					e.getMessage());
+		}
+		Response resp = SscljProxy.get(SscljProxy.BASE_RESOURCE +
+				"connector/" + connectorName, "super ADMIN");
+		if (SscljProxy.isError(resp)) {
+			fail("Failed to create connector " + connectorName + " with: " +
+					resp.getEntityAsText());
+		}
 	}
 
 	// FIXME: duplicate from ResourceTestBase

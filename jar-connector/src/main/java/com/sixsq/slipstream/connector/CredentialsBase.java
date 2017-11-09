@@ -106,7 +106,7 @@ public abstract class CredentialsBase implements Credentials {
 		return paramsMap;
 	}
 
-	public Object genCloudCredsDoc(Map<String, UserParameter> params, String
+	public Object getCloudCredCreateTmpl(Map<String, UserParameter> params, String
 			connInstanceName) {
 		throw new NotImplementedException();
 	}

@@ -40,6 +40,6 @@ public interface Credentials {
 	/**
 	 * @param connInstanceName category of the provided parameter set.
 	 */
-	public Object genCloudCredsDoc(Map<String, UserParameter> prams, String
+	public Object getCloudCredCreateTmpl(Map<String, UserParameter> prams, String
 			connInstanceName);
 }
