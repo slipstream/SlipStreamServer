@@ -211,6 +211,7 @@
           <requires>
             <require>jre-headless &gt;= ${server.jre.version}</require>
             <require>slipstream-useradd</require>
+            <require>slipstream-ring-container</require>
           </requires>
           <obsoletes>
             <obsolete>slipstream-service-catalog</obsolete>
