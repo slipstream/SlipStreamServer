@@ -233,7 +233,6 @@ public abstract class CommonTestUtil {
 
 	public static void createConnector(String cloudServiceName, String
 			connectorName, SystemConfigurationParametersFactoryBase systemParamsFactory) {
-		ConnectorFactory.dontUseServiceCatalogue();
 		try {
 			CommonTestUtil.lockAndLoadConnector(connectorName + ":" + cloudServiceName, cloudServiceName,
 					systemParamsFactory);

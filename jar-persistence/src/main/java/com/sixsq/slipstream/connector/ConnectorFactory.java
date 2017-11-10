@@ -25,8 +25,6 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Parameter;
-import com.sixsq.slipstream.persistence.ServiceCatalog;
-import com.sixsq.slipstream.persistence.ServiceCatalogs;
 import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.User;
 
@@ -36,13 +34,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class ConnectorFactory {
 
     private static final String CONNECTOR_CLASS_SEPARATOR = ",";
 	private static Map<String, Connector> connectors = null;
-	private static boolean serviceCatalogue = true;
 
     public static Connector getCurrentConnector(User user) throws ConfigurationException, ValidationException {
         String cloudServiceName = getDefaultCloudServiceName(user);
@@ -151,10 +147,6 @@ public class ConnectorFactory {
         }
 
         setConnectors(connectors);
-
-        if (serviceCatalogue) {
-            updateServiceCatalog(connectors.keySet());
-        }
     }
 
     private static Map<String, String> processConnectorInstanceConfig(String[] instances) {
@@ -201,32 +193,6 @@ public class ConnectorFactory {
         }
     }
 
-    private static void updateServiceCatalog(Set<String> cloudServiceNames) {
-
-        ServiceCatalogs scs = new ServiceCatalogs();
-        scs.loadAll();
-        for (ServiceCatalog sc : scs.getList()) {
-            if (!cloudServiceNames.contains(sc.getCloud())) {
-                sc.remove();
-            }
-        }
-        for (String cloud : cloudServiceNames) {
-            boolean foundIt = false;
-            scs.loadAll();
-            for (ServiceCatalog sc : scs.getList()) {
-                if (sc.getCloud().equals(cloud)) {
-                    foundIt = true;
-                    break;
-                }
-            }
-            if (!foundIt) {
-                ServiceCatalog sc = new ServiceCatalog(cloud);
-                sc = sc.store();
-                scs.getList().add(sc);
-            }
-        }
-    }
-
     public static Map<String, Connector> getConnectors() throws ConfigurationException, ValidationException {
         return getConnectors(getConnectorClassNames());
     }
@@ -261,14 +227,6 @@ public class ConnectorFactory {
     public static String[] getCloudServiceNames() throws ConfigurationException, ValidationException {
         List<String> names = getCloudServiceNamesList();
         return names.toArray(new String[names.size()]);
-    }
-
-    public static void dontUseServiceCatalogue() {
-        serviceCatalogue = false;
-    }
-
-    public static void useServiceCatalogue() {
-        serviceCatalogue = true;
     }
 
     public static String cloudNameFromInstanceName(String connInstName) {
