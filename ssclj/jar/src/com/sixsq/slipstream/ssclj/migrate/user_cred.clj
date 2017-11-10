@@ -187,5 +187,4 @@
                                    :username (environ/env :dbmigration-user) ;;export DBMIGRATION_USER="super"
 
                                    :password (environ/env :dbmigration-password)})]
-    (doall (map (partial add-credentials client) (map #(first (keys %)) mappings-exoscale ;mappings
-                                                      )))))
+    (doall (map (partial add-credentials client) (map #(first (keys %)) mappings)))))
