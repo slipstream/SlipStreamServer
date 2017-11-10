@@ -162,6 +162,7 @@
 
 (deftest template-validation
   ;; invalid scenario
+
   (are [tpl ks] (not (t/valid-template? tpl ks))
                 nil nil
                 nil :k
@@ -179,7 +180,7 @@
                 {:credentialTemplate {:href      "credential-template/store-cloud-cred-nuvlabox",
                                       :key       "",
                                       :secret    "",
-                                      :connector "connector/nuvlabox-carl-cori"}} t/keys-cred-nuvlabox
+                                      :connector "connector/nuvlabox-carl-cori"}} [:href]
                 {:credentialTemplate {:key "key" :tenant-name ""}} [:tenant-name])
 
   ;;valid scenario
@@ -204,3 +205,13 @@
                                        (count t/mappings-opennebula)
                                        (count t/mappings-exoscale)
                                        (count t/mappings-ec2)]))))
+
+(deftest gen-mappings
+  (are [expected-fn c t] (expected-fn (t/gen-mappings c t))
+                         empty? nil nil
+                         empty? nil "template"
+                         empty? :wrong "template"
+                         (complement empty?) (ffirst t/cat-config) "template"
+                         )
+  (is (every? (complement empty?) (map #(t/gen-mappings % "template") (keys t/cat-config)))))
+
