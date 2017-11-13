@@ -23,6 +23,7 @@ package com.sixsq.slipstream.factory;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ParameterType;
+import com.sixsq.slipstream.ssclj.util.UserCloudParamsDesc;
 
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,11 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 
 	protected abstract void initReferenceParameters()
 			throws ValidationException;
+
+	protected void initReferenceParameters(String cloudName) throws ValidationException {
+		Map<String, Map> paramsDesc = UserCloudParamsDesc.getDesc(cloudName);
+		initReferenceParameters(paramsDesc);
+	}
 
 	protected void initReferenceParameters(Map<String, Map> paramsDesc)
 			throws ValidationException {

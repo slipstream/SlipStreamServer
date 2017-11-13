@@ -106,7 +106,7 @@
 
 (deftask dev-fixture-env
          []
-         (environ :env {:config-name      "config-hsqldb-mem.edn"
+         (environ :env {:config-name      "config-hsqldb.edn"
                         :auth-private-key (str (clojure.java.io/resource "auth_privkey.pem"))
                         :auth-public-key  (str (clojure.java.io/resource "auth_pubkey.pem"))}))
 
@@ -167,7 +167,8 @@
                             #"log4j.properties"}
                  :invert true)
            (aot :namespace #{'com.sixsq.slipstream.ssclj.app.main
-                             'com.sixsq.slipstream.ssclj.usage.summarizer})
+                             'com.sixsq.slipstream.ssclj.usage.summarizer
+                             'com.sixsq.slipstream.ssclj.util.usercloudparamsdesc})
            #_(uber :exclude #{#"(?i)^META-INF/INDEX.LIST$"
                               #"(?i)^META-INF/[^/]*\.(MF|SF|RSA|DSA)$"
                               #".*log4j\.properties"})
