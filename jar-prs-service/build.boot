@@ -1,4 +1,4 @@
-(def +version+ "3.40-SNAPSHOT")
+(def +version+ "3.41-SNAPSHOT")
 
 (set-env!
   :project 'com.sixsq.slipstream/SlipStreamPricingService-jar
