@@ -34,6 +34,7 @@
                     [org.clojure/data.xml]
                     [superstring]
 
+                    [com.sixsq.slipstream/cimi-resources-jar]
                     [com.sixsq.slipstream/SlipStreamCljResources-jar]
                     [com.sixsq.slipstream/SlipStreamPersistence]
 

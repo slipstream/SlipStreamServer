@@ -18,6 +18,9 @@
     <module>utils</module>
     <module>token</module>
     <module>auth</module>
+    <module>cimi</module>
+    <module>cimi-resources</module>
+    <module>cimi-tools</module>
     <module>jar-persistence</module>
     <module>jar-connector</module>
     <module>jar-async</module>
@@ -26,7 +29,6 @@
     <module>jar-pricing-lib</module>
     <module>jar-placement-lib</module>
     <module>jar-prs-service</module>
-    <module>ssclj</module>
     <module>db-binding</module>
     <module>db-serializers</module>
     <module>ring-container</module>
@@ -47,6 +49,10 @@
         <module>rpm</module>
         <module>rpm-prs</module>
         <module>ring-container-rpm</module>
+        <module>cimi-rpm</module>
+        <module>cimi-resources-rpm</module>
+        <module>cimi-tools-rpm</module>
+        <module>metering-rpm</module>
       </modules>
     </profile>
     <profile>
@@ -60,6 +66,10 @@
         <module>rpm</module>
         <module>rpm-prs</module>
         <module>ring-container-rpm</module>
+        <module>cimi-rpm</module>
+        <module>cimi-resources-rpm</module>
+        <module>cimi-tools-rpm</module>
+        <module>metering-rpm</module>
       </modules>
     </profile>
   </profiles>

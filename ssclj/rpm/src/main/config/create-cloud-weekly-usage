@@ -1,1 +1,0 @@
-40 2 * * 1 root (date --utc; /usr/sbin/create-cloud-weekly-usage.sh) >> /var/log/create-cloud-weekly-usage-cron.log 2>&1
