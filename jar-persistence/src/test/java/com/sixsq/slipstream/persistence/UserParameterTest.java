@@ -26,6 +26,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
+import com.sixsq.slipstream.ssclj.app.SscljTestServer;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
@@ -34,6 +37,16 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.util.SerializationUtil;
 
 public class UserParameterTest {
+
+	@BeforeClass
+	public static void setupClass() {
+		SscljTestServer.start();
+	}
+
+	@AfterClass
+	public static void teardownClass() {
+		SscljTestServer.stop();
+	}
 
 	@Test(expected = ValidationException.class)
 	public void nullParameterName() throws SlipStreamClientException {

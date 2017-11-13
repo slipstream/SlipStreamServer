@@ -276,9 +276,18 @@ public class SscljProxy {
     }
 
     public static String toJson(Object obj) {
+        class TestExclStrat implements ExclusionStrategy {
+            public boolean shouldSkipClass(Class<?> arg0) {
+                return false;
+            }
+            public boolean shouldSkipField(FieldAttributes f) {
+                return f.getName().equals("jpaVersion");
+            }
+        }
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(Date.class, new DateTypeAdapter())
                 .setPrettyPrinting()
+                .setExclusionStrategies(new TestExclStrat())
                 .create();
         return gson.toJson(obj);
     }

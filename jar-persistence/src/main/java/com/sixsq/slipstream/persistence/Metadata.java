@@ -30,7 +30,7 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.PersistenceException;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import com.google.gson.annotations.SerializedName;
+import com.google.gson.annotations.*;
 
 import org.simpleframework.xml.Attribute;
 
@@ -42,26 +42,26 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 public abstract class Metadata implements Serializable {
 
 	@SerializedName("created")
-	protected transient Date creation = new Date();
+	protected Date creation = new Date();
 
 	@Attribute(required = false)
 	@Temporal(TemporalType.TIMESTAMP)
 	@SerializedName("updated")
-	protected transient Date lastModified;
+	protected Date lastModified;
 
 	@SuppressWarnings("unused")
 	@Deprecated
-	private transient int jpaVersion;
+	private int jpaVersion;
 
 	@Attribute(required = false)
-	protected transient ModuleCategory category;
+	protected ModuleCategory category;
 
 	@Attribute(required = false)
 	@Column(length=1024)
-	protected transient String description;
+	protected String description;
 
 	@Attribute(required = false)
-	protected transient boolean deleted;
+	protected boolean deleted;
 
 	protected Metadata() {
 	}
@@ -162,7 +162,7 @@ public abstract class Metadata implements Serializable {
 		remove(getResourceUri(), this.getClass());
 	}
 
-	public static void remove(String resourceUri, Class<? extends Metadata> c) {
+	private static void remove(String resourceUri, Class<? extends Metadata> c) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		EntityTransaction transaction = em.getTransaction();
 		transaction.begin();

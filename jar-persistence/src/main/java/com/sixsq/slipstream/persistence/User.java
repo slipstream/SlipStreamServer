@@ -86,17 +86,6 @@ public class User extends Metadata {
 
 	private static transient final List<String> FORBIDDEN_ROLES = Arrays.asList("ADMIN", "USER", "ROLE", "ANON");
 
-	// FIXME: not used
-//	@Attribute(required = false)
-//	@Column(length = 1000)
-//	private String authnToken;
-//
-//	@Attribute(required = false)
-//	private String githubLogin;
-//
-//	@Attribute(required = false)
-//	private String cycloneLogin;
-
 	private String href;
 
 	@Attribute
@@ -625,6 +614,16 @@ public class User extends Metadata {
 		}
 	}
 
+	public static void remove(String resourceUri, Class<? extends Metadata> c) {
+		if (resourceUri != null && resourceUri.startsWith(RESOURCE_URL_PREFIX)) {
+			Response resp = SscljProxy.delete(SscljProxy.BASE_RESOURCE + resourceUri, USERNAME_ROLE, false);
+			if (resp.getStatus().getCode() >= 1000) {
+				throw new SlipStreamDatabaseException("Failed to connect " +
+						"to backend with: " + resp.getStatus().toString());
+			}
+		}
+	}
+
 	public static void removeNamedUser(String name) {
 		SscljProxy.delete(SscljProxy.BASE_RESOURCE + User.constructResourceUri(name),
 				USERNAME_ROLE, true);
@@ -742,8 +741,8 @@ public class User extends Metadata {
 	}
 
 	private static class UserTemplate {
-		private User userTemplate;
-		private UserTemplate(User user) {
+		public User userTemplate;
+		public UserTemplate(User user) {
 			userTemplate = user;
 			userTemplate.href = "user-template/auto";
 		}
