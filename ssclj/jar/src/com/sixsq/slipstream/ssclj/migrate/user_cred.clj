@@ -14,6 +14,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.util.config :as uc]
     [sixsq.slipstream.client.api.authn :as authn]
+    [clojure.string :as str]
     [clojure.edn :as edn])
   (:gen-class))
 
@@ -135,13 +136,13 @@
                                             :domain-name domain}
                        :name               category}
 
-        add-acl-to-template (fn [t u] (assoc-in t [:credentialTemplate :acl] {:owner {:principal u
+        add-acl-to-template (fn [t u] (assoc-in t [:credentialTemplate :acl] {:owner {:principal (str/replace u #"^user/" "")
                                                                                       :type      "USER"}
                                                                               :rules [{:type      "ROLE",
                                                                                        :principal "ADMIN",
                                                                                        :right     "ALL"}
                                                                                       {:type      "USER",
-                                                                                       :principal u,
+                                                                                       :principal (str/replace u #"^user/" ""),
                                                                                        :right     "MODIFY"}
                                                                                       ]}))
         template-keys (:ks (mapped category))
