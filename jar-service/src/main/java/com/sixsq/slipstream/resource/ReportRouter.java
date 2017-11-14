@@ -27,7 +27,6 @@ import org.restlet.routing.Router;
 import org.restlet.security.Authenticator;
 import org.restlet.security.Authorizer;
 
-import com.sixsq.slipstream.authn.BasicAuthenticator;
 import com.sixsq.slipstream.authn.CookieAuthenticator;
 import com.sixsq.slipstream.authz.ReportsAuthorizer;
 import com.sixsq.slipstream.authz.SuperEnroler;
@@ -44,13 +43,10 @@ public class ReportRouter extends Router {
 		String reportsLocation = Configuration.getInstance().getProperty("slipstream.reports.location");
 
 		Authorizer authorizer = new ReportsAuthorizer();
-		Authenticator basicAuthenticator = new BasicAuthenticator(getContext());
-		basicAuthenticator.setEnroler(new SuperEnroler(application));
 		Authenticator authenticator = new CookieAuthenticator(getContext());
-		authenticator.setOptional(true);
-		authenticator.setNext(basicAuthenticator);
+		authenticator.setOptional(false);
 		authenticator.setEnroler(new SuperEnroler(application));
-		basicAuthenticator.setNext(authorizer);
+		authenticator.setNext(authorizer);
 
 		ResultsDirectory directory = new ResultsDirectory(getContext(), "file://" + reportsLocation);
 		Filter decorator = new ReportDecorator();
