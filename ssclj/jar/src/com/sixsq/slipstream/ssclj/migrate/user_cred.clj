@@ -151,13 +151,13 @@
                                             :domain-name domain}
                        :name               category}
 
-        add-acl-to-template (fn [t u] (assoc-in t [:credentialTemplate :acl] {:owner {:principal u
+        add-acl-to-template (fn [t u] (assoc-in t [:credentialTemplate :acl] {:owner {:principal (second (when u (clojure.string/split u #"user/")))
                                                                                       :type      "USER"}
                                                                               :rules [{:type      "ROLE",
                                                                                        :principal "ADMIN",
                                                                                        :right     "ALL"}
                                                                                       {:type      "USER",
-                                                                                       :principal u,
+                                                                                       :principal (second (when u (clojure.string/split u #"user/"))),
                                                                                        :right     "MODIFY"}
                                                                                       ]}))
         template-keys (:ks (mapped category))
