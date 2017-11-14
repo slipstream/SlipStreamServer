@@ -2,13 +2,13 @@
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.virtual-machine]
-
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.auth.acl :as a]
     [ring.util.response :as r]
+    [clojure.string :as str]
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.ssclj.util.log :as logu]))
 
@@ -38,16 +38,12 @@
 ;; multimethod for ACLs
 ;;
 
-(defn create-acl
-  [id]
+(defn create-acl [id]
   {:owner {:principal "ADMIN"
            :type      "ROLE"}
    :rules [{:principal id
             :type      "USER"
             :right     "VIEW"}]})
-
-
-
 
 (def validate-fn (u/create-spec-validation-fn :cimi/virtual-machine))
 (defmethod crud/validate
@@ -55,29 +51,17 @@
   [resource]
   (validate-fn resource))
 
-
 (defmethod crud/add-acl resource-uri
   [{:keys [acl] :as resource} request]
   (if acl
     resource
     (let [user-id (:identity (a/current-authentication request))
-          run-owner (subs (-> request
-                              :body
-                              :deployment
-                              :user
-                              :href
-                              )
-                          (count "/user"))
-
-          ]
+          run-owner (some-> request
+                            (get-in [:body :deployment :user :href])
+                            (str/replace #"^user/" ""))]
       (if run-owner
         (assoc resource :acl (create-acl run-owner))
-        (assoc resource :acl (create-acl user-id))
-        )
-
-      )
-    )
-  )
+        (assoc resource :acl (create-acl user-id))))))
 
 ;;
 ;; CRUD operations
@@ -91,8 +75,6 @@
 (defmethod crud/edit resource-name
   [request]
   (edit-impl request))
-
-
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 (defmethod crud/retrieve resource-name
