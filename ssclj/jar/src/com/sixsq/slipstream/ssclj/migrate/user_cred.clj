@@ -18,7 +18,8 @@
     [clojure.edn :as edn])
   (:gen-class))
 
-(def ^:const cat-config (uc/read-config "com/sixsq/slipstream/migrate/credential-categories-config.edn"))
+(def ^:const cat-config (uc/read-config (or (environ/env :dbmigration-configfile)
+                                            "com/sixsq/slipstream/migrate/credential-categories-config.edn")))
 
 (defn gen-mappings
   [category t]
@@ -136,15 +137,15 @@
                                             :domain-name domain}
                        :name               category}
 
-        add-acl-to-template (fn [t u] (assoc-in t [:credentialTemplate :acl] {:owner {:principal (str/replace u #"^user/" "")
-                                                                                      :type      "USER"}
-                                                                              :rules [{:type      "ROLE",
-                                                                                       :principal "ADMIN",
-                                                                                       :right     "ALL"}
-                                                                                      {:type      "USER",
-                                                                                       :principal (str/replace u #"^user/" ""),
-                                                                                       :right     "MODIFY"}
-                                                                                      ]}))
+        add-acl-to-template (fn [t u] (when (and t u) (assoc-in t [:credentialTemplate :acl] {:owner {:principal (str/replace u #"^user/" "")
+                                                                                                      :type      "USER"}
+                                                                                              :rules [{:type      "ROLE",
+                                                                                                       :principal "ADMIN",
+                                                                                                       :right     "ALL"}
+                                                                                                      {:type      "USER",
+                                                                                                       :principal (str/replace u #"^user/" ""),
+                                                                                                       :right     "MODIFY"}
+                                                                                                      ]})))
         template-keys (:ks (mapped category))
         template-instance (update-in base-template [:credentialTemplate] select-keys template-keys)]
     (when (valid-template? template-instance template-keys) (add-acl-to-template template-instance user))))
