@@ -1,6 +1,6 @@
 ;;
-;; To run this script:
-;; java -cp .../ssclj-XXX-SNAPSHOT-standalone.jar com.sixsq.slipstream.ssclj.migrate.user-cred
+;; Usage of this script is described here:
+;; http://ssdocs.sixsq.com/en/latest/release_notes/candidate_releases.html#v3-39-candidate-4-november-2017
 ;;
 (ns com.sixsq.slipstream.ssclj.migrate.user-cred
   (:require
@@ -8,7 +8,6 @@
     [korma.db :as kdb]
     [clojure.java.io :as io]
     [environ.core :as environ]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [sixsq.slipstream.client.api.cimi :as cimi]
     [sixsq.slipstream.client.sync :as sync]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
@@ -137,15 +136,17 @@
                                             :domain-name domain}
                        :name               category}
 
-        add-acl-to-template (fn [t u] (when (and t u) (assoc-in t [:credentialTemplate :acl] {:owner {:principal (str/replace u #"^user/" "")
-                                                                                                      :type      "USER"}
-                                                                                              :rules [{:type      "ROLE",
-                                                                                                       :principal "ADMIN",
-                                                                                                       :right     "ALL"}
-                                                                                                      {:type      "USER",
-                                                                                                       :principal (str/replace u #"^user/" ""),
-                                                                                                       :right     "MODIFY"}
-                                                                                                      ]})))
+        add-acl-to-template (fn [t u] (when (and t u)
+                                        (assoc-in t [:credentialTemplate :acl]
+                                                  {:owner {:principal (str/replace u #"^user/" "")
+                                                           :type      "USER"}
+                                                   :rules [{:type      "ROLE",
+                                                            :principal "ADMIN",
+                                                            :right     "ALL"}
+                                                           {:type      "USER",
+                                                            :principal (str/replace u #"^user/" ""),
+                                                            :right     "MODIFY"}
+                                                           ]})))
         template-keys (:ks (mapped category))
         template-instance (update-in base-template [:credentialTemplate] select-keys template-keys)]
     (when (valid-template? template-instance template-keys) (add-acl-to-template template-instance user))))
@@ -162,15 +163,15 @@
     (doall (map (partial cimi/add client "credentials") records))))
 
 (defn -main
-  " Main function to migrate client data resources from DB to CIMI (Elastic Search) "
+  " Main function to migrate users credentials from HSQLDB to CIMI"
   []
   (let [init (do-korma-init)
-        ;categories (keys mappings)
         cep-endpoint (or (environ/env :dbmigration-endpoint) "https://nuv.la/api/cloud-entry-point")
-        ;;e.g DBMIGRATION_OPTIONS={:insecure? true}
-        client (if (environ/env :dbmigration-options) (sync/instance cep-endpoint (read-string (environ/env :dbmigration-options))) (sync/instance cep-endpoint))
+        client (if (environ/env :dbmigration-options)
+                 (sync/instance cep-endpoint (read-string (environ/env :dbmigration-options)))
+                 (sync/instance cep-endpoint))
         login (authn/login client {:href     "session-template/internal"
-                                   :username (environ/env :dbmigration-user) ;;export DBMIGRATION_USER="super"
+                                   :username (environ/env :dbmigration-user)
 
                                    :password (environ/env :dbmigration-password)})]
     (doall (map (partial add-credentials client) (map #(first (keys %)) mappings)))))
