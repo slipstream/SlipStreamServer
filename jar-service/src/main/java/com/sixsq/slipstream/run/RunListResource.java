@@ -34,7 +34,10 @@ import javax.persistence.OptimisticLockException;
 import javax.persistence.RollbackException;
 
 import com.sixsq.slipstream.dashboard.DashboardResource;
+import com.sixsq.slipstream.exceptions.NotFoundException;
 import org.hibernate.StaleObjectStateException;
+import org.json.JSONObject;
+import org.json.XML;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
@@ -100,12 +103,24 @@ public class RunListResource extends BaseResource {
 		return new StringRepresentation(result);
 	}
 
-	@Get("xml")
-	public Representation toXml() {
+	private String toXmlString() {
 
 		RunViewList runViewList = getRunViewList();
-		String result = SerializationUtil.toXmlString(runViewList);
-		return new StringRepresentation(result, MediaType.APPLICATION_XML);
+		return SerializationUtil.toXmlString(runViewList);
+	}
+
+	@Get("xml")
+	public Representation toXml() {
+		return new StringRepresentation(toXmlString(), MediaType.APPLICATION_XML);
+	}
+
+	@Get("json")
+	public Representation toJson() throws NotFoundException,
+			ValidationException, ConfigurationException {
+
+		String xml = toXmlString();
+		JSONObject obj = XML.toJSONObject(xml);
+		return new StringRepresentation(obj.toString(), MediaType.APPLICATION_JSON);
 	}
 
 	@Get("html")
