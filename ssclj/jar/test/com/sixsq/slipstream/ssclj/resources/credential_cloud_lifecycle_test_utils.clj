@@ -1,5 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential-cloud-lifecycle-test-utils
-    (:require
+  (:require
     [clojure.test :refer [deftest is are use-fixtures]]
     [peridot.core :refer :all]
     [clojure.data.json :as json]
@@ -152,7 +152,7 @@
             (ltu/is-operation-absent "edit")))
 
       ;; ensure credential contains correct information
-      (let [{:keys [name description properties
+      (let [{:keys [name description properties quota
                     key secret tenant-name domain-name]} (-> session-user
                                                              (request abs-uri)
                                                              (ltu/body->edn)
@@ -162,8 +162,9 @@
         (is (= name name-attr))
         (is (= description description-attr))
         (is (= properties properties-attr))
-        (is (= "key" key))
-        (is (= "secret" secret))
+        (is (= (get-in create-import-href [:credentialTemplate :key]) key))
+        (is (= (get-in create-import-href [:credentialTemplate :secret]) secret))
+        (is (= (get-in create-import-href [:credentialTemplate :quota]) quota))
 
         ;; delete the credential
         (-> session-user
