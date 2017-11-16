@@ -1,6 +1,6 @@
 ;;
-;; To run this script:
-;; java -cp .../ssclj-XXX-SNAPSHOT-standalone.jar com.sixsq.slipstream.ssclj.migrate.user-cred
+;; Usage of this script is described here:
+;; http://ssdocs.sixsq.com/en/latest/release_notes/candidate_releases.html#v3-39-candidate-4-november-2017
 ;;
 (ns com.sixsq.slipstream.ssclj.migrate.user-cred
   (:require
@@ -8,52 +8,38 @@
     [korma.db :as kdb]
     [clojure.java.io :as io]
     [environ.core :as environ]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [sixsq.slipstream.client.api.cimi :as cimi]
     [sixsq.slipstream.client.sync :as sync]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.util.config :as uc]
     [sixsq.slipstream.client.api.authn :as authn]
+    [clojure.string :as str]
     [clojure.edn :as edn])
   (:gen-class))
 
-(def ^:const keys-cred-full [:href :key :secret :connector :domain-name :tenant-name])
-(def ^:const keys-cred-nuvlabox (vec (remove #{:domain-name :tenant-name} keys-cred-full)))
-(def ^:const keys-cred-stratuslab (vec (remove #{:domain-name :tenant-name} keys-cred-full)))
-(def ^:const keys-cred-otc keys-cred-full)
-(def ^:const keys-cred-openstack keys-cred-full)
-(def ^:const keys-cred-opennebula (vec (remove #{:domain-name :tenant-name} keys-cred-full)))
-(def ^:const keys-cred-exoscale (vec (remove #{:tenant-name} keys-cred-full)))
-(def ^:const keys-cred-ec2 (vec (remove #{:domain-name :tenant-name} keys-cred-full)))
+(def ^:const cat-config (uc/read-config (or (environ/env :dbmigration-configfile)
+                                            "com/sixsq/slipstream/migrate/credential-categories-config.edn")))
+
+(defn gen-mappings
+  [category t]
+  (set (map #(hash-map %
+                       {:ks            (-> cat-config
+                                           category
+                                           :template-keys)
+                        :template-name t})
+            (when category
+              (-> cat-config
+                  category
+                  :connectors)))))
 
 
-(def ^:const cat-nuvlabox #{"nuvlabox-arthur-harden", "nuvlabox-bertil-ohlin",
-                            "nuvlabox-carl-cori", "nuvlabox-cecil-powell", "nuvlabox-christiane-n-volhard",
-                            "nuvlabox-felix-bloch", "nuvlabox-henry-dunant", "nuvlabox-joseph-e-murray",
-                            "nuvlabox-joseph-e-stiglitz", "nuvlabox-joseph-erlanger", "nuvlabox-joseph-h-taylor-jr",
-                            "nuvlabox-joseph-l-goldstein", "nuvlabox-jules-bordet", "nuvlabox-max-born",
-                            "nuvlabox-scissor1", "nuvlabox-scissor2", "nuvlabox-stanley-cohen",
-                            "nuvlabox-yves-chauvin", "nuvlabox-louis-neel"})
-
-(def ^:const cat-stratuslabiter #{"atos-es1"})
-(def ^:const cat-otc #{"open-telekom-de1"})
-(def ^:const cat-openstack #{"advania-se1", "cyclone-de1", "cyclone-fr2", "cyclone-tb-it1", "ebi-embassy-uk1",
-                             "eo-cloudferro-pl1", "ifb-bird-stack", "ifb-bistro-iphc", "ifb-core-cloud", "ifb-core-pilot",
-                             "ifb-genouest-genostack", "ifb-prabi-girofle"})
-(def ^:const cat-opennebula #{"eo-cesnet-cz1", "scissor-fr1", "scissor-fr2", "scissor-fr3", "teidehpc-es-tfs1"})
-(def ^:const cat-exoscale #{"exoscale-ch-dk", "exoscale-ch-gva"})
-(def ^:const cat-ec2 #{"ec2-ap-northeast-1", "ec2-ap-southeast-1", "ec2-ap-southeast-2", "ec2-eu-central-1",
-                       "ec2-eu-west", "ec2-eu-west-2", "ec2-sa-east-1", "ec2-us-east-1", "ec2-us-west-1", "ec2-us-west-2"})
-
-
-
-(def ^:const mappings-nuvlabox (set (map #(hash-map % {:ks keys-cred-nuvlabox :template-name "store-cloud-cred-nuvlabox"}) cat-nuvlabox)))
-(def ^:const mappings-stratuslabiter (set (map #(hash-map % {:ks keys-cred-stratuslab :template-name "store-cloud-cred-stratuslabiter"}) cat-stratuslabiter)))
-(def ^:const mappings-otc (set (map #(hash-map % {:ks keys-cred-otc :template-name "store-cloud-cred-otc"}) cat-otc)))
-(def ^:const mappings-openstack (set (map #(hash-map % {:ks keys-cred-openstack :template-name "store-cloud-cred-openstack"}) cat-openstack)))
-(def ^:const mappings-opennebula (set (map #(hash-map % {:ks keys-cred-opennebula :template-name "store-cloud-cred-opennebula"}) cat-opennebula)))
-(def ^:const mappings-exoscale (set (map #(hash-map % {:ks keys-cred-exoscale :template-name "store-cloud-cred-exoscale"}) cat-exoscale)))
-(def ^:const mappings-ec2 (set (map #(hash-map % {:ks keys-cred-ec2 :template-name "store-cloud-cred-ec2"}) cat-ec2)))
-
+(def ^:const mappings-nuvlabox (gen-mappings :cat-nuvlabox "store-cloud-cred-nuvlabox"))
+(def ^:const mappings-stratuslabiter (gen-mappings :cat-stratuslabiter "store-cloud-cred-stratuslabiter"))
+(def ^:const mappings-otc (gen-mappings :cat-otc "store-cloud-cred-otc"))
+(def ^:const mappings-openstack (gen-mappings :cat-openstack "store-cloud-cred-openstack"))
+(def ^:const mappings-opennebula (gen-mappings :cat-opennebula "store-cloud-cred-opennebula"))
+(def ^:const mappings-exoscale (gen-mappings :cat-exoscale "store-cloud-cred-exoscale"))
+(def ^:const mappings-ec2 (gen-mappings :cat-ec2 "store-cloud-cred-ec2"))
 
 (def ^:const mappings
   (clojure.set/union mappings-nuvlabox
@@ -63,7 +49,6 @@
                      mappings-opennebula
                      mappings-exoscale
                      mappings-ec2))
-
 
 (defn mapped
   "Return characteristics of given category as defined in `mappings`"
@@ -151,15 +136,17 @@
                                             :domain-name domain}
                        :name               category}
 
-        add-acl-to-template (fn [t u] (assoc-in t [:credentialTemplate :acl] {:owner {:principal u
-                                                                                      :type      "USER"}
-                                                                              :rules [{:type      "ROLE",
-                                                                                       :principal "ADMIN",
-                                                                                       :right     "ALL"}
-                                                                                      {:type      "USER",
-                                                                                       :principal u,
-                                                                                       :right     "MODIFY"}
-                                                                                      ]}))
+        add-acl-to-template (fn [t u] (when (and t u)
+                                        (assoc-in t [:credentialTemplate :acl]
+                                                  {:owner {:principal (str/replace u #"^user/" "")
+                                                           :type      "USER"}
+                                                   :rules [{:type      "ROLE",
+                                                            :principal "ADMIN",
+                                                            :right     "ALL"}
+                                                           {:type      "USER",
+                                                            :principal (str/replace u #"^user/" ""),
+                                                            :right     "MODIFY"}
+                                                           ]})))
         template-keys (:ks (mapped category))
         template-instance (update-in base-template [:credentialTemplate] select-keys template-keys)]
     (when (valid-template? template-instance template-keys) (add-acl-to-template template-instance user))))
@@ -176,15 +163,15 @@
     (doall (map (partial cimi/add client "credentials") records))))
 
 (defn -main
-  " Main function to migrate client data resources from DB to CIMI (Elastic Search) "
+  " Main function to migrate users credentials from HSQLDB to CIMI"
   []
   (let [init (do-korma-init)
-        ;categories (keys mappings)
         cep-endpoint (or (environ/env :dbmigration-endpoint) "https://nuv.la/api/cloud-entry-point")
-        ;;e.g DBMIGRATION_OPTIONS={:insecure? true}
-        client (if (environ/env :dbmigration-options) (sync/instance cep-endpoint (read-string (environ/env :dbmigration-options))) (sync/instance cep-endpoint))
+        client (if (environ/env :dbmigration-options)
+                 (sync/instance cep-endpoint (read-string (environ/env :dbmigration-options)))
+                 (sync/instance cep-endpoint))
         login (authn/login client {:href     "session-template/internal"
-                                   :username (environ/env :dbmigration-user) ;;export DBMIGRATION_USER="super"
+                                   :username (environ/env :dbmigration-user)
 
                                    :password (environ/env :dbmigration-password)})]
     (doall (map (partial add-credentials client) (map #(first (keys %)) mappings)))))

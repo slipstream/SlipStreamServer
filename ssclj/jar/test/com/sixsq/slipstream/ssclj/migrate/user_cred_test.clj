@@ -6,104 +6,104 @@
 (def user1 "user/user1")
 (def user2 "user/user2")
 
-(def coll {user1
-           [{:ID                    103413,
-             :VALUE                 "EXO0000000001",
-             :MANDATORY             true,
-             :CATEGORY              "exoscale-ch-gva",
-             :ORDER_                10,
-             :INSTRUCTIONS          "On the Exoscale web interface you can find this information on <code>Account > Profile > API Keys</code>",
-             :DESCRIPTION           "API Key",
-             :CONTAINER_RESOURCEURI user1,
-             :TYPE                  6,
-             :READONLY              false,
-             :ENUMVALUES            nil,
-             :NAME                  "exoscale-ch-gva.username"}
-            {:ID                    103419,
-             :VALUE                 "20",
-             :MANDATORY             true,
-             :CATEGORY              "exoscale-ch-gva",
-             :ORDER_                0,
-             :INSTRUCTIONS          nil,
-             :DESCRIPTION           "Number of VMs the user can start for this cloud",
-             :CONTAINER_RESOURCEURI user1,
-             :TYPE                  0,
-             :READONLY              true,
-             :ENUMVALUES            nil,
-             :NAME                  "exoscale-ch-gva.quota.vm"}
-            {:ID                    103458,
-             :VALUE                 "secret",
-             :MANDATORY             true,
-             :CATEGORY              "exoscale-ch-gva",
-             :ORDER_                20,
-             :INSTRUCTIONS          "On the Exoscale web interface you can find this information on <code>Account > Profile > API Keys</code>",
-             :DESCRIPTION           "Secret Key",
-             :CONTAINER_RESOURCEURI user1,
-             :TYPE                  2,
-             :READONLY              false,
-             :ENUMVALUES            nil,
-             :NAME                  "exoscale-ch-gva.password"}
-            {:ID                    103487,
-             :VALUE                 "",
-             :MANDATORY             true,
-             :CATEGORY              "exoscale-ch-gva",
-             :ORDER_                10,
-             :INSTRUCTIONS          "If you use the DNS service of Exoscale you can set here the name of one of your domains and SlipStream will create a subdomain for each of your instances",
-             :DESCRIPTION           "Name of your domain managed by Exoscale",
-             :CONTAINER_RESOURCEURI user1,
-             :TYPE                  0,
-             :READONLY              false,
-             :ENUMVALUES            nil,
-             :NAME                  "exoscale-ch-gva.domain.name"}],
-           user2
-           [{:ID                    76652,
-             :VALUE                 "EXO0000000002",
-             :MANDATORY             true,
-             :CATEGORY              "exoscale-ch-gva",
-             :ORDER_                10,
-             :INSTRUCTIONS          "On the Exoscale web interface you can find this information on <code>Account > Profile > API Keys</code>",
-             :DESCRIPTION           "API Key",
-             :CONTAINER_RESOURCEURI user2,
-             :TYPE                  6,
-             :READONLY              false,
-             :ENUMVALUES            nil,
-             :NAME                  "exoscale-ch-gva.username"}
-            {:ID                    76657,
-             :VALUE                 "20",
-             :MANDATORY             true,
-             :CATEGORY              "exoscale-ch-gva",
-             :ORDER_                0,
-             :INSTRUCTIONS          nil,
-             :DESCRIPTION           "Number of VMs the user can start for this cloud",
-             :CONTAINER_RESOURCEURI user2,
-             :TYPE                  0,
-             :READONLY              true,
-             :ENUMVALUES            nil,
-             :NAME                  "exoscale-ch-gva.quota.vm"}
-            {:ID                    73487,
-             :VALUE                 "",
-             :MANDATORY             true,
-             :CATEGORY              "exoscale-ch-gva",
-             :ORDER_                10,
-             :INSTRUCTIONS          "If you use the DNS service of Exoscale you can set here the name of one of your domains and SlipStream will create a subdomain for each of your instances",
-             :DESCRIPTION           "Name of your domain managed by Exoscale",
-             :CONTAINER_RESOURCEURI user2,
-             :TYPE                  0,
-             :READONLY              false,
-             :ENUMVALUES            nil,
-             :NAME                  "exoscale-ch-gva.domain.name"}
-            {:ID                    76693,
-             :VALUE                 "secret",
-             :MANDATORY             true,
-             :CATEGORY              "exoscale-ch-gva",
-             :ORDER_                20,
-             :INSTRUCTIONS          "On the Exoscale web interface you can find this information on <code>Account > Profile > API Keys</code>",
-             :DESCRIPTION           "Secret Key",
-             :CONTAINER_RESOURCEURI user2,
-             :TYPE                  2,
-             :READONLY              false,
-             :ENUMVALUES            nil,
-             :NAME                  "exoscale-ch-gva.password"}]})
+(def collect {user1
+              [{:ID                    103413,
+                :VALUE                 "EXO0000000001",
+                :MANDATORY             true,
+                :CATEGORY              "exoscale-ch-gva",
+                :ORDER_                10,
+                :INSTRUCTIONS          "On the Exoscale web interface you can find this information on <code>Account > Profile > API Keys</code>",
+                :DESCRIPTION           "API Key",
+                :CONTAINER_RESOURCEURI user1,
+                :TYPE                  6,
+                :READONLY              false,
+                :ENUMVALUES            nil,
+                :NAME                  "exoscale-ch-gva.username"}
+               {:ID                    103419,
+                :VALUE                 "20",
+                :MANDATORY             true,
+                :CATEGORY              "exoscale-ch-gva",
+                :ORDER_                0,
+                :INSTRUCTIONS          nil,
+                :DESCRIPTION           "Number of VMs the user can start for this cloud",
+                :CONTAINER_RESOURCEURI user1,
+                :TYPE                  0,
+                :READONLY              true,
+                :ENUMVALUES            nil,
+                :NAME                  "exoscale-ch-gva.quota.vm"}
+               {:ID                    103458,
+                :VALUE                 "secret",
+                :MANDATORY             true,
+                :CATEGORY              "exoscale-ch-gva",
+                :ORDER_                20,
+                :INSTRUCTIONS          "On the Exoscale web interface you can find this information on <code>Account > Profile > API Keys</code>",
+                :DESCRIPTION           "Secret Key",
+                :CONTAINER_RESOURCEURI user1,
+                :TYPE                  2,
+                :READONLY              false,
+                :ENUMVALUES            nil,
+                :NAME                  "exoscale-ch-gva.password"}
+               {:ID                    103487,
+                :VALUE                 "",
+                :MANDATORY             true,
+                :CATEGORY              "exoscale-ch-gva",
+                :ORDER_                10,
+                :INSTRUCTIONS          "If you use the DNS service of Exoscale you can set here the name of one of your domains and SlipStream will create a subdomain for each of your instances",
+                :DESCRIPTION           "Name of your domain managed by Exoscale",
+                :CONTAINER_RESOURCEURI user1,
+                :TYPE                  0,
+                :READONLY              false,
+                :ENUMVALUES            nil,
+                :NAME                  "exoscale-ch-gva.domain.name"}],
+              user2
+              [{:ID                    76652,
+                :VALUE                 "EXO0000000002",
+                :MANDATORY             true,
+                :CATEGORY              "exoscale-ch-gva",
+                :ORDER_                10,
+                :INSTRUCTIONS          "On the Exoscale web interface you can find this information on <code>Account > Profile > API Keys</code>",
+                :DESCRIPTION           "API Key",
+                :CONTAINER_RESOURCEURI user2,
+                :TYPE                  6,
+                :READONLY              false,
+                :ENUMVALUES            nil,
+                :NAME                  "exoscale-ch-gva.username"}
+               {:ID                    76657,
+                :VALUE                 "20",
+                :MANDATORY             true,
+                :CATEGORY              "exoscale-ch-gva",
+                :ORDER_                0,
+                :INSTRUCTIONS          nil,
+                :DESCRIPTION           "Number of VMs the user can start for this cloud",
+                :CONTAINER_RESOURCEURI user2,
+                :TYPE                  0,
+                :READONLY              true,
+                :ENUMVALUES            nil,
+                :NAME                  "exoscale-ch-gva.quota.vm"}
+               {:ID                    73487,
+                :VALUE                 "",
+                :MANDATORY             true,
+                :CATEGORY              "exoscale-ch-gva",
+                :ORDER_                10,
+                :INSTRUCTIONS          "If you use the DNS service of Exoscale you can set here the name of one of your domains and SlipStream will create a subdomain for each of your instances",
+                :DESCRIPTION           "Name of your domain managed by Exoscale",
+                :CONTAINER_RESOURCEURI user2,
+                :TYPE                  0,
+                :READONLY              false,
+                :ENUMVALUES            nil,
+                :NAME                  "exoscale-ch-gva.domain.name"}
+               {:ID                    76693,
+                :VALUE                 "secret",
+                :MANDATORY             true,
+                :CATEGORY              "exoscale-ch-gva",
+                :ORDER_                20,
+                :INSTRUCTIONS          "On the Exoscale web interface you can find this information on <code>Account > Profile > API Keys</code>",
+                :DESCRIPTION           "Secret Key",
+                :CONTAINER_RESOURCEURI user2,
+                :TYPE                  2,
+                :READONLY              false,
+                :ENUMVALUES            nil,
+                :NAME                  "exoscale-ch-gva.password"}]})
 
 
 (deftest extracting-data
@@ -115,12 +115,12 @@
                                         :secret      "secret"
                                         :connector   "connector/exoscale-ch-gva"
                                         :domain-name ""
-                                        :acl         {:owner {:principal "user/user1"
+                                        :acl         {:owner {:principal "user1"
                                                               :type      "USER"}
                                                       :rules [{:principal "ADMIN"
                                                                :right     "ALL"
                                                                :type      "ROLE"}
-                                                              {:principal "user/user1"
+                                                              {:principal "user1"
                                                                :right     "MODIFY"
                                                                :type      "USER"}]}
                                         }
@@ -131,27 +131,27 @@
                                         :secret      "secret"
                                         :connector   "connector/exoscale-ch-gva"
                                         :domain-name ""
-                                        :acl         {:owner {:principal "user/user2"
+                                        :acl         {:owner {:principal "user2"
                                                               :type      "USER"}
                                                       :rules [{:principal "ADMIN"
                                                                :right     "ALL"
                                                                :type      "ROLE"}
-                                                              {:principal "user/user2"
+                                                              {:principal "user2"
                                                                :right     "MODIFY"
                                                                :type      "USER"}]}}
                    :name               "exoscale-ch-gva"}]
 
     (are [expected category coll user] (= expected (t/extract-data category coll user))
                                        nil nil nil nil
-                                       nil nil coll nil
+                                       nil nil collect nil
                                        nil nil nil user1
-                                       nil category-exo-gva coll nil
-                                       nil nil coll user1
+                                       nil category-exo-gva collect nil
+                                       nil nil collect user1
                                        nil category-exo-gva nil user1
-                                       expected1 category-exo-gva coll user1
-                                       expected2 category-exo-gva coll user2
-                                       nil wrong-category coll user1
-                                       nil category-otc coll user1)))
+                                       expected1 category-exo-gva collect user1
+                                       expected2 category-exo-gva collect user2
+                                       nil wrong-category collect user1
+                                       nil category-otc collect user1)))
 
 (deftest mapped-connectors
   (are [expect-fn arg] (expect-fn (t/mapped arg))
@@ -162,6 +162,7 @@
 
 (deftest template-validation
   ;; invalid scenario
+
   (are [tpl ks] (not (t/valid-template? tpl ks))
                 nil nil
                 nil :k
@@ -179,7 +180,7 @@
                 {:credentialTemplate {:href      "credential-template/store-cloud-cred-nuvlabox",
                                       :key       "",
                                       :secret    "",
-                                      :connector "connector/nuvlabox-carl-cori"}} t/keys-cred-nuvlabox
+                                      :connector "connector/nuvlabox-carl-cori"}} [:href]
                 {:credentialTemplate {:key "key" :tenant-name ""}} [:tenant-name])
 
   ;;valid scenario
@@ -204,3 +205,13 @@
                                        (count t/mappings-opennebula)
                                        (count t/mappings-exoscale)
                                        (count t/mappings-ec2)]))))
+
+(deftest gen-mappings
+  (are [expected-fn c t] (expected-fn (t/gen-mappings c t))
+                         empty? nil nil
+                         empty? nil "template"
+                         empty? :wrong "template"
+                         (complement empty?) (ffirst t/cat-config) "template"
+                         )
+  (is (every? (complement empty?) (map #(t/gen-mappings % "template") (keys t/cat-config)))))
+
