@@ -22,6 +22,8 @@ package com.sixsq.slipstream.module;
 
 import java.util.ArrayList;
 
+import org.json.JSONObject;
+import org.json.XML;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
@@ -54,14 +56,22 @@ public class ModuleListResource extends BaseResource {
 		}
 	}
 
-	@Get("xml")
-	public Representation toXml() {
-
+	private String toXmlString() {
 		ModuleViewList moduleViewList = retrieveFilteredModuleViewList();
 
-		String result = SerializationUtil.toXmlString(moduleViewList);
+		return SerializationUtil.toXmlString(moduleViewList);
+	}
 
-		return new StringRepresentation(result, MediaType.APPLICATION_XML);
+	@Get("xml")
+	public Representation toXml() {
+		return new StringRepresentation(toXmlString(), MediaType.APPLICATION_XML);
+	}
+
+	@Get("json")
+	public Representation toJson() {
+		String xml = toXmlString();
+		JSONObject obj = XML.toJSONObject(xml);
+		return new StringRepresentation(obj.toString(), MediaType.APPLICATION_JSON);
 	}
 
 	@Get("html")
