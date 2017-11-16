@@ -142,13 +142,6 @@
    :activeSince epoch
    :lastExecute epoch})
 
-;; FIXME:
-(defn dump [d t]
-  (println "==>>" t) (clojure.pprint/pprint d) (println t "<<==") d)
-(defn dump-log
-  [d t]
-  (log/info "==>>" t) (log/info d) (log/info t "<<==") d)
-
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 ;; requires a UserTemplate to create new User
 (defmethod crud/add resource-name

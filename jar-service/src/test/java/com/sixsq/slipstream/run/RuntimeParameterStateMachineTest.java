@@ -52,14 +52,11 @@ public class RuntimeParameterStateMachineTest extends
 
 		createUser();
 		CommonTestUtil.addSshKeys(user);
-
-		SscljProxy.muteForTests();
 	}
 
 	@After
 	public void tearDown() {
 		removeDeployments();
-		SscljProxy.unmuteForTests();
 	}
 
 	@Test

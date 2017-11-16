@@ -227,3 +227,7 @@
           (try
             (uzk/close-client!)
             (catch Exception _)))))))                       ; ignore exceptions when closing client
+
+(defn refresh-es-indices
+  []
+  (esu/refresh-all-indices esb/*client*))

@@ -1,6 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.resources.configuration
   (:require
-    [com.sixsq.slipstream.ssclj.resources.configuration-template :as tpl]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]

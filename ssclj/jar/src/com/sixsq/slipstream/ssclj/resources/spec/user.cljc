@@ -1,10 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.user
   (:require
     [clojure.spec.alpha :as s]
-    [clojure.spec.gen.alpha :as gen]
-    [clojure.string :as str]
     [com.sixsq.slipstream.ssclj.util.spec :as su]
-    ;[com.sixsq.slipstream.ssclj.resources.spec.user-template]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]))
 
 (s/def :cimi.user/username :cimi.core/nonblank-string)

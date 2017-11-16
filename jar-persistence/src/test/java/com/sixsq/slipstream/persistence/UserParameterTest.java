@@ -72,9 +72,6 @@ public class UserParameterTest {
 	public void parametersPersisted() throws ValidationException {
 		User user = new User("parametersPersisted");
 
-		UserParameter p = new UserParameter("toto");
-		user.setParameter(p);
-
 		user.store();
 
 		user = User.loadByName(user.getName());

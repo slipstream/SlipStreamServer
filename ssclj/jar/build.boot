@@ -168,7 +168,7 @@
                  :invert true)
            (aot :namespace #{'com.sixsq.slipstream.ssclj.app.main
                              'com.sixsq.slipstream.ssclj.usage.summarizer
-                             'com.sixsq.slipstream.ssclj.util.usercloudparamsdesc})
+                             'com.sixsq.slipstream.ssclj.util.userparamsdesc})
            #_(uber :exclude #{#"(?i)^META-INF/INDEX.LIST$"
                               #"(?i)^META-INF/[^/]*\.(MF|SF|RSA|DSA)$"
                               #".*log4j\.properties"})

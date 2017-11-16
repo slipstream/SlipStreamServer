@@ -23,7 +23,7 @@ package com.sixsq.slipstream.util;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.UserCloudCredentialsTest;
+import com.sixsq.slipstream.persistence.UserTest;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -50,10 +50,10 @@ public class XmlUtilTest extends ResourceTestBase {
 
 		Document document = createNewDocument();
 
-		User user1 = UserCloudCredentialsTest.createUser("test1");
+		User user1 = UserTest.createUser("test1");
 		user1.setSuper(true);
 
-		User user2 = UserCloudCredentialsTest.createUser("test2");
+		User user2 = UserTest.createUser("test2");
 		user2.setSuper(false);
 
 		XmlUtil.addUser(document, user1);

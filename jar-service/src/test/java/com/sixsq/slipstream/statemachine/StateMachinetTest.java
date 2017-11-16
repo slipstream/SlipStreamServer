@@ -34,6 +34,7 @@ import java.util.Set;
 
 import javax.persistence.EntityManager;
 
+import com.sixsq.slipstream.ssclj.app.SscljTestServer;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -78,7 +79,8 @@ public class StateMachinetTest {
 			ValidationException {
 
 		Event.muteForTests();
-		CljElasticsearchHelper.createAndInitTestDb();
+		SscljTestServer.start();
+		CljElasticsearchHelper.initTestDb();
 
 		user = CommonTestUtil.createTestUser();
 
@@ -91,7 +93,7 @@ public class StateMachinetTest {
 		removeRuns();
 		List<Run> runs = Run.listAll();
 		assertEquals(0, runs.size());
-		CljElasticsearchHelper.stopAndUnbindTestDb();
+		SscljTestServer.stop();
 	}
 
 	private static void removeRuns() throws ValidationException {

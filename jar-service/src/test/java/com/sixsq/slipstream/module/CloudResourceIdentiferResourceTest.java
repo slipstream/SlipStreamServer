@@ -26,7 +26,8 @@ import com.sixsq.slipstream.persistence.CloudImageIdentifier;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.UserCloudCredentialsTest;
+import com.sixsq.slipstream.persistence.UserTest;
+import com.sixsq.slipstream.ssclj.app.SscljTestServer;
 import com.sixsq.slipstream.util.ResourceTestBase;
 import org.junit.*;
 import org.restlet.Request;
@@ -41,11 +42,8 @@ import static org.junit.Assert.assertEquals;
 
 public class CloudResourceIdentiferResourceTest extends ResourceTestBase {
 
-	protected static User user = UserCloudCredentialsTest.createUser("test", UserCloudCredentialsTest.PASSWORD);
-
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		UserCloudCredentialsTest.storeUser(user);
 	}
 
 	@AfterClass

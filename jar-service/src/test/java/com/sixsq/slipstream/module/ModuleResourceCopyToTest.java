@@ -51,7 +51,7 @@ import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.NodeParameter;
 import com.sixsq.slipstream.persistence.ProjectModule;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.UserCloudCredentialsTest;
+import com.sixsq.slipstream.persistence.UserTest;
 import com.sixsq.slipstream.util.ResourceTestBase;
 
 public class ModuleResourceCopyToTest extends ResourceTestBase {
@@ -76,7 +76,7 @@ public class ModuleResourceCopyToTest extends ResourceTestBase {
 		anotherUser = new User("anotherUser");
 		anotherUser
 				.setDefaultCloudServiceName(LocalConnector.CLOUD_SERVICE_NAME);
-		UserCloudCredentialsTest.storeUser(anotherUser);
+		UserTest.storeUser(anotherUser);
 
 		user.setDefaultCloudServiceName(LocalConnector.CLOUD_SERVICE_NAME);
 		user = (User) user.store();

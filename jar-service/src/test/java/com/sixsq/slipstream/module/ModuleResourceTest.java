@@ -55,7 +55,7 @@ import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ModuleCategory;
 import com.sixsq.slipstream.persistence.ProjectModule;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.UserCloudCredentialsTest;
+import com.sixsq.slipstream.persistence.UserTest;
 import com.sixsq.slipstream.util.ResourceTestBase;
 import com.sixsq.slipstream.util.SerializationUtil;
 import com.sixsq.slipstream.util.XmlUtil;
@@ -72,13 +72,13 @@ public class ModuleResourceTest extends ResourceTestBase {
 
 		resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
 
-		user = UserCloudCredentialsTest.createUser("userModuleResourceTest", "password");
+		user = UserTest.createUser("userModuleResourceTest");
 		user.setDefaultCloudServiceName(cloudServiceName);
-		user = UserCloudCredentialsTest.storeUser(user);
+		user = UserTest.storeUser(user);
 
 		anotherUser = new User("anotherUser");
 		anotherUser.setDefaultCloudServiceName(cloudServiceName);
-		anotherUser = UserCloudCredentialsTest.storeUser(anotherUser);
+		anotherUser = UserTest.storeUser(anotherUser);
 	}
 
 	@AfterClass

@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sixsq.slipstream.es.CljElasticsearchHelper;
+import com.sixsq.slipstream.ssclj.app.SscljTestServer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.restlet.Request;
@@ -55,18 +56,20 @@ import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.run.RunTestBase;
-import com.sixsq.slipstream.persistence.UserCloudCredentialsTest;
+import com.sixsq.slipstream.persistence.UserTest;
 
 public class ResourceTestBase extends RunTestBase {
 
 	@BeforeClass
 	public static void createTestElasticsearchDb(){
-		CljElasticsearchHelper.createAndInitTestDb();
+		SscljTestServer.start();
+		CljElasticsearchHelper.initTestDb();
+		user = UserTest.createUser("test");
 	}
 
 	@AfterClass
 	public static void stopTestElasticsearchDb(){
-		CljElasticsearchHelper.stopAndUnbindTestDb();
+	    SscljTestServer.stop();
 	}
 
 	protected static final String TEST_REQUEST_NAME = "/test/request";
@@ -76,7 +79,7 @@ public class ResourceTestBase extends RunTestBase {
 	public static String cloudServiceName = new LocalConnector()
 			.getCloudServiceName();
 
-	protected static User user = UserCloudCredentialsTest.createUser("test", UserCloudCredentialsTest.PASSWORD);
+	protected static User user;
 
 	public static void resetAndLoadConnector(
 			Class<? extends Connector> connectorClass)

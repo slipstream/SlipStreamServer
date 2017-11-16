@@ -57,14 +57,12 @@ public class QuotaTest {
 	@BeforeClass
 	public static void setupClass() {
 		Event.muteForTests();
-		SscljProxy.muteForTests();
 		setupBackend();
 	}
 
 	@AfterClass
 	public static void teardownClass() {
 	    teardownBackend();
-		SscljProxy.unmuteForTests();
 	}
 
 	private Run testQuotaCreateRun(User user, String cloud)

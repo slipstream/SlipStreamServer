@@ -46,8 +46,6 @@
                                :resource:instanceType "Large"}})
 
 (deftest test-schema-check
-  #_(s/explain-data :cimi/virtual-machine vm-sample)
-
   (are [expect-fn arg] (expect-fn (s/valid? :cimi/virtual-machine arg))
                        true? vm-sample
                        false? (assoc vm-sample :bad-attr {})

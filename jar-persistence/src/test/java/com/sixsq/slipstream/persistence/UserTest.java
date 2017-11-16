@@ -20,20 +20,17 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
-import com.google.gson.annotations.SerializedName;
 import com.sixsq.slipstream.exceptions.*;
 import com.sixsq.slipstream.persistence.User.State;
 import com.sixsq.slipstream.ssclj.app.SscljTestServer;
 import com.sixsq.slipstream.user.UserView;
 import com.sixsq.slipstream.util.SerializationUtil;
-import com.sixsq.slipstream.util.SscljProxy;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.restlet.Response;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
@@ -140,7 +137,6 @@ public class UserTest {
 	}
 
 	@Test
-	@Ignore
 	public void withParameters() throws SlipStreamClientException {
 
 		String username = "dummy";
@@ -150,12 +146,13 @@ public class UserTest {
 
 		String resourceUrl = user.getResourceUri();
 
-		String parameterName = "name";
-		String description = "description";
-		String value = "value";
+		String category = ParameterCategory.General.toString();
+		String parameterName = UserParameter.constructKey(category,
+				UserParameter.KEY_KEEP_RUNNING);
+		String value = "always";
 
-		UserParameter parameter = new UserParameter(parameterName, value,
-				description);
+		UserParameter parameter = new UserParameter(parameterName, value, "");
+		parameter.setCategory(category);
 		user.setParameter(parameter);
 
 		user.store();
@@ -171,8 +168,8 @@ public class UserTest {
 		parameter = parameters.get(parameterName);
 		assertNotNull(parameter);
 		assertEquals(parameterName, parameter.getName());
-		assertEquals(description, parameter.getDescription());
 		assertEquals(value, parameter.getValue());
+		assertFalse(parameter.getDescription().isEmpty());
 
 		restored.remove();
 		SscljTestServer.refresh();

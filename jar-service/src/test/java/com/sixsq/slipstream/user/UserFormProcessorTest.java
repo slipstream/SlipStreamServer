@@ -25,8 +25,11 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
+import com.sixsq.slipstream.ssclj.app.SscljTestServer;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.restlet.data.Form;
@@ -45,6 +48,16 @@ public class UserFormProcessorTest {
 	private static String prefix = "parameter--";
 	private static int count = 0;
 	private User user;
+
+	@BeforeClass
+	public static void setupClass() throws Exception {
+		SscljTestServer.start();
+	}
+
+	@AfterClass
+	public static void teardownClass() throws Exception {
+		SscljTestServer.stop();
+	}
 
 	@Before
 	public void setup() throws ValidationException {

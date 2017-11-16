@@ -24,6 +24,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import com.sixsq.slipstream.ssclj.app.SscljTestServer;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.restlet.data.Form;
@@ -35,24 +37,30 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.UserCloudCredentialsTest;
+import com.sixsq.slipstream.persistence.UserTest;
 import com.sixsq.slipstream.util.ResourceTestBase;
 
 public class ImageFormProcesorTest {
 
-	protected static final String PASSWORD = "password";
-	protected static User user = UserCloudCredentialsTest.createUser("test", PASSWORD);
+	protected static User user;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		UserCloudCredentialsTest.storeUser(user);
+		SscljTestServer.start();
+		user = UserTest.createUser("test");
+		UserTest.storeUser(user);
 		ResourceTestBase.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
 	}
+
+	@AfterClass
+	public static void teardownClass() throws Exception {
+		SscljTestServer.stop();
+    }
 
 	@Test
 	public void newNameIllegal() throws BadlyFormedElementException,
 			SlipStreamClientException {
-		User user = UserCloudCredentialsTest.createUser("test");
+		User user = UserTest.createUser("test");
 
 		String imageName = "newNameIllegal";
 		Module image = new ImageModule(imageName);
@@ -76,7 +84,7 @@ public class ImageFormProcesorTest {
 	@Test
 	public void saveNativeWithImageIdsImage() throws BadlyFormedElementException,
 			SlipStreamClientException {
-		User user = UserCloudCredentialsTest.createUser("test");
+		User user = UserTest.createUser("test");
 		String cloudServiceName = LocalConnector.CLOUD_SERVICE_NAME;
 
 		String imageName = "imageWithIds";
@@ -105,7 +113,7 @@ public class ImageFormProcesorTest {
 	@Test
 	public void saveTemplateImageWithChangedCreateStuffCleansImageIds() throws BadlyFormedElementException,
 			SlipStreamClientException {
-		User user = UserCloudCredentialsTest.createUser("test");
+		User user = UserTest.createUser("test");
 		String cloudServiceName = LocalConnector.CLOUD_SERVICE_NAME;
 
 		String imageName = "imageWithIds";
@@ -135,7 +143,7 @@ public class ImageFormProcesorTest {
 	@Test
 	public void saveTemplateImageWithoutChangedCreateStuffKeepsOldImageIds() throws BadlyFormedElementException,
 			SlipStreamClientException {
-		User user = UserCloudCredentialsTest.createUser("test");
+		User user = UserTest.createUser("test");
 		String cloudServiceName = LocalConnector.CLOUD_SERVICE_NAME;
 
 		String imageName = "imageWithIds";

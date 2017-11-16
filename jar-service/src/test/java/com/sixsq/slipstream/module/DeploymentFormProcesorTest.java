@@ -23,6 +23,8 @@ package com.sixsq.slipstream.module;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
+import com.sixsq.slipstream.ssclj.app.SscljTestServer;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.restlet.data.Form;
@@ -38,23 +40,29 @@ import com.sixsq.slipstream.persistence.Node;
 import com.sixsq.slipstream.persistence.NodeParameter;
 import com.sixsq.slipstream.persistence.ParameterCategory;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.UserCloudCredentialsTest;
+import com.sixsq.slipstream.persistence.UserTest;
 
 public class DeploymentFormProcesorTest {
 
-	private static final String PASSWORD = "password";
-	private static User user = UserCloudCredentialsTest.createUser("test", PASSWORD);
+	private static User user;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		UserCloudCredentialsTest.storeUser(user);
+		SscljTestServer.start();
+		user = UserTest.createUser("test");
+		UserTest.storeUser(user);
 	}
+
+	@AfterClass
+	public static void teardownClass() throws Exception {
+		SscljTestServer.stop();
+    }
 
 	@Test
 	public void processDeploymentMapping() throws ConfigurationException,
 			SlipStreamClientException {
 
-		User user = UserCloudCredentialsTest.createUser("test");
+		User user = UserTest.createUser("test");
 
 		String imageName = "processDeploymentMappingImage";
 		Module image = new ImageModule(imageName);
@@ -101,7 +109,7 @@ public class DeploymentFormProcesorTest {
 	public void deploymentWithIllegalSelfReferencingNode()
 			throws ConfigurationException, SlipStreamClientException {
 
-		User user = UserCloudCredentialsTest.createUser("test");
+		User user = UserTest.createUser("test");
 
 		String imageName = "deploymentWithIllegalSelfReferencingNode";
 		Module image = new ImageModule(imageName);
@@ -132,7 +140,7 @@ public class DeploymentFormProcesorTest {
 	public void deploymentWithMissingMappingAndNoDefaultValue()
 			throws ConfigurationException, SlipStreamClientException {
 
-		User user = UserCloudCredentialsTest.createUser("test");
+		User user = UserTest.createUser("test");
 
 		String imageName = "deploymentWithMissingMappingAndNoDefaultValue";
 		Module image = new ImageModule(imageName);
@@ -159,7 +167,7 @@ public class DeploymentFormProcesorTest {
 	public void deploymentWithMissingMappingAndDefaultValue()
 			throws ConfigurationException, SlipStreamClientException {
 
-		User user = UserCloudCredentialsTest.createUser("test");
+		User user = UserTest.createUser("test");
 
 		String imageName = "deploymentWithMissingMappingAndDefaultValue";
 		Module image = new ImageModule(imageName);

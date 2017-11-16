@@ -44,6 +44,7 @@ import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -71,6 +72,9 @@ public class User extends Metadata {
 
 	public static final String RESOURCE_NAME = "user";
 	public static final String RESOURCE_URL_PREFIX = RESOURCE_NAME + "/";
+
+	public static final String RESOURCE_USER_PARAMS_COLLECTION =
+			SscljProxy.BASE_RESOURCE + "user-param";
 
 	public static final int ACTIVE_TIMEOUT_MINUTES = 1;
 
@@ -157,7 +161,13 @@ public class User extends Metadata {
 	@ElementMap(name = "parameters", required = false, valueType = UserParameter.class)
 	public Map<String, UserParameter> getParameters() {
 	    if (null == parameters || parameters.size() == 0) {
-	    	parameters = loadParameters(this);
+			try {
+				parameters = loadParameters(this);
+			} catch (ValidationException e) {
+				e.printStackTrace();
+				throw new SlipStreamDatabaseException("Failed to load User " +
+						"parameters: " + e.getMessage());
+			}
 		}
 		return parameters;
 	}
@@ -579,12 +589,15 @@ public class User extends Metadata {
 		return params;
 	}
 
-	private static Map<String, UserParameter> loadGeneralParameters(User user) {
-		Map<String, UserParameter> params = new HashMap<>();
-		return params;
+	private static Map<String, UserParameter> loadGeneralParameters(User user) throws ValidationException {
+		UserGeneralParams userGeneralParams = getGeneralParamsFromBackend(user);
+		if (null == userGeneralParams) {
+			userGeneralParams = new UserGeneralParams();
+		}
+		return userGeneralParams.toParameters();
 	}
 
-	private static Map<String, UserParameter> loadParameters(User user) {
+	private static Map<String, UserParameter> loadParameters(User user) throws ValidationException {
 		Map<String, UserParameter> params = new HashMap<>();
 		if (null == user) {
 			return params;
@@ -677,20 +690,57 @@ public class User extends Metadata {
 	}
 
 	private void storeParameters() {
-		System.out.println("STORING PARAMETERS....");
 		storeGeneralParameters();
 		storeSshCredentials();
 		storeCloudCredentials();
 	}
 
+	private static UserGeneralParams getGeneralParamsFromBackend(User user) {
+		String authn = user.getName() + " USER";
+		Response resp = SscljProxy.get(RESOURCE_USER_PARAMS_COLLECTION, authn);
+		UserGeneralParamsCollection pColl = UserGeneralParamsCollection.fromJson(resp.getEntityAsText());
+		if (null == pColl || pColl.getCount() == 0) {
+		    return null;
+		} else if (pColl.getCount() == 1) {
+			return pColl.getUserParams().get(0);
+		} else {
+			throw new SlipStreamDatabaseException("Inconsistent state with " +
+					"user General params - number of stored instances is more" +
+					" than one: " +	pColl.getCount());
+		}
+	}
+
 	private void storeGeneralParameters() {
-		System.out.println("Storing General params.");
-		Map<String, UserParameter> globalParams = getParameters(ParameterCategory.General.toString());
+		Response resp;
+		String authn = this.getName() + " USER";
+		Collection<UserParameter> generalParams = getParameters(
+				ParameterCategory.General.toString()).values();
+		UserGeneralParams params = getGeneralParamsFromBackend(this);
+		if (null == params) {
+			// creating
+			params = new UserGeneralParams();
+			params.setParameters(generalParams);
+			UserGeneralParamsTemplate paramsTemplate = new UserGeneralParamsTemplate(params);
+			resp = SscljProxy.post(RESOURCE_USER_PARAMS_COLLECTION, authn, paramsTemplate);
+			if (SscljProxy.isError(resp)) {
+				throw new SlipStreamDatabaseException("Failed to create user" +
+						" General params: " + resp.toString());
+			}
+		} else {
+			// editing
+			params.setParameters(generalParams);
+			resp = SscljProxy.put(SscljProxy.BASE_RESOURCE + params.id,
+                    authn, params);
+			if (SscljProxy.isError(resp)) {
+				throw new SlipStreamDatabaseException("Failed to edit user" +
+						" General params: " + resp.toString());
+			}
+		}
 	}
 
 	private void storeSshCredentials() {
-		System.out.println("Storing Ssh Credentials params.");
-		Map<String, UserParameter> globalParams = getParameters(ParameterCategory.General.toString());
+		logger.info("Storing Ssh Credentials params.");
+		Map<String, UserParameter> sshParams = getParameters(ParameterCategory.General.toString());
 	}
 
 	private boolean isCredentialCategory(String category) {
@@ -769,7 +819,13 @@ public class User extends Metadata {
 			}
 			user = (new Gson()).fromJson(resp.getEntityAsText(), User.class);
 		}
-		user.parameters = loadParameters(user);
+		try {
+			user.parameters = loadParameters(user);
+		} catch (ValidationException e) {
+			e.printStackTrace();
+			throw new SlipStreamDatabaseException("Failed to load User " +
+					"parameters: " + e.getMessage());
+		}
 		return user;
 	}
 

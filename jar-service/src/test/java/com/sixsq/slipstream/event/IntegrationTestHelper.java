@@ -1,6 +1,6 @@
 package com.sixsq.slipstream.event;
 
-import static com.sixsq.slipstream.persistence.UserCloudCredentialsTest.createUser;
+import static com.sixsq.slipstream.persistence.UserTest.createUser;
 
 import java.net.URL;
 import java.net.URLClassLoader;

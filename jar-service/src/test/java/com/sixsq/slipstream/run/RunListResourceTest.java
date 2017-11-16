@@ -79,7 +79,6 @@ public class RunListResourceTest extends ResourceTestBase {
 
 
 		Event.muteForTests();
-		SscljProxy.muteForTests();
 
 		CommonTestUtil.addSshKeys(user);
 
@@ -112,7 +111,6 @@ public class RunListResourceTest extends ResourceTestBase {
 	@AfterClass
 	public static void teardownClass() throws ConfigurationException, ValidationException {
 		removeAllRuns();
-		SscljProxy.unmuteForTests();
 	}
 
 	@Before

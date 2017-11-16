@@ -28,6 +28,7 @@ import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
 import com.sixsq.slipstream.persistence.*;
+import com.sixsq.slipstream.ssclj.app.SscljTestServer;
 import com.sixsq.slipstream.util.CommonTestUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -50,12 +51,13 @@ public class ConnectorTest extends ConnectorDummy {
 	@BeforeClass
 	public static void setupClass() {
 		Event.muteForTests();
-		CljElasticsearchHelper.createAndInitTestDb();
+		SscljTestServer.start();
+		CljElasticsearchHelper.initTestDb();
 	}
 
 	@AfterClass
 	public static void teardownClass() {
-		CljElasticsearchHelper.stopAndUnbindTestDb();
+		SscljTestServer.stop();
 	}
 
 	@Test

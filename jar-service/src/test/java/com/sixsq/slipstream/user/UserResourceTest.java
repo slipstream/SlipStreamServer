@@ -29,7 +29,7 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.User.State;
 import com.sixsq.slipstream.persistence.UserParameter;
-import com.sixsq.slipstream.persistence.UserCloudCredentialsTest;
+import com.sixsq.slipstream.persistence.UserTest;
 import com.sixsq.slipstream.util.ResourceTestBase;
 import com.sixsq.slipstream.util.SerializationUtil;
 import com.sixsq.slipstream.util.XmlUtil;
@@ -58,8 +58,8 @@ public class UserResourceTest extends ResourceTestBase {
 
 	private static final String NEW_PASSWORD = "newPassword";
 	private static final String SUPER_PASSWORD = "passwordSuper";
-	private static User otherUser = UserCloudCredentialsTest.createUser("test2", "password2");
-	private static User superUser = UserCloudCredentialsTest
+	private static User otherUser = UserTest.createUser("test2", "password2");
+	private static User superUser = UserTest
 			.createUser("super", SUPER_PASSWORD);
 	private static User user = null;
 
@@ -72,11 +72,11 @@ public class UserResourceTest extends ResourceTestBase {
 
 	@Before
 	public void setup() {
-		user = UserCloudCredentialsTest.createUser("test");
-		user = UserCloudCredentialsTest.storeUser(user);
-		UserCloudCredentialsTest.storeUser(otherUser);
+		user = UserTest.createUser("test");
+		user = UserTest.storeUser(user);
+		UserTest.storeUser(otherUser);
 		superUser.setSuper(true);
-		superUser = UserCloudCredentialsTest.storeUser(superUser);
+		superUser = UserTest.storeUser(superUser);
 	}
 
 	@After
@@ -137,7 +137,7 @@ public class UserResourceTest extends ResourceTestBase {
 		assertThat(getPersistedPassword(user),
 				is(not(Passwords.hash(NEW_PASSWORD))));
 
-		Passwords passwords = createValidPasswords(UserCloudCredentialsTest.PASSWORD);
+		Passwords passwords = createValidPasswords(UserTest.PASSWORD);
 		Request request = createPutRequest(user, superUser.getName(), passwords);
 		Response response = executeRequest(request);
 
@@ -194,7 +194,7 @@ public class UserResourceTest extends ResourceTestBase {
 			throws ConfigurationException, NoSuchAlgorithmException,
 			UnsupportedEncodingException, ValidationException {
 
-		Passwords passwords = createValidPasswords(UserCloudCredentialsTest.PASSWORD);
+		Passwords passwords = createValidPasswords(UserTest.PASSWORD);
 		passwords.oldPassword = null;
 		Request request = createPutRequest(user, user.getName(), passwords);
 		Response response = executeRequest(request);
@@ -207,9 +207,9 @@ public class UserResourceTest extends ResourceTestBase {
 			throws ConfigurationException, ValidationException,
 			NoSuchAlgorithmException, UnsupportedEncodingException {
 
-		user.hashAndSetPassword(UserCloudCredentialsTest.PASSWORD);
+		user.hashAndSetPassword(UserTest.PASSWORD);
 
-		Passwords passwords = createValidPasswords(UserCloudCredentialsTest.PASSWORD);
+		Passwords passwords = createValidPasswords(UserTest.PASSWORD);
 		passwords.oldPassword = null;
 		Request request = createPutRequest(user, superUser.getName(), passwords);
 		Response response = executeRequest(request);
@@ -274,7 +274,7 @@ public class UserResourceTest extends ResourceTestBase {
 	public void deleteUser() throws ConfigurationException, ValidationException {
 
 		User toBeDelete = new User("toBeDelete");
-		UserCloudCredentialsTest.storeUser(toBeDelete);
+		UserTest.storeUser(toBeDelete);
 
 		Request request = createDeleteRequest(toBeDelete, toBeDelete);
 		Response response = executeRequest(request);
@@ -287,7 +287,7 @@ public class UserResourceTest extends ResourceTestBase {
 			ValidationException {
 
 		User cantBeDeleted = new User("cantBeDeletedByAnotherUser");
-		UserCloudCredentialsTest.storeUser(cantBeDeleted);
+		UserTest.storeUser(cantBeDeleted);
 
 		Request request = createDeleteRequest(user, cantBeDeleted);
 		Response response = executeRequest(request);
@@ -301,8 +301,8 @@ public class UserResourceTest extends ResourceTestBase {
 	public void cantSelfAssignSuperUnlessAlreadySuper()
 			throws ConfigurationException, ValidationException {
 
-		User cantSelfAssignSuper = UserCloudCredentialsTest.createUser("cantSelfAssignSuper");
-		UserCloudCredentialsTest.storeUser(cantSelfAssignSuper);
+		User cantSelfAssignSuper = UserTest.createUser("cantSelfAssignSuper");
+		UserTest.storeUser(cantSelfAssignSuper);
 
 		cantSelfAssignSuper.setSuper(true);
 
@@ -323,12 +323,12 @@ public class UserResourceTest extends ResourceTestBase {
 	public void superCanAssignSuperToOthers() throws ConfigurationException,
 			ValidationException {
 
-		User superCanAssignSuperToOthers = UserCloudCredentialsTest.createUser(
+		User superCanAssignSuperToOthers = UserTest.createUser(
 				"superCanAssignSuperToOthers");
 
 		superCanAssignSuperToOthers.setSuper(true);
 
-		UserCloudCredentialsTest.storeUser(superCanAssignSuperToOthers);
+		UserTest.storeUser(superCanAssignSuperToOthers);
 
 		superCanAssignSuperToOthers.setSuper(false);
 
@@ -406,8 +406,8 @@ public class UserResourceTest extends ResourceTestBase {
 	@Test
 	public void superCreatesInActiveState() throws ValidationException,
 			ConfigurationException {
-		User willBeActive = UserCloudCredentialsTest.createUser("superCreatesInActiveState");
-		Passwords passwords = new Passwords(null, UserCloudCredentialsTest.PASSWORD, UserCloudCredentialsTest.PASSWORD);
+		User willBeActive = UserTest.createUser("superCreatesInActiveState");
+		Passwords passwords = new Passwords(null, UserTest.PASSWORD, UserTest.PASSWORD);
 
 		Request request = createPutRequest(willBeActive, superUser.getName(), passwords);
 		Response response = executeRequest(request);
@@ -423,8 +423,8 @@ public class UserResourceTest extends ResourceTestBase {
 	@Test
 	public void normalUserCreatedInNewState() throws ValidationException,
 			ConfigurationException {
-		User willBeNew = UserCloudCredentialsTest.createUser("normalUserCreatedInNewState");
-		Passwords passwords = new Passwords(null, UserCloudCredentialsTest.PASSWORD, UserCloudCredentialsTest.PASSWORD);
+		User willBeNew = UserTest.createUser("normalUserCreatedInNewState");
+		Passwords passwords = new Passwords(null, UserTest.PASSWORD, UserTest.PASSWORD);
 
 		Request request = createPutRequest(willBeNew, user.getName(), passwords);
 		Response response = executeRequest(request);
@@ -440,9 +440,9 @@ public class UserResourceTest extends ResourceTestBase {
 	@Test
 	public void createWithUserState() throws ValidationException,
 			ConfigurationException {
-		User withState = UserCloudCredentialsTest.createUser("createWithUserState");
+		User withState = UserTest.createUser("createWithUserState");
 		withState.setState(State.SUSPENDED);
-		Passwords passwords = new Passwords(null, UserCloudCredentialsTest.PASSWORD, UserCloudCredentialsTest.PASSWORD);
+		Passwords passwords = new Passwords(null, UserTest.PASSWORD, UserTest.PASSWORD);
 
 		Request request = createPutRequest(withState, superUser.getName(), passwords);
 		Response response = executeRequest(request);
@@ -458,7 +458,7 @@ public class UserResourceTest extends ResourceTestBase {
 	@Test
 	public void putWithUserState() throws ValidationException,
 			ConfigurationException {
-		User withState = UserCloudCredentialsTest.createUser("putWithUserState");
+		User withState = UserTest.createUser("putWithUserState");
 		withState = withState.store();
 		withState.setState(State.SUSPENDED);
 
