@@ -21,6 +21,7 @@ package com.sixsq.slipstream.run;
  */
 
 import com.google.gson.JsonObject;
+import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.exceptions.*;
 import com.sixsq.slipstream.factory.DeploymentFactory;
@@ -75,7 +76,7 @@ public class RunFactoryTest extends RunTest {
 
 		try {
 			CommonTestUtil
-					.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
+					.resetAndLoadConnector(LocalConnector.class);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();

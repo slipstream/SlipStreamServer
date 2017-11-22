@@ -30,7 +30,6 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.*;
 import com.sixsq.slipstream.util.CommonTestUtil;
 import com.sixsq.slipstream.util.ResourceTestBase;
-import com.sixsq.slipstream.util.SscljProxy;
 import com.sixsq.slipstream.util.XmlUtil;
 import org.junit.*;
 import org.restlet.Request;
@@ -65,7 +64,7 @@ public class RunListResourceTest extends ResourceTestBase {
 			IllegalAccessException, InvocationTargetException,
 			NoSuchMethodException, ClassNotFoundException {
 
-		resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
+		resetAndLoadConnector(LocalConnector.class);
 
 		UserParameter keyParameter = new UserParameter(
 				new LocalUserParametersFactory()

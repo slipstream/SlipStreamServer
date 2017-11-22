@@ -91,8 +91,6 @@
         (is (:paramsType desc-body))
         (is (:acl desc-body))
 
-        (is (thrown-with-msg? ExceptionInfo #".*resource does not satisfy defined schema.*" (crud/validate entry-body)))
-
         ;; anonymous access not permitted
         (-> session
             (content-type "application/json")

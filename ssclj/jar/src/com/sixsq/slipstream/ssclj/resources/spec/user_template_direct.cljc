@@ -3,8 +3,10 @@
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.util.spec :as su]
     [com.sixsq.slipstream.ssclj.resources.spec.user :as u]
+    [com.sixsq.slipstream.ssclj.resources.spec.user-template]
     [com.sixsq.slipstream.ssclj.resources.spec.user-template :as ps]))
 
+(s/def :cimi.user-template.direct/href :cimi.user-template/href)
 (s/def :cimi.user-template.direct/password :cimi.core/nonblank-string)
 (s/def :cimi.user-template.direct/roles string?)
 (s/def :cimi.user-template.direct/state :cimi.core/nonblank-string)
@@ -16,7 +18,8 @@
 (s/def :cimi.user-template.direct/deleted boolean?)
 
 (def user-tempate-direct-keys
-  {:opt-un [:cimi.user-template.direct/password
+  {:opt-un [:cimi.user-template.direct/href
+            :cimi.user-template.direct/password
             :cimi.user-template.direct/roles
             :cimi.user-template.direct/isSuperUser
             :cimi.user-template.direct/state

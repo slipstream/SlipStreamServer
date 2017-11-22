@@ -24,13 +24,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.ssclj.app.SscljTestServer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.restlet.data.Form;
 
-import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.exceptions.BadlyFormedElementException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -49,7 +49,7 @@ public class ImageFormProcesorTest {
 		SscljTestServer.start();
 		user = UserTest.createUser("test");
 		UserTest.storeUser(user);
-		ResourceTestBase.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
+		ResourceTestBase.resetAndLoadConnector(LocalConnector.class);
 	}
 
 	@AfterClass

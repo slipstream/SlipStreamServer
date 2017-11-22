@@ -42,4 +42,8 @@ public interface Credentials {
 	 */
 	public Object getCloudCredCreateTmpl(Map<String, UserParameter> prams, String
 			connInstanceName);
+
+	public ICloudCredential getCloudCredential(Map<String, UserParameter> params, String connInstanceName);
+
+	public void store() throws ValidationException;
 }

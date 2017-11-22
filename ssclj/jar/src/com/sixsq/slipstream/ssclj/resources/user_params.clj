@@ -38,8 +38,6 @@
 
 (defmethod validate-subtype :default
   [resource]
-  ;(println "RESOURCE validate-subtype")
-  ;(clojure.pprint/pprint resource)
   (let [err-msg (str "unknown UserParam type: " (:paramsType resource))]
     (throw
       (ex-info err-msg {:status  400

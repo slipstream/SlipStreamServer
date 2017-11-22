@@ -104,8 +104,7 @@
   (throw (ex-info (str "unknown UserParamTemplate type: " (:paramsType resource))
                   resource)))
 
-(defmethod crud/validate
-  resource-uri
+(defmethod crud/validate resource-uri
   [resource]
   (validate-subtype resource))
 

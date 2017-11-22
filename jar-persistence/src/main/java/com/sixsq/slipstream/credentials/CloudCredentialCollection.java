@@ -1,4 +1,4 @@
-package com.sixsq.slipstream.persistence;
+package com.sixsq.slipstream.credentials;
 
 import com.google.gson.Gson;
 
@@ -24,12 +24,12 @@ import java.util.List;
  * limitations under the License.
  * -=================================================================-
  */
-public class CloudCredentials {
+public class CloudCredentialCollection {
 
     private List<CloudCredential> credentials = new ArrayList<>();
     private Integer count;
 
-    public List<CloudCredential> getCloudCredentials() {
+    public List<CloudCredential> getCredentials() {
         return credentials;
     }
 
@@ -37,8 +37,8 @@ public class CloudCredentials {
         return count;
     }
 
-    public static CloudCredentials fromJson(String jsonRecords) {
+    public static Object fromJson(String jsonRecords, Class klass) {
         Gson gson = new Gson();
-        return gson.fromJson(jsonRecords, CloudCredentials.class);
+        return gson.fromJson(jsonRecords, klass);
     }
 }

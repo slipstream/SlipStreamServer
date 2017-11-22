@@ -31,9 +31,7 @@ import java.util.Random;
 import java.util.Set;
 
 import com.sixsq.slipstream.util.SscljProxy;
-import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

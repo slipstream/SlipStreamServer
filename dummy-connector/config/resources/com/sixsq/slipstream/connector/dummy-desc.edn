@@ -1,0 +1,29 @@
+{
+ :orchestratorInstanceType
+ {:displayName "orchestrator.instance.type",
+  :type        "enum",
+  :category    "",
+  :description "Orchestrator instance type",
+  :mandatory   true,
+  :readOnly    false,
+  :order       0,
+  :enum        ["Micro" "Tiny" "Small" "Medium" "Large" "Extra-large" "Huge" "Mega" "Titan"]},
+ :zone
+ {:displayName "zone",
+  :type        "enum",
+  :category    "",
+  :description "Zone",
+  :mandatory   true,
+  :readOnly    false,
+  :order       0,
+  :enum        ["CH-GVA-2" "CH-DK-2"]},
+ :orchestratorDisk
+ {:displayName "orchestrator.disk",
+  :type        "enum",
+  :category    "",
+  :description "Orchestrator root disk size",
+  :mandatory   true,
+  :readOnly    false,
+  :order       0,
+  :enum        ["10G" "50G" "100G" "200G" "400G"]}
+ }

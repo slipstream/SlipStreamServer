@@ -55,6 +55,7 @@ public class SscljProxy {
     public static final String BASE_RESOURCE = "api/";
     public static final String QUOTA_RESOURCE = BASE_RESOURCE + "quota";
     public static final String SERVICE_OFFER_RESOURCE = BASE_RESOURCE + "service-offer";
+    public static final String CREDENTIAL_RESOURCE = BASE_RESOURCE + "credential";
 
     private static final String SSCLJ_ENDPOINT_PROPERTY_NAME = "ssclj.endpoint";
     private static final String SSCLJ_ENDPOINT_ENV_NAME = "SSCLJ_ENDPOINT";
@@ -95,6 +96,10 @@ public class SscljProxy {
 
     public static Response post(String resource, String username, Boolean throwException) {
         return request(Method.POST, resource, null, username, null, null, throwException);
+    }
+
+    public static Response post(String resource, String username, Object obj, Boolean throwException) {
+        return request(Method.POST, resource, obj, username, null, null, throwException);
     }
 
     public static Response post(String resource, MediaType mediaType, Boolean throwException) {

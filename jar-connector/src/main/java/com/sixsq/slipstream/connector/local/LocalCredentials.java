@@ -22,10 +22,14 @@ package com.sixsq.slipstream.connector.local;
 
 import com.sixsq.slipstream.connector.CredentialsBase;
 import com.sixsq.slipstream.credentials.Credentials;
+import com.sixsq.slipstream.credentials.ICloudCredential;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.persistence.UserParameter;
+
+import java.util.Map;
 
 class LocalCredentials extends CredentialsBase implements Credentials {
 
@@ -45,6 +49,11 @@ class LocalCredentials extends CredentialsBase implements Credentials {
 
 	public String getSecret() throws InvalidElementException {
 		return getParameterValue(LocalUserParametersFactory.SECRET_PARAMETER_NAME);
+	}
+
+	@Override
+	public ICloudCredential getCloudCredential(Map<String, UserParameter> params, String connInstanceName) {
+		return null;
 	}
 
 }

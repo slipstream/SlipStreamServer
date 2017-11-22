@@ -58,6 +58,7 @@ import static org.junit.Assert.fail;
 public abstract class CommonTestUtil {
 
 	protected static final String PASSWORD = "password";
+	protected static final String publicSshKey = "ssh-rsa ABCD x";
 
 	// Need to set cloudServiceName before the status user is
 	// created, since the createUser method uses it
@@ -70,7 +71,7 @@ public abstract class CommonTestUtil {
 
 	public static User createUser(String name) throws ConfigurationException,
 			ValidationException {
-		return CommonTestUtil.createUser(name, "");
+		return CommonTestUtil.createUser(name, PASSWORD);
 	}
 
 	public static User createUser(String name, String password)
@@ -114,7 +115,7 @@ public abstract class CommonTestUtil {
 
 		String key = Parameter.constructKey(ParameterCategory.General.toString(),
 				UserParameter.SSHKEY_PARAMETER_NAME);
-		user.setParameter(new UserParameter(key, "ssh-rsa xx", ""));
+		user.setParameter(new UserParameter(key, publicSshKey, ""));
 
 		return user.store();
 	}
@@ -126,7 +127,8 @@ public abstract class CommonTestUtil {
 	}
 
 	public static void addSshKeys(User user) throws ValidationException {
-		UserParameter userKey = new UserParameter(UserParametersFactoryBase.getPublicKeyParameterName(), "xxx", "xxx");
+		UserParameter userKey = new UserParameter(UserParametersFactoryBase
+				.getPublicKeyParameterName(), publicSshKey, "xxx");
 		user.setParameter(userKey);
 
 		String publicSshKey = ServiceConfiguration.CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY;

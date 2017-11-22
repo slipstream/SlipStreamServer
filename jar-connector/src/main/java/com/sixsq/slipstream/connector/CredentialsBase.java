@@ -20,9 +20,10 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.credentials.CloudCredential;
+import com.sixsq.slipstream.credentials.CloudCredentialCreateTmpl;
 import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
-import com.sixsq.slipstream.exceptions.NotImplementedException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.User;
@@ -106,8 +107,20 @@ public abstract class CredentialsBase implements Credentials {
 		return paramsMap;
 	}
 
-	public Object getCloudCredCreateTmpl(Map<String, UserParameter> params, String
-			connInstanceName) {
-		throw new NotImplementedException();
+	public CloudCredentialCreateTmpl getCloudCredCreateTmpl(Map<String, UserParameter> params, String connInstanceName) {
+		if (params.size() < 1) {
+			return null;
+		}
+		return new CloudCredentialCreateTmpl(getCloudCredential(params, connInstanceName));
+	}
+
+	public void store() throws ValidationException {
+		String category = cloudParametersFactory.getCategory();
+		Map<String, UserParameter> params = this.user.getParameters(category);
+		if (null == params || params.size() < 1) {
+			return;
+		}
+		CloudCredential cd = (CloudCredential) getCloudCredential(params, category);
+		cd.store(this.user);
 	}
 }

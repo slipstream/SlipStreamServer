@@ -5,6 +5,7 @@
     [com.sixsq.slipstream.ssclj.resources.spec.user :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.user-template :as ps]))
 
+(s/def :cimi.user-template.auto/href :cimi.user-template/href)
 (s/def :cimi.user-template.auto/password :cimi.core/nonblank-string)
 (s/def :cimi.user-template.auto/roles string?)
 (s/def :cimi.user-template.auto/state :cimi.core/nonblank-string)
@@ -16,7 +17,8 @@
 (s/def :cimi.user-template.auto/deleted boolean?)
 
 (def user-tempate-auto-keys
-  {:opt-un [:cimi.user-template.auto/password
+  {:opt-un [:cimi.user-template.auto/href
+            :cimi.user-template.auto/password
             :cimi.user-template.auto/roles
             :cimi.user-template.auto/isSuperUser
             :cimi.user-template.auto/state

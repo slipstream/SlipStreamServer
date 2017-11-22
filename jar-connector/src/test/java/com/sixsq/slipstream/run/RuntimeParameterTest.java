@@ -30,6 +30,7 @@ import static org.junit.Assert.fail;
 import java.lang.reflect.InvocationTargetException;
 
 import com.sixsq.slipstream.connector.ConnectorTestBase;
+import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.event.Event;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -63,7 +64,7 @@ public class RuntimeParameterTest {
 
 		CommonTestUtil.addSshKeys(user);
 
-		CommonTestUtil.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
+		CommonTestUtil.resetAndLoadConnector(LocalConnector.class);
 	}
 
 	@AfterClass

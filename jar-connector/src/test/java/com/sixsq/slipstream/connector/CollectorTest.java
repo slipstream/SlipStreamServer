@@ -29,7 +29,6 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.run.RunTestBase;
-import com.sixsq.slipstream.util.SscljProxy;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;

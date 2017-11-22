@@ -111,6 +111,15 @@ public abstract class CloudCredentialsTestBase implements
 		SscljTestServer.refresh();
 	}
 
+	public static boolean isInteger(String v) {
+		try {
+			Integer.parseInt(v);
+			return true;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
+
 	@Test
 	public void cloudCredentialsLifecycle() throws ValidationException {
 
@@ -127,14 +136,17 @@ public abstract class CloudCredentialsTestBase implements
 		}
 
 		// Credential parameters are updated.
+        // Use integer to let integer based parameters to work.
+		String newValue = String.valueOf(System.currentTimeMillis());
+		newValue = newValue.substring(newValue.length() - 7);
 		for (String pname: params.keySet()) {
 			UserParameter p = user.getParameter(pname);
-			p.setValue("new-value");
+			p.setValue(newValue);
 			user.setParameter(p);
 			user.store();
 			SscljTestServer.refresh();
 			u1 = User.loadByName(user.getName());
-			assertTrue(u1.getParameter(pname).getValue().equals("new-value"));
+			assertTrue(u1.getParameter(pname).getValue().equals(newValue));
 		}
 	}
 

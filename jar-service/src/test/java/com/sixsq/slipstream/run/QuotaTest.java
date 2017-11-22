@@ -21,6 +21,10 @@ package com.sixsq.slipstream.run;
  */
 
 import com.sixsq.slipstream.configuration.Configuration;
+import com.sixsq.slipstream.connector.dummy.DummyCloudCredDef;
+import com.sixsq.slipstream.connector.dummy.DummyConnector;
+import com.sixsq.slipstream.connector.dummy.DummySystemConfigurationParametersFactory;
+import com.sixsq.slipstream.credentials.CloudCredentialCreateTmpl;
 import com.sixsq.slipstream.es.CljElasticsearchHelper;
 import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -28,10 +32,12 @@ import com.sixsq.slipstream.exceptions.QuotaException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.*;
 import com.sixsq.slipstream.ssclj.app.SscljTestServer;
+import com.sixsq.slipstream.util.CommonTestUtil;
 import com.sixsq.slipstream.util.SscljProxy;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -42,8 +48,11 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
+import org.restlet.Response;
 
 public class QuotaTest {
+
+	private static final String USERNAME = "test";
 
 	public static void setupBackend() {
 		SscljTestServer.start();
@@ -72,7 +81,7 @@ public class QuotaTest {
 	}
 
 	private User testQuotaCreateUser() throws ValidationException {
-		User user = new User("user");
+		User user = new User(USERNAME);
 		user.store();
 		return user;
 	}
@@ -127,8 +136,26 @@ public class QuotaTest {
 
 	@Test
 	public void validateNoUsage() throws ValidationException, ConfigurationException, QuotaException {
-		String cloud = "cloud1";
 		User user = testQuotaCreateUser();
+
+		String cloud = "cloud1";
+
+		// create connector
+		CommonTestUtil.createConnector(DummyConnector.CLOUD_SERVICE_NAME, cloud,
+				new DummySystemConfigurationParametersFactory(cloud));
+
+		// create credentials
+		DummyCloudCredDef credCreate = new DummyCloudCredDef(
+				cloud,
+				"key",
+				"secret",
+				"dn");
+		CloudCredentialCreateTmpl cloudCredentialCreateTmpl = new CloudCredentialCreateTmpl(credCreate);
+		Response resp = SscljProxy.post(SscljProxy.BASE_RESOURCE + "credential",
+				USERNAME + " USER", cloudCredentialCreateTmpl);
+		assertFalse(resp.toString(), SscljProxy.isError(resp));
+		SscljTestServer.refresh();
+
 		setQuota(user, cloud, "10");
 
 		Map<String, CloudUsage> usage = new HashMap<>();

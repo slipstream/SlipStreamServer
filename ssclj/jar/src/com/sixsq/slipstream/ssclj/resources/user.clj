@@ -192,6 +192,7 @@
                       (a/can-modify? request))
           merged  (merge current (filter-for-regular-user body request))]
       (-> merged
+          (dissoc :href)
           (u/update-timestamps)
           (crud/validate)
           (db/edit request)))

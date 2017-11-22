@@ -189,6 +189,7 @@
                 :dependencies (merge-defaults
                                 ['sixsq/default-deps (get-env :version)]
                                 [['org.apache.curator/curator-test :scope "compile"]
+                                 ['com.cemerick/url]
                                  ['com.sixsq.slipstream/slipstream-ring-container :scope "compile"]]))
            (sift
              :to-resource #{#"lifecycle_test_utils\.clj"

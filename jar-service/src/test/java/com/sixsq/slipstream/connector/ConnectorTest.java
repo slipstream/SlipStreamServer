@@ -20,6 +20,7 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.connector.dummy.DummyConnector;
 import com.sixsq.slipstream.es.CljElasticsearchHelper;
 import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.exceptions.AbortException;
@@ -40,7 +41,7 @@ import java.util.Collections;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 
-public class ConnectorTest extends ConnectorDummy {
+public class ConnectorTest extends DummyConnector {
 
 	protected static final String INSTANCE_NAME = "local";
 
@@ -72,7 +73,7 @@ public class ConnectorTest extends ConnectorDummy {
 		CommonTestUtil.addSshKeys(user);
 
 		CommonTestUtil.resetAndLoadConnector(
-				com.sixsq.slipstream.connector.local.LocalConnector.class,
+				DummyConnector.class,
 				INSTANCE_NAME);
 
 		Run run = RunFactory.getRun(deployment, RunType.Orchestration, user);

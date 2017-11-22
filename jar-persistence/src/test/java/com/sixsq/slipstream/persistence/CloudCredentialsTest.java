@@ -1,6 +1,8 @@
 package com.sixsq.slipstream.persistence;
 
 
+import com.sixsq.slipstream.credentials.CloudCredential;
+import com.sixsq.slipstream.credentials.CloudCredentialCollection;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -30,13 +32,13 @@ public class CloudCredentialsTest {
 
     @Test
     public void parseClodCredRecords() throws IOException {
-        CloudCredentials ccreds = CloudCredentials.fromJson(jsonCloudCredentials());
-        Assert.assertEquals(1, ccreds.getCloudCredentials().size());
+        CloudCredentialCollection ccreds = (CloudCredentialCollection) CloudCredentialCollection.fromJson
+                (jsonCloudCredentials(), CloudCredentialCollection.class);
+        Assert.assertEquals(1, ccreds.getCredentials().size());
 
-        CloudCredential ccred = ccreds.getCloudCredentials().get(0);
+        CloudCredential ccred = (CloudCredential) ccreds.getCredentials().get(0);
 
-        Assert.assertEquals("credential/1-2-3-4-5", ccred.getInstanceID());
-
+        Assert.assertEquals("credential/1-2-3-4-5", ccred.id);
     }
 
 
