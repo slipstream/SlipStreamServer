@@ -142,6 +142,10 @@
    :activeSince epoch
    :lastExecute epoch})
 
+(defn merge-with-defaults
+  [resource]
+  (merge user-attrs-defaults resource))
+
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 ;; requires a UserTemplate to create new User
 (defmethod crud/add resource-name
@@ -155,7 +159,7 @@
                                   (update-in [:userTemplate] merge desc-attrs) ;; validate desc attrs
                                   (crud/validate)
                                   (:userTemplate)
-                                  (merge user-attrs-defaults)
+                                  (merge-with-defaults)
                                   (tpl->user request)
                                   (merge desc-attrs))]      ;; ensure desc attrs are added
     (add-impl (assoc request :id id :body body))))

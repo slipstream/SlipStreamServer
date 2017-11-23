@@ -199,7 +199,7 @@ public class UserResource extends UserParameterizedResource {
 
 	@Override
 	protected void authorize() {
-		boolean isMachine = isMachine();
+		boolean notMachine = !isMachine();
 		String targetUserOrganization = null;
 		try {
 			targetUserOrganization = getTargetUser().getOrganization();
@@ -210,10 +210,19 @@ public class UserResource extends UserParameterizedResource {
 			isOrganizationManagedByUser = targetUserOrganization.equals(organizationManagedByUser);
 		}
 
-		setCanPut(!newTemplateResource() && !isMachine
-				&& (getUser().isSuper() || !isExisting()
-				|| (newInQuery() && !isExisting()) || isItSelf() || isOrganizationManagedByUser));
-		setCanDelete((getUser().isSuper() || isItSelf() || isOrganizationManagedByUser) && !isMachine);
+		setCanPut(!newTemplateResource()
+				  && notMachine
+				  && (getUser().isSuper()
+				      || !isExisting()
+				      || (newInQuery() && !isExisting())
+				      || isItSelf()
+				      || isOrganizationManagedByUser));
+
+		setCanDelete((getUser().isSuper()
+				        || isItSelf()
+				        || isOrganizationManagedByUser)
+				      && notMachine);
+
 		setCanGet(getUser().isSuper() || newTemplateResource() || isItSelf() || isOrganizationManagedByUser);
 	}
 

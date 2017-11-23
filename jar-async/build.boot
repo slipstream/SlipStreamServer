@@ -27,6 +27,8 @@
                    [com.sixsq.slipstream/SlipStreamConnector]
 
                    [com.sixsq.slipstream/SlipStreamDbSerializers-jar nil :scope "test"]
+                   [com.sixsq.slipstream/SlipStreamCljResources-jar nil :scope "provided"]
+                   [com.sixsq.slipstream/SlipStreamCljResourcesTestServer-jar :classifier "tests" :scope "test"]
 
                    [adzerk/boot-test]
                    [adzerk/boot-reload]
@@ -48,6 +50,34 @@
 (task-options!
   pom {:project (get-env :project)
        :version (get-env :version)}
-  test {:junit-output-to ""})
+  test {:junit-output-to ""}
+  install {:pom (str (get-env :project))}
+  push {:pom (str (get-env :project))
+        :repo "sixsq"})
 
+(deftask run-tests
+         "runs all tests and performs full compilation"
+         []
+         (comp
+           (test)))
 
+(deftask build []
+         (comp
+           (pom)
+           (aot :all true)
+           (jar)))
+
+(deftask mvn-test
+         "run all tests of project"
+         []
+         (run-tests))
+
+(deftask mvn-build
+         "build full project through maven"
+         []
+         (comp
+           (build)
+           (install)
+           (if (= "true" (System/getenv "BOOT_PUSH"))
+             (push)
+             identity)))
