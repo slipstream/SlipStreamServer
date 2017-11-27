@@ -32,6 +32,7 @@ import com.sixsq.slipstream.persistence.*;
 import com.sixsq.slipstream.statemachine.States;
 import com.sixsq.slipstream.util.CommonTestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
+import com.sixsq.slipstream.util.SscljProxy;
 import com.sixsq.slipstream.util.Terminator;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -58,6 +59,7 @@ public class RunTest extends RunTestBase {
 			ClassNotFoundException {
 		UsageRecorder.muteForTests();
 		Event.muteForTests();
+		SscljProxy.muteForTests();
 		ConnectorTestBase.setupBackend();
 		setupImages();
 		CommonTestUtil
@@ -69,6 +71,7 @@ public class RunTest extends RunTestBase {
 		tearDownImages();
 		ConnectorTestBase.teardownBackend();
 		UsageRecorder.unmuteForTests();
+		SscljProxy.unmuteForTests();
 	}
 
 	@Test
