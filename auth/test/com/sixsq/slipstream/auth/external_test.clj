@@ -6,14 +6,9 @@
     [com.sixsq.slipstream.auth.external :refer :all]
     [com.sixsq.slipstream.auth.test-helper :as th]))
 
-(defn fixture-delete-all
-  [f]
-  (th/create-test-empty-user-table)
-  (f))
+(use-fixtures :each th/ssclj-server-fixture)
 
-(use-fixtures :each fixture-delete-all)
-
-(deftest match-new-github-user-github
+#_(deftest match-new-github-user-github
   (is (= [] (kc/select db/users)))
   (match-external-user! :github "st" "st@sixsq.com")
   (let [created-user (first (kc/select db/users))]
@@ -32,7 +27,7 @@
             :ORGANIZATION nil}
            (dissoc created-user :CREATION :PASSWORD)))))
 
-(deftest match-new-cyclone-user-github
+#_(deftest match-new-cyclone-user-github
   (is (= [] (kc/select db/users)))
   (match-external-user! :cyclone "st" "st@sixsq.com")
   (let [created-user (first (kc/select db/users))]
@@ -51,7 +46,7 @@
             :ORGANIZATION nil}
            (dissoc created-user :CREATION :PASSWORD)))))
 
-(deftest match-existing-user
+#_(deftest match-existing-user
   (th/add-user-for-test! {:username "joe" :password "secret" :email "st@sixsq.com" :state "ACTIVE"})
   (let [users-before-match (kc/select db/users)]
     (is (= 1 (count users-before-match)))
@@ -61,7 +56,7 @@
     (is (= 1 (count users-after-match)))
     (is (= "st" (:GITHUBLOGIN (first users-after-match))))))
 
-(deftest match-already-mapped
+#_(deftest match-already-mapped
   (let [user-info {:username  "joe" :password "secret"
                    :github-id "st" :email "st@sixsq.com" :state "ACTIVE"}
         _ (th/add-user-for-test! user-info)
@@ -73,7 +68,7 @@
     (match-external-user! :cyclone "st" "st@sixsq.com")
     (is (= [(assoc user :CYCLONELOGIN "st")] (kc/select db/users)))))
 
-(deftest match-existing-deleted-user
+#_(deftest match-existing-deleted-user
   (th/add-user-for-test! {:username "st" :password "secret" :email "st@sixsq.com" :state "DELETED"})
   (let [users-before-match (kc/select db/users)]
     (is (= 1 (count users-before-match))))
@@ -84,7 +79,7 @@
     (is (= "st" (:GITHUBLOGIN new-user)))
     (is (= "st_1" (:NAME new-user)))))
 
-(deftest check-create-user-when-missing!
+#_(deftest check-create-user-when-missing!
   (let [users (kc/select db/users)]
     (is (zero? (count users))))
   (th/add-user-for-test! {:username "not-missing" :password "secret" :email "not-missing@example.com" :state "ACTIVE"})

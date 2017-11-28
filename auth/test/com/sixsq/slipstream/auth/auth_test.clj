@@ -4,15 +4,14 @@
     [com.sixsq.slipstream.auth.auth :as auth]
     [com.sixsq.slipstream.auth.test-helper :as th]))
 
-(def valid-credentials {:username "super" :password "supeRsupeR"})
+(use-fixtures :each th/ssclj-server-fixture)
+
+(def valid-credentials {:username "super"
+                        :password "supeRsupeR"
+                        :emailAddress "jane@example.org"
+                        :firstName "Jane"
+                        :lastName "Tester"})
 (def valid-request {:params (merge {:authn-method :internal} valid-credentials)})
-
-(defn fixture-delete-all
-  [f]
-  (th/create-test-empty-user-table)
-  (f))
-
-(use-fixtures :each fixture-delete-all)
 
 (deftest test-auth-internal-accepts-username-and-fallbacks-to-user-name
   (th/add-user-for-test! valid-credentials)

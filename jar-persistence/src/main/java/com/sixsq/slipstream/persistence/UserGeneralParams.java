@@ -1,12 +1,15 @@
 package com.sixsq.slipstream.persistence;
 
 import com.google.gson.Gson;
+import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.connector.ExecutionControlUserParametersFactory;
+import com.sixsq.slipstream.connector.UserParametersFactoryBase;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.ssclj.util.UserParamsDesc;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class UserGeneralParams {
@@ -101,6 +104,8 @@ public class UserGeneralParams {
         param.setDescription((String) paramsDesc.get("defaultCloudService").get("description"));
         param.setInstructions((String) paramsDesc.get("defaultCloudService").get("instructions"));
         param.setCategory(category);
+        List<String> clouds = UserParametersFactoryBase.extractCloudNames(ConnectorFactory.getConnectors());
+        param.setEnumValues(clouds);
         params.put(k, param);
 
         return params;

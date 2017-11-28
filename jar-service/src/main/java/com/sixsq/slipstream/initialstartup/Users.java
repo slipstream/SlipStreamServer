@@ -80,10 +80,13 @@ public class Users {
 			throw new ValidationException(e.getMessage());
 		}
 		user.setState(State.ACTIVE);
-		user.setSuper(true);
 
         user = loadPassword(user);
 
+		user = user.store();
+
+		// It's forbidden to create super user directly.
+		user.setSuper(true);
 		user.store();
 	}
 

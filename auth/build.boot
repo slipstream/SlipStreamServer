@@ -21,6 +21,7 @@
                 (merge-defaults
                   ['sixsq/default-deps (get-env :version)]
                   '[[org.clojure/clojure]
+                    [org.clojure/test.check]
 
                     [buddy/buddy-core]
                     [buddy/buddy-hashers]
@@ -36,8 +37,10 @@
                     [ring/ring-core]
                     [superstring]
 
-                    [com.sixsq.slipstream/token]
-                    [com.sixsq.slipstream/utils]
+                    [com.sixsq.slipstream/SlipStreamDbBinding-jar]
+                    [com.sixsq.slipstream/SlipStreamCljResources-jar nil :scope "test"]
+                    [com.sixsq.slipstream/SlipStreamCljResourcesTestServer-jar :classifier "tests" :scope "test"]
+                    [com.sixsq.slipstream/SlipStreamCljResourcesTests-jar nil :classifier "tests" :type "test-jar" :scope "test"]
 
                     [peridot]
 
@@ -76,14 +79,19 @@
          (set-env! :source-paths #(set (concat % #{"test" "test-resources"})))
          identity)
 
+(deftask run-tests-ns
+         [n namespaces NAMESPACES #{sym} "The set of namespace symbols to run tests in."]
+         (comp
+           (dev-env)
+           (dev-fixture-env)
+           (test :namespaces namespaces)))
+
 (deftask run-tests
          "runs all tests and performs full compilation"
          []
          (comp
-           (dev-env)
-           (dev-fixture-env)
-           (aot :all true)
-           (test)))
+           (run-tests-ns)
+           (aot :all true)))
 
 (deftask build []
          (comp

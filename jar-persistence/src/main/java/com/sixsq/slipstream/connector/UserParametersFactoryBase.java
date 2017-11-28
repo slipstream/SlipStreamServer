@@ -25,8 +25,10 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.ParametersFactoryBase;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ParameterCategory;
+import com.sixsq.slipstream.persistence.ParameterType;
 import com.sixsq.slipstream.persistence.QuotaParameter;
 import com.sixsq.slipstream.persistence.UserParameter;
+import com.sixsq.slipstream.ssclj.util.UserParamsDesc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -69,7 +71,8 @@ public abstract class UserParametersFactoryBase extends
 
 	protected void initBaseParameters() throws ValidationException {
 		if(Configuration.isQuotaEnabled()) {
-			initQuotaParameter();
+			// FIXME: move to initReferenceParameters()
+			// initQuotaParameter();
 		}
 	}
 

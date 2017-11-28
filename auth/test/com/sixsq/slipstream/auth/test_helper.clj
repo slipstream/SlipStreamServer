@@ -1,72 +1,62 @@
 (ns com.sixsq.slipstream.auth.test-helper
   (:refer-clojure :exclude [update])
   (:require
+    [clojure.test :refer :all]
     [clojure.tools.logging :as log]
-    [clojure.java.jdbc :refer :all :as jdbc]
     [clojure.string :as str]
+    [com.sixsq.slipstream.db.es.utils :as esu]
+    [com.sixsq.slipstream.db.es.binding :as esb]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.user :as ur]
+    [com.sixsq.slipstream.ssclj.resources.user-template :as ct]
+    [com.sixsq.slipstream.ssclj.resources.user-template-auto :as auto]
     [com.sixsq.slipstream.auth.utils.db :as db]
-    [korma.core :as kc]
     [com.sixsq.slipstream.auth.internal :as ia]))
 
-(defn- simple-surrounder
-  [c]
-  (fn sur [s]
-    (str c s c)))
+(def rname ur/resource-url)
+(def req-u-name "unknown")
+(def req-u-role "ANON")
+(def req-template {:userTemplate
+                   {:href (str ct/resource-url "/" auto/registration-method)
+                    :method "auto"}})
+(def request-base {:identity     {:current req-u-name
+                                  :authentications
+                                           {req-u-name {:roles    #{req-u-role}
+                                                        :identity req-u-name}}}
+                   :sixsq.slipstream.authn/claims
+                                 {:username req-u-name
+                                  :roles    #{req-u-role}}
+                   :user-name    req-u-name
+                   :params       {:resource-name rname}
+                   :route-params {:resource-name rname}
+                   :body         req-template})
 
-(defn- surrounder
-  [c]
-  (fn [s]
-    (->> (str/split s #"\.")
-         (map (simple-surrounder c))
-         (str/join "."))))
-
-(def double-quote (surrounder \"))
-
-(defn- column-description
-  [[name type]]
-  (str (double-quote name) " " type))
-
-(defn- columns
-  [& name-types]
-  (->> name-types
-       (partition 2)
-       (map column-description)
-       (str/join ",")))
-
-(defonce ^:private columns-users (columns "NAME" "VARCHAR(100)"
-                                          "PASSWORD" "VARCHAR(200)"
-                                          "EMAIL" "VARCHAR(200)"
-                                          "GITHUBLOGIN" "VARCHAR(200)"
-                                          "CYCLONELOGIN" "VARCHAR(200)"
-                                          "CREATION" "TIMESTAMP"
-                                          "DELETED" "BOOLEAN"
-                                          "ISSUPERUSER" "BOOLEAN"
-                                          "ROLES" "VARCHAR(255)"
-                                          "RESOURCEURI" "VARCHAR(200)"
-                                          "JPAVERSION" "INTEGER"
-                                          "STATE" "VARCHAR(200)"
-                                          "FIRSTNAME" "VARCHAR(200)"
-                                          "LASTNAME" "VARCHAR(200)"
-                                          "ORGANIZATION" "VARCHAR(200)"
-                                          ))
-
-(defn- create-table!
-  [table columns & [options]]
-  (jdbc/execute! (db/db-spec) [(str "CREATE TABLE IF NOT EXISTS " (double-quote table) " ( " columns options " ) ")])
-  (log/info "Created (if needed!) table:" table ", columns:" columns ", options: " options))
-
-(defn create-test-empty-user-table
-  []
-  (db/init)
-  (create-table! "USER" columns-users)
-  (kc/delete db/users))
+(defn- user-request
+  [user]
+  (let [with-hashed-pass (assoc user :password (ia/hash-password (:password user)))
+        request          (update-in request-base [:body :userTemplate] merge
+                                    with-hashed-pass)]
+    request))
 
 (defn add-user-for-test!
   [user]
-  (db/init)
-  (kc/insert db/users (kc/values {:NAME        (:username user)
-                                  :PASSWORD    (ia/hash-password (:password user))
-                                  :EMAIL       (:email user)
-                                  :GITHUBLOGIN (:github-id user)
-                                  :STATE       (or (:state user) "ACTIVE")
-                                  :ISSUPERUSER (boolean (:issuperuser user))})))
+  (crud/add (user-request user)))
+
+(defn initialize-fixture
+  [f]
+  (dyn/initialize)
+  (f))
+
+(def ssclj-server-fixture (compose-fixtures
+                            ltu/with-test-es-client-fixture
+                            initialize-fixture))
+
+(defn es-db-dump
+  [type]
+  (println "ES DUMP. Doc type:" type)
+  (clojure.pprint/pprint
+    (esu/dump esb/*client* esb/index-name type))
+  (println (apply str (repeat 20 "-"))))
+

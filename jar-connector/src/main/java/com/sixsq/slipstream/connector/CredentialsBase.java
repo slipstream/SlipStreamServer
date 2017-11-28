@@ -121,6 +121,8 @@ public abstract class CredentialsBase implements Credentials {
 			return;
 		}
 		CloudCredential cd = (CloudCredential) getCloudCredential(params, category);
-		cd.store(this.user);
+		if (null != cd) {
+			cd.store(this.user);
+		}
 	}
 }

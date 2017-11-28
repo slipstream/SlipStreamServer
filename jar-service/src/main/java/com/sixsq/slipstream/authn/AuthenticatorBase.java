@@ -22,12 +22,7 @@ public abstract class AuthenticatorBase extends Authenticator {
 
 	protected void setLastOnline(User user) {
 		user.setLastOnline();
-		try {
-			user = user.store();
-		} catch (StaleObjectStateException e) {
-		} catch (RollbackException e) {
-		} catch (OptimisticLockException e) {
-		}
+		user.store();
 	}
 
 	protected void setLastOnline(Cookie cookie) {

@@ -1,5 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential-cloud-dummy
-    (:require
+  (:require
     [com.sixsq.slipstream.auth.acl :as acl]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-cloud-dummy]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
@@ -14,7 +14,7 @@
   (let [resource (cond-> {:resourceURI p/resource-uri
                           :type        type
                           :method      method
-                          :quota       quota
+                          :quota-vm    quota
                           :connector   connector
                           :key         key
                           :secret      secret

@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential-template-cloud-dummy
-    "This CredentialTemplate allows creating a Cloud Credential instance to hold
-    cloud credentials for Dummy cloud."
-    (:require
+  "This CredentialTemplate allows creating a Cloud Credential instance to hold
+  cloud credentials for Dummy cloud."
+  (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.connector.dummy-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template-cloud-dummy]
@@ -27,7 +27,7 @@
    :method      method
    :name        "Dummy cloud credentials store"
    :description "Stores user cloud credentials for Dummy"
-   :quota       10
+   :quota-vm    10
    :connector   {:href ""}
    :key         ""
    :secret      ""

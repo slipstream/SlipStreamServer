@@ -9,14 +9,14 @@
 (s/def :cimi.credential.cloud-dummy/connector :cimi.common/resource-link)
 (s/def :cimi.credential.cloud-dummy/key :cimi.core/nonblank-string)
 (s/def :cimi.credential.cloud-dummy/secret :cimi.core/nonblank-string)
-(s/def :cimi.credential.cloud-dummy/quota (s/or :pos-int pos-int? :zero zero?))
+(s/def :cimi.credential.cloud-dummy/quota-vm (s/or :pos-int pos-int? :zero zero?))
 (s/def :cimi.credential.cloud-dummy/domain-name string?)
 
 (def credential-keys-spec
   {:req-un [:cimi.credential.cloud-dummy/connector
             :cimi.credential.cloud-dummy/key
             :cimi.credential.cloud-dummy/secret
-            :cimi.credential.cloud-dummy/quota]
+            :cimi.credential.cloud-dummy/quota-vm]
    :opt-un [:cimi.credential.cloud-dummy/domain-name]})
 
 (s/def :cimi/credential.cloud-dummy
