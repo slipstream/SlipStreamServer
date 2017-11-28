@@ -748,7 +748,7 @@ public class User extends Metadata {
 
     private void storeSshCredentials() throws ValidationException {
         UserParameter param = getParameter(SshCredential.sshParamKey);
-        if (null != param) {
+        if (null != param && !param.getValue().isEmpty()) {
             Map<String, UserParameter> params = new HashMap<>();
             params.put(SshCredential.sshParamKey, param);
             new SshCredential(params).store(this);
