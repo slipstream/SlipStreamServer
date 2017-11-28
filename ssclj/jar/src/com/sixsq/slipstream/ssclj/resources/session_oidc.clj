@@ -31,8 +31,6 @@
 
 (def ^:const login-request-timeout (* 3 60))
 
-(def ^:const oidc-relative-url "/auth?response_type=code&client_id=%s&redirect_uri=%s")
-
 ;;
 ;; schemas
 ;;
