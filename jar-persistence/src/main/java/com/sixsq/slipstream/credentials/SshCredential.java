@@ -147,8 +147,10 @@ public class SshCredential<T> implements ISshCredential<T> {
         Map<String, UserParameter> params = new HashMap<>();
 
         if (null != this.publicKey) {
-            params.put(sshParamKey,
-                    new UserParameter(sshParamKey, this.publicKey, ""));
+            UserParameter pubKey = new UserParameter(sshParamKey, this.publicKey,
+                    "SSH Public Key(s) (one per line)");
+            pubKey.setInstructions("Warning: Some clouds may take into account only the first key until SlipStream bootstraps the machine.");
+            params.put(sshParamKey, pubKey);
         }
         return params;
     }
