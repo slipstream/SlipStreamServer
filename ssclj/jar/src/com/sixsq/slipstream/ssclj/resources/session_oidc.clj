@@ -74,7 +74,7 @@
         [{:status 303, :headers {"Location" redirect-url}} session])
       (oidc-utils/throw-bad-client-config authn-method redirectURI))))
 
-;; add a "validate" action (callback) to complete the GitHub authentication workflow
+;; add a "validate" action (callback) to complete the OIDC authentication workflow
 (defmethod p/set-session-operations authn-method
   [{:keys [id resourceURI username] :as resource} request]
   (let [href (str id "/validate")
@@ -83,7 +83,7 @@
     (cond-> (dissoc resource :operations)
             (seq ops) (assoc :operations ops))))
 
-;; execute the "validate" callback to complete the GitHub authentication workflow
+;; execute the "validate" callback to complete the OIDC authentication workflow
 (defmethod p/validate-callback authn-method
   [resource {:keys [headers base-uri uri] :as request}]
   (let [session-id (sutils/extract-session-id uri)
