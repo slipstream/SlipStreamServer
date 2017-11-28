@@ -27,10 +27,6 @@
   (str cyclone-base-url
        (format "/auth?client_id=slipstream&redirect_uri=%s&response_type=code" (redirect_uri))))
 
-(defn- cyclone-token-url
-  []
-  (str cyclone-base-url "/token"))
-
 (defn login
   []
   (log/debug "Starting CYCLONE authentication.")

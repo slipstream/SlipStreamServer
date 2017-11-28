@@ -5,7 +5,6 @@
     [clojure.string :as str]
     [peridot.core :refer :all]
     [ring.util.codec :as codec]
-    [com.sixsq.slipstream.auth.cyclone :as auth-oidc]
     [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.auth.utils.sign :as sign]
     [com.sixsq.slipstream.ssclj.app.params :as p]
@@ -19,7 +18,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-    [com.sixsq.slipstream.ssclj.resources.session-template :as st]))
+    [com.sixsq.slipstream.ssclj.resources.session-template :as st]
+    [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as oidc-utils]))
 
 (use-fixtures :each ltu/with-test-es-client-fixture)
 
@@ -361,11 +361,11 @@
                 (ltu/is-status 303))                        ;; always expect redirect when redirectURI is provided
 
             ;; try now with a fake code
-            (with-redefs [auth-oidc/get-oidc-access-token (fn [client-id client-secret oauth-code redirect-url]
-                                                            (case oauth-code
-                                                              "GOOD" good-token
-                                                              "BAD" bad-token
-                                                              nil))
+            (with-redefs [oidc-utils/get-oidc-access-token-from-token-url (fn [client-id token-url oauth-code redirect-url]
+                                                                            (case oauth-code
+                                                                              "GOOD" good-token
+                                                                              "BAD" bad-token
+                                                                              nil))
                           db/find-roles-for-username (fn [username]
                                                        "USER ANON alpha")
                           db/user-exists? (constantly true)]

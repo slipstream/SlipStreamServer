@@ -6,19 +6,26 @@
 
 (s/def :cimi.configuration-template.session-oidc/clientID :cimi.core/token)
 (s/def :cimi.configuration-template.session-oidc/baseURL :cimi.core/token)
+(s/def :cimi.configuration-template.session-oidc/tokenURL :cimi.core/token)
+(s/def :cimi.configuration-template.session-oidc/authorizeURL :cimi.core/token)
 (s/def :cimi.configuration-template.session-oidc/publicKey :cimi.core/token)
 
 (def configuration-template-keys-spec-req
   {:req-un [:cimi.configuration-template/instance
             :cimi.configuration-template.session-oidc/clientID
-            :cimi.configuration-template.session-oidc/baseURL
-            :cimi.configuration-template.session-oidc/publicKey]})
+            :cimi.configuration-template.session-oidc/publicKey]
+   :opt-un [:cimi.configuration-template.session-oidc/baseURL
+            :cimi.configuration-template.session-oidc/tokenURL
+            :cimi.configuration-template.session-oidc/authorizeURL]})
 
 (def configuration-template-keys-spec-create
   {:req-un [:cimi.configuration-template/instance
             :cimi.configuration-template.session-oidc/clientID
             :cimi.configuration-template.session-oidc/baseURL
-            :cimi.configuration-template.session-oidc/publicKey]})
+            :cimi.configuration-template.session-oidc/publicKey]
+   :opt-un [:cimi.configuration-template.session-oidc/baseURL
+            :cimi.configuration-template.session-oidc/tokenURL
+            :cimi.configuration-template.session-oidc/authorizeURL]})
 
 ;; Defines the contents of the OIDC authentication ConfigurationTemplate resource itself.
 (s/def :cimi/configuration-template.session-oidc

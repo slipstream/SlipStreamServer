@@ -5,7 +5,6 @@
     [peridot.core :refer :all]
     [ring.util.codec :as codec]
 
-    [com.sixsq.slipstream.auth.cyclone :as auth-cyclone]
     [com.sixsq.slipstream.auth.external :as ex]
     [com.sixsq.slipstream.auth.internal :as auth-internal]
     [com.sixsq.slipstream.auth.utils.db :as db]
@@ -21,7 +20,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.session-template :as st]
-    [com.sixsq.slipstream.ssclj.resources.configuration :as configuration]))
+    [com.sixsq.slipstream.ssclj.resources.configuration :as configuration]
+    [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as oidc-utils]))
 
 (use-fixtures :each ltu/with-test-es-client-fixture)
 
@@ -360,11 +360,11 @@
                 (ltu/is-status 303))                        ;; always expect redirect when redirectURI is provided
 
             ;; try now with a fake code
-            (with-redefs [auth-cyclone/get-oidc-access-token (fn [client-id client-secret oauth-code redirect-url]
-                                                               (case oauth-code
-                                                                 "GOOD" good-token
-                                                                 "BAD" bad-token
-                                                                 nil))
+            (with-redefs [oidc-utils/get-oidc-access-token-from-token-url (fn [client-id token-url oauth-code redirect-url]
+                                                                            (case oauth-code
+                                                                              "GOOD" good-token
+                                                                              "BAD" bad-token
+                                                                              nil))
                           ex/match-external-user! (fn [authn-method external-login external-email]
                                                     ["MATCHED_USER" "/dashboard"])
                           db/find-roles-for-username (fn [username]
