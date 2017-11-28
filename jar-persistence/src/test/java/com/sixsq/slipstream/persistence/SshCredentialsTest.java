@@ -14,6 +14,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -52,6 +53,8 @@ public class SshCredentialsTest {
         Map<String, UserParameter> params = cred.getParams();
         assertTrue(params.containsKey(sshParamKey));
         assertTrue("foo".equals(params.get(sshParamKey).getValue()));
+        assertTrue(!params.get(sshParamKey).getDescription().isEmpty());
+        assertTrue(!params.get(sshParamKey).getInstructions().isEmpty());
 
         params.clear();
         assertEquals(0, params.size());
@@ -69,6 +72,19 @@ public class SshCredentialsTest {
 
         SshCredential cred1 = new SshCredential(publicKey);
         cred1.store(user);
+        SshCredential cred2 = new SshCredential((String) null);
+        cred2.load(user);
+        assertTrue(cred2.publicKey.startsWith(publicKey.substring(0, 13)));
+    }
+
+    @Test
+    public void storeLoadMultiLinePubKeysTest() throws ValidationException {
+        SshCredential cred1 = new SshCredential(publicKey + "\n" + publicKey + "\n");
+        cred1.store(user);
+
+        List<SshCredential> pubKeys = cred1.searchCollection(user);
+        assertEquals(2, pubKeys.size());
+
         SshCredential cred2 = new SshCredential((String) null);
         cred2.load(user);
         assertTrue(cred2.publicKey.startsWith(publicKey.substring(0, 13)));
@@ -93,5 +109,4 @@ public class SshCredentialsTest {
         assertNotEquals(null, p);
         assertTrue(p.getValue().startsWith(publicKey.substring(0, 13)));
     }
-
 }

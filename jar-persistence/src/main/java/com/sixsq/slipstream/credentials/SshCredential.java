@@ -53,8 +53,8 @@ public class SshCredential<T> implements ISshCredential<T> {
         String filter = "type='ssh-public-key'";
         Form queryParameters = new Form();
         queryParameters.add("$filter", filter);
-        queryParameters.add("$orderby", "updated:desc");
-        queryParameters.add("$last", "1");
+//        queryParameters.add("$orderby", "updated:desc");
+//        queryParameters.add("$last", "1");
 
         return queryParameters;
     }
@@ -71,8 +71,12 @@ public class SshCredential<T> implements ISshCredential<T> {
         List<SshCredential> credList = searchCollection(user);
         if (credList.isEmpty()) {
             // Create
-            // TODO: use factory to provide CredentialCreateTmpl for Ssh and Cloud
-            SscljProxy.post(SscljProxy.CREDENTIAL_RESOURCE, authz, new SshCredentialCreateTmpl(this), true);
+            for (String pubKey: this.publicKey.split("\n")) {
+                if (!pubKey.isEmpty()) {
+                    SshCredentialCreateTmpl sshCredTmpl = new SshCredentialCreateTmpl(new SshCredential(pubKey));
+                    SscljProxy.post(SscljProxy.CREDENTIAL_RESOURCE, authz, sshCredTmpl, true);
+                }
+            }
         } else {
             // Edit
 
@@ -89,7 +93,7 @@ public class SshCredential<T> implements ISshCredential<T> {
         }
     }
 
-    private List<SshCredential> searchCollection(User user) {
+    public List<SshCredential> searchCollection(User user) {
         String authz = user.getName() + " USER";
         Response resp = SscljProxy.get(SscljProxy.CREDENTIAL_RESOURCE, authz, queryParameters());
         SshCredentialCollection cc = (SshCredentialCollection) fromJson(resp.getEntityAsText(),
