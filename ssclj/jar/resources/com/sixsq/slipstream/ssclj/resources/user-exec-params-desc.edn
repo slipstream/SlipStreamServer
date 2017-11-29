@@ -22,6 +22,12 @@
   :instructions "Frequency for receiving emails concerning your cloud usage."
   :type         "text"
   :order        40}
+ :sshPublicKey
+ {:description  "SSH Public Key(s) (one per line)"
+  :options      nil
+  :instructions "Warning: Some clouds may take into account only the first key until SlipStream bootstraps the machine."
+  :type         "text"
+  :order        50}
  :mailUsage
  {:description  "Cloud usage email"
   ;; :options      ["never" "daily" "weekly" "monthly"]

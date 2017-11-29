@@ -48,13 +48,9 @@ public class SshCredential<T> implements ISshCredential<T> {
 
     private Form queryParameters() {
 
-        // search for last modified
-
         String filter = "type='ssh-public-key'";
         Form queryParameters = new Form();
         queryParameters.add("$filter", filter);
-//        queryParameters.add("$orderby", "updated:desc");
-//        queryParameters.add("$last", "1");
 
         return queryParameters;
     }

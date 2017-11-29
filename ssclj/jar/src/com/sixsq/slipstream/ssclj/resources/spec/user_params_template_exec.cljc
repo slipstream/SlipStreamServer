@@ -6,13 +6,15 @@
     [com.sixsq.slipstream.ssclj.resources.spec.user-params-template :as ps]))
 
 (s/def :cimi.user-params-template-exec/defaultCloudService string?)
+(s/def :cimi.user-params-template-exec/sshPublicKey string?)
 (s/def :cimi.user-params-template-exec/keepRunning :cimi.core/nonblank-string)
 (s/def :cimi.user-params-template-exec/mailUsage :cimi.core/nonblank-string)
 (s/def :cimi.user-params-template-exec/verbosityLevel int?)
 (s/def :cimi.user-params-template-exec/timeout int?)
 
 (def user-params-template-exec-keys
-  [:cimi.user-params-template-exec/defaultCloudService
+  [:cimi.user-params-template-exec/sshPublicKey
+   :cimi.user-params-template-exec/defaultCloudService
    :cimi.user-params-template-exec/verbosityLevel
    :cimi.user-params-template-exec/keepRunning
    :cimi.user-params-template-exec/mailUsage

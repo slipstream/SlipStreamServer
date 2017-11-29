@@ -32,6 +32,7 @@
                    :keepRunning         "bar"
                    :mailUsage           "baz"
                    :verbosityLevel      0
+                   :sshPublicKey        ""
                    :timeout             0}]
     (is (s/valid? :cimi/user-params-template.exec root))
     (doseq [k (only-not-common-req-attrs root)]

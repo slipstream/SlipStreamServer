@@ -18,18 +18,21 @@ public class UserGeneralParams {
     public String defaultCloudService = "";
     public String keepRunning = UserParameter.KEEP_RUNNING_DEFAULT;
     public String mailUsage = UserParameter.MAIL_USAGE_DEFAULT;
+    public String sshPublicKey = "";
     public String id;
     public String paramsType = "execution";
 
     public UserGeneralParams() { }
 
     public UserGeneralParams(String defaultCloudService, String keepRunning,
-                             String mailUsage, Integer timeout, Integer verbosityLevel) {
+                             String mailUsage, Integer timeout, Integer
+                                     verbosityLevel, String sshPublicKey) {
         this.defaultCloudService = defaultCloudService;
         this.keepRunning = keepRunning;
         this.mailUsage = mailUsage;
         this.timeout = timeout;
         this.verbosityLevel = verbosityLevel;
+        this.sshPublicKey = sshPublicKey;
     }
 
     public static UserGeneralParams fromJson(String jsonRecords) {
@@ -55,6 +58,9 @@ public class UserGeneralParams {
         } else if (pName.equals(UserParameter.constructKey(category,
                 UserParameter.KEY_TIMEOUT))) {
             this.timeout = Integer.parseInt(pValue);
+        } else if (pName.equals(UserParameter.constructKey(category,
+                UserParameter.SSHKEY_PARAMETER_NAME))) {
+            this.sshPublicKey = pValue;
         }
     }
     public void setParameters(Collection<UserParameter> params) {
@@ -106,6 +112,13 @@ public class UserGeneralParams {
         param.setCategory(category);
         List<String> clouds = UserParametersFactoryBase.extractCloudNames(ConnectorFactory.getConnectors());
         param.setEnumValues(clouds);
+        params.put(k, param);
+
+        k = UserParameter.constructKey(category, UserParameter.SSHKEY_PARAMETER_NAME);
+        param = new UserParameter(k, this.sshPublicKey, "");
+        param.setDescription((String) paramsDesc.get("sshPublicKey").get("description"));
+        param.setInstructions((String) paramsDesc.get("sshPublicKey").get("instructions"));
+        param.setCategory(category);
         params.put(k, param);
 
         return params;

@@ -53,10 +53,12 @@
                               (ltu/body->edn)
                               (ltu/is-status 200)
                               (get-in [:response :body]))
-        create-from-templ {:userParamTemplate (-> template
-                                                  strip-unwanted-attrs
-                                                  (merge {:defaultCloudService "foo-bar-baz"
-                                                          :timeout             30}))}]
+        create-from-templ {:userParamTemplate
+                           (-> template
+                               strip-unwanted-attrs
+                               (merge {:defaultCloudService "foo-bar-baz"
+                                       :timeout             30
+                                       :sshPublicKey        "ssh-rsa ABCDE foo"}))}]
 
     ;; Query.
     ;; anonymous user collection query should fail
@@ -123,9 +125,11 @@
                                :response
                                :body)
             time-out       (+ (:timeout resource) 10)
-            verbosity      (+ (:verbosityLevel resource) 1)
             timeout-json   (json/write-str (assoc resource :timeout time-out))
-            verbosity-json (json/write-str (assoc resource :verbosityLevel verbosity))]
+            verbosity      (+ (:verbosityLevel resource) 1)
+            verbosity-json (json/write-str (assoc resource :verbosityLevel verbosity))
+            ssh-pub-keys   (str (:sshPublicKey resource) "\nssh-rsa XYZ baz")
+            ssh-keys-json (json/write-str (assoc resource :sshPublicKey ssh-pub-keys))]
 
         ;; anon user can NOT edit
         (-> session-anon
@@ -154,6 +158,21 @@
                             :response
                             :body
                             :timeout)))
+
+        (-> session-user
+            (request u1-abs-uri
+                     :request-method :put
+                     :body ssh-keys-json)
+            (ltu/body->edn)
+            (ltu/is-status 200))
+        (is (= 2 (-> session-admin
+                            (request u1-abs-uri)
+                            (ltu/body->edn)
+                            :response
+                            :body
+                            :sshPublicKey
+                            (clojure.string/split #"\n")
+                            count)))
 
         ;; super can edit
         (-> session-admin

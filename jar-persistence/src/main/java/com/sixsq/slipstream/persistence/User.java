@@ -611,7 +611,7 @@ public class User extends Metadata {
             return params;
         }
         params.putAll(loadCloudCredentials(user));
-        params.putAll(loadSshCredentials(user));
+//        params.putAll(loadSshCredentials(user));
         params.putAll(loadGeneralParameters(user));
         return params;
     }
@@ -699,7 +699,7 @@ public class User extends Metadata {
 
     private void storeParameters() throws ValidationException {
         storeGeneralParameters();
-        storeSshCredentials();
+//        storeSshCredentials();
         storeCloudCredentials();
     }
 

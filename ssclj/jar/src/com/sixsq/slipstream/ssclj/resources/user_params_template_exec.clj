@@ -17,6 +17,7 @@
    :keepRunning         "on-success"
    :mailUsage           "never"
    :verbosityLevel      0
+   :sshPublicKey        ""
    :timeout             30})
 
 (def ^:const desc
