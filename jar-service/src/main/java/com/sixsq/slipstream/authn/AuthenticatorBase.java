@@ -22,7 +22,6 @@ public abstract class AuthenticatorBase extends Authenticator {
 
 	protected void setLastOnline(User user) {
 		user.setLastOnline();
-		user.store();
 	}
 
 	protected void setLastOnline(Cookie cookie) {

@@ -229,7 +229,10 @@ public class ConnectorFactory {
         return names.toArray(new String[names.size()]);
     }
 
-    public static String cloudNameFromInstanceName(String connInstName) {
+    public static String cloudNameFromInstanceName(final String connInstName) {
+        if (connInstName.trim().isEmpty()) {
+            return null;
+        }
         Map<String, String> connInstNameToCloudMap = new HashMap<>();
         try {
             for (String c : ConnectorFactory.getConnectorClassNames()) {
@@ -237,10 +240,10 @@ public class ConnectorFactory {
                 String cloudName;
                 if (c.contains(":")) {
                     String[] parts = c.split(":");
-                    instName = parts[0];
-                    cloudName = parts[1];
+                    instName = parts[0].trim();
+                    cloudName = parts[1].trim();
                 } else {
-                    instName = c;
+                    instName = c.trim();
                     cloudName = instName;
                 }
                 connInstNameToCloudMap.put(instName, cloudName);
@@ -248,6 +251,6 @@ public class ConnectorFactory {
         } catch (ValidationException e) {
             return null;
         }
-        return connInstNameToCloudMap.get(connInstName);
+        return connInstNameToCloudMap.get(connInstName.trim());
     }
 }
