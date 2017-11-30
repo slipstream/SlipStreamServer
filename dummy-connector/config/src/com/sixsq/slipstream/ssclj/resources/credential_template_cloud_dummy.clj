@@ -27,7 +27,7 @@
    :method      method
    :name        "Dummy cloud credentials store"
    :description "Stores user cloud credentials for Dummy"
-   :quota-vm    10
+   :quota       20
    :connector   {:href ""}
    :key         ""
    :secret      ""

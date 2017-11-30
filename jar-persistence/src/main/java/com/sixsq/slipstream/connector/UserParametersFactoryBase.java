@@ -65,27 +65,7 @@ public abstract class UserParametersFactoryBase extends
 	public UserParametersFactoryBase(String category)
 			throws ValidationException {
 		super(category);
-		initBaseParameters();
 		initReferenceParameters();
-	}
-
-	protected void initBaseParameters() throws ValidationException {
-		if(Configuration.isQuotaEnabled()) {
-			// FIXME: move to initReferenceParameters()
-			// initQuotaParameter();
-		}
-	}
-
-	protected void initQuotaParameter()	throws ValidationException {
-		putParameter(
-				QuotaParameter.QUOTA_VM_PARAMETER_NAME,
-				Configuration
-						.getInstance()
-						.getParameters()
-						.getParameterValue(
-								constructKey(QuotaParameter.QUOTA_VM_PARAMETER_NAME),
-								QuotaParameter.QUOTA_VM_DEFAULT),
-				QuotaParameter.QUOTA_VM_DESCRIPTION, true, true);
 	}
 
 	public Map<String, UserParameter> getParameters() {
@@ -119,6 +99,18 @@ public abstract class UserParametersFactoryBase extends
 	public static String getPublicKeyParameterName() {
 		return Parameter.constructKey(ParameterCategory.General.toString(),
 				SSHKEY_PARAMETER_NAME);
+	}
+
+	protected String descKeyToParamName(String key) {
+		String name = key.replaceAll("-", ".");
+		if (name.equals("key")) {
+			name = UserParametersFactoryBase.KEY_PARAMETER_NAME;
+		} else if (name.equals("secret")) {
+			name = UserParametersFactoryBase.SECRET_PARAMETER_NAME;
+		} else if (name.equals("quota")) {
+			name = QuotaParameter.QUOTA_VM_PARAMETER_NAME;
+		}
+		return name;
 	}
 
 }

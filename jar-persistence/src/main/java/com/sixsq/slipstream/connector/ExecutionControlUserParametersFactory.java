@@ -39,15 +39,10 @@ public class ExecutionControlUserParametersFactory extends
 		super(CATEGORY);
 	}
 
-	// Don't add quota parameter for this section
-	@Override
-	protected void initQuotaParameter()	throws ValidationException {
-		return;
-	}
-
 	@Override
 	protected void initReferenceParameters() throws ValidationException {
 
+		// FIXME: take docu, instructions, defaults from .edn for user exec params
 		List<String> clouds = extractCloudNames(ConnectorFactory.getConnectors());
 		putMandatoryEnumParameter(
 				UserParametersFactoryBase.DEFAULT_CLOUD_SERVICE_PARAMETER_NAME,

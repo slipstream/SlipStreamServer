@@ -63,16 +63,10 @@ public class DummyCredentials extends CredentialsBase implements Credentials {
      */
     protected String getCloudCredParamValue(String pName, String
             cloudCredsJSON) throws ValidationException {
-        DummyCloudCredDef credDef = (DummyCloudCredDef) fromJson(cloudCredsJSON,
-                DummyCloudCredDef.class);
         switch (pName) {
-            case "key":
-                return credDef.key;
-            case "secret":
-                return credDef.secret;
-            case "quota":
-                return (credDef.quota == null) ? null : String.valueOf(credDef.quota);
-            case "domain.name":
+            case DummyUserParametersFactory.KEY_DOMAIN_NAME:
+                DummyCloudCredDef credDef = (DummyCloudCredDef) fromJson(cloudCredsJSON,
+                        DummyCloudCredDef.class);
                 return credDef.domainName;
             default:
                 return super.getCloudCredParamValue(pName, cloudCredsJSON);

@@ -817,14 +817,14 @@ public class User extends Metadata {
         }
         if (SscljProxy.isError(resp)) {
             throw new SlipStreamDatabaseException("Failed to persist User: "
-                    + resp.toString());
+                    + SscljProxy.respToString(resp));
         }
         User user = (new Gson()).fromJson(resp.getEntityAsText(), User.class);
         if (null == user || null == user.name) {
             resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + resourceUri, USERNAME_ROLE);
             if (SscljProxy.isError(resp)) {
                 throw new SlipStreamDatabaseException("Failed to persist User: "
-                        + resp.toString());
+                        + SscljProxy.respToString(resp));
             }
             user = (new Gson()).fromJson(resp.getEntityAsText(), User.class);
         }
@@ -933,6 +933,14 @@ public class User extends Metadata {
         } else {
             checkNoForbiddenRoles(roles);
         }
+    }
+
+    public void setDeleted() {
+        deleted = true;
+    }
+
+    public void unsetDeleted() {
+        deleted = false;
     }
 }
 

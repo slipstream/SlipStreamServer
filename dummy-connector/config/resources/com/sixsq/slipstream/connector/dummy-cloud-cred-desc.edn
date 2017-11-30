@@ -19,7 +19,7 @@
                :mandatory   false
                :readOnly    false
                :order       100}
- :quota-vm    {:displayName "User VM quota"
+ :quota       {:displayName "User VM quota"
                :category    "cloud-cred-dummy"
                :description "Number of VMs the user can start for this cloud"
                :type        "string"

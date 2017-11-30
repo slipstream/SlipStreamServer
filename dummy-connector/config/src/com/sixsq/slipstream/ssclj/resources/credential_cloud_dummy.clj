@@ -14,7 +14,7 @@
   (let [resource (cond-> {:resourceURI p/resource-uri
                           :type        type
                           :method      method
-                          :quota-vm    quota
+                          :quota       quota
                           :connector   connector
                           :key         key
                           :secret      secret

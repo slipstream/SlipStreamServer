@@ -6,8 +6,11 @@
     [com.sixsq.slipstream.ssclj.util.spec :as su]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]))
 
-(s/def :cimi.credential-template.cloud/key :cimi.core/nonblank-string)
-(s/def :cimi.credential-template.cloud/secret :cimi.core/nonblank-string)
+; FIXME: see https://github.com/slipstream/SlipStreamServer/issues/1309
+(s/def :cimi.credential-template.cloud/key string?)
+(s/def :cimi.credential-template.cloud/secret string?)
+;(s/def :cimi.credential-template.cloud/key :cimi.core/nonblank-string)
+;(s/def :cimi.credential-template.cloud/secret :cimi.core/nonblank-string)
 (s/def :cimi.credential-template.cloud/connector :cimi.common/resource-link)
 (s/def :cimi.credential-template.cloud/quota (s/or :pos-int pos-int? :zero zero?))
 

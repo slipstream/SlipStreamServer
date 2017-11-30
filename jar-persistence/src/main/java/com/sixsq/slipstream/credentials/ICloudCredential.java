@@ -25,4 +25,6 @@ public interface ICloudCredential<T> {
     void setParams(Map<String, UserParameter> params);
 
     Map<String, UserParameter> getParams() throws ValidationException;
+
+    boolean cloudCredsDefined();
 }

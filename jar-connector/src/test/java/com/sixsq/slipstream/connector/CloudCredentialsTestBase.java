@@ -20,10 +20,14 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.configuration.Configuration;
+import com.sixsq.slipstream.es.CljElasticsearchHelper;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotImplementedException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.ServiceConfiguration;
+import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.ssclj.app.SscljTestServer;
@@ -52,8 +56,20 @@ public abstract class CloudCredentialsTestBase implements
 	public static final String CONNECTOR_NAME = "foo-bar-baz";
 
 	@BeforeClass
-	public static void setupClass() {
+	public static void setupClass() throws ValidationException {
 		SscljTestServer.start();
+		CljElasticsearchHelper.initTestDb();
+		enableQuota();
+	}
+
+	public static void enableQuota() throws ValidationException {
+		ServiceConfiguration sc = Configuration.getInstance().getParameters();
+		String scQuotaParamName = ServiceConfiguration.RequiredParameters.SLIPSTREAM_QUOTA_ENABLE.getName();
+		ServiceConfigurationParameter quotaParam = sc.getParameter(scQuotaParamName);
+		quotaParam.setValue("true");
+		sc.setParameter(quotaParam);
+		sc.store();
+		SscljTestServer.refresh();
 	}
 
 	@AfterClass
@@ -132,7 +148,11 @@ public abstract class CloudCredentialsTestBase implements
 		assertNotNull(credParams);
 		assertTrue(credParams.size() >= params.size());
 		for (String pname: params.keySet()) {
-			assertTrue(params.get(pname).getValue().equals(u1.getParameter(pname).getValue()));
+			String pVal = params.get(pname).getValue();
+			assertNotNull(pVal);
+			UserParameter u1Param = u1.getParameter(pname);
+			assertNotNull(u1Param);
+			assertTrue(pVal.equals(u1Param.getValue()));
 		}
 
 		// Credential parameters are updated.

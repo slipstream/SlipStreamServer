@@ -1,10 +1,13 @@
 package com.sixsq.slipstream.credentials;
 
 import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.CloudConnector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
+import com.sixsq.slipstream.connector.UserParametersFactoryBase;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.QuotaParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.util.SscljProxy;
@@ -76,8 +79,14 @@ public class CloudCredential<T> implements ICloudCredential<T> {
         CloudCredentialCollection cc = (CloudCredentialCollection) fromJson(resp.getEntityAsText(), CloudCredentialCollection.class);
         List<CloudCredential> credList = cc.getCredentials();
         if (credList.isEmpty()){
-            // Create
-            SscljProxy.post(SscljProxy.CREDENTIAL_RESOURCE, authz, new CloudCredentialCreateTmpl(this), true);
+            // Create only if the base part of the credentials is properly defined.
+            if (cloudCredsDefined()) {
+                SscljProxy.post(SscljProxy.CREDENTIAL_RESOURCE, authz, new CloudCredentialCreateTmpl(this), true);
+            } else {
+                logger.warning("Base part of credentials for connector instance '" +
+                        connector.href + "' is not properly defined for user '" +
+                        user.getName() + "'. Not creating.");
+            }
         } else{
             // Edit
 
@@ -114,21 +123,35 @@ public class CloudCredential<T> implements ICloudCredential<T> {
         String instanceName = getConnectorInstanceName();
         String k;
 
-        k = UserParameter.constructKey(instanceName, "key");
+        k = UserParameter.constructKey(instanceName,
+                UserParametersFactoryBase.KEY_PARAMETER_NAME);
         if (params.containsKey(k)) {
             key = params.get(k).getValue();
         }
-        k = UserParameter.constructKey(instanceName, "secret");
+        k = UserParameter.constructKey(instanceName,
+                UserParametersFactoryBase.SECRET_PARAMETER_NAME);
         if (params.containsKey(k)) {
             secret = params.get(k).getValue();
         }
-        k = UserParameter.constructKey(instanceName, "quota");
+        k = UserParameter.constructKey(instanceName, QuotaParameter.QUOTA_VM_PARAMETER_NAME);
         if (params.containsKey(k)) {
             String value = params.get(k).getValue();
             if (!value.isEmpty()) {
                 quota = Integer.parseInt(value);
             }
         }
+    }
+
+    private boolean isKeySet() {
+        return null != this.key && !this.key.isEmpty();
+    }
+
+    private boolean isSecretSet() {
+        return null != this.secret && !this.secret.isEmpty();
+    }
+
+    public boolean cloudCredsDefined() {
+        return isKeySet() && isSecretSet();
     }
 
     @Override
@@ -139,15 +162,17 @@ public class CloudCredential<T> implements ICloudCredential<T> {
         String k;
 
         if (null != this.key) {
-            k = UserParameter.constructKey(instanceName, "key");
+            k = UserParameter.constructKey(instanceName,
+                    UserParametersFactoryBase.KEY_PARAMETER_NAME);
             params.put(k, new UserParameter(k, this.key, ""));
         }
         if (null != this.secret) {
-            k = UserParameter.constructKey(instanceName, "secret");
+            k = UserParameter.constructKey(instanceName,
+                    UserParametersFactoryBase.SECRET_PARAMETER_NAME);
             params.put(k, new UserParameter(k, this.secret, ""));
         }
         if (null != this.quota) {
-            k = UserParameter.constructKey(instanceName, "quota");
+            k = UserParameter.constructKey(instanceName, QuotaParameter.QUOTA_VM_PARAMETER_NAME);
             params.put(k, new UserParameter(k, String.valueOf(this.quota), ""));
         }
         return params;

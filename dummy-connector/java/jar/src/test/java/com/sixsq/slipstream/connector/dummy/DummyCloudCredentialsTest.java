@@ -22,7 +22,9 @@ package com.sixsq.slipstream.connector.dummy;
 
 import com.sixsq.slipstream.connector.SystemConfigurationParametersFactoryBase;
 import com.sixsq.slipstream.connector.CloudCredentialsTestBase;
+import com.sixsq.slipstream.connector.UserParametersFactoryBase;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.QuotaParameter;
 import com.sixsq.slipstream.persistence.UserParameter;
 
 import java.util.HashMap;
@@ -34,10 +36,10 @@ public class DummyCloudCredentialsTest extends CloudCredentialsTestBase {
 	public Map<String, UserParameter> createAndStoreCloudCredentials() throws ValidationException {
 
 		Map<String, String> paramsKeyVal = new HashMap<>();
-		paramsKeyVal.put("key", "key");
-		paramsKeyVal.put("secret", "secret");
-		paramsKeyVal.put("quota", "7");
-		paramsKeyVal.put("domain.name", "dn");
+		paramsKeyVal.put(UserParametersFactoryBase.KEY_PARAMETER_NAME, "key");
+		paramsKeyVal.put(UserParametersFactoryBase.SECRET_PARAMETER_NAME, "secret");
+		paramsKeyVal.put(QuotaParameter.QUOTA_VM_PARAMETER_NAME, "7");
+		paramsKeyVal.put(DummyUserParametersFactory.KEY_DOMAIN_NAME, "dn");
 
 		Map<String, UserParameter> params = new HashMap<>();
 		UserParameter param;

@@ -452,6 +452,7 @@ public class UserResource extends UserParameterizedResource {
 		}
 
 		getTargetUser().setState(State.DELETED);
+		getTargetUser().setDeleted();
 		getTargetUser().store();
 
 		postEventDeleted(getParameterized());

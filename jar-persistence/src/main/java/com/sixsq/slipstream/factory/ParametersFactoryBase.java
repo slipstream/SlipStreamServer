@@ -20,9 +20,12 @@ package com.sixsq.slipstream.factory;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.configuration.Configuration;
+import com.sixsq.slipstream.connector.UserParametersFactoryBase;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ParameterType;
+import com.sixsq.slipstream.persistence.QuotaParameter;
 import com.sixsq.slipstream.ssclj.util.UserParamsDesc;
 
 import java.util.List;
@@ -43,39 +46,67 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 		initReferenceParameters(paramsDesc);
 	}
 
+	protected String descKeyToParamName(String key) {
+		return key;
+	}
+
+	private ParameterType descTypeToParamType(String type) {
+		ParameterType ptype;
+		switch (type) {
+			case "password":
+				ptype = ParameterType.Password;
+				break;
+			default:
+				ptype = ParameterType.String;
+				break;
+		}
+		return ptype;
+	}
+
+	private boolean skipParameter(String name) throws ValidationException {
+		switch (name) {
+			case QuotaParameter.QUOTA_VM_PARAMETER_NAME:
+				return !Configuration.isQuotaEnabled();
+			default:
+				return false;
+		}
+	}
+
+	private String defaultParamValue(String name) throws ValidationException {
+		switch (name) {
+			case QuotaParameter.QUOTA_VM_PARAMETER_NAME:
+				return QuotaParameter.QUOTA_VM_DEFAULT;
+			default:
+				return "";
+		}
+	}
+
 	protected void initReferenceParameters(Map<String, Map> paramsDesc)
 			throws ValidationException {
 		for (String key : paramsDesc.keySet()) {
 			Map desc = paramsDesc.get(key);
 
-			String name = key.replaceAll("-", ".");
+			String name = descKeyToParamName(key);
+			if (skipParameter(name)) {
+				continue;
+			}
 			String description = (String) desc.get("displayName");
+			Boolean mandatory = (Boolean) desc.get("mandatory");
+			String value = defaultParamValue(name);
+
+			S parameter = createParameter(name, value, description, mandatory);
+
 			String instructions = (String) desc.get("description");
 			int order = ((Long) desc.get("order")).intValue();
+			ParameterType ptype = descTypeToParamType((String) desc.get("type"));
+			Boolean readOnly = (Boolean) desc.get("readOnly");
 
-			String type = (String) desc.get("type");
-			ParameterType ptype;
-			switch (type) {
-				case "password":
-					ptype = ParameterType.Password;
-					break;
-				default:
-					ptype = ParameterType.String;
-					break;
-			}
-			Boolean mandatory = (Boolean) desc.get("mandatory");
-			if (mandatory) {
-				String value = "";
-				putMandatoryParameter(
-						name,
-						description,
-						value,
-						ptype,
-						instructions,
-						order);
-			} else {
-				putParameter(name, description, instructions, ptype, false);
-			}
+			parameter.setInstructions(instructions);
+			parameter.setOrder(order);
+			parameter.setType(ptype);
+			parameter.setReadonly(readOnly);
+
+			assignParameter(parameter);
 		}
 	};
 

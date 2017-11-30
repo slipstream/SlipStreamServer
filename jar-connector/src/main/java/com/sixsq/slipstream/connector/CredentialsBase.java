@@ -26,12 +26,16 @@ import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Parameter;
+import com.sixsq.slipstream.persistence.QuotaParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 public abstract class CredentialsBase implements Credentials {
+
+	private Logger logger = Logger.getLogger(this.getClass().toString());
 
 	@Override
 	abstract public String getKey() throws InvalidElementException;
@@ -59,7 +63,7 @@ public abstract class CredentialsBase implements Credentials {
 			throw new ValidationException(e.getMessage());
 		}
 	}
-	
+
 	protected String getParameterValue(String key) throws InvalidElementException {
 		UserParameter parameter = user.getParameter(qualifyKey(key));
 		if (parameter == null) {
@@ -88,7 +92,21 @@ public abstract class CredentialsBase implements Credentials {
 	 * @throws ValidationException
 	 */
 	protected String getCloudCredParamValue(String pName, String cloudCredsJSON) throws ValidationException {
-		return null;
+		CloudCredential credDef = (CloudCredential) CloudCredential.fromJson(cloudCredsJSON, CloudCredential.class);
+		switch (pName) {
+			case "key":
+				return credDef.key;
+			case UserParametersFactoryBase.KEY_PARAMETER_NAME:
+				return credDef.key;
+			case "secret":
+				return credDef.secret;
+			case UserParametersFactoryBase.SECRET_PARAMETER_NAME:
+				return credDef.secret;
+			case QuotaParameter.QUOTA_VM_PARAMETER_NAME:
+				return (credDef.quota == null) ? null : String.valueOf(credDef.quota);
+			default:
+				return null;
+		}
 	}
 
 	public Map<String, UserParameter> setUserParametersValues(

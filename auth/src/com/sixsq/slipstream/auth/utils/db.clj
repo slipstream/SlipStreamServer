@@ -144,7 +144,7 @@
 
 (defn find-password-for-username
   [username]
-  (:password (get-user username)))
+  (:password (get-active-user-by-name username)))
 
 (defn build-roles [super? roles-string]
   (let [initial-role (if super? ["ADMIN" "USER" "ANON"] ["USER" "ANON"])

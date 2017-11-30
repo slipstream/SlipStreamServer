@@ -349,4 +349,8 @@ public class SscljProxy {
     public static boolean isError(Response resp) {
         return resp == null || resp.getStatus().isError();
     }
+
+    public static String respToString(Response resp) {
+        return null == resp ? "response is 'null'." : resp.toString();
+    }
 }
