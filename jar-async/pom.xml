@@ -12,11 +12,11 @@
     </license>
   </licenses>
 
-  <parent>
-    <groupId>com.sixsq.slipstream</groupId>
-    <artifactId>SlipStreamServer</artifactId>
-    <version>3.39-SNAPSHOT</version>
-  </parent>
+	<parent>
+		<groupId>com.sixsq.slipstream</groupId>
+		<artifactId>SlipStreamServer</artifactId>
+		<version>3.41-SNAPSHOT</version>
+	</parent>
 
   <dependencies>
     <dependency>

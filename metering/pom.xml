@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>metering-pom</artifactId>
-  <version>3.39-SNAPSHOT</version>
+  <version>3.41-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>SlipStream Metering (POM)</name>
   <url>http://sixsq.com/</url>
@@ -10,7 +10,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.39-SNAPSHOT</version>
+    <version>3.41-SNAPSHOT</version>
   </parent>
 
   <modules>

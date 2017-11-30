@@ -3,14 +3,14 @@
 
   <artifactId>SlipStreamDbBinding-jar-dep</artifactId>
   <packaging>pom</packaging>
-  <version>3.39-SNAPSHOT</version>
+  <version>3.41-SNAPSHOT</version>
   <name>SlipStreamServer/db-binding</name>
   <url>http://sixsq.com</url>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.39-SNAPSHOT</version>
+    <version>3.41-SNAPSHOT</version>
   </parent>
 
   <licenses>
