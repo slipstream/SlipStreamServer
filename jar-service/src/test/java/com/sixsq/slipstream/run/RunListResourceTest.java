@@ -156,7 +156,7 @@ public class RunListResourceTest extends ResourceTestBase {
 
 		Response resp = getRunList(null, null, null);
 		assertEquals(Status.SUCCESS_OK, resp.getStatus());
-		Document runs = XmlUtil.stringToDom(resp.getEntityAsText());
+		Document runs = XmlUtil.stringToDom(resp.getEntityAsText().trim());
 		assertEquals(0, runs.getDocumentElement().getElementsByTagName("item").getLength());
 
 		listAllRuns("Runs after explicit cleanup.");
@@ -371,6 +371,7 @@ public class RunListResourceTest extends ResourceTestBase {
 		attributes.put(User.REQUEST_KEY, user);
 
 		Form queryString = new Form();
+		queryString.set("media", "xml");
 		if (offset != null) queryString.set("offset", offset.toString());
 		if (limit != null) queryString.set("limit", limit.toString());
 		if (cloudServiceName != null) queryString.set("cloud", cloudServiceName);

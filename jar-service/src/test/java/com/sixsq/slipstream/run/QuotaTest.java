@@ -34,8 +34,8 @@ import com.sixsq.slipstream.persistence.*;
 import com.sixsq.slipstream.ssclj.app.SscljTestServer;
 import com.sixsq.slipstream.util.CommonTestUtil;
 import com.sixsq.slipstream.util.SscljProxy;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -63,14 +63,14 @@ public class QuotaTest {
 		SscljTestServer.stop();
 	}
 
-	@BeforeClass
-	public static void setupClass() {
+	@Before
+	public void setUp() {
 		Event.muteForTests();
 		setupBackend();
 	}
 
-	@AfterClass
-	public static void teardownClass() {
+	@After
+	public void tearDown() {
 	    teardownBackend();
 	}
 

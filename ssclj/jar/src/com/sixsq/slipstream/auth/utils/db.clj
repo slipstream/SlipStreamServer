@@ -8,9 +8,7 @@
     [korma.db :refer [defdb]]
     [com.sixsq.slipstream.auth.utils.config :as cf]
     [com.sixsq.slipstream.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.filter.parser :as parser]
-    ;[com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    ))
+    [com.sixsq.slipstream.ssclj.filter.parser :as parser]))
 
 (defn in?
   "true if coll contains elm"

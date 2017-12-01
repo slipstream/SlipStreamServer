@@ -65,6 +65,7 @@ public class ResourceTestBase extends RunTestBase {
 		SscljTestServer.start();
 		CljElasticsearchHelper.initTestDb();
 		user = UserTest.createUser("test");
+		user.store();
 	}
 
 	@AfterClass
@@ -73,11 +74,6 @@ public class ResourceTestBase extends RunTestBase {
 	}
 
 	protected static final String TEST_REQUEST_NAME = "/test/request";
-
-	// Need to set cloudServiceName before the status user is
-	// created, since the createUser method uses it
-	public static String cloudServiceName = new LocalConnector()
-			.getCloudServiceName();
 
 	protected static User user;
 

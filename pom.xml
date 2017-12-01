@@ -17,7 +17,6 @@
   <modules>
     <module>utils</module>
     <module>token</module>
-    <module>auth</module>
     <module>jar-persistence</module>
     <module>jar-connector</module>
     <module>dummy-connector</module>

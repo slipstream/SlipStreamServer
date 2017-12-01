@@ -26,9 +26,9 @@
                    [com.sixsq.slipstream/SlipStreamPersistence]
                    [com.sixsq.slipstream/SlipStreamConnector]
 
-                   [com.sixsq.slipstream/SlipStreamDbSerializers-jar nil :scope "test"]
-                   [com.sixsq.slipstream/SlipStreamCljResources-jar nil :scope "provided"]
-                   [com.sixsq.slipstream/SlipStreamCljResourcesTestServer-jar :classifier "tests" :scope "test"]
+                   [com.sixsq.slipstream/SlipStreamDbSerializers-jar :scope "test"]
+                   [com.sixsq.slipstream/SlipStreamCljResources-jar :scope "provided"]
+                   [com.sixsq.slipstream/SlipStreamCljResourcesTestServer-jar :classifier "tests"]
 
                    [adzerk/boot-test]
                    [adzerk/boot-reload]

@@ -1,4 +1,3 @@
-;; old namespace: com.sixsq.slipstream.ssclj.resources.common.authz-test
 (ns com.sixsq.slipstream.auth.acl-test
   (:require
     [clojure.test :refer [deftest are is]]

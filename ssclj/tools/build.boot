@@ -33,6 +33,8 @@
                     [onetom/boot-lein-generate]
 
                     [com.sixsq.slipstream/SlipStreamPersistence nil :scope "compile"]
+                    [com.sixsq.slipstream/SlipStreamCljResources-jar nil :scope "compile"]
+                    [com.sixsq.slipstream/SlipStreamDbBinding-jar nil :scope "compile"]
                     [com.sixsq.slipstream/SlipStreamDbSerializers-jar nil :scope "compile"]
 
                     [superstring]

@@ -1,4 +1,3 @@
-;; old namespace: com.sixsq.slipstream.ssclj.resources.common.authz
 (ns com.sixsq.slipstream.auth.acl
   (:require
     [ring.util.response :as r]

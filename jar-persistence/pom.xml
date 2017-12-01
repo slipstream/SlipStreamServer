@@ -48,6 +48,13 @@
 
 		<dependency>
 			<groupId>com.sixsq.slipstream</groupId>
+			<artifactId>SlipStreamCljResources-jar-dep</artifactId>
+			<type>pom</type>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
 			<artifactId>SlipStreamCljResources-jar</artifactId>
 			<type>jar</type>
 			<scope>provided</scope>

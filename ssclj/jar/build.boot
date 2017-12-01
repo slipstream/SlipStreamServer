@@ -43,6 +43,7 @@
                     [org.apache.logging.log4j/log4j-api]
                     [org.clojure/data.json]
                     [org.clojure/java.classpath]
+                    [org.clojure/test.check :scope "test"]
                     [org.clojure/tools.cli]
                     [org.clojure/tools.logging]
                     [org.clojure/tools.namespace]
@@ -53,8 +54,14 @@
                     [superstring]
                     [zookeeper-clj]
 
+                    ; dependencies for auth
+                    [buddy/buddy-core]
+                    [buddy/buddy-hashers]
+                    [buddy/buddy-sign]
+                    [clj-http]
+                    [peridot]
+
                     [com.sixsq.slipstream/utils]
-                    [com.sixsq.slipstream/auth]
                     [com.sixsq.slipstream/slipstream-ring-container :scope "test"]
                     [com.sixsq.slipstream/SlipStreamDbBinding-jar]
                     [com.sixsq.slipstream/SlipStreamClientAPI-jar]
