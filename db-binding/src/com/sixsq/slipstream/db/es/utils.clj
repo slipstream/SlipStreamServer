@@ -31,9 +31,13 @@
     (org.elasticsearch.cluster.health ClusterHealthStatus)
     (org.elasticsearch.index IndexNotFoundException)
     (org.elasticsearch.index.query QueryBuilders)
-    (org.elasticsearch.node Node)
+    (org.elasticsearch.node Node MockNode)
+    (org.elasticsearch.test ESIntegTestCase)
+    (com.carrotsearch.randomizedtesting RandomizedContext)
     (org.elasticsearch.plugins Plugin)
-    (org.elasticsearch.transport.client PreBuiltTransportClient)))
+    (org.elasticsearch.transport Netty4Plugin)
+    (org.elasticsearch.transport.client PreBuiltTransportClient)
+    (org.elasticsearch.env Environment)))
 
 (def ^:const max-result-window 200000)
 
@@ -149,23 +153,32 @@
 ;; Util functions
 ;;
 
+
 (defn create-test-node
   "Creates a local elasticsearch node that holds data but cannot be accessed
    through the HTTP protocol."
   ([]
    (create-test-node (cu/random-uuid)))
   ([^String cluster-name]
-   (let [home (str (fs/temp-dir "es-data-"))
+   (let [tempDir (str (fs/temp-dir "es-data-"))
          settings (.. (Settings/builder)
-                      (put "http.enabled" false)
-                      (put "node.data" true)
                       (put "cluster.name" cluster-name)
-                      (put "transport.type" "local")
-                      (put "path.home" home)
+                      (put "path.home" tempDir)
+                      (put "transport.netty.worker_count" 3)
+                      (put "node.data" true)
+                      (put "http.enabled" true)
                       (put "logger.level" "INFO")
-                      (build))]
-     (.. (Node. ^Settings settings)
+                      (put "http.type" "netty4")
+                      (put "http.port" "9200-9300")
+                      (put "transport.type" "netty4")
+                      (put "network.host" "127.0.0.1")
+                      (build))
+         plugins [Netty4Plugin]
+         ]
+     (.. (MockNode. ^Settings settings plugins)
          (start)))))
+
+
 
 (def ^:const mapping-not-analyzed
   (-> "com/sixsq/slipstream/db/es/mapping-not-analyzed.json"

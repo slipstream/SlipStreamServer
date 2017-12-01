@@ -40,6 +40,9 @@
                    [org.apache.logging.log4j/log4j-api]
                    [org.apache.logging.log4j/log4j-web]
                    [org.elasticsearch.client/transport]
+                   [org.elasticsearch.plugin/transport-netty4-client]
+                   [org.elasticsearch.test/framework]
+
                    [ring/ring-json]
                    [superstring]
 
@@ -69,8 +72,8 @@
   '[boot.lein :refer [generate]])
 
 (set-env!
-  :source-paths #{"test"}
-  :resource-paths #{"src" "resources"})
+  :source-paths #{"test" "java"}
+  :resource-paths #{"src" "resources" "java"})
 
 (task-options!
   pom {:project (get-env :project)
@@ -84,6 +87,7 @@
          "runs all tests and performs full compilation"
          []
          (comp
+          (javac)
            (test)
            #_(sift :include #{#".*_test\.clj"}
                  :invert true)
@@ -92,6 +96,7 @@
 (deftask build []
          (comp
            (pom)
+           (javac)
            (sift :include #{#".*_test\.clj"}
                  :invert true)
            (aot :all true)
