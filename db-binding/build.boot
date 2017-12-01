@@ -43,6 +43,7 @@
                    [org.elasticsearch.plugin/transport-netty4-client :scope "test"]
                    [org.elasticsearch.test/framework :scope "test"]
 
+
                    [ring/ring-json]
                    [superstring]
 
