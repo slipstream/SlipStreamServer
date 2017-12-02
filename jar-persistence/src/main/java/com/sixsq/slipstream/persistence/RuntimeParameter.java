@@ -20,26 +20,25 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
+import javax.persistence.*;
 
+import com.sixsq.slipstream.exceptions.NotFoundException;
+import com.sixsq.slipstream.util.SscljProxy;
+import org.restlet.Response;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Text;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
+
+import static com.sixsq.slipstream.util.SscljProxy.VIRTUAL_MACHINE_RESOURCE;
 
 /**
  * Unit tests:
@@ -245,7 +244,6 @@ public class RuntimeParameter extends Metadata {
 	@Attribute(name = "key")
 	private String key_;
 
-	@Text(required = false, data = true)
 	@Column(length = VALUE_MAX_LENGTH)
 	private String value = "";
 
@@ -390,10 +388,50 @@ public class RuntimeParameter extends Metadata {
 		return resourceUri;
 	}
 
+	public String getVmState() throws NotFoundException, UnsupportedEncodingException {
+
+		EntityManager em = PersistenceUtil.createEntityManager();
+
+		Run run = Run.load(container.getResourceUri(), em);
+		String cloud = run.getRuntimeParameterValueIgnoreAbort(
+				constructParamName(group_, RuntimeParameter.CLOUD_SERVICE_NAME));
+		String instanceId = run.getRuntimeParameterValueIgnoreAbort(
+				constructParamName(group_, RuntimeParameter.INSTANCE_ID_KEY));
+
+		em.close();
+
+		String cimiQuery = new StringBuffer()
+				.append("connector/href='connector/").append(cloud)
+				.append("' and instanceID='").append(instanceId).append("'").toString();
+		String resource = VIRTUAL_MACHINE_RESOURCE + "?$filter=" + URLEncoder.encode(cimiQuery, "UTF-8");
+
+		Response res = SscljProxy.get(resource, " internal ADMIN");
+		if (res == null) return null;
+
+		VirtualMachines records = VirtualMachines.fromJson(res.getEntityAsText());
+		if (records == null) return null;
+
+		List<VirtualMachine> machines = records.getVirtualMachines();
+		if (machines.size() < 1) return null;
+
+		return machines.get(0).getState();
+	}
+
+	@Text(required = false, data = true)
 	public String getValue() {
+		if (STATE_VM_KEY.equals(name_)) {
+			try {
+				String vmState = getVmState();
+				if (vmState != null) return vmState;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return "Unknown";
+		}
 		return value;
 	}
 
+	@Text(required = false, data = true)
 	public void setValue(String value) {
 		setIsSet(!isNullOrEmpty(value));
 		this.value = value;

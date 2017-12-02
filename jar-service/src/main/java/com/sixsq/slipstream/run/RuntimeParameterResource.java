@@ -143,10 +143,8 @@ public class RuntimeParameterResource extends RunBaseResource {
 		try {
 			long start = System.currentTimeMillis();
 
-			if (!runtimeParameter.isSet()) {
-				throw new ResourceException(
-						Status.CLIENT_ERROR_PRECONDITION_FAILED, "key " + key
-								+ " not yet set");
+			if (!runtimeParameter.isSet() && !RuntimeParameter.STATE_VM_KEY.equals(runtimeParameter.getName())) {
+				throw new ResourceException(Status.CLIENT_ERROR_PRECONDITION_FAILED, "key " + key + " not yet set");
 			}
 
 			logTimeDiff("processing get on runtime parameter", start);

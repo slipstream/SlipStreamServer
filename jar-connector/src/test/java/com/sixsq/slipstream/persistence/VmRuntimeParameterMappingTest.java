@@ -148,7 +148,10 @@ public class VmRuntimeParameterMappingTest {
 		mapping = VmRuntimeParameterMapping.find("local", instanceId);
 		assertThat(mapping.getRunUuid(), is(run.getUuid()));
 		assertThat(vm.getRunUuid(), is(run.getUuid()));
-		assertThat(mapping.getVmstateRuntimeParameter().getValue(), is(vmstate));
+
+		// Assertion below is commented because vmstate is now taken from SSCLJ /api/virtual-machine
+		// assertThat(mapping.getVmstateRuntimeParameter().getValue(), is(vmstate));
+
 		assertThat(
 				RuntimeParameter.loadFromUuidAndKey(run.getUuid(),
 						RuntimeParameter.constructParamName(Run.MACHINE_NAME, RuntimeParameter.INSTANCE_ID_KEY))
