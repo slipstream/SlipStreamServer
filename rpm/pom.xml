@@ -8,7 +8,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.41-SNAPSHOT</version>
+    <version>3.42-SNAPSHOT</version>
   </parent>
   <properties>
     <slipstream.logs.dir>/var/log/slipstream/server</slipstream.logs.dir>
@@ -463,6 +463,28 @@
                     <exclude>META-INF</exclude>
                     <exclude>META-INF/**/*</exclude>
                   </excludes>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>${installation.dir}/webapps/slipstream.war/static-content/css</directory>
+              <filemode>664</filemode>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>target/dashboard_tabs/css</location>
+                </source>
+              </sources>
+            </mapping>
+
+            <mapping>
+              <directory>${installation.dir}/webapps/slipstream.war/static-content/js</directory>
+              <filemode>664</filemode>
+              <directoryIncluded>false</directoryIncluded>
+              <sources>
+                <source>
+                  <location>target/dashboard_tabs/js/dashboard_tabs.js</location>
                 </source>
               </sources>
             </mapping>

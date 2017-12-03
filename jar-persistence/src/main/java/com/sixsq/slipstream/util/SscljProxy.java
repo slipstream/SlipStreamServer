@@ -56,6 +56,7 @@ public class SscljProxy {
     public static final String QUOTA_RESOURCE = BASE_RESOURCE + "quota";
     public static final String SERVICE_OFFER_RESOURCE = BASE_RESOURCE + "service-offer";
     public static final String CREDENTIAL_RESOURCE = BASE_RESOURCE + "credential";
+    public static final String VIRTUAL_MACHINE_RESOURCE = BASE_RESOURCE + "virtual-machine";
 
     private static final String SSCLJ_ENDPOINT_PROPERTY_NAME = "ssclj.endpoint";
     private static final String SSCLJ_ENDPOINT_ENV_NAME = "SSCLJ_ENDPOINT";
