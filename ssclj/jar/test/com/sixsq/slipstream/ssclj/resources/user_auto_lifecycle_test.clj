@@ -32,38 +32,42 @@
     (into {} (remove #(unwanted (first %)) m))))
 
 (deftest lifecycle
-  (let [href (str ct/resource-url "/" auto/registration-method)
-        template-url (str p/service-context ct/resource-url "/" auto/registration-method)
-        session-admin (-> (session (ring-app))
-                          (content-type "application/json")
-                          (header authn-info-header "root ADMIN"))
-        session-user (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "unknown ANON"))
+  (let [href             (str ct/resource-url "/" auto/registration-method)
+        template-url     (str p/service-context ct/resource-url "/" auto/registration-method)
+        session-admin    (-> (session (ring-app))
+                             (content-type "application/json")
+                             (header authn-info-header "root ADMIN"))
+        session-user     (-> (session (ring-app))
+                             (content-type "application/json")
+                             (header authn-info-header "jane USER ANON"))
+        session-anon     (-> (session (ring-app))
+                             (content-type "application/json")
+                             (header authn-info-header "unknown ANON"))
 
-        name-attr "name"
+        name-attr        "name"
         description-attr "description"
-        properties-attr {:a "one", :b "two"}
+        properties-attr  {:a "one", :b "two"}
 
-        template (-> session-admin
-                     (request template-url)
-                     (ltu/body->edn)
-                     (ltu/is-status 200)
-                     (get-in [:response :body]))
+        template         (-> session-admin
+                             (request template-url)
+                             (ltu/body->edn)
+                             (ltu/is-status 200)
+                             (get-in [:response :body]))
 
-        no-href-create {:userTemplate (strip-unwanted-attrs (assoc template
-                                                              :username "user"
-                                                              :emailAddress "user@example.org"))}
-        href-create {:name         name-attr
-                     :description  description-attr
-                     :properties   properties-attr
-                     :userTemplate {:href         href
-                                    :username     "jane"
-                                    :emailAddress "jane@example.org"}}
-        invalid-create (assoc-in href-create [:userTemplate :href] "user-template/unknown-template")]
+        no-href-create   {:userTemplate (strip-unwanted-attrs (assoc template
+                                                                :username "user"
+                                                                :emailAddress "user@example.org"))}
+        href-create      {:name         name-attr
+                          :description  description-attr
+                          :properties   properties-attr
+                          :userTemplate {:href         href
+                                         :username     "jane"
+                                         :emailAddress "jane@example.org"
+                                         :firstName    "Jane"
+                                         :lastName     "Tester"
+                                         :password     "password"
+                                         :organization ""}}
+        invalid-create   (assoc-in href-create [:userTemplate :href] "user-template/unknown-template")]
 
     ;; anonymous user collection query should succeed but be empty
     ;; access needed to allow self-registration
@@ -111,15 +115,15 @@
         (ltu/is-status 400))
 
     ;; create a user anonymously
-    (let [resp (-> session-anon
-                   (request base-uri
-                            :request-method :post
-                            :body (json/write-str href-create))
-                   (ltu/body->edn)
-                   (ltu/is-status 201))
-          id (get-in resp [:response :body :resource-id])
-          uri (-> resp
-                  (ltu/location))
+    (let [resp    (-> session-anon
+                      (request base-uri
+                               :request-method :post
+                               :body (json/write-str href-create))
+                      (ltu/body->edn)
+                      (ltu/is-status 201))
+          id      (get-in resp [:response :body :resource-id])
+          uri     (-> resp
+                      (ltu/location))
           abs-uri (str p/service-context (u/de-camelcase uri))]
 
       ;; creating same user a second time should fail
@@ -146,14 +150,68 @@
           (ltu/is-operation-present "edit"))
 
       ;; check contents of resource
-      (let [{:keys [name description properties] :as user} (-> session-admin
-                                                               (request abs-uri)
-                                                               (ltu/body->edn)
-                                                               :response
-                                                               :body)]
+      (let [{:keys [name
+                    description
+                    properties
+                    isSuperUser
+                    state
+                    lastOnline
+                    activeSince
+                    lastExecute
+                    deleted] :as user} (-> session-admin
+                                           (request abs-uri)
+                                           (ltu/body->edn)
+                                           :response
+                                           :body)]
         (is (= name name-attr))
         (is (= description description-attr))
-        (is (= properties properties-attr)))
+        (is (= properties properties-attr))
+        (is (false? isSuperUser))
+        (is (= user/initial-state state))
+        (is (false? deleted))
+        (is (= user/epoch lastOnline activeSince lastExecute)))
+
+      ;; edit
+      (let [body      (-> session-admin
+                          (request abs-uri)
+                          (ltu/body->edn)
+                          :response
+                          :body)
+            user-json (json/write-str (assoc body :isSuperUser true))]
+
+        ;; anon users can NOT edit
+        (-> session-anon
+            (request abs-uri
+                     :request-method :put
+                     :body user-json)
+            (ltu/is-status 403))
+
+        ;; regular users can NOT set isSuperUser
+        (-> session-user
+            (request abs-uri
+                     :request-method :put
+                     :body user-json)
+            (ltu/is-status 200))
+        (is (false? (-> session-user
+                        (request abs-uri)
+                        (ltu/body->edn)
+                        :response
+                        :body
+                        :isSuperUser)))
+
+        ;; admin can set isSuperUser
+        (-> session-admin
+            (request abs-uri
+                     :request-method :put
+                     :body user-json)
+            (ltu/body->edn)
+            (ltu/is-status 200))
+        (is (true? (-> session-admin
+                       (request abs-uri)
+                       (ltu/body->edn)
+                       :response
+                       :body
+                       :isSuperUser))))
 
       ;; admin can delete resource
       (-> session-admin

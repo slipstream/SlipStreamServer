@@ -123,15 +123,38 @@
     (catch Exception e
       (dissoc resource :operations))))
 
+(defn check-connector-exists
+  "Use ADMIN role as we only want to check if href points to an existing
+  resource."
+  [body idmap]
+  (let [admin {:identity {:current         "internal",
+                          :authentications {"internal" {:roles #{"ADMIN"}, :identity "internal"}}}}
+        href  (get-in body [:credentialTemplate :connector])]
+    (std-crud/resolve-hrefs href admin))
+  body)
+
+(defn resolve-hrefs
+  [body idmap]
+  (let [connector-href (if (contains? (:credentialTemplate body) :connector)
+                         {:connector (get-in body [:credentialTemplate :connector])}
+                         {})] ;; to put back the unexpanded href after
+    (-> body
+        (check-connector-exists idmap)
+        ;; remove connector href (if any); regular user doesn't have rights to see them
+        (update-in [:credentialTemplate] dissoc :connector)
+        (std-crud/resolve-hrefs idmap)
+        ;; put back unexpanded connector href
+        (update-in [:credentialTemplate] merge connector-href))))
+
 ;; requires a CredentialTemplate to create new Credential
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
-  (let [idmap {:identity (:identity request)}
+  (let [idmap      {:identity (:identity request)}
         desc-attrs (u/select-desc-keys body)
         [create-resp {:keys [id] :as body}] (-> body
                                                 (assoc :resourceURI create-uri)
                                                 (update-in [:credentialTemplate] dissoc :type) ;; forces use of template reference
-                                                (std-crud/resolve-hrefs idmap)
+                                                (resolve-hrefs idmap)
                                                 (update-in [:credentialTemplate] merge desc-attrs) ;; ensure desc attrs are validated
                                                 crud/validate
                                                 :credentialTemplate

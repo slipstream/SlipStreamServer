@@ -24,8 +24,17 @@
 
 		<dependency>
 			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>auth-dep</artifactId>
+			<artifactId>SlipStreamCljResources-jar-dep</artifactId>
+			<version>${project.version}</version>
 			<type>pom</type>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
+			<artifactId>SlipStreamCljResources-jar</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
@@ -56,17 +65,6 @@
 			<scope>test</scope>
 			<classifier>tests</classifier>
 			<version>${project.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamUI-dep</artifactId>
-			<type>pom</type>
-		</dependency>
-
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamUI</artifactId>
 		</dependency>
 
 		<dependency>

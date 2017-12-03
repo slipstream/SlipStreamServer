@@ -22,6 +22,7 @@ package com.sixsq.slipstream.run;
 
 import com.sixsq.slipstream.connector.ConnectorTestBase;
 import com.sixsq.slipstream.connector.UsageRecorder;
+import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
@@ -63,7 +64,7 @@ public class RunTest extends RunTestBase {
 		ConnectorTestBase.setupBackend();
 		setupImages();
 		CommonTestUtil
-				.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
+				.resetAndLoadConnector(LocalConnector.class);
 	}
 
 	@AfterClass
@@ -384,7 +385,7 @@ public class RunTest extends RunTestBase {
 			InvocationTargetException, NoSuchMethodException,
 			ClassNotFoundException {
 		CommonTestUtil
-				.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
+				.resetAndLoadConnector(LocalConnector.class);
 
 		ImageModule image = new ImageModule(
 				"setInexistantRuntimeParameterImage");

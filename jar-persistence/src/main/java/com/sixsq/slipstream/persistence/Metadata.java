@@ -30,6 +30,7 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.PersistenceException;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import com.google.gson.annotations.*;
 
 import org.simpleframework.xml.Attribute;
 
@@ -40,10 +41,12 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 @SuppressWarnings("serial")
 public abstract class Metadata implements Serializable {
 
+	@SerializedName("created")
 	protected Date creation = new Date();
 
 	@Attribute(required = false)
 	@Temporal(TemporalType.TIMESTAMP)
+	@SerializedName("updated")
 	protected Date lastModified;
 
 	@SuppressWarnings("unused")
@@ -159,7 +162,7 @@ public abstract class Metadata implements Serializable {
 		remove(getResourceUri(), this.getClass());
 	}
 
-	public static void remove(String resourceUri, Class<? extends Metadata> c) {
+	private static void remove(String resourceUri, Class<? extends Metadata> c) {
 		EntityManager em = PersistenceUtil.createEntityManager();
 		EntityTransaction transaction = em.getTransaction();
 		transaction.begin();

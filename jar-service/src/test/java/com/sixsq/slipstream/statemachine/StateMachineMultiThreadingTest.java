@@ -34,6 +34,7 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
+import com.sixsq.slipstream.connector.dummy.DummyConnector;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -148,7 +149,7 @@ public class StateMachineMultiThreadingTest extends
 		errors = 0;
 
 		CommonTestUtil
-				.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
+				.resetAndLoadConnector(DummyConnector.class);
 
 		EntityManager em = PersistenceUtil.createEntityManager();
 

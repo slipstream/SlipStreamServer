@@ -20,12 +20,18 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.configuration.Configuration;
+import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.exceptions.*;
 import com.sixsq.slipstream.persistence.User.State;
+import com.sixsq.slipstream.ssclj.app.SscljTestServer;
 import com.sixsq.slipstream.user.UserView;
 import com.sixsq.slipstream.util.SerializationUtil;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
@@ -41,10 +47,21 @@ public class UserTest {
 
 	public static final String PASSWORD = "password";
 
+	@BeforeClass
+	public static void setupClass() {
+		SscljTestServer.start();
+	}
+
+	@AfterClass
+	public static void teardownClass() {
+		SscljTestServer.stop();
+	}
+
 	@Before
 	public void setup() {
 		user = createUser("test");
 		user = storeUser(user);
+		SscljTestServer.refresh();
 	}
 
 	public static User storeUser(User user) {
@@ -53,19 +70,22 @@ public class UserTest {
 
 	@After
 	public void tearDown() {
+	    removeAllUsers();
+	}
+
+	public void removeAllUsers() {
+		SscljTestServer.refresh();
 		for(User u : User.list()) {
 			u.remove();
 		}
+		SscljTestServer.refresh();
 	}
 
 	@Test
-	public void setParameter() throws ValidationException {
-		User user = User.loadByName(UserTest.user.getName());
-
-		user.setParameter(new UserParameter("p", "v", "d"));
-		user = user.store();
-		user.setParameter(new UserParameter("p", "v", "d"));
-		user = user.store();
+	public void loadByName() throws ValidationException {
+	    String username = UserTest.user.getName();
+		User user = User.loadByName(username);
+		assertTrue(username.equals(user.getName()));
 	}
 
 	@Test
@@ -78,7 +98,6 @@ public class UserTest {
 
 		assertEquals(name, user.getName());
 		assertEquals(resourceUrl, user.getResourceUri());
-
 	}
 
 	@Test(expected = InvalidElementException.class)
@@ -89,7 +108,6 @@ public class UserTest {
 
 	@Test(expected = ValidationException.class)
 	public void emptyNameNotAllowed() throws SlipStreamClientException {
-
 		User user = new User("");
 		user.validate();
 	}
@@ -102,6 +120,7 @@ public class UserTest {
 
 		User user = UserTest.createUser(name);
 		user.store();
+		SscljTestServer.refresh();
 
 		User userRestored = User.loadByName(name);
 		assertNotNull(userRestored);
@@ -124,19 +143,22 @@ public class UserTest {
 
 		String username = "dummy";
 
-		User user = UserTest.createUser(username);
+		User user = UserTest.createUser(username).store();
+		SscljTestServer.refresh();
 
 		String resourceUrl = user.getResourceUri();
 
-		String parameterName = "name";
-		String description = "description";
-		String value = "value";
+		String category = ParameterCategory.General.toString();
+		String parameterName = UserParameter.constructKey(category,
+				UserParameter.KEY_KEEP_RUNNING);
+		String value = "always";
 
-		UserParameter parameter = new UserParameter(parameterName, value,
-				description);
+		UserParameter parameter = new UserParameter(parameterName, value, "");
+		parameter.setCategory(category);
 		user.setParameter(parameter);
 
 		user.store();
+		SscljTestServer.refresh();
 
 		User restored = User.load(resourceUrl);
 		assertNotNull(restored);
@@ -148,10 +170,11 @@ public class UserTest {
 		parameter = parameters.get(parameterName);
 		assertNotNull(parameter);
 		assertEquals(parameterName, parameter.getName());
-		assertEquals(description, parameter.getDescription());
 		assertEquals(value, parameter.getValue());
+		assertFalse(parameter.getDescription().isEmpty());
 
 		restored.remove();
+		SscljTestServer.refresh();
 		user = User.load(resourceUrl);
 		assertNull(user);
 	}
@@ -159,15 +182,15 @@ public class UserTest {
 	@Test
 	public void verifyUserList() {
 
-		User userActive1 = UserTest.createUser("user1");
+		User userActive1 = UserTest.createUser("user1").store();
 		userActive1.setState(State.ACTIVE);
 		userActive1.store();
 
-		User userNew = UserTest.createUser("user2");
+		User userNew = UserTest.createUser("user2").store();
 		userNew.setState(State.NEW);
 		userNew.store();
 
-		User userActive2 = UserTest.createUser("user3");
+		User userActive2 = UserTest.createUser("user3").store();
 		userActive2.setState(State.ACTIVE);
 		userActive2.store();
 
@@ -221,7 +244,7 @@ public class UserTest {
 	@Test
 	public void userViewListHasAttributes() {
 
-		User user = UserTest.createUser("user");
+		User user = UserTest.createUser("user").store();
 		user.setState(State.ACTIVE);
 		user.setLastExecute();
 		user.setLastOnline();
@@ -310,24 +333,39 @@ public class UserTest {
 		assertThat(user.isOnline(), is(false));
 	}
 
+	@Test
+	public void isSuperAlone() {
+		removeAllUsers();
+		assertFalse(User.isSuperAlone());
+		UserTest.createUser("user").store();
+		SscljTestServer.refresh();
+		assertFalse(User.isSuperAlone());
+		UserTest.createUser("super").store();
+		SscljTestServer.refresh();
+		assertFalse(User.isSuperAlone());
+		removeAllUsers();
+		UserTest.createUser("super").store();
+		SscljTestServer.refresh();
+		assertTrue(User.isSuperAlone());
+	}
+
 	public static User createUser(String name, String password) {
 		User user = null;
 		try {
-			user = (User) User.loadByName(name);
-		} catch (ConfigurationException e) {
-			e.printStackTrace();
-			fail();
-		} catch (ValidationException e) {
+			user = User.loadByName(name);
+		} catch (ConfigurationException|ValidationException e) {
 			e.printStackTrace();
 			fail();
 		}
 		if (user != null) {
 			user.remove();
+			SscljTestServer.refresh();
 		}
 		try {
 			user = new User(name);
 		} catch (ValidationException e) {
 			e.printStackTrace();
+			fail();
 		}
 
 		user.setFirstName("Te");
@@ -343,18 +381,9 @@ public class UserTest {
 
 		try {
 			user.hashAndSetPassword(password);
-		} catch (NoSuchAlgorithmException e) {
+		} catch (NoSuchAlgorithmException|UnsupportedEncodingException e) {
 			e.printStackTrace();
 			fail();
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			fail();
-		}
-
-		try {
-			user.setDefaultCloudServiceName("local");
-		} catch (ValidationException e) {
-			throw (new SlipStreamRuntimeException(e));
 		}
 
 		return user;
@@ -363,5 +392,4 @@ public class UserTest {
 	public static User createUser(String name) {
 		return createUser(name, PASSWORD);
 	}
-
 }

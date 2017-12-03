@@ -43,6 +43,7 @@
                     [org.apache.logging.log4j/log4j-api]
                     [org.clojure/data.json]
                     [org.clojure/java.classpath]
+                    [org.clojure/test.check :scope "test"]
                     [org.clojure/tools.cli]
                     [org.clojure/tools.logging]
                     [org.clojure/tools.namespace]
@@ -53,8 +54,14 @@
                     [superstring]
                     [zookeeper-clj]
 
+                    ; dependencies for auth
+                    [buddy/buddy-core]
+                    [buddy/buddy-hashers]
+                    [buddy/buddy-sign]
+                    [clj-http]
+                    [peridot]
+
                     [com.sixsq.slipstream/utils]
-                    [com.sixsq.slipstream/auth]
                     [com.sixsq.slipstream/slipstream-ring-container :scope "test"]
                     [com.sixsq.slipstream/SlipStreamDbBinding-jar]
                     [com.sixsq.slipstream/SlipStreamClientAPI-jar]
@@ -109,7 +116,7 @@
 
 (deftask dev-fixture-env
          []
-         (environ :env {:config-name      "config-hsqldb-mem.edn"
+         (environ :env {:config-name      "config-hsqldb.edn"
                         :auth-private-key (str (clojure.java.io/resource "auth_privkey.pem"))
                         :auth-public-key  (str (clojure.java.io/resource "auth_pubkey.pem"))}))
 
@@ -172,6 +179,7 @@
 
            (aot :namespace #{'com.sixsq.slipstream.ssclj.app.main
                              'com.sixsq.slipstream.ssclj.usage.summarizer
+                             'com.sixsq.slipstream.ssclj.util.userparamsdesc
                              'com.sixsq.slipstream.ssclj.migrate.user-cred})
            #_(uber :exclude #{#"(?i)^META-INF/INDEX.LIST$"
                               #"(?i)^META-INF/[^/]*\.(MF|SF|RSA|DSA)$"
@@ -194,6 +202,7 @@
                 :dependencies (merge-defaults
                                 ['sixsq/default-deps (get-env :version)]
                                 [['org.apache.curator/curator-test :scope "compile"]
+                                 ['com.cemerick/url]
                                  ['com.sixsq.slipstream/slipstream-ring-container :scope "compile"]]))
            (sift
              :to-resource #{#"lifecycle_test_utils\.clj"
@@ -220,6 +229,7 @@
                 :dependencies (merge-defaults
                                 ['sixsq/default-deps (get-env :version)]
                                 [['org.apache.curator/curator-test :scope "compile"]
+                                 ['com.sixsq.slipstream/SlipStreamCljResources-jar :scope "compile"]
                                  ['com.sixsq.slipstream/slipstream-ring-container :scope "compile"]]))
            (sift
              :to-resource #{#"test_server\.clj"

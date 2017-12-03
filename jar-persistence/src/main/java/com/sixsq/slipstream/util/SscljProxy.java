@@ -55,6 +55,7 @@ public class SscljProxy {
     public static final String BASE_RESOURCE = "api/";
     public static final String QUOTA_RESOURCE = BASE_RESOURCE + "quota";
     public static final String SERVICE_OFFER_RESOURCE = BASE_RESOURCE + "service-offer";
+    public static final String CREDENTIAL_RESOURCE = BASE_RESOURCE + "credential";
     public static final String VIRTUAL_MACHINE_RESOURCE = BASE_RESOURCE + "virtual-machine";
 
     private static final String SSCLJ_ENDPOINT_PROPERTY_NAME = "ssclj.endpoint";
@@ -96,6 +97,10 @@ public class SscljProxy {
 
     public static Response post(String resource, String username, Boolean throwException) {
         return request(Method.POST, resource, null, username, null, null, throwException);
+    }
+
+    public static Response post(String resource, String username, Object obj, Boolean throwException) {
+        return request(Method.POST, resource, obj, username, null, null, throwException);
     }
 
     public static Response post(String resource, MediaType mediaType, Boolean throwException) {
@@ -159,7 +164,7 @@ public class SscljProxy {
 
         String sscljEndpoint = getSscljEndpoint();
 
-        logger.fine("Calling SSCLJ " + sscljEndpoint + " with: "
+        logger.finest("Calling SSCLJ " + sscljEndpoint + " with: "
                 + "method=" + String.valueOf(method)
                 + ", resource=" + resource
                 + ", object=" + String.valueOf(obj)
@@ -196,16 +201,16 @@ public class SscljProxy {
                     responseEntity = client.get(mediaType);
                     break;
                 case PUT:
-                    responseEntity = client.put(content, mediaType);
                     logger.finest("PUT content : " + content.getText());
+                    responseEntity = client.put(content, mediaType);
                     break;
                 case POST:
-                    responseEntity = client.post(content, mediaType);
                     logger.finest("POST content : " + content.getText());
+                    responseEntity = client.post(content, mediaType);
                     break;
                 case DELETE:
-                    responseEntity = client.delete(mediaType);
                     logger.finest("DELETE content : " + content.getText());
+                    responseEntity = client.delete(mediaType);
                     break;
                 default:
                     throw new UnsupportedOperationException("Method " + method.toString() + "not supported");
@@ -277,9 +282,18 @@ public class SscljProxy {
     }
 
     public static String toJson(Object obj) {
+        class TestExclStrat implements ExclusionStrategy {
+            public boolean shouldSkipClass(Class<?> arg0) {
+                return false;
+            }
+            public boolean shouldSkipField(FieldAttributes f) {
+                return f.getName().equals("jpaVersion");
+            }
+        }
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(Date.class, new DateTypeAdapter())
                 .setPrettyPrinting()
+                .setExclusionStrategies(new TestExclStrat())
                 .create();
         return gson.toJson(obj);
     }
@@ -333,4 +347,11 @@ public class SscljProxy {
         isMuted = false;
     }
 
+    public static boolean isError(Response resp) {
+        return resp == null || resp.getStatus().isError();
+    }
+
+    public static String respToString(Response resp) {
+        return null == resp ? "response is 'null'." : resp.toString();
+    }
 }

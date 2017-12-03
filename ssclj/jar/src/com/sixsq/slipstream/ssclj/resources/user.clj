@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.user
   (:require
     [clojure.spec.alpha :as s]
+    [clj-time.core :as t]
     [com.sixsq.slipstream.ssclj.resources.user-template-direct :as tpl]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
@@ -10,7 +11,9 @@
     [com.sixsq.slipstream.db.impl :as db]
     [ring.util.response :as r]
     [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.ssclj.util.log :as logu]))
+    [com.sixsq.slipstream.ssclj.util.log :as logu])
+  (:import
+    (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-tag :users)
 
@@ -49,14 +52,18 @@
 (def ^:const desc UserDescription)
 
 ;;
-;; validate the created user resource
-;; all create (registration) requests produce user resources with the same schema
+;; validate subclasses of user
 ;;
-(def validate-fn (u/create-spec-validation-fn :cimi/user))
-(defmethod crud/validate
-  resource-uri
+
+(defmulti validate-subtype :method)
+
+(defmethod validate-subtype :default
   [resource]
-  (validate-fn resource))
+  (throw (ex-info (str "unknown User type: '" (:method resource) "'") resource)))
+
+(defmethod crud/validate resource-uri
+  [resource]
+  (validate-subtype resource))
 
 ;;
 ;; validate create requests for subclasses of users
@@ -123,20 +130,36 @@
 ;; CRUD operations
 ;;
 
-(def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
+;; Some defaults for the optional attributes.
+(def ^:const epoch (u/unparse-timestamp-datetime (t/date-time 1970)))
 
+(def ^:const initial-state "NEW")
+
+(def user-attrs-defaults
+  {:state       initial-state
+   :deleted     false
+   :lastOnline  epoch
+   :activeSince epoch
+   :lastExecute epoch})
+
+(defn merge-with-defaults
+  [resource]
+  (merge user-attrs-defaults resource))
+
+(def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 ;; requires a UserTemplate to create new User
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
-  (let [idmap {:identity (:identity request)}
+  (let [idmap      {:identity (:identity request)}
         desc-attrs (u/select-desc-keys body)
         {:keys [id] :as body} (-> body
                                   (assoc :resourceURI create-uri)
-                                  (update-in [:userTemplate] dissoc :method) ;; forces use of template reference
+                                  (update-in [:userTemplate] dissoc :method :id) ;; forces use of template reference
                                   (std-crud/resolve-hrefs idmap)
                                   (update-in [:userTemplate] merge desc-attrs) ;; validate desc attrs
                                   (crud/validate)
                                   (:userTemplate)
+                                  (merge-with-defaults)
                                   (tpl->user request)
                                   (merge desc-attrs))]      ;; ensure desc attrs are added
     (add-impl (assoc request :id id :body body))))
@@ -156,3 +179,29 @@
   [request]
   (query-impl request))
 
+(defn admin?
+  [request]
+  (contains? (get-in request [:sixsq.slipstream.authn/claims :roles]) "ADMIN"))
+
+(defn filter-for-regular-user
+  [user-resource request]
+  (if (admin? request)
+    user-resource
+    (dissoc user-resource :isSuperUser)))
+
+(defn edit-impl [{body :body :as request}]
+  (try
+    (let [current (-> (:id body)
+                      (db/retrieve request)
+                      (a/can-modify? request))
+          merged  (merge current (filter-for-regular-user body request))]
+      (-> merged
+          (dissoc :href)
+          (u/update-timestamps)
+          (crud/validate)
+          (db/edit request)))
+    (catch ExceptionInfo ei
+      (ex-data ei))))
+(defmethod crud/edit resource-name
+  [request]
+  (edit-impl request))

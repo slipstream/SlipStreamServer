@@ -23,6 +23,9 @@ package com.sixsq.slipstream.initialstartup;
 import static org.junit.Assert.assertEquals;
 
 import com.sixsq.slipstream.exceptions.InvalidElementException;
+import com.sixsq.slipstream.ssclj.app.SscljTestServer;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
@@ -34,6 +37,16 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 
 public class UsersTest {
+
+	@BeforeClass
+	public static void setupClass() {
+		SscljTestServer.start();
+	}
+
+	@AfterClass
+	public static void teardownClass() {
+		SscljTestServer.stop();
+	}
 
 	// Fixes #143
 	@Test

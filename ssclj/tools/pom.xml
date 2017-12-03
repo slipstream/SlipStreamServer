@@ -34,6 +34,13 @@
     </dependency>
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamDbBinding-jar-dep</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
       <artifactId>SlipStreamDbSerializers-jar-dep</artifactId>
       <version>${project.version}</version>
       <type>pom</type>

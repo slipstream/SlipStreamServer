@@ -52,7 +52,6 @@ import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.User.State;
 import com.sixsq.slipstream.persistence.UserParameter;
-import com.sixsq.slipstream.resource.ParameterizedResource;
 import com.sixsq.slipstream.util.FileUtil;
 import com.sixsq.slipstream.util.ModuleUriUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
@@ -61,7 +60,7 @@ import com.sixsq.slipstream.util.XmlUtil;
 /**
  * @see UserResourceTest
  */
-public class UserResource extends ParameterizedResource<User> {
+public class UserResource extends UserParameterizedResource {
 
 	public static final String USERNAME_URI_ATTRIBUTE = "user";
 	private static final String resourceRoot = User.RESOURCE_URL_PREFIX;
@@ -139,13 +138,13 @@ public class UserResource extends ParameterizedResource<User> {
 		Cookie cookie = CookieUtils.extractAuthnCookie(getRequest());
 		String cloudServiceName = CookieUtils.getCookieCloudServiceName(cookie);
 		if (cloudServiceName != null && CookieUtils.isMachine(cookie) == true) {
-			Map<String, Parameter<User>> params = user.getParameters(ParameterCategory.General.name());
+			Map<String, UserParameter> params = user.getParameters(ParameterCategory.General.name());
 			params.putAll(user.getParameters(cloudServiceName));
 
 			Map<String, UserParameter> userParameters = user.getParameters();
 			userParameters.clear();
-			for (Map.Entry<String,Parameter<User>> entry : params.entrySet()) {
-				userParameters.put(entry.getKey(), (UserParameter)entry.getValue());
+			for (Map.Entry<String, UserParameter> entry : params.entrySet()) {
+				userParameters.put(entry.getKey(), entry.getValue());
 			}
 		}
 
@@ -200,7 +199,7 @@ public class UserResource extends ParameterizedResource<User> {
 
 	@Override
 	protected void authorize() {
-		boolean isMachine = isMachine();
+		boolean notMachine = !isMachine();
 		String targetUserOrganization = null;
 		try {
 			targetUserOrganization = getTargetUser().getOrganization();
@@ -211,10 +210,19 @@ public class UserResource extends ParameterizedResource<User> {
 			isOrganizationManagedByUser = targetUserOrganization.equals(organizationManagedByUser);
 		}
 
-		setCanPut(!newTemplateResource() && !isMachine
-				&& (getUser().isSuper() || !isExisting()
-				|| (newInQuery() && !isExisting()) || isItSelf() || isOrganizationManagedByUser));
-		setCanDelete((getUser().isSuper() || isItSelf() || isOrganizationManagedByUser) && !isMachine);
+		setCanPut(!newTemplateResource()
+				  && notMachine
+				  && (getUser().isSuper()
+				      || !isExisting()
+				      || (newInQuery() && !isExisting())
+				      || isItSelf()
+				      || isOrganizationManagedByUser));
+
+		setCanDelete((getUser().isSuper()
+				        || isItSelf()
+				        || isOrganizationManagedByUser)
+				      && notMachine);
+
 		setCanGet(getUser().isSuper() || newTemplateResource() || isItSelf() || isOrganizationManagedByUser);
 	}
 
@@ -444,6 +452,7 @@ public class UserResource extends ParameterizedResource<User> {
 		}
 
 		getTargetUser().setState(State.DELETED);
+		getTargetUser().setDeleted();
 		getTargetUser().store();
 
 		postEventDeleted(getParameterized());

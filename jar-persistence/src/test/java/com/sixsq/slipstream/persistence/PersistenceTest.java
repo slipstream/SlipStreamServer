@@ -20,14 +20,25 @@ package com.sixsq.slipstream.persistence;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.ssclj.app.SscljTestServer;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 
 public class PersistenceTest {
+	@BeforeClass
+	public static void setupClass() {
+		SscljTestServer.start();
+	}
+
+	@AfterClass
+	public static void teardownClass() {
+		SscljTestServer.stop();
+	}
 
 	@Test
 	public void removeDoesntExistsIsSilent() {
-		User.remove("doesntexists", User.class);
+		User.remove(User.RESOURCE_URL_PREFIX + "doesntexists", User.class);
 	}
-	
 }

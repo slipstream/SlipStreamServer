@@ -20,14 +20,22 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.credentials.CloudCredential;
+import com.sixsq.slipstream.credentials.CloudCredentialCreateTmpl;
 import com.sixsq.slipstream.credentials.Credentials;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Parameter;
+import com.sixsq.slipstream.persistence.QuotaParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
 
+import java.util.Map;
+import java.util.logging.Logger;
+
 public abstract class CredentialsBase implements Credentials {
+
+	private Logger logger = Logger.getLogger(this.getClass().toString());
 
 	@Override
 	abstract public String getKey() throws InvalidElementException;
@@ -55,7 +63,7 @@ public abstract class CredentialsBase implements Credentials {
 			throw new ValidationException(e.getMessage());
 		}
 	}
-	
+
 	protected String getParameterValue(String key) throws InvalidElementException {
 		UserParameter parameter = user.getParameter(qualifyKey(key));
 		if (parameter == null) {
@@ -75,4 +83,64 @@ public abstract class CredentialsBase implements Credentials {
 				+ user.getName() + "'>user account</a>"));
 	}
 
+	/**
+	 *
+	 * When mapping is not known, null should be returned.
+	 * @param pName parameter name of the UserParameter.
+	 * @param cloudCredsJSON JSON with cloud cred definition document.
+	 * @return value for the parameter or null
+	 * @throws ValidationException
+	 */
+	protected String getCloudCredParamValue(String pName, String cloudCredsJSON) throws ValidationException {
+		CloudCredential credDef = (CloudCredential) CloudCredential.fromJson(cloudCredsJSON, CloudCredential.class);
+		switch (pName) {
+			case "key":
+				return credDef.key;
+			case UserParametersFactoryBase.KEY_PARAMETER_NAME:
+				return credDef.key;
+			case "secret":
+				return credDef.secret;
+			case UserParametersFactoryBase.SECRET_PARAMETER_NAME:
+				return credDef.secret;
+			case QuotaParameter.QUOTA_VM_PARAMETER_NAME:
+				return (credDef.quota == null) ? null : String.valueOf(credDef.quota);
+			default:
+				return null;
+		}
+	}
+
+	public Map<String, UserParameter> setUserParametersValues(
+			String cloudCredsJSON) throws ValidationException {
+		Map<String, UserParameter> paramsMap = cloudParametersFactory.getParameters();
+		for (UserParameter p: paramsMap.values()) {
+			String paramName = p.getName();
+			String name = paramName.replace(p.getCategory() + ".", "");
+			// the type of the value of any parameter is String.
+			String value = getCloudCredParamValue(name, cloudCredsJSON);
+			if (null != value) {
+				p.setValue(value);
+				paramsMap.put(paramName, p);
+			}
+		}
+		return paramsMap;
+	}
+
+	public CloudCredentialCreateTmpl getCloudCredCreateTmpl(Map<String, UserParameter> params, String connInstanceName) {
+		if (params.size() < 1) {
+			return null;
+		}
+		return new CloudCredentialCreateTmpl(getCloudCredential(params, connInstanceName));
+	}
+
+	public void store() throws ValidationException {
+		String category = cloudParametersFactory.getCategory();
+		Map<String, UserParameter> params = this.user.getParameters(category);
+		if (null == params || params.size() < 1) {
+			return;
+		}
+		CloudCredential cd = (CloudCredential) getCloudCredential(params, category);
+		if (null != cd) {
+			cd.store(this.user);
+		}
+	}
 }

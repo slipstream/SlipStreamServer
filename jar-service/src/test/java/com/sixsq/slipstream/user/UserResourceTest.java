@@ -30,6 +30,7 @@ import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.User.State;
 import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.persistence.UserTest;
+import com.sixsq.slipstream.ssclj.app.SscljTestServer;
 import com.sixsq.slipstream.util.ResourceTestBase;
 import com.sixsq.slipstream.util.SerializationUtil;
 import com.sixsq.slipstream.util.XmlUtil;
@@ -75,8 +76,10 @@ public class UserResourceTest extends ResourceTestBase {
 		user = UserTest.createUser("test");
 		user = UserTest.storeUser(user);
 		UserTest.storeUser(otherUser);
+		superUser.store();
+		SscljTestServer.refresh();
 		superUser.setSuper(true);
-		superUser = UserTest.storeUser(superUser);
+		superUser.store();
 	}
 
 	@After
@@ -406,7 +409,7 @@ public class UserResourceTest extends ResourceTestBase {
 	@Test
 	public void superCreatesInActiveState() throws ValidationException,
 			ConfigurationException {
-		User willBeActive = UserTest.createUser("superCreatesInActiveState");
+		User willBeActive = UserTest.createUser("willBeCreatedInActiveState");
 		Passwords passwords = new Passwords(null, UserTest.PASSWORD, UserTest.PASSWORD);
 
 		Request request = createPutRequest(willBeActive, superUser.getName(), passwords);

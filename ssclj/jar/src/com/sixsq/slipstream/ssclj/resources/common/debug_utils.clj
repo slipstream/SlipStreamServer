@@ -9,6 +9,14 @@
   (println "--------")
   x)
 
+(defn show-m
+  [x m]
+  (println "SHOW----" m)
+  (println ":-> " (class x))
+  (pprint x)
+  (println m "--------")
+  x)
+
 (defn show-timestamp
   [x]
   (println "\n" (System/currentTimeMillis))

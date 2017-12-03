@@ -169,7 +169,7 @@
   [context & body]
   `(try
     (while true
-      (log/log-info "Executing " ~context)
+      (log/log-debug "Executing " ~context)
       ~@body)
     (catch Exception e#
       (log/log-warn ~context " caught exception : " (.getMessage e#)))))
@@ -178,7 +178,7 @@
   "Launches in a go thread an infinite loop that collects VM for user/cloud"
   [chan worker-id]
   (go
-    (log/log-info "Go thread started for " worker-id)
+    (log/log-debug "Go thread started for " worker-id)
     (forever (str "Collection for " worker-id)
              (let [[[user connector] _] (alts! [chan (timeout timeout-processing-loop)])]
                (when (not-nil? user)

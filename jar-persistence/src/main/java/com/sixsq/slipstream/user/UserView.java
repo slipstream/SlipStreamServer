@@ -20,6 +20,7 @@ package com.sixsq.slipstream.user;
  * -=================================================================-
  */
 
+import com.google.gson.annotations.SerializedName;
 import com.sixsq.slipstream.persistence.User;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementList;
@@ -32,9 +33,11 @@ import java.util.List;
 public class UserView {
 
 	@Attribute
+	@SerializedName("username")
 	public final String name;
 
 	@Attribute
+	@SerializedName("id")
 	public final String resourceUri;
 
 	@Attribute(required = false)
@@ -44,6 +47,7 @@ public class UserView {
 	public final String lastName;
 
 	@Attribute(required = false)
+	@SerializedName("emailAddress")
 	public final String email;
 
 	@Attribute(required = false)

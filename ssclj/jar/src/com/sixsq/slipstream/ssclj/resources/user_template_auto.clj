@@ -23,7 +23,12 @@
    :name         "Auto"
    :description  "Creates a new user through self-registration"
    :username     "username"
+   :password     "password"
+   :firstName    "John"
+   :lastName     "Doe"
    :emailAddress "user@example.com"
+   :organization ""
+   :roles        ""
    :acl          resource-acl})
 
 ;;
@@ -32,19 +37,40 @@
 (def ^:const desc
   (merge p/UserTemplateDescription
          {:username     {:displayName "Username"
-                         :category    "general"
+                         :category    "summary"
                          :description "username"
                          :type        "string"
                          :mandatory   true
                          :readOnly    false
                          :order       20}
+          :firstName    {:displayName "First name"
+                         :category    "summary"
+                         :description "First name"
+                         :type        "string"
+                         :mandatory   true
+                         :readOnly    false
+                         :order       21}
+          :lastName     {:displayName "Last name"
+                         :category    "summary"
+                         :description "Last name"
+                         :type        "string"
+                         :mandatory   true
+                         :readOnly    false
+                         :order       22}
+          :organization {:displayName "Organization"
+                         :category    "summary"
+                         :description "First name"
+                         :type        "string"
+                         :mandatory   true
+                         :readOnly    false
+                         :order       23}
           :emailAddress {:displayName "Email Address"
                          :category    "general"
                          :description "email address"
                          :type        "string"
                          :mandatory   true
                          :readOnly    false
-                         :order       21}}))
+                         :order       24}}))
 
 ;;
 ;; initialization: register this User template

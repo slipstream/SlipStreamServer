@@ -1,0 +1,29 @@
+{:key         {:displayName "API key"
+               :category    "cloud-cred-dummy"
+               :description "On the Dummy web interface you can find this information on Account > Profile > API Keys"
+               :type        "restricted string"
+               :mandatory   true
+               :readOnly    false
+               :order       10}
+ :secret      {:displayName "API secret"
+               :category    "cloud-cred-dummy"
+               :description "On the Dummy web interface you can find this information on Account > Profile > API Keys"
+               :type        "password"
+               :mandatory   true
+               :readOnly    false
+               :order       20}
+ :domain-name {:displayName "Name of your domain managed by Dummy"
+               :category    "cloud-cred-dummy"
+               :description "If you use the DNS service of Dummy you can set here the name of one of your domains and SlipStream will create a subdomain for each of your instances"
+               :type        "string"
+               :mandatory   false
+               :readOnly    false
+               :order       100}
+ :quota       {:displayName "User VM quota"
+               :category    "cloud-cred-dummy"
+               :description "Number of VMs the user can start for this cloud"
+               :type        "string"
+               :mandatory   true
+               :readOnly    true
+               :order       0}
+ }

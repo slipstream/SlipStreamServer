@@ -24,11 +24,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import com.sixsq.slipstream.connector.local.LocalConnector;
+import com.sixsq.slipstream.ssclj.app.SscljTestServer;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.restlet.data.Form;
 
-import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.exceptions.BadlyFormedElementException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -40,14 +42,20 @@ import com.sixsq.slipstream.util.ResourceTestBase;
 
 public class ImageFormProcesorTest {
 
-	protected static final String PASSWORD = "password";
-	protected static User user = UserTest.createUser("test", PASSWORD);
+	protected static User user;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
+		SscljTestServer.start();
+		user = UserTest.createUser("test");
 		UserTest.storeUser(user);
-		ResourceTestBase.resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
+		ResourceTestBase.resetAndLoadConnector(LocalConnector.class);
 	}
+
+	@AfterClass
+	public static void teardownClass() throws Exception {
+		SscljTestServer.stop();
+    }
 
 	@Test
 	public void newNameIllegal() throws BadlyFormedElementException,

@@ -42,6 +42,8 @@ import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
+import com.sixsq.slipstream.ssclj.app.SscljTestServer;
+import org.restlet.Response;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
@@ -56,6 +58,7 @@ import static org.junit.Assert.fail;
 public abstract class CommonTestUtil {
 
 	protected static final String PASSWORD = "password";
+	protected static final String publicSshKey = "ssh-rsa ABCD x";
 
 	// Need to set cloudServiceName before the status user is
 	// created, since the createUser method uses it
@@ -68,7 +71,7 @@ public abstract class CommonTestUtil {
 
 	public static User createUser(String name) throws ConfigurationException,
 			ValidationException {
-		return CommonTestUtil.createUser(name, "");
+		return CommonTestUtil.createUser(name, PASSWORD);
 	}
 
 	public static User createUser(String name, String password)
@@ -112,7 +115,7 @@ public abstract class CommonTestUtil {
 
 		String key = Parameter.constructKey(ParameterCategory.General.toString(),
 				UserParameter.SSHKEY_PARAMETER_NAME);
-		user.setParameter(new UserParameter(key, "ssh-rsa xx", ""));
+		user.setParameter(new UserParameter(key, publicSshKey, ""));
 
 		return user.store();
 	}
@@ -124,7 +127,8 @@ public abstract class CommonTestUtil {
 	}
 
 	public static void addSshKeys(User user) throws ValidationException {
-		UserParameter userKey = new UserParameter(UserParametersFactoryBase.getPublicKeyParameterName(), "xxx", "xxx");
+		UserParameter userKey = new UserParameter(UserParametersFactoryBase
+				.getPublicKeyParameterName(), publicSshKey, "xxx");
 		user.setParameter(userKey);
 
 		String publicSshKey = ServiceConfiguration.CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY;
@@ -217,11 +221,50 @@ public abstract class CommonTestUtil {
 		ConnectorFactory.getConnectors();
 
 		// update the configuration
-		setCloudConnector(configConnectorName);
-		updateServiceConfigurationParameters(systemConfigurationFactory);
+		Configuration configuration = null;
+		try {
+			configuration = Configuration.getInstance();
+		} catch (ValidationException e) {
+			fail();
+		}
+
+		ServiceConfiguration sc = configuration.getParameters();
+		try {
+			sc.setParameter(new ServiceConfigurationParameter(RequiredParameters.CLOUD_CONNECTOR_CLASS.getName(),
+					configConnectorName));
+		} catch (ValidationException e) {
+			fail();
+		}
+		sc.setParameters(systemConfigurationFactory.getParameters());
+		sc.store();
+		ConnectorFactory.resetConnectors();
 
 		// return the loaded connector
-		return ConnectorFactory.getConnector(cloudServiceName);
+		String connectorInstanceName = cloudServiceName;
+		if (configConnectorName.contains(":")) {
+			String[] parts = configConnectorName.split(":");
+			connectorInstanceName = parts[0];
+		}
+		return ConnectorFactory.getConnector(connectorInstanceName);
+	}
+
+	public static void createConnector(String cloudServiceName, String
+			connectorName, SystemConfigurationParametersFactoryBase systemParamsFactory) {
+		try {
+			CommonTestUtil.lockAndLoadConnector(connectorName + ":" + cloudServiceName, cloudServiceName,
+					systemParamsFactory);
+			SscljTestServer.refresh();
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Failed to create connector " + connectorName + " with: " +
+					e.getMessage());
+		}
+		Response resp = SscljProxy.get(SscljProxy.BASE_RESOURCE +
+				"connector/" + connectorName, "super ADMIN");
+		if (SscljProxy.isError(resp)) {
+			fail("Failed to create connector " + connectorName + " with: " +
+					resp.getEntityAsText());
+		}
 	}
 
 	// FIXME: duplicate from ResourceTestBase

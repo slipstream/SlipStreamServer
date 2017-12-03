@@ -2,18 +2,37 @@
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [com.sixsq.slipstream.ssclj.resources.spec.user :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.user-template :as ps]))
 
-(s/def :cimi.user-template.auto/username :cimi.core/nonblank-string)
-(s/def :cimi.user-template.auto/emailAddress :cimi.core/nonblank-string)
+(s/def :cimi.user-template.auto/href :cimi.user-template/href)
+(s/def :cimi.user-template.auto/password :cimi.core/nonblank-string)
+(s/def :cimi.user-template.auto/roles string?)
+(s/def :cimi.user-template.auto/state :cimi.core/nonblank-string)
+(s/def :cimi.user-template.auto/creation :cimi.core/timestamp)
+(s/def :cimi.user-template.auto/lastOnline :cimi.core/timestamp)
+(s/def :cimi.user-template.auto/lastExecute :cimi.core/timestamp)
+(s/def :cimi.user-template.auto/activeSince :cimi.core/timestamp)
+(s/def :cimi.user-template.auto/isSuperUser boolean?)
+(s/def :cimi.user-template.auto/deleted boolean?)
+
+(def user-tempate-auto-keys
+  {:opt-un [:cimi.user-template.auto/href
+            :cimi.user-template.auto/password
+            :cimi.user-template.auto/roles
+            :cimi.user-template.auto/isSuperUser
+            :cimi.user-template.auto/state
+            :cimi.user-template.auto/deleted
+            :cimi.user-template.auto/creation
+            :cimi.user-template.auto/lastOnline
+            :cimi.user-template.auto/lastExecute
+            :cimi.user-template.auto/activeSince]})
 
 (def user-template-keys-spec-req
-  {:req-un [:cimi.user-template.auto/username
-            :cimi.user-template.auto/emailAddress]})
+  (su/merge-keys-specs
+    [u/user-keys-spec user-tempate-auto-keys]))
 
-(def user-template-create-keys-spec-req
-  {:req-un [:cimi.user-template.auto/username
-            :cimi.user-template.auto/emailAddress]})
+(def user-template-create-keys-spec-req user-template-keys-spec-req)
 
 ;; Defines the contents of the auto UserTemplate resource itself.
 (s/def :cimi/user-template.auto

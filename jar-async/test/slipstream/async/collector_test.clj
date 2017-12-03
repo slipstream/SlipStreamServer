@@ -1,6 +1,8 @@
 (ns slipstream.async.collector-test
   (:require
     [clojure.test :refer :all]
+    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
+    [com.sixsq.slipstream.ssclj.app.test-server :as ts]
     [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]
     [com.sixsq.slipstream.db.serializers.utils :as su]
     [slipstream.async.collector :refer :all])
@@ -9,19 +11,17 @@
     [com.sixsq.slipstream.persistence User]
     [com.sixsq.slipstream.persistence UserParameter]))
 
-;; Fixtures
-;; NB! We are using Elasticsearch for some Java entities.
-;; Start local ES node, create a client of it, and set DB CRUD impl.
-(use-fixtures :once su/test-fixture-es-client-and-db-impl)
+(use-fixtures :once (fn [f] (ts/start) (dyn/initialize) (f) (ts/stop) ))
 
 (use-fixtures :each (fn [f] (sci/db-add-default-config) (f)))
+
+
 
 (deftest test-add-increasing-space
   (is (= [["joe" "exo" 0] ["joe" "aws" 10] ["mike" "exo" 20]]
          (add-increasing-space [["joe" "exo"] ["joe" "aws"] ["mike" "exo"]] 10)))
   (is (= [["joe" "exo" 0] ["joe" "aws" 1] ["mike" "exo" 2]]
-         (add-increasing-space [["joe" "exo"] ["joe" "aws"] ["mike" "exo"]] 1)))
-  )
+         (add-increasing-space [["joe" "exo"] ["joe" "aws"] ["mike" "exo"]] 1))))
 
 (def connector (LocalConnector. "c1"))
 (def user-no-connector (User. "foo"))

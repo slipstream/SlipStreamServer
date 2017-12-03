@@ -32,4 +32,3 @@
                      (ring-resp/status 400))]
     (log/warn msg)
     (throw (ex-info msg response))))
-

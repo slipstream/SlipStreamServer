@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sixsq.slipstream.es.CljElasticsearchHelper;
+import com.sixsq.slipstream.ssclj.app.SscljTestServer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.restlet.Request;
@@ -61,22 +62,20 @@ public class ResourceTestBase extends RunTestBase {
 
 	@BeforeClass
 	public static void createTestElasticsearchDb(){
-		CljElasticsearchHelper.createAndInitTestDb();
+		SscljTestServer.start();
+		CljElasticsearchHelper.initTestDb();
+		user = UserTest.createUser("test");
+		user.store();
 	}
 
 	@AfterClass
 	public static void stopTestElasticsearchDb(){
-		CljElasticsearchHelper.stopAndUnbindTestDb();
+	    SscljTestServer.stop();
 	}
 
 	protected static final String TEST_REQUEST_NAME = "/test/request";
 
-	// Need to set cloudServiceName before the status user is
-	// created, since the createUser method uses it
-	public static String cloudServiceName = new LocalConnector()
-			.getCloudServiceName();
-
-	protected static User user = UserTest.createUser("test", UserTest.PASSWORD);
+	protected static User user;
 
 	public static void resetAndLoadConnector(
 			Class<? extends Connector> connectorClass)

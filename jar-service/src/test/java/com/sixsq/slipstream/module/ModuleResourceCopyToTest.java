@@ -27,6 +27,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sixsq.slipstream.connector.local.LocalConnector;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -39,7 +40,6 @@ import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ServerResource;
 
-import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -71,7 +71,7 @@ public class ModuleResourceCopyToTest extends ResourceTestBase {
 			IllegalAccessException, InvocationTargetException,
 			NoSuchMethodException, ClassNotFoundException {
 
-		resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
+		resetAndLoadConnector(LocalConnector.class);
 
 		anotherUser = new User("anotherUser");
 		anotherUser

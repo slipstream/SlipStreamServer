@@ -34,7 +34,7 @@
                     [org.clojure/data.xml]
                     [superstring]
 
-                    [com.sixsq.slipstream/SlipStreamCljResources-jar]
+                    [com.sixsq.slipstream/SlipStreamCljResources-jar :scope "provided"]
                     [com.sixsq.slipstream/SlipStreamPersistence]
 
                     [org.clojure/test.check]

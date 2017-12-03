@@ -74,7 +74,7 @@ public class LocalConnector extends ConnectorBase {
 	}
 
 	public static final String CLOUD_SERVICE_NAME = "local";
-	public static final String CLOUDCONNECTOR_PYTHON_MODULENAME = "slipstream.cloudconnectors.dummy.DummyClientCloud";
+	public static final String CLOUDCONNECTOR_PYTHON_MODULENAME = "slipstream.cloudconnectors.local.LocalClientCloud";
 
 	public LocalConnector() {
 		this(CLOUD_SERVICE_NAME);

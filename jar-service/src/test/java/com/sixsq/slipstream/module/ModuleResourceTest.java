@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.sixsq.slipstream.connector.dummy.DummyConnector;
 import org.json.JSONObject;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -70,9 +71,9 @@ public class ModuleResourceTest extends ResourceTestBase {
 			IllegalAccessException, InvocationTargetException,
 			NoSuchMethodException, ClassNotFoundException {
 
-		resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
+		resetAndLoadConnector(DummyConnector.class);
 
-		user = UserTest.createUser("userModuleResourceTest", "password");
+		user = UserTest.createUser("userModuleResourceTest");
 		user.setDefaultCloudServiceName(cloudServiceName);
 		user = UserTest.storeUser(user);
 

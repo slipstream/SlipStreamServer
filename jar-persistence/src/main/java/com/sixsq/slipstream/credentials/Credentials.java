@@ -22,6 +22,8 @@ package com.sixsq.slipstream.credentials;
 
 import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.UserParameter;
+import java.util.Map;
 
 
 public interface Credentials {
@@ -31,4 +33,17 @@ public interface Credentials {
 	public String getSecret() throws InvalidElementException;
 	
 	public void validate() throws ValidationException;
+
+	public Map<String, UserParameter> setUserParametersValues(String cloudCredsJSON)
+			throws ValidationException;
+
+	/**
+	 * @param connInstanceName category of the provided parameter set.
+	 */
+	public Object getCloudCredCreateTmpl(Map<String, UserParameter> prams, String
+			connInstanceName);
+
+	public ICloudCredential getCloudCredential(Map<String, UserParameter> params, String connInstanceName);
+
+	public void store() throws ValidationException;
 }

@@ -1,17 +1,16 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+<?xml version="1.0" encoding="UTF-8"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-	<artifactId>SlipStreamAsync</artifactId>
-	<packaging>jar</packaging>
-	<name>SlipStreamServer/jar-async</name>
-	<url>http://sixsq.com</url>
-	<licenses>
-		<license>
-			<name>Apache License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
-		</license>
-	</licenses>
+  <artifactId>SlipStreamAsync-dep</artifactId>
+  <packaging>jar</packaging>
+  <name>SlipStreamServer/jar-async</name>
+  <url>http://sixsq.com</url>
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+    </license>
+  </licenses>
 
 	<parent>
 		<groupId>com.sixsq.slipstream</groupId>
@@ -19,113 +18,84 @@
 		<version>3.42-SNAPSHOT</version>
 	</parent>
 
-	<dependencies>
+  <dependencies>
+    <dependency>
+      <groupId>sixsq</groupId>
+      <artifactId>default-deps</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamCljResources-jar-dep</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
 
-        <dependency>
-                <groupId>com.sixsq.slipstream</groupId>
-                <artifactId>SlipStreamPersistence</artifactId>
-        </dependency>
+  <profiles>
+    <profile>
+      <id>run-tests</id>
+      <activation>
+        <property>
+          <name>!skipTests</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>boot-test</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>boot</executable>
+                  <arguments>
+                    <argument>mvn-test</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
-        <dependency>
-                <groupId>com.sixsq.slipstream</groupId>
-                <artifactId>SlipStreamConnector</artifactId>
-        </dependency>
+  <build>
+    <plugins>
 
-        <dependency>
-                <groupId>com.sixsq.slipstream</groupId>
-                <artifactId>SlipStreamDbSerializers-jar</artifactId>
-                <version>${project.version}</version>
-                <scope>test</scope>
-        </dependency>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>boot-build</id>
+            <phase>install</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>boot</executable>
+              <environmentVariables>
+                <BOOT_PUSH>${boot.push}</BOOT_PUSH>
+              </environmentVariables>
+              <arguments>
+                <argument>mvn-build</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
-        <dependency>
-                <groupId>org.clojure</groupId>
-                <artifactId>clojure</artifactId>
-        </dependency>
+    </plugins>
+  </build>
 
-        <dependency>
-                <groupId>org.clojure</groupId>
-                <artifactId>core.async</artifactId>
-        </dependency>
-
-	</dependencies>
-
-	<build>
-		<resources>
-			<resource>
-				<directory>src</directory>
-			</resource>
-			<resource>
-				<directory>test</directory>
-			</resource>
-		</resources>
-		<plugins>
-                  <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>findbugs-maven-plugin</artifactId>
-                    <configuration>
-                      <skip>true</skip>
-                    </configuration>
-                  </plugin>
-			<plugin>
-				<groupId>com.theoryinpractise</groupId>
-				<artifactId>clojure-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>compile</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>compile</goal>
-						</goals>
-					</execution>
-                                        <execution>
-						<id>test</id>
-						<phase>test</phase>
-						<goals>
-							<goal>test</goal>
-						</goals>
-					</execution>
-                                </executions>
-				<configuration>
-					<sourceDirectories>
-						<sourceDirectory>src</sourceDirectory>
-					</sourceDirectories>
-                                        <testSourceDirectories>
-						<testSourceDirectory>test</testSourceDirectory>
-					</testSourceDirectories>
-				</configuration>
-			</plugin>
-		</plugins>
-		<!-- <directory>target</directory> -->
-		<outputDirectory>target/classes</outputDirectory>
-	</build>
-	<repositories>
-		<repository>
-			<id>central</id>
-			<url>http://repo1.maven.org/maven2</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-		</repository>
-		<repository>
-			<id>clojars</id>
-			<url>https://clojars.org/repo/</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-		</repository>
-	</repositories>
-	<!-- <pluginRepositories> <pluginRepository> <id>sonatype-snapshots</id>
-		<url>http://oss.sonatype.org/content/repositories/releases</url> </pluginRepository>
-		</pluginRepositories> -->
 </project>
 
-<!-- This file was autogenerated by Leiningen. Please do not edit it directly;
-	instead edit project.clj and regenerate it. It should not be considered canonical
-	data. For more information see https://github.com/technomancy/leiningen -->

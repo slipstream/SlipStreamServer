@@ -191,9 +191,15 @@
   (pprint response)
   response)
 
+(defn dump-m
+  [response message]
+  (println "-->>" message)
+  (pprint response)
+  (println message "<<--")
+  response)
+
 (defn dump-es
   [type]
-  (println "DUMP")
   (pprint
     (esu/dump esb/*client* esb/index-name type)))
 
@@ -227,3 +233,7 @@
           (try
             (uzk/close-client!)
             (catch Exception _)))))))                       ; ignore exceptions when closing client
+
+(defn refresh-es-indices
+  []
+  (esu/refresh-all-indices esb/*client*))

@@ -20,6 +20,7 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.connector.dummy.DummyConnector;
 import com.sixsq.slipstream.es.CljElasticsearchHelper;
 import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.exceptions.AbortException;
@@ -28,6 +29,7 @@ import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
 import com.sixsq.slipstream.persistence.*;
+import com.sixsq.slipstream.ssclj.app.SscljTestServer;
 import com.sixsq.slipstream.util.CommonTestUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -39,7 +41,7 @@ import java.util.Collections;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 
-public class ConnectorTest extends ConnectorDummy {
+public class ConnectorTest extends DummyConnector {
 
 	protected static final String INSTANCE_NAME = "local";
 
@@ -50,12 +52,13 @@ public class ConnectorTest extends ConnectorDummy {
 	@BeforeClass
 	public static void setupClass() {
 		Event.muteForTests();
-		CljElasticsearchHelper.createAndInitTestDb();
+		SscljTestServer.start();
+		CljElasticsearchHelper.initTestDb();
 	}
 
 	@AfterClass
 	public static void teardownClass() {
-		CljElasticsearchHelper.stopAndUnbindTestDb();
+		SscljTestServer.stop();
 	}
 
 	@Test
@@ -70,7 +73,7 @@ public class ConnectorTest extends ConnectorDummy {
 		CommonTestUtil.addSshKeys(user);
 
 		CommonTestUtil.resetAndLoadConnector(
-				com.sixsq.slipstream.connector.local.LocalConnector.class,
+				DummyConnector.class,
 				INSTANCE_NAME);
 
 		Run run = RunFactory.getRun(deployment, RunType.Orchestration, user);

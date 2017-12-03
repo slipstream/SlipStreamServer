@@ -30,7 +30,6 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.*;
 import com.sixsq.slipstream.util.CommonTestUtil;
 import com.sixsq.slipstream.util.ResourceTestBase;
-import com.sixsq.slipstream.util.SscljProxy;
 import com.sixsq.slipstream.util.XmlUtil;
 import org.junit.*;
 import org.restlet.Request;
@@ -65,7 +64,7 @@ public class RunListResourceTest extends ResourceTestBase {
 			IllegalAccessException, InvocationTargetException,
 			NoSuchMethodException, ClassNotFoundException {
 
-		resetAndLoadConnector(com.sixsq.slipstream.connector.local.LocalConnector.class);
+		resetAndLoadConnector(LocalConnector.class);
 
 		UserParameter keyParameter = new UserParameter(
 				new LocalUserParametersFactory()
@@ -79,7 +78,6 @@ public class RunListResourceTest extends ResourceTestBase {
 
 
 		Event.muteForTests();
-		SscljProxy.muteForTests();
 
 		CommonTestUtil.addSshKeys(user);
 
@@ -112,7 +110,6 @@ public class RunListResourceTest extends ResourceTestBase {
 	@AfterClass
 	public static void teardownClass() throws ConfigurationException, ValidationException {
 		removeAllRuns();
-		SscljProxy.unmuteForTests();
 	}
 
 	@Before
@@ -159,7 +156,7 @@ public class RunListResourceTest extends ResourceTestBase {
 
 		Response resp = getRunList(null, null, null);
 		assertEquals(Status.SUCCESS_OK, resp.getStatus());
-		Document runs = XmlUtil.stringToDom(resp.getEntityAsText());
+		Document runs = XmlUtil.stringToDom(resp.getEntityAsText().trim());
 		assertEquals(0, runs.getDocumentElement().getElementsByTagName("item").getLength());
 
 		listAllRuns("Runs after explicit cleanup.");
@@ -372,6 +369,7 @@ public class RunListResourceTest extends ResourceTestBase {
 
 		Map<String, Object> attributes = new HashMap<String, Object>();
 		attributes.put(User.REQUEST_KEY, user);
+		attributes.put("Accept", "application/xml");
 
 		Form queryString = new Form();
 		if (offset != null) queryString.set("offset", offset.toString());

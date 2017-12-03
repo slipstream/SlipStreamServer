@@ -1,0 +1,70 @@
+{
+  "count": 1,
+  "acl": {
+    "owner": {
+      "principal": "ADMIN",
+      "type": "ROLE"
+    },
+    "rules": [
+      {
+        "principal": "ADMIN",
+        "type": "ROLE",
+        "right": "MODIFY"
+      },
+      {
+        "principal": "USER",
+        "type": "ROLE",
+        "right": "MODIFY"
+      }
+    ]
+  },
+  "resourceURI": "http://sixsq.com/slipstream/1/CredentialCollection",
+  "id": "credential",
+  "operations": [
+    {
+      "rel": "add",
+      "href": "credential"
+    }
+  ],
+  "credentials": [
+    {
+      "connector": {
+        "href": "connector/exoscale-ch-dk"
+      },
+      "key": "xxx",
+      "method": "store-cloud-cred-exoscale",
+      "updated": "2017-11-07T15:36:19.868Z",
+      "name": "exoscale-ch-dk",
+      "type": "cloud-cred-exoscale",
+      "created": "2017-11-07T15:36:19.868Z",
+      "secret": "yyy",
+      "domain-name": "",
+      "id": "credential/1-2-3-4-5",
+      "acl": {
+        "owner": {
+          "principal": "user/some_user",
+          "type": "USER"
+        },
+        "rules": [
+          {
+            "type": "ROLE",
+            "principal": "ADMIN",
+            "right": "ALL"
+          },
+          {
+            "type": "USER",
+            "principal": "user/some_user",
+            "right": "MODIFY"
+          }
+        ]
+      },
+      "operations": [
+        {
+          "rel": "delete",
+          "href": "credential/1-2-3-4-5"
+        }
+      ],
+      "resourceURI": "http://sixsq.com/slipstream/1/Credential"
+    }
+  ]
+}
