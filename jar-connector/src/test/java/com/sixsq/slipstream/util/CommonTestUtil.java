@@ -221,8 +221,23 @@ public abstract class CommonTestUtil {
 		ConnectorFactory.getConnectors();
 
 		// update the configuration
-		setCloudConnector(configConnectorName);
-		updateServiceConfigurationParameters(systemConfigurationFactory);
+		Configuration configuration = null;
+		try {
+			configuration = Configuration.getInstance();
+		} catch (ValidationException e) {
+			fail();
+		}
+
+		ServiceConfiguration sc = configuration.getParameters();
+		try {
+			sc.setParameter(new ServiceConfigurationParameter(RequiredParameters.CLOUD_CONNECTOR_CLASS.getName(),
+					configConnectorName));
+		} catch (ValidationException e) {
+			fail();
+		}
+		sc.setParameters(systemConfigurationFactory.getParameters());
+		sc.store();
+		ConnectorFactory.resetConnectors();
 
 		// return the loaded connector
 		String connectorInstanceName = cloudServiceName;

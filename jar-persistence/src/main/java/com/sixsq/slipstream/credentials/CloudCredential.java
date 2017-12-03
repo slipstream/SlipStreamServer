@@ -27,7 +27,7 @@ public class CloudCredential<T> implements ICloudCredential<T> {
 
     public String secret;
 
-    public Integer quota = 10;
+    public Integer quota = 20;
 
     private transient static final Logger logger = Logger.getLogger(
             "com.sixsq.slipstream.credentials." + CloudCredential.class.getName());

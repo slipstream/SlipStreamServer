@@ -369,9 +369,9 @@ public class RunListResourceTest extends ResourceTestBase {
 
 		Map<String, Object> attributes = new HashMap<String, Object>();
 		attributes.put(User.REQUEST_KEY, user);
+		attributes.put("Accept", "application/xml");
 
 		Form queryString = new Form();
-		queryString.set("media", "xml");
 		if (offset != null) queryString.set("offset", offset.toString());
 		if (limit != null) queryString.set("limit", limit.toString());
 		if (cloudServiceName != null) queryString.set("cloud", cloudServiceName);

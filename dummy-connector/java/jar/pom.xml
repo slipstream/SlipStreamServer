@@ -52,6 +52,12 @@
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamDbBinding-jar</artifactId>
+      <scope>test</scope>
+    </dependency>
+
     <!-- Needs to be before junit -->
     <dependency>
       <groupId>org.hamcrest</groupId>

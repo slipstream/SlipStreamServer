@@ -229,6 +229,7 @@
                 :dependencies (merge-defaults
                                 ['sixsq/default-deps (get-env :version)]
                                 [['org.apache.curator/curator-test :scope "compile"]
+                                 ['com.sixsq.slipstream/SlipStreamCljResources-jar :scope "compile"]
                                  ['com.sixsq.slipstream/slipstream-ring-container :scope "compile"]]))
            (sift
              :to-resource #{#"test_server\.clj"
