@@ -67,6 +67,9 @@ public class SscljProxy {
 
     private static boolean isMuted = false;
 
+    private static final String MUTED_MESSAGE = "You should NOT see this message in production: request to SSCLJ " +
+            "won't be made";
+
     public static Response get(String resource, String username) {
         return request(Method.GET, resource, null, username, null, null, null);
     }
@@ -154,6 +157,7 @@ public class SscljProxy {
                                     Iterable<Parameter> queryParameters, MediaType mediaType,
                                     Boolean throwExceptions) {
         if (isMuted) {
+            logger.severe(MUTED_MESSAGE);
             return new Response(new org.restlet.Request());
         }
 
@@ -340,7 +344,7 @@ public class SscljProxy {
 
     public static void muteForTests() {
         isMuted = true;
-        logger.severe("You should NOT see this message in production: request to SSCLJ won't be made");
+        logger.severe(MUTED_MESSAGE);
     }
 
     public static void unmuteForTests() {

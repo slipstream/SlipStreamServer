@@ -815,14 +815,14 @@ public class User extends Metadata {
         } else {
             resp = SscljProxy.put(SscljProxy.BASE_RESOURCE + resourceUri, USERNAME_ROLE, this);
         }
-        if (SscljProxy.isError(resp)) {
+        if (SscljProxy.isError(resp) || null == resp.getEntityAsText()) {
             throw new SlipStreamDatabaseException("Failed to persist User: "
                     + SscljProxy.respToString(resp));
         }
         User user = (new Gson()).fromJson(resp.getEntityAsText(), User.class);
         if (null == user || null == user.name) {
             resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + resourceUri, USERNAME_ROLE);
-            if (SscljProxy.isError(resp)) {
+            if (SscljProxy.isError(resp) || null == resp.getEntityAsText()) {
                 throw new SlipStreamDatabaseException("Failed to persist User: "
                         + SscljProxy.respToString(resp));
             }
@@ -832,8 +832,7 @@ public class User extends Metadata {
             user.parameters = loadParameters(user);
         } catch (ValidationException e) {
             e.printStackTrace();
-            throw new SlipStreamDatabaseException("Failed to load User " +
-                    "parameters: " + e.getMessage());
+            throw new SlipStreamDatabaseException("Failed to load User parameters: " + e.getMessage());
         }
         return user;
     }

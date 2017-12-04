@@ -3,6 +3,7 @@ package com.sixsq.slipstream.run;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.connector.UserParametersFactoryBase;
@@ -41,6 +42,8 @@ public class RunTestBase {
 	public static DeploymentModule deployment = null;
 	protected static ImageModule imageForDeployment1 = null;
 	protected static ImageModule imageForDeployment2 = null;
+
+	private static final Logger logger = Logger.getLogger(RunTestBase.class.getName());
 
 	protected static void setupImages() throws ValidationException {
 		imagebase = new ImageModule("test/imagebase");
@@ -91,11 +94,16 @@ public class RunTestBase {
 				UserParametersFactoryBase.DEFAULT_CLOUD_SERVICE_PARAMETER_NAME, cloudServiceName, ""));
 	}
 
-	protected static void tearDownImages() {
-		imagebase.remove();
-		imageref.remove();
-		image.remove();
-		user.remove();
+	protected static void tearDownImagesAndUser() {
+		try {
+			imagebase.remove();
+			imageref.remove();
+			image.remove();
+			user.remove();
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.warning("Failed removing images and user in RunTestBase.tearDownImagesAndUser().");
+		}
 	}
 
 	protected static void setupDeployments() throws ValidationException,
