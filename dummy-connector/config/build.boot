@@ -5,7 +5,7 @@
 
   :version +version+
   :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
-  :edition "enterprise"
+  :edition "community"
 
   :dependencies '[[org.clojure/clojure "1.9.0-beta2"]
                   [sixsq/build-utils "0.1.4" :scope "test"]])
