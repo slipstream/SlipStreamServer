@@ -574,7 +574,7 @@ public class User extends Metadata {
 				cloudCredParams.putAll(cloudCredTmpl.setUserParametersValues(resp.getEntityAsText()));
 			} catch (ValidationException e) {
 				e.printStackTrace();
-				logger.warning("Failed to transform user cloud credentials " +
+				logger.warning("Failed to transform user " + user.getName() + " cloud credentials " +
 						conn.instanceName + " with: " + e.getMessage());
 			}
 		}
@@ -586,7 +586,7 @@ public class User extends Metadata {
         if (null != creds && creds.getCount() >= 1 && null != user) {
             return loadCloudCredentials(creds.getCredentials(), user);
         } else {
-            logger.warning("No cloud credentials for user.");
+            logger.warning("No cloud credentials for user " + user.getName() + ".");
             return new HashMap<>();
         }
     }
