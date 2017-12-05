@@ -53,6 +53,7 @@
                     [ring/ring-json]
                     [superstring]
                     [zookeeper-clj]
+                    [com.draines/postal]
 
                     ; dependencies for auth
                     [buddy/buddy-core]
