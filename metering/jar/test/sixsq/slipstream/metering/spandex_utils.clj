@@ -2,6 +2,7 @@
   (:require
     [clojure.string :as str]
     [com.sixsq.slipstream.db.es.utils :as esu]
+    [com.sixsq.slipstream.dbtest.es.utils :as esut]
     [com.sixsq.slipstream.db.es.binding :as esb]
     [com.sixsq.slipstream.db.impl :as db]
     [qbits.spandex :as spandex])
@@ -11,6 +12,7 @@
            (org.elasticsearch.client RestClient)
            (org.elasticsearch.action.admin.cluster.node.info NodeInfo NodesInfoResponse)
            (org.elasticsearch.common.transport InetSocketTransportAddress)))
+
 
 
 (defn cluster-ready? [client]
@@ -66,6 +68,7 @@
         (throw (ex-info msg resp))))))
 
 
+
 (defn node-address
   [^NodeInfo node-info]
   (when-let [http (.getHttp node-info)]
@@ -80,8 +83,10 @@
     (HttpHost. (.getAddress address) (.getPort address) "http")))
 
 
+
 (defn cli->rest
   "Take a node client and return a map with rest client and hosts "
+
   [^NodeClient client]
   (let [^NodesInfoResponse resp (.. client
                                     admin
@@ -99,7 +104,8 @@
 
 
 (defn provide-test-client []
-  (esu/node-client (esu/create-test-node)))
+  (esu/node-client (esut/create-test-node)))
+
 
 
 (defn provide-mock-rest-client
