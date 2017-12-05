@@ -203,6 +203,11 @@
   (pprint
     (esu/dump esb/*client* esb/index-name type)))
 
+(defn dump-message
+  [request]
+  (println (get-in request [:response :body :message]))
+  request)
+
 (defmacro with-test-es-client
   "Creates an Elasticsearch test client, executes the body with the created
    client bound to the Elasticsearch client binding, and then clean up the
