@@ -20,8 +20,9 @@ import java.util.List;
 import java.util.Map;
 
 public class CloudCredential<T> implements ICloudCredential<T> {
-    public HRef connector;
     public String id;
+
+    public HRef connector;
 
     public String key;
 
@@ -32,14 +33,14 @@ public class CloudCredential<T> implements ICloudCredential<T> {
     private transient static final Logger logger = Logger.getLogger(
             "com.sixsq.slipstream.credentials." + CloudCredential.class.getName());
 
-    public CloudCredential(HRef connector, String key, String secret) {
-        this.connector = connector;
-        this.key = key;
-        this.secret = secret;
+    public CloudCredential(String connectorInstanceName) {
+        this.connector = new HRef("connector/" + connectorInstanceName);
     }
 
-    public CloudCredential(HRef connector) {
-        this.connector = connector;
+    public CloudCredential(String connectorInstanceName, String key, String secret) {
+        this.connector = new HRef("connector/" + connectorInstanceName);
+        this.key = key;
+        this.secret = secret;
     }
 
     public String getConnectorInstanceName() {
@@ -78,7 +79,7 @@ public class CloudCredential<T> implements ICloudCredential<T> {
         Response resp = SscljProxy.get(SscljProxy.CREDENTIAL_RESOURCE, authz, queryParameters);
         CloudCredentialCollection cc = (CloudCredentialCollection) fromJson(resp.getEntityAsText(), CloudCredentialCollection.class);
         List<CloudCredential> credList = cc.getCredentials();
-        if (credList.isEmpty()){
+        if (credList.isEmpty()) {
             // Create only if the base part of the credentials is properly defined.
             if (cloudCredsDefined()) {
                 SscljProxy.post(SscljProxy.CREDENTIAL_RESOURCE, authz, new CloudCredentialCreateTmpl(this), true);
@@ -87,7 +88,7 @@ public class CloudCredential<T> implements ICloudCredential<T> {
                         connector.href + "' is not properly defined for user '" +
                         user.getName() + "'. Not creating.");
             }
-        } else{
+        } else {
             // Edit
 
             // merge
@@ -115,7 +116,9 @@ public class CloudCredential<T> implements ICloudCredential<T> {
 
     @Override
     public boolean credEquals(ICloudCredential<T> other) {
-        return false;
+        CloudCredential o = (CloudCredential) other;
+        return this.key.equals(o.key) && this.secret.equals(o.secret)
+                && this.quota.equals(o.quota);
     }
 
     @Override
