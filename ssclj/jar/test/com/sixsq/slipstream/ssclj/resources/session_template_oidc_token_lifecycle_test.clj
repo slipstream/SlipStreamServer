@@ -1,9 +1,9 @@
-(ns com.sixsq.slipstream.ssclj.resources.session-template-oidc-lifecycle-test
+(ns com.sixsq.slipstream.ssclj.resources.session-template-oidc-token-lifecycle-test
   (:require
     [clojure.test :refer [use-fixtures deftest]]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.resources.session-template :as st]
-    [com.sixsq.slipstream.ssclj.resources.session-template-oidc :as oidc]
+    [com.sixsq.slipstream.ssclj.resources.session-template-oidc-token :as oidc-token]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
@@ -20,10 +20,10 @@
 ;; initialize must to called to pull in SessionTemplate descriptions
 (dyn/initialize)
 
-(def valid-template {:method      oidc/authn-method
-                     :instance    oidc/authn-method
-                     :name        "OpenID Connect"
-                     :description "External Authentication via OpenID Connect Protocol"
+(def valid-template {:method      oidc-token/authn-method
+                     :instance    oidc-token/authn-method
+                     :name        "OpenID Connect Token"
+                     :description "External Authentication via OpenID Connect Token"
                      :acl         st/resource-acl})
 
 (deftest lifecycle
