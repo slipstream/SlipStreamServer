@@ -67,8 +67,6 @@
       (let [msg (str "refresh failed: " status ", " index)]
         (throw (ex-info msg resp))))))
 
-
-
 (defn node-address
   [^NodeInfo node-info]
   (when-let [http (.getHttp node-info)]
@@ -76,17 +74,13 @@
         address
         publishAddress)))
 
-
 (defn host-address
   [^InetSocketTransportAddress address]
   (when address
     (HttpHost. (.getAddress address) (.getPort address) "http")))
 
-
-
 (defn cli->rest
   "Take a node client and return a map with rest client and hosts "
-
   [^NodeClient client]
   (let [^NodesInfoResponse resp (.. client
                                     admin
@@ -105,8 +99,6 @@
 
 (defn provide-test-client []
   (esu/node-client (esut/create-test-node)))
-
-
 
 (defn provide-mock-rest-client
   []
