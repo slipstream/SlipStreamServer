@@ -7,7 +7,10 @@
     [qbits.spandex :as spandex])
   (:import (org.apache.http HttpHost)
            (org.elasticsearch.common.network NetworkAddress)
-           (org.elasticsearch.client RestClient)))
+           (org.elasticsearch.client.node NodeClient)
+           (org.elasticsearch.client RestClient)
+           (org.elasticsearch.action.admin.cluster.node.info NodeInfo NodesInfoResponse)
+           (org.elasticsearch.common.transport InetSocketTransportAddress)))
 
 
 (defn cluster-ready? [client]
@@ -62,45 +65,43 @@
       (let [msg (str "refresh failed: " status ", " index)]
         (throw (ex-info msg resp))))))
 
-(defn- addresses
-  [nodeInfos]
-  "Get a list of org.elasticsearch.common.transport.InetSocketTransportAddress for each NodeInfo
-  where Http is enabled"
-  (let [node-address (fn [node] (when (.getHttp node)
-                                  (-> node
-                                      (.getHttp)
-                                      (.address)
-                                      (.publishAddress)
-                                      )))]
-    (map node-address nodeInfos)))
+
+(defn node-address
+  [^NodeInfo node-info]
+  (when-let [http (.getHttp node-info)]
+    (.. http
+        address
+        publishAddress)))
+
+
+(defn host-address
+  [^InetSocketTransportAddress address]
+  (when address
+    (HttpHost. (.getAddress address) (.getPort address) "http")))
 
 
 (defn cli->rest
   "Take a node client and return a map with rest client and hosts "
-  [client]
-  (let [nodes (-> client
-                  (.admin)
-                  (.cluster)
-                  (.prepareNodesInfo (into-array String []))
-                  (.get)
-                  (.getNodes))
-        addresses (addresses nodes)
-        host-address (fn [address] (HttpHost. (.getAddress address) (.getPort address) "http"))
-        hosts (map host-address addresses)
+  [^NodeClient client]
+  (let [^NodesInfoResponse resp (.. client
+                                    admin
+                                    cluster
+                                    (prepareNodesInfo (into-array String []))
+                                    get)
+        hosts (->> (.getNodes resp)
+                   (map node-address)
+                   (map host-address)
+                   (remove nil?)
+                   vec)
         builder (RestClient/builder (into-array HttpHost hosts))]
     {:client (.build builder)
-     :hosts  (vec (map str hosts))
-     }))
+     :hosts  (vec (map str hosts))}))
+
 
 (defn provide-test-client []
-  (let [node (esu/create-test-node)]
-    (esu/node-client node)))
+  (esu/node-client (esu/create-test-node)))
+
 
 (defn provide-mock-rest-client
   []
   (cli->rest (provide-test-client)))
-
-
-
-
-
