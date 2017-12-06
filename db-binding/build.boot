@@ -40,8 +40,8 @@
                    [org.apache.logging.log4j/log4j-api]
                    [org.apache.logging.log4j/log4j-web]
                    [org.elasticsearch.client/transport]
-                   [org.elasticsearch.plugin/transport-netty4-client]
-                   [org.elasticsearch.test/framework]
+                   [org.elasticsearch.plugin/transport-netty4-client :scope "test"]
+                   [org.elasticsearch.test/framework :scope "test"]
 
                    [ring/ring-json]
                    [superstring]
@@ -50,7 +50,7 @@
                    ;; This dependency is included explicitly to avoid having
                    ;; ring/ring-json pull in an old version of ring-core that
                    ;; conflicts with the more recent one.
-                   ;; 
+                   ;;
                    [ring/ring-core]
 
 

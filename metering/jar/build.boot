@@ -30,6 +30,8 @@
                     [com.sixsq.slipstream/slipstream-ring-container :scope "test"]
                     [com.sixsq.slipstream/SlipStreamClientAPI-jar]
                     [com.sixsq.slipstream/SlipStreamDbBinding-jar]
+                    [org.elasticsearch.plugin/transport-netty4-client :scope "test"]
+                    [org.elasticsearch.test/framework :scope "test"]
 
                     [aleph]
                     [cc.qbits/spandex]
