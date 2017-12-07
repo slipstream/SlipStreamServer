@@ -72,9 +72,9 @@
       (content-type "application/x-www-form-urlencoded")
       (request base-uri
                :request-method :put
-               :body (url/map->query {:$filter (format "type^='cloud-cred' and connector/href='connector/%s'" conn-inst-name)
+               :body (url/map->query {:$filter  (format "type^='cloud-cred' and connector/href='connector/%s'" conn-inst-name)
                                       :$orderby "created:desc"
-                                      :$last 1}))
+                                      :$last    1}))
       (ltu/body->edn)
       (ltu/is-status 200)))
 
@@ -166,6 +166,7 @@
                                :body (json/write-str create-import-href))
                       (ltu/body->edn)
                       (ltu/is-status 201))
+          _       (ltu/refresh-es-indices)
           id      (get-in resp [:response :body :resource-id])
           uri     (-> resp
                       (ltu/location))

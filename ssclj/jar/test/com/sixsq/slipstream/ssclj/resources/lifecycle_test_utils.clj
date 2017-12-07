@@ -42,7 +42,8 @@
   [m status]
   `((fn [m# status#]
       (let [actual# (get-in m# [:response :status])]
-        (is (= status# actual#) (str "Expecting status " status# " got " (or actual# "nil")))
+        (is (= status# actual#) (str "Expecting status " status# " got " (or actual# "nil") ". Message: "
+                                     (get-in m# [:response :body :message])))
         m#)) ~m ~status))
 
 (defmacro is-key-value

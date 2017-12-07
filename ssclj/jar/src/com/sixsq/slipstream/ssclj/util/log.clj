@@ -32,3 +32,12 @@
                      (ring-resp/status 400))]
     (log/warn msg)
     (throw (ex-info msg response))))
+
+(defn log-obj-info
+  [o m]
+  (log/info "--->>>" m)
+  (let [s (new java.io.StringWriter)]
+    (clojure.pprint/pprint o s)
+    (log/info (str s)))
+  (log/info m "<<---")
+  o)
