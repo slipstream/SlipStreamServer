@@ -85,6 +85,8 @@
           entries-and-count (merge metadata (wrapper-fn request entries))]
       (r/json-response entries-and-count))))
 
+(def ^:const href-not-found-msg "Requested href not found")
+
 (defn resolve-href-keep
   "Pulls in the resource identified by the value of the :href key and merges
    that resource with argument. Keys specified directly in the argument take
@@ -98,6 +100,8 @@
   [{:keys [href] :as resource} idmap]
   (if (not (str/blank? href))
     (let [refdoc (crud/retrieve-by-id href)]
+      (when-not refdoc
+        (throw (r/ex-bad-request (format "%s: %s" href-not-found-msg href))))
       (a/can-view? refdoc idmap)
       (-> refdoc
           (u/strip-common-attrs)
