@@ -85,7 +85,9 @@
           entries-and-count (merge metadata (wrapper-fn request entries))]
       (r/json-response entries-and-count))))
 
-(def ^:const href-not-found-msg "Requested href not found")
+(def ^:const href-not-found-msg "requested href not found")
+
+(def ^:const href-not-accessible-msg "requested href cannot be accessed")
 
 (defn resolve-href-keep
   "Pulls in the resource identified by the value of the :href key and merges
@@ -98,16 +100,18 @@
    If a referenced document doesn't exist or if the user doesn't have read
    access to the document, then the method will throw."
   [{:keys [href] :as resource} idmap]
-  (if (not (str/blank? href))
-    (let [refdoc (crud/retrieve-by-id href)]
-      (when-not refdoc
-        (throw (r/ex-bad-request (format "%s: %s" href-not-found-msg href))))
-      (a/can-view? refdoc idmap)
-      (-> refdoc
-          (u/strip-common-attrs)
-          (u/strip-service-attrs)
-          (dissoc :acl)
-          (merge resource)))
+  (if-not (str/blank? href)
+    (if-let [refdoc (crud/retrieve-by-id href)]
+      (try
+        (a/can-view? refdoc idmap)
+        (-> refdoc
+            (u/strip-common-attrs)
+            (u/strip-service-attrs)
+            (dissoc :acl)
+            (merge resource))
+        (catch Exception ex
+          (throw (r/ex-bad-request (format "%s: %s" href-not-accessible-msg href)))))
+      (throw (r/ex-bad-request (format "%s: %s" href-not-found-msg href))))
     resource))
 
 (defn resolve-href
