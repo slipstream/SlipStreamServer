@@ -99,13 +99,13 @@
           (ltu/body->edn)
           (ltu/is-status 400)))
 
-    ;; creating a new credential as anon will fail
+    ;; creating a new credential as anon will fail; expect 400 because href cannot be accessed
     (-> session-anon
         (request base-uri
                  :request-method :post
                  :body (json/write-str create-import-href))
         (ltu/body->edn)
-        (ltu/is-status 403))
+        (ltu/is-status 400))
 
     ;; create a credential as a normal user
     (let [resp (-> session-user

@@ -86,13 +86,13 @@
         (ltu/body->edn)
         (ltu/is-status 400))
 
-    ;; anonymous create must fail
+    ;; anonymous create must fail; expect 400 because href cannot be accessed
     (-> session-anon
         (request base-uri
                  :request-method :post
                  :body (json/write-str href-create))
         (ltu/body->edn)
-        (ltu/is-status 403))
+        (ltu/is-status 400))
 
     ;; anonymous create without template reference fails
     (-> session-anon
