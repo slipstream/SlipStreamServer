@@ -46,7 +46,6 @@ import com.sixsq.slipstream.filter.TrimmedMediaTypesFilter;
 import com.sixsq.slipstream.initialstartup.CloudIds;
 import com.sixsq.slipstream.initialstartup.Modules;
 import com.sixsq.slipstream.initialstartup.Users;
-import com.sixsq.slipstream.metrics.GraphiteRouter;
 import com.sixsq.slipstream.module.ModuleListRouter;
 import com.sixsq.slipstream.metrics.Metrics;
 import com.sixsq.slipstream.module.ModuleRouter;
@@ -249,7 +248,6 @@ public class RootApplication extends Application {
 
 		try {
 			attachModulesChooser(router);
-			attachMetering(router);
 			attachAction(router);
 			attachModule(router);
 			attachUser(router);
@@ -439,10 +437,6 @@ public class RootApplication extends Application {
 
 	public void addConfigurationToRequest(Request request) throws ConfigurationException, ValidationException {
 		ConfigurationUtil.addConfigurationToRequest(request);
-	}
-
-	private void attachMetering(RootRouter router) throws ConfigurationException, ValidationException {
-		guardAndAttach(router, new GraphiteRouter(getContext()), GraphiteRouter.ROOT_URI);
 	}
 
 	private void attachEvent(RootRouter router) throws ValidationException {
