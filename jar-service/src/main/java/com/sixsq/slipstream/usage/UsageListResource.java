@@ -9,13 +9,13 @@ public class UsageListResource extends APICollectionResource {
         super("usage");
     }
 
-    protected String cimiFilter() {
-        String cimiFilter = String.format("&$filter=user='%s'", getUser().getName());
+    @Override
+    protected String getSsclj() {
+        return "{}";
+    }
 
-        String cimiFilterFromReq = RequestUtil.getCIMIFilter(getRequest());
-        if (cimiFilterFromReq != null && !cimiFilterFromReq.isEmpty()) {
-            cimiFilter += ("and" + cimiFilterFromReq);
-        }
-        return cimiFilter;
+    @Override
+    protected String cimiFilter() {
+        return "";
     }
 }
