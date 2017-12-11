@@ -343,22 +343,6 @@
             </mapping>
 
             <mapping>
-              <directory>/usr/sbin</directory>
-              <filemode>755</filemode>
-              <username>root</username>
-              <groupname>root</groupname>
-              <directoryIncluded>false</directoryIncluded>
-              <sources>
-                <source>
-                  <location>src/main/scripts</location>
-                  <includes>
-                    <include>send-daily-usage-emails.sh</include>
-                  </includes>
-                </source>
-              </sources>
-            </mapping>
-
-            <mapping>
               <directory>${installation.dir}/resources</directory>
               <filemode>664</filemode>
               <directoryIncluded>false</directoryIncluded>
