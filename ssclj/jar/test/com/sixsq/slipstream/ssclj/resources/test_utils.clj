@@ -15,9 +15,17 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
     [peridot.core :refer :all]
     [clojure.data.json :as json]
-    [com.sixsq.slipstream.ssclj.usage.utils :as u]
     [clj-time.core :as time]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
+    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
+    [clj-time.format :as time-fmt]))
+
+
+(defn to-time
+  "Tries to parse the given string as a DateTime value.  Returns the DateTime
+   instance on success and nil on failure."
+  [s]
+  (time-fmt/parse (:date-time time-fmt/formatters) s))
+
 
 (defn- urlencode-param
   [p]
@@ -92,7 +100,7 @@
 
 (defn ordered-desc?
   [timestamps]
-  (every? (fn [[a b]] (not-before? (u/to-time a) (u/to-time b))) (partition 2 1 timestamps)))
+  (every? (fn [[a b]] (not-before? (to-time a) (to-time b))) (partition 2 1 timestamps)))
 
 (defn submap?
   "True if a is a submap of b
