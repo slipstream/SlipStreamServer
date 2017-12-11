@@ -11,7 +11,7 @@ public class UsageListResource extends APICollectionResource {
 
     @Override
     protected String getSsclj() {
-        return "{}";
+        return "";
     }
 
     @Override
