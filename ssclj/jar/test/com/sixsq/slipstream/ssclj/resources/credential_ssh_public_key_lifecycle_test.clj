@@ -129,7 +129,7 @@
             (ltu/body->edn)
             (ltu/is-status 200)
             (ltu/is-operation-present "delete")
-            (ltu/is-operation-absent "edit")))
+            (ltu/is-operation-present "edit")))
 
       ;; ensure credential contains correct information
       (let [resource (-> session-user
@@ -197,7 +197,7 @@
             (ltu/body->edn)
             (ltu/is-status 200)
             (ltu/is-operation-present "delete")
-            (ltu/is-operation-absent "edit")))
+            (ltu/is-operation-present "edit")))
 
       ;; ensure credential contains correct information
       (let [resource (-> session-user
