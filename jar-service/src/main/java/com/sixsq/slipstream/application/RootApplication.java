@@ -30,6 +30,7 @@ import com.sixsq.slipstream.authn.LogoutResource;
 import com.sixsq.slipstream.authn.RegistrationResource;
 import com.sixsq.slipstream.authn.ResetPasswordResource;
 import com.sixsq.slipstream.authz.SuperEnroler;
+import com.sixsq.slipstream.cloudusage.CloudUsageRouter;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.DiscoverableConnectorServiceLoader;
@@ -266,6 +267,7 @@ public class RootApplication extends Application {
 			attachUsage(router);
 			attachServiceInfo(router);
 			attachAttribute(router);
+			attachCloudUsage(router);
 			attachNuvlaboxAdmin(router);
 
 			attachAppStore(router);
@@ -457,6 +459,10 @@ public class RootApplication extends Application {
 
 	private void attachAttribute(RootRouter router) throws ValidationException {
 		guardAndAttach(router, new AttributeRouter(getContext()), "service-attribute");
+	}
+
+	private void attachCloudUsage(RootRouter router) throws ValidationException {
+		guardAndAttach(router, new CloudUsageRouter(getContext()), "cloud-usage");
 	}
 
 	private void attachAppStore(RootRouter router) throws ValidationException {
