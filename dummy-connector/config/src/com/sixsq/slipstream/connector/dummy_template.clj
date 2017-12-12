@@ -1,5 +1,5 @@
 (ns com.sixsq.slipstream.connector.dummy-template
-    (:require
+  (:require
     [clojure.set :as set]
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as sch]
@@ -58,7 +58,7 @@
 ;;
 ;; resource
 ;;
-;; defautls for the template
+;; defaults for the template
 (def ^:const resource
   (merge ctpl/connector-reference-attrs-defaults
          {:cloudServiceType         cloud-service-type
