@@ -1,11 +1,13 @@
 (ns slipstream.async.garbage-collector
-  (:require [clojure.core.async       :as async :refer [go timeout thread chan sliding-buffer <! >! <!! alts!]])
-  (:require [slipstream.async.log     :as log])
-  (:import [com.sixsq.slipstream.util Terminator])
+  (:require
+    [clojure.core.async :as async :refer [go timeout thread chan sliding-buffer <! >! <!! alts!]]
+    [slipstream.async.log :as log])
+  (:import
+    [com.sixsq.slipstream.util Terminator])
   (:gen-class
     :name slipstream.async.GarbageCollector
     :methods [#^{:static true}
-                [start [] void]]))
+  [start [] void]]))
 
 (defn seconds-in-msecs
   [seconds]
