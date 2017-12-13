@@ -1,18 +1,8 @@
 package com.sixsq.slipstream.resource;
 
-import org.restlet.data.MediaType;
-import org.restlet.representation.Representation;
-import org.restlet.representation.StringRepresentation;
-import org.restlet.resource.Get;
-
 import com.sixsq.slipstream.module.ModuleView.ModuleViewList;
 import com.sixsq.slipstream.module.ModuleListResource;
-import com.sixsq.slipstream.exceptions.ConfigurationException;
-import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Module;
-import com.sixsq.slipstream.persistence.ServiceCatalogs;
-import com.sixsq.slipstream.util.HtmlUtil;
-import com.sixsq.slipstream.util.SerializationUtil;
 
 /*
  * +=================================================================+
