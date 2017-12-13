@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 
-import com.sixsq.slipstream.connector.Collector;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorBase;
 import com.sixsq.slipstream.credentials.Credentials;
@@ -65,7 +64,6 @@ public class LocalConnector extends ConnectorBase {
 					username, new LocalConnector().isVmUsable(randomState));
 			vms.add(vm);
 		}
-		Collector.update(vms, username, cloud);
 		getLog().info("Done generating dummy VMs");
 	}
 
