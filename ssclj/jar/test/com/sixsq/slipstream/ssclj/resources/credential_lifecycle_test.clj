@@ -25,7 +25,6 @@
     (doall
       (for [[uri method] [[base-uri :options]
                           [base-uri :delete]
-                          [resource-uri :put]
                           [resource-uri :options]
                           [resource-uri :post]]]
         (-> (session (ring-app))

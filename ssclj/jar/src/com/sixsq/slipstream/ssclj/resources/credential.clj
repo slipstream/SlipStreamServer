@@ -110,7 +110,8 @@
 ;; available operations
 ;;
 
-(defmethod crud/set-operations resource-uri
+;; Use standard method for setting operations.
+#_(defmethod crud/set-operations resource-uri
   [resource request]
   (try
     (a/can-modify? resource request)
@@ -163,6 +164,11 @@
         (assoc :id id :body (merge body desc-attrs))
         add-impl
         (update-in [:body] merge create-resp))))
+
+(def edit-impl (std-crud/edit-fn resource-name))
+(defmethod crud/edit resource-name
+  [request]
+  (edit-impl request))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 (defmethod crud/retrieve resource-name

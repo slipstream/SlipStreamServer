@@ -60,9 +60,9 @@
 
         create-import-no-href {:credentialTemplate (strip-unwanted-attrs template)}
 
-        create-import-href {:name name-attr
-                            :description description-attr
-                            :properties properties-attr
+        create-import-href {:name               name-attr
+                            :description        description-attr
+                            :properties         properties-attr
                             :credentialTemplate {:href href
                                                  :ttl  1000}}
 
@@ -133,7 +133,7 @@
             (ltu/body->edn)
             (ltu/is-status 200)
             (ltu/is-operation-present "delete")
-            (ltu/is-operation-absent "edit")))
+            (ltu/is-operation-present "edit")))
 
       ;; ensure credential contains correct information
       (let [{:keys [name description properties
@@ -184,7 +184,7 @@
             (ltu/body->edn)
             (ltu/is-status 200)
             (ltu/is-operation-present "delete")
-            (ltu/is-operation-absent "edit")))
+            (ltu/is-operation-present "edit")))
 
       ;; ensure credential contains correct information
       (let [{:keys [digest expiry claims]} (-> session-user
@@ -231,19 +231,39 @@
             (ltu/body->edn)
             (ltu/is-status 200)
             (ltu/is-operation-present "delete")
-            (ltu/is-operation-absent "edit")))
+            (ltu/is-operation-present "edit")))
 
       ;; ensure credential contains correct information
-      (let [{:keys [digest expiry claims]} (-> session-user
-                                               (request abs-uri)
-                                               (ltu/body->edn)
-                                               (ltu/is-status 200)
-                                               :response
-                                               :body)]
+      (let [{:keys [digest expiry claims] :as current} (-> session-user
+                                                           (request abs-uri)
+                                                           (ltu/body->edn)
+                                                           (ltu/is-status 200)
+                                                           :response
+                                                           :body)]
         (is digest)
         (is (key-utils/valid? secret-key digest))
         (is (nil? expiry))
-        (is claims))
+        (is claims)
+
+        ;; update the credential by changing the name attribute
+        (-> session-user
+            (request abs-uri
+                     :request-method :put
+                     :body (json/write-str (assoc current :name "UPDATED!")))
+            (ltu/body->edn)
+            (ltu/is-status 200))
+
+        ;; verify that the attribute has been changed
+        (let [expected (assoc current :name "UPDATED!")
+              reread (-> session-user
+                         (request abs-uri)
+                         (ltu/body->edn)
+                         (ltu/is-status 200)
+                         :response
+                         :body)]
+
+          (is (= (dissoc expected :updated) (dissoc reread :updated)))
+          (is (not= (:updated expected) (:updated reread)))))
 
       ;; delete the credential
       (-> session-user

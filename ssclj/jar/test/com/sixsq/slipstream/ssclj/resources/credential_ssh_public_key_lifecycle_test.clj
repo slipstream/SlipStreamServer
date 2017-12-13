@@ -129,7 +129,7 @@
             (ltu/body->edn)
             (ltu/is-status 200)
             (ltu/is-operation-present "delete")
-            (ltu/is-operation-absent "edit")))
+            (ltu/is-operation-present "edit")))
 
       ;; ensure credential contains correct information
       (let [resource (-> session-user
@@ -197,18 +197,38 @@
             (ltu/body->edn)
             (ltu/is-status 200)
             (ltu/is-operation-present "delete")
-            (ltu/is-operation-absent "edit")))
+            (ltu/is-operation-present "edit")))
 
       ;; ensure credential contains correct information
-      (let [resource (-> session-user
+      (let [current (-> session-user
+                        (request abs-uri)
+                        (ltu/body->edn)
+                        (ltu/is-status 200)
+                        :response
+                        :body)]
+        (is (= "rsa" (:algorithm current)))
+        (is (:fingerprint current))
+        (is (:publicKey current))
+
+        ;; update the credential by changing the name attribute
+        (-> session-user
+            (request abs-uri
+                     :request-method :put
+                     :body (json/write-str (assoc current :name "UPDATED!")))
+            (ltu/body->edn)
+            (ltu/is-status 200))
+
+        ;; verify that the attribute has been changed
+        (let [expected (assoc current :name "UPDATED!")
+              reread (-> session-user
                          (request abs-uri)
                          (ltu/body->edn)
                          (ltu/is-status 200)
                          :response
                          :body)]
-        (is (= "rsa" (:algorithm resource)))
-        (is (:fingerprint resource))
-        (is (:publicKey resource)))
+
+          (is (= (dissoc expected :updated) (dissoc reread :updated)))
+          (is (not= (:updated expected) (:updated reread)))))
 
       ;; delete the credential
       (-> session-user
