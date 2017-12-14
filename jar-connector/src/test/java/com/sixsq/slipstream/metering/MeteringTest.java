@@ -21,9 +21,7 @@ package com.sixsq.slipstream.metering;
  */
 
 
-import com.sixsq.slipstream.connector.Collector;
 import com.sixsq.slipstream.connector.ConnectorTestBase;
-import com.sixsq.slipstream.connector.UsageRecorder;
 import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
@@ -54,7 +52,6 @@ public class MeteringTest extends RunTestBase {
 
 	@BeforeClass
 	public static void setupClass() throws ConfigurationException, SlipStreamException {
-		UsageRecorder.muteForTests();
 		ConnectorTestBase.setupBackend();
 		createUser();
 		String username = user.getName();
@@ -70,13 +67,11 @@ public class MeteringTest extends RunTestBase {
 		vms.add(createVm(UUID.randomUUID().toString(), CLOUD_A, RUNNING_VM_STATE, username, runId));
 		vms.add(createVm(UUID.randomUUID().toString(), CLOUD_A, RUNNING_VM_STATE, username, runId));
 		vms.add(createVm(UUID.randomUUID().toString(), CLOUD_A, "Terminated", username, runId));
-		Collector.update(vms, username, CLOUD_A);
 
 		vms.clear();
 		vms.add(createVm(UUID.randomUUID().toString(), CLOUD_B, "Pending", username, runId));
 		vms.add(createVm(UUID.randomUUID().toString(), CLOUD_B, RUNNING_VM_STATE, username, runId));
 		vms.add(createVm(UUID.randomUUID().toString(), CLOUD_B, "Terminated", username, runId));
-		Collector.update(vms, username, CLOUD_B);
 	}
 
 	@AfterClass

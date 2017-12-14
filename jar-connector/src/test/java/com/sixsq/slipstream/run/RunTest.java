@@ -21,7 +21,6 @@ package com.sixsq.slipstream.run;
  */
 
 import com.sixsq.slipstream.connector.ConnectorTestBase;
-import com.sixsq.slipstream.connector.UsageRecorder;
 import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
@@ -57,7 +56,6 @@ public class RunTest extends RunTestBase {
 			InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException,
 			ClassNotFoundException {
-		UsageRecorder.muteForTests();
 		Event.muteForTests();
 		ConnectorTestBase.setupBackend();
 		setupImages();
@@ -69,7 +67,6 @@ public class RunTest extends RunTestBase {
 	public static void teardownClass() {
 		tearDownImagesAndUser();
 		ConnectorTestBase.teardownBackend();
-		UsageRecorder.unmuteForTests();
 	}
 
 	@Test

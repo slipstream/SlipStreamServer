@@ -1,16 +1,18 @@
 (ns slipstream.async.launcher
-  (:require [slipstream.async.log :as log])
-  (:import [com.sixsq.slipstream.connector Launcher])
-  (:import [com.sixsq.slipstream.persistence Run])
-  (:import [com.sixsq.slipstream.persistence User])
-  (:import [com.sixsq.slipstream.util Logger])
-  (:require [clojure.core.async :as async :refer [go timeout thread chan <! >! <!! alts!]])
+  (:require
+    [clojure.core.async :as async :refer [go timeout thread chan <! >! <!! alts!]]
+    [slipstream.async.log :as log])
+  (:import
+    [com.sixsq.slipstream.connector Launcher]
+    [com.sixsq.slipstream.persistence Run]
+    [com.sixsq.slipstream.persistence User]
+    [com.sixsq.slipstream.util Logger])
   (:gen-class
     :name slipstream.async.Launcher
     :methods [#^{:static true
-                 :doc "Takes: run user"}
-                [launch [com.sixsq.slipstream.persistence.Run
-                         com.sixsq.slipstream.persistence.User] void]]))
+                 :doc    "Takes: run user"}
+  [launch [com.sixsq.slipstream.persistence.Run
+           com.sixsq.slipstream.persistence.User] void]]))
 
 (defn minutes-in-msecs
   [minutes]
