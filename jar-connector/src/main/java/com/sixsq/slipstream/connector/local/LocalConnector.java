@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 
-import com.sixsq.slipstream.connector.Collector;
 import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.ConnectorBase;
 import com.sixsq.slipstream.credentials.Credentials;
@@ -53,21 +52,6 @@ public class LocalConnector extends ConnectorBase {
 	private static String[] states = { "running", "terminated", "initializing" };
 	private static Random random = new Random();
 	public static int MAX_VMS = 3;
-
-	public static void generateDummyVms() {
-		getLog().info("Generating " + MAX_VMS + " dummy VMs...");
-		String username = "super";
-		String cloud = "local";
-		vms = new ArrayList<Vm>();
-		for (int i = 0; i < MAX_VMS; i++) {
-			String randomState = randomState();
-			Vm vm = new Vm(UUID.randomUUID().toString(), cloud, randomState,
-					username, new LocalConnector().isVmUsable(randomState));
-			vms.add(vm);
-		}
-		Collector.update(vms, username, cloud);
-		getLog().info("Done generating dummy VMs");
-	}
 
 	private static String randomState() {
 		return states[random.nextInt(states.length)];
