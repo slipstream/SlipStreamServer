@@ -29,6 +29,7 @@
                    [com.sixsq.slipstream/SlipStreamDbSerializers-jar :scope "test"]
                    [com.sixsq.slipstream/SlipStreamCljResources-jar :scope "provided"]
                    [com.sixsq.slipstream/SlipStreamCljResourcesTestServer-jar :classifier "tests"]
+                   [com.sixsq.slipstream/SlipStreamDbTesting-jar :scope "test"]
 
                    [adzerk/boot-reload]
                    [tolitius/boot-check]

@@ -30,8 +30,7 @@
                     [com.sixsq.slipstream/slipstream-ring-container :scope "test"]
                     [com.sixsq.slipstream/SlipStreamClientAPI-jar]
                     [com.sixsq.slipstream/SlipStreamDbBinding-jar]
-
-                    [com.sixsq.slipstream/SlipStreamDbTesting-jar]
+                    [com.sixsq.slipstream/SlipStreamDbTesting-jar :scope "test"]
 
 
                     [aleph]

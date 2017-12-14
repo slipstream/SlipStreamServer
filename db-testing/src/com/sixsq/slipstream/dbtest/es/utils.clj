@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.db.es.utils
+(ns com.sixsq.slipstream.dbtest.es.utils
   (:refer-clojure :exclude [read update])
   (:require
     [clojure.java.io :as io]
@@ -31,9 +31,9 @@
     (org.elasticsearch.cluster.health ClusterHealthStatus)
     (org.elasticsearch.index IndexNotFoundException)
     (org.elasticsearch.index.query QueryBuilders)
-    (org.elasticsearch.node Node)
-    #_(org.elasticsearch.test ESIntegTestCase)
-    #_(com.carrotsearch.randomizedtesting RandomizedContext)
+    (org.elasticsearch.node Node MockNode)
+    (org.elasticsearch.test ESIntegTestCase)
+    (com.carrotsearch.randomizedtesting RandomizedContext)
     (org.elasticsearch.plugins Plugin)
     (org.elasticsearch.transport Netty4Plugin)
     (org.elasticsearch.transport.client PreBuiltTransportClient)
@@ -154,7 +154,7 @@
 ;;
 
 
-#_(defn create-test-node
+(defn create-test-node
   "Creates a local elasticsearch node that holds data but cannot be accessed
    through the HTTP protocol."
   ([]
@@ -181,7 +181,7 @@
 
 
 (def ^:const mapping-not-analyzed
-  (-> "com/sixsq/slipstream/db/es/mapping-not-analyzed.json"
+  (-> "com/sixsq/slipstream/dbtest/es/mapping-not-analyzed.json"
       io/resource
       slurp))
 
@@ -314,7 +314,7 @@
   []
   (str (UUID/randomUUID)))
 
-#_(defmacro with-es-test-client
+(defmacro with-es-test-client
   "Creates a new elasticsearch node, client, and test index, executes the body
    with `node`, `client`, and `index` vars bound to the values, and then
    reliably closes the node and client."

@@ -1,16 +1,14 @@
 (def +version+ "3.42-SNAPSHOT")
 
 (set-env!
-  :project 'com.sixsq.slipstream/SlipStreamDbBinding-jar
+  :project 'com.sixsq.slipstream/SlipStreamDbTesting-jar
 
   :version +version+
   :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
   :edition "community"
 
-
-  :dependencies '[[org.clojure/clojure "1.9.0"]
+  :dependencies '[[org.clojure/clojure "1.9.0-beta2"]
                   [sixsq/build-utils "0.1.4" :scope "test"]])
-
 
 (require '[sixsq.build-fns :refer [merge-defaults
                                    sixsq-nexus-url]])
@@ -42,12 +40,14 @@
                    [org.apache.logging.log4j/log4j-api]
                    [org.apache.logging.log4j/log4j-web]
                    [org.elasticsearch.client/transport]
-
-
+                   [org.elasticsearch.plugin/transport-netty4-client]
+                   [org.elasticsearch.test/framework]
 
                    [ring/ring-json]
                    [superstring]
-                   [com.sixsq.slipstream/SlipStreamDbTesting-jar]
+
+
+                   [com.sixsq.slipstream/SlipStreamDbBinding-jar]
                    ;;
                    ;; This dependency is included explicitly to avoid having
                    ;; ring/ring-json pull in an old version of ring-core that
@@ -74,8 +74,8 @@
   '[boot.lein :refer [generate]])
 
 (set-env!
-  :source-paths #{"test"}
-  :resource-paths #{"src" "resources"})
+  :source-paths #{"test" "java"}
+  :resource-paths #{"src" "resources" "java"})
 
 (task-options!
   pom {:project (get-env :project)
@@ -89,6 +89,7 @@
          "runs all tests and performs full compilation"
          []
          (comp
+          (javac)
            (test)
            #_(sift :include #{#".*_test\.clj"}
                  :invert true)
@@ -97,6 +98,7 @@
 (deftask build []
          (comp
            (pom)
+           (javac)
            (sift :include #{#".*_test\.clj"}
                  :invert true)
            (aot :all true)

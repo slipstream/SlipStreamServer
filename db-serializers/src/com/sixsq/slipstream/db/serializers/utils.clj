@@ -6,6 +6,7 @@
 
     [com.sixsq.slipstream.db.es.binding :as esb]
     [com.sixsq.slipstream.db.es.utils :as esu]
+    [com.sixsq.slipstream.dbtest.es.utils :as esut]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :as aih]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn])
@@ -63,7 +64,7 @@
    Because `.close` will never be called on the generated node and client, THIS
    FUNCTION WILL LEAK MEMORY."
   []
-  (let [node   (esu/create-test-node)
+  (let [node   (esut/create-test-node)
         client (-> node
                    esu/node-client
                    esb/wait-client-create-index)]
@@ -75,7 +76,7 @@
    client bound to the Elasticsearch client binding, and then clean up the
    allocated resources by closing both the client and the node."
   [& body]
-  `(with-open [node#   (esu/create-test-node)
+  `(with-open [node#   (esut/create-test-node)
                client# (-> node#
                            esu/node-client
                            esb/wait-client-create-index)]
@@ -247,7 +248,7 @@
    code unconditionally. This must never be called from native clojure code.
    Use of this function will cause a MEMORY LEAK."
   []
-  (let [node   (esu/create-test-node)
+  (let [node   (esut/create-test-node)
         client (-> node
                    esu/node-client
                    esb/wait-client-create-index)]

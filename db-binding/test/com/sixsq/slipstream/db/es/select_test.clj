@@ -3,13 +3,14 @@
   (:require
     [clojure.test :refer [deftest is are]]
     [com.sixsq.slipstream.db.es.select :as t]
+    [com.sixsq.slipstream.dbtest.es.utils :as eut]
     [com.sixsq.slipstream.db.es.utils :as eu])
   (:import (org.elasticsearch.search.sort SortOrder)
            (org.elasticsearch.action.search SearchRequestBuilder)
            (org.elasticsearch.search.aggregations AggregationBuilder)))
 
 (deftest check-select-keys
-  (eu/with-es-test-client
+  (eut/with-es-test-client
     (let [n 10
           type "test-resource"
           shuffled (shuffle
