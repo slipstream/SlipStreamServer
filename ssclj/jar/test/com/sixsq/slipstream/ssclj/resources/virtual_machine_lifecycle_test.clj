@@ -108,8 +108,8 @@
 
 
                           :credentials  [{:href  "credential/0123-4567-8912",
-                                         :roles ["realm:cern", "realm:my-accounting-group"]
-                                         :users ["long-user-id-1", "long-user-id-2"]}]
+                                          :roles ["realm:cern", "realm:my-accounting-group"]
+                                          :users ["long-user-id-1", "long-user-id-2"]}]
 
 
                           :deployment   {:href "run/aaa-bbb-ccc",
@@ -121,8 +121,10 @@
                                          :resource:disk         10
                                          :resource:instanceType "Large"}}
 
-          create-jane-vm (assoc create-test-vm :deployment {:href "run/444-555-666"
-                                                            :user {:href "user/jane"}})
+          create-jane-vm (-> create-test-vm
+                             (assoc :deployment {:href "run/444-555-666"
+                                                 :user {:href "user/jane"}})
+                             (assoc :instanceID "otherID"))
 
           resp-test (-> session-admin
                         (request base-uri
@@ -130,6 +132,14 @@
                                  :body (json/write-str create-test-vm))
                         (ltu/body->edn)
                         (ltu/is-status 201))
+
+          ; duplicated vm will fail (with same instanceID and connector/href)
+          resp-test2 (-> session-admin
+                         (request base-uri
+                                  :request-method :post
+                                  :body (json/write-str create-test-vm))
+                         (ltu/body->edn)
+                         (ltu/is-status 409))
 
           resp-jane (-> session-admin
                         (request base-uri
