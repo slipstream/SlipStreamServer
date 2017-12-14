@@ -80,7 +80,6 @@ import org.restlet.routing.Template;
 import org.restlet.routing.TemplateRoute;
 import org.restlet.security.Authenticator;
 import org.restlet.service.MetadataService;
-import slipstream.async.Collector;
 import slipstream.async.GarbageCollector;
 
 import java.io.UnsupportedEncodingException;
@@ -141,7 +140,6 @@ public class RootApplication extends Application {
 			// Load the configuration early
 			Configuration.getInstance();
 
-			Collector.start();
 			GarbageCollector.start();
 
 			Metrics.addJvmMetrics();

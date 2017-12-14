@@ -5,7 +5,7 @@
   :version +version+
   :license {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
   :edition "community"
-  
+
   :dependencies '[[org.clojure/clojure "1.9.0-beta2"]
                   [sixsq/build-utils "0.1.4" :scope "test"]])
 
@@ -30,47 +30,32 @@
                    [com.sixsq.slipstream/SlipStreamCljResources-jar :scope "provided"]
                    [com.sixsq.slipstream/SlipStreamCljResourcesTestServer-jar :classifier "tests"]
 
-                   [adzerk/boot-test]
                    [adzerk/boot-reload]
                    [tolitius/boot-check]
                    [boot-codox]
                    [onetom/boot-lein-generate]]))))
 
 (require
-  '[adzerk.boot-test :refer [test]]
   '[adzerk.boot-reload :refer [reload]]
   '[tolitius.boot-check :refer [with-yagni with-eastwood with-kibit with-bikeshed]]
   '[codox.boot :refer [codox]]
   '[boot.lein :refer [generate]])
 
 (set-env!
-  :source-paths #{"test"}
   :resource-paths #{"src"})
 
 (task-options!
   pom {:project (get-env :project)
        :version (get-env :version)}
-  test {:junit-output-to ""}
   install {:pom (str (get-env :project))}
   push {:pom (str (get-env :project))
         :repo "sixsq"})
-
-(deftask run-tests
-         "runs all tests and performs full compilation"
-         []
-         (comp
-           (test)))
 
 (deftask build []
          (comp
            (pom)
            (aot :all true)
            (jar)))
-
-(deftask mvn-test
-         "run all tests of project"
-         []
-         (run-tests))
 
 (deftask mvn-build
          "build full project through maven"
