@@ -5,7 +5,7 @@
     [qbits.spandex :as spandex]
     [sixsq.slipstream.metering.metering :as t]
     [sixsq.slipstream.metering.utils :as utils]
-    [sixsq.slipstream.metering.spandex-utils :as spu]))
+    [com.sixsq.slipstream.dbtest.es.spandex-utils :as spu]))
 
 (defn random-doc
   [resource-type]

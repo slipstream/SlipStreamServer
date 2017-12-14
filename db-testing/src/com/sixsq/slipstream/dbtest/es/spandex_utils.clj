@@ -1,11 +1,10 @@
-(ns sixsq.slipstream.metering.spandex-utils
-  (:require
-    [clojure.string :as str]
-    [com.sixsq.slipstream.db.es.utils :as esu]
-    [com.sixsq.slipstream.dbtest.es.utils :as esut]
-    [com.sixsq.slipstream.db.es.binding :as esb]
-    [com.sixsq.slipstream.db.impl :as db]
-    [qbits.spandex :as spandex])
+(ns com.sixsq.slipstream.dbtest.es.spandex-utils (:require
+                                                   [clojure.string :as str]
+                                                   [com.sixsq.slipstream.db.es.utils :as esu]
+                                                   [com.sixsq.slipstream.dbtest.es.utils :as esut]
+                                                   [com.sixsq.slipstream.db.es.binding :as esb]
+                                                   [com.sixsq.slipstream.db.impl :as db]
+                                                   [qbits.spandex :as spandex])
   (:import (org.apache.http HttpHost)
            (org.elasticsearch.common.network NetworkAddress)
            (org.elasticsearch.client.node NodeClient)
