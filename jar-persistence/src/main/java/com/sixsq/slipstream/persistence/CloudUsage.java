@@ -34,36 +34,15 @@ public class CloudUsage {
     @Attribute(empty = "0")
     private Integer userRunUsage = null;
 
-    @Attribute
-    private int userVmUsage = 0;
-
-    @Attribute
-    private int userInactiveVmUsage = 0;
-
-    @Attribute
-    private int othersVmUsage = 0;
-
-    @Attribute
-    private int pendingVmUsage = 0;
-
-    @Attribute
-    private int unknownVmUsage = 0;
-
     public CloudUsage(String cloud) {
         this.cloud = cloud;
     }
 
-    public CloudUsage(String cloud, Integer vmQuota, Integer userRunUsage, int userVmUsage, int userInactiveVmUsage,
-                      int othersVmUsage, int pendingVmUsage, int unknownVmUsage)
+    public CloudUsage(String cloud, Integer vmQuota, Integer userRunUsage)
     {
         this.cloud = cloud;
         this.vmQuota = vmQuota;
         this.userRunUsage = userRunUsage;
-        this.userVmUsage = userVmUsage;
-        this.userInactiveVmUsage = userInactiveVmUsage;
-        this.othersVmUsage = othersVmUsage;
-        this.unknownVmUsage = unknownVmUsage;
-        this.pendingVmUsage = pendingVmUsage;
     }
 
     public String getCloud() {
@@ -86,46 +65,6 @@ public class CloudUsage {
         this.userRunUsage = userRunUsage;
     }
 
-    public int getUserVmUsage() {
-        return this.userVmUsage;
-    }
-
-    public void incrementUserVmUsage() {
-        this.userVmUsage++;
-    }
-
-    public int getUserInactiveVmUsage() {
-        return userInactiveVmUsage;
-    }
-
-    public void incrementUserInactiveVmUsage() {
-        this.userInactiveVmUsage++;
-    }
-
-    public int getOthersVmUsage() {
-        return othersVmUsage;
-    }
-
-    public void incrementOthersVmUsage() {
-        this.othersVmUsage++;
-    }
-
-    public int getPendingVmUsage() {
-        return pendingVmUsage;
-    }
-
-    public void incrementPendingVmUsage() {
-        this.pendingVmUsage++;
-    }
-
-    public int getUnknownVmUsage() {
-        return unknownVmUsage;
-    }
-
-    public void incrementUnknownVmUsage() {
-        this.unknownVmUsage++;
-    }
-
     public void add(CloudUsage usage) {
         add(usage, true);
     }
@@ -145,12 +84,6 @@ public class CloudUsage {
             }
             this.userRunUsage += usage.userRunUsage;
         }
-
-        this.userVmUsage += usage.userVmUsage;
-        this.userInactiveVmUsage += usage.userInactiveVmUsage;
-        this.othersVmUsage += usage.othersVmUsage;
-        this.unknownVmUsage += usage.unknownVmUsage;
-        this.pendingVmUsage += usage.pendingVmUsage;
     }
 
 }

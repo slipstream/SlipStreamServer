@@ -70,7 +70,6 @@ import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
-import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.resource.BaseResource;
 import com.sixsq.slipstream.util.ConfigurationUtil;
 import com.sixsq.slipstream.util.HtmlUtil;
@@ -194,7 +193,7 @@ public class RunListResource extends BaseResource {
 			setTags(run, form);
 
 			if (Configuration.isQuotaEnabled()) {
-				Quota.validate(user, run, Vm.usage(user.getName()), RequestUtil.getRolesFromRequest(getRequest()));
+				Quota.validate(user, run, RequestUtil.getRolesFromRequest(getRequest()));
 			}
 
 			createRepositoryResource(run);

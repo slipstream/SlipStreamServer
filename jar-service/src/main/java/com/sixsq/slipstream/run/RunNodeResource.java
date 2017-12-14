@@ -35,7 +35,6 @@ import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunParameter;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.statemachine.StateMachine;
 import com.sixsq.slipstream.statemachine.States;
 import com.sixsq.slipstream.util.RequestUtil;
@@ -149,7 +148,7 @@ public class RunNodeResource extends RunBaseResource {
 
 			if (Configuration.isQuotaEnabled()) {
 				User user = User.loadByName(run.getUser());
-				Quota.validate(user, run, Vm.usage(user.getName()), RequestUtil.getRolesFromRequest(getRequest()));
+				Quota.validate(user, run, RequestUtil.getRolesFromRequest(getRequest()));
 			}
 
 			transaction.commit();
