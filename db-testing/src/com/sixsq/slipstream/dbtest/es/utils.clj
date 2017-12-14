@@ -37,7 +37,8 @@
     (org.elasticsearch.plugins Plugin)
     (org.elasticsearch.transport Netty4Plugin)
     (org.elasticsearch.transport.client PreBuiltTransportClient)
-    (org.elasticsearch.env Environment)))
+    (org.elasticsearch.env Environment)
+    (org.elasticsearch.common.logging LogConfigurator)))
 
 (def ^:const max-result-window 200000)
 
@@ -167,7 +168,7 @@
                       (put "transport.netty.worker_count" 3)
                       (put "node.data" true)
                       (put "http.enabled" true)
-                      (put "logger.level" "INFO")
+                      (put "logger.level" "ERROR")
                       (put "http.type" "netty4")
                       (put "http.port" "9200-9300")
                       (put "transport.type" "netty4")
@@ -175,6 +176,8 @@
                       (build))
          plugins [Netty4Plugin]
          ]
+
+     (LogConfigurator/configureWithoutConfig settings)
      (.. (MockNode. ^Settings settings plugins)
          (start)))))
 
