@@ -39,54 +39,22 @@ import static com.sixsq.slipstream.util.ServiceOffersUtil.cpuAttributeName;
 import static com.sixsq.slipstream.util.ServiceOffersUtil.ramAttributeName;
 import static com.sixsq.slipstream.util.ServiceOffersUtil.diskAttributeName;
 
-import com.sixsq.slipstream.cookie.CookieUtils;
-
-/**
- * Unit test:
- *
- * @see QuotaTest
- *
- */
-
 public class Quota {
 
 	private static java.util.logging.Logger logger = Logger.getLogger(ServiceOffersUtil.class.getName());
 
-	public static void validate(User user, Run run, Map<String, CloudUsage> usage, String roles)
+	public static void validate(User user, Run run, String roles)
 			throws ValidationException, QuotaException {
 		Map<String, Integer> request = run.getCloudServiceUsage();
-		validate_old(user, request, usage);
-		validate_new(user, roles, run);
+		validate(user, roles, run);
 	}
 
-	public static void validate(User user, Run run, Map<String, CloudUsage> usage)
+	public static void validate(User user, Run run)
 			throws ValidationException, QuotaException {
-		validate(user, run, usage, "");
+		validate(user, run,"");
 	}
 
-	private static void validate_old(User user, Map<String, Integer> request, Map<String, CloudUsage> usage)
-			throws ValidationException, QuotaException {
-
-		for (Map.Entry<String, Integer> entry : request.entrySet()) {
-			String cloud = entry.getKey();
-			int nodesRequested = entry.getValue();
-
-			Integer quota = Integer.parseInt(getValue(user, cloud));
-
-			Integer currentUsage = 0;
-			if (usage.containsKey(cloud)) {
-				currentUsage = usage.get(cloud).getUserVmUsage();
-			}
-
-			if ((currentUsage + nodesRequested) > quota) {
-				String msg = String.format("Concurrent VM quota exceeded (quota=%d, current=%d, requested=%d)",
-						quota, currentUsage, nodesRequested);
-				throw new QuotaException(msg);
-			}
-		}
-	}
-
-	private static void validate_new(User user,  String roles, Run run) throws QuotaException {
+	private static void validate(User user, String roles, Run run) throws QuotaException {
 
 		int nbVms = 0;
 		int nbCpu = 0;
