@@ -168,13 +168,7 @@
 (defn bad-methods [base-uri ring-app]
   (let [resource-uri (str p/service-context (u/new-resource-id resource-name))
         session (session ring-app)]
-    (doall
-      (for [[uri method] [[base-uri :options]
-                          [base-uri :delete]
-                          [resource-uri :options]
-                          [resource-uri :post]]]
-        (-> session
-            (request uri
-                     :request-method method
-                     :body (json/write-str {:dummy "value"}))
-            (ltu/is-status 405))))))
+    (ltu/verify-405-status [[base-uri :options]
+                            [base-uri :delete]
+                            [resource-uri :options]
+                            [resource-uri :post]])))

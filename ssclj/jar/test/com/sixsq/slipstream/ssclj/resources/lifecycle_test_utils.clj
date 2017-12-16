@@ -5,6 +5,7 @@
     [clojure.string :as str]
     [clojure.test :refer [is]]
     [clojure.pprint :refer [pprint]]
+    [peridot.core :refer [session request]]
     [compojure.core :as cc]
     [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
     [ring.middleware.params :refer [wrap-params]]
@@ -288,3 +289,18 @@
   (let [unwanted #{:id :resourceURI :acl :operations
                    :created :updated :name :description :properties}]
     (into {} (remove #(unwanted (first %)) m))))
+
+
+(defn verify-405-status
+  "The url-methods parameter must be a list of URL/method tuples. It is
+  expected that any request with the method to the URL will return a 405
+  status."
+  [url-methods]
+  (doall
+    (for [[uri method] url-methods]
+      (-> (ring-app)
+          session
+          (request uri
+                   :request-method method
+                   :body (json/write-str {:dummy "value"}))
+          (is-status 405)))))

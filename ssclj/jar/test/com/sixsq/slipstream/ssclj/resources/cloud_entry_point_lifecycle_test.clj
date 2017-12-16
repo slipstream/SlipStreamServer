@@ -82,15 +82,9 @@
 
 
 (deftest bad-methods
-  (doall
-    (for [[uri method] [[base-uri :options]
-                        [base-uri :delete]
-                        [base-uri :post]]]
-      (-> (session (ltu/ring-app))
-          (request uri
-                   :request-method method
-                   :body (json/write-str {:dummy "value"}))
-          (ltu/is-status 405)))))
+  (ltu/verify-405-status [[base-uri :options]
+                          [base-uri :delete]
+                          [base-uri :post]]))
 
 
 
