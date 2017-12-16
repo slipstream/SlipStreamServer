@@ -22,17 +22,12 @@
 
   (let [n-vm 300
 
-        session-admin (-> (session (ltu/ring-app))
-                          (content-type "application/json")
-                          (header authn-info-header "super ADMIN USER ANON"))
-        session-jane (-> (session (ltu/ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-        session-tarzan (-> (session (ltu/ring-app))
-                           (content-type "application/json")
-                           (header authn-info-header "tarzan USER ANON"))
-        session-anon (-> (session (ltu/ring-app))
-                         (content-type "application/json"))]
+        session-anon (-> (ltu/ring-app)
+                         session
+                         (content-type "application/json"))
+        session-admin (header session-anon authn-info-header "super ADMIN USER ANON")
+        session-jane (header session-anon authn-info-header "jane USER ANON")
+        session-tarzan (header session-anon authn-info-header "tarzan USER ANON")]
 
     ;; create some virtual machine resources
     (let [freq (quota-test-utils/create-virtual-machines n-vm)]

@@ -26,15 +26,12 @@
   (is (= [] (t/strip-session-role ["session/2d273461-2778-4a66-9017-668f6fed43ae"]))))
 
 (deftest lifecycle
-  (let [session-admin (-> (session (ltu/ring-app))
-                          (content-type "application/json")
-                          (header authn-info-header "root ADMIN USER ANON"))
-        session-user (-> (session (ltu/ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ltu/ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "unknown ANON"))
+  (let [session (-> (ltu/ring-app)
+                    session
+                    (content-type "application/json"))
+        session-admin (header session authn-info-header "root ADMIN USER ANON")
+        session-user (header session authn-info-header "jane USER ANON")
+        session-anon (header session authn-info-header "unknown ANON")
 
         name-attr "name"
         description-attr "description"

@@ -59,19 +59,16 @@
 (deftest lifecycle
 
   (let [app (ltu/ring-app)
-        session-admin (-> (session app)
-                          (content-type "application/json")
-                          (header authn-info-header "admin ADMIN USER ANON"))
-        session-user (-> (session app)
-                         (content-type "application/json")
-                         (header authn-info-header "user USER ANON"))
-        session-anon (-> (session app)
-                         (content-type "application/json")
-                         (header authn-info-header "unknown ANON"))
-        session-anon-form (-> (session app)
+        session (-> (ltu/ring-app)
+                    session
+                    (content-type "application/json"))
+        session-admin (header session authn-info-header "admin ADMIN USER ANON")
+        session-user (header session authn-info-header "user USER ANON")
+        session-anon (header session authn-info-header "unknown ANON")
+        session-anon-form (-> session
                               (content-type session/form-urlencoded)
-                              (header "content-type" session/form-urlencoded)
                               (header authn-info-header "unknown ANON"))
+
         redirect-uri "https://example.com/webui"]
 
     ;; get session template so that session resources can be tested

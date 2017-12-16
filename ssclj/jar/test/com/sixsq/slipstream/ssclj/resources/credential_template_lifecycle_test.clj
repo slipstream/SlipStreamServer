@@ -30,10 +30,10 @@
 
 ;; check that all templates are visible as normal user
 (deftest lifecycle-admin
-  (let [session (-> (session (ltu/ring-app))
-                    (content-type "application/json")
-                    (header authn-info-header "jane USER ANON"))
-        entries (-> session
+  (let [session-user (-> (session (ltu/ring-app))
+                         (content-type "application/json")
+                         (header authn-info-header "jane USER ANON"))
+        entries (-> session-user
                     (request base-uri)
                     (ltu/body->edn)
                     (ltu/is-status 200)
@@ -60,14 +60,14 @@
             entry-url (str p/service-context (:id entry))
             describe-url (str p/service-context href)
 
-            entry-resp (-> session
+            entry-resp (-> session-user
                            (request entry-url)
                            (ltu/is-status 200)
                            (ltu/body->edn))
 
             entry-body (get-in entry-resp [:response :body])
 
-            desc (-> session
+            desc (-> session-user
                      (request describe-url)
                      (ltu/body->edn)
                      (ltu/is-status 200))

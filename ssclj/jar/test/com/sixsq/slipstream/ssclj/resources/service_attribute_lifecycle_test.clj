@@ -31,14 +31,11 @@
 
 (deftest lifecycle
 
-  (let [session-admin (-> (session (ltu/ring-app))
-                          (content-type "application/json")
-                          (header authn-info-header "super ADMIN USER ANON"))
-        session-user (-> (session (ltu/ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ltu/ring-app))
-                         (content-type "application/json"))]
+  (let [session-anon (-> (ltu/ring-app)
+                         session
+                         (content-type "application/json"))
+        session-admin (header session-anon authn-info-header "super ADMIN USER ANON")
+        session-user (header session-anon authn-info-header "jane USER ANON")]
 
     ;; create namespace
     (-> session-admin
@@ -88,129 +85,18 @@
       (-> session-user
           (request abs-uri :request-method :delete)
           (t/body->edn)
-          (t/is-status 200))))
+          (t/is-status 200)))))
 
-  ;; adding, retrieving and deleting entry as user should succeed
-  #_(let [uri (-> (session (ltu/ring-app))
-                  (content-type "application/json")
-                  (header authn-info-header "jane")
-                  (request base-uri
-                           :request-method :post
-                           :body (json/write-str valid-entry))
-                  (t/body->edn)
-                  (t/is-status 201)
-                  (t/location))
-          abs-uri (str p/service-context (u/de-camelcase uri))]
-
-      (-> (session (ltu/ring-app))
-          (header authn-info-header "jane")
-          (request abs-uri)
-          (t/body->edn)
-          (t/is-status 200))
-
-      (-> (session (ltu/ring-app))
-          (header authn-info-header "jane")
-          (request abs-uri
-                   :request-method :delete)
-          (t/body->edn)
-          (t/is-status 200)))
-
-  ;; adding as user, retrieving and deleting entry as ADMIN should work
-  #_(let [uri (-> (session (ltu/ring-app))
-                  (content-type "application/json")
-                  (header authn-info-header "jane")
-                  (request base-uri
-                           :request-method :post
-                           :body (json/write-str valid-entry))
-                  (t/body->edn)
-                  (t/is-status 201)
-                  (t/location))
-          abs-uri (str p/service-context (u/de-camelcase uri))]
-
-      (-> (session (ltu/ring-app))
-          (header authn-info-header "root ADMIN")
-          (request abs-uri)
-          (t/body->edn)
-          (t/is-status 200))
-
-      (-> (session (ltu/ring-app))
-          (header authn-info-header "root ADMIN")
-          (request abs-uri
-                   :request-method :delete)
-          (t/body->edn)
-          (t/is-status 200))
-
-      ;; try adding invalid entry
-      (-> (session (ltu/ring-app))
-          (content-type "application/json")
-          (header authn-info-header "root ADMIN")
-          (request base-uri
-                   :request-method :post
-                   :body (json/write-str invalid-entry))
-          (t/body->edn)
-          (t/is-status 400)))
-
-  ;; add a new entry
-  #_(let [uri (-> (session (ltu/ring-app))
-                  (content-type "application/json")
-                  (header authn-info-header "root ADMIN")
-                  (request base-uri
-                           :request-method :post
-                           :body (json/write-str valid-entry))
-                  (t/body->edn)
-                  (t/is-status 201)
-                  (t/location))
-          abs-uri (str p/service-context (u/de-camelcase uri))]
-
-      (is uri)
-
-      ;; verify that the new entry is accessible
-      (-> (session (ltu/ring-app))
-          (header authn-info-header "root ADMIN")
-          (request abs-uri)
-          (t/body->edn)
-          (t/is-status 200)
-          (dissoc :acl)                                     ;; ACL added automatically
-          (t/does-body-contain valid-entry))
-
-      ;; query to see that entry is listed
-      (let [entries (-> (session (ltu/ring-app))
-                        (content-type "application/json")
-                        (header authn-info-header "root ADMIN")
-                        (request base-uri)
-                        (t/body->edn)
-                        (t/is-status 200)
-                        (t/is-resource-uri collection-uri)
-                        (t/is-count pos?)
-                        (t/entries resource-tag))]
-
-        (is ((set (map :id entries)) uri))
-
-        ;; delete the entry
-        (-> (session (ltu/ring-app))
-            (header authn-info-header "root ADMIN")
-            (request abs-uri
-                     :request-method :delete)
-            (t/body->edn)
-            (t/is-status 200))
-
-        ;; ensure that it really is gone
-        (-> (session (ltu/ring-app))
-            (header authn-info-header "root ADMIN")
-            (request abs-uri)
-            (t/body->edn)
-            (t/is-status 404)))))
-
-#_(deftest bad-methods
-    (let [resource-uri (str p/service-context (u/new-resource-id resource-name))]
-      (doall
-        (for [[uri method] [[base-uri :options]
-                            [base-uri :delete]
-                            [resource-uri :options]
-                            [resource-uri :post]]]
-          (do
-            (-> (session (ltu/ring-app))
-                (request uri
-                         :request-method method
-                         :body (json/write-str {:dummy "value"}))
-                (t/is-status 405)))))))
+(deftest bad-methods
+  (let [resource-uri (str p/service-context (u/new-resource-id resource-name))]
+    (doall
+      (for [[uri method] [[base-uri :options]
+                          [base-uri :delete]
+                          [resource-uri :options]
+                          [resource-uri :post]]]
+        (do
+          (-> (session (ltu/ring-app))
+              (request uri
+                       :request-method method
+                       :body (json/write-str {:dummy "value"}))
+              (t/is-status 405)))))))

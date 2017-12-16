@@ -56,20 +56,15 @@
 
 (deftest lifecycle
 
-  (let [app (ltu/ring-app)
-        session-admin (-> (session app)
-                          (content-type "application/json")
-                          (header authn-info-header "admin ADMIN USER ANON"))
-        session-user (-> (session app)
-                         (content-type "application/json")
-                         (header authn-info-header "user USER ANON"))
-        session-anon (-> (session app)
+  (let [session-anon (-> (ltu/ring-app)
+                         session
                          (content-type "application/json")
                          (header authn-info-header "unknown ANON"))
-        session-anon-form (-> (session app)
-                              (content-type session/form-urlencoded)
-                              (header "content-type" session/form-urlencoded)
-                              (header authn-info-header "unknown ANON"))
+        session-admin (header session-anon authn-info-header "admin ADMIN USER ANON")
+        session-user (header session-anon authn-info-header "user USER ANON")
+        session-anon-form (-> session-anon
+                              (content-type session/form-urlencoded))
+
         redirect-uri "https://example.com/webui"]
 
     ;; get session template so that session resources can be tested
@@ -254,7 +249,8 @@
               (ltu/is-operation-absent "edit"))
 
           ;; check contents of session resource
-          (let [{:keys [name description properties] :as body} (-> (session app)
+          (let [{:keys [name description properties] :as body} (-> (ltu/ring-app)
+                                                                   session
                                                                    (header authn-info-header (str "user USER " id))
                                                                    (request abs-uri)
                                                                    (ltu/body->edn)

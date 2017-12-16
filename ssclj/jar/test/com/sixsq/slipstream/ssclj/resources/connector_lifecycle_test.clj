@@ -10,9 +10,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 (use-fixtures :each ltu/with-test-es-client-fixture)
 
@@ -25,9 +23,14 @@
 
   (let [href (str ct/resource-url "/" example/cloud-service-type)
         template-url (str p/service-context ct/resource-url "/" example/cloud-service-type)
-        resp (-> (session (ltu/ring-app))
-                 (content-type "application/json")
-                 (header authn-info-header "root ADMIN")
+
+        session-anon (-> (ltu/ring-app)
+                         session
+                         (content-type "application/json"))
+        session-user (header session-anon authn-info-header "jane USER")
+        session-admin (header session-anon authn-info-header "root ADMIN")
+
+        resp (-> session-admin
                  (request template-url)
                  (ltu/body->edn)
                  (ltu/is-status 200))
@@ -40,8 +43,7 @@
         invalid-create (assoc-in valid-create [:connectorTemplate :invalid] "BAD")]
 
     ;; anonymous create should fail
-    (-> (session (ltu/ring-app))
-        (content-type "application/json")
+    (-> session-anon
         (request base-uri
                  :request-method :post
                  :body (json/write-str valid-create))
@@ -49,9 +51,7 @@
         (ltu/is-status 403))
 
     ;; user create should also fail
-    (-> (session (ltu/ring-app))
-        (content-type "application/json")
-        (header authn-info-header "jane USER")
+    (-> session-user
         (request base-uri
                  :request-method :post
                  :body (json/write-str valid-create))
@@ -59,9 +59,7 @@
         (ltu/is-status 403))
 
     ;; admin create with invalid template fails
-    (-> (session (ltu/ring-app))
-        (content-type "application/json")
-        (header authn-info-header "root ADMIN")
+    (-> session-admin
         (request base-uri
                  :request-method :post
                  :body (json/write-str invalid-create))
@@ -69,9 +67,7 @@
         (ltu/is-status 400))
 
     ;; full connector lifecycle as administrator should work
-    (let [uri (-> (session (ltu/ring-app))
-                  (content-type "application/json")
-                  (header authn-info-header "root ADMIN")
+    (let [uri (-> session-admin
                   (request base-uri
                            :request-method :post
                            :body (json/write-str valid-create))
@@ -81,22 +77,19 @@
           abs-uri (str p/service-context (u/de-camelcase uri))]
 
       ;; admin get succeeds
-      (-> (session (ltu/ring-app))
-          (header authn-info-header "root ADMIN")
+      (-> session-admin
           (request abs-uri)
           (ltu/body->edn)
           (ltu/is-status 200))
 
       ;; anonymous query fails
-      (-> (session (ltu/ring-app))
+      (-> session-anon
           (request base-uri)
           (ltu/body->edn)
           (ltu/is-status 403))
 
       ;; admin query succeeds
-      (let [entries (-> (session (ltu/ring-app))
-                        (content-type "application/json")
-                        (header authn-info-header "root ADMIN")
+      (let [entries (-> session-admin
                         (request base-uri)
                         (ltu/body->edn)
                         (ltu/is-status 200)
@@ -109,32 +102,27 @@
         (let [pair-fn (juxt :id #(str p/service-context (:id %)))
               pairs (map pair-fn entries)]
           (doseq [[id entry-uri] pairs]
-            (-> (session (ltu/ring-app))
-                (header authn-info-header "root ADMIN")
+            (-> session-admin
                 (request entry-uri)
                 (ltu/body->edn)
                 (ltu/is-status 200)
                 (ltu/is-id id)))))
 
       ;; admin delete succeeds
-      (-> (session (ltu/ring-app))
-          (header authn-info-header "root ADMIN")
+      (-> session-admin
           (request abs-uri
                    :request-method :delete)
           (ltu/body->edn)
           (ltu/is-status 200))
 
       ;; ensure entry is really gone
-      (-> (session (ltu/ring-app))
-          (header authn-info-header "root ADMIN")
+      (-> session-admin
           (request abs-uri)
           (ltu/body->edn)
           (ltu/is-status 404)))
 
     ;; abbreviated lifecycle using href to template instead of copy
-    (let [uri (-> (session (ltu/ring-app))
-                  (content-type "application/json")
-                  (header authn-info-header "root ADMIN")
+    (let [uri (-> session-admin
                   (request base-uri
                            :request-method :post
                            :body (json/write-str href-create))
@@ -144,16 +132,14 @@
           abs-uri (str p/service-context (u/de-camelcase uri))]
 
       ;; admin delete succeeds
-      (-> (session (ltu/ring-app))
-          (header authn-info-header "root ADMIN")
+      (-> session-admin
           (request abs-uri
                    :request-method :delete)
           (ltu/body->edn)
           (ltu/is-status 200))
 
       ;; ensure entry is really gone
-      (-> (session (ltu/ring-app))
-          (header authn-info-header "root ADMIN")
+      (-> session-admin
           (request abs-uri)
           (ltu/body->edn)
           (ltu/is-status 404)))))

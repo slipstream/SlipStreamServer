@@ -29,14 +29,11 @@
    :uri    "https://schema-com/z"})
 
 (deftest lifecycle
-  (let [session-admin (-> (session (ltu/ring-app))
-                          (content-type "application/json")
-                          (header authn-info-header "super ADMIN USER ANON"))
-        session-user (-> (session (ltu/ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ltu/ring-app))
-                         (content-type "application/json"))]
+  (let [session-anon (-> (ltu/ring-app)
+                         session
+                         (content-type "application/json"))
+        session-admin (header session-anon authn-info-header "super ADMIN USER ANON")
+        session-user (header session-anon authn-info-header "jane USER ANON")]
 
     ;; anonymous create should fail
     (-> session-anon

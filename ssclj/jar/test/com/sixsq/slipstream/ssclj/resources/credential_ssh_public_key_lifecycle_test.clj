@@ -25,15 +25,12 @@
 (dyn/initialize)
 
 (deftest lifecycle-import
-  (let [session-admin (-> (session (ltu/ring-app))
-                          (content-type "application/json")
-                          (header authn-info-header "root ADMIN USER ANON"))
-        session-user (-> (session (ltu/ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ltu/ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "unknown ANON"))
+  (let [session (-> (ltu/ring-app)
+                    session
+                    (content-type "application/json"))
+        session-admin (header session authn-info-header "root ADMIN USER ANON")
+        session-user (header session authn-info-header "jane USER ANON")
+        session-anon (header session authn-info-header "unknown ANON")
 
         href (str ct/resource-url "/" spk/method)
         template-url (str p/service-context ct/resource-url "/" spk/method)
@@ -141,15 +138,12 @@
           (ltu/is-status 200)))))
 
 (deftest lifecycle-generate
-  (let [session-admin (-> (session (ltu/ring-app))
-                          (content-type "application/json")
-                          (header authn-info-header "root ADMIN USER ANON"))
-        session-user (-> (session (ltu/ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ltu/ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "unknown ANON"))
+  (let [session (-> (ltu/ring-app)
+                    session
+                    (content-type "application/json"))
+        session-admin (header session authn-info-header "root ADMIN USER ANON")
+        session-user (header session authn-info-header "jane USER ANON")
+        session-anon (header session authn-info-header "unknown ANON")
 
         href (str ct/resource-url "/" skp/method)
         template-url (str p/service-context ct/resource-url "/" skp/method)
@@ -227,4 +221,3 @@
                    :request-method :delete)
           (ltu/body->edn)
           (ltu/is-status 200)))))
-

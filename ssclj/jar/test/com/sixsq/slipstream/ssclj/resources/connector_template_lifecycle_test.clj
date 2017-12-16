@@ -11,8 +11,7 @@
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du])
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c])
   (:import (clojure.lang ExceptionInfo)))
 
 (use-fixtures :each ltu/with-test-es-client-fixture)
@@ -29,91 +28,83 @@
 
 (deftest lifecycle
 
-  ;; anonymous query is not authorized
-  (-> (session (ltu/ring-app))
-      (request base-uri)
-      (ltu/body->edn)
-      (ltu/is-status 403))
+  (let [session-anon (-> (ltu/ring-app)
+                         session
+                         (content-type "application/json"))
+        session-user (header session-anon authn-info-header "jane USER")
+        session-admin (header session-anon authn-info-header "root ADMIN")]
 
-  ;; user query is not authorized
-  (-> (session (ltu/ring-app))
-      (header authn-info-header "jane USER")
-      (request base-uri)
-      (ltu/body->edn)
-      (ltu/is-status 403))
+    ;; anonymous query is not authorized
+    (-> session-anon
+        (request base-uri)
+        (ltu/body->edn)
+        (ltu/is-status 403))
 
-  ;; query as ADMIN should work correctly
-  (let [session (session (ltu/ring-app))
-        entries (-> session
-                    (content-type "application/json")
-                    (header authn-info-header "root ADMIN")
-                    (request base-uri)
-                    (ltu/body->edn)
-                    (ltu/is-status 200)
-                    (ltu/is-resource-uri collection-uri)
-                    (ltu/is-count pos?)
-                    (ltu/is-operation-absent "add")
-                    (ltu/is-operation-absent "delete")
-                    (ltu/is-operation-absent "edit")
-                    (ltu/is-operation-absent "describe")
-                    (ltu/entries resource-tag))
-        ids (set (map :id entries))
-        types (set (map :cloudServiceType entries))]
-    (is (= #{(str resource-url "/" example/cloud-service-type)} ids))
-    (is (= #{example/cloud-service-type} types))
+    ;; user query is not authorized
+    (-> session-user
+        (request base-uri)
+        (ltu/body->edn)
+        (ltu/is-status 403))
 
-    (doseq [entry entries]
-      (let [ops (ltu/operations->map entry)
-            href (get ops (c/action-uri :describe))
-            entry-url (str p/service-context (:id entry))
-            describe-url (str p/service-context href)
+    ;; query as ADMIN should work correctly
+    (let [entries (-> session-admin
+                      (request base-uri)
+                      (ltu/body->edn)
+                      (ltu/is-status 200)
+                      (ltu/is-resource-uri collection-uri)
+                      (ltu/is-count pos?)
+                      (ltu/is-operation-absent "add")
+                      (ltu/is-operation-absent "delete")
+                      (ltu/is-operation-absent "edit")
+                      (ltu/is-operation-absent "describe")
+                      (ltu/entries resource-tag))
+          ids (set (map :id entries))
+          types (set (map :cloudServiceType entries))]
+      (is (= #{(str resource-url "/" example/cloud-service-type)} ids))
+      (is (= #{example/cloud-service-type} types))
 
-            entry-resp (-> session
-                           (content-type "application/json")
-                           (header authn-info-header "root ADMIN")
-                           (request entry-url)
-                           (ltu/is-status 200)
-                           (ltu/body->edn))
+      (doseq [entry entries]
+        (let [ops (ltu/operations->map entry)
+              href (get ops (c/action-uri :describe))
+              entry-url (str p/service-context (:id entry))
+              describe-url (str p/service-context href)
 
-            entry-body (get-in entry-resp [:response :body])
+              entry-resp (-> session-admin
+                             (request entry-url)
+                             (ltu/is-status 200)
+                             (ltu/body->edn))
 
-            desc (-> session
-                     (content-type "application/json")
-                     (header authn-info-header "root ADMIN")
-                     (request describe-url)
-                     (ltu/body->edn)
-                     (ltu/is-status 200))
-            desc-body (get-in desc [:response :body])]
-        (is (nil? (get ops (c/action-uri :add))))
-        (is (nil? (get ops (c/action-uri :edit))))
-        (is (nil? (get ops (c/action-uri :delete))))
-        (is (:cloudServiceType desc-body))
-        (is (:acl desc-body))
+              entry-body (get-in entry-resp [:response :body])
 
-        (is (thrown-with-msg? ExceptionInfo #".*resource does not satisfy defined schema.*" (crud/validate entry-body)))
-        (is (crud/validate (assoc entry-body :instanceName "alpha-omega")))
+              desc (-> session-admin
+                       (request describe-url)
+                       (ltu/body->edn)
+                       (ltu/is-status 200))
+              desc-body (get-in desc [:response :body])]
+          (is (nil? (get ops (c/action-uri :add))))
+          (is (nil? (get ops (c/action-uri :edit))))
+          (is (nil? (get ops (c/action-uri :delete))))
+          (is (:cloudServiceType desc-body))
+          (is (:acl desc-body))
 
-        ;; anonymous access not permitted
-        (-> session
-            (content-type "application/json")
-            (request entry-url)
-            (ltu/is-status 403))
-        (-> session
-            (content-type "application/json")
-            (request describe-url)
-            (ltu/is-status 403))
+          (is (thrown-with-msg? ExceptionInfo #".*resource does not satisfy defined schema.*" (crud/validate entry-body)))
+          (is (crud/validate (assoc entry-body :instanceName "alpha-omega")))
 
-        ;; user cannot access
-        (-> session
-            (content-type "application/json")
-            (header authn-info-header "jane USER")
-            (request entry-url)
-            (ltu/is-status 403))
-        (-> session
-            (content-type "application/json")
-            (header authn-info-header "jane USER")
-            (request describe-url)
-            (ltu/is-status 403))))))
+          ;; anonymous access not permitted
+          (-> session-anon
+              (request entry-url)
+              (ltu/is-status 403))
+          (-> session-anon
+              (request describe-url)
+              (ltu/is-status 403))
+
+          ;; user cannot access
+          (-> session-user
+              (request entry-url)
+              (ltu/is-status 403))
+          (-> session-user
+              (request describe-url)
+              (ltu/is-status 403)))))))
 
 (deftest bad-methods
   (let [resource-uri (str p/service-context (u/new-resource-id resource-name))]
