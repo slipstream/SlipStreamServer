@@ -10,37 +10,23 @@
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
-(defn ring-app []
-  (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
-
 ;; initialize must to called to pull in ConfigurationTemplate test examples
 (dyn/initialize)
-
-(defn strip-unwanted-attrs [m]
-  (let [unwanted #{:id :resourceURI :acl :operations
-                   :created :updated :name :description}]
-    (into {} (remove #(unwanted (first %)) m))))
 
 (defn check-lifecycle
   [service attr-kw attr-value attr-new-value]
 
-  (let [session-anon (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "unknown ANON"))
-
-        session-user (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-
-        session-admin (-> (session (ring-app))
-                          (content-type "application/json")
-                          (header authn-info-header "root ADMIN USER ANON"))
+  (let [session (-> (ltu/ring-app)
+                    session
+                    (content-type "application/json"))
+        session-anon (header session authn-info-header "unknown ANON")
+        session-user (header session authn-info-header "jane USER ANON")
+        session-admin (header session authn-info-header "root ADMIN USER ANON")
 
         name-attr "name"
         description-attr "description"
@@ -53,10 +39,10 @@
                  (ltu/body->edn)
                  (ltu/is-status 200))
         template (get-in resp [:response :body])
-        valid-create {:name            name-attr
-                      :description     description-attr
-                      :properties      properties-attr
-                      :configurationTemplate (strip-unwanted-attrs (assoc template attr-kw attr-value))}
+        valid-create {:name                  name-attr
+                      :description           description-attr
+                      :properties            properties-attr
+                      :configurationTemplate (ltu/strip-unwanted-attrs (assoc template attr-kw attr-value))}
         href-create {:configurationTemplate {:href   href
                                              attr-kw attr-value}}
         invalid-create (assoc-in valid-create [:configurationTemplate :invalid] "BAD")]
@@ -206,7 +192,7 @@
                           [base-uri :delete]
                           [resource-uri :options]
                           [resource-uri :post]]]
-        (-> (session (ring-app))
+        (-> (session (ltu/ring-app))
             (request uri
                      :request-method method
                      :body (json/write-str {:dummy "value"}))

@@ -10,7 +10,6 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
@@ -18,9 +17,6 @@
 (use-fixtures :each ltu/with-test-es-client-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
-
-(defn ring-app []
-  (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
 
 ;; initialize must to called to pull in ConfigurationTemplate resources
 (dyn/initialize)
@@ -35,20 +31,20 @@
   [service]
 
   ;; anonymous query is not authorized
-  (-> (session (ring-app))
+  (-> (session (ltu/ring-app))
       (request base-uri)
       (ltu/body->edn)
       (ltu/is-status 403))
 
   ;; user query is not authorized
-  (-> (session (ring-app))
+  (-> (session (ltu/ring-app))
       (header authn-info-header "jane USER")
       (request base-uri)
       (ltu/body->edn)
       (ltu/is-status 403))
 
   ;; query as ADMIN should work correctly
-  (let [session (session (ring-app))
+  (let [session (session (ltu/ring-app))
         entries (-> session
                     (content-type "application/json")
                     (header authn-info-header "root ADMIN")
@@ -130,7 +126,7 @@
                           [resource-uri :put]
                           [resource-uri :post]
                           [resource-uri :delete]]]
-        (-> (session (ring-app))
+        (-> (session (ltu/ring-app))
             (request uri
                      :request-method method
                      :body (json/write-str {:dummy "value"}))

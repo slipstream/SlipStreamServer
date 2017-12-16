@@ -9,7 +9,6 @@
     [com.sixsq.slipstream.auth.internal :as auth-internal]
     [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]))
@@ -18,25 +17,13 @@
 
 (def base-uri (str p/service-context (u/de-camelcase vmm/resource-url)))
 
-(defn ring-app []
-  (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
-
-(defn strip-unwanted-attrs [m]
-  (let [unwanted #{:id :resourceURI :acl :operations
-                   :created :updated :name :description}]
-    (into {} (remove #(unwanted (first %)) m))))
-
-
 (deftest lifecycle
-  (let [session-admin (-> (session (ring-app))
-                          (content-type "application/json")
-                          (header authn-info-header "root ADMIN USER ANON"))
-        session-jane (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "unknown ANON"))]
+  (let [session (-> (ltu/ring-app)
+                    session
+                    (content-type "application/json"))
+        session-admin (header session authn-info-header "root ADMIN USER ANON")
+        session-jane (header session authn-info-header "jane USER ANON")
+        session-anon (header session authn-info-header "unknown ANON")]
 
     ;; admin collection query should succeed but be empty (no  records created yet)
     (-> session-admin
@@ -194,7 +181,7 @@
                           [resource-uri :options]
                           [resource-uri :put]
                           [resource-uri :post]]]
-        (-> (session (ring-app))
+        (-> (session (ltu/ring-app))
             (request uri
                      :request-method method
                      :body (json/write-str {:dummy "value"}))

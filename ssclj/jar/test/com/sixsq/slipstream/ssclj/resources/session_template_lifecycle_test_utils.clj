@@ -11,25 +11,18 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
 (defn session-template-lifecycle [base-uri ring-app valid-template]
 
-  (let [session-admin (-> ring-app
-                          session
-                          (content-type "application/json")
-                          (header authn-info-header "root ADMIN USER ANON"))
-        session-user (-> ring-app
-                         session
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-        session-anon (-> ring-app
-                         session
-                         (content-type "application/json")
-                         (header authn-info-header "unknown ANON"))]
+  (let [session (-> ring-app
+                    session
+                    (content-type "application/json"))
+        session-admin (header session authn-info-header "root ADMIN USER ANON")
+        session-user (header session authn-info-header "jane USER ANON")
+        session-anon (header session authn-info-header "unknown ANON")]
 
     ;; all view actions should be available to anonymous users
     (-> session-anon
@@ -164,14 +157,13 @@
           (ltu/is-status 404))
 
       ;; session template should not be there anymore
-      ;; unreliable test because the update of the search index in
-      ;; elasticsearch is asynchronous.
-      #_(-> session-anon
-            (request base-uri)
-            (ltu/body->edn)
-            (ltu/is-status 200)
-            (ltu/is-resource-uri collection-uri)
-            (ltu/is-count zero?)))))
+      (ltu/refresh-es-indices)
+      (-> session-anon
+          (request base-uri)
+          (ltu/body->edn)
+          (ltu/is-status 200)
+          (ltu/is-resource-uri collection-uri)
+          (ltu/is-count zero?)))))
 
 (defn bad-methods [base-uri ring-app]
   (let [resource-uri (str p/service-context (u/new-resource-id resource-name))

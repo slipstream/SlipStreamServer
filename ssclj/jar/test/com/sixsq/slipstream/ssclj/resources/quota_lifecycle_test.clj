@@ -7,7 +7,6 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.quota.utils-test :as quota-test-utils]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.quota :as quota]
@@ -17,25 +16,22 @@
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
-(defn ring-app []
-  (ltu/make-ring-app (ltu/concat-routes routes/final-routes)))
-
 (def quota-jane (quota-test-utils/make-quota "jane" "count:id" 100))
 
 (deftest lifecycle
 
   (let [n-vm 300
 
-        session-admin (-> (session (ring-app))
+        session-admin (-> (session (ltu/ring-app))
                           (content-type "application/json")
                           (header authn-info-header "super ADMIN USER ANON"))
-        session-jane (-> (session (ring-app))
+        session-jane (-> (session (ltu/ring-app))
                          (content-type "application/json")
                          (header authn-info-header "jane USER ANON"))
-        session-tarzan (-> (session (ring-app))
+        session-tarzan (-> (session (ltu/ring-app))
                            (content-type "application/json")
                            (header authn-info-header "tarzan USER ANON"))
-        session-anon (-> (session (ring-app))
+        session-anon (-> (session (ltu/ring-app))
                          (content-type "application/json"))]
 
     ;; create some virtual machine resources
@@ -192,7 +188,7 @@
                           [resource-uri :options]
                           [resource-uri :post]]]
         (do
-          (-> (session (ring-app))
+          (-> (session (ltu/ring-app))
               (request uri
                        :request-method method
                        :body (json/write-str {:dummy "value"}))

@@ -9,7 +9,8 @@
     [com.sixsq.slipstream.ssclj.resources.test-utils :as tu]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.db.es.binding :as esb]))
+    [com.sixsq.slipstream.db.es.binding :as esb]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]))
 
 (def base-uri (str p/service-context (u/de-camelcase e/resource-name)))
 
@@ -20,13 +21,10 @@
 (defn- event-template
   []
   {
-   :acl       {
-               :owner {
-                       :type "USER" :principal :placeholder}
+   :acl       {:owner {:type "USER" :principal :placeholder}
                :rules [{:type "USER" :principal :placeholder :right "ALL"}]}
    :timestamp (rnd-date-str)
-   :content   {
-               :resource {:href :placeholder}
+   :content   {:resource {:href :placeholder}
                :state    "Started"}
    :type      "state"
    :severity  (rand-nth ["critical" "high" "medium" "low"])})
@@ -43,7 +41,7 @@
 (defn insert-to-db
   [events username]
   (let [nb (count events)
-        state (-> (session (tu/ring-app))
+        state (-> (session (ltu/ring-app))
                   (content-type "application/json")
                   (header aih/authn-info-header username))
         indexed-events (map-indexed (fn [idx itm] [idx itm]) events)]

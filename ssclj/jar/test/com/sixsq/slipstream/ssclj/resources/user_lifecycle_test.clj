@@ -12,16 +12,12 @@
     [com.sixsq.slipstream.auth.internal :as auth-internal]
     [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [clojure.spec.alpha :as s]))
 
 (use-fixtures :each ltu/with-test-es-client-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase user/resource-name)))
-
-(defn ring-app []
-  (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
 
 (dyn/initialize)
 
@@ -33,7 +29,7 @@
                           [resource-uri :options]
                           [resource-uri :put]
                           [resource-uri :post]]]
-        (-> (session (ring-app))
+        (-> (session (ltu/ring-app))
             (request uri
                      :request-method method
                      :body (json/write-str {:dummy "value"}))
