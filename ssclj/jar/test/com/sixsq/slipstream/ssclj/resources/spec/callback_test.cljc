@@ -2,7 +2,7 @@
   (:require
     [clojure.test :refer [deftest are is]]
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.resources.callback :as sc]))
+    [com.sixsq.slipstream.ssclj.resources.callback :as t]))
 
 
 (def valid-acl {:owner {:principal "ADMIN"
@@ -14,8 +14,8 @@
 
 (deftest check-callback-schema
   (let [timestamp "1964-08-25T10:00:00.0Z"
-        callback {:id          (str sc/resource-url "/test-callback")
-                  :resourceURI sc/resource-uri
+        callback {:id          (str t/resource-url "/test-callback")
+                  :resourceURI t/resource-uri
                   :created     timestamp
                   :updated     timestamp
                   :acl         valid-acl
@@ -27,7 +27,7 @@
                                 :another "value"}}]
 
     (is (s/valid? :cimi/callback callback))
-    (is (s/valid? :cimi/callback (assoc callback :state "SUCCESS")))
+    (is (s/valid? :cimi/callback (assoc callback :state "SUCCEEDED")))
     (is (s/valid? :cimi/callback (assoc callback :state "FAILED")))
     (is (not (s/valid? :cimi/callback (assoc callback :state "UNKNOWN"))))
     (doseq [attr #{:id :resourceURI :created :updated :acl :action}]

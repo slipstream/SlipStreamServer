@@ -1,6 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-internal
   (:require
-    [clojure.string :as str]
     [com.sixsq.slipstream.ssclj.resources.spec.session]
     [com.sixsq.slipstream.ssclj.resources.session.utils :as sutils]
     [com.sixsq.slipstream.ssclj.resources.spec.session-template-internal]

@@ -1,13 +1,14 @@
 (ns com.sixsq.slipstream.ssclj.resources.callback
   (:require
-    [clojure.string :as str]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.callback.utils :as utils]
     [com.sixsq.slipstream.ssclj.resources.spec.callback]
     [com.sixsq.slipstream.auth.acl :as a]
-    [com.sixsq.slipstream.ssclj.util.log :as log-util])
+    [com.sixsq.slipstream.ssclj.util.log :as log-util]
+    [com.sixsq.slipstream.util.response :as r])
   (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-tag :callbacks)
@@ -32,7 +33,6 @@
 ;; validate subclasses of callbacks
 ;;
 
-
 (def validate-fn (u/create-spec-validation-fn :cimi/callback))
 (defmethod crud/validate
   resource-uri
@@ -50,6 +50,7 @@
             :type      "ROLE"
             :right     "VIEW"}]})
 
+
 (defmethod crud/add-acl resource-uri
   [{:keys [acl] :as resource} request]
   (assoc
@@ -66,15 +67,18 @@
   [request]
   (add-impl (assoc-in request [:body :state] "WAITING")))
 
+
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 (defmethod crud/retrieve resource-name
   [request]
   (retrieve-impl request))
 
+
 (def delete-impl (std-crud/delete-fn resource-name))
 (defmethod crud/delete resource-name
   [request]
   (delete-impl request))
+
 
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
 (defmethod crud/query resource-name
@@ -85,43 +89,42 @@
 ;; available operations
 ;;
 
-
 (defmethod crud/set-operations resource-uri
   [{:keys [id resourceURI] :as resource} request]
-  (let [href (str id "/join")]
-    (try
-      (a/can-modify? resource request)
-      (let [ops (if (.endsWith resourceURI "Collection")
-                  [{:rel (:add c/action-uri) :href id}]
-                  [{:rel (:delete c/action-uri) :href id}
-                   {:rel (:validate c/action-uri) :href href}])]
-        (assoc resource :operations ops))
-      (catch Exception e
-        (if (.endsWith resourceURI "Collection")
-          (dissoc resource :operations)
-          (assoc resource :operations [{:rel (:validate c/action-uri) :href href}]))))))
+  (let [href (str id "/execute")
+        collection? (u/cimi-collection? resourceURI)
+        modifiable? (a/modifiable? resource request)
+        ops (cond-> []
+                    (and collection? modifiable?) (conj {:rel (:add c/action-uri) :href id})
+                    (and (not collection?) modifiable?) (conj {:rel (:delete c/action-uri) :href id})
+                    (and (not collection?) (utils/executable? resource)) (conj {:rel (:execute c/action-uri) :href href}))]
+    (if (empty? ops)
+      (dissoc resource :operations)
+      (assoc resource :operations ops))))
 
 ;;
 ;; actions
 ;;
 
-(defn dispatch-conversion
-  "Dispatches on the Action for multimethods that take the resource as arguments."
-  [resource]
-  (:action resource))
+(def dispatch-on-action :action)
 
-(defmulti validate-action-callback dispatch-conversion)
 
-(defmethod validate-action-callback :default
-  [resource]
-  (log-util/log-and-throw 400 (str "error executing join callback: '" (dispatch-conversion resource) "'")))
+(defmulti execute dispatch-on-action)
 
-(defmethod crud/do-action [resource-url "validate"]
-  [{{uuid :uuid} :params}]
+
+(defmethod execute :default
+  [{:keys [id] :as resource}]
+  (utils/callback-failed! id)
+  (log-util/log-and-throw 400 (str "error executing callback: '" (dispatch-on-action resource) "'")))
+
+
+(defmethod crud/do-action [resource-url "execute"]
+  [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
-      (-> (crud/retrieve-by-id id {:user-name  "INTERNAL"
-                                   :user-roles [id]})       ;; Essentially turn off authz by spoofing owner of resource.
-          (validate-action-callback)))
+      (when-let [callback (crud/retrieve-by-id id {:user-name "INTERNAL", :user-roles ["ADMIN"]})]
+        (if (utils/executable? callback)
+          (execute callback)
+          (r/map-response "cannot re-execute callback" 409 id))))
     (catch ExceptionInfo ei
       (ex-data ei))))
