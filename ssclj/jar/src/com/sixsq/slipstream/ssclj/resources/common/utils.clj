@@ -112,8 +112,7 @@
   "This will return true if the given date (as a string) represents a moment
    of time in the past.  Returns false otherwise."
   [expiry]
-  (and expiry
-       (time/before? (as-datetime expiry) (time/now))))
+  (boolean (and expiry (time/before? (as-datetime expiry) (time/now)))))
 
 (def not-expired? (complement expired?))
 
