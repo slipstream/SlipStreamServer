@@ -8,7 +8,6 @@
    email address. When the callback is triggered, the validated? flag is set to
    true."
   (:require
-    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.email]
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
@@ -16,10 +15,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.email.utils :as email-utils]
-    [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.util.response :as r]
-    [superstring.core :as str])
-  (:import (clojure.lang ExceptionInfo)))
+    [superstring.core :as str]))
 
 (def ^:const resource-name "Email")
 
@@ -100,7 +97,7 @@
                 (cond-> [{:rel (:delete c/action-uri) :href href}]
                         (not validated?) (conj {:rel (:validate c/action-uri) :href (str href "/validate")})))]
       (assoc resource :operations ops))
-    (catch Exception e
+    (catch Exception _
       (dissoc resource :operations))))
 
 ;;
@@ -112,33 +109,18 @@
   (query-impl request))
 
 
-;; FIXME: Use in the generated callback to update flag.
-(defn set-validated-flag [resource]
-  (some-> resource
-          (assoc :validated? true)
-          (db/edit {:user-name "INTERNAL" :user-roles ["ADMIN"]})))
-
-
-;; FIXME: Create the callback itself.
-(defn create-callback [id]
-  nil)
-
-
-;; FIXME: Send an email with the callback URL.
-(defn send-validation-email [address]
-  nil)
-
-
 ;;
 ;; actions
 ;;
 (defmethod crud/do-action [resource-url "validate"]
-  [{{uuid :uuid} :params :as request}]
+  [{{uuid :uuid} :params baseURI :baseURI}]
   (let [id (str resource-url "/" uuid)]
-    (when-let [{:keys [address validated?] :as email-resource} (crud/retrieve-by-id id)]
+    (when-let [{:keys [address validated?]} (crud/retrieve-by-id id {:user-name "INTERNAL", :user-roles ["ADMIN"]})]
       (if-not validated?
-        (do
-          (create-callback id)
-          (send-validation-email address)
-          (r/map-response "check your mailbox for a validation message" 202))
-        (r/ex-bad-request "email address is already validated")))))
+        (try
+          (-> (email-utils/create-callback id baseURI)
+              (email-utils/send-validation-email address))
+          (r/map-response "check your mailbox for a validation message" 202)
+          (catch Exception e
+            (.printStackTrace e)))
+        (throw (r/ex-bad-request "email address is already validated"))))))

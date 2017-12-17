@@ -135,6 +135,17 @@
         (logu/log-and-throw-400 (str "resource does not satisfy defined schema:\n" (explain resource)))
         resource))))
 
+
+(defn get-op
+  "Get the operation href from the resources operations value."
+  [{:keys [operations]} op]
+  (->> operations
+       (map (juxt :rel :href))
+       (filter (fn [[rel _]] (.endsWith rel op)))
+       first
+       second))
+
+
 (defn into-vec-without-nil
   [op xs]
   (when (->> xs

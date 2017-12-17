@@ -7,9 +7,10 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]))
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.resources.email.utils :as email-utils]
+    [postal.core :as postal]))
 
 (use-fixtures :each ltu/with-test-es-client-fixture)
 
@@ -117,9 +118,49 @@
                       (ltu/is-operation-present "delete")
                       (ltu/is-operation-present (:validate c/action-uri))
                       :response
-                      :body)]
+                      :body)
+            validate-url (->> (u/get-op email "validate")
+                              (str p/service-context))]
         (is (= "admin@example.com" (:address email)))
-        (is (false? (:validated? email))))
+        (is (false? (:validated? email)))
+        (is validate-url)
+
+        (let [validation-link (atom nil)]
+          (with-redefs [email-utils/smtp-cfg (fn []
+                                               {:host "smtp@example.com"
+                                                :port 465
+                                                :ssl  true
+                                                :user "admin"
+                                                :pass "password"})
+                        postal/send-message (fn [_ {:keys [body] :as message}]
+                                              (let [url (second (re-matches #"(?s).*-->>\s+(.*?)\n.*" body))]
+                                                (reset! validation-link url))
+                                              {:code 0, :error :SUCCESS, :message "OK"})]
+
+            (-> session-anon
+                (request validate-url)
+                (ltu/body->edn)
+                (ltu/is-status 202))
+
+            (let [abs-validation-link (str p/service-context @validation-link)]
+              (is (re-matches #"^email/.* successfully validated$" (-> session-anon
+                            (request abs-validation-link)
+                            (ltu/body->edn)
+                            (ltu/is-status 200)
+                            :response
+                            :body
+                            :message)))
+
+              (is (true? (-> session-admin
+                             (request admin-abs-uri)
+                             (ltu/body->edn)
+                             (ltu/is-status 200)
+                             (ltu/is-operation-absent "edit")
+                             (ltu/is-operation-present "delete")
+                             (ltu/is-operation-absent (:validate c/action-uri))
+                             :response
+                             :body
+                             :validated?)))))))
 
       ;; verify contents of user email
       (let [email (-> session-user
@@ -130,9 +171,18 @@
                       (ltu/is-operation-present "delete")
                       (ltu/is-operation-present (:validate c/action-uri))
                       :response
-                      :body)]
+                      :body)
+            validate-url (->> (u/get-op email "validate")
+                              (str p/service-context))]
         (is (= "user@example.com" (:address email)))
-        (is (false? (:validated? email))))
+        (is (false? (:validated? email)))
+        (is validate-url)
+
+        #_(-> session-anon
+              (request validate-url)
+              (ltu/body->edn)
+              (ltu/is-status 200)))
+
 
       ;; admin can delete the email
       (-> session-admin
