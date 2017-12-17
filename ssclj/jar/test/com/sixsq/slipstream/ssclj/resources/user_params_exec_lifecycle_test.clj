@@ -14,7 +14,6 @@
     [com.sixsq.slipstream.auth.internal :as auth-internal]
     [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [clojure.spec.alpha :as s]))
 
@@ -22,40 +21,29 @@
 
 (def base-uri (str p/service-context (u/de-camelcase up/resource-name)))
 
-(defn ring-app []
-  (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
-
 ;; initialize must to called to pull in SessionTemplate test examples
 (dyn/initialize)
 
-(defn strip-unwanted-attrs [m]
-  (let [unwanted #{:id :resourceURI :acl :operations
-                   :created :updated :name :description}]
-    (into {} (remove #(unwanted (first %)) m))))
-
 (deftest lifecycle
-  (let [href              (str ct/resource-url "/" exec/params-type)
-        template-url      (str p/service-context ct/resource-url "/" exec/params-type)
-        session-admin     (-> (session (ring-app))
-                              (content-type "application/json")
-                              (header authn-info-header "root ADMIN"))
-        session-user      (-> (session (ring-app))
-                              (content-type "application/json")
-                              (header authn-info-header "jane USER ANON"))
-        session-user2     (-> (session (ring-app))
-                              (content-type "application/json")
-                              (header authn-info-header "john USER ANON"))
-        session-anon      (-> (session (ring-app))
-                              (content-type "application/json")
-                              (header authn-info-header "unknown ANON"))
-        template          (-> session-admin
-                              (request template-url)
-                              (ltu/body->edn)
-                              (ltu/is-status 200)
-                              (get-in [:response :body]))
+  (let [href (str ct/resource-url "/" exec/params-type)
+        template-url (str p/service-context ct/resource-url "/" exec/params-type)
+
+        session (-> (ltu/ring-app)
+                    session
+                    (content-type "application/json"))
+        session-admin (header session authn-info-header "root ADMIN")
+        session-user (header session authn-info-header "jane USER ANON")
+        session-user2 (header session authn-info-header "john USER ANON")
+        session-anon (header session authn-info-header "unknown ANON")
+
+        template (-> session-admin
+                     (request template-url)
+                     (ltu/body->edn)
+                     (ltu/is-status 200)
+                     (get-in [:response :body]))
         create-from-templ {:userParamTemplate
                            (-> template
-                               strip-unwanted-attrs
+                               ltu/strip-unwanted-attrs
                                (merge {:defaultCloudService "foo-bar-baz"
                                        :timeout             30
                                        :sshPublicKey        "ssh-rsa ABCDE foo"}))}]
@@ -80,13 +68,13 @@
 
     ;; Create.
     ;; only one document per parameter type is allowed per user
-    (let [uri        (-> session-user
-                         (request base-uri
-                                  :request-method :post
-                                  :body (json/write-str create-from-templ))
-                         (ltu/body->edn)
-                         (ltu/is-status 201)
-                         (ltu/location))
+    (let [uri (-> session-user
+                  (request base-uri
+                           :request-method :post
+                           :body (json/write-str create-from-templ))
+                  (ltu/body->edn)
+                  (ltu/is-status 201)
+                  (ltu/location))
           u1-abs-uri (str p/service-context (u/de-camelcase uri))]
       (-> session-user
           (request u1-abs-uri)
@@ -119,16 +107,16 @@
 
       ;; Edit.
       ;; user can edit the document
-      (let [resource       (-> session-admin
-                               (request u1-abs-uri)
-                               (ltu/body->edn)
-                               :response
-                               :body)
-            time-out       (+ (:timeout resource) 10)
-            timeout-json   (json/write-str (assoc resource :timeout time-out))
-            verbosity      (+ (:verbosityLevel resource) 1)
+      (let [resource (-> session-admin
+                         (request u1-abs-uri)
+                         (ltu/body->edn)
+                         :response
+                         :body)
+            time-out (+ (:timeout resource) 10)
+            timeout-json (json/write-str (assoc resource :timeout time-out))
+            verbosity (+ (:verbosityLevel resource) 1)
             verbosity-json (json/write-str (assoc resource :verbosityLevel verbosity))
-            ssh-pub-keys   (str (:sshPublicKey resource) "\nssh-rsa XYZ baz")
+            ssh-pub-keys (str (:sshPublicKey resource) "\nssh-rsa XYZ baz")
             ssh-keys-json (json/write-str (assoc resource :sshPublicKey ssh-pub-keys))]
 
         ;; anon user can NOT edit
@@ -166,13 +154,13 @@
             (ltu/body->edn)
             (ltu/is-status 200))
         (is (= 2 (-> session-admin
-                            (request u1-abs-uri)
-                            (ltu/body->edn)
-                            :response
-                            :body
-                            :sshPublicKey
-                            (clojure.string/split #"\n")
-                            count)))
+                     (request u1-abs-uri)
+                     (ltu/body->edn)
+                     :response
+                     :body
+                     :sshPublicKey
+                     (clojure.string/split #"\n")
+                     count)))
 
         ;; super can edit
         (-> session-admin
@@ -210,17 +198,17 @@
           (ltu/is-status 200)
           (ltu/is-count 0))
 
-      (let [resp    (-> session-user2
-                        (request base-uri)
-                        (ltu/body->edn)
-                        (ltu/is-status 200)
-                        (ltu/is-count 1))
-            uri     (->> resp
-                         :response
-                         :body
-                         :userParam
-                         first
-                         :id)
+      (let [resp (-> session-user2
+                     (request base-uri)
+                     (ltu/body->edn)
+                     (ltu/is-status 200)
+                     (ltu/is-count 1))
+            uri (->> resp
+                     :response
+                     :body
+                     :userParam
+                     first
+                     :id)
             abs-uri (str p/service-context (u/de-camelcase uri))]
         (-> session-user2
             (request abs-uri
