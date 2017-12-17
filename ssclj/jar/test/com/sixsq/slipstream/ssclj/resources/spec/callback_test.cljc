@@ -4,8 +4,6 @@
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.callback :as sc]))
 
-(def valid? (partial s/valid? :cimi/callback))
-(def invalid? (complement valid?))
 
 (def valid-acl {:owner {:principal "ADMIN"
                         :type      "ROLE"}
@@ -14,19 +12,25 @@
                          :right     "MODIFY"}]})
 
 
-(deftest check-callback
+(deftest check-callback-schema
   (let [timestamp "1964-08-25T10:00:00.0Z"
         callback {:id          (str sc/resource-url "/test-callback")
                   :resourceURI sc/resource-uri
                   :created     timestamp
-                  :acl         valid-acl
                   :updated     timestamp
+                  :acl         valid-acl
+                  :action      "validate-something"
                   :state       "WAITING"
-                  :action      "validate-something"}]
-    (are [expect-fn arg] (expect-fn arg)
-                         valid? callback
-                         valid? (assoc callback :state "SUCCESS")
-                         valid? (assoc callback :data {:a "a" :b 1 :c nil})
-                         invalid? (assoc callback :data "should be a map")
-                         invalid? (assoc callback :state "XY")
-                         )))
+                  :resource    {:href "email/1230958abdef"}
+                  :expires     timestamp
+                  :data        {:some    "value"
+                                :another "value"}}]
+
+    (is (s/valid? :cimi/callback callback))
+    (is (s/valid? :cimi/callback (assoc callback :state "SUCCESS")))
+    (is (s/valid? :cimi/callback (assoc callback :state "FAILED")))
+    (is (not (s/valid? :cimi/callback (assoc callback :state "UNKNOWN"))))
+    (doseq [attr #{:id :resourceURI :created :updated :acl :action}]
+      (is (not (s/valid? :cimi/callback (dissoc callback attr)))))
+    (doseq [attr #{:expires :data}]
+      (is (s/valid? :cimi/callback (dissoc callback attr))))))

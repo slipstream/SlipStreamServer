@@ -15,24 +15,13 @@
 
 (def base-uri (str p/service-context (u/de-camelcase callback/resource-url)))
 
-(defn ring-app []
-  (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
-
-(defn strip-unwanted-attrs [m]
-  (let [unwanted #{:id :resourceURI :acl :operations
-                   :created :updated :name :description}]
-    (into {} (remove #(unwanted (first %)) m))))
-
 (deftest lifecycle
-  (let [session-admin (-> (session (ring-app))
-                          (content-type "application/json")
-                          (header authn-info-header "root ADMIN USER ANON"))
-        session-jane (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "unknown ANON"))]
+  (let [session (-> (ltu/ring-app)
+                    session
+                    (content-type "application/json"))
+        session-admin (header session authn-info-header "root ADMIN USER ANON")
+        session-jane (header session authn-info-header "jane USER ANON")
+        session-anon (header session authn-info-header "unknown ANON")]
 
     ;; admin user collection query should succeed but be empty (no  records created yet)
     (-> session-admin
@@ -59,8 +48,8 @@
 
 
     ;; create a callback as a admin user
-    (let [
-          create-test-callback {:action "action-name"}
+    (let [create-test-callback {:action   "action-name"
+                                :resource {:href "email/1234579abcdef"}}
 
           resp-test (-> session-admin
                         (request base-uri
@@ -84,7 +73,6 @@
           (ltu/is-status 200)
           (ltu/is-operation-present "delete")
           (ltu/is-operation-absent "edit")
-          (ltu/dump)
           (ltu/is-operation-present (:validate c/action-uri)))
 
       (-> session-jane
@@ -100,8 +88,8 @@
                                      :response
                                      :body)]
 
-        (is (= (strip-unwanted-attrs reread-test-callback)
-               (strip-unwanted-attrs (assoc create-test-callback :state "WAITING")))))
+        (is (= (ltu/strip-unwanted-attrs reread-test-callback)
+               (ltu/strip-unwanted-attrs (assoc create-test-callback :state "WAITING")))))
 
       ;; disallowed edits
       (-> session-jane
@@ -149,15 +137,8 @@
 
 
 (deftest bad-methods
-
   (let [resource-uri (str p/service-context (u/new-resource-id callback/resource-name))]
-    (doall
-      (for [[uri method] [[base-uri :options]
-                          [base-uri :delete]
-                          [resource-uri :options]
-                          [resource-uri :post]]]
-        (-> (session (ring-app))
-            (request uri
-                     :request-method method
-                     :body (json/write-str {:dummy "value"}))
-            (ltu/is-status 405))))))
+    (ltu/verify-405-status [[base-uri :options]
+                            [base-uri :delete]
+                            [resource-uri :options]
+                            [resource-uri :post]])))

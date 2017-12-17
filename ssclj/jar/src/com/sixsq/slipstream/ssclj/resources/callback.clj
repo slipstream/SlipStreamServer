@@ -7,7 +7,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.callback]
     [com.sixsq.slipstream.auth.acl :as a]
-    [com.sixsq.slipstream.ssclj.util.log :as log-util]))
+    [com.sixsq.slipstream.ssclj.util.log :as log-util])
+  (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-tag :callbacks)
 
@@ -21,8 +22,6 @@
 
 (def ^:const collection-uri (str c/slipstream-schema-uri collection-name))
 
-(def ^:const create-uri (str c/slipstream-schema-uri resource-name "Create"))
-
 (def collection-acl {:owner {:principal "ADMIN"
                              :type      "ROLE"}
                      :rules [{:principal "ADMIN"
@@ -30,7 +29,7 @@
                               :right     "MODIFY"}]})
 
 ;;
-;; validate subclasses of sessions
+;; validate subclasses of callbacks
 ;;
 
 
@@ -65,10 +64,7 @@
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 (defmethod crud/add resource-name
   [request]
-  (add-impl
-    (if-not (get-in request [:body :state])
-      (assoc-in request [:body :state] "WAITING")
-      request)))
+  (add-impl (assoc-in request [:body :state] "WAITING")))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 (defmethod crud/retrieve resource-name
