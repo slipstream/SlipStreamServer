@@ -34,7 +34,6 @@
                                                   (request base-uri
                                                            :request-method :post
                                                            :body (json/write-str create-callback-succeeds))
-                                                  (ltu/dump)
                                                   (ltu/body->edn)
                                                   (ltu/is-status 201)
                                                   :response
