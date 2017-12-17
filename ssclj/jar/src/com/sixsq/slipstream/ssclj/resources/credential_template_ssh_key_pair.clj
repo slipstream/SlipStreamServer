@@ -2,10 +2,8 @@
   "This CredentialTemplate allows creating a Credential containing the SSH
    public key from a generated SSH key pair."
   (:require
-    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template-ssh-key-pair]
     [com.sixsq.slipstream.ssclj.resources.credential-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 (def ^:const credential-type "ssh-public-key")

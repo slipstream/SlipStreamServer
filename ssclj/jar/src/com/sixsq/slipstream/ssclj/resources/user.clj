@@ -1,6 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.resources.user
   (:require
-    [clojure.spec.alpha :as s]
     [clj-time.core :as t]
     [com.sixsq.slipstream.ssclj.resources.user-template-direct :as tpl]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
@@ -9,8 +8,6 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.db.impl :as db]
-    [ring.util.response :as r]
-    [clojure.tools.logging :as log]
     [com.sixsq.slipstream.ssclj.util.log :as logu])
   (:import
     (clojure.lang ExceptionInfo)))

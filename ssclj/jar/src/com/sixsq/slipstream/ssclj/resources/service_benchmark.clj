@@ -1,6 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.resources.service-benchmark
   (:require
-    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.service-benchmark]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]

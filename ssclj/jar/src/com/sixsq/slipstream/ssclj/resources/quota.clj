@@ -1,7 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.quota
   (:require
     [superstring.core :as str]
-    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.spec.quota]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
@@ -9,8 +8,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.quota.utils :as quota-utils]
-    [com.sixsq.slipstream.util.response :as sr]
-    [ring.util.response :as r])
+    [com.sixsq.slipstream.util.response :as sr])
   (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-name "Quota")
