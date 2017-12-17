@@ -1,7 +1,6 @@
 (ns
   com.sixsq.slipstream.ssclj.resources.event
   (:require
-    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.event]
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]

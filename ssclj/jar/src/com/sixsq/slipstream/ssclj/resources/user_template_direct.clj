@@ -1,9 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.user-template-direct
   (:require
-    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.user-template-direct]
     [com.sixsq.slipstream.ssclj.resources.user-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 (def ^:const registration-method "direct")

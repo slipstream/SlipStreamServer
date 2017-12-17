@@ -1,11 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream
   (:require
-    [clojure.tools.logging :as log]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.util.config :as uc]
-    [clojure.java.io :as io]))
+    [com.sixsq.slipstream.ssclj.util.config :as uc]))
 
 (def ^:const service "slipstream")
 

@@ -1,16 +1,12 @@
 (ns com.sixsq.slipstream.ssclj.resources.virtual-machine
   (:require
-    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.virtual-machine]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.auth.acl :as a]
-    [ring.util.response :as r]
-    [clojure.string :as str]
-    [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.ssclj.util.log :as logu]))
+    [clojure.string :as str]))
 
 (def ^:const resource-tag :virtualMachines)
 

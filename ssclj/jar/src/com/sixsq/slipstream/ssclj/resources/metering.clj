@@ -1,6 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.resources.metering
   (:require
-    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.metering]
 
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
@@ -8,10 +7,6 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.auth.acl :as a]
-    [com.sixsq.slipstream.db.impl :as db]
-    [ring.util.response :as r]
-    [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.ssclj.util.log :as logu]
     [superstring.core :as str]))
 
 (def ^:const resource-name "Metering")
