@@ -15,14 +15,6 @@
 
 (def base-uri (str p/service-context (u/de-camelcase t/resource-url)))
 
-(defn ring-app []
-  (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
-
-(defn strip-unwanted-attrs [m]
-  (let [unwanted #{:id :resourceURI :acl :operations
-                   :created :updated :name :description}]
-    (into {} (remove #(unwanted (first %)) m))))
-
 (def valid-acl {:owner {:principal "ADMIN",
                         :type      "ROLE"},
                 :rules [{:principal "realm:accounting_manager",
@@ -39,7 +31,7 @@
                          :right     "VIEW"}]})
 
 (deftest lifecycle
-  (let [session-anon (-> (ring-app)
+  (let [session-anon (-> (ltu/ring-app)
                          session
                          (content-type "application/json"))
         session-admin (header session-anon authn-info-header "super ADMIN USER ANON")
@@ -157,14 +149,8 @@
 
 (deftest bad-methods
   (let [resource-uri (str p/service-context (u/new-resource-id t/resource-name))]
-    (doall
-      (for [[uri method] [[base-uri :options]
-                          [base-uri :delete]
-                          [resource-uri :put]
-                          [resource-uri :options]
-                          [resource-uri :post]]]
-        (-> (session (ring-app))
-            (request uri
-                     :request-method method
-                     :body (json/write-str {:dummy "value"}))
-            (ltu/is-status 405))))))
+    (ltu/verify-405-status [[base-uri :options]
+                            [base-uri :delete]
+                            [resource-uri :put]
+                            [resource-uri :options]
+                            [resource-uri :post]])))
