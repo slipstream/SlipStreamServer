@@ -327,38 +327,6 @@
             </mapping>
 
             <mapping>
-              <directory>/etc/cron.d</directory>
-              <filemode>644</filemode>
-              <username>root</username>
-              <groupname>root</groupname>
-              <directoryIncluded>false</directoryIncluded>
-              <sources>
-                <source>
-                  <location>src/main/scripts</location>
-                  <includes>
-                    <include>daily-usage-emails</include>
-                  </includes>
-                </source>
-              </sources>
-            </mapping>
-
-            <mapping>
-              <directory>/usr/sbin</directory>
-              <filemode>755</filemode>
-              <username>root</username>
-              <groupname>root</groupname>
-              <directoryIncluded>false</directoryIncluded>
-              <sources>
-                <source>
-                  <location>src/main/scripts</location>
-                  <includes>
-                    <include>send-daily-usage-emails.sh</include>
-                  </includes>
-                </source>
-              </sources>
-            </mapping>
-
-            <mapping>
               <directory>${installation.dir}/resources</directory>
               <filemode>664</filemode>
               <directoryIncluded>false</directoryIncluded>
@@ -473,7 +441,7 @@
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
-                  <location>target/dashboard_tabs/css</location>
+                  <location>target/legacy/css</location>
                 </source>
               </sources>
             </mapping>
@@ -484,7 +452,7 @@
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
-                  <location>target/dashboard_tabs/js/dashboard_tabs.js</location>
+                  <location>target/legacy/js/legacy.js</location>
                 </source>
               </sources>
             </mapping>

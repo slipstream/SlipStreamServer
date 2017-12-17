@@ -165,22 +165,21 @@ public class SscljProxy {
         Response response = null;
         Representation responseEntity = null;
         StringRepresentation content = new StringRepresentation("");
+        if (mediaType == null) {
+            mediaType = MediaType.APPLICATION_JSON;
+        }
 
         String sscljEndpoint = getSscljEndpoint();
 
-        logger.finest("Calling SSCLJ " + sscljEndpoint + " with: "
-                + "method=" + String.valueOf(method)
+        String requestParamsLog = "method=" + String.valueOf(method)
                 + ", resource=" + resource
                 + ", object=" + String.valueOf(obj)
                 + ", username=" + username
                 + ", queryParameters=" + queryParametersToString(queryParameters)
-                + ", mediaType=" + String.valueOf(mediaType));
+                + ", mediaType=" + String.valueOf(mediaType);
+        logger.finest("Calling SSCLJ " + sscljEndpoint + " with: " + requestParamsLog);
 
         try {
-            if (mediaType == null) {
-                mediaType = MediaType.APPLICATION_JSON;
-            }
-
             if (obj != null) {
                 content = new StringRepresentation(toJson(obj));
                 content.setMediaType(mediaType);
@@ -231,6 +230,7 @@ public class SscljProxy {
             String message = "ResourceException: " + re.getMessage();
             try {
                 Response resp = client.getResponse();
+                message += "\n\twith request: " + requestParamsLog;
                 message += "\n\twith status: " + resp.getStatus().toString();
                 message += "\n\twith content: " + resp.getEntityAsText();
             } catch (Exception ignored) {
@@ -290,6 +290,7 @@ public class SscljProxy {
             public boolean shouldSkipClass(Class<?> arg0) {
                 return false;
             }
+
             public boolean shouldSkipField(FieldAttributes f) {
                 return f.getName().equals("jpaVersion");
             }

@@ -266,41 +266,6 @@ public class Vm {
 		return vmCountPerRun;
 	}
 
-	public static Map<String, CloudUsage> usage(String user) {
-		List<?> vms;
-		EntityManager em = PersistenceUtil.createEntityManager();
-		try {
-			vms = em.createNamedQuery("byUser").setParameter("user", user).getResultList();
-		} finally {
-			em.close();
-		}
-
-		Map<String, CloudUsage> usages = new HashMap<>();
-		for (Object vm : vms) {
-			Date measurement = (Date) ((Object[]) vm)[0];
-			String runUuid = (String) ((Object[]) vm)[1];
-			String runOwner = (String) ((Object[]) vm)[2];
-			String cloud = (String) ((Object[]) vm)[3];
-			Boolean isUsable = (Boolean) ((Object[]) vm)[4];
-
-			if (user.equals(runOwner)) {
-				if (isUsable) {
-					addCloudIntoUsage(usages, cloud).incrementUserVmUsage();
-				} else {
-					addCloudIntoUsage(usages, cloud).incrementUserInactiveVmUsage();
-				}
-			} else if (runUuid != null) {
-				addCloudIntoUsage(usages, cloud).incrementOthersVmUsage();
-			} else if (((new Date()).getTime() - measurement.getTime()) < PENDING_TIMEOUT) {
-				addCloudIntoUsage(usages, cloud).incrementPendingVmUsage();
-			} else {
-				addCloudIntoUsage(usages, cloud).incrementUnknownVmUsage();
-			}
-		}
-
-		return usages;
-	}
-
 	/**
 	 * This method assumes that the input VMs correspond to a single cloud.
 	 * Otherwise, duplicate instance ids would overwrite each other.

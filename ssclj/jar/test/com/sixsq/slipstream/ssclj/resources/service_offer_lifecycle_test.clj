@@ -8,16 +8,13 @@
     [com.sixsq.slipstream.ssclj.resources.service-offer :refer :all]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]))
 
 (use-fixtures :each t/with-test-es-client-fixture)
 
 (def base-uri (str p/service-context resource-url))
-
-(defn ring-app []
-  (t/make-ring-app (t/concat-routes routes/final-routes)))
 
 (def valid-entry
   {:connector       {:href "cloud-software-solution-1"}
@@ -56,20 +53,13 @@
 
 (deftest lifecycle
 
-  (let [session-admin-json (-> (session (ring-app))
-                               (content-type "application/json")
-                               (header authn-info-header "super ADMIN USER ANON"))
-        session-admin-form (-> (session (ring-app))
-                               (content-type "application/x-www-form-urlencoded")
-                               (header authn-info-header "super ADMIN USER ANON"))
-        session-user (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ring-app))
-                         (content-type "application/json"))]
+  (let [session-anon (-> (session (ltu/ring-app))
+                         (content-type "application/json"))
+        session-admin (header session-anon authn-info-header "super ADMIN USER ANON")
+        session-user (header session-anon authn-info-header "jane USER ANON")]
 
     ;; create namespace
-    (-> session-admin-json
+    (-> session-admin
         (request (str p/service-context sn/resource-url)
                  :request-method :post
                  :body (json/write-str valid-namespace))
@@ -112,7 +102,7 @@
           (t/body->edn)
           (t/is-status 200))
 
-      (-> (session (ring-app))
+      (-> (session (ltu/ring-app))
           (header authn-info-header "jane role1 ADMIN")
           (request abs-uri :request-method :delete)
           (t/body->edn)
@@ -128,19 +118,19 @@
                   (t/location))
           abs-uri (str p/service-context (u/de-camelcase uri))]
 
-      (-> session-admin-json
+      (-> session-admin
           (request abs-uri)
           (t/body->edn)
           (t/is-status 200))
 
-      (-> session-admin-json
+      (-> session-admin
           (request abs-uri
                    :request-method :delete)
           (t/body->edn)
           (t/is-status 200))
 
       ;; try adding invalid entry
-      (-> session-admin-json
+      (-> session-admin
           (request base-uri
                    :request-method :post
                    :body (json/write-str invalid-entry))
@@ -148,7 +138,7 @@
           (t/is-status 400)))
 
     ;; add a new entry
-    (let [uri (-> session-admin-json
+    (let [uri (-> session-admin
                   (request base-uri
                            :request-method :post
                            :body (json/write-str valid-entry))
@@ -160,7 +150,7 @@
       (is uri)
 
       ;; verify that the new entry is accessible
-      (-> session-admin-json
+      (-> session-admin
           (request abs-uri)
           (t/body->edn)
           (t/is-status 200)
@@ -168,7 +158,7 @@
           (t/does-body-contain valid-entry))
 
       ;; query to see that entry is listed
-      (let [entries (-> session-admin-json
+      (let [entries (-> session-admin
                         (request base-uri)
                         (t/body->edn)
                         (t/is-status 200)
@@ -179,16 +169,17 @@
         (is ((set (map :id entries)) uri))
 
         ;; delete the entry
-        (-> session-admin-json
+        (-> session-admin
             (request abs-uri :request-method :delete)
             (t/body->edn)
             (t/is-status 200))
 
         ;; ensure that it really is gone
-        (-> session-admin-json
+        (-> session-admin
             (request abs-uri)
             (t/body->edn)
             (t/is-status 404))))))
+
 
 (deftest bad-methods
   (let [resource-uri (str p/service-context (u/new-resource-id resource-name))]
@@ -198,28 +189,22 @@
                           [resource-uri :options]
                           [resource-uri :post]]]
         (do
-          (-> (session (ring-app))
+          (-> (session (ltu/ring-app))
               (request uri
                        :request-method method
                        :body (json/write-str {:dummy "value"}))
               (t/is-status 405)))))))
 
+
 (deftest uris-as-keys
 
-  (let [session-admin-json (-> (session (ring-app))
-                               (content-type "application/json")
-                               (header authn-info-header "super ADMIN USER ANON"))
-        session-admin-form (-> (session (ring-app))
-                               (content-type "application/x-www-form-urlencoded")
-                               (header authn-info-header "super ADMIN USER ANON"))
-        session-user (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ring-app))
-                         (content-type "application/json"))]
+  (let [session-anon (-> (session (ltu/ring-app))
+                         (content-type "application/json"))
+        session-admin (header session-anon authn-info-header "super ADMIN USER ANON")
+        session-user (header session-anon authn-info-header "jane USER ANON")]
 
     ;; create namespace
-    (-> session-admin-json
+    (-> session-admin
         (request (str p/service-context sn/resource-url)
                  :request-method :post
                  :body (json/write-str valid-namespace))
@@ -240,7 +225,7 @@
 
           abs-uri (str p/service-context (u/de-camelcase uri-of-posted))
 
-          doc (-> session-admin-json
+          doc (-> session-admin
                   (request abs-uri)
                   (t/body->edn)
                   (t/is-status 200)
@@ -251,27 +236,20 @@
 
 (deftest nested-values
 
-  (let [session-admin-json (-> (session (ring-app))
-                               (content-type "application/json")
-                               (header authn-info-header "super ADMIN USER ANON"))
-        session-admin-form (-> (session (ring-app))
-                               (content-type "application/x-www-form-urlencoded")
-                               (header authn-info-header "super ADMIN USER ANON"))
-        session-user (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ring-app))
-                         (content-type "application/json"))]
+  (let [session-anon (-> (session (ltu/ring-app))
+                         (content-type "application/json"))
+        session-admin (header session-anon authn-info-header "super ADMIN USER ANON")
+        session-user (header session-anon authn-info-header "jane USER ANON")]
 
     ;; create namespaces
-    (-> session-admin-json
+    (-> session-admin
         (request (str p/service-context sn/resource-url)
                  :request-method :post
                  :body (json/write-str valid-namespace))
         (t/body->edn)
         (t/is-status 201))
 
-    (-> session-admin-json
+    (-> session-admin
         (request (str p/service-context sn/resource-url)
                  :request-method :post
                  :body (json/write-str namespace-com))
@@ -287,7 +265,7 @@
                   (t/location))
           abs-uri (str p/service-context (u/de-camelcase uri))
 
-          doc (-> session-admin-json
+          doc (-> session-admin
                   (request abs-uri)
                   (t/body->edn)
                   (t/is-status 200)
@@ -308,21 +286,14 @@
 
 (deftest cimi-filter-namespaced-attributes
 
-  (let [session-admin-json (-> (session (ring-app))
-                               (content-type "application/json")
-                               (header authn-info-header "super ADMIN USER ANON"))
-        session-admin-form (-> (session (ring-app))
-                               (content-type "application/x-www-form-urlencoded")
-                               (header authn-info-header "super ADMIN USER ANON"))
-        session-user (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ring-app))
-                         (content-type "application/json"))]
+  (let [session-anon (-> (session (ltu/ring-app))
+                         (content-type "application/json"))
+        session-admin (header session-anon authn-info-header "super ADMIN USER ANON")
+        session-user (header session-anon authn-info-header "jane USER ANON")]
 
 
     ;; create namespaces
-    (-> session-admin-json
+    (-> session-admin
         (request (str p/service-context sn/resource-url)
                  :request-method :post
                  :body (json/write-str valid-namespace))
@@ -344,19 +315,19 @@
                                   resource-url
                                   "?$filter=schema-org:att1='xxx'")
 
-          res-all (-> session-admin-json
+          res-all (-> session-admin
                       (request (str p/service-context resource-url))
                       (t/body->edn)
                       (t/is-status 200)
                       (get-in [:response :body]))
 
-          res-ok (-> session-admin-json
+          res-ok (-> session-admin
                      (request cimi-url-ok)
                      (t/body->edn)
                      (t/is-status 200)
                      (get-in [:response :body]))
 
-          res-empty (-> session-admin-json
+          res-empty (-> session-admin
                         (request cimi-url-no-result)
                         (t/body->edn)
                         (t/is-status 200)
@@ -368,27 +339,20 @@
 
 (deftest cimi-filter-nested-values
 
-  (let [session-admin-json (-> (session (ring-app))
-                               (content-type "application/json")
-                               (header authn-info-header "super ADMIN USER ANON"))
-        session-admin-form (-> (session (ring-app))
-                               (content-type "application/x-www-form-urlencoded")
-                               (header authn-info-header "super ADMIN USER ANON"))
-        session-user (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ring-app))
-                         (content-type "application/json"))]
+  (let [session-anon (-> (session (ltu/ring-app))
+                         (content-type "application/json"))
+        session-admin (header session-anon authn-info-header "super ADMIN USER ANON")
+        session-user (header session-anon authn-info-header "jane USER ANON")]
 
     ;; create namespaces
-    (-> session-admin-json
+    (-> session-admin
         (request (str p/service-context sn/resource-url)
                  :request-method :post
                  :body (json/write-str valid-namespace))
         (t/body->edn)
         (t/is-status 201))
 
-    (-> session-admin-json
+    (-> session-admin
         (request (str p/service-context sn/resource-url)
                  :request-method :post
                  :body (json/write-str namespace-com))
@@ -408,20 +372,20 @@
           cimi-url-no-result (str p/service-context
                                   resource-url
                                   "?$filter=schema-org:att1/schema-org:att2='xxx'")
-          res-ok (-> session-admin-json
+          res-ok (-> session-admin
                      (request cimi-url-ok)
                      (t/body->edn)
                      (t/is-status 200)
                      (get-in [:response :body]))
 
-          res-ok-put (-> session-admin-json
+          res-ok-put (-> session-admin
                          (request cimi-url-ok
                                   :request-method :put)
                          (t/body->edn)
                          (t/is-status 200)
                          (get-in [:response :body]))
 
-          res-ok-put-body (-> (session (ring-app))
+          res-ok-put-body (-> (session (ltu/ring-app))
                               (content-type "application/x-www-form-urlencoded")
                               (header authn-info-header "super ADMIN USER ANON")
                               (request cimi-url-ok
@@ -431,20 +395,20 @@
                               (t/is-status 200)
                               (get-in [:response :body]))
 
-          no-result (-> session-admin-json
+          no-result (-> session-admin
                         (request cimi-url-no-result)
                         (t/body->edn)
                         (t/is-status 200)
                         (get-in [:response :body]))
 
-          no-result-put (-> session-admin-json
+          no-result-put (-> session-admin
                             (request cimi-url-no-result
                                      :request-method :put)
                             (t/body->edn)
                             (t/is-status 200)
                             (get-in [:response :body]))
 
-          no-result-put-body (-> (session (ring-app))
+          no-result-put-body (-> (session (ltu/ring-app))
                                  (content-type "application/x-www-form-urlencoded")
                                  (header authn-info-header "super ADMIN USER ANON")
                                  (request cimi-url-no-result

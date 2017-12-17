@@ -23,7 +23,6 @@ package com.sixsq.slipstream.application;
 
 
 import com.sixsq.slipstream.action.ActionRouter;
-import com.sixsq.slipstream.attribute.AttributeRouter;
 import com.sixsq.slipstream.authn.CookieAuthenticator;
 import com.sixsq.slipstream.authn.LoginResource;
 import com.sixsq.slipstream.authn.LogoutResource;
@@ -56,12 +55,10 @@ import com.sixsq.slipstream.resource.AppStoreResource;
 import com.sixsq.slipstream.resource.ModulesChooserResource;
 import com.sixsq.slipstream.resource.ReportRouter;
 import com.sixsq.slipstream.resource.RootRedirectResource;
-import com.sixsq.slipstream.resource.ServiceCatalogRouter;
 import com.sixsq.slipstream.resource.configuration.ServiceConfigurationResource;
 import com.sixsq.slipstream.resource.NuvlaboxAdminRouter;
 import com.sixsq.slipstream.run.RunRouter;
 import com.sixsq.slipstream.run.VmsRouter;
-import com.sixsq.slipstream.serviceinfo.ServiceInfoRouter;
 import com.sixsq.slipstream.ui.UIResourceRouter;
 import com.sixsq.slipstream.usage.UsageRouter;
 import com.sixsq.slipstream.user.UserRouter;
@@ -83,7 +80,6 @@ import org.restlet.routing.Template;
 import org.restlet.routing.TemplateRoute;
 import org.restlet.security.Authenticator;
 import org.restlet.service.MetadataService;
-import slipstream.async.Collector;
 import slipstream.async.GarbageCollector;
 
 import java.io.UnsupportedEncodingException;
@@ -144,7 +140,6 @@ public class RootApplication extends Application {
 			// Load the configuration early
 			Configuration.getInstance();
 
-			Collector.start();
 			GarbageCollector.start();
 
 			Metrics.addJvmMetrics();
@@ -261,12 +256,9 @@ public class RootApplication extends Application {
 			attachLogin(router);
 			attachLogout(router);
 			attachConfiguration(router);
-			attachServiceCatalog(router); // needs to be after configuration
 			attachReports(router);
 			attachEvent(router);
 			attachUsage(router);
-			attachServiceInfo(router);
-			attachAttribute(router);
 			attachCloudUsage(router);
 			attachNuvlaboxAdmin(router);
 
@@ -365,10 +357,6 @@ public class RootApplication extends Application {
 		guardAndAttach(router, new DashboardRouter(getContext()), "dashboard");
 	}
 
-	private void attachServiceCatalog(RootRouter router) {
-		guardAndAttach(router, new ServiceCatalogRouter(getContext()), "service_catalog");
-	}
-
 	private void attachVms(RootRouter router) {
 		guardAndAttach(router, new VmsRouter(getContext()), "vms");
 	}
@@ -451,14 +439,6 @@ public class RootApplication extends Application {
 
 	private void attachUsage(RootRouter router) throws ValidationException {
 		guardAndAttach(router, new UsageRouter(getContext()), "usage");
-	}
-
-	private void attachServiceInfo(RootRouter router) throws ValidationException {
-		guardAndAttach(router, new ServiceInfoRouter(getContext()), "service-offer");
-	}
-
-	private void attachAttribute(RootRouter router) throws ValidationException {
-		guardAndAttach(router, new AttributeRouter(getContext()), "service-attribute");
 	}
 
 	private void attachCloudUsage(RootRouter router) throws ValidationException {

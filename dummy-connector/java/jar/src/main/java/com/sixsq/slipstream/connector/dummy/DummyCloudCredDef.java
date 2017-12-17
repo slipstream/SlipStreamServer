@@ -2,7 +2,6 @@ package com.sixsq.slipstream.connector.dummy;
 
 import com.google.gson.annotations.SerializedName;
 import com.sixsq.slipstream.credentials.CloudCredential;
-import com.sixsq.slipstream.credentials.HRef;
 import com.sixsq.slipstream.credentials.ICloudCredential;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.UserParameter;
@@ -18,19 +17,18 @@ public class DummyCloudCredDef extends CloudCredential<DummyCloudCredDef> {
 
     public DummyCloudCredDef(String instanceName, String key, String secret,
                              String domainName) {
-        super(new HRef("connector/" + instanceName), key, secret);
+        super(instanceName, key, secret);
         this.domainName = domainName;
     }
 
     public DummyCloudCredDef(String instanceName, String key, String secret,
-                             String domainName, Integer quota) {
-
+                             Integer quota, String domainName) {
         this(instanceName, key, secret, domainName);
         this.quota = quota;
     }
 
-    public DummyCloudCredDef(String instanceName, Map<String, UserParameter> params) {
-        super(new HRef("connector/" + instanceName));
+    DummyCloudCredDef(String instanceName, Map<String, UserParameter> params) {
+        super(instanceName);
         setParams(params);
     }
 
@@ -66,8 +64,7 @@ public class DummyCloudCredDef extends CloudCredential<DummyCloudCredDef> {
 
     public boolean credEquals(ICloudCredential<DummyCloudCredDef> other) {
         DummyCloudCredDef o = (DummyCloudCredDef) other;
-        return this.key.equals(o.key) && this.secret.equals(o.secret)
-                && this.domainName.equals(o.domainName);
+        return super.credEquals(o) && this.domainName.equals(o.domainName);
     }
 }
 

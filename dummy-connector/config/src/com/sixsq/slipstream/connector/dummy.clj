@@ -1,5 +1,5 @@
 (ns com.sixsq.slipstream.connector.dummy
-    (:require
+  (:require
     [com.sixsq.slipstream.connector.dummy-template :as tpl]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as sch]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]

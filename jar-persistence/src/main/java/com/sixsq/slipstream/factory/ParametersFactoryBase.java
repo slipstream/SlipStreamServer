@@ -56,6 +56,9 @@ public abstract class ParametersFactoryBase<S extends Parameter<?>> {
 			case "password":
 				ptype = ParameterType.Password;
 				break;
+			case "restricted text":
+				ptype = ParameterType.RestrictedText;
+				break;
 			default:
 				ptype = ParameterType.String;
 				break;

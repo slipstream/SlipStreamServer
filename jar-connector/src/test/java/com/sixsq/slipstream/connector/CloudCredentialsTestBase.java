@@ -41,6 +41,7 @@ import org.junit.Test;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
+import java.util.Random;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -157,16 +158,22 @@ public abstract class CloudCredentialsTestBase implements
 
 		// Credential parameters are updated.
         // Use integer to let integer based parameters to work.
-		String newValue = String.valueOf(System.currentTimeMillis());
-		newValue = newValue.substring(newValue.length() - 7);
+		String newValue = String.valueOf(new Random().nextInt(100));
 		for (String pname: params.keySet()) {
 			UserParameter p = user.getParameter(pname);
 			p.setValue(newValue);
 			user.setParameter(p);
 			user.store();
 			SscljTestServer.refresh();
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			u1 = User.loadByName(user.getName());
-			assertTrue(u1.getParameter(pname).getValue().equals(newValue));
+			String value = u1.getParameter(pname).getValue();
+			assertTrue("Not equal for parameter: " + pname + " - " + value + " != " + newValue,
+					value.equals(newValue));
 		}
 	}
 

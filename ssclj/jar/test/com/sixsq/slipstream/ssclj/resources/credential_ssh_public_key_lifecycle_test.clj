@@ -12,7 +12,6 @@
     [com.sixsq.slipstream.auth.internal :as auth-internal]
     [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.credential.ssh-utils :as ssh-utils]
@@ -22,27 +21,16 @@
 
 (def base-uri (str p/service-context (u/de-camelcase credential/resource-url)))
 
-(defn ring-app []
-  (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
-
 ;; initialize must to called to pull in CredentialTemplate resources
 (dyn/initialize)
 
-(defn strip-unwanted-attrs [m]
-  (let [unwanted #{:id :resourceURI :acl :operations
-                   :created :updated :name :description}]
-    (into {} (remove #(unwanted (first %)) m))))
-
 (deftest lifecycle-import
-  (let [session-admin (-> (session (ring-app))
-                          (content-type "application/json")
-                          (header authn-info-header "root ADMIN USER ANON"))
-        session-user (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "unknown ANON"))
+  (let [session (-> (ltu/ring-app)
+                    session
+                    (content-type "application/json"))
+        session-admin (header session authn-info-header "root ADMIN USER ANON")
+        session-user (header session authn-info-header "jane USER ANON")
+        session-anon (header session authn-info-header "unknown ANON")
 
         href (str ct/resource-url "/" spk/method)
         template-url (str p/service-context ct/resource-url "/" spk/method)
@@ -55,7 +43,7 @@
 
         imported-ssh-key-info (ssh-utils/generate)
 
-        create-import-no-href {:credentialTemplate (strip-unwanted-attrs
+        create-import-no-href {:credentialTemplate (ltu/strip-unwanted-attrs
                                                      (assoc template
                                                        :publicKey (:publicKey imported-ssh-key-info)))}
 
@@ -90,13 +78,13 @@
           (ltu/body->edn)
           (ltu/is-status 400)))
 
-    ;; creating a new credential as anon will fail
+    ;; creating a new credential as anon will fail; expect 400 because href cannot be accessed
     (-> session-anon
         (request base-uri
                  :request-method :post
                  :body (json/write-str create-import-href))
         (ltu/body->edn)
-        (ltu/is-status 403))
+        (ltu/is-status 400))
 
     ;; creating a new credential with bad key must return 400
     (-> session-user
@@ -129,7 +117,7 @@
             (ltu/body->edn)
             (ltu/is-status 200)
             (ltu/is-operation-present "delete")
-            (ltu/is-operation-absent "edit")))
+            (ltu/is-operation-present "edit")))
 
       ;; ensure credential contains correct information
       (let [resource (-> session-user
@@ -150,15 +138,12 @@
           (ltu/is-status 200)))))
 
 (deftest lifecycle-generate
-  (let [session-admin (-> (session (ring-app))
-                          (content-type "application/json")
-                          (header authn-info-header "root ADMIN USER ANON"))
-        session-user (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "unknown ANON"))
+  (let [session (-> (ltu/ring-app)
+                    session
+                    (content-type "application/json"))
+        session-admin (header session authn-info-header "root ADMIN USER ANON")
+        session-user (header session authn-info-header "jane USER ANON")
+        session-anon (header session authn-info-header "unknown ANON")
 
         href (str ct/resource-url "/" skp/method)
         template-url (str p/service-context ct/resource-url "/" skp/method)
@@ -197,18 +182,38 @@
             (ltu/body->edn)
             (ltu/is-status 200)
             (ltu/is-operation-present "delete")
-            (ltu/is-operation-absent "edit")))
+            (ltu/is-operation-present "edit")))
 
       ;; ensure credential contains correct information
-      (let [resource (-> session-user
+      (let [current (-> session-user
+                        (request abs-uri)
+                        (ltu/body->edn)
+                        (ltu/is-status 200)
+                        :response
+                        :body)]
+        (is (= "rsa" (:algorithm current)))
+        (is (:fingerprint current))
+        (is (:publicKey current))
+
+        ;; update the credential by changing the name attribute
+        (-> session-user
+            (request abs-uri
+                     :request-method :put
+                     :body (json/write-str (assoc current :name "UPDATED!")))
+            (ltu/body->edn)
+            (ltu/is-status 200))
+
+        ;; verify that the attribute has been changed
+        (let [expected (assoc current :name "UPDATED!")
+              reread (-> session-user
                          (request abs-uri)
                          (ltu/body->edn)
                          (ltu/is-status 200)
                          :response
                          :body)]
-        (is (= "rsa" (:algorithm resource)))
-        (is (:fingerprint resource))
-        (is (:publicKey resource)))
+
+          (is (= (dissoc expected :updated) (dissoc reread :updated)))
+          (is (not= (:updated expected) (:updated reread)))))
 
       ;; delete the credential
       (-> session-user
@@ -216,4 +221,3 @@
                    :request-method :delete)
           (ltu/body->edn)
           (ltu/is-status 200)))))
-

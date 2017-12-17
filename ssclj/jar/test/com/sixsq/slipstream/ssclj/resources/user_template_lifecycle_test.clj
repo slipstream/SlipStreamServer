@@ -12,7 +12,6 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
@@ -20,9 +19,6 @@
 (use-fixtures :each ltu/with-test-es-client-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
-
-(defn ring-app []
-  (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
 
 ;; initialize must to called to pull in UserTemplate resources
 (dyn/initialize)
@@ -36,7 +32,7 @@
 
 ;; check that all templates are visible as administrator
 (deftest lifecycle-admin
-  (let [session (-> (session (ring-app))
+  (let [session (-> (session (ltu/ring-app))
                     (content-type "application/json")
                     (header authn-info-header "root ADMIN"))
         entries (-> session
@@ -87,7 +83,7 @@
 
 ;; checks that only the auto user-template is visible
 (deftest lifecycle-anon
-  (let [session (-> (session (ring-app))
+  (let [session (-> (session (ltu/ring-app))
                     (content-type "application/json")
                     (header authn-info-header "unknown ANON"))
         entries (-> session
@@ -110,16 +106,10 @@
 
 (deftest bad-methods
   (let [resource-uri (str p/service-context (u/new-resource-id resource-name))]
-    (doall
-      (for [[uri method] [[base-uri :options]
-                          [base-uri :post]
-                          [base-uri :delete]
-                          [resource-uri :options]
-                          [resource-uri :put]
-                          [resource-uri :post]
-                          [resource-uri :delete]]]
-        (-> (session (ring-app))
-            (request uri
-                     :request-method method
-                     :body (json/write-str {:dummy "value"}))
-            (ltu/is-status 405))))))
+    (ltu/verify-405-status [[base-uri :options]
+                            [base-uri :post]
+                            [base-uri :delete]
+                            [resource-uri :options]
+                            [resource-uri :put]
+                            [resource-uri :post]
+                            [resource-uri :delete]])))
