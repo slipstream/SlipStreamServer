@@ -1,10 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential-template-api-key
   "This creates an API key that can be used to log into the server."
   (:require
-    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template-api-key]
     [com.sixsq.slipstream.ssclj.resources.credential-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 (def ^:const credential-type "api-key")

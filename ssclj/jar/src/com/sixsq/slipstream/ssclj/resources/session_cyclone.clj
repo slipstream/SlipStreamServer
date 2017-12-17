@@ -1,6 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-cyclone
   (:require
-    [clojure.string :as str]
     [com.sixsq.slipstream.ssclj.resources.spec.session]
     [com.sixsq.slipstream.ssclj.resources.session.utils :as sutils]
     [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as oidc-utils]
@@ -11,15 +10,8 @@
     [com.sixsq.slipstream.auth.cyclone :as auth-cyclone]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.util.log :as logu]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.auth.utils.sign :as sg]
     [com.sixsq.slipstream.auth.cookies :as cookies]
     [com.sixsq.slipstream.auth.utils.timestamp :as tsutil]
-    [environ.core :as environ]
-    [com.sixsq.slipstream.ssclj.util.log :as log-util]
-    [ring.util.codec :as codec]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.auth.utils.http :as uh]
     [com.sixsq.slipstream.auth.utils.sign :as sign]
     [com.sixsq.slipstream.auth.external :as ex]

@@ -1,9 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-github
   (:require
-    [clojure.string :as str]
     [clojure.tools.logging :as log]
     [environ.core :as environ]
-    [ring.util.codec :as codec]
 
     [com.sixsq.slipstream.ssclj.resources.spec.session]
     [com.sixsq.slipstream.ssclj.resources.spec.session-template-github]

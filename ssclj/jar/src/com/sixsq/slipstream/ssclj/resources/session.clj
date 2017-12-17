@@ -2,14 +2,12 @@
   (:require
     [clojure.string :as str]
     [com.sixsq.slipstream.auth.cookies :as cookies]
-    [com.sixsq.slipstream.ssclj.resources.session-template :as tpl]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.db.impl :as db]
-    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.filter.parser :as parser]
     [com.sixsq.slipstream.ssclj.util.log :as log-util]
     [clojure.walk :as walk])
