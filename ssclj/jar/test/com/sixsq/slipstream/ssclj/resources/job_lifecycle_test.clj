@@ -6,7 +6,6 @@
     [clojure.test :refer :all]
     [clojure.data.json :as json]
     [peridot.core :refer :all]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
@@ -20,24 +19,18 @@
 
 (def base-uri (str p/service-context resource-url))
 
-(defn ring-app []
-  (t/make-ring-app (t/concat-routes routes/final-routes)))
-
 (def valid-job
   {:resourceURI resource-uri
    :action      "collect"
-   :acl     {:owner {:type "USER" :principal "admin"}
-             :rules [{:type "USER" :principal "jane" :right "VIEW"}]}})
+   :acl         {:owner {:type "USER" :principal "admin"}
+                 :rules [{:type "USER" :principal "jane" :right "VIEW"}]}})
 
 (deftest lifecycle
-  (let [session-admin (-> (session (ring-app))
-                          (content-type "application/json")
-                          (header authn-info-header "super ADMIN USER ANON"))
-        session-user (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ring-app))
-                         (content-type "application/json"))]
+  (let [session-anon (-> (ltu/ring-app)
+                         session
+                         (content-type "application/json"))
+        session-admin (header session-anon authn-info-header "super ADMIN USER ANON")
+        session-user (header session-anon authn-info-header "jane USER ANON")]
 
     (initialize)
 

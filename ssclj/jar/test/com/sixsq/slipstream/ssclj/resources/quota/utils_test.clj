@@ -7,7 +7,6 @@
     [com.sixsq.slipstream.ssclj.resources.quota :as quota]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.virtual-machine :as vm]
@@ -19,9 +18,6 @@
 (def base-uri (str p/service-context (u/de-camelcase quota/resource-name)))
 
 (def vm-base-uri (str p/service-context (u/de-camelcase vm/resource-name)))
-
-(defn ring-app []
-  (ltu/make-ring-app (ltu/concat-routes routes/final-routes)))
 
 (defn make-quota
   [user aggregation limit]
@@ -39,7 +35,7 @@
      :updated     timestamp
      :acl         valid-acl
 
-     :resource  "VirtualMachine"
+     :resource    "VirtualMachine"
      :selection   "id!=null"
      :aggregation aggregation
      :limit       limit}))
@@ -75,7 +71,7 @@
                              :type      "USER"}]}}))
 
 (defn create-virtual-machine []
-  (let [session-admin (-> (session (ring-app))
+  (let [session-admin (-> (session (ltu/ring-app))
                           (content-type "application/json")
                           (header authn-info-header "super ADMIN USER ANON"))]
 
@@ -89,7 +85,7 @@
       vm)))
 
 (defn create-virtual-machines [n-vm]
-  (let [session-admin (-> (session (ring-app))
+  (let [session-admin (-> (session (ltu/ring-app))
                           (content-type "application/json")
                           (header authn-info-header "super ADMIN USER ANON"))]
 
@@ -110,20 +106,13 @@
 
 (deftest lifecycle
 
-  (let [session-admin (-> (session (ring-app))
-                          (content-type "application/json")
-                          (header authn-info-header "super ADMIN USER ANON"))
-        session-jane (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-        session-tarzan (-> (session (ring-app))
-                           (content-type "application/json")
-                           (header authn-info-header "tarzan USER ANON"))
-        session-other (-> (session (ring-app))
-                          (content-type "application/json")
-                          (header authn-info-header "other USER ANON"))
-        session-anon (-> (session (ring-app))
-                         (content-type "application/json"))]
+  (let [session-anon (-> (ltu/ring-app)
+                         session
+                         (content-type "application/json"))
+        session-admin (header session-anon authn-info-header "super ADMIN USER ANON")
+        session-jane (header session-anon authn-info-header "jane USER ANON")
+        session-tarzan (header session-anon authn-info-header "tarzan USER ANON")
+        session-other (header session-anon authn-info-header "other USER ANON")]
 
     ;; create some virtual machine documents to test quota queries
     (let [n-vm 300]

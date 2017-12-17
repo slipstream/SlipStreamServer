@@ -8,16 +8,13 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
     [com.sixsq.slipstream.ssclj.resources.service-benchmark :refer :all]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]))
 
 (use-fixtures :each t/with-test-es-client-fixture)
 
 (def base-uri (str p/service-context resource-url))
-
-(defn ring-app []
-  (t/make-ring-app (t/concat-routes routes/final-routes)))
 
 (def valid-entry
   {:serviceOffer    {:href "service-offer/a3db10f4-ad81-4b3e-8c04-4994450da9e3"}
@@ -63,16 +60,16 @@
 
 (deftest lifecycle
 
-  (let [session-admin-json (-> (session (ring-app))
+  (let [session-admin-json (-> (session (ltu/ring-app))
                                (content-type "application/json")
                                (header authn-info-header "super ADMIN USER ANON"))
-        session-admin-form (-> (session (ring-app))
+        session-admin-form (-> (session (ltu/ring-app))
                                (content-type "application/x-www-form-urlencoded")
                                (header authn-info-header "super ADMIN USER ANON"))
-        session-user (-> (session (ring-app))
+        session-user (-> (session (ltu/ring-app))
                          (content-type "application/json")
                          (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ring-app))
+        session-anon (-> (session (ltu/ring-app))
                          (content-type "application/json"))]
 
     ;; create namespace
@@ -119,7 +116,7 @@
           (t/body->edn)
           (t/is-status 200))
 
-      (-> (session (ring-app))
+      (-> (session (ltu/ring-app))
           (header authn-info-header "jane role1 ADMIN")
           (request abs-uri :request-method :delete)
           (t/body->edn)
@@ -205,7 +202,7 @@
                           [resource-uri :options]
                           [resource-uri :post]]]
         (do
-          (-> (session (ring-app))
+          (-> (session (ltu/ring-app))
               (request uri
                        :request-method method
                        :body (json/write-str {:dummy "value"}))
@@ -213,16 +210,16 @@
 
 (deftest uris-as-keys
 
-  (let [session-admin-json (-> (session (ring-app))
+  (let [session-admin-json (-> (session (ltu/ring-app))
                                (content-type "application/json")
                                (header authn-info-header "super ADMIN USER ANON"))
-        session-admin-form (-> (session (ring-app))
+        session-admin-form (-> (session (ltu/ring-app))
                                (content-type "application/x-www-form-urlencoded")
                                (header authn-info-header "super ADMIN USER ANON"))
-        session-user (-> (session (ring-app))
+        session-user (-> (session (ltu/ring-app))
                          (content-type "application/json")
                          (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ring-app))
+        session-anon (-> (session (ltu/ring-app))
                          (content-type "application/json"))]
 
     ;; create namespace
@@ -259,16 +256,16 @@
 
 (deftest nested-values
 
-  (let [session-admin-json (-> (session (ring-app))
+  (let [session-admin-json (-> (session (ltu/ring-app))
                                (content-type "application/json")
                                (header authn-info-header "super ADMIN USER ANON"))
-        session-admin-form (-> (session (ring-app))
+        session-admin-form (-> (session (ltu/ring-app))
                                (content-type "application/x-www-form-urlencoded")
                                (header authn-info-header "super ADMIN USER ANON"))
-        session-user (-> (session (ring-app))
+        session-user (-> (session (ltu/ring-app))
                          (content-type "application/json")
                          (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ring-app))
+        session-anon (-> (session (ltu/ring-app))
                          (content-type "application/json"))]
 
     ;; create namespaces
@@ -316,16 +313,16 @@
 
 (deftest cimi-filter-namespaced-attributes
 
-  (let [session-admin-json (-> (session (ring-app))
+  (let [session-admin-json (-> (session (ltu/ring-app))
                                (content-type "application/json")
                                (header authn-info-header "super ADMIN USER ANON"))
-        session-admin-form (-> (session (ring-app))
+        session-admin-form (-> (session (ltu/ring-app))
                                (content-type "application/x-www-form-urlencoded")
                                (header authn-info-header "super ADMIN USER ANON"))
-        session-user (-> (session (ring-app))
+        session-user (-> (session (ltu/ring-app))
                          (content-type "application/json")
                          (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ring-app))
+        session-anon (-> (session (ltu/ring-app))
                          (content-type "application/json"))]
 
 
@@ -376,17 +373,15 @@
 
 (deftest cimi-filter-nested-values
 
-  (let [session-admin-json (-> (session (ring-app))
-                               (content-type "application/json")
-                               (header authn-info-header "super ADMIN USER ANON"))
-        session-admin-form (-> (session (ring-app))
+  (let [session-anon (-> (ltu/ring-app)
+                         session
+                         (content-type "application/json"))
+        session-admin-form (-> (ltu/ring-app)
+                               session
                                (content-type "application/x-www-form-urlencoded")
                                (header authn-info-header "super ADMIN USER ANON"))
-        session-user (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ring-app))
-                         (content-type "application/json"))]
+        session-admin-json (header session-anon authn-info-header "super ADMIN USER ANON")
+        session-user (header session-anon authn-info-header "jane USER ANON")]
 
     ;; create namespaces
     (-> session-admin-json
@@ -429,9 +424,7 @@
                          (t/is-status 200)
                          (get-in [:response :body]))
 
-          res-ok-put-body (-> (session (ring-app))
-                              (content-type "application/x-www-form-urlencoded")
-                              (header authn-info-header "super ADMIN USER ANON")
+          res-ok-put-body (-> session-admin-form
                               (request cimi-url-ok
                                        :request-method :put
                                        :body (rc/form-encode {:$filter "schema-org:att1/schema-org:att2='456'"}))
@@ -452,9 +445,7 @@
                             (t/is-status 200)
                             (get-in [:response :body]))
 
-          no-result-put-body (-> (session (ring-app))
-                                 (content-type "application/x-www-form-urlencoded")
-                                 (header authn-info-header "super ADMIN USER ANON")
+          no-result-put-body (-> session-admin-form
                                  (request cimi-url-no-result
                                           :request-method :put
                                           :body (rc/form-encode {:$filter "schema-org:att1/schema-org:att2='xxx'"}))

@@ -12,7 +12,6 @@
     [com.sixsq.slipstream.auth.internal :as auth-internal]
     [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [clojure.spec.alpha :as s]))
 
@@ -20,54 +19,44 @@
 
 (def base-uri (str p/service-context (u/de-camelcase user/resource-name)))
 
-(defn ring-app []
-  (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
-
 ;; initialize must to called to pull in SessionTemplate test examples
 (dyn/initialize)
 
-(defn strip-unwanted-attrs [m]
-  (let [unwanted #{:id :resourceURI :acl :operations
-                   :created :updated :name :description}]
-    (into {} (remove #(unwanted (first %)) m))))
-
 (deftest lifecycle
-  (let [href             (str ct/resource-url "/" auto/registration-method)
-        template-url     (str p/service-context ct/resource-url "/" auto/registration-method)
-        session-admin    (-> (session (ring-app))
-                             (content-type "application/json")
-                             (header authn-info-header "root ADMIN"))
-        session-user     (-> (session (ring-app))
-                             (content-type "application/json")
-                             (header authn-info-header "jane USER ANON"))
-        session-anon     (-> (session (ring-app))
-                             (content-type "application/json")
-                             (header authn-info-header "unknown ANON"))
+  (let [href (str ct/resource-url "/" auto/registration-method)
+        template-url (str p/service-context ct/resource-url "/" auto/registration-method)
 
-        name-attr        "name"
+        session (-> (ltu/ring-app)
+                    session
+                    (content-type "application/json"))
+        session-admin (header session authn-info-header "root ADMIN")
+        session-user (header session authn-info-header "jane USER ANON")
+        session-anon (header session authn-info-header "unknown ANON")
+
+        name-attr "name"
         description-attr "description"
-        properties-attr  {:a "one", :b "two"}
+        properties-attr {:a "one", :b "two"}
 
-        template         (-> session-admin
-                             (request template-url)
-                             (ltu/body->edn)
-                             (ltu/is-status 200)
-                             (get-in [:response :body]))
+        template (-> session-admin
+                     (request template-url)
+                     (ltu/body->edn)
+                     (ltu/is-status 200)
+                     (get-in [:response :body]))
 
-        no-href-create   {:userTemplate (strip-unwanted-attrs (assoc template
-                                                                :username "user"
-                                                                :emailAddress "user@example.org"))}
-        href-create      {:name         name-attr
-                          :description  description-attr
-                          :properties   properties-attr
-                          :userTemplate {:href         href
-                                         :username     "jane"
-                                         :emailAddress "jane@example.org"
-                                         :firstName    "Jane"
-                                         :lastName     "Tester"
-                                         :password     "password"
-                                         :organization ""}}
-        invalid-create   (assoc-in href-create [:userTemplate :href] "user-template/unknown-template")]
+        no-href-create {:userTemplate (ltu/strip-unwanted-attrs (assoc template
+                                                                  :username "user"
+                                                                  :emailAddress "user@example.org"))}
+        href-create {:name         name-attr
+                     :description  description-attr
+                     :properties   properties-attr
+                     :userTemplate {:href         href
+                                    :username     "jane"
+                                    :emailAddress "jane@example.org"
+                                    :firstName    "Jane"
+                                    :lastName     "Tester"
+                                    :password     "password"
+                                    :organization ""}}
+        invalid-create (assoc-in href-create [:userTemplate :href] "user-template/unknown-template")]
 
     ;; anonymous user collection query should succeed but be empty
     ;; access needed to allow self-registration
@@ -115,15 +104,15 @@
         (ltu/is-status 400))
 
     ;; create a user anonymously
-    (let [resp    (-> session-anon
-                      (request base-uri
-                               :request-method :post
-                               :body (json/write-str href-create))
-                      (ltu/body->edn)
-                      (ltu/is-status 201))
-          id      (get-in resp [:response :body :resource-id])
-          uri     (-> resp
-                      (ltu/location))
+    (let [resp (-> session-anon
+                   (request base-uri
+                            :request-method :post
+                            :body (json/write-str href-create))
+                   (ltu/body->edn)
+                   (ltu/is-status 201))
+          id (get-in resp [:response :body :resource-id])
+          uri (-> resp
+                  (ltu/location))
           abs-uri (str p/service-context (u/de-camelcase uri))]
 
       ;; creating same user a second time should fail
@@ -172,11 +161,11 @@
         (is (= user/epoch lastOnline activeSince lastExecute)))
 
       ;; edit
-      (let [body      (-> session-admin
-                          (request abs-uri)
-                          (ltu/body->edn)
-                          :response
-                          :body)
+      (let [body (-> session-admin
+                     (request abs-uri)
+                     (ltu/body->edn)
+                     :response
+                     :body)
             user-json (json/write-str (assoc body :isSuperUser true))]
 
         ;; anon users can NOT edit
