@@ -50,6 +50,12 @@
 
 (s/def :cimi.core/resource-type :cimi.core/kebab-identifier)
 
+;; Email address verifier.
+(def email-regex #"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+(defn email? [s] (re-matches email-regex s))
+(s/def :cimi.core/email
+  (s/and string? email?))
+
 ;;
 ;; A resource href is the concatenation of a resource type and resource identifier separated
 ;; with a slash.  The later part is optional for singleton resources like the cloud-entry-point.
