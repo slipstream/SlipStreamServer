@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.db.es.aggregate-test
+(ns com.sixsq.slipstream.dbtest.es.aggregate-test
   (:refer-clojure :exclude [read update])
   (:require
     [clojure.test :refer [deftest is are]]

@@ -47,7 +47,7 @@
 
                    [ring/ring-json]
                    [superstring]
-                   [com.sixsq.slipstream/SlipStreamDbTesting-jar]
+
                    ;;
                    ;; This dependency is included explicitly to avoid having
                    ;; ring/ring-json pull in an old version of ring-core that

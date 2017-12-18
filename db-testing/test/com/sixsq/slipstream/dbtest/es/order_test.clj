@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.db.es.order-test
+(ns com.sixsq.slipstream.dbtest.es.order-test
   (:refer-clojure :exclude [read update])
   (:require
     [clojure.test :refer [deftest is are]]
