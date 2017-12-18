@@ -28,6 +28,11 @@
   []
   (str (UUID/randomUUID)))
 
+(defn from-data-uuid
+  "Provides the string representation of a UUID generated from an input."
+  [input]
+  (str (UUID/nameUUIDFromBytes (.getBytes input "UTF-8"))))
+
 (defn new-resource-id
   [resource-name]
   (str resource-name "/" (random-uuid)))
