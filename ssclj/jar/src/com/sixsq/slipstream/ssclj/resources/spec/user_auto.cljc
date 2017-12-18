@@ -17,6 +17,8 @@
 (s/def :cimi.user-auto/activeSince :cimi.core/timestamp)
 (s/def :cimi.user-auto/isSuperUser boolean?)
 (s/def :cimi.user-auto/deleted boolean?)
+(s/def :cimi.user-auto/githublogin string?)
+(s/def :cimi.user-auto/cyclonelogin string?)
 
 (def user-auto-keys-spec
   {:opt-un [:cimi.user-auto/method
@@ -29,7 +31,9 @@
             :cimi.user-auto/creation
             :cimi.user-auto/lastOnline
             :cimi.user-auto/lastExecute
-            :cimi.user-auto/activeSince]})
+            :cimi.user-auto/activeSince
+            :cimi.user-auto/githublogin
+            :cimi.user-auto/cyclonelogin]})
 
 (s/def :cimi/user-auto
   (su/only-keys-maps

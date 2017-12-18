@@ -1,9 +1,10 @@
 (ns com.sixsq.slipstream.auth.external
-  (:require [clojure.tools.logging :as log]
-            [clojure.string :as str]
-            [com.sixsq.slipstream.auth.utils.db :as db]
-            [com.sixsq.slipstream.auth.cookies :as cookies]
-            [com.sixsq.slipstream.auth.utils.http :as uh]))
+  (:require
+    [clojure.tools.logging :as log]
+    [clojure.string :as str]
+    [com.sixsq.slipstream.auth.utils.db :as db]
+    [com.sixsq.slipstream.auth.cookies :as cookies]
+    [com.sixsq.slipstream.auth.utils.http :as uh]))
 
 (defn- mapped-user
   [authn-method username]
@@ -34,25 +35,26 @@
           [name-new-user (format "/user/%s?edit=true" name-new-user)])
         [(map-slipstream-user! authn-method (first usernames-same-email) external-login) "/dashboard"]))))
 
+(defn sanitize-login-name
+  "Replace characters not satisfying [a-zA-Z0-9_] with underscore"
+  [s]
+  (when s (str/replace s #"[^a-zA-Z0-9_-]" "_")))
+
 (defn create-user-when-missing!
   [{:keys [authn-login] :as user-record}]
-  (if-not (db/user-exists? authn-login)
-    (create-slipstream-user! user-record)
-    authn-login))
+  (let [user-name (sanitize-login-name authn-login)]
+    (if-not (db/user-exists? user-name)
+     (create-slipstream-user! (assoc user-record :authn-login user-name))
+     user-name)))
 
 (defn redirect-with-matched-user
   [authn-method external-login external-email redirect-server]
   (if (and (not-empty external-login) (not-empty external-email))
-    (let [[matched-user redirect-url] (match-external-user! authn-method external-login external-email)
+    (let [[matched-user redirect-url] (match-external-user! authn-method (sanitize-login-name external-login) external-email)
           claims {:username matched-user
                   :roles    (db/find-roles-for-username matched-user)}]
-
       (assoc
         (uh/response-redirect (str redirect-server redirect-url))
         :cookies (cookies/claims-cookie claims "com.sixsq.slipstream.cookie")))
     (uh/response-redirect (str redirect-server "/login?flash-now-warning=auth-failed"))))
 
-(defn sanitize-login-name
-  "Replace characters not satisfying [a-zA-Z0-9_] with underscore"
-  [s]
-  (when s (str/replace s #"[^a-zA-Z0-9_]" "_")))

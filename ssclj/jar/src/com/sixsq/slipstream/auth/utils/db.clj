@@ -1,62 +1,72 @@
 (ns com.sixsq.slipstream.auth.utils.db
-  (:import (java.util Date UUID)
-           (clojure.lang ExceptionInfo))
   (:require
     [clojure.string :as s]
     [clojure.tools.logging :as log]
-    [korma.core :as kc]
-    [korma.db :refer [defdb]]
-    [com.sixsq.slipstream.auth.utils.config :as cf]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.filter.parser :as parser]))
+    [com.sixsq.slipstream.ssclj.filter.parser :as parser])
+  (:import
+    (java.util UUID)
+    (clojure.lang ExceptionInfo)))
 
 (defn in?
   "true if coll contains elm"
   [coll elm]
   (if (some #(= elm %) coll) true false))
 
-(def user-resource-uri "user/")
+(def ^:private active-user ["NEW" "ACTIVE"])
+(def ^:private active-user-filter "(state='NEW' or state='ACTIVE')")
+
+(def resource-name "user")
+
+(defn resource-uri
+  [name]
+  (str resource-name "/" name))
+
+(defn get-all-users
+  []
+  (try (-> (db/query resource-name {:user-roles ["ADMIN"]})
+           second)
+       (catch ExceptionInfo e [])))
+
+(defn get-active-users
+  []
+  (let [filter {:filter (parser/parse-cimi-filter active-user-filter)}]
+    (try (-> (db/query resource-name {:cimi-params filter
+                                      :user-roles  ["ADMIN"]})
+             second)
+         (catch ExceptionInfo e []))))
 
 (defn get-user
   [username]
   (try
-    (db/retrieve (str "user/" username) {})
+    (db/retrieve (resource-uri username) {})
     (catch ExceptionInfo e {})))
-
-(def ^:private active-user ["NEW" "ACTIVE"])
-(def ^:private active-user-filter "(state='NEW' or state='ACTIVE')")
 
 (defn find-usernames-by-email
   [email]
   (when email
-    #_(map :NAME (kc/select users
-                            (kc/fields [:NAME])
-                            (kc/where {:EMAIL email
-                                       :STATE [in active-user]})))))
-
-(defn- column-name
-  [authn-method]
-  (-> authn-method
-      name
-      (str "login")
-      s/upper-case))
-
-(defn- column-keyword
-  [authn-method]
-  (keyword (column-name authn-method)))
-
+    (let [filter-str    (format "emailAddress='%s' and %s" email active-user-filter)
+          filter        {:filter (parser/parse-cimi-filter filter-str)}
+          matched-users (try (-> (db/query resource-name {:cimi-params filter
+                                                          :user-roles  ["ADMIN"]})
+                                 second)
+                             (catch ExceptionInfo e []))]
+      (map :username matched-users))))
 
 (defn find-username-by-authn
   [authn-method authn-id]
   (when (and authn-method authn-id)
-    (let [matched-users ()
-          #_(kc/select users
-                       (kc/fields [:NAME])
-                       (kc/where {(column-keyword authn-method) authn-id
-                                  :STATE                        [in active-user]}))]
+    (let [filter-str    (format "%s='%s' and %s" (name authn-method) authn-id active-user-filter)
+          filter        {:filter (parser/parse-cimi-filter filter-str)}
+          matched-users (try (-> (db/query resource-name {:cimi-params filter
+                                                          :user-roles  ["ADMIN"]})
+                                 second)
+                             (catch ExceptionInfo e []))]
       (if (> (count matched-users) 1)
-        (throw (Exception. (str "There should be only one result for " authn-id)))
-        (:NAME (first matched-users))))))
+        (throw (Exception. (str "There should be only one result for "
+                                authn-id ". Was " matched-users)))
+        (:username (first matched-users))))))
 
 (defn get-active-user-by-name
   [username]
@@ -75,11 +85,31 @@
   [username]
   (in? active-user (:state (get-active-user-by-name username))))
 
+(defn- to-resource-id
+  [n]
+  (format "%s/%s" resource-name n))
+
+(defn- to-am-kw
+  [authn-method]
+  (keyword (str (name authn-method) "login")))
+
 (defn update-user-authn-info
   [authn-method slipstream-username authn-id]
-  #_(kc/update users
-               (kc/set-fields {(column-keyword authn-method) authn-id})
-               (kc/where {:NAME slipstream-username}))
+  (let [body    {:id       (to-resource-id slipstream-username)
+                 :username slipstream-username
+                 (to-am-kw authn-method)   authn-id}
+        request {:identity       {:current slipstream-username
+                                  :authentications
+                                           {slipstream-username {:roles #{"USER"} :identity slipstream-username}}}
+                 :sixsq.slipstream.authn/claims
+                                 {:username slipstream-username :roles #{"USER"}}
+                 :params         {:resource-name resource-name}
+                 :route-params   {:resource-name resource-name}
+                 :user-roles     #{"ANON"}
+                 :uri            (format "/api/%s/%s" resource-name slipstream-username)
+                 :request-method "PUT"
+                 :body           body}]
+    (crud/edit request))
   slipstream-username)
 
 (defn- inc-string
@@ -100,37 +130,50 @@
     (recur (append-number-or-inc name) existing-names)
     name))
 
-(defn- existing-user-names
+(defn existing-user-names
   []
-  (map :NAME () #_(kc/select users (kc/fields [:NAME]))))
+  (let [users (second (db/query "user" {:user-roles ["ADMIN"]}))]
+    (map :username users)))
 
 (defn random-password
   []
   (str (UUID/randomUUID)))
+
+(defn user-create-request
+  [{:keys [authn-login email authn-method firstname lastname roles organization
+           state]}]
+  (let [slipstream-username (name-no-collision authn-login (existing-user-names))
+        user-resource       (cond-> {:href         "user-template/auto"
+                                     :username     slipstream-username
+                                     :emailAddress email
+                                     :password     (random-password)
+                                     :deleted      false
+                                     :isSuperUser  false
+                                     :state        (or state "ACTIVE")}
+                                    authn-method (assoc (to-am-kw authn-method) authn-login)
+                                    firstname (assoc :firstName firstname)
+                                    lastname (assoc :lastName lastname)
+                                    roles (assoc :roles roles)
+                                    organization (assoc :organization organization))]
+    {:identity     {:current "unknown"
+                    :authentications
+                             {"unknown" {:roles #{"ANON"}, :identity "unknown"}}}
+     :sixsq.slipstream.authn/claims
+                   {:username "unknown", :roles #{"ANON"}}
+     :params       {:resource-name "user"}
+     :route-params {:resource-name "user"}
+     :user-roles   #{"ANON"}
+     :body         {:userTemplate user-resource}}))
 
 (defn create-user!
   "Create a new user in the database. Values for 'email' and 'authn-login'
    must be provided. NOTE: The 'authn-login' value may be modified to avoid
    collisions with existing users. The value used to create the account is
    returned."
-  ([{:keys [authn-login email authn-method firstname lastname roles organization state fail-on-existing?]}]
-   (let [slipstream-username (name-no-collision authn-login (existing-user-names))
-         user-record         (cond-> {"RESOURCEURI" (str "user/" slipstream-username)
-                                      "DELETED"     false
-                                      "JPAVERSION"  0
-                                      "ISSUPERUSER" false
-                                      "STATE"       (or state "ACTIVE")
-                                      "NAME"        slipstream-username
-                                      "PASSWORD"    (random-password)
-                                      "CREATION"    (Date.)}
-                                     firstname (assoc "FIRSTNAME" firstname)
-                                     lastname (assoc "LASTNAME" lastname)
-                                     email (assoc "EMAIL" email)
-                                     roles (assoc "ROLES" roles)
-                                     organization (assoc "ORGANIZATION" organization)
-                                     authn-method (assoc (column-name authn-method) authn-login))]
+  ([{:keys [authn-login fail-on-existing?] :as user-record}]
+   (let [slipstream-username (name-no-collision authn-login (existing-user-names))]
      (when (or (not fail-on-existing?) (= authn-login slipstream-username))
-       () #_(kc/insert users (kc/values user-record))
+       (crud/add (user-create-request user-record))
        slipstream-username)))
   ([authn-method authn-login email]
    (create-user! {:authn-login  authn-login
