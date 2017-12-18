@@ -187,6 +187,7 @@
     (dissoc user-resource :isSuperUser)))
 
 (defn edit-impl [{body :body :as request}]
+  "Returns edited document or exception data in case of an error."
   (try
     (let [current (-> (:id body)
                       (db/retrieve request)

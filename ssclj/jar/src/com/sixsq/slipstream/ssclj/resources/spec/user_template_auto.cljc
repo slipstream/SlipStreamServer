@@ -15,6 +15,8 @@
 (s/def :cimi.user-template.auto/activeSince :cimi.core/timestamp)
 (s/def :cimi.user-template.auto/isSuperUser boolean?)
 (s/def :cimi.user-template.auto/deleted boolean?)
+(s/def :cimi.user-template.auto/githublogin string?)
+(s/def :cimi.user-template.auto/cyclonelogin string?)
 
 (def user-tempate-auto-keys
   {:opt-un [:cimi.user-template.auto/href
@@ -26,7 +28,9 @@
             :cimi.user-template.auto/creation
             :cimi.user-template.auto/lastOnline
             :cimi.user-template.auto/lastExecute
-            :cimi.user-template.auto/activeSince]})
+            :cimi.user-template.auto/activeSince
+            :cimi.user-template.auto/githublogin
+            :cimi.user-template.auto/cyclonelogin]})
 
 (def user-template-keys-spec-req
   (su/merge-keys-specs

@@ -61,8 +61,8 @@
     (if (and base-url client-id public-key)
       (let [session-init (cond-> {:href href}
                                  redirectURI (assoc :redirectURI redirectURI))
-            session (sutils/create-session session-init headers authn-method)
-            session (assoc session :expiry (ts/format-timestamp (tsutil/expiry-later login-request-timeout)))
+            session      (sutils/create-session session-init headers authn-method)
+            session      (assoc session :expiry (ts/format-timestamp (tsutil/expiry-later login-request-timeout)))
             redirect-url (str base-url (format oidc-relative-url client-id (sutils/validate-action-url base-uri (:id session))))]
         [{:status 303, :headers {"Location" redirect-url}} session])
       (oidc-utils/throw-bad-client-config authn-method redirectURI))))
@@ -71,8 +71,8 @@
 (defmethod p/set-session-operations authn-method
   [{:keys [id resourceURI username] :as resource} request]
   (let [href (str id "/validate")
-        ops (cond-> (p/standard-session-operations resource request)
-                    (nil? username) (conj {:rel (:validate c/action-uri) :href href}))]
+        ops  (cond-> (p/standard-session-operations resource request)
+                     (nil? username) (conj {:rel (:validate c/action-uri) :href href}))]
     (cond-> (dissoc resource :operations)
             (seq ops) (assoc :operations ops))))
 
@@ -81,7 +81,7 @@
   [resource {:keys [headers base-uri uri] :as request}]
   (let [session-id (sutils/extract-session-id uri)
         {:keys [server clientIP redirectURI] {:keys [href]} :sessionTemplate :as current-session} (sutils/retrieve-session-by-id session-id)
-        instance (u/document-id href)
+        instance   (u/document-id href)
         [client-id base-url public-key] (oidc-utils/config-params redirectURI instance)]
     (if-let [code (uh/param-value request :code)]
       (if-let [access-token (auth-oidc/get-oidc-access-token client-id base-url code (sutils/validate-action-url-unencoded base-uri (or (:id resource) "unknown-id")))]
@@ -97,15 +97,15 @@
                                                                    :firstname    given_name
                                                                    :lastname     family_name
                                                                    :organization realm})]
-                (let [claims (cond-> (auth-internal/create-claims matched-user)
-                                     session-id (assoc :session session-id)
-                                     session-id (update :roles #(str session-id " " %))
-                                     roles (update :roles #(str % " " (str/join " " roles)))
-                                     server (assoc :server server)
-                                     clientIP (assoc :clientIP clientIP))
-                      cookie (cookies/claims-cookie claims)
-                      expires (:expires cookie)
-                      claims-roles (:roles claims)
+                (let [claims          (cond-> (auth-internal/create-claims matched-user)
+                                              session-id (assoc :session session-id)
+                                              session-id (update :roles #(str session-id " " %))
+                                              roles (update :roles #(str % " " (str/join " " roles)))
+                                              server (assoc :server server)
+                                              clientIP (assoc :clientIP clientIP))
+                      cookie          (cookies/claims-cookie claims)
+                      expires         (:expires cookie)
+                      claims-roles    (:roles claims)
                       updated-session (cond-> (assoc current-session :username matched-user :expiry expires)
                                               claims-roles (assoc :roles claims-roles))
                       {:keys [status] :as resp} (sutils/update-session session-id updated-session)]

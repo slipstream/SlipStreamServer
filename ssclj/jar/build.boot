@@ -122,11 +122,12 @@
                         :auth-public-key  (str (clojure.java.io/resource "auth_pubkey.pem"))}))
 
 (deftask run-tests-ns
-         [n namespaces NAMESPACES #{sym} "The set of namespace symbols to run tests in."]
+         [n namespaces NAMESPACES #{sym} "The set of namespace symbols to run tests in."
+          f filters    EXPR       #{edn} "The set of expressions to use to filter namespaces. Ex: '(re-find #\"my-test\" (str %))'"]
          (comp
            (dev-env)
            (dev-fixture-env)
-           (test :namespaces namespaces)))
+           (test :namespaces namespaces :filters filters)))
 
 (deftask run-tests
          "runs all tests and performs full compilation"
