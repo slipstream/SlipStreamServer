@@ -10,7 +10,6 @@
     [com.sixsq.slipstream.auth.internal :as auth-internal]
     [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [clj-time.core :as time]
     [clojure.spec.alpha :as s]
@@ -19,14 +18,6 @@
 (use-fixtures :each ltu/with-test-es-client-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase m/resource-url)))
-
-(defn ring-app []
-  (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
-
-(defn strip-unwanted-attrs [m]
-  (let [unwanted #{:id :resourceURI :acl :operations
-                   :created :updated :name :description}]
-    (into {} (remove #(unwanted (first %)) m))))
 
 (def valid-acl {:owner {:principal "ADMIN",
                         :type      "ROLE"},
@@ -44,7 +35,7 @@
                          :right     "VIEW"}]})
 
 (deftest lifecycle
-  (let [session-admin (-> (session (ring-app))
+  (let [session-admin (-> (session (ltu/ring-app))
                           (content-type "application/json")
                           (header authn-info-header "root ADMIN USER ANON"))]
 
@@ -144,7 +135,7 @@
                                :response
                                :body)]
 
-        (is (= (strip-unwanted-attrs reread-test-vm) (strip-unwanted-attrs create-test-metering)))
+        (is (= (ltu/strip-unwanted-attrs reread-test-vm) (ltu/strip-unwanted-attrs create-test-metering)))
 
         (let [edited-test-vm (-> session-admin
                                  (request test-uri
@@ -155,8 +146,8 @@
                                  :response
                                  :body)]
 
-          (is (= (assoc (strip-unwanted-attrs reread-test-vm) :state "UPDATED!")
-                 (strip-unwanted-attrs edited-test-vm)))))
+          (is (= (assoc (ltu/strip-unwanted-attrs reread-test-vm) :state "UPDATED!")
+                 (ltu/strip-unwanted-attrs edited-test-vm)))))
 
 
       ;; search
@@ -197,7 +188,7 @@
                           [base-uri :delete]
                           [resource-uri :options]
                           [resource-uri :post]]]
-        (-> (session (ring-app))
+        (-> (session (ltu/ring-app))
             (request uri
                      :request-method method
                      :body (json/write-str {:dummy "value"}))
@@ -212,7 +203,7 @@
                :body (json/write-str doc))))
 
 (deftest insertions
-  (let [session-admin (-> (session (ring-app))
+  (let [session-admin (-> (session (ltu/ring-app))
                           (content-type "application/json")
                           (header authn-info-header "root ADMIN USER ANON"))
         timestamp (time/now)

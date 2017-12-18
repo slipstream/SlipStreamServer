@@ -1,7 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.connector
   (:require
     [com.sixsq.slipstream.ssclj.resources.spec.connector]
-    [com.sixsq.slipstream.ssclj.resources.connector-template :as tpl]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]

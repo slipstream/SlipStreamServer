@@ -15,9 +15,6 @@
 
 (def base-uri (str p/service-context (u/de-camelcase st/resource-name)))
 
-(defn ring-app []
-  (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
-
 ;; initialize must to called to pull in SessionTemplate descriptions
 (dyn/initialize)
 
@@ -28,7 +25,7 @@
                      :acl         st/resource-acl})
 
 (deftest lifecycle
-  (stu/session-template-lifecycle base-uri (ring-app) valid-template))
+  (stu/session-template-lifecycle base-uri (ltu/ring-app) valid-template))
 
 (deftest bad-methods
-  (stu/bad-methods base-uri (ring-app)))
+  (stu/bad-methods base-uri (ltu/ring-app)))

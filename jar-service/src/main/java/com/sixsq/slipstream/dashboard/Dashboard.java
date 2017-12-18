@@ -22,7 +22,6 @@ package com.sixsq.slipstream.dashboard;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.sixsq.slipstream.run.RunsQueryParameters;
 import org.simpleframework.xml.ElementList;
@@ -34,7 +33,6 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.CloudUsage;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.Run;
-import com.sixsq.slipstream.persistence.Vm;
 import com.sixsq.slipstream.run.Quota;
 
 @Root
@@ -59,12 +57,11 @@ public class Dashboard {
 		user = User.loadByName(user.getName());  // ensure user is loaded from database
 
 		clouds = ConnectorFactory.getCloudServiceNamesList();
-		Map<String, CloudUsage> cloudUsages = Vm.usage(user.getName());
 
 		CloudUsage allClouds = new CloudUsage("All Clouds");
 
 		for (String cloud : clouds) {
-			CloudUsage usage = cloudUsages.containsKey(cloud) ? cloudUsages.get(cloud) : new CloudUsage(cloud);
+			CloudUsage usage = new CloudUsage(cloud);
 
 			usage.setVmQuota(getQuota(user, cloud));
 			usage.setUserRunUsage(getActiveRunCount(user, cloud));

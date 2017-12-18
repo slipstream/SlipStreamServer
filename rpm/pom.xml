@@ -441,7 +441,7 @@
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
-                  <location>target/dashboard_tabs/css</location>
+                  <location>target/legacy/css</location>
                 </source>
               </sources>
             </mapping>
@@ -452,7 +452,7 @@
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
-                  <location>target/dashboard_tabs/js/dashboard_tabs.js</location>
+                  <location>target/legacy/js/legacy.js</location>
                 </source>
               </sources>
             </mapping>

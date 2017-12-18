@@ -6,16 +6,13 @@
     [clojure.test :refer :all]
     [clojure.data.json :as json]
     [peridot.core :refer :all]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]))
 
 (use-fixtures :each t/with-test-es-client-fixture)
 
 (def base-uri (str p/service-context resource-url))
-
-(defn ring-app []
-  (t/make-ring-app (t/concat-routes routes/final-routes)))
 
 (def valid-namespace
   {:prefix "schema-org"
@@ -32,14 +29,11 @@
    :uri    "https://schema-com/z"})
 
 (deftest lifecycle
-  (let [session-admin (-> (session (ring-app))
-                          (content-type "application/json")
-                          (header authn-info-header "super ADMIN USER ANON"))
-        session-user (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ring-app))
-                         (content-type "application/json"))]
+  (let [session-anon (-> (ltu/ring-app)
+                         session
+                         (content-type "application/json"))
+        session-admin (header session-anon authn-info-header "super ADMIN USER ANON")
+        session-user (header session-anon authn-info-header "jane USER ANON")]
 
     ;; anonymous create should fail
     (-> session-anon

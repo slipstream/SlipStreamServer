@@ -8,7 +8,6 @@
     [com.sixsq.slipstream.auth.internal :as auth-internal]
     [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.resources.session :as session]
     [com.sixsq.slipstream.ssclj.resources.session-template :as ct]
@@ -31,9 +30,6 @@
 
 (def session-template-base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
 
-(defn ring-app []
-  (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
-
 ;; initialize must to called to pull in SessionTemplate test examples
 (dyn/initialize)
 
@@ -49,27 +45,17 @@
                                                            :clientID     "FAKE_CLIENT_ID"
                                                            :clientSecret "ABCDEF..."}})
 
-(defn strip-unwanted-attrs [m]
-  (let [unwanted #{:id :resourceURI :acl :operations
-                   :created :updated :name :description}]
-    (into {} (remove #(unwanted (first %)) m))))
-
 (deftest lifecycle
 
-  (let [app (ring-app)
-        session-admin (-> (session app)
-                          (content-type "application/json")
-                          (header authn-info-header "admin ADMIN USER ANON"))
-        session-user (-> (session app)
-                         (content-type "application/json")
-                         (header authn-info-header "user USER ANON"))
-        session-anon (-> (session app)
-                         (content-type "application/json")
-                         (header authn-info-header "unknown ANON"))
-        session-anon-form (-> (session app)
-                              (content-type session/form-urlencoded)
-                              (header "content-type" session/form-urlencoded)
-                              (header authn-info-header "unknown ANON"))
+  (let [app (ltu/ring-app)
+        session (-> (session app)
+                    (content-type "application/json"))
+        session-admin (header session authn-info-header "admin ADMIN USER ANON")
+        session-user (header session authn-info-header "user USER ANON")
+        session-anon (header session authn-info-header "unknown ANON")
+        session-anon-form (-> session-anon
+                              (content-type session/form-urlencoded))
+
         redirect-uri "https://example.com/webui"]
 
     ;; get session template so that session resources can be tested

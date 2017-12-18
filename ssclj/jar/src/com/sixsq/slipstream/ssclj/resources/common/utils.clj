@@ -47,6 +47,11 @@
   [resource-id]
   (second (split-resource-id resource-id)))
 
+
+(defn cimi-collection? [resourceURI]
+  (and (instance? String resourceURI)
+       (.endsWith ^String resourceURI "Collection")))
+
 ;;
 ;; utilities for handling common attributes
 ;;
@@ -107,9 +112,7 @@
   "This will return true if the given date (as a string) represents a moment
    of time in the past.  Returns false otherwise."
   [expiry]
-  (if expiry
-    (time/before? (as-datetime expiry) (time/now))
-    false))
+  (boolean (and expiry (time/before? (as-datetime expiry) (time/now)))))
 
 (def not-expired? (complement expired?))
 
@@ -131,6 +134,17 @@
       (if-not (ok? resource)
         (logu/log-and-throw-400 (str "resource does not satisfy defined schema:\n" (explain resource)))
         resource))))
+
+
+(defn get-op
+  "Get the operation href from the resources operations value."
+  [{:keys [operations]} op]
+  (->> operations
+       (map (juxt :rel :href))
+       (filter (fn [[rel _]] (.endsWith rel op)))
+       first
+       second))
+
 
 (defn into-vec-without-nil
   [op xs]

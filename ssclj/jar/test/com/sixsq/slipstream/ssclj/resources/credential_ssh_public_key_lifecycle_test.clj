@@ -12,7 +12,6 @@
     [com.sixsq.slipstream.auth.internal :as auth-internal]
     [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.credential.ssh-utils :as ssh-utils]
@@ -22,27 +21,16 @@
 
 (def base-uri (str p/service-context (u/de-camelcase credential/resource-url)))
 
-(defn ring-app []
-  (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
-
 ;; initialize must to called to pull in CredentialTemplate resources
 (dyn/initialize)
 
-(defn strip-unwanted-attrs [m]
-  (let [unwanted #{:id :resourceURI :acl :operations
-                   :created :updated :name :description}]
-    (into {} (remove #(unwanted (first %)) m))))
-
 (deftest lifecycle-import
-  (let [session-admin (-> (session (ring-app))
-                          (content-type "application/json")
-                          (header authn-info-header "root ADMIN USER ANON"))
-        session-user (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "unknown ANON"))
+  (let [session (-> (ltu/ring-app)
+                    session
+                    (content-type "application/json"))
+        session-admin (header session authn-info-header "root ADMIN USER ANON")
+        session-user (header session authn-info-header "jane USER ANON")
+        session-anon (header session authn-info-header "unknown ANON")
 
         href (str ct/resource-url "/" spk/method)
         template-url (str p/service-context ct/resource-url "/" spk/method)
@@ -55,7 +43,7 @@
 
         imported-ssh-key-info (ssh-utils/generate)
 
-        create-import-no-href {:credentialTemplate (strip-unwanted-attrs
+        create-import-no-href {:credentialTemplate (ltu/strip-unwanted-attrs
                                                      (assoc template
                                                        :publicKey (:publicKey imported-ssh-key-info)))}
 
@@ -150,15 +138,12 @@
           (ltu/is-status 200)))))
 
 (deftest lifecycle-generate
-  (let [session-admin (-> (session (ring-app))
-                          (content-type "application/json")
-                          (header authn-info-header "root ADMIN USER ANON"))
-        session-user (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "unknown ANON"))
+  (let [session (-> (ltu/ring-app)
+                    session
+                    (content-type "application/json"))
+        session-admin (header session authn-info-header "root ADMIN USER ANON")
+        session-user (header session authn-info-header "jane USER ANON")
+        session-anon (header session authn-info-header "unknown ANON")
 
         href (str ct/resource-url "/" skp/method)
         template-url (str p/service-context ct/resource-url "/" skp/method)
@@ -236,4 +221,3 @@
                    :request-method :delete)
           (ltu/body->edn)
           (ltu/is-status 200)))))
-

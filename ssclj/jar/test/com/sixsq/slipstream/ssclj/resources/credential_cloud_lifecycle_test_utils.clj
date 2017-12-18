@@ -11,21 +11,10 @@
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.credential.key-utils :as key-utils]
     [com.sixsq.slipstream.ssclj.resources.connector :as con]
     [com.sixsq.slipstream.ssclj.resources.connector-template :as cont]))
-
-(defn strip-unwanted-attrs
-  [m]
-  (let [unwanted #{:id :resourceURI :acl :operations
-                   :created :updated :name :description :properties}]
-    (into {} (remove #(unwanted (first %)) m))))
-
-(defn ring-app
-  []
-  (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
 
 (def base-uri (str p/service-context (u/de-camelcase credential/resource-url)))
 
@@ -33,7 +22,7 @@
 (defn get-connector-template
   [cloud-service-type connector-instance-name]
   (let [template-url (str p/service-context cont/resource-url "/" cloud-service-type)
-        resp (-> (session (ring-app))
+        resp (-> (session (ltu/ring-app))
                  (content-type "application/json")
                  (header authn-info-header "internal ADMIN")
                  (request template-url)
@@ -41,7 +30,7 @@
                  (ltu/is-status 200))
         template (get-in resp [:response :body])]
     {:connectorTemplate (-> template
-                            strip-unwanted-attrs
+                            ltu/strip-unwanted-attrs
                             (assoc :instanceName connector-instance-name))}))
 
 (defn create-connector-instance
@@ -49,7 +38,7 @@
   (let [connector-create-uri (str p/service-context con/resource-url)
         href (str cont/resource-url "/" cloud-service-type)
         href-create (get-connector-template cloud-service-type connector-instance-name)]
-    (-> (session (ring-app))
+    (-> (session (ltu/ring-app))
         (content-type "application/json")
         (header authn-info-header "internal ADMIN")
         (request connector-create-uri
@@ -105,15 +94,12 @@
 (defn cloud-cred-lifecycle
   [{cloud-method-href :href :as credential-template-data} cloud-service-type]
   (create-connector-instance cloud-service-type (connector-instance-name credential-template-data))
-  (let [session-admin (-> (session (ring-app))
-                          (content-type "application/json")
-                          (header authn-info-header "root ADMIN USER ANON"))
-        session-user (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "unknown ANON"))
+  (let [session (-> (ltu/ring-app)
+                    session
+                    (content-type "application/json"))
+        session-admin (header session authn-info-header "root ADMIN USER ANON")
+        session-user (header session authn-info-header "jane USER ANON")
+        session-anon (header session authn-info-header "unknown ANON")
 
         name-attr "name"
         description-attr "description"
@@ -127,7 +113,7 @@
                      (ltu/body->edn)
                      (ltu/is-status 200)
                      (get-in [:response :body]))
-        create-import-no-href {:credentialTemplate (strip-unwanted-attrs template)}
+        create-import-no-href {:credentialTemplate (ltu/strip-unwanted-attrs template)}
 
         create-import-href {:name               name-attr
                             :description        description-attr
@@ -235,7 +221,7 @@
                       cred-take-first)
           id-old (:id old-doc)
           ;; merge
-          new-doc (-> (strip-unwanted-attrs old-doc)
+          new-doc (-> (ltu/strip-unwanted-attrs old-doc)
                       (merge secret)
                       (assoc :href cloud-method-href))]
 

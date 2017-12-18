@@ -1,17 +1,13 @@
 (ns com.sixsq.slipstream.ssclj.resources.job
   (:require
     [superstring.core :as str]
-    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.spec.job]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.util.response :as sr]
-    [ring.util.response :as r]
     [com.sixsq.slipstream.db.impl :as db]
-    [clj-time.core :as time]
     [com.sixsq.slipstream.ssclj.resources.job.utils :as ju])
   (:import (clojure.lang ExceptionInfo)))
 

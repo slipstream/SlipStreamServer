@@ -99,6 +99,18 @@
   [resource request]
   (can-do? resource request ::modify))
 
+
+(defn modifiable?
+  "Predicate to determine if the given resource can be modified. Returns only
+   true or false."
+  [resource request]
+  (try
+    (can-modify? resource request)
+    true
+    (catch Exception _
+      false)))
+
+
 (defn can-view?
   "Determines if the resource can be modified by the user in the request.
    Returns the request on success; throws an error ring response on

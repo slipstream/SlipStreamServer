@@ -14,7 +14,6 @@
     [com.sixsq.slipstream.auth.internal :as auth-internal]
     [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.auth.utils.sign :as sign]
     [com.sixsq.slipstream.ssclj.resources.session-template :as st]))
@@ -24,9 +23,6 @@
 (def base-uri (str p/service-context (u/de-camelcase session/resource-name)))
 
 (def session-template-base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
-
-(defn ring-app []
-  (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
 
 ;; initialize must to called to pull in SessionTemplate test examples
 (dyn/initialize)
@@ -38,11 +34,6 @@
                                 :username    "username"
                                 :password    "password"
                                 :acl         st/resource-acl})
-
-(defn strip-unwanted-attrs [m]
-  (let [unwanted #{:id :resourceURI :acl :operations
-                   :created :updated :name :description}]
-    (into {} (remove #(unwanted (first %)) m))))
 
 (defn mock-login-valid?
   "Will return true if the username and password are identical;
@@ -90,7 +81,7 @@
     (is (= (str/join " " ["USER" "ANON"]) (db/find-roles-for-username "user")))
 
     ;; get session template so that session resources can be tested
-    (let [app (ring-app)
+    (let [app (ltu/ring-app)
           session-json (content-type (session app) "application/json")
           session-anon (header session-json authn-info-header "unknown ANON")
           session-user (header session-json authn-info-header "user USER")

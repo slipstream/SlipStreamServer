@@ -1,6 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential-template
   (:require
-    [clojure.spec.alpha :as s]
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]

@@ -7,28 +7,17 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 (use-fixtures :each ltu/with-test-es-client-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase vm/resource-url)))
 
-(defn ring-app []
-  (ltu/make-ring-app (ltu/concat-routes [(routes/get-main-routes)])))
-
-(defn strip-unwanted-attrs [m]
-  (let [unwanted #{:id :resourceURI :acl :operations
-                   :created :updated :name :description}]
-    (into {} (remove #(unwanted (first %)) m))))
-
 (defn random-virtual-machine
   []
   (let [resource-type "virtual-machine"
-        doc-id (str resource-type "/" (cu/random-uuid))
-        instance-id (cu/random-uuid)
+        doc-id (str resource-type "/" (u/random-uuid))
+        instance-id (u/random-uuid)
         cloud (rand-nth ["connector/cloud-1" "connector/cloud-2" "connector/cloud-3"])
         user (rand-nth ["user-1" "user-2" "user-3"])]
     {:id          doc-id
@@ -51,15 +40,12 @@
 
 
 (deftest lifecycle
-  (let [session-admin (-> (session (ring-app))
-                          (content-type "application/json")
-                          (header authn-info-header "root ADMIN USER ANON"))
-        session-jane (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "jane USER ANON"))
-        session-anon (-> (session (ring-app))
-                         (content-type "application/json")
-                         (header authn-info-header "unknown ANON"))]
+  (let [session (-> (ltu/ring-app)
+                    session
+                    (content-type "application/json"))
+        session-admin (header session authn-info-header "root ADMIN USER ANON")
+        session-jane (header session authn-info-header "jane USER ANON")
+        session-anon (header session authn-info-header "unknown ANON")]
 
     ;; admin user collection query should succeed but be empty (no  records created yet)
     (-> session-admin
@@ -108,8 +94,8 @@
 
 
                           :credentials  [{:href  "credential/0123-4567-8912",
-                                         :roles ["realm:cern", "realm:my-accounting-group"]
-                                         :users ["long-user-id-1", "long-user-id-2"]}]
+                                          :roles ["realm:cern", "realm:my-accounting-group"]
+                                          :users ["long-user-id-1", "long-user-id-2"]}]
 
 
                           :deployment   {:href "run/aaa-bbb-ccc",
@@ -180,7 +166,7 @@
                                :response
                                :body)]
 
-        (is (= (strip-unwanted-attrs reread-test-vm) (strip-unwanted-attrs create-test-vm)))
+        (is (= (ltu/strip-unwanted-attrs reread-test-vm) (ltu/strip-unwanted-attrs create-test-vm)))
 
         (let [edited-test-vm (-> session-admin
                                  (request test-uri
@@ -191,8 +177,8 @@
                                  :response
                                  :body)]
 
-          (is (= (assoc (strip-unwanted-attrs reread-test-vm) :state "UPDATED!")
-                 (strip-unwanted-attrs edited-test-vm)))))
+          (is (= (assoc (ltu/strip-unwanted-attrs reread-test-vm) :state "UPDATED!")
+                 (ltu/strip-unwanted-attrs edited-test-vm)))))
 
       ;; disallowed edits
       (-> session-jane
@@ -246,15 +232,8 @@
 
 
 (deftest bad-methods
-
   (let [resource-uri (str p/service-context (u/new-resource-id vm/resource-name))]
-    (doall
-      (for [[uri method] [[base-uri :options]
-                          [base-uri :delete]
-                          [resource-uri :options]
-                          [resource-uri :post]]]
-        (-> (session (ring-app))
-            (request uri
-                     :request-method method
-                     :body (json/write-str {:dummy "value"}))
-            (ltu/is-status 405))))))
+    (ltu/verify-405-status [[base-uri :options]
+                            [base-uri :delete]
+                            [resource-uri :options]
+                            [resource-uri :post]])))
