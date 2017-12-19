@@ -102,7 +102,7 @@
                                   :authentications
                                            {slipstream-username {:roles #{"USER"} :identity slipstream-username}}}
                  :sixsq.slipstream.authn/claims
-                                 {:username slipstream-username :roles #{"USER"}}
+                                 {:username slipstream-username :roles "USER"}
                  :params         {:resource-name resource-name}
                  :route-params   {:resource-name resource-name}
                  :user-roles     #{"ANON"}
