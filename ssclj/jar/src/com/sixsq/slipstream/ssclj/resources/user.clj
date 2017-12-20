@@ -176,18 +176,34 @@
   [request]
   (query-impl request))
 
+(defn in?
+  "true if coll contains elm."
+  [coll elm]
+  (if (some #(= elm %) coll) true false))
+
 (defn admin?
-  [request]
-  (contains? (get-in request [:sixsq.slipstream.authn/claims :roles]) "ADMIN"))
+  "Expects identity map from the request."
+  [identity]
+  (-> identity
+      :authentications
+      (get (:current identity))
+      :roles
+      (in? "ADMIN")))
 
 (defn filter-for-regular-user
   [user-resource request]
-  (if (admin? request)
+  (if (admin? (:identity request))
     user-resource
     (dissoc user-resource :isSuperUser)))
 
+(defn throw-no-id
+  [body]
+  (if-not (contains? body :id)
+    (logu/log-and-throw-400 "id is not provided in the document.")))
+
 (defn edit-impl [{body :body :as request}]
   "Returns edited document or exception data in case of an error."
+  (throw-no-id body)
   (try
     (let [current (-> (:id body)
                       (db/retrieve request)
