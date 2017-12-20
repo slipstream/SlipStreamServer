@@ -1,9 +1,10 @@
-(ns com.sixsq.slipstream.db.es.order-test
+(ns com.sixsq.slipstream.dbtest.es.order-test
   (:refer-clojure :exclude [read update])
   (:require
     [clojure.test :refer [deftest is are]]
     [com.sixsq.slipstream.db.es.order :as t]
     [com.sixsq.slipstream.db.es.utils :as eu]
+    [com.sixsq.slipstream.dbtest.es.utils :as eut]
     [clojure.data.json :as json])
   (:import (org.elasticsearch.search.sort SortOrder)
            (org.elasticsearch.action.search SearchRequestBuilder)
@@ -27,7 +28,7 @@
     (is (apply test-fn (map :number docs)))))
 
 (deftest check-sorting-in-search
-  (eu/with-es-test-client
+  (eut/with-es-test-client
     (let [n 10
           type "test-resource"
           shuffled (shuffle

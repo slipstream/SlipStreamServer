@@ -36,7 +36,8 @@
 
                     [com.sixsq.slipstream/SlipStreamCljResources-jar :scope "provided"]
                     [com.sixsq.slipstream/SlipStreamPersistence]
-
+                    [com.sixsq.slipstream/SlipStreamDbTesting-jar] 
+                   
                     [org.clojure/test.check]
 
                     ;; boot tasks

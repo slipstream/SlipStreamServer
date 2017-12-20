@@ -26,6 +26,7 @@
                    [com.sixsq.slipstream/SlipStreamConnector]
                    [com.sixsq.slipstream/SlipStreamClientAPI-jar]
                    [com.sixsq.slipstream/SlipStreamDbBinding-jar :scope "test"]
+                   [com.sixsq.slipstream/SlipStreamDbTesting-jar :scope "test"] 
                    [com.sixsq.slipstream/SlipStreamDbSerializers-jar :scope "test"]
                    [com.sixsq.slipstream/SlipStreamCljResources-jar :scope "test"]
                    [org.clojure/data.json]
