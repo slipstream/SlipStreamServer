@@ -1,19 +1,34 @@
+(def +version+ "3.42-SNAPSHOT")
+
+;; FIXME: Provide HTTPS access to Nexus.
+(require 'cemerick.pomegranate.aether)
+(cemerick.pomegranate.aether/register-wagon-factory!
+  "http" #(org.apache.maven.wagon.providers.http.HttpWagon.))
+
 (defproject
   com.sixsq.slipstream/SlipStreamPlacementLib-jar
-  "3.32-SNAPSHOT"
+  "3.42-SNAPSHOT"
   :license
   {"commercial" "http://sixsq.com"}
+
+  :plugins [[lein-parent "0.3.2"]]
+
+  :parent-project {:coords  [com.sixsq.slipstream/parent "3.42-SNAPSHOT"]
+                   :inherit [:min-lein-version :managed-dependencies :repositories]}
+
+  :source-paths ["src"]
+
+  :resource-paths ["resources"]
+
+  :test-paths ["test"]
+
+  :pom-location "target/"
+
+  :aot :all
+
   :dependencies
-  [[org.clojure/clojure "1.9.0-alpha17"]
-   [sixsq/build-utils "0.1.4" :scope "test"]
-   [org.clojure/data.json "0.2.6"]
-   [environ "1.1.0"]
-   [superstring "2.1.0"]
-   [com.sixsq.slipstream/SlipStreamPricingLib-jar "3.32-SNAPSHOT"]
-   [com.sixsq.slipstream/SlipStreamClientAPI-jar "3.32-SNAPSHOT"]
-   [adzerk/boot-test "1.2.0" :scope "test"]
-   [adzerk/boot-reload "0.5.1" :scope "test"]
-   [tolitius/boot-check "0.1.4" :scope "test"]]
-  :source-paths
-  ["test" "src"]
-  :resource-paths ["resources"])
+  [[org.clojure/data.json]
+   [environ]
+   [com.sixsq.slipstream/SlipStreamPricingLib-jar]
+   [com.sixsq.slipstream/SlipStreamClientAPI-jar]]
+  )

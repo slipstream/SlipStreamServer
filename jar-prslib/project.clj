@@ -11,7 +11,10 @@
   :license
   {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
 
-  :plugins [[lein-parent "0.3.2"]]
+  :plugins [[lein-parent "0.3.2"]
+            [lein-codox "0.10.3"]
+            [lein-shell "0.5.0"]
+            [lein-localrepo "0.5.4"]]
 
   :parent-project {:coords  [com.sixsq.slipstream/parent "3.42-SNAPSHOT"]
                    :inherit [:min-lein-version :managed-dependencies :repositories]}
@@ -23,6 +26,12 @@
   :pom-location "target/"
 
   :aot :all
+
+  :codox {:name         "com.sixsq.slipstream/SlipStreamServerPRSlib-jar"
+          :version      ~+version+
+          :source-paths #{"src/clj"}
+          :source-uri   "https://github.com/slipstream/SlipStreamServer/blob/master/jar-prslib/{filepath}#L{line}"
+          :language     :clojure}
 
   :uberjar-exclusions [#"(?i)^META-INF/INDEX.LIST$"
                        #"(?i)^META-INF/[^/]*\.(MF|SF|RSA|DSA)$"
@@ -36,8 +45,19 @@
                  [org.clojure/tools.logging]]
 
   :profiles {:test
-             {:dependencies [[sixsq/build-utils "0.1.4"]
-                             [com.sixsq.slipstream/SlipStreamDbBinding-jar]
+             {:dependencies [[com.sixsq.slipstream/SlipStreamDbBinding-jar]
                              [com.sixsq.slipstream/SlipStreamDbSerializers-jar]
-                             [com.sixsq.slipstream/SlipStreamCljResources-jar]]}}
+                             [com.sixsq.slipstream/SlipStreamCljResources-jar]
+                             [com.sixsq.slipstream/SlipStreamDbTesting-jar]]}}
+
+  :aliases {"install" [["do"
+                        ["uberjar"]
+                        ["pom"]
+                        ["localrepo" "install" "-p" "target/pom.xml"
+                         ~(str "target/SlipStreamServerPRSlib-jar-" +version+ "-standalone.jar")
+                         "com.sixsq.slipstream/SlipStreamServerPRSlib-jar"
+                         ~+version+]
+                        ]]
+            "docs"    ["codox"]
+            "publish" ["shell" "../publish-docs.sh"]}
   )

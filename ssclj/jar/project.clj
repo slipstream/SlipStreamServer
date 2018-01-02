@@ -76,7 +76,8 @@
                            [org.clojure/test.check]
                            [org.slf4j/slf4j-log4j12]
                            [com.cemerick/url]
-                           [org.apache.curator/curator-test]]
+                           [org.apache.curator/curator-test]
+                           [com.sixsq.slipstream/SlipStreamDbTesting-jar]]
           :source-paths   ["test"]
           :resource-paths ["test-resources"]
           :env            {:config-name      "config-hsqldb.edn"
