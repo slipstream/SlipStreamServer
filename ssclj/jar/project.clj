@@ -12,7 +12,8 @@
   {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
 
   :plugins [[lein-parent "0.3.2"]
-            [lein-environ "1.1.0"]]
+            [lein-environ "1.1.0"]
+            [lein-localrepo "0.5.4"]]
 
   :parent-project {:coords  [com.sixsq.slipstream/parent "3.42-SNAPSHOT"]
                    :inherit [:min-lein-version :managed-dependencies :repositories]}
@@ -70,23 +71,38 @@
    [org.clojure/java.jdbc]]
 
   :profiles
-  {:test {:dependencies   [[com.sixsq.slipstream/slipstream-ring-container]
-                           [peridot]
-                           [honeysql]
-                           [org.clojure/test.check]
-                           [org.slf4j/slf4j-log4j12]
-                           [com.cemerick/url]
-                           [org.apache.curator/curator-test]
-                           [com.sixsq.slipstream/SlipStreamDbTesting-jar]]
-          :source-paths   ["test"]
-          :resource-paths ["test-resources"]
-          :env            {:config-name      "config-hsqldb.edn"
-                           :auth-private-key "test-resources/auth_privkey.pem"
-                           :auth-public-key  "test-resources/auth_pubkey.pem" #_(str (clojure.java.io/resource ))}
-          :aot            :all
-          }
-   :dev  {:env {:config-name      "config-hsqldb.edn"
-                ;:auth-private-key (str (clojure.java.io/resource "auth_privkey.pem"))
-                ;:auth-public-key  (str (clojure.java.io/resource "auth_pubkey.pem"))
-                }}}
+  {:provided {:aot [com.sixsq.slipstream.ssclj.app.main
+                    com.sixsq.slipstream.ssclj.util.userparamsdesc
+                    com.sixsq.slipstream.ssclj.migrate.user-cred]}
+   :test     {:dependencies   [[com.sixsq.slipstream/slipstream-ring-container]
+                               [peridot]
+                               [honeysql]
+                               [org.clojure/test.check]
+                               [org.slf4j/slf4j-log4j12]
+                               [com.cemerick/url]
+                               [org.apache.curator/curator-test]
+                               [com.sixsq.slipstream/SlipStreamDbTesting-jar]]
+              :source-paths   ["test"]
+              :resource-paths ["test-resources"]
+              :env            {:config-name      "config-hsqldb.edn"
+                               :auth-private-key "test-resources/auth_privkey.pem"
+                               :auth-public-key  "test-resources/auth_pubkey.pem" #_(str (clojure.java.io/resource))}
+              :aot            :all
+              }
+   :dev      {:dependencies [[com.sixsq.slipstream/slipstream-ring-container]]}
+   :test-jar {:jar-name       ~(str "SlipStreamCljResourcesTests-jar-" +version+ ".jar")
+              :jar-exclusions [#".*"]
+              :jar-inclusions [#"lifecycle_test_utils\.clj"
+                               #"connector_test_utils\.clj"]
+              :source-paths   ["test"]
+              :classifier     "tests"}
+   }
+
+  :aliases {"mvn-build-tests-jar" [["do"
+                                    ["with-profile" "test-jar" ["do" [["jar"] ["pom"]]]]
+                                    ["localrepo" "install"
+                                     ~(str "target/SlipStreamCljResourcesTests-jar-" +version+ ".jar")
+                                     "com.sixsq.slipstream/SlipStreamCljResourcesTests-jar"
+                                     ~+version+]
+                                    ]]}
   )

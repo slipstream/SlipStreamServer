@@ -12,7 +12,7 @@
   {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
 
   :plugins [[lein-parent "0.3.2"]
-            [lein-codox "0.10.3"]
+            [kirasystems/lein-codox "0.10.4"]
             [lein-shell "0.5.0"]
             [lein-localrepo "0.5.4"]]
 

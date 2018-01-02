@@ -31,7 +31,7 @@
 
   :dependencies
   [[org.clojure/clojure]
-   [org.clojure/tools.reader]
+   ;[org.clojure/tools.reader]
 
    [environ]
 

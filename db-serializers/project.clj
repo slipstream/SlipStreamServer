@@ -30,13 +30,11 @@
                  [org.clojure/data.xml]
                  [superstring]
                  [org.clojure/test.check]
-                 [com.sixsq.slipstream/SlipStreamPersistence]]
+                 [com.sixsq.slipstream/SlipStreamPersistence]
+                 [com.sixsq.slipstream/SlipStreamDbTesting-jar]]
 
   :profiles
-  {:test     {:dependencies   [[sixsq/build-utils "0.1.4"]
-                               [com.sixsq.slipstream/SlipStreamDbTesting-jar]]
-              :source-paths   ["test"]
-              :resource-paths ["test-resources"]
-              }
+  {:test     {:source-paths   ["test"]
+              :resource-paths ["test-resources"]}
    :provided {:dependencies [[com.sixsq.slipstream/SlipStreamCljResources-jar]]}}
   )

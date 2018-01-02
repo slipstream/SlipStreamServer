@@ -21,7 +21,7 @@
       <url>http://www.apache.org/licenses/LICENSE-2.0</url>
     </license>
   </licenses>
-  
+
   <dependencies>
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>

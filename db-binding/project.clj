@@ -43,8 +43,4 @@
    [ring/ring-json]
    [superstring]
    [ring/ring-core]]
-
-  :profiles
-  {:test
-   {:dependencies [[sixsq/build-utils "0.1.4"]]}}
   )
