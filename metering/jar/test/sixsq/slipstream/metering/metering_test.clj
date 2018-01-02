@@ -134,15 +134,15 @@
                     :resource:ram  512.0
                     :resource:disk 10.0}]
     (is (= {} (t/assoc-price {})))
-    (is (= nil (:price (t/assoc-price {::bad " BAD! "}))))
-    (is (= nil (:price (t/assoc-price {:serviceOffer " BAD! "}))))
-    (is (= nil (:price (t/assoc-price base-vm))))
-    (is (= nil (:price (t/assoc-price (assoc base-vm :serviceOffer so-no-price)))))
+    (is (nil? (:price (t/assoc-price {::bad " BAD! "}))))
+    (is (nil? (:price (t/assoc-price {:serviceOffer " BAD! "}))))
+    (is (nil? (:price (t/assoc-price base-vm))))
+    (is (nil? (:price (t/assoc-price (assoc base-vm :serviceOffer so-no-price)))))
     (is (= (:price:unitCost so-minute) (:price (t/assoc-price (assoc base-vm :serviceOffer so-minute)))))
     (is (= (/ (:price:unitCost so-hour) 60) (:price (t/assoc-price (assoc base-vm :serviceOffer so-hour)))))
-    (is (= nil (:price (t/assoc-price (assoc base-vm :serviceOffer so-unknown-period)))))
-    (is (= nil (:price (t/assoc-price (assoc base-vm :serviceOffer so-unitCode-but-no-cost)))))
-    (is (= nil (:price (t/assoc-price (assoc base-vm :serviceOffer so-unknown)))))))
+    (is (nil? (:price (t/assoc-price (assoc base-vm :serviceOffer so-unknown-period)))))
+    (is (nil? (:price (t/assoc-price (assoc base-vm :serviceOffer so-unitCode-but-no-cost)))))
+    (is (nil? (:price (t/assoc-price (assoc base-vm :serviceOffer so-unknown)))))))
 
 (deftest check-update-id
   (let [uuid "5b24caac-e87c-4446-96bc-a20b21450a1"

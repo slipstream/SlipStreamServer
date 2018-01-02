@@ -33,7 +33,8 @@
                  [com.sixsq.slipstream/SlipStreamPersistence]]
 
   :profiles
-  {:test     {:dependencies   [[sixsq/build-utils "0.1.4"]]
+  {:test     {:dependencies   [[sixsq/build-utils "0.1.4"]
+                               [com.sixsq.slipstream/SlipStreamDbTesting-jar]]
               :source-paths   ["test"]
               :resource-paths ["test-resources"]
               }

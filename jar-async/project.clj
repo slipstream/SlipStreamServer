@@ -29,4 +29,5 @@
    [com.sixsq.slipstream/SlipStreamConnector]]
 
   :profiles
-  {:provided {:dependencies [[com.sixsq.slipstream/SlipStreamCljResources-jar]]}})
+  {:provided {:dependencies [[com.sixsq.slipstream/SlipStreamCljResources-jar]
+                             [com.sixsq.slipstream/SlipStreamDbTesting-jar]]}})

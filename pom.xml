@@ -28,6 +28,7 @@
     <module>jar-prs-service</module>
     <module>ssclj</module>
     <module>db-binding</module>
+    <module>db-testing</module>
     <module>db-serializers</module>
     <module>ring-container</module>
     <module>metering</module>

@@ -1,9 +1,12 @@
-(ns com.sixsq.slipstream.db.es.aggregate-test
+(ns com.sixsq.slipstream.dbtest.es.aggregate-test
   (:refer-clojure :exclude [read update])
   (:require
     [clojure.test :refer [deftest is are]]
     [com.sixsq.slipstream.db.es.aggregation :as t]
-    [com.sixsq.slipstream.db.es.utils :as eu])
+    [com.sixsq.slipstream.db.es.utils :as eu]
+    [com.sixsq.slipstream.dbtest.es.utils :as eut]
+
+    )
   (:import (org.elasticsearch.search.sort SortOrder)
            (org.elasticsearch.action.search SearchRequestBuilder)
            (org.elasticsearch.search.aggregations AggregationBuilder)))
@@ -14,7 +17,7 @@
       (is (instance? AggregationBuilder (algo-fn "field-name"))))))
 
 (deftest check-aggregation-in-search
-  (eu/with-es-test-client
+  (eut/with-es-test-client
     (let [n 19
           type "test-resource"
           shuffled (shuffle

@@ -136,6 +136,14 @@ public class User extends Metadata {
     @Attribute(required = false)
     private Date activeSince = null;
 
+    @Attribute(required = false)
+    @SerializedName("githublogin")
+    private String githubLogin = null;
+
+    @Attribute(required = false)
+    @SerializedName("cyclonelogin")
+    private String cycloneLogin = null;
+
     protected transient Map<String, UserParameter> parameters;
 
     @SuppressWarnings("unused")

@@ -35,7 +35,8 @@
    [ring/ring-json]
    [ring/ring-defaults]]
 
-  :profiles {:test {:dependencies [[com.sixsq.slipstream/slipstream-ring-container]]
+  :profiles {:test {:dependencies [[com.sixsq.slipstream/slipstream-ring-container]
+                                   [com.sixsq.slipstream/SlipStreamDbTesting-jar]]
                     :source-paths ["test"]
                     :resource-paths ["test-resources"]}
              :provided {:dependencies [[org.slf4j/slf4j-log4j12]]}}

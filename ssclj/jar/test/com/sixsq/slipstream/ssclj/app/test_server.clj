@@ -2,6 +2,7 @@
   (:require
     [com.sixsq.slipstream.db.es.binding :as esb]
     [com.sixsq.slipstream.db.es.utils :as esu]
+    [com.sixsq.slipstream.dbtest.es.utils :as esut]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as zku]
     [com.sixsq.slipstream.ssclj.app.server :as server]
@@ -32,7 +33,7 @@
         zk-create-client-fn (constantly zk-client)
 
         es-port 12002
-        es-node (esu/create-test-node)
+        es-node (esut/create-test-node)
         es-client (-> es-node
                       esu/node-client
                       esb/wait-client-create-index)

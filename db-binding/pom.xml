@@ -21,7 +21,7 @@
       <url>http://www.apache.org/licenses/LICENSE-2.0</url>
     </license>
   </licenses>
-
+  
   <dependencies>
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
@@ -29,8 +29,14 @@
       <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamDbTesting-jar-dep</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
-
   <profiles>
     <profile>
       <id>run-tests</id>
