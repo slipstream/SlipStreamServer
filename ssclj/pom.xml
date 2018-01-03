@@ -17,6 +17,8 @@
 
   <modules>
     <module>jar</module>
+    <module>test-jar</module>
+    <module>test-server-jar</module>
     <module>tools</module>
   </modules>
 

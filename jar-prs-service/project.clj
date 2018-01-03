@@ -31,7 +31,6 @@
    [ring/ring-json]
    [ring/ring-defaults]]
 
-  :profiles {:test {:dependencies   [[sixsq/build-utils "0.1.4"]]
-                    :source-paths   ["test"]
+  :profiles {:test {:source-paths   ["test"]
                     :resource-paths ["test-resources"]}}
   )

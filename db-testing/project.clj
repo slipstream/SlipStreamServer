@@ -44,6 +44,7 @@
    [me.raynes/fs]
    [org.clojure/data.json]
    [org.clojure/tools.logging]
+   [org.clojure/tools.reader]
    [org.elasticsearch/elasticsearch]
    ; required by elasticsearch
    [org.apache.logging.log4j/log4j-core]

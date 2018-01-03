@@ -29,8 +29,7 @@
 
   :profiles
   {:test
-   {:dependencies [[sixsq/build-utils "0.1.4"]
-                   [com.sixsq.slipstream/SlipStreamCljResourcesTests-jar ~+version+
+   {:dependencies [[com.sixsq.slipstream/SlipStreamCljResourcesTests-jar ~+version+
                     :classifier "tests" :type "test-jar"]
                    [com.sixsq.slipstream/SlipStreamDbTesting-jar]
                    [peridot]

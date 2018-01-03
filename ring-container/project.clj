@@ -33,7 +33,6 @@
    [org.slf4j/slf4j-log4j12]]
 
   :profiles
-  {:test     {:dependencies   [[sixsq/build-utils "0.1.4"]]
-              :source-paths   ["test"]
+  {:test     {:source-paths   ["test"]
               :resource-paths ["test-resources"]}}
   )
