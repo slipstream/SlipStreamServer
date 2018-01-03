@@ -14,7 +14,7 @@
   :plugins [[lein-parent "0.3.2"]]
 
   :parent-project {:coords  [com.sixsq.slipstream/parent "3.42-SNAPSHOT"]
-                   :inherit [:min-lein-version :managed-dependencies :repositories]}
+                   :inherit [:min-lein-version :managed-dependencies :repositories :deploy-repositories]}
 
   :source-paths ["src"]
 
@@ -36,5 +36,4 @@
   :profiles
   {:test     {:source-paths   ["test"]
               :resource-paths ["test-resources"]}
-   :provided {:dependencies [[com.sixsq.slipstream/SlipStreamCljResources-jar]]}}
-  )
+   :provided {:dependencies [[com.sixsq.slipstream/SlipStreamCljResources-jar]]}})

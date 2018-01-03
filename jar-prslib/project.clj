@@ -17,7 +17,7 @@
             [lein-localrepo "0.5.4"]]
 
   :parent-project {:coords  [com.sixsq.slipstream/parent "3.42-SNAPSHOT"]
-                   :inherit [:min-lein-version :managed-dependencies :repositories]}
+                   :inherit [:min-lein-version :managed-dependencies :repositories :deploy-repositories]}
 
   :source-paths ["src/clj"]
 
@@ -59,5 +59,4 @@
                          ~+version+]
                         ]]
             "docs"    ["codox"]
-            "publish" ["shell" "../publish-docs.sh"]}
-  )
+            "publish" ["shell" "../publish-docs.sh"]})

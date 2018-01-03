@@ -15,7 +15,7 @@
             [lein-environ "1.1.0"]]
 
   :parent-project {:coords  [com.sixsq.slipstream/parent "3.42-SNAPSHOT"]
-                   :inherit [:min-lein-version :managed-dependencies :repositories]}
+                   :inherit [:min-lein-version :managed-dependencies :repositories :deploy-repositories]}
 
   :pom-location "target/"
 
@@ -33,5 +33,4 @@
 
   :profiles {:test {:source-paths   ["test"]
                     :resource-paths ["test-resources"]}
-             :dev  {:env {:config-name "config-hsqldb-mem.edn"}}}
-  )
+             :dev  {:env {:config-name "config-hsqldb-mem.edn"}}})

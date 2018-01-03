@@ -15,7 +15,7 @@
             [lein-environ "1.1.0"]]
 
   :parent-project {:coords  [com.sixsq.slipstream/parent "3.42-SNAPSHOT"]
-                   :inherit [:min-lein-version :managed-dependencies :repositories]}
+                   :inherit [:min-lein-version :managed-dependencies :repositories :deploy-repositories]}
 
   :source-paths ["src"]
 
@@ -70,22 +70,21 @@
    [org.clojure/java.jdbc]]
 
   :profiles
-  {:provided {:aot [com.sixsq.slipstream.ssclj.app.main
+  {
+   :provided {:aot [com.sixsq.slipstream.ssclj.app.main
                     com.sixsq.slipstream.ssclj.util.userparamsdesc
                     com.sixsq.slipstream.ssclj.migrate.user-cred]}
-   :test     {:dependencies   [[com.sixsq.slipstream/slipstream-ring-container]
-                               [peridot]
+   :test     {:dependencies   [[peridot]
                                [honeysql]
                                [org.clojure/test.check]
                                [org.slf4j/slf4j-log4j12]
                                [com.cemerick/url]
                                [org.apache.curator/curator-test]
                                [com.sixsq.slipstream/SlipStreamDbTesting-jar]]
-              :source-paths   ["test"]
               :resource-paths ["test-resources"]
               :env            {:config-name      "config-hsqldb.edn"
                                :auth-private-key "test-resources/auth_privkey.pem"
                                :auth-public-key  "test-resources/auth_pubkey.pem"}
               :aot            :all}
-   :dev      {:dependencies [[com.sixsq.slipstream/slipstream-ring-container]]}}
-  )
+   :dev      {:dependencies [[com.sixsq.slipstream/slipstream-ring-container]]}
+   })

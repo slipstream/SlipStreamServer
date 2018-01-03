@@ -14,7 +14,7 @@
   :plugins [[lein-parent "0.3.2"]]
 
   :parent-project {:coords  [com.sixsq.slipstream/parent "3.42-SNAPSHOT"]
-                   :inherit [:min-lein-version :managed-dependencies :repositories]}
+                   :inherit [:min-lein-version :managed-dependencies :repositories :deploy-repositories]}
 
   :pom-location "target/"
 
@@ -30,5 +30,4 @@
 
   :profiles {:test {:aot            :all
                     :source-paths   ["test"]
-                    :resource-paths ["test-resources"]}}
-  )
+                    :resource-paths ["test-resources"]}})
