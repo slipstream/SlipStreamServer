@@ -6,7 +6,7 @@
   "http" #(org.apache.maven.wagon.providers.http.HttpWagon.))
 
 (defproject
-  com.sixsq.slipstream/SlipStreamPricingLib-jar
+  com.sixsq.slipstream/token-java
   "3.42-SNAPSHOT"
   :license
   {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
@@ -16,13 +16,19 @@
   :parent-project {:coords  [com.sixsq.slipstream/parent "3.42-SNAPSHOT"]
                    :inherit [:min-lein-version :managed-dependencies :repositories :deploy-repositories]}
 
-  :source-paths ["src"]
-
-  :test-paths ["test"]
-
   :pom-location "target/"
+
+  :source-paths ["../clj/src"]
 
   :aot :all
 
   :dependencies
-  [[org.clojure/clojure]])
+  [[org.clojure/clojure]
+   [buddy/buddy-core]
+   [buddy/buddy-hashers]
+   [buddy/buddy-sign]
+   [environ]
+   [log4j]
+   [org.clojure/tools.logging]
+   [peridot]])
+

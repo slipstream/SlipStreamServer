@@ -15,7 +15,7 @@
             [lein-environ "1.1.0"]]
 
   :parent-project {:coords  [com.sixsq.slipstream/parent "3.42-SNAPSHOT"]
-                   :inherit [:min-lein-version :managed-dependencies :repositories :deploy-repositories :plugins]}
+                   :inherit [:min-lein-version :managed-dependencies :repositories :deploy-repositories]}
 
   :source-paths ["src"]
 
