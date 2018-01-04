@@ -159,7 +159,7 @@
                     :authentications
                              {"unknown" {:roles #{"ANON"}, :identity "unknown"}}}
      :sixsq.slipstream.authn/claims
-                   {:username "unknown", :roles #{"ANON"}}
+                   {:username "unknown", :roles "ANON"}
      :params       {:resource-name "user"}
      :route-params {:resource-name "user"}
      :user-roles   #{"ANON"}

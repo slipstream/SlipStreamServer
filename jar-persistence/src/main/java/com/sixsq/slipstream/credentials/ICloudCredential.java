@@ -7,6 +7,10 @@ import com.sixsq.slipstream.persistence.UserParameter;
 import java.util.Map;
 
 public interface ICloudCredential<T> {
+    public String href = null;
+
+    public void removeHref();
+
     String getConnectorInstanceName();
 
     String toJson();

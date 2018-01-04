@@ -9,8 +9,6 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-    [com.sixsq.slipstream.auth.internal :as auth-internal]
-    [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [clojure.spec.alpha :as s]))
@@ -23,14 +21,15 @@
 (dyn/initialize)
 
 (deftest lifecycle
-  (let [href (str ct/resource-url "/" auto/registration-method)
+  (let [uname "120720737412@eduid.chhttps://eduid.ch/idp/shibboleth!https://fed-id.nuv.la/samlbridge/module.php/saml/sp/metadata.php/sixsq-saml-bridge!iqqrh4oiyshzcw9o40cvo0+pgka="
+        href (str ct/resource-url "/" auto/registration-method)
         template-url (str p/service-context ct/resource-url "/" auto/registration-method)
 
         session (-> (ltu/ring-app)
                     session
                     (content-type "application/json"))
         session-admin (header session authn-info-header "root ADMIN")
-        session-user (header session authn-info-header "jane USER ANON")
+        session-user (header session authn-info-header (format "%s USER ANON" uname))
         session-anon (header session authn-info-header "unknown ANON")
 
         name-attr "name"
@@ -44,13 +43,13 @@
                      (get-in [:response :body]))
 
         no-href-create {:userTemplate (ltu/strip-unwanted-attrs (assoc template
-                                                                  :username "user"
+                                                                  :username uname
                                                                   :emailAddress "user@example.org"))}
         href-create {:name         name-attr
                      :description  description-attr
                      :properties   properties-attr
                      :userTemplate {:href         href
-                                    :username     "jane"
+                                    :username     uname
                                     :emailAddress "jane@example.org"
                                     :firstName    "Jane"
                                     :lastName     "Tester"

@@ -37,6 +37,6 @@
 
 (s/def :cimi/user-auto
   (su/only-keys-maps
-    c/common-attrs
+    ps/user-common-attrs
     ps/user-keys-spec
     user-auto-keys-spec))

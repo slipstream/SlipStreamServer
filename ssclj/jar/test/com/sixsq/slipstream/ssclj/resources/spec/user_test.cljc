@@ -13,12 +13,13 @@
 
 (deftest check-user-schema
   (let [timestamp "1964-08-25T10:00:00.0Z"
-        cfg {:id           (str resource-url "/user-abc")
+        uname "120720737412@eduid.chhttps://eduid.ch/idp/shibboleth!https://fed-id.nuv.la/samlbridge/module.php/saml/sp/metadata.php/sixsq-saml-bridge!iqqrh4oiyshzcw9o40cvo0+pgka="
+        cfg {:id           (str resource-url "/" uname)
              :resourceURI  resource-uri
              :created      timestamp
              :updated      timestamp
              :acl          valid-acl
-             :username     "ssuser"
+             :username     uname
              :emailAddress "me@example.com"
              :firstName    "John"
              :lastName     "Smith"}]

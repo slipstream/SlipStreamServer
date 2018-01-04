@@ -3,7 +3,6 @@
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.util.spec :as su]
     [com.sixsq.slipstream.ssclj.resources.spec.user :as u]
-    [com.sixsq.slipstream.ssclj.resources.spec.user-template]
     [com.sixsq.slipstream.ssclj.resources.spec.user-template :as ps]))
 
 (s/def :cimi.user-template.direct/href :cimi.user-template/href)
@@ -16,6 +15,8 @@
 (s/def :cimi.user-template.direct/activeSince :cimi.core/timestamp)
 (s/def :cimi.user-template.direct/isSuperUser boolean?)
 (s/def :cimi.user-template.direct/deleted boolean?)
+(s/def :cimi.user-template.direct/githublogin string?)
+(s/def :cimi.user-template.direct/cyclonelogin string?)
 
 (def user-tempate-direct-keys
   {:opt-un [:cimi.user-template.direct/href
@@ -27,7 +28,9 @@
             :cimi.user-template.direct/creation
             :cimi.user-template.direct/lastOnline
             :cimi.user-template.direct/lastExecute
-            :cimi.user-template.direct/activeSince]})
+            :cimi.user-template.direct/activeSince
+            :cimi.user-template.direct/githublogin
+            :cimi.user-template.direct/cyclonelogin]})
 
 (def user-template-keys-spec-req
   (su/merge-keys-specs
