@@ -1,373 +1,373 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-	<artifactId>SlipStreamService</artifactId>
-	<name>SlipStreamServer/jar-service</name>
+  <artifactId>SlipStreamService</artifactId>
+  <name>SlipStreamServer/jar-service</name>
 
-	<packaging>jar</packaging>
+  <packaging>jar</packaging>
 
-	<url>http://sixsq.com</url>
+  <url>http://sixsq.com</url>
 
-	<licenses>
-		<license>
-			<name>Apache License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
-		</license>
-	</licenses>
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+    </license>
+  </licenses>
 
-	<parent>
-		<groupId>com.sixsq.slipstream</groupId>
-		<artifactId>SlipStreamServer</artifactId>
-		<version>3.42-SNAPSHOT</version>
-	</parent>
+  <parent>
+    <groupId>com.sixsq.slipstream</groupId>
+    <artifactId>SlipStreamServer</artifactId>
+    <version>3.42-SNAPSHOT</version>
+  </parent>
 
-	<dependencies>
+  <dependencies>
 
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamServerPRSlib-jar-dep</artifactId>
-			<version>${project.version}</version>
-			<type>pom</type>
-			<scope>provided</scope>
-		</dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamServerPRSlib-jar-dep</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+      <scope>provided</scope>
+    </dependency>
 
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamServerPRSlib-jar</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamServerPRSlib-jar</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamUI-dep</artifactId>
-			<version>${project.version}</version>
-			<type>pom</type>
-		</dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamUI-dep</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+    </dependency>
 
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamUI</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamUI</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamDbSerializers-jar-dep</artifactId>
-			<version>${project.version}</version>
-			<type>pom</type>
-			<scope>provided</scope>
-		</dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamDbSerializers-jar-dep</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+      <scope>provided</scope>
+    </dependency>
 
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamDbSerializers-jar</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamDbSerializers-jar</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
 
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamPersistence</artifactId>
-		</dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamPersistence</artifactId>
+    </dependency>
 
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamPersistence</artifactId>
-			<type>test-jar</type>
-            <scope>test</scope>
-		</dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamPersistence</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
 
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamAsync</artifactId>
-			<type>jar</type>
-		</dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamAsync</artifactId>
+      <type>jar</type>
+    </dependency>
 
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamConnector</artifactId>
-		</dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamConnector</artifactId>
+    </dependency>
 
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamConnector</artifactId>
-			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamConnector</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
 
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamConnector-Dummy-conf-dep</artifactId>
-			<type>pom</type>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamConnector-Dummy-conf-dep</artifactId>
+      <type>pom</type>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
 
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamConnector-Dummy-conf</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamConnector-Dummy-conf</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
 
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamConnector-Dummy-jar</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamConnector-Dummy-jar</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
 
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamCljResources-jar</artifactId>
-			<scope>test</scope>
-			<version>${project.version}</version>
-		</dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamCljResources-jar</artifactId>
+      <scope>test</scope>
+      <version>${project.version}</version>
+    </dependency>
 
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamCljResourcesTestServer-jar</artifactId>
-			<scope>test</scope>
-			<classifier>tests</classifier>
-			<version>${project.version}</version>
-		</dependency>
-		
-  	<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-			<artifactId>SlipStreamDbTesting-jar</artifactId>
-			<scope>test</scope>
-			<version>${project.version}</version>
-		</dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamCljResourcesTestServer-jar</artifactId>
+      <scope>test</scope>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamDbTesting-jar</artifactId>
+      <scope>test</scope>
+      <version>${project.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.elasticsearch</groupId>
       <artifactId>elasticsearch</artifactId>
       <scope>test</scope>
       <version>5.5.0</version>
     </dependency>
-		<!-- required for passing tests on clean build -->
-		<dependency>
-			<groupId>com.sixsq.slipstream</groupId>
-                        <artifactId>SlipStreamServer-ui-static-content</artifactId>
-                        <version>${project.version}</version>
-                        <type>zip</type>
-		</dependency>
+    <!-- required for passing tests on clean build -->
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamServer-ui-static-content</artifactId>
+      <version>${project.version}</version>
+      <type>zip</type>
+    </dependency>
 
-		<dependency>
-			<groupId>org.clojure</groupId>
-			<artifactId>clojure</artifactId>
-		</dependency>
+    <dependency>
+      <groupId>org.clojure</groupId>
+      <artifactId>clojure</artifactId>
+    </dependency>
 
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-entitymanager</artifactId>
-		</dependency>
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-entitymanager</artifactId>
+    </dependency>
 
-		<dependency>
-			<groupId>org.restlet.jee</groupId>
-			<artifactId>org.restlet</artifactId>
-		</dependency>
+    <dependency>
+      <groupId>org.restlet.jee</groupId>
+      <artifactId>org.restlet</artifactId>
+    </dependency>
 
-		<dependency>
-			<groupId>org.restlet.jee</groupId>
-			<artifactId>org.restlet.ext.servlet</artifactId>
-		</dependency>
+    <dependency>
+      <groupId>org.restlet.jee</groupId>
+      <artifactId>org.restlet.ext.servlet</artifactId>
+    </dependency>
 
-		<dependency>
-			<groupId>org.restlet.jee</groupId>
-			<artifactId>org.restlet.ext.httpclient</artifactId>
-		</dependency>
+    <dependency>
+      <groupId>org.restlet.jee</groupId>
+      <artifactId>org.restlet.ext.httpclient</artifactId>
+    </dependency>
 
-		<dependency>
-			<groupId>org.restlet.jee</groupId>
-			<artifactId>org.restlet.ext.fileupload</artifactId>
-		</dependency>
+    <dependency>
+      <groupId>org.restlet.jee</groupId>
+      <artifactId>org.restlet.ext.fileupload</artifactId>
+    </dependency>
 
-		<dependency>
-			<groupId>org.restlet.jee</groupId>
-			<artifactId>org.restlet.ext.xml</artifactId>
-		</dependency>
+    <dependency>
+      <groupId>org.restlet.jee</groupId>
+      <artifactId>org.restlet.ext.xml</artifactId>
+    </dependency>
 
-		<dependency>
-			<groupId>org.simpleframework</groupId>
-			<artifactId>simple-xml</artifactId>
-		</dependency>
+    <dependency>
+      <groupId>org.simpleframework</groupId>
+      <artifactId>simple-xml</artifactId>
+    </dependency>
 
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
 
-		<dependency>
-			<groupId>javax.mail</groupId>
-			<artifactId>mail</artifactId>
-		</dependency>
+    <dependency>
+      <groupId>javax.mail</groupId>
+      <artifactId>mail</artifactId>
+    </dependency>
 
-		<!-- Needs to be before junit -->
-		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-all</artifactId>
-			<scope>test</scope>
-		</dependency>
+    <!-- Needs to be before junit -->
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest-all</artifactId>
+      <scope>test</scope>
+    </dependency>
 
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
 
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-jdk14</artifactId>
-		</dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-jdk14</artifactId>
+    </dependency>
 
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-api</artifactId>
-		</dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+    </dependency>
 
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-core</artifactId>
-		</dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+    </dependency>
 
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-		</dependency>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+    </dependency>
 
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-		</dependency>
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+    </dependency>
 
-		<dependency>
-			<groupId>com.jcraft</groupId>
-			<artifactId>jsch</artifactId>
-			<type>jar</type>
-		</dependency>
+    <dependency>
+      <groupId>com.jcraft</groupId>
+      <artifactId>jsch</artifactId>
+      <type>jar</type>
+    </dependency>
 
-	</dependencies>
+  </dependencies>
 
-	<build>
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>true</filtering>
-			</resource>
-		</resources>
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
 
-		<plugins>
+    <plugins>
 
-                  <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>findbugs-maven-plugin</artifactId>
-                    <configuration>
-                      <findbugsXmlOutput>true</findbugsXmlOutput>
-                      <findbugsXmlWithMessages>true</findbugsXmlWithMessages>
-                      <xmlOutput>true</xmlOutput>
-                    </configuration>
-                  </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>findbugs-maven-plugin</artifactId>
+        <configuration>
+          <findbugsXmlOutput>true</findbugsXmlOutput>
+          <findbugsXmlWithMessages>true</findbugsXmlWithMessages>
+          <xmlOutput>true</xmlOutput>
+        </configuration>
+      </plugin>
 
-			<plugin>
-				<groupId>eu.somatik.serviceloader-maven-plugin</groupId>
-				<artifactId>serviceloader-maven-plugin</artifactId>
-				<configuration>
-					<services>
-						<param>com.sixsq.slipstream.connector.Connector</param>
-					</services>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+      <plugin>
+        <groupId>eu.somatik.serviceloader-maven-plugin</groupId>
+        <artifactId>serviceloader-maven-plugin</artifactId>
+        <configuration>
+          <services>
+            <param>com.sixsq.slipstream.connector.Connector</param>
+          </services>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-			</plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>configure-instance</id>
-						<phase>generate-test-resources</phase>
-						<configuration>
-							<outputDirectory>${project.build.directory}/configuration</outputDirectory>
-							<delimiters>
-								<delimiter>${*}</delimiter>
-							</delimiters>
-							<overwrite>true</overwrite>
-							<resources>
-								<resource>
-									<directory>${basedir}/src/main/configuration</directory>
-									<filtering>true</filtering>
-								</resource>
-							</resources>
-						</configuration>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>configure-instance</id>
+            <phase>generate-test-resources</phase>
+            <configuration>
+              <outputDirectory>${project.build.directory}/configuration</outputDirectory>
+              <delimiters>
+                <delimiter>${*}</delimiter>
+              </delimiters>
+              <overwrite>true</overwrite>
+              <resources>
+                <resource>
+                  <directory>${basedir}/src/main/configuration</directory>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<systemPropertyVariables>
-						<slipstream.config.dir>${project.build.directory}/configuration</slipstream.config.dir>
-					</systemPropertyVariables>
-					<useSystemClassLoader>false</useSystemClassLoader>
-					<includes>
-						<include>${slipstream.test.includes}</include>
-					</includes>
-					<excludes>
-						<exclude>${slipstream.test.excludes}</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <systemPropertyVariables>
+            <slipstream.config.dir>${project.build.directory}/configuration</slipstream.config.dir>
+          </systemPropertyVariables>
+          <useSystemClassLoader>false</useSystemClassLoader>
+          <includes>
+            <include>${slipstream.test.includes}</include>
+          </includes>
+          <excludes>
+            <exclude>${slipstream.test.excludes}</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
 
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>license-maven-plugin</artifactId>
-				<configuration>
-					<licenseName>apache_v2</licenseName>
-					<organizationName>SixSq Sarl (sixsq.com)</organizationName>
-					<inceptionYear>2013</inceptionYear>
-					<processStartTag>+=================================================================+</processStartTag>
-					<sectionDelimiter>=====</sectionDelimiter>
-					<processEndTag>-=================================================================-</processEndTag>
-					<excludes>
-						<exclude>**/external/**</exclude>
-						<exclude>**/interoute/**</exclude>
-						<exclude>**/cloudsigma/**</exclude>
-						<exclude>**/aws/**</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <configuration>
+          <licenseName>apache_v2</licenseName>
+          <organizationName>SixSq Sarl (sixsq.com)</organizationName>
+          <inceptionYear>2013</inceptionYear>
+          <processStartTag>+=================================================================+</processStartTag>
+          <sectionDelimiter>=====</sectionDelimiter>
+          <processEndTag>-=================================================================-</processEndTag>
+          <excludes>
+            <exclude>**/external/**</exclude>
+            <exclude>**/interoute/**</exclude>
+            <exclude>**/cloudsigma/**</exclude>
+            <exclude>**/aws/**</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>test-jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
 
-		</plugins>
+    </plugins>
 
-	</build>
+  </build>
 
 </project>

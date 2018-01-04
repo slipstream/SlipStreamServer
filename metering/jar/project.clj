@@ -15,7 +15,7 @@
             [lein-shell "0.5.0"]]
 
   :parent-project {:coords  [com.sixsq.slipstream/parent "3.42-SNAPSHOT"]
-                   :inherit [:min-lein-version :managed-dependencies :repositories :deploy-repositories]}
+                   :inherit [:min-lein-version :managed-dependencies :repositories :deploy-repositories :plugins]}
 
   :pom-location "target/"
 

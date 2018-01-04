@@ -16,7 +16,6 @@ The following dependencies should be added to the POM file of you module.
 		<groupId>com.sixsq.slipstream</groupId>
 		<artifactId>SlipStreamCljResourcesTestServer-jar</artifactId>
 		<scope>test</scope>
-		<classifier>tests</classifier>
 		<version>${project.version}</version>
 	</dependency>
 
