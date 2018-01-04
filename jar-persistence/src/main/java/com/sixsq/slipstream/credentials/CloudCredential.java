@@ -6,6 +6,7 @@ import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.CloudConnector;
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.connector.UserParametersFactoryBase;
+import com.sixsq.slipstream.exceptions.NotImplementedException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.QuotaParameter;
 import com.sixsq.slipstream.persistence.User;
@@ -22,6 +23,8 @@ import java.util.Map;
 public class CloudCredential<T> implements ICloudCredential<T> {
     public String id;
 
+    public String href = null;
+
     public HRef connector;
 
     public String key;
@@ -33,14 +36,25 @@ public class CloudCredential<T> implements ICloudCredential<T> {
     private transient static final Logger logger = Logger.getLogger(
             "com.sixsq.slipstream.credentials." + CloudCredential.class.getName());
 
-    public CloudCredential(String connectorInstanceName) {
+    public CloudCredential(String connectorInstanceName, String connectorName) {
         this.connector = new HRef("connector/" + connectorInstanceName);
+        setHref(connectorName);
     }
 
-    public CloudCredential(String connectorInstanceName, String key, String secret) {
+    public CloudCredential(String connectorInstanceName, String key, String secret, String connectorName) {
         this.connector = new HRef("connector/" + connectorInstanceName);
         this.key = key;
         this.secret = secret;
+        setHref(connectorName);
+    }
+
+    @Override
+    public void removeHref() {
+        href = null;
+    }
+
+    private void setHref(String connectorName) {
+        this.href = "credential-template/store-cloud-cred-" + connectorName;
     }
 
     public String getConnectorInstanceName() {
@@ -84,22 +98,16 @@ public class CloudCredential<T> implements ICloudCredential<T> {
             if (cloudCredsDefined()) {
                 SscljProxy.post(SscljProxy.CREDENTIAL_RESOURCE, authz, new CloudCredentialCreateTmpl(this), true);
             } else {
-                logger.warning("Base part of credentials for connector instance '" +
-                        connector.href + "' is not properly defined for user '" +
+                logger.warning("Key and/or secret for connector instance '" +
+                        connector.href + "' is not defined for user '" +
                         user.getName() + "'. Not creating.");
             }
         } else {
-            // Edit
-
-            // merge
-            CloudCredential credOld = (CloudCredential) cc.getCredentials().get(0);
+            // Update.  'href' is not required and will be removed.
+            CloudCredential credOld = cc.getCredentials().get(0);
             merge(credOld);
-
-            // create new
-            SscljProxy.post(SscljProxy.CREDENTIAL_RESOURCE, authz, new CloudCredentialCreateTmpl(this), true);
-
-            // delete old
-            SscljProxy.delete(SscljProxy.BASE_RESOURCE + credOld.id, authz, true);
+            removeHref();
+            SscljProxy.put(SscljProxy.BASE_RESOURCE + credOld.id, authz, this, true);
         }
     }
 
@@ -139,7 +147,7 @@ public class CloudCredential<T> implements ICloudCredential<T> {
         k = UserParameter.constructKey(instanceName, QuotaParameter.QUOTA_VM_PARAMETER_NAME);
         if (params.containsKey(k)) {
             String value = params.get(k).getValue();
-            if (!value.isEmpty()) {
+            if (null != value && !value.isEmpty()) {
                 quota = Integer.parseInt(value);
             }
         }

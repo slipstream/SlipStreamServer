@@ -22,7 +22,8 @@ public class UserGeneralParams {
     public String id;
     public String paramsType = "execution";
 
-    public UserGeneralParams() { }
+    public UserGeneralParams() {
+    }
 
     public UserGeneralParams(String defaultCloudService, String keepRunning,
                              String mailUsage, Integer timeout, Integer
@@ -41,8 +42,13 @@ public class UserGeneralParams {
 
     public void setParameter(UserParameter param) {
         String pName = param.getName();
-        String pValue = param.getValue();
         String category = param.getCategory();
+        String pValue;
+        if (null == param.getValue()) {
+            pValue = "";
+        } else {
+            pValue = param.getValue();
+        }
         if (pName.equals(UserParameter.constructKey(category,
                 UserParameter.KEY_KEEP_RUNNING))) {
             this.keepRunning = pValue;
@@ -51,21 +57,30 @@ public class UserGeneralParams {
             this.mailUsage = pValue;
         } else if (pName.equals(UserParameter.constructKey(category,
                 ExecutionControlUserParametersFactory.VERBOSITY_LEVEL))) {
-            this.verbosityLevel = Integer.parseInt(pValue);
+            if (pValue.isEmpty()) {
+                this.verbosityLevel = Integer.parseInt(ExecutionControlUserParametersFactory.VERBOSITY_LEVEL_DEFAULT);
+            } else {
+                this.verbosityLevel = Integer.parseInt(pValue);
+            }
         } else if (pName.equals(UserParameter.constructKey(category,
                 UserParameter.DEFAULT_CLOUD_SERVICE_PARAMETER_NAME))) {
             this.defaultCloudService = pValue;
         } else if (pName.equals(UserParameter.constructKey(category,
                 UserParameter.KEY_TIMEOUT))) {
-            this.timeout = Integer.parseInt(pValue);
+            if (pValue.isEmpty()) {
+                this.timeout = 0;
+            } else {
+                this.timeout = Integer.parseInt(pValue);
+            }
         } else if (pName.equals(UserParameter.constructKey(category,
                 UserParameter.SSHKEY_PARAMETER_NAME))) {
             this.sshPublicKey = pValue;
         }
     }
+
     public void setParameters(Collection<UserParameter> params) {
-        for (UserParameter p: params) {
-           setParameter(p);
+        for (UserParameter p : params) {
+            setParameter(p);
         }
     }
 

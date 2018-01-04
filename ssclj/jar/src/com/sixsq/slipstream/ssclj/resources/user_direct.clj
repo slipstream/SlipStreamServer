@@ -2,6 +2,7 @@
   (:require
     [com.sixsq.slipstream.ssclj.resources.spec.user]
     [com.sixsq.slipstream.ssclj.resources.spec.user-template-direct]
+    [com.sixsq.slipstream.ssclj.resources.spec.user-direct]
     [com.sixsq.slipstream.ssclj.resources.user :as p]
     [com.sixsq.slipstream.ssclj.resources.user-template-direct :as tpl]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
@@ -9,7 +10,7 @@
 ;;
 ;; validate the create resource
 ;;
-(def validate-fn (u/create-spec-validation-fn :cimi/user-template.direct))
+(def validate-fn (u/create-spec-validation-fn :cimi/user-direct))
 (defmethod p/validate-subtype tpl/registration-method
   [resource]
   (validate-fn resource))

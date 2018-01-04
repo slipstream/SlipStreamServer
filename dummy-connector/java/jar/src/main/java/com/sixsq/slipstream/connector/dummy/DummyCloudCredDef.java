@@ -10,14 +10,12 @@ import java.util.Map;
 
 public class DummyCloudCredDef extends CloudCredential<DummyCloudCredDef> {
 
-    public String href = "credential-template/store-cloud-cred-dummy";
-
     @SerializedName("domain-name")
     public String domainName;
 
     public DummyCloudCredDef(String instanceName, String key, String secret,
                              String domainName) {
-        super(instanceName, key, secret);
+        super(instanceName, key, secret, DummyConnector.CLOUD_SERVICE_NAME);
         this.domainName = domainName;
     }
 
@@ -28,7 +26,7 @@ public class DummyCloudCredDef extends CloudCredential<DummyCloudCredDef> {
     }
 
     DummyCloudCredDef(String instanceName, Map<String, UserParameter> params) {
-        super(instanceName);
+        super(instanceName, DummyConnector.CLOUD_SERVICE_NAME);
         setParams(params);
     }
 
