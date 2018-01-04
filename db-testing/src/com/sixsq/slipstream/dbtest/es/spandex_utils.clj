@@ -1,7 +1,17 @@
-(ns sixsq.slipstream.metering.spandex-utils
-  (:require
-    [clojure.string :as str]
-    [qbits.spandex :as spandex]))
+(ns com.sixsq.slipstream.dbtest.es.spandex-utils (:require
+                                                   [clojure.string :as str]
+                                                   [com.sixsq.slipstream.db.es.utils :as esu]
+                                                   [com.sixsq.slipstream.dbtest.es.utils :as esut]
+                                                   [com.sixsq.slipstream.db.es.binding :as esb]
+                                                   [com.sixsq.slipstream.db.impl :as db]
+                                                   [qbits.spandex :as spandex])
+  (:import (org.apache.http HttpHost)
+           (org.elasticsearch.common.network NetworkAddress)
+           (org.elasticsearch.client.node NodeClient)
+           (org.elasticsearch.client RestClient)
+           (org.elasticsearch.action.admin.cluster.node.info NodeInfo NodesInfoResponse)
+           (org.elasticsearch.common.transport InetSocketTransportAddress)))
+
 
 
 (defn cluster-ready? [client]
@@ -56,3 +66,39 @@
       (let [msg (str "refresh failed: " status ", " index)]
         (throw (ex-info msg resp))))))
 
+(defn node-address
+  [^NodeInfo node-info]
+  (when-let [http (.getHttp node-info)]
+    (.. http
+        address
+        publishAddress)))
+
+(defn host-address
+  [^InetSocketTransportAddress address]
+  (when address
+    (HttpHost. (.getAddress address) (.getPort address) "http")))
+
+(defn cli->rest
+  "Take a node client and return a map with rest client and hosts "
+  [^NodeClient client]
+  (let [^NodesInfoResponse resp (.. client
+                                    admin
+                                    cluster
+                                    (prepareNodesInfo (into-array String []))
+                                    get)
+        hosts (->> (.getNodes resp)
+                   (map node-address)
+                   (map host-address)
+                   (remove nil?)
+                   vec)
+        builder (RestClient/builder (into-array HttpHost hosts))]
+    {:client (.build builder)
+     :hosts  (vec (map str hosts))}))
+
+
+(defn provide-test-client []
+  (esu/node-client (esut/create-test-node)))
+
+(defn provide-mock-rest-client
+  []
+  (cli->rest (provide-test-client)))

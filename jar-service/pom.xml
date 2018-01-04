@@ -131,7 +131,19 @@
 			<classifier>tests</classifier>
 			<version>${project.version}</version>
 		</dependency>
-
+		
+  	<dependency>
+			<groupId>com.sixsq.slipstream</groupId>
+			<artifactId>SlipStreamDbTesting-jar</artifactId>
+			<scope>test</scope>
+			<version>${project.version}</version>
+		</dependency>
+    <dependency>
+      <groupId>org.elasticsearch</groupId>
+      <artifactId>elasticsearch</artifactId>
+      <scope>test</scope>
+      <version>5.5.0</version>
+    </dependency>
 		<!-- required for passing tests on clean build -->
 		<dependency>
 			<groupId>com.sixsq.slipstream</groupId>

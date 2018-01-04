@@ -27,7 +27,7 @@
 
                     [com.sixsq.slipstream/SlipStreamCljResources-jar nil :scope "provided"]
                     [com.sixsq.slipstream/SlipStreamCljResourcesTests-jar nil :classifier "tests" :type "test-jar" :scope "test"]
-
+                    [com.sixsq.slipstream/SlipStreamDbTesting-jar :scope "test"]
                     ;; test dependencies
                     [peridot nil :scope "test"]
                     [commons-logging nil :scope "test"]

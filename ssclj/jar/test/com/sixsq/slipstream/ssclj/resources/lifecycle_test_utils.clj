@@ -21,6 +21,7 @@
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [wrap-authn-info-header]]
     [com.sixsq.slipstream.db.es.binding :as esb]
     [com.sixsq.slipstream.db.es.utils :as esu]
+    [com.sixsq.slipstream.dbtest.es.utils :as esut]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
     [zookeeper :as zk]
     [com.sixsq.slipstream.ssclj.app.routes :as routes])
@@ -243,7 +244,7 @@
    client bound to the Elasticsearch client binding, and then clean up the
    allocated resources by closing both the client and the node."
   [& body]
-  `(with-open [node# (esu/create-test-node)
+  `(with-open [node# (esut/create-test-node)
                client# (-> node#
                            esu/node-client
                            esb/wait-client-create-index)]

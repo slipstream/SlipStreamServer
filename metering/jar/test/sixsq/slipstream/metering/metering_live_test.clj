@@ -5,7 +5,7 @@
     [qbits.spandex :as spandex]
     [sixsq.slipstream.metering.metering :as t]
     [sixsq.slipstream.metering.utils :as utils]
-    [sixsq.slipstream.metering.spandex-utils :as esu]))
+    [com.sixsq.slipstream.dbtest.es.spandex-utils :as spu]))
 
 (defn random-doc
   [resource-type]
@@ -44,24 +44,23 @@
         (is (nil? (<!! ch)))))))
 
 (deftest lifecycle
-  (let [hosts ["http://localhost:9200"]
-        resource-index (utils/random-uuid)
+  (let [resource-index (utils/random-uuid)
         resource-type "virtual-machine"
         resource-search-url (t/search-url resource-index resource-type)
         metering-index (utils/random-uuid)
         metering-type "metering"
-        metering-action (t/index-action metering-index metering-type)]
-    (with-open [client (spandex/client {:hosts hosts})]
-      (when (esu/cluster-ready? client)
-        (esu/index-create client resource-index)
-
+        metering-action (t/index-action metering-index metering-type)
+        rest-map (spu/provide-mock-rest-client)]
+    (with-open [client (:client rest-map)]
+      (when (spu/cluster-ready? client)
+        (spu/index-create client resource-index)
         (try
           (let [n 199
                 docs (repeatedly n (partial random-doc resource-type))
                 ids (set (map :id docs))]
-            (doall (map (partial esu/index-add client resource-index) docs))
+            (doall (map (partial spu/index-add client resource-index) docs))
 
-            (esu/index-refresh client resource-index)
+            (spu/index-refresh client resource-index)
 
             (let [ch (spandex/scroll-chan client
                                           {:url  resource-search-url
@@ -76,8 +75,6 @@
               (is (= n (count ids)))
               (is (= n (count db-ids)))
               (is (= ids (set db-ids)))
-
-              (is (= [n n n] (<!! (t/meter-resources hosts resource-search-url metering-action))))))
-
+              (is (= [n n n] (<!! (t/meter-resources (:hosts rest-map) resource-search-url metering-action))))))
           (finally
-            (esu/index-delete client resource-index)))))))
+            (spu/index-delete client resource-index)))))))
