@@ -25,9 +25,9 @@ import java.util.List;
 
 public enum ParameterCategory {
 	General,
-	Dummy1, // was Amazon
-	Dummy2, // was StratusLab
-	Dummy3, // was CloudSigma
+	Dummy1,
+	Dummy2,
+	Dummy3,
 	Input,
 	Output,
 	Execution_Parameters,

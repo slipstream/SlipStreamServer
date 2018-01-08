@@ -60,12 +60,6 @@
       <artifactId>SlipStreamConnector-PhysicalHost-jar</artifactId>
       <version>${project.version}</version>
     </dependency>
-
-    <dependency>
-      <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>SlipStreamConnector-StratusLab-jar</artifactId>
-      <version>${project.version}</version>
-    </dependency>
 -->
 
     <dependency>
@@ -242,12 +236,6 @@
           <dependency>
               <groupId>com.sixsq.slipstream</groupId>
               <artifactId>SlipStreamConnector-PhysicalHost-jar</artifactId>
-              <version>${project.version}</version>
-          </dependency>
-
-          <dependency>
-              <groupId>com.sixsq.slipstream</groupId>
-              <artifactId>SlipStreamConnector-StratusLab-jar</artifactId>
               <version>${project.version}</version>
           </dependency>
 
