@@ -37,7 +37,7 @@ import clojure.lang.IFn;
 public class ServiceConfiguration extends
 		Parameterized<ServiceConfiguration, ServiceConfigurationParameter> {
 
-	private static Logger logger = Logger.getLogger(CljElasticsearchHelper.class.getName());
+	private static Logger logger = Logger.getLogger(ServiceConfiguration.class.getName());
 
 	private final static String RESOURCE_URI = "configuration/slipstream";
     public final static String CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY = "cloud.connector.orchestrator.publicsshkey";

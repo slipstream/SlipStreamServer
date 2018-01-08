@@ -2,6 +2,7 @@
   (:require
     [clojure.string :as s]
     [clojure.test :refer :all]
+    [com.sixsq.slipstream.dbtest.es.utils-esdb :as ud]
     [com.sixsq.slipstream.db.serializers.utils :as u])
   (:import
     (com.sixsq.slipstream.persistence ServiceConfigurationParameter)))
@@ -40,8 +41,8 @@
   )
 
 (deftest test-start-stop-es
-  (is (instance? clojure.lang.Var$Unbound u/*es-server*))
-  (u/create-test-es-db-uncond)
-  (is (not (instance? clojure.lang.Var$Unbound u/*es-server*)))
-  (u/close-es-server!)
-  (is (instance? clojure.lang.Var$Unbound u/*es-server*)))
+  (is (instance? clojure.lang.Var$Unbound ud/*es-server*))
+  (ud/create-test-es-db-uncond)
+  (is (not (instance? clojure.lang.Var$Unbound ud/*es-server*)))
+  (ud/close-es-server!)
+  (is (instance? clojure.lang.Var$Unbound ud/*es-server*)))
