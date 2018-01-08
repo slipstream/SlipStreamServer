@@ -3,13 +3,14 @@
     [clojure.test :refer :all]
     [sixsq.slipstream.prs.javawrapper :refer :all]
     [com.sixsq.slipstream.db.serializers.utils :as su]
+    [com.sixsq.slipstream.dbtest.es.utils-esdb :as sud]
     [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]
     )
   (:import [java.util HashMap ArrayList HashSet]
            [com.sixsq.slipstream.persistence ImageModule DeploymentModule Node ModuleParameter ParameterCategory]))
 
 ;; Fixtures
-(use-fixtures :once su/test-fixture-es-client-and-db-impl)
+(use-fixtures :once sud/test-fixture-es-client-and-db-impl)
 
 (use-fixtures :each (fn [f]
                       (su/initialize)

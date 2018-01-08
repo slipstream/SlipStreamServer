@@ -122,36 +122,6 @@ public abstract class UserTestUtil {
 		config.store();
 	}
 
-	// This should be used starting from jar-connector, as in the
-	// jar-persistance there are no connectors, thus, call to
-	// setCloudConnector() will fail.
-	public static void setDefaultCloudServiceName(User user, String connectorName) {
-		try {
-			user.setDefaultCloudServiceName(connectorName);
-			setCloudConnector(connectorName);
-		} catch (ValidationException e) {
-			throw (new SlipStreamRuntimeException(e));
-		}
-	}
-
-	public static void setCloudConnector(String connectorClassName) throws ConfigurationException {
-		Configuration configuration = null;
-		try {
-			configuration = Configuration.getInstance();
-		} catch (ValidationException e) {
-			fail();
-		}
-
-		ServiceConfiguration sc = configuration.getParameters();
-		try {
-			sc.setParameter(new ServiceConfigurationParameter(ServiceConfiguration.RequiredParameters.CLOUD_CONNECTOR_CLASS.getName(),
-					connectorClassName));
-		} catch (ValidationException e) {
-			fail();
-		}
-		sc.store();
-		ConnectorFactory.resetConnectors();
-	}
 	// Only static methods. Ensure no instances are created.
 	public UserTestUtil() {
 

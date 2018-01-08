@@ -5,6 +5,7 @@
 
     [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]
     [com.sixsq.slipstream.db.serializers.utils :as u]
+    [com.sixsq.slipstream.dbtest.es.utils-esdb :as ud]
     [com.sixsq.slipstream.ssclj.resources.configuration :as cfg]
     [com.sixsq.slipstream.ssclj.resources.configuration-slipstream :as cfg-s]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as cfgt]
@@ -54,7 +55,7 @@
 
 (defn init-db-client
   []
-  (u/db-client-and-crud-impl))
+  (ud/db-client-and-crud-impl))
 
 (defn init-namespaces
   []

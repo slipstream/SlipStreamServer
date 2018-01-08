@@ -43,8 +43,6 @@
                    [org.apache.logging.log4j/log4j-web]
                    [org.elasticsearch.client/transport]
 
-
-
                    [ring/ring-json]
                    [superstring]
 
