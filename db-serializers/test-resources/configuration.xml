@@ -511,12 +511,6 @@
          </parameter>
       </entry>
       <entry>
-         <string>cyclone-fr1.update.clienturl</string>
-         <parameter name="cyclone-fr1.update.clienturl" description="URL pointing to the tarball containing the client for cyclone-fr1" category="cyclone-fr1" mandatory="true" type="String" readonly="false" order_="0" order="0">
-            <value><![CDATA[https://185.19.28.68/downloads/stratuslabclient.tgz]]></value>
-         </parameter>
-      </entry>
-      <entry>
          <string>ec2-ap-northeast-1.security.group</string>
          <parameter name="ec2-ap-northeast-1.security.group" description="Orchestrator security group" category="ec2-ap-northeast-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
             <value><![CDATA[default]]></value>
@@ -866,12 +860,6 @@
          </parameter>
       </entry>
       <entry>
-         <string>cyclone-fr1.marketplace.endpoint</string>
-         <parameter name="cyclone-fr1.marketplace.endpoint" description="Marketplace endpoint" category="cyclone-fr1" mandatory="true" type="String" readonly="false" order_="0" order="0">
-            <value><![CDATA[https://marketplace.stratuslab.eu/marketplace]]></value>
-         </parameter>
-      </entry>
-      <entry>
          <string>exoscale-ch-dk.update.clienturl</string>
          <parameter name="exoscale-ch-dk.update.clienturl" description="URL pointing to the tarball containing the client for exoscale-ch-dk" category="exoscale-ch-dk" mandatory="true" type="String" readonly="false" order_="950" order="950">
             <value><![CDATA[https://185.19.28.68/downloads/exoscaleclient.tgz]]></value>
@@ -949,12 +937,6 @@
          <string>nuvlabox-cecil-powell.orchestrator.imageid</string>
          <parameter name="nuvlabox-cecil-powell.orchestrator.imageid" description="Image Id of the orchestrator for nuvlabox-cecil-powell" category="nuvlabox-cecil-powell" mandatory="true" type="String" readonly="false" order_="15" order="15">
             <value><![CDATA[51407bacb9745864b663da2c6b1d9034]]></value>
-         </parameter>
-      </entry>
-      <entry>
-         <string>cyclone-fr1.max.iaas.workers</string>
-         <parameter name="cyclone-fr1.max.iaas.workers" description="Max number of concurrently provisioned VMs by orchestrator" category="cyclone-fr1" mandatory="true" type="String" readonly="false" order_="0" order="0">
-            <value><![CDATA[20]]></value>
          </parameter>
       </entry>
       <entry>
@@ -2765,12 +2747,6 @@ nuvlabox-demo:nuvlabox]]></value>
          </parameter>
       </entry>
       <entry>
-         <string>cyclone-fr1.orchestrator.instance.type</string>
-         <parameter name="cyclone-fr1.orchestrator.instance.type" description="Orchestrator instance type" category="cyclone-fr1" mandatory="true" type="String" readonly="false" order_="0" order="0">
-            <value><![CDATA[t1.micro]]></value>
-         </parameter>
-      </entry>
-      <entry>
          <string>cyfronet-pl1.network.private</string>
          <parameter name="cyfronet-pl1.network.private" description="Mapping for Private network" category="cyfronet-pl1" mandatory="true" type="String" readonly="false" order_="0" order="0">
             <value><![CDATA[private]]></value>
@@ -3011,21 +2987,9 @@ nuvlabox-demo:nuvlabox]]></value>
          </parameter>
       </entry>
       <entry>
-         <string>cyclone-fr1.orchestrator.imageid</string>
-         <parameter name="cyclone-fr1.orchestrator.imageid" description="Image Id of the orchestrator for cyclone-fr1" category="cyclone-fr1" mandatory="true" type="String" readonly="false" order_="0" order="0">
-            <value><![CDATA[N-Bu1h1jt3K8ODnCTw4JiyPaH5k]]></value>
-         </parameter>
-      </entry>
-      <entry>
          <string>cyfronet-pl1.service.type</string>
          <parameter name="cyfronet-pl1.service.type" description="Type-name of the service which provides the instances functionality" category="cyfronet-pl1" mandatory="true" type="String" readonly="false" order_="0" order="0">
             <value><![CDATA[compute]]></value>
-         </parameter>
-      </entry>
-      <entry>
-         <string>cyclone-fr1.endpoint</string>
-         <parameter name="cyclone-fr1.endpoint" description="Service endpoint for cyclone-fr1 (e.g. http://example.com:5000)" category="cyclone-fr1" mandatory="true" type="String" readonly="false" order_="0" order="0">
-            <value><![CDATA[https://cloud.lal.stratuslab.eu/one-proxy/xmlrpc]]></value>
          </parameter>
       </entry>
       <entry>
@@ -3039,12 +3003,6 @@ nuvlabox-demo:nuvlabox]]></value>
          <string>nuvlabox-max-born.quota.vm</string>
          <parameter name="nuvlabox-max-born.quota.vm" description="VM quota for nuvlabox-max-born (i.e. maximum number of VMs allowed)" category="nuvlabox-max-born" mandatory="true" type="String" readonly="false" order_="910" order="910">
             <value><![CDATA[8]]></value>
-         </parameter>
-      </entry>
-      <entry>
-         <string>cyclone-fr1.quota.vm</string>
-         <parameter name="cyclone-fr1.quota.vm" description="VM quota for cyclone-fr1 (i.e. maximum number of VMs allowed)" category="cyclone-fr1" mandatory="true" type="String" readonly="false" order_="0" order="0">
-            <value><![CDATA[20]]></value>
          </parameter>
       </entry>
       <entry>
@@ -3102,12 +3060,6 @@ nuvlabox-demo:nuvlabox]]></value>
          <string>ec2-us-west-2.security.groups</string>
          <parameter name="ec2-us-west-2.security.groups" description="Orchestrator security groups (comma separated list)" category="ec2-us-west-2" mandatory="true" type="String" readonly="false" order_="0" order="0">
             <value><![CDATA[slipstream_managed]]></value>
-         </parameter>
-      </entry>
-      <entry>
-         <string>cyclone-fr1.pdisk.endpoint</string>
-         <parameter name="cyclone-fr1.pdisk.endpoint" description="PDisk endpoint" category="cyclone-fr1" mandatory="true" type="String" readonly="false" order_="0" order="0">
-            <value><![CDATA[https://pdisk.lal.stratuslab.eu/pdisk]]></value>
          </parameter>
       </entry>
    </parameters>
