@@ -51,11 +51,11 @@ public class ConnectorFactoryTest extends ConnectorTestBase {
 
     @Test
     public void checkClassNameConversions() {
-        assertThat(ConnectorFactory.convertClassNameToServiceName("stratuslab"), equalTo("stratuslab"));
+        assertThat(ConnectorFactory.convertClassNameToServiceName("somecloud"), equalTo("somecloud"));
         assertThat(ConnectorFactory
-                        .convertClassNameToServiceName("com.sixsq.slipstream.connector.stratuslab.StratusLabConnector"),
-                equalTo("stratuslab"));
-        assertThat(ConnectorFactory.convertClassNameToServiceName("stratuslab.alpha"), equalTo("stratuslab"));
+                        .convertClassNameToServiceName("com.sixsq.slipstream.connector.somecloud.SomeCloudConnector"),
+                equalTo("somecloud"));
+        assertThat(ConnectorFactory.convertClassNameToServiceName("somecloud.alpha"), equalTo("somecloud"));
         assertThat(ConnectorFactory.convertClassNameToServiceName("com.sixsq.slipstream.connector.aws.Ec2Connector"),
                 equalTo("ec2"));
         assertThat(ConnectorFactory.convertClassNameToServiceName("aws.Ec2Connector"), equalTo("ec2"));
