@@ -129,7 +129,7 @@ class MainProgram(CommandBase):
 
     def update_user_pass(self, username, client):
         print('->>> update user pass for %s' % username)
-        pswd = self.get_user_pass(username)
+        pswd = self.get_user_pass(username).strip()
         client.put(self.options.endpoint + '/api/user/%s' % username,
                    '{"password": "%s", "id": "user/%s"}' % (pswd, username),
                    contentType='application/json', retry=False)
