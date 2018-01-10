@@ -26,6 +26,7 @@ import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.initialstartup.FileLoader;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.User.State;
 import com.sixsq.slipstream.persistence.UserParameter;
@@ -34,6 +35,7 @@ import com.sixsq.slipstream.ssclj.app.SscljTestServer;
 import com.sixsq.slipstream.util.ResourceTestBase;
 import com.sixsq.slipstream.util.SerializationUtil;
 import com.sixsq.slipstream.util.XmlUtil;
+import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -44,6 +46,9 @@ import org.restlet.Response;
 import org.restlet.data.Form;
 import org.restlet.data.Status;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
@@ -54,6 +59,8 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class UserResourceTest extends ResourceTestBase {
 
@@ -493,6 +500,26 @@ public class UserResourceTest extends ResourceTestBase {
 		UserParameter systemParameter = user
 				.getParameter("slipstream.support.email");
 		assertNotNull(systemParameter);
+	}
+
+	@Test
+	public void xmlToUser() {
+		String userXml = fileToXml("/config/users/test.xml");
+		User user = UserResource.xmlToUser(userXml);
+		assertTrue("test".equals(user.getName()));
+		assertTrue("user/test".equals(user.getResourceUri()));
+	}
+
+	private String fileToXml(String fName) {
+		InputStream stream = getClass().getResourceAsStream(fName);
+		assertNotNull("Failed to find test xml file.", stream);
+		String xml = "";
+		try {
+			xml = IOUtils.toString(stream);
+		} catch (IOException e) {
+			fail("Failed to load test xml file with: " + e.getMessage());
+		}
+		return xml;
 	}
 
 	private Request createDeleteRequest(User targetUser, User user)

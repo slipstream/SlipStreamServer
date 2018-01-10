@@ -131,4 +131,9 @@ public class CljElasticsearchHelper {
         return scps;
     }
 
+    public static void dumpEsDb(String resource) {
+        requireNs("com.sixsq.slipstream.db.serializers.utils");
+        Clojure.var("com.sixsq.slipstream.db.serializers.utils", "dump").invoke(resource);
+    }
+
 }
