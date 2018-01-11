@@ -715,7 +715,7 @@ public class User extends Metadata {
         String authn = user.getName() + " USER";
         Response resp = SscljProxy.get(RESOURCE_USER_PARAMS_COLLECTION, authn);
         UserGeneralParamsCollection pColl = UserGeneralParamsCollection.fromJson(resp.getEntityAsText());
-        if (null == pColl || pColl.getCount() == 0) {
+        if (null == pColl || pColl.getCount() == null || pColl.getCount() == 0) {
             return null;
         } else if (pColl.getCount() == 1) {
             return pColl.getUserParams().get(0);

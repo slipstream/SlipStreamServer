@@ -330,16 +330,14 @@ public class ServiceConfiguration extends
 
 	}
 
-	private static String CLJ_NS_SERVICE_CONFIG = CljElasticsearchHelper.NS_SERIALIZERS_SERVICE_CONFIG;
-
 	public static ServiceConfiguration load() {
-		IFn load = CljElasticsearchHelper.getLoadFn(CLJ_NS_SERVICE_CONFIG);
+		IFn load = CljElasticsearchHelper.getLoadFn(CljElasticsearchHelper.NS_SERIALIZERS_SERVICE_CONFIG);
 		return (ServiceConfiguration) load.invoke();
 	}
 
 	public ServiceConfiguration store() {
 		validate();
-		IFn store = CljElasticsearchHelper.getStoreFn(CLJ_NS_SERVICE_CONFIG);
+		IFn store = CljElasticsearchHelper.getStoreFn(CljElasticsearchHelper.NS_SERIALIZERS_SERVICE_CONFIG);
 		return (ServiceConfiguration) store.invoke(this);
 	}
 

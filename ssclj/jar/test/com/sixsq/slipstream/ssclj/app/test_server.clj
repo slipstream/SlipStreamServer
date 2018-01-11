@@ -5,7 +5,6 @@
     [com.sixsq.slipstream.dbtest.es.utils :as esut]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as zku]
-    [com.sixsq.slipstream.ssclj.app.server :as server]
     [metrics.core :refer [remove-all-metrics]]
     [sixsq.slipstream.server.ring-container :as rc]
     [zookeeper :as zk])
