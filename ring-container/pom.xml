@@ -3,14 +3,14 @@
 
   <artifactId>slipstream-ring-container-dep</artifactId>
   <packaging>pom</packaging>
-  <version>3.42-SNAPSHOT</version>
+  <version>3.42</version>
   <name>SlipStreamServer/ring-container</name>
   <url>http://sixsq.com</url>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.42-SNAPSHOT</version>
+    <version>3.42</version>
   </parent>
 
   <licenses>

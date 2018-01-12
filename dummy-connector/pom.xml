@@ -3,14 +3,14 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>SlipStreamConnector-Dummy</artifactId>
-  <version>3.42-SNAPSHOT</version>
+  <version>3.42</version>
   <packaging>pom</packaging>
   <name>SlipStreamConnectors/dummy</name>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.42-SNAPSHOT</version>
+    <version>3.42</version>
   </parent>
 
   <modules>
