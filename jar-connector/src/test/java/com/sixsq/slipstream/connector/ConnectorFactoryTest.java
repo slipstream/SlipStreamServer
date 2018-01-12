@@ -21,6 +21,8 @@ package com.sixsq.slipstream.connector;
  */
 
 import com.sixsq.slipstream.util.CommonTestUtil;
+import org.junit.After;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -33,10 +35,32 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class ConnectorFactoryTest extends ConnectorTestBase {
+
+    @BeforeClass
+    public static void beforeClass() {
+        CommonTestUtil.setCloudConnector("");
+    }
+
+    @After
+    public void afterEach() {
+        CommonTestUtil.setCloudConnector("");
+    }
+
+    @Test
+    public void cloudNameFromInstanceNameTest() {
+        CommonTestUtil.setCloudConnector("c1, c1-instance1:c1 , c2");
+        assertNull(ConnectorFactory.cloudNameFromInstanceName(""));
+        assertNull(ConnectorFactory.cloudNameFromInstanceName(" "));
+        assertNull(ConnectorFactory.cloudNameFromInstanceName("does-not-exist"));
+        assertTrue("c1".equals(ConnectorFactory.cloudNameFromInstanceName("c1-instance1")));
+        assertTrue("c1".equals(ConnectorFactory.cloudNameFromInstanceName("c1")));
+        assertTrue("c2".equals(ConnectorFactory.cloudNameFromInstanceName("c2")));
+    }
 
     @Test
     public void splitConnectorClassNames() {
@@ -51,11 +75,11 @@ public class ConnectorFactoryTest extends ConnectorTestBase {
 
     @Test
     public void checkClassNameConversions() {
-        assertThat(ConnectorFactory.convertClassNameToServiceName("stratuslab"), equalTo("stratuslab"));
+        assertThat(ConnectorFactory.convertClassNameToServiceName("somecloud"), equalTo("somecloud"));
         assertThat(ConnectorFactory
-                        .convertClassNameToServiceName("com.sixsq.slipstream.connector.stratuslab.StratusLabConnector"),
-                equalTo("stratuslab"));
-        assertThat(ConnectorFactory.convertClassNameToServiceName("stratuslab.alpha"), equalTo("stratuslab"));
+                        .convertClassNameToServiceName("com.sixsq.slipstream.connector.somecloud.SomeCloudConnector"),
+                equalTo("somecloud"));
+        assertThat(ConnectorFactory.convertClassNameToServiceName("somecloud.alpha"), equalTo("somecloud"));
         assertThat(ConnectorFactory.convertClassNameToServiceName("com.sixsq.slipstream.connector.aws.Ec2Connector"),
                 equalTo("ec2"));
         assertThat(ConnectorFactory.convertClassNameToServiceName("aws.Ec2Connector"), equalTo("ec2"));

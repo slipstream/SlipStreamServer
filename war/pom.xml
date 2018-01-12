@@ -9,7 +9,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.42-SNAPSHOT</version>
+    <version>3.43-SNAPSHOT</version>
   </parent>
   
   <dependencies>
@@ -34,36 +34,82 @@
 
 <!--
   These cannot be added to WAR because it creates a circular dependency
-  between the SlipStreamServer module (which contains the connector 
+  between the SlipStreamServer module (which contains the connector
   interface) and the SlipStreamConnector module.
 
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>SlipStreamConnector-CloudStack-jar</artifactId>
+      <artifactId>SlipStreamConnector-OTC-conf</artifactId>
       <version>${project.version}</version>
     </dependency>
-
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>SlipStreamConnector-Okeanos-jar</artifactId>
+      <artifactId>SlipStreamConnector-OTC-jar</artifactId>
       <version>${project.version}</version>
     </dependency>
-
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamConnector-OpenNebula-conf</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamConnector-OpenNebula-jar</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamConnector-OpenStack-conf</artifactId>
+      <version>${project.version}</version>
+    </dependency>
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
       <artifactId>SlipStreamConnector-OpenStack-jar</artifactId>
       <version>${project.version}</version>
     </dependency>
-
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamConnector-NuvlaBox-conf</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamConnector-NuvlaBox-java-jar</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamConnector-EC2-conf</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamConnector-EC2-java-jar</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamConnector-CloudStack-conf</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamConnector-CloudStack-jar</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamConnector-Exoscale-conf</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamConnector-Exoscale-jar</artifactId>
+      <version>${project.version}</version>
+    </dependency>
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
       <artifactId>SlipStreamConnector-PhysicalHost-jar</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>SlipStreamConnector-StratusLab-jar</artifactId>
       <version>${project.version}</version>
     </dependency>
 -->
@@ -242,12 +288,6 @@
           <dependency>
               <groupId>com.sixsq.slipstream</groupId>
               <artifactId>SlipStreamConnector-PhysicalHost-jar</artifactId>
-              <version>${project.version}</version>
-          </dependency>
-
-          <dependency>
-              <groupId>com.sixsq.slipstream</groupId>
-              <artifactId>SlipStreamConnector-StratusLab-jar</artifactId>
               <version>${project.version}</version>
           </dependency>
 

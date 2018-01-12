@@ -26,8 +26,6 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 
 import java.io.File;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -46,39 +44,18 @@ public class CljElasticsearchHelper {
         logger.info("Creating DB client and setting ES DB CRUD implementation.");
         requireNs(NS_SERIALIZERS_UTILS);
         Clojure.var(NS_SERIALIZERS_UTILS, "db-client-and-crud-impl").invoke();
-        initializeConnectorTemplates();
-    }
-
-    /**
-     * Creates
-     * - local ES node
-     * - resources index
-     * Initializes
-     * - ServiceConfiguration document
-     * - resource templates (including connector templates).
-     */
-    public static void createAndInitTestDb() {
-        logger.info("Creating test DB node/client and setting ES DB CRUD implementation.");
-        requireNs(NS_SERIALIZERS_UTILS);
-        Clojure.var(NS_SERIALIZERS_UTILS, "test-db-client-and-crud-impl").invoke();
-        initTestDb();
+        initializeResourceTemplates();
     }
 
     public static void initTestDb() {
         addDefaultServiceConfigToDb();
-        initializeConnectorTemplates();
+        initializeResourceTemplates();
         pushServerConfig();
     }
 
-    public static void stopAndUnbindTestDb() {
-        logger.info("Stop and unbind test ES DB.");
+    public static void initializeResourceTemplates() {
         requireNs(NS_SERIALIZERS_UTILS);
-        Clojure.var(NS_SERIALIZERS_UTILS, "test-db-unset-client-and-impl").invoke();
-    }
-
-    public static void initializeConnectorTemplates() {
-        requireNs(NS_SERIALIZERS_UTILS);
-        logger.info("Initializing connector templates.");
+        logger.info("Initializing resource templates.");
         Clojure.var(NS_SERIALIZERS_UTILS, "initialize").invoke();
     }
 
@@ -152,6 +129,11 @@ public class CljElasticsearchHelper {
             logger.warning("Loaded 0 connector parameters for connector '" + connectorName + "'");
         }
         return scps;
+    }
+
+    public static void dumpEsDb(String resource) {
+        requireNs("com.sixsq.slipstream.db.serializers.utils");
+        Clojure.var("com.sixsq.slipstream.db.serializers.utils", "dump").invoke(resource);
     }
 
 }

@@ -1,0 +1,1225 @@
+<user deleted="false" resourceUri="user/test" name="test" email="dev@sixsq.com" firstName="Test" lastName="User" organization="SixSq" roles="" issuper="false" state="ACTIVE" lastOnline="2017-08-07 09:54:47.914 UTC" lastExecute="2017-08-07 09:48:43.442 UTC" creation="2013-11-20 11:28:27.651 UTC">
+   <parameters class="org.hibernate.collection.internal.PersistentMap">
+      <entry>
+         <string>ifb-bistro-iphc.username</string>
+         <parameter name="ifb-bistro-iphc.username" description="Username" category="ifb-bistro-iphc" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <value><![CDATA[sixsqtest]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-christiane-nusslein-volhard.quota.vm</string>
+         <parameter name="nuvlabox-christiane-nusslein-volhard.quota.vm" description="Number of VMs the user can start for this cloud" category="nuvlabox-christiane-nusslein-volhard" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-dk.username</string>
+         <parameter name="exoscale-ch-dk.username" description="API Key" category="exoscale-ch-dk" mandatory="true" type="RestrictedString" readonly="false" order_="10" order="10">
+            <instructions><![CDATA[On the Exoscale web interface you can find this information on <code>Account > Profile > API Keys</code>]]></instructions>
+            <value><![CDATA[MEKtgh8swrU1wVU4Qf7aYKFVVxUOB_cLvsoW25pQMsJxYI6J6Y4UuK-SfeFdaZs-l8YEnblF3WXd0_4t9igmsA]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>open-telekom-de1.domain.name</string>
+         <parameter name="open-telekom-de1.domain.name" description="Domain name" category="open-telekom-de1" mandatory="true" type="String" readonly="false" order_="40" order="40">
+            <instructions><![CDATA[To find the domain name, login to the OTC console, then go to 'My Credential' and copy the value next to 'Domain Name']]></instructions>
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr2.password</string>
+         <parameter name="cyclone-fr2.password" description="Password" category="cyclone-fr2" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[p0ld5wiZZa0]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ifb-bird-stack.quota.vm</string>
+         <parameter name="ifb-bird-stack.quota.vm" description="Number of VMs the user can start for this cloud" category="ifb-bird-stack" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-bertil-ohlin.password</string>
+         <parameter name="nuvlabox-bertil-ohlin.password" description="NuvlaBox account password" category="nuvlabox-bertil-ohlin" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[4yBv5JSDDPPQH58G1rUonUeN0WCY2iEj]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>scissor-fr2.password</string>
+         <parameter name="scissor-fr2.password" description="Password" category="scissor-fr2" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[qns4d3iuiyft]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-christiane-n-volhard.quota.vm</string>
+         <parameter name="nuvlabox-christiane-n-volhard.quota.vm" description="Number of VMs the user can start for this cloud" category="nuvlabox-christiane-n-volhard" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ultimum-cz1.quota.vm</string>
+         <parameter name="ultimum-cz1.quota.vm" description="Number of VMs the user can start for this cloud" category="ultimum-cz1" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[10]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>eo-cloudferro-pl1.tenant.name</string>
+         <parameter name="eo-cloudferro-pl1.tenant.name" description="Project name (Tenant name)" category="eo-cloudferro-pl1" mandatory="true" type="String" readonly="false" order_="30" order="30">
+            <value><![CDATA[cloud_00252 project_with_eo]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-demo.username</string>
+         <parameter name="nuvlabox-demo.username" description="NuvlaBox account username" category="nuvlabox-demo" mandatory="true" type="RestrictedString" readonly="false" order_="10" order="10">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-eu-west.secret.key</string>
+         <parameter name="ec2-eu-west.secret.key" description="Secret key" category="ec2-eu-west" mandatory="true" type="Password" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[This is required in order to be able to deploy to this EC2 cloud. You can find the <code>secret key</code> by logging into the AWS Console and going to the Security Credentials page.]]></instructions>
+            <value><![CDATA[EIhlrL2xhAg6NVuR9g8jbt2VK6EUiBVj31otNQzB]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-southeast-1.secret.key</string>
+         <parameter name="ec2-ap-southeast-1.secret.key" description="Secret key" category="ec2-ap-southeast-1" mandatory="true" type="Password" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[This is required in order to be able to deploy to this EC2 cloud. You can find the <code>secret key</code> by logging into the AWS Console and going to the Security Credentials page.]]></instructions>
+            <value><![CDATA[EIhlrL2xhAg6NVuR9g8jbt2VK6EUiBVj31otNQzB]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>open-telekom-de1.username</string>
+         <parameter name="open-telekom-de1.username" description="User Name" category="open-telekom-de1" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <instructions><![CDATA[To find your username, login to the OTC console, then go to 'My Credential' and copy the full value of 'User Name']]></instructions>
+            <value><![CDATA[14768005 OTC00000000001000003820]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-stanley-cohen.username</string>
+         <parameter name="nuvlabox-stanley-cohen.username" description="NuvlaBox account username" category="nuvlabox-stanley-cohen" mandatory="true" type="RestrictedString" readonly="false" order_="10" order="10">
+            <value><![CDATA[ssuser]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-scissor1.username</string>
+         <parameter name="nuvlabox-scissor1.username" description="NuvlaBox account username" category="nuvlabox-scissor1" mandatory="true" type="RestrictedString" readonly="false" order_="10" order="10">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>teidehpc-es-tfs1.username</string>
+         <parameter name="teidehpc-es-tfs1.username" description="Username" category="teidehpc-es-tfs1" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <value><![CDATA[sixsq]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-eu-central-1.secret.key</string>
+         <parameter name="ec2-eu-central-1.secret.key" description="Secret key" category="ec2-eu-central-1" mandatory="true" type="Password" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[This is required in order to be able to deploy to this EC2 cloud. You can find the <code>secret key</code> by logging into the AWS Console and going to the Security Credentials page.]]></instructions>
+            <value><![CDATA[EIhlrL2xhAg6NVuR9g8jbt2VK6EUiBVj31otNQzB]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ifb-core-pilot.domain.name</string>
+         <parameter name="ifb-core-pilot.domain.name" description="Domain" category="ifb-core-pilot" mandatory="true" type="String" readonly="false" order_="40" order="40">
+            <instructions><![CDATA[Only useful if Identity API v3]]></instructions>
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-west-2.access.id</string>
+         <parameter name="ec2-us-west-2.access.id" description="Access id" category="ec2-us-west-2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[This is required in order to be able to deploy to this EC2 cloud. You can find the <code>access id</code> by logging into the AWS Console and going to the Security Credentials page.]]></instructions>
+            <value><![CDATA[AKIAI4RSKZMH3S2UAOEA]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyfronet-pl1.tenant.name</string>
+         <parameter name="cyfronet-pl1.tenant.name" description="Project name (Tenant name)" category="cyfronet-pl1" mandatory="true" type="String" readonly="false" order_="30" order="30">
+            <value><![CDATA[sixsq]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-de1.tenant.name</string>
+         <parameter name="cyclone-de1.tenant.name" description="Project name (Tenant name)" category="cyclone-de1" mandatory="true" type="String" readonly="false" order_="30" order="30">
+            <value><![CDATA[T050-0001_CYCLONE]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-sa-east-1.access.id</string>
+         <parameter name="ec2-sa-east-1.access.id" description="Access id" category="ec2-sa-east-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[This is required in order to be able to deploy to this EC2 cloud. You can find the <code>access id</code> by logging into the AWS Console and going to the Security Credentials page.]]></instructions>
+            <value><![CDATA[AKIAI4RSKZMH3S2UAOEA]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-it1.password</string>
+         <parameter name="cyclone-it1.password" description="Password" category="cyclone-it1" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-henry-dunant.quota.vm</string>
+         <parameter name="nuvlabox-henry-dunant.quota.vm" description="Number of VMs the user can start for this cloud" category="nuvlabox-henry-dunant" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-gva.username</string>
+         <parameter name="exoscale-ch-gva.username" description="API Key" category="exoscale-ch-gva" mandatory="true" type="RestrictedString" readonly="false" order_="10" order="10">
+            <instructions><![CDATA[On the Exoscale web interface you can find this information on <code>Account > Profile > API Keys</code>]]></instructions>
+            <value><![CDATA[MEKtgh8swrU1wVU4Qf7aYKFVVxUOB_cLvsoW25pQMsJxYI6J6Y4UuK-SfeFdaZs-l8YEnblF3WXd0_4t9igmsA]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>General.default.cloud.service</string>
+         <parameter name="General.default.cloud.service" description="Default Cloud" category="General" mandatory="true" type="Enum" readonly="false" order_="10" order="10">
+            <instructions><![CDATA[Select the cloud that you want to use as the default.]]></instructions>
+            <enumValues length="45">
+               <string>eo-cesnet-cz1</string>
+               <string>nuvlabox-arthur-harden</string>
+               <string>nuvlabox-carl-cori</string>
+               <string>ifb-bird-stack</string>
+               <string>ifb-core-pilot</string>
+               <string>nuvlabox-albert-einstein</string>
+               <string>cyclone-fr2</string>
+               <string>ec2-ap-northeast-1</string>
+               <string>open-telekom-de1</string>
+               <string>nuvlabox-henry-dunant</string>
+               <string>nuvlabox-scissor1</string>
+               <string>exoscale-ch-dk</string>
+               <string>nuvlabox-scissor2</string>
+               <string>ifb-genouest-genostack</string>
+               <string>nuvlabox-bertil-ohlin</string>
+               <string>teidehpc-es-tfs1</string>
+               <string>ec2-ap-southeast-2</string>
+               <string>ec2-us-west-1</string>
+               <string>ec2-us-west-2</string>
+               <string>nuvlabox-james-chadwick</string>
+               <string>ec2-ap-southeast-1</string>
+               <string>eo-cloudferro-pl1</string>
+               <string>nuvlabox-christiane-n-volhard</string>
+               <string>ec2-sa-east-1</string>
+               <string>cyclone-de1</string>
+               <string>nuvlabox-stanley-cohen</string>
+               <string>nuvlabox-max-planck</string>
+               <string>ec2-eu-west-2</string>
+               <string>ifb-bistro-iphc</string>
+               <string>cyclone-tb-it1</string>
+               <string>nuvlabox-yves-chauvin</string>
+               <string>ec2-eu-west</string>
+               <string>ec2-eu-central-1</string>
+               <string>ec2-us-east-1</string>
+               <string>nuvlabox-max-born</string>
+               <string>atos-es1</string>
+               <string>nuvlabox-cecil-powell</string>
+               <string>advania-se1</string>
+               <string>nuvlabox-felix-bloch</string>
+               <string>ifb-prabi-girofle</string>
+               <string>scissor-fr1</string>
+               <string>scissor-fr2</string>
+               <string>exoscale-ch-gva</string>
+            </enumValues>
+            <value><![CDATA[exoscale-ch-gva]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-cecil-powell.password</string>
+         <parameter name="nuvlabox-cecil-powell.password" description="NuvlaBox account password" category="nuvlabox-cecil-powell" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[CGmAarPGA7nNpa3irjwA2bhsxO3nQgp3]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-scissor2.password</string>
+         <parameter name="nuvlabox-scissor2.password" description="NuvlaBox account password" category="nuvlabox-scissor2" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-gva.quota.vm</string>
+         <parameter name="exoscale-ch-gva.quota.vm" description="Number of VMs the user can start for this cloud" category="exoscale-ch-gva" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr1.password</string>
+         <parameter name="cyclone-fr1.password" description="StratusLab account password" category="cyclone-fr1" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[UZgsxOjJSxA2]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>eo-cesnet-cz1.quota.vm</string>
+         <parameter name="eo-cesnet-cz1.quota.vm" description="Number of VMs the user can start for this cloud" category="eo-cesnet-cz1" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-yves-chauvin.password</string>
+         <parameter name="nuvlabox-yves-chauvin.password" description="NuvlaBox account password" category="nuvlabox-yves-chauvin" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[eGOO2SSNU2CU7QKfxTXEVNQNJfRfCsjv]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-eu-central-1.access.id</string>
+         <parameter name="ec2-eu-central-1.access.id" description="Access id" category="ec2-eu-central-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[This is required in order to be able to deploy to this EC2 cloud. You can find the <code>access id</code> by logging into the AWS Console and going to the Security Credentials page.]]></instructions>
+            <value><![CDATA[AKIAI4RSKZMH3S2UAOEA]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-henry-dunant.username</string>
+         <parameter name="nuvlabox-henry-dunant.username" description="NuvlaBox account username" category="nuvlabox-henry-dunant" mandatory="true" type="RestrictedString" readonly="false" order_="10" order="10">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyfronet-pl1.quota.vm</string>
+         <parameter name="cyfronet-pl1.quota.vm" description="Number of VMs the user can start for this cloud" category="cyfronet-pl1" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ifb-genouest-genostack.password</string>
+         <parameter name="ifb-genouest-genostack.password" description="Password" category="ifb-genouest-genostack" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[mTt4qjiRE7L9PQuJT3FjJaFe7DA=]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-northeast-1.quota.vm</string>
+         <parameter name="ec2-ap-northeast-1.quota.vm" description="Number of VMs the user can start for this cloud" category="ec2-ap-northeast-1" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[6]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-tb-it1.password</string>
+         <parameter name="cyclone-tb-it1.password" description="Password" category="cyclone-tb-it1" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[charlesl]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ifb-genouest-genostack.tenant.name</string>
+         <parameter name="ifb-genouest-genostack.tenant.name" description="Project name (Tenant name)" category="ifb-genouest-genostack" mandatory="true" type="String" readonly="false" order_="30" order="30">
+            <value><![CDATA[biosphere]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-southeast-2.quota.vm</string>
+         <parameter name="ec2-ap-southeast-2.quota.vm" description="Number of VMs the user can start for this cloud" category="ec2-ap-southeast-2" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[6]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-albert-einstein.username</string>
+         <parameter name="nuvlabox-albert-einstein.username" description="NuvlaBox account username" category="nuvlabox-albert-einstein" mandatory="true" type="RestrictedString" readonly="false" order_="10" order="10">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr1.username</string>
+         <parameter name="cyclone-fr1.username" description="StratusLab account username" category="cyclone-fr1" mandatory="true" type="RestrictedString" readonly="false" order_="10" order="10">
+            <value><![CDATA[sixsqdev]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-albert-einstein.password</string>
+         <parameter name="nuvlabox-albert-einstein.password" description="NuvlaBox account password" category="nuvlabox-albert-einstein" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[ePBsKP1t8A2b8dNNEgmx7hveSGXslWJ1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>eo-cloudferro-pl1.username</string>
+         <parameter name="eo-cloudferro-pl1.username" description="Username" category="eo-cloudferro-pl1" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <value><![CDATA[support@sixsq.com]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-east-1.access.id</string>
+         <parameter name="ec2-us-east-1.access.id" description="Access id" category="ec2-us-east-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[This is required in order to be able to deploy to this EC2 cloud. You can find the <code>access id</code> by logging into the AWS Console and going to the Security Credentials page.]]></instructions>
+            <value><![CDATA[AKIAI4RSKZMH3S2UAOEA]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-southeast-2.access.id</string>
+         <parameter name="ec2-ap-southeast-2.access.id" description="Access id" category="ec2-ap-southeast-2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[This is required in order to be able to deploy to this EC2 cloud. You can find the <code>access id</code> by logging into the AWS Console and going to the Security Credentials page.]]></instructions>
+            <value><![CDATA[AKIAI4RSKZMH3S2UAOEA]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>scissor-fr1.username</string>
+         <parameter name="scissor-fr1.username" description="Username" category="scissor-fr1" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <value><![CDATA[ssuser]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr2.quota.vm</string>
+         <parameter name="cyclone-fr2.quota.vm" description="Number of VMs the user can start for this cloud" category="cyclone-fr2" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[50]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-scissor2.username</string>
+         <parameter name="nuvlabox-scissor2.username" description="NuvlaBox account username" category="nuvlabox-scissor2" mandatory="true" type="RestrictedString" readonly="false" order_="10" order="10">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ifb-genouest-genostack.quota.vm</string>
+         <parameter name="ifb-genouest-genostack.quota.vm" description="Number of VMs the user can start for this cloud" category="ifb-genouest-genostack" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>scissor-fr2.quota.vm</string>
+         <parameter name="scissor-fr2.quota.vm" description="Number of VMs the user can start for this cloud" category="scissor-fr2" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[16]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-eu-west-2.secret.key</string>
+         <parameter name="ec2-eu-west-2.secret.key" description="Secret key" category="ec2-eu-west-2" mandatory="true" type="Password" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[This is required in order to be able to deploy to this EC2 cloud. You can find the <code>secret key</code> by logging into the AWS Console and going to the Security Credentials page.]]></instructions>
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ultimum-cz1.domain.name</string>
+         <parameter name="ultimum-cz1.domain.name" description="Domain" category="ultimum-cz1" mandatory="true" type="String" readonly="false" order_="40" order="40">
+            <instructions><![CDATA[Only useful if Identity API v3]]></instructions>
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-eu-west-2.access.id</string>
+         <parameter name="ec2-eu-west-2.access.id" description="Access id" category="ec2-eu-west-2" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[This is required in order to be able to deploy to this EC2 cloud. You can find the <code>access id</code> by logging into the AWS Console and going to the Security Credentials page.]]></instructions>
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>atos-es1.username</string>
+         <parameter name="atos-es1.username" description="StratusLab account username" category="atos-es1" mandatory="true" type="RestrictedString" readonly="false" order_="10" order="10">
+            <value><![CDATA[sixsquser]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-tb-it1.username</string>
+         <parameter name="cyclone-tb-it1.username" description="Username" category="cyclone-tb-it1" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <value><![CDATA[Charles]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ultimum-cz1.username</string>
+         <parameter name="ultimum-cz1.username" description="Username" category="ultimum-cz1" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <value><![CDATA[meb@sixsq.com]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-southeast-1.quota.vm</string>
+         <parameter name="ec2-ap-southeast-1.quota.vm" description="Number of VMs the user can start for this cloud" category="ec2-ap-southeast-1" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[6]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-dk.quota.vm</string>
+         <parameter name="exoscale-ch-dk.quota.vm" description="Number of VMs the user can start for this cloud" category="exoscale-ch-dk" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-tb-it1.tenant.name</string>
+         <parameter name="cyclone-tb-it1.tenant.name" description="Project name (Tenant name)" category="cyclone-tb-it1" mandatory="true" type="String" readonly="false" order_="30" order="30">
+            <value><![CDATA[CYCLONE]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-yves-chauvin.quota.vm</string>
+         <parameter name="nuvlabox-yves-chauvin.quota.vm" description="Number of VMs the user can start for this cloud" category="nuvlabox-yves-chauvin" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ultimum-cz1.tenant.name</string>
+         <parameter name="ultimum-cz1.tenant.name" description="Project name (Tenant name)" category="ultimum-cz1" mandatory="true" type="String" readonly="false" order_="30" order="30">
+            <value><![CDATA[meb@sixsq.com]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>General.ssh.public.key</string>
+         <parameter name="General.ssh.public.key" description="SSH Public Key(s) (one per line)" category="General" mandatory="true" type="RestrictedText" readonly="false" order_="50" order="50">
+            <instructions><![CDATA[Warning: Some clouds may take into account only the first key until SlipStream bootstraps the machine.]]></instructions>
+            <value><![CDATA[ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDZQFRYe7v6CD1NQfOHBtERHc50am2mOXKggRmN5avvDKSLXVaintBzDVUT8XfAmTKFTVRgjCb5irKykkW24veC+HwVGgXrxQgiQlpVoPmHoTx1ORTGzNKgg3Tl2KZDniX28TC9K7X5Zw3KInr7jsXQdqv0j6PUx0wFbq86C3XjmJlgQXpD/k65DPL5QWYUzOcrZPkDE+qUPKzPmX/FwLeyXrJAtl4H8hPBy+OD9bCWIV++VwZprPaIiGkI1uuDVO6M3OXAz9F73WHZpo56aITFn5QQ2K8wUavmpBywJf7BM57QwLa4fh5T2MH/IXhSSJqjiVR7flb6VmlkpxY9U6PN lionel
+
+ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAr5rru3joRUQ6UE4fYRfNZWkWiwIRtOEpo5FPjTK9LYSX1Q2U3xfCfOesuA+QXLh4mzfzewNDUDYgIPqcIQw4beaDd7ppzf9Qgs4CEZ4i+ksXIeRgzSyehMWQ9paGZMhtUnk+cXcqJKARbl98sPd3jURyVwd/TQVTa4MajWYaK7CJVcerEnvvmpZ4j19j66p0e+ubVZTYaI9kVTXeSgB3njl89eK8xVvSzWeTbPdo83+C5HVbrFT78WPAOBKtZpqUIhzQNZKJ9vfxpQnaoSdaZkUkBmXH/lNZUYMyu5u1CPnfB4712e94QaFXKdj3nMv2xRmwbzEkF4L95nvxqXd2Aw== kvs
+
+ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAwSwt4WTABnlabGt62u1fjXaw7zhMKX/bm1++m/cLPxgTiRJLor/K2QW10l0lE5/yOU/OQV8KGbKu+xemfkkXdIMzXNQFaD+GsT1GrbUayl5v0DiBVS24Hd8j8TmdIzpldxWEYvAPyjurUsNGwn72XMTMhNIC2CVvu205lZVjdOTs75Wjvnas/0/xvpuzYYFGVjCd5dJJNIwlglp/8a68Lldl/MRaxGbKnYGRqvuV9SXQNaOlfYLqcok9PynEvBTA+MSn1HPvHY0EGqyYGJEmlFTCM2chbKPSo1jwnXgcxAzW2Olvkl9720kOOp7XVOlLdGIMqT6IX1U8JBq2tE/Fuw== loomis
+
+ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAnRxAn1QdEdHEjgerzI3aBBgezjjG4Zv3FxVRgBuzgog2Px8Zti6g74bjs+iNgabduLZCskc87ZHOb97iDktefrOMrucBqkWVvnC5gFxI4lD8EhrIS0MyqIHm+Flbf2Sr6gjcqCttT1bX7s9vL3LMNw9WZ+6brsufBVg3rexjk2GvbqHcmWV98I5v+KIoSCUwmN2o+ENTL8qWCOO8JPqHmyF9qJYudEC1RU0alUcA5UVEJYeGsX13unhNEDeZIvAObAh/uIhA6V7GPg803JGwmOClQ0BIPVBudv2mHHQFTms/6NBqK10v5bEGO47NkJb8c+K8sePufd71PxSu77MH4Q== khaled]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-felix-bloch.quota.vm</string>
+         <parameter name="nuvlabox-felix-bloch.quota.vm" description="Number of VMs the user can start for this cloud" category="nuvlabox-felix-bloch" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-james-chadwick.password</string>
+         <parameter name="nuvlabox-james-chadwick.password" description="NuvlaBox account password" category="nuvlabox-james-chadwick" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[lqnE2abhQulIe1rkLJPOtp2mpMyTtbMb]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>eo-cloudferro-pl1.password</string>
+         <parameter name="eo-cloudferro-pl1.password" description="Password" category="eo-cloudferro-pl1" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[siXsQ%rocKs!]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>scissor-fr1.password</string>
+         <parameter name="scissor-fr1.password" description="Password" category="scissor-fr1" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[rgz2yj23k7oi]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-carl-cori.quota.vm</string>
+         <parameter name="nuvlabox-carl-cori.quota.vm" description="Number of VMs the user can start for this cloud" category="nuvlabox-carl-cori" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-arthur-harden.quota.vm</string>
+         <parameter name="nuvlabox-arthur-harden.quota.vm" description="Number of VMs the user can start for this cloud" category="nuvlabox-arthur-harden" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>advania-se1.quota.vm</string>
+         <parameter name="advania-se1.quota.vm" description="Number of VMs the user can start for this cloud" category="advania-se1" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-de1.quota.vm</string>
+         <parameter name="cyclone-de1.quota.vm" description="Number of VMs the user can start for this cloud" category="cyclone-de1" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>atos-es1.password</string>
+         <parameter name="atos-es1.password" description="StratusLab account password" category="atos-es1" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[757x6q2xso2d]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ifb-bistro-iphc.password</string>
+         <parameter name="ifb-bistro-iphc.password" description="Password" category="ifb-bistro-iphc" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[h9WezlKz6GFow]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-sa-east-1.quota.vm</string>
+         <parameter name="ec2-sa-east-1.quota.vm" description="Number of VMs the user can start for this cloud" category="ec2-sa-east-1" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[6]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-it1.quota.vm</string>
+         <parameter name="cyclone-it1.quota.vm" description="Number of VMs the user can start for this cloud" category="cyclone-it1" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-born.password</string>
+         <parameter name="nuvlabox-max-born.password" description="NuvlaBox account password" category="nuvlabox-max-born" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ifb-bird-stack.tenant.name</string>
+         <parameter name="ifb-bird-stack.tenant.name" description="Project name (Tenant name)" category="ifb-bird-stack" mandatory="true" type="String" readonly="false" order_="30" order="30">
+            <value><![CDATA[biosphere]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ifb-bistro-iphc.tenant.name</string>
+         <parameter name="ifb-bistro-iphc.tenant.name" description="Project name (Tenant name)" category="ifb-bistro-iphc" mandatory="true" type="String" readonly="false" order_="30" order="30">
+            <value><![CDATA[biosphere]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyfronet-pl1.domain.name</string>
+         <parameter name="cyfronet-pl1.domain.name" description="Domain" category="cyfronet-pl1" mandatory="true" type="String" readonly="false" order_="40" order="40">
+            <instructions><![CDATA[Only useful if Identity API v3]]></instructions>
+            <value><![CDATA[default]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-cecil-powell.quota.vm</string>
+         <parameter name="nuvlabox-cecil-powell.quota.vm" description="Number of VMs the user can start for this cloud" category="nuvlabox-cecil-powell" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-sa-east-1.secret.key</string>
+         <parameter name="ec2-sa-east-1.secret.key" description="Secret key" category="ec2-sa-east-1" mandatory="true" type="Password" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[This is required in order to be able to deploy to this EC2 cloud. You can find the <code>secret key</code> by logging into the AWS Console and going to the Security Credentials page.]]></instructions>
+            <value><![CDATA[EIhlrL2xhAg6NVuR9g8jbt2VK6EUiBVj31otNQzB]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-gva.password</string>
+         <parameter name="exoscale-ch-gva.password" description="Secret Key" category="exoscale-ch-gva" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <instructions><![CDATA[On the Exoscale web interface you can find this information on <code>Account > Profile > API Keys</code>]]></instructions>
+            <value><![CDATA[tK6TQqsD6qGOtBuQwPyTivLNm4_PTW572b7iijiZAOO-oT6-IkywYttvix1d3tOSZuqiAhtzHoLLYD76tMBHZw]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-james-chadwick.username</string>
+         <parameter name="nuvlabox-james-chadwick.username" description="NuvlaBox account username" category="nuvlabox-james-chadwick" mandatory="true" type="RestrictedString" readonly="false" order_="10" order="10">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ifb-prabi-girofle.domain.name</string>
+         <parameter name="ifb-prabi-girofle.domain.name" description="Domain" category="ifb-prabi-girofle" mandatory="true" type="String" readonly="false" order_="40" order="40">
+            <instructions><![CDATA[Only useful if Identity API v3]]></instructions>
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ifb-core-pilot.username</string>
+         <parameter name="ifb-core-pilot.username" description="Username" category="ifb-core-pilot" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <value><![CDATA[Cal]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr2.domain.name</string>
+         <parameter name="cyclone-fr2.domain.name" description="Domain" category="cyclone-fr2" mandatory="true" type="String" readonly="false" order_="40" order="40">
+            <instructions><![CDATA[Only useful if Identity API v3]]></instructions>
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-stanley-cohen.password</string>
+         <parameter name="nuvlabox-stanley-cohen.password" description="NuvlaBox account password" category="nuvlabox-stanley-cohen" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[GnjRFRvnxpJEJbhYamOMx5SyYNxyJMvB]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-planck.quota.vm</string>
+         <parameter name="nuvlabox-max-planck.quota.vm" description="Number of VMs the user can start for this cloud" category="nuvlabox-max-planck" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-felix-bloch.username</string>
+         <parameter name="nuvlabox-felix-bloch.username" description="NuvlaBox account username" category="nuvlabox-felix-bloch" mandatory="true" type="RestrictedString" readonly="false" order_="10" order="10">
+            <value><![CDATA[ssuser]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>advania-se1.tenant.name</string>
+         <parameter name="advania-se1.tenant.name" description="Project name (Tenant name)" category="advania-se1" mandatory="true" type="String" readonly="false" order_="30" order="30">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-albert-einstein.quota.vm</string>
+         <parameter name="nuvlabox-albert-einstein.quota.vm" description="Number of VMs the user can start for this cloud" category="nuvlabox-albert-einstein" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ifb-bird-stack.domain.name</string>
+         <parameter name="ifb-bird-stack.domain.name" description="Domain" category="ifb-bird-stack" mandatory="true" type="String" readonly="false" order_="40" order="40">
+            <instructions><![CDATA[Only useful if Identity API v3]]></instructions>
+            <value><![CDATA[biosphere]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-eu-west.quota.vm</string>
+         <parameter name="ec2-eu-west.quota.vm" description="Number of VMs the user can start for this cloud" category="ec2-eu-west" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[10]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-it1.username</string>
+         <parameter name="cyclone-it1.username" description="Username" category="cyclone-it1" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr2.tenant.name</string>
+         <parameter name="cyclone-fr2.tenant.name" description="Project name (Tenant name)" category="cyclone-fr2" mandatory="true" type="String" readonly="false" order_="30" order="30">
+            <value><![CDATA[SixSQ]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>eo-cloudferro-pl1.domain.name</string>
+         <parameter name="eo-cloudferro-pl1.domain.name" description="Domain" category="eo-cloudferro-pl1" mandatory="true" type="String" readonly="false" order_="40" order="40">
+            <instructions><![CDATA[Only useful if Identity API v3]]></instructions>
+            <value><![CDATA[cloud_00252]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-demo.password</string>
+         <parameter name="nuvlabox-demo.password" description="NuvlaBox account password" category="nuvlabox-demo" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>General.orchestrator.publicsshkey</string>
+         <parameter name="General.orchestrator.publicsshkey" description="" category="General" mandatory="false" type="String" readonly="false" order_="0" order="0">
+            <value><![CDATA[ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDmEoEkSG4peTgejHX9Jr489aWcYaE7meGCKOfI0eOcPslUGtkQ0SPwdhdlA1a+xAoCQtQKG2QuHFKbD7YtVz/BRfHMIp/09H4mDzQvxkdFZqgoMSYxrskc0+dkj4AsKJq7eIAZaiuEKfZDft8q/0MYn8aW+I5n58KJfrzPdyXAI4kaDJcQXbCrh9CZz4GvOGwJMDdJ6PfiNc+G7m/G6MGiNYjgD5LokEat34g1kSrwAIKvDi3bVfcPmXDPCIrlPg9XblKM6Du3bYw9lQx/kGhFQT1NieWQZc7flTx3x2gum4Xg68p2ybliJqeAowUqhI29Ice4ZuFCA/J6KrujD0yL root@machine761e9e6c-3be9-4770-880b-589e8d2d9083
+]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>open-telekom-de1.tenant.name</string>
+         <parameter name="open-telekom-de1.tenant.name" description="Project name" category="open-telekom-de1" mandatory="true" type="String" readonly="false" order_="30" order="30">
+            <instructions><![CDATA[To find the project name, login to the OTC console, then go to 'My Credential' and copy the chosen 'Project Name' under 'Project List']]></instructions>
+            <value><![CDATA[eu-de]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ifb-genouest-genostack.username</string>
+         <parameter name="ifb-genouest-genostack.username" description="Username" category="ifb-genouest-genostack" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <value><![CDATA[nuvla]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-west-2.quota.vm</string>
+         <parameter name="ec2-us-west-2.quota.vm" description="Number of VMs the user can start for this cloud" category="ec2-us-west-2" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[6]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ifb-core-pilot.password</string>
+         <parameter name="ifb-core-pilot.password" description="Password" category="ifb-core-pilot" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[sixsq!rocks]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ifb-core-pilot.tenant.name</string>
+         <parameter name="ifb-core-pilot.tenant.name" description="Project name (Tenant name)" category="ifb-core-pilot" mandatory="true" type="String" readonly="false" order_="30" order="30">
+            <value><![CDATA[tests]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-eu-west-2.quota.vm</string>
+         <parameter name="ec2-eu-west-2.quota.vm" description="Number of VMs the user can start for this cloud" category="ec2-eu-west-2" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>open-telekom-de1.quota.vm</string>
+         <parameter name="open-telekom-de1.quota.vm" description="Number of VMs the user can start for this cloud" category="open-telekom-de1" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-born.username</string>
+         <parameter name="nuvlabox-max-born.username" description="NuvlaBox account username" category="nuvlabox-max-born" mandatory="true" type="RestrictedString" readonly="false" order_="10" order="10">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-northeast-1.access.id</string>
+         <parameter name="ec2-ap-northeast-1.access.id" description="Access id" category="ec2-ap-northeast-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[This is required in order to be able to deploy to this EC2 cloud. You can find the <code>access id</code> by logging into the AWS Console and going to the Security Credentials page.]]></instructions>
+            <value><![CDATA[AKIAI4RSKZMH3S2UAOEA]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-de1.password</string>
+         <parameter name="cyclone-de1.password" description="Password" category="cyclone-de1" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[yjNHD4bVTPe3bfBY38Tj2kw7BdACTg]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-tb-it1.quota.vm</string>
+         <parameter name="cyclone-tb-it1.quota.vm" description="Number of VMs the user can start for this cloud" category="cyclone-tb-it1" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-southeast-1.access.id</string>
+         <parameter name="ec2-ap-southeast-1.access.id" description="Access id" category="ec2-ap-southeast-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[This is required in order to be able to deploy to this EC2 cloud. You can find the <code>access id</code> by logging into the AWS Console and going to the Security Credentials page.]]></instructions>
+            <value><![CDATA[AKIAI4RSKZMH3S2UAOEA]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>teidehpc-es-tfs1.quota.vm</string>
+         <parameter name="teidehpc-es-tfs1.quota.vm" description="Number of VMs the user can start for this cloud" category="teidehpc-es-tfs1" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[4]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ifb-prabi-girofle.quota.vm</string>
+         <parameter name="ifb-prabi-girofle.quota.vm" description="Number of VMs the user can start for this cloud" category="ifb-prabi-girofle" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-stanley-cohen.quota.vm</string>
+         <parameter name="nuvlabox-stanley-cohen.quota.vm" description="Number of VMs the user can start for this cloud" category="nuvlabox-stanley-cohen" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-eu-west.access.id</string>
+         <parameter name="ec2-eu-west.access.id" description="Access id" category="ec2-eu-west" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[This is required in order to be able to deploy to this EC2 cloud. You can find the <code>access id</code> by logging into the AWS Console and going to the Security Credentials page.]]></instructions>
+            <value><![CDATA[AKIAI4RSKZMH3S2UAOEA]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-arthur-harden.username</string>
+         <parameter name="nuvlabox-arthur-harden.username" description="NuvlaBox account username" category="nuvlabox-arthur-harden" mandatory="true" type="RestrictedString" readonly="false" order_="10" order="10">
+            <value><![CDATA[ssuser]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-gva.domain.name</string>
+         <parameter name="exoscale-ch-gva.domain.name" description="Name of your domain managed by Exoscale" category="exoscale-ch-gva" mandatory="true" type="String" readonly="false" order_="100" order="100">
+            <instructions><![CDATA[If you use the DNS service of Exoscale you can set here the name of one of your domains and SlipStream will create a subdomain for each of your instances]]></instructions>
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-scissor1.quota.vm</string>
+         <parameter name="nuvlabox-scissor1.quota.vm" description="Number of VMs the user can start for this cloud" category="nuvlabox-scissor1" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-southeast-2.secret.key</string>
+         <parameter name="ec2-ap-southeast-2.secret.key" description="Secret key" category="ec2-ap-southeast-2" mandatory="true" type="Password" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[This is required in order to be able to deploy to this EC2 cloud. You can find the <code>secret key</code> by logging into the AWS Console and going to the Security Credentials page.]]></instructions>
+            <value><![CDATA[EIhlrL2xhAg6NVuR9g8jbt2VK6EUiBVj31otNQzB]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ifb-prabi-girofle.tenant.name</string>
+         <parameter name="ifb-prabi-girofle.tenant.name" description="Project name (Tenant name)" category="ifb-prabi-girofle" mandatory="true" type="String" readonly="false" order_="30" order="30">
+            <value><![CDATA[biosphere]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyfronet-pl1.username</string>
+         <parameter name="cyfronet-pl1.username" description="Username" category="cyfronet-pl1" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <value><![CDATA[sixsq]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>scissor-fr2.username</string>
+         <parameter name="scissor-fr2.username" description="Username" category="scissor-fr2" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <value><![CDATA[ssuser]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ifb-bistro-iphc.quota.vm</string>
+         <parameter name="ifb-bistro-iphc.quota.vm" description="Number of VMs the user can start for this cloud" category="ifb-bistro-iphc" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>General.keep-running</string>
+         <parameter name="General.keep-running" description="Keep running after deployment" category="General" mandatory="true" type="Enum" readonly="false" order_="15" order="15">
+            <instructions><![CDATA[Here you can define if and when SlipStream should leave the application running after performing the deployment. <br/><code>On success</code> is useful for production deployments or long tests. </br><code>On Error</code> might be useful so that resources are consumed only when debugging is needed. <br/><code>Never</code> ensures that SlipStream automatically terminates the application after performing the deployment. <br/>Note: This parameter doesn't apply to <code>mutable deployment</code> Runs and to <code>build image</code> Runs.]]></instructions>
+            <enumValues length="4">
+               <string>always</string>
+               <string>on-success</string>
+               <string>on-error</string>
+               <string>never</string>
+            </enumValues>
+            <value><![CDATA[never]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>open-telekom-de1.password</string>
+         <parameter name="open-telekom-de1.password" description="Password" category="open-telekom-de1" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <instructions><![CDATA[On old account you have to use an API Key instead of a password. To find it, login to the OTC console, then go to 'My Credential' and copy the value next to 'API Key'.]]></instructions>
+            <value><![CDATA[6yFnV5lgAEEeuWiLnKUcOszSA7QkxQaw]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-scissor1.password</string>
+         <parameter name="nuvlabox-scissor1.password" description="NuvlaBox account password" category="nuvlabox-scissor1" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>General.mail-usage</string>
+         <parameter name="General.mail-usage" description="Cloud usage email" category="General" mandatory="true" type="Enum" readonly="false" order_="60" order="60">
+            <instructions><![CDATA[Frequency for receiving emails concerning your cloud usage.]]></instructions>
+            <enumValues length="2">
+               <string>never</string>
+               <string>daily</string>
+            </enumValues>
+            <value><![CDATA[daily]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-bertil-ohlin.username</string>
+         <parameter name="nuvlabox-bertil-ohlin.username" description="NuvlaBox account username" category="nuvlabox-bertil-ohlin" mandatory="true" type="RestrictedString" readonly="false" order_="10" order="10">
+            <value><![CDATA[ssuser]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>General.Timeout</string>
+         <parameter name="General.Timeout" description="Execution timeout (in minutes)" category="General" mandatory="true" type="String" readonly="false" order_="40" order="40">
+            <instructions><![CDATA[If the execution stays in a transitional state for more than the value of this timeout, the execution is forcefully terminated.]]></instructions>
+            <value><![CDATA[90]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-eu-central-1.quota.vm</string>
+         <parameter name="ec2-eu-central-1.quota.vm" description="Number of VMs the user can start for this cloud" category="ec2-eu-central-1" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-ap-northeast-1.secret.key</string>
+         <parameter name="ec2-ap-northeast-1.secret.key" description="Secret key" category="ec2-ap-northeast-1" mandatory="true" type="Password" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[This is required in order to be able to deploy to this EC2 cloud. You can find the <code>secret key</code> by logging into the AWS Console and going to the Security Credentials page.]]></instructions>
+            <value><![CDATA[EIhlrL2xhAg6NVuR9g8jbt2VK6EUiBVj31otNQzB]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-west-1.quota.vm</string>
+         <parameter name="ec2-us-west-1.quota.vm" description="Number of VMs the user can start for this cloud" category="ec2-us-west-1" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[6]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ifb-bird-stack.password</string>
+         <parameter name="ifb-bird-stack.password" description="Password" category="ifb-bird-stack" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[sixsqtest]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-bertil-ohlin.quota.vm</string>
+         <parameter name="nuvlabox-bertil-ohlin.quota.vm" description="Number of VMs the user can start for this cloud" category="nuvlabox-bertil-ohlin" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-carl-cori.username</string>
+         <parameter name="nuvlabox-carl-cori.username" description="NuvlaBox account username" category="nuvlabox-carl-cori" mandatory="true" type="RestrictedString" readonly="false" order_="10" order="10">
+            <value><![CDATA[ssuser]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-demo.quota.vm</string>
+         <parameter name="nuvlabox-demo.quota.vm" description="Number of VMs the user can start for this cloud" category="nuvlabox-demo" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-christiane-n-volhard.password</string>
+         <parameter name="nuvlabox-christiane-n-volhard.password" description="NuvlaBox account password" category="nuvlabox-christiane-n-volhard" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[jN5rpTVwIQwjlqvqeng8sx1PLGefxFH5]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-cecil-powell.username</string>
+         <parameter name="nuvlabox-cecil-powell.username" description="NuvlaBox account username" category="nuvlabox-cecil-powell" mandatory="true" type="RestrictedString" readonly="false" order_="10" order="10">
+            <value><![CDATA[ssuser]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>eo-cesnet-cz1.username</string>
+         <parameter name="eo-cesnet-cz1.username" description="Username" category="eo-cesnet-cz1" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <value><![CDATA[eo-poc-nuvla]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ultimum-cz1.password</string>
+         <parameter name="ultimum-cz1.password" description="Password" category="ultimum-cz1" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[9FCBF258-D257-4EE4-A69F-DBC1668192B5]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-it1.domain.name</string>
+         <parameter name="cyclone-it1.domain.name" description="Domain" category="cyclone-it1" mandatory="true" type="String" readonly="false" order_="40" order="40">
+            <instructions><![CDATA[Only useful if Identity API v3]]></instructions>
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ifb-prabi-girofle.username</string>
+         <parameter name="ifb-prabi-girofle.username" description="Username" category="ifb-prabi-girofle" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <value><![CDATA[sixsqtest]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-planck.password</string>
+         <parameter name="nuvlabox-max-planck.password" description="NuvlaBox account password" category="nuvlabox-max-planck" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-christiane-nusslein-volhard.username</string>
+         <parameter name="nuvlabox-christiane-nusslein-volhard.username" description="NuvlaBox account username" category="nuvlabox-christiane-nusslein-volhard" mandatory="true" type="RestrictedString" readonly="false" order_="10" order="10">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyfronet-pl1.password</string>
+         <parameter name="cyfronet-pl1.password" description="Password" category="cyfronet-pl1" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[GrydistOivCak4Swatya]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-it1.tenant.name</string>
+         <parameter name="cyclone-it1.tenant.name" description="Project name (Tenant name)" category="cyclone-it1" mandatory="true" type="String" readonly="false" order_="30" order="30">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ifb-bistro-iphc.domain.name</string>
+         <parameter name="ifb-bistro-iphc.domain.name" description="Domain" category="ifb-bistro-iphc" mandatory="true" type="String" readonly="false" order_="40" order="40">
+            <instructions><![CDATA[Only useful if Identity API v3]]></instructions>
+            <value><![CDATA[IFB]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-west-1.secret.key</string>
+         <parameter name="ec2-us-west-1.secret.key" description="Secret key" category="ec2-us-west-1" mandatory="true" type="Password" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[This is required in order to be able to deploy to this EC2 cloud. You can find the <code>secret key</code> by logging into the AWS Console and going to the Security Credentials page.]]></instructions>
+            <value><![CDATA[EIhlrL2xhAg6NVuR9g8jbt2VK6EUiBVj31otNQzB]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-tb-it1.domain.name</string>
+         <parameter name="cyclone-tb-it1.domain.name" description="Domain" category="cyclone-tb-it1" mandatory="true" type="String" readonly="false" order_="40" order="40">
+            <instructions><![CDATA[Only useful if Identity API v3]]></instructions>
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>advania-se1.password</string>
+         <parameter name="advania-se1.password" description="Password" category="advania-se1" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-east-1.secret.key</string>
+         <parameter name="ec2-us-east-1.secret.key" description="Secret key" category="ec2-us-east-1" mandatory="true" type="Password" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[This is required in order to be able to deploy to this EC2 cloud. You can find the <code>secret key</code> by logging into the AWS Console and going to the Security Credentials page.]]></instructions>
+            <value><![CDATA[EIhlrL2xhAg6NVuR9g8jbt2VK6EUiBVj31otNQzB]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ifb-bird-stack.username</string>
+         <parameter name="ifb-bird-stack.username" description="Username" category="ifb-bird-stack" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <value><![CDATA[sixsqtest]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-arthur-harden.password</string>
+         <parameter name="nuvlabox-arthur-harden.password" description="NuvlaBox account password" category="nuvlabox-arthur-harden" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[qF5xqwuxxCrp0vHgpp2cE5ATisxxWpfY]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-james-chadwick.quota.vm</string>
+         <parameter name="nuvlabox-james-chadwick.quota.vm" description="Number of VMs the user can start for this cloud" category="nuvlabox-james-chadwick" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>scissor-fr1.quota.vm</string>
+         <parameter name="scissor-fr1.quota.vm" description="Number of VMs the user can start for this cloud" category="scissor-fr1" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[16]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-west-2.secret.key</string>
+         <parameter name="ec2-us-west-2.secret.key" description="Secret key" category="ec2-us-west-2" mandatory="true" type="Password" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[This is required in order to be able to deploy to this EC2 cloud. You can find the <code>secret key</code> by logging into the AWS Console and going to the Security Credentials page.]]></instructions>
+            <value><![CDATA[EIhlrL2xhAg6NVuR9g8jbt2VK6EUiBVj31otNQzB]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-felix-bloch.password</string>
+         <parameter name="nuvlabox-felix-bloch.password" description="NuvlaBox account password" category="nuvlabox-felix-bloch" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[DNeqyBp2iVOadtNsaUNbjy4Qtsro4083]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-dk.domain.name</string>
+         <parameter name="exoscale-ch-dk.domain.name" description="Name of your domain managed by Exoscale" category="exoscale-ch-dk" mandatory="true" type="String" readonly="false" order_="100" order="100">
+            <instructions><![CDATA[If you use the DNS service of Exoscale you can set here the name of one of your domains and SlipStream will create a subdomain for each of your instances]]></instructions>
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>atos-es1.quota.vm</string>
+         <parameter name="atos-es1.quota.vm" description="Number of VMs the user can start for this cloud" category="atos-es1" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>exoscale-ch-dk.password</string>
+         <parameter name="exoscale-ch-dk.password" description="Secret Key" category="exoscale-ch-dk" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <instructions><![CDATA[On the Exoscale web interface you can find this information on <code>Account > Profile > API Keys</code>]]></instructions>
+            <value><![CDATA[tK6TQqsD6qGOtBuQwPyTivLNm4_PTW572b7iijiZAOO-oT6-IkywYttvix1d3tOSZuqiAhtzHoLLYD76tMBHZw]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr2.username</string>
+         <parameter name="cyclone-fr2.username" description="Username" category="cyclone-fr2" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <value><![CDATA[sixsq]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>advania-se1.domain.name</string>
+         <parameter name="advania-se1.domain.name" description="Domain" category="advania-se1" mandatory="true" type="String" readonly="false" order_="40" order="40">
+            <instructions><![CDATA[Only useful if Identity API v3]]></instructions>
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-born.quota.vm</string>
+         <parameter name="nuvlabox-max-born.quota.vm" description="Number of VMs the user can start for this cloud" category="nuvlabox-max-born" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-henry-dunant.password</string>
+         <parameter name="nuvlabox-henry-dunant.password" description="NuvlaBox account password" category="nuvlabox-henry-dunant" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-christiane-n-volhard.username</string>
+         <parameter name="nuvlabox-christiane-n-volhard.username" description="NuvlaBox account username" category="nuvlabox-christiane-n-volhard" mandatory="true" type="RestrictedString" readonly="false" order_="10" order="10">
+            <value><![CDATA[ssuser]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-carl-cori.password</string>
+         <parameter name="nuvlabox-carl-cori.password" description="NuvlaBox account password" category="nuvlabox-carl-cori" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[Ma2gJx4vXcrGWcdCKTHIl1YjSS3kWurE]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-yves-chauvin.username</string>
+         <parameter name="nuvlabox-yves-chauvin.username" description="NuvlaBox account username" category="nuvlabox-yves-chauvin" mandatory="true" type="RestrictedString" readonly="false" order_="10" order="10">
+            <value><![CDATA[ssuser]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-fr1.quota.vm</string>
+         <parameter name="cyclone-fr1.quota.vm" description="Number of VMs the user can start for this cloud" category="cyclone-fr1" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>eo-cesnet-cz1.password</string>
+         <parameter name="eo-cesnet-cz1.password" description="Password" category="eo-cesnet-cz1" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[fepboypheTwophyeibBabbej3]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-de1.domain.name</string>
+         <parameter name="cyclone-de1.domain.name" description="Domain" category="cyclone-de1" mandatory="true" type="String" readonly="false" order_="40" order="40">
+            <instructions><![CDATA[Only useful if Identity API v3]]></instructions>
+            <value><![CDATA[default]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-scissor2.quota.vm</string>
+         <parameter name="nuvlabox-scissor2.quota.vm" description="Number of VMs the user can start for this cloud" category="nuvlabox-scissor2" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[8]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>General.Verbosity Level</string>
+         <parameter name="General.Verbosity Level" description="Level of verbosity" category="General" mandatory="true" type="Enum" readonly="false" order_="30" order="30">
+            <instructions><![CDATA[0 - Actions,  1 - Steps,  2 - Details data,  3 - Debugging]]></instructions>
+            <enumValues length="4">
+               <string>0</string>
+               <string>1</string>
+               <string>2</string>
+               <string>3</string>
+            </enumValues>
+            <value><![CDATA[1]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-east-1.quota.vm</string>
+         <parameter name="ec2-us-east-1.quota.vm" description="Number of VMs the user can start for this cloud" category="ec2-us-east-1" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[10]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-christiane-nusslein-volhard.password</string>
+         <parameter name="nuvlabox-christiane-nusslein-volhard.password" description="NuvlaBox account password" category="nuvlabox-christiane-nusslein-volhard" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>eo-cloudferro-pl1.quota.vm</string>
+         <parameter name="eo-cloudferro-pl1.quota.vm" description="Number of VMs the user can start for this cloud" category="eo-cloudferro-pl1" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ifb-genouest-genostack.domain.name</string>
+         <parameter name="ifb-genouest-genostack.domain.name" description="Domain" category="ifb-genouest-genostack" mandatory="true" type="String" readonly="false" order_="40" order="40">
+            <instructions><![CDATA[Only useful if Identity API v3]]></instructions>
+            <value><![CDATA[biosphere]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>teidehpc-es-tfs1.password</string>
+         <parameter name="teidehpc-es-tfs1.password" description="Password" category="teidehpc-es-tfs1" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[19iPj8nRs]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ifb-prabi-girofle.password</string>
+         <parameter name="ifb-prabi-girofle.password" description="Password" category="ifb-prabi-girofle" mandatory="true" type="Password" readonly="false" order_="20" order="20">
+            <value><![CDATA[sixsqtest]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ifb-core-pilot.quota.vm</string>
+         <parameter name="ifb-core-pilot.quota.vm" description="Number of VMs the user can start for this cloud" category="ifb-core-pilot" mandatory="true" type="String" readonly="true" order_="0" order="0">
+            <value><![CDATA[20]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>nuvlabox-max-planck.username</string>
+         <parameter name="nuvlabox-max-planck.username" description="NuvlaBox account username" category="nuvlabox-max-planck" mandatory="true" type="RestrictedString" readonly="false" order_="10" order="10">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>ec2-us-west-1.access.id</string>
+         <parameter name="ec2-us-west-1.access.id" description="Access id" category="ec2-us-west-1" mandatory="true" type="String" readonly="false" order_="0" order="0">
+            <instructions><![CDATA[This is required in order to be able to deploy to this EC2 cloud. You can find the <code>access id</code> by logging into the AWS Console and going to the Security Credentials page.]]></instructions>
+            <value><![CDATA[AKIAI4RSKZMH3S2UAOEA]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>advania-se1.username</string>
+         <parameter name="advania-se1.username" description="Username" category="advania-se1" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <value><![CDATA[]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>cyclone-de1.username</string>
+         <parameter name="cyclone-de1.username" description="Username" category="cyclone-de1" mandatory="true" type="String" readonly="false" order_="10" order="10">
+            <value><![CDATA[dev@sixsq.com]]></value>
+         </parameter>
+      </entry>
+   </parameters>
+</user>

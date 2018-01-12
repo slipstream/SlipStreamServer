@@ -197,27 +197,16 @@ public class RootApplication extends Application {
 		Event.postEvent("system", Event.Severity.high, message, "system", Event.EventType.system);
 	}
 
-	protected void loadConnectors() {
-		ServiceLoader<Connector> connectorLoader = ServiceLoader.load(Connector.class);
-
-		for (Connector c : connectorLoader) {
-			getLogger().info("Connector name: " + c.getCloudServiceName());
+	private void createStartupMetadata() {
+		try {
+			Users.create();
+		} catch (ValidationException |
+				NotFoundException |
+				NoSuchAlgorithmException |
+				UnsupportedEncodingException e) {
+			getLogger().warning("Error creating default users... already existing?");
 		}
 	}
-
-	private void createStartupMetadata() {
-        try {
-            Users.create();
-        } catch (ValidationException e) {
-            getLogger().warning("Error creating default users... already existing?");
-        } catch (NotFoundException e) {
-            getLogger().warning("Error creating default users... already existing?");
-        } catch (NoSuchAlgorithmException e) {
-            getLogger().warning("Error creating default users... already existing?");
-        } catch (UnsupportedEncodingException e) {
-            getLogger().warning("Error creating default users... already existing?");
-        }
-    }
 
 	private void initializeStatusServiceToHandleErrors() {
 		CommonStatusService statusService = new CommonStatusService();

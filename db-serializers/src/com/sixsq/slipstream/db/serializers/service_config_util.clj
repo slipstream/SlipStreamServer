@@ -6,7 +6,7 @@
     [me.raynes.fs :as fs]
     [com.sixsq.slipstream.db.serializers.utils :as u])
   (:import
-    [com.sixsq.slipstream.persistence ServiceConfiguration]))
+    (com.sixsq.slipstream.persistence ServiceConfiguration)))
 
 (defn- xml-params
   [xml]

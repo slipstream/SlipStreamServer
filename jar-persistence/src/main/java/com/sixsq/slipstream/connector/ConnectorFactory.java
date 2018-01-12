@@ -28,6 +28,7 @@ import com.sixsq.slipstream.persistence.Parameter;
 import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.User;
 
+import java.io.FileNotFoundException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -197,11 +198,25 @@ public class ConnectorFactory {
         return getConnectors(getConnectorClassNames());
     }
 
-    public static String[] getConnectorClassNames() throws ConfigurationException, ValidationException {
-        String connectorsClassNames = Configuration.getInstance().getRequiredProperty(
-                RequiredParameters.CLOUD_CONNECTOR_CLASS.getName());
+    // FIXME: hack to allow loading of configuration fail due to unavailability of db-serializers on
+    // classpath.  This only possible during tests.
+    private static String getConnectorClassNamesString() throws ConfigurationException, ValidationException {
+        try {
+            return Configuration.getInstance().getRequiredProperty(
+                    RequiredParameters.CLOUD_CONNECTOR_CLASS.getName());
+        } catch (ConfigurationException | ValidationException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            if (FileNotFoundException.class.isInstance(ex) && ex.getMessage().contains("db/serializers")) {
+                return "";
+            } else {
+                throw ex;
+            }
+        }
+    }
 
-        return splitConnectorClassNames(connectorsClassNames);
+    public static String[] getConnectorClassNames() throws ConfigurationException, ValidationException {
+        return splitConnectorClassNames(getConnectorClassNamesString());
     }
 
     public static String[] splitConnectorClassNames(String connectorsClassNames) {

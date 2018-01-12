@@ -10,10 +10,9 @@
     [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]
     [com.sixsq.slipstream.db.serializers.service-config-util :as scu]
     [com.sixsq.slipstream.db.serializers.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as sd]
+    [com.sixsq.slipstream.dbtest.es.utils-esdb :as ud]
     [com.sixsq.slipstream.ssclj.resources.spec.description]
     [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-slipstream :as crtpls] ;; template and resource have same schema
-    [com.sixsq.slipstream.ssclj.resources.configuration-slipstream :as crs]
     [com.sixsq.slipstream.ssclj.util.config :as ssclj-cu])
   (:import
     (com.sixsq.slipstream.persistence ServiceConfiguration)))
@@ -41,7 +40,7 @@
 
 
 ;; Fixtures
-(use-fixtures :once u/test-fixture-es-client-and-db-impl)
+(use-fixtures :once ud/test-fixture-es-client-and-db-impl)
 
 ;; initialize resource (including possible connectors on the classpath).
 (u/initialize)

@@ -18,7 +18,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.42-SNAPSHOT</version>
+    <version>3.43-SNAPSHOT</version>
   </parent>
 
   <dependencies>
@@ -147,11 +147,9 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <systemPropertyVariables>
-            <property>
-              <name>slipstream.config.dir</name>
-              <value>${project.build.directory}/configuration
-              </value>
-            </property>
+            <slipstream.config.dir>${project.build.directory}/configuration</slipstream.config.dir>
+            <es.host>localhost</es.host>
+            <es.port>12002</es.port>
           </systemPropertyVariables>
           <useSystemClassLoader>false</useSystemClassLoader>
           <excludes>

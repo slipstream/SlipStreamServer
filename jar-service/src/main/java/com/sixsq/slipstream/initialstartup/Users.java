@@ -126,7 +126,7 @@ public class Users {
 		return User.isSuperAlone();
 	}
 
-	private static void loadSingleUser(File f) {
+	public static void loadSingleUser(File f) {
 
         Logger.info("Loading config file: " + f.getPath());
 

@@ -49,10 +49,13 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class RunListResourceTest extends ResourceTestBase {
 
 	private static final String NODE_NAME = "n1";
+
+	private static final String REQ_MEDIA_SUBTYPE = "xml";
 
 	private static final String PARAMETER_NAME = "parameter_name";
 
@@ -156,6 +159,9 @@ public class RunListResourceTest extends ResourceTestBase {
 
 		Response resp = getRunList(null, null, null);
 		assertEquals(Status.SUCCESS_OK, resp.getStatus());
+		// FIXME: KS. When run with mvn, it returns JSON on my machine.
+		assertTrue("Returned type doesn't match requested one.",
+				REQ_MEDIA_SUBTYPE.equals(resp.getEntity().getMediaType().getSubType()));
 		Document runs = XmlUtil.stringToDom(resp.getEntityAsText().trim());
 		assertEquals(0, runs.getDocumentElement().getElementsByTagName("item").getLength());
 
@@ -180,7 +186,7 @@ public class RunListResourceTest extends ResourceTestBase {
 
 		resp = getRunList(null, null, null);
 		assertEquals(Status.SUCCESS_OK, resp.getStatus());
-		runs = XmlUtil.stringToDom(resp.getEntityAsText());
+		runs = XmlUtil.stringToDom(resp.getEntityAsText().trim());
 		assertEquals(5, runs.getDocumentElement().getElementsByTagName("item").getLength());
 		assertEquals("5", runs.getDocumentElement().getAttribute("count"));
 		assertEquals("5", runs.getDocumentElement().getAttribute("totalCount"));
@@ -189,7 +195,7 @@ public class RunListResourceTest extends ResourceTestBase {
 
 		resp = getRunList(null, 10, "CloudB");
 		assertEquals(Status.SUCCESS_OK, resp.getStatus());
-		runs = XmlUtil.stringToDom(resp.getEntityAsText());
+		runs = XmlUtil.stringToDom(resp.getEntityAsText().trim());
 		assertEquals(4, runs.getDocumentElement().getElementsByTagName("item").getLength());
 		assertEquals("4", runs.getDocumentElement().getAttribute("count"));
 		assertEquals("4", runs.getDocumentElement().getAttribute("totalCount"));
@@ -197,7 +203,7 @@ public class RunListResourceTest extends ResourceTestBase {
 
 		resp = getRunList(1, 4, null);
 		assertEquals(Status.SUCCESS_OK, resp.getStatus());
-		runs = XmlUtil.stringToDom(resp.getEntityAsText());
+		runs = XmlUtil.stringToDom(resp.getEntityAsText().trim());
 		assertEquals(4, runs.getDocumentElement().getElementsByTagName("item").getLength());
 		assertEquals("4", runs.getDocumentElement().getAttribute("count"));
 		assertEquals("5", runs.getDocumentElement().getAttribute("totalCount"));
@@ -206,7 +212,7 @@ public class RunListResourceTest extends ResourceTestBase {
 
 		resp = getRunList(null, null, "CloudC");
 		assertEquals(Status.SUCCESS_OK, resp.getStatus());
-		runs = XmlUtil.stringToDom(resp.getEntityAsText());
+		runs = XmlUtil.stringToDom(resp.getEntityAsText().trim());
 		assertEquals(3, runs.getDocumentElement().getElementsByTagName("item").getLength());
 		assertEquals("3", runs.getDocumentElement().getAttribute("count"));
 		assertEquals("3", runs.getDocumentElement().getAttribute("totalCount"));
@@ -369,7 +375,7 @@ public class RunListResourceTest extends ResourceTestBase {
 
 		Map<String, Object> attributes = new HashMap<String, Object>();
 		attributes.put(User.REQUEST_KEY, user);
-		attributes.put("Accept", "application/xml");
+		attributes.put("Accept", "application/" + REQ_MEDIA_SUBTYPE);
 
 		Form queryString = new Form();
 		if (offset != null) queryString.set("offset", offset.toString());

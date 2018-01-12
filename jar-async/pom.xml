@@ -21,6 +21,15 @@
     </license>
   </licenses>
 
+!<<<<<<< HEAD
+=======
+	<parent>
+		<groupId>com.sixsq.slipstream</groupId>
+		<artifactId>SlipStreamServer</artifactId>
+		<version>3.43-SNAPSHOT</version>
+	</parent>
+
+>>>>>>> master
   <dependencies>
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>

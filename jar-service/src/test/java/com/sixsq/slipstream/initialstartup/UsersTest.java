@@ -21,13 +21,16 @@ package com.sixsq.slipstream.initialstartup;
  */
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import com.sixsq.slipstream.es.CljElasticsearchHelper;
 import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.ssclj.app.SscljTestServer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 
@@ -94,5 +97,17 @@ public class UsersTest {
 		user.setPassword(null);
 		user.validate();
 		User.validateMinimumInfo(user);
+	}
+
+	@Test
+	public void loadSingleUserFromConfigFiles() throws ValidationException {
+		ClassLoader classLoader = getClass().getClassLoader();
+		String fn = classLoader.getResource("config/users/test.xml").getFile();
+		File f = new File(fn);
+		Users.loadSingleUser(f);
+		CljElasticsearchHelper.dumpEsDb("user");
+		User user = User.loadByName("test");
+		assertTrue("test".equals(user.getName()));
+		assertTrue("user/test".equals(user.getResourceUri()));
 	}
 }

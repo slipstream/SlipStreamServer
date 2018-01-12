@@ -62,9 +62,20 @@
     (GET uri-github request (gh/callback-github request (cf/property-value :main-server)))
     (GET uri-cyclone request (cy/callback-cyclone request (cf/property-value :main-server)))))
 
+(def user-routes
+  (let-routes [uri (str p/service-context ":resource-name{user}/:uuid{.*}")]
+    (GET uri request
+      (crud/retrieve request))
+    (PUT uri request
+      (crud/edit request))
+    (DELETE uri request
+      (crud/delete request))
+    (ANY uri request
+      (throw (r/ex-bad-method request)))))
+
 (def final-routes
-  [
-   collection-routes
+  [collection-routes
+   user-routes
    resource-routes
    action-routes
    auth-routes

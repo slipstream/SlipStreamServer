@@ -18,7 +18,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.42-SNAPSHOT</version>
+    <version>3.43-SNAPSHOT</version>
   </parent>
 
   <dependencies>
@@ -26,6 +26,19 @@
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojure</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.clojure</groupId>
+      <artifactId>test.check</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamCljResourcesTestServer-jar</artifactId>
+      <scope>test</scope>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -55,21 +68,6 @@
 
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>SlipStreamCljResourcesTestServer-jar-dep</artifactId>
-      <version>${project.version}</version>
-      <type>pom</type>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>SlipStreamCljResourcesTestServer-jar</artifactId>
-      <scope>test</scope>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.sixsq.slipstream</groupId>
       <artifactId>slipstream-ring-container</artifactId>
       <scope>test</scope>
       <type>jar</type>
@@ -95,12 +93,6 @@
       <artifactId>elasticsearch</artifactId>
       <scope>test</scope>
       <version>5.5.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>SlipStreamDbSerializers-jar</artifactId>
-      <scope>test</scope>
     </dependency>
 
     <!-- Needs to be before junit -->
@@ -209,10 +201,9 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <systemPropertyVariables>
-            <property>
-              <name>slipstream.config.dir</name>
-              <value>${project.build.directory}/configuration</value>
-            </property>
+            <slipstream.config.dir>${project.build.directory}/configuration</slipstream.config.dir>
+            <es.host>localhost</es.host>
+            <es.port>12002</es.port>
           </systemPropertyVariables>
           <useSystemClassLoader>false</useSystemClassLoader>
           <excludes>
