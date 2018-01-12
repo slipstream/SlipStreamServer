@@ -29,7 +29,7 @@
       <entry>
          <string>cyclone-fr2.password</string>
          <parameter name="cyclone-fr2.password" description="Password" category="cyclone-fr2" mandatory="true" type="Password" readonly="false" order_="20" order="20">
-            <value><![CDATA[p0ld5wiZZa0]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
@@ -41,13 +41,13 @@
       <entry>
          <string>nuvlabox-bertil-ohlin.password</string>
          <parameter name="nuvlabox-bertil-ohlin.password" description="NuvlaBox account password" category="nuvlabox-bertil-ohlin" mandatory="true" type="Password" readonly="false" order_="20" order="20">
-            <value><![CDATA[4yBv5JSDDPPQH58G1rUonUeN0WCY2iEj]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
          <string>scissor-fr2.password</string>
          <parameter name="scissor-fr2.password" description="Password" category="scissor-fr2" mandatory="true" type="Password" readonly="false" order_="20" order="20">
-            <value><![CDATA[qns4d3iuiyft]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
@@ -227,7 +227,7 @@
       <entry>
          <string>nuvlabox-cecil-powell.password</string>
          <parameter name="nuvlabox-cecil-powell.password" description="NuvlaBox account password" category="nuvlabox-cecil-powell" mandatory="true" type="Password" readonly="false" order_="20" order="20">
-            <value><![CDATA[CGmAarPGA7nNpa3irjwA2bhsxO3nQgp3]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
@@ -245,7 +245,7 @@
       <entry>
          <string>cyclone-fr1.password</string>
          <parameter name="cyclone-fr1.password" description="StratusLab account password" category="cyclone-fr1" mandatory="true" type="Password" readonly="false" order_="20" order="20">
-            <value><![CDATA[UZgsxOjJSxA2]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
@@ -257,7 +257,7 @@
       <entry>
          <string>nuvlabox-yves-chauvin.password</string>
          <parameter name="nuvlabox-yves-chauvin.password" description="NuvlaBox account password" category="nuvlabox-yves-chauvin" mandatory="true" type="Password" readonly="false" order_="20" order="20">
-            <value><![CDATA[eGOO2SSNU2CU7QKfxTXEVNQNJfRfCsjv]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
@@ -282,7 +282,7 @@
       <entry>
          <string>ifb-genouest-genostack.password</string>
          <parameter name="ifb-genouest-genostack.password" description="Password" category="ifb-genouest-genostack" mandatory="true" type="Password" readonly="false" order_="20" order="20">
-            <value><![CDATA[mTt4qjiRE7L9PQuJT3FjJaFe7DA=]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
@@ -294,7 +294,7 @@
       <entry>
          <string>cyclone-tb-it1.password</string>
          <parameter name="cyclone-tb-it1.password" description="Password" category="cyclone-tb-it1" mandatory="true" type="Password" readonly="false" order_="20" order="20">
-            <value><![CDATA[charlesl]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
@@ -324,7 +324,7 @@
       <entry>
          <string>nuvlabox-albert-einstein.password</string>
          <parameter name="nuvlabox-albert-einstein.password" description="NuvlaBox account password" category="nuvlabox-albert-einstein" mandatory="true" type="Password" readonly="false" order_="20" order="20">
-            <value><![CDATA[ePBsKP1t8A2b8dNNEgmx7hveSGXslWJ1]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
@@ -468,19 +468,19 @@ ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAnRxAn1QdEdHEjgerzI3aBBgezjjG4Zv3FxVRgBuzgog2
       <entry>
          <string>nuvlabox-james-chadwick.password</string>
          <parameter name="nuvlabox-james-chadwick.password" description="NuvlaBox account password" category="nuvlabox-james-chadwick" mandatory="true" type="Password" readonly="false" order_="20" order="20">
-            <value><![CDATA[lqnE2abhQulIe1rkLJPOtp2mpMyTtbMb]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
          <string>eo-cloudferro-pl1.password</string>
          <parameter name="eo-cloudferro-pl1.password" description="Password" category="eo-cloudferro-pl1" mandatory="true" type="Password" readonly="false" order_="20" order="20">
-            <value><![CDATA[siXsQ%rocKs!]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
          <string>scissor-fr1.password</string>
          <parameter name="scissor-fr1.password" description="Password" category="scissor-fr1" mandatory="true" type="Password" readonly="false" order_="20" order="20">
-            <value><![CDATA[rgz2yj23k7oi]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
@@ -510,13 +510,13 @@ ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAnRxAn1QdEdHEjgerzI3aBBgezjjG4Zv3FxVRgBuzgog2
       <entry>
          <string>atos-es1.password</string>
          <parameter name="atos-es1.password" description="StratusLab account password" category="atos-es1" mandatory="true" type="Password" readonly="false" order_="20" order="20">
-            <value><![CDATA[757x6q2xso2d]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
          <string>ifb-bistro-iphc.password</string>
          <parameter name="ifb-bistro-iphc.password" description="Password" category="ifb-bistro-iphc" mandatory="true" type="Password" readonly="false" order_="20" order="20">
-            <value><![CDATA[h9WezlKz6GFow]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
@@ -573,7 +573,7 @@ ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAnRxAn1QdEdHEjgerzI3aBBgezjjG4Zv3FxVRgBuzgog2
          <string>exoscale-ch-gva.password</string>
          <parameter name="exoscale-ch-gva.password" description="Secret Key" category="exoscale-ch-gva" mandatory="true" type="Password" readonly="false" order_="20" order="20">
             <instructions><![CDATA[On the Exoscale web interface you can find this information on <code>Account > Profile > API Keys</code>]]></instructions>
-            <value><![CDATA[tK6TQqsD6qGOtBuQwPyTivLNm4_PTW572b7iijiZAOO-oT6-IkywYttvix1d3tOSZuqiAhtzHoLLYD76tMBHZw]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
@@ -605,7 +605,7 @@ ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAnRxAn1QdEdHEjgerzI3aBBgezjjG4Zv3FxVRgBuzgog2
       <entry>
          <string>nuvlabox-stanley-cohen.password</string>
          <parameter name="nuvlabox-stanley-cohen.password" description="NuvlaBox account password" category="nuvlabox-stanley-cohen" mandatory="true" type="Password" readonly="false" order_="20" order="20">
-            <value><![CDATA[GnjRFRvnxpJEJbhYamOMx5SyYNxyJMvB]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
@@ -699,7 +699,7 @@ ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAnRxAn1QdEdHEjgerzI3aBBgezjjG4Zv3FxVRgBuzgog2
       <entry>
          <string>ifb-core-pilot.password</string>
          <parameter name="ifb-core-pilot.password" description="Password" category="ifb-core-pilot" mandatory="true" type="Password" readonly="false" order_="20" order="20">
-            <value><![CDATA[sixsq!rocks]]></value>
+            <value><![CDATA[]]></value>
          </parameter>
       </entry>
       <entry>
@@ -736,7 +736,7 @@ ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAnRxAn1QdEdHEjgerzI3aBBgezjjG4Zv3FxVRgBuzgog2
       <entry>
          <string>cyclone-de1.password</string>
          <parameter name="cyclone-de1.password" description="Password" category="cyclone-de1" mandatory="true" type="Password" readonly="false" order_="20" order="20">
-            <value><![CDATA[yjNHD4bVTPe3bfBY38Tj2kw7BdACTg]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
@@ -844,7 +844,7 @@ ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAnRxAn1QdEdHEjgerzI3aBBgezjjG4Zv3FxVRgBuzgog2
          <string>open-telekom-de1.password</string>
          <parameter name="open-telekom-de1.password" description="Password" category="open-telekom-de1" mandatory="true" type="Password" readonly="false" order_="20" order="20">
             <instructions><![CDATA[On old account you have to use an API Key instead of a password. To find it, login to the OTC console, then go to 'My Credential' and copy the value next to 'API Key'.]]></instructions>
-            <value><![CDATA[6yFnV5lgAEEeuWiLnKUcOszSA7QkxQaw]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
@@ -899,7 +899,7 @@ ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAnRxAn1QdEdHEjgerzI3aBBgezjjG4Zv3FxVRgBuzgog2
       <entry>
          <string>ifb-bird-stack.password</string>
          <parameter name="ifb-bird-stack.password" description="Password" category="ifb-bird-stack" mandatory="true" type="Password" readonly="false" order_="20" order="20">
-            <value><![CDATA[sixsqtest]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
@@ -923,7 +923,7 @@ ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAnRxAn1QdEdHEjgerzI3aBBgezjjG4Zv3FxVRgBuzgog2
       <entry>
          <string>nuvlabox-christiane-n-volhard.password</string>
          <parameter name="nuvlabox-christiane-n-volhard.password" description="NuvlaBox account password" category="nuvlabox-christiane-n-volhard" mandatory="true" type="Password" readonly="false" order_="20" order="20">
-            <value><![CDATA[jN5rpTVwIQwjlqvqeng8sx1PLGefxFH5]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
@@ -941,7 +941,7 @@ ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAnRxAn1QdEdHEjgerzI3aBBgezjjG4Zv3FxVRgBuzgog2
       <entry>
          <string>ultimum-cz1.password</string>
          <parameter name="ultimum-cz1.password" description="Password" category="ultimum-cz1" mandatory="true" type="Password" readonly="false" order_="20" order="20">
-            <value><![CDATA[9FCBF258-D257-4EE4-A69F-DBC1668192B5]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
@@ -972,7 +972,7 @@ ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAnRxAn1QdEdHEjgerzI3aBBgezjjG4Zv3FxVRgBuzgog2
       <entry>
          <string>cyfronet-pl1.password</string>
          <parameter name="cyfronet-pl1.password" description="Password" category="cyfronet-pl1" mandatory="true" type="Password" readonly="false" order_="20" order="20">
-            <value><![CDATA[GrydistOivCak4Swatya]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
@@ -1024,7 +1024,7 @@ ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAnRxAn1QdEdHEjgerzI3aBBgezjjG4Zv3FxVRgBuzgog2
       <entry>
          <string>nuvlabox-arthur-harden.password</string>
          <parameter name="nuvlabox-arthur-harden.password" description="NuvlaBox account password" category="nuvlabox-arthur-harden" mandatory="true" type="Password" readonly="false" order_="20" order="20">
-            <value><![CDATA[qF5xqwuxxCrp0vHgpp2cE5ATisxxWpfY]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
@@ -1049,7 +1049,7 @@ ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAnRxAn1QdEdHEjgerzI3aBBgezjjG4Zv3FxVRgBuzgog2
       <entry>
          <string>nuvlabox-felix-bloch.password</string>
          <parameter name="nuvlabox-felix-bloch.password" description="NuvlaBox account password" category="nuvlabox-felix-bloch" mandatory="true" type="Password" readonly="false" order_="20" order="20">
-            <value><![CDATA[DNeqyBp2iVOadtNsaUNbjy4Qtsro4083]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
@@ -1069,7 +1069,7 @@ ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAnRxAn1QdEdHEjgerzI3aBBgezjjG4Zv3FxVRgBuzgog2
          <string>exoscale-ch-dk.password</string>
          <parameter name="exoscale-ch-dk.password" description="Secret Key" category="exoscale-ch-dk" mandatory="true" type="Password" readonly="false" order_="20" order="20">
             <instructions><![CDATA[On the Exoscale web interface you can find this information on <code>Account > Profile > API Keys</code>]]></instructions>
-            <value><![CDATA[tK6TQqsD6qGOtBuQwPyTivLNm4_PTW572b7iijiZAOO-oT6-IkywYttvix1d3tOSZuqiAhtzHoLLYD76tMBHZw]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
@@ -1106,7 +1106,7 @@ ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAnRxAn1QdEdHEjgerzI3aBBgezjjG4Zv3FxVRgBuzgog2
       <entry>
          <string>nuvlabox-carl-cori.password</string>
          <parameter name="nuvlabox-carl-cori.password" description="NuvlaBox account password" category="nuvlabox-carl-cori" mandatory="true" type="Password" readonly="false" order_="20" order="20">
-            <value><![CDATA[Ma2gJx4vXcrGWcdCKTHIl1YjSS3kWurE]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
@@ -1124,7 +1124,7 @@ ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAnRxAn1QdEdHEjgerzI3aBBgezjjG4Zv3FxVRgBuzgog2
       <entry>
          <string>eo-cesnet-cz1.password</string>
          <parameter name="eo-cesnet-cz1.password" description="Password" category="eo-cesnet-cz1" mandatory="true" type="Password" readonly="false" order_="20" order="20">
-            <value><![CDATA[fepboypheTwophyeibBabbej3]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
@@ -1181,13 +1181,13 @@ ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAnRxAn1QdEdHEjgerzI3aBBgezjjG4Zv3FxVRgBuzgog2
       <entry>
          <string>teidehpc-es-tfs1.password</string>
          <parameter name="teidehpc-es-tfs1.password" description="Password" category="teidehpc-es-tfs1" mandatory="true" type="Password" readonly="false" order_="20" order="20">
-            <value><![CDATA[19iPj8nRs]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
          <string>ifb-prabi-girofle.password</string>
          <parameter name="ifb-prabi-girofle.password" description="Password" category="ifb-prabi-girofle" mandatory="true" type="Password" readonly="false" order_="20" order="20">
-            <value><![CDATA[sixsqtest]]></value>
+            <value><![CDATA[xxx]]></value>
          </parameter>
       </entry>
       <entry>
