@@ -3,14 +3,14 @@
 
   <artifactId>SlipStreamDbTesting-jar-dep</artifactId>
   <packaging>pom</packaging>
-  <version>3.42</version>
+  <version>3.43-SNAPSHOT</version>
   <name>SlipStreamServer/db-testing</name>
   <url>http://sixsq.com</url>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.42</version>
+    <version>3.43-SNAPSHOT</version>
   </parent>
 
   <licenses>
