@@ -1,10 +1,19 @@
-<?xml version="1.0" encoding="UTF-8"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>SlipStreamAsync-dep</artifactId>
   <packaging>jar</packaging>
   <name>SlipStreamServer/jar-async</name>
   <url>http://sixsq.com</url>
+
+  <parent>
+    <groupId>com.sixsq.slipstream</groupId>
+    <artifactId>SlipStreamServer</artifactId>
+    <version>3.43-SNAPSHOT</version>
+  </parent>
+
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
@@ -12,16 +21,10 @@
     </license>
   </licenses>
 
-	<parent>
-		<groupId>com.sixsq.slipstream</groupId>
-		<artifactId>SlipStreamServer</artifactId>
-		<version>3.43-SNAPSHOT</version>
-	</parent>
-
   <dependencies>
     <dependency>
-      <groupId>sixsq</groupId>
-      <artifactId>default-deps</artifactId>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>parent</artifactId>
       <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
@@ -41,6 +44,40 @@
     </dependency>
   </dependencies>
 
+  <profiles>
+    <profile>
+      <id>run-tests</id>
+      <activation>
+        <property>
+          <name>!skipTests</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>lein-test</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>lein</executable>
+                  <arguments>
+                    <argument>test</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
   <build>
     <plugins>
 
@@ -49,18 +86,15 @@
         <artifactId>exec-maven-plugin</artifactId>
         <executions>
           <execution>
-            <id>boot-build</id>
+            <id>lein-build</id>
             <phase>install</phase>
             <goals>
               <goal>exec</goal>
             </goals>
             <configuration>
-              <executable>boot</executable>
-              <environmentVariables>
-                <BOOT_PUSH>${boot.push}</BOOT_PUSH>
-              </environmentVariables>
+              <executable>lein</executable>
               <arguments>
-                <argument>mvn-build</argument>
+                <argument>install</argument>
               </arguments>
             </configuration>
           </execution>

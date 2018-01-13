@@ -1,17 +1,16 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>SlipStreamDbBinding-jar-dep</artifactId>
+  <artifactId>token</artifactId>
   <packaging>pom</packaging>
   <version>3.43-SNAPSHOT</version>
-  <name>SlipStreamServer/db-binding</name>
+  <name>token</name>
+  <description>SlipStreamServer/token</description>
   <url>http://sixsq.com</url>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
-    <artifactId>SlipStreamServer</artifactId>
+    <artifactId>token-dep</artifactId>
     <version>3.43-SNAPSHOT</version>
   </parent>
 
@@ -30,6 +29,7 @@
       <scope>provided</scope>
     </dependency>
   </dependencies>
+  
   <profiles>
     <profile>
       <id>run-tests</id>

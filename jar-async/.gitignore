@@ -7,7 +7,6 @@
 
 # Clojure with Leiningen #
 ##########################
-project.clj
 /checkouts
 .lein-deps-sum
 .lein-failures
