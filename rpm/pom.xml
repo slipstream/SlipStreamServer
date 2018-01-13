@@ -413,7 +413,7 @@
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
-                  <location>target/public/webui</location>
+                  <location>target/webui</location>
                   <excludes>
                     <exclude>META-INF</exclude>
                     <exclude>META-INF/**/*</exclude>
@@ -428,7 +428,7 @@
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
-                  <location>target/public/authn</location>
+                  <location>target/authn</location>
                   <excludes>
                     <exclude>META-INF</exclude>
                     <exclude>META-INF/**/*</exclude>
@@ -443,7 +443,7 @@
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
-                  <location>target/public/legacy/css</location>
+                  <location>target/legacy/css</location>
                 </source>
               </sources>
             </mapping>
@@ -454,7 +454,7 @@
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
-                  <location>target/public/legacy/js/legacy.js</location>
+                  <location>target/legacy/js/legacy.js</location>
                 </source>
               </sources>
             </mapping>
