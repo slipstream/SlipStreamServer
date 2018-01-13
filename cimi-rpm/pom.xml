@@ -3,13 +3,13 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>ssclj-server-rpm</artifactId>
-  <name>SlipStreamServer/ssclj/rpm</name>
+  <name>SlipStreamServer/cimi-rpm</name>
 
   <packaging>pom</packaging>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
-    <artifactId>SlipStreamCljResources</artifactId>
+    <artifactId>SlipStreamServer</artifactId>
     <version>3.43-SNAPSHOT</version>
   </parent>
 

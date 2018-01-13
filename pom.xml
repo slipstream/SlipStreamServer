@@ -25,8 +25,8 @@
     <module>jar-prslib</module>
     <module>jar-pricing-lib</module>
     <module>jar-placement-lib</module>
-    <module>jar-prs-service</module>
-    <module>ssclj</module>
+    <module>prs</module>
+    <module>cimi</module>
     <module>db-binding</module>
     <module>db-testing</module>
     <module>db-serializers</module>
@@ -45,8 +45,10 @@
         </file>
       </activation>
       <modules>
+        <module>cimi-rpm</module>
         <module>rpm</module>
-        <module>rpm-prs</module>
+        <module>metering-rpm</module>
+        <module>prs-rpm</module>
         <module>ring-container-rpm</module>
       </modules>
     </profile>
@@ -58,8 +60,10 @@
         </file>
       </activation>
       <modules>
+        <module>cimi-rpm</module>
         <module>rpm</module>
-        <module>rpm-prs</module>
+        <module>metering-rpm</module>
+        <module>prs-rpm</module>
         <module>ring-container-rpm</module>
       </modules>
     </profile>

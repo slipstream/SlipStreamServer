@@ -1,16 +1,17 @@
-<?xml version="1.0" encoding="UTF-8"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>metering-dep</artifactId>
+  <artifactId>SlipStreamPricingService-jar-dep</artifactId>
   <packaging>pom</packaging>
   <version>3.43-SNAPSHOT</version>
-  <name>SlipStreamServer/metering/jar</name>
-  <description>SlipStream Metering (DEP)</description>
+  <name>SlipStreamServer/prs</name>
   <url>http://sixsq.com</url>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
-    <artifactId>metering-pom</artifactId>
+    <artifactId>SlipStreamServer</artifactId>
     <version>3.43-SNAPSHOT</version>
   </parent>
 
@@ -28,15 +29,8 @@
       <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>SlipStreamDbTesting-jar-dep</artifactId>
-      <version>${project.version}</version>
-      <type>pom</type>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
-  
+
   <profiles>
     <profile>
       <id>run-tests</id>
