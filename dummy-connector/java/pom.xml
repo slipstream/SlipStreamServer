@@ -4,7 +4,7 @@
 
   <artifactId>SlipStreamConnector-Dummy-java</artifactId>
   <packaging>pom</packaging>
-  <name>SlipStreamConnectors/dummy/java</name>
+  <name>SlipStreamServer/dummy/java</name>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>

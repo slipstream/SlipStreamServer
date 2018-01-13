@@ -4,8 +4,8 @@
   <artifactId>token-java</artifactId>
   <packaging>pom</packaging>
   <version>3.43-SNAPSHOT</version>
-  <name>token-java</name>
-  <description>SlipStreamServer/token</description>
+  <name>SlipStreamServer/token/java</name>
+  <description>SlipStreamServer/token/java</description>
   <url>http://sixsq.com</url>
 
   <parent>

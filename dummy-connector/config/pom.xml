@@ -5,7 +5,7 @@
 
   <artifactId>SlipStreamConnector-Dummy-conf-dep</artifactId>
   <packaging>pom</packaging>
-  <name>SlipStreamConnectors/dummy/config</name>
+  <name>SlipStreamServer/dummy/config</name>
   <url>http://sixsq.com</url>
 
   <parent>

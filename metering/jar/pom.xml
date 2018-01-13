@@ -4,7 +4,7 @@
   <artifactId>metering-dep</artifactId>
   <packaging>pom</packaging>
   <version>3.43-SNAPSHOT</version>
-  <name>metering-dep</name>
+  <name>SlipStreamServer/metering/jar</name>
   <description>SlipStream Metering (DEP)</description>
   <url>http://sixsq.com</url>
 

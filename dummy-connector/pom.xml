@@ -5,7 +5,7 @@
   <artifactId>SlipStreamConnector-Dummy</artifactId>
   <version>3.43-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>SlipStreamConnectors/dummy</name>
+  <name>SlipStreamServer/dummy</name>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>

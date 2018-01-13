@@ -4,7 +4,7 @@
   <artifactId>metering-pom</artifactId>
   <version>3.43-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>SlipStream Metering (POM)</name>
+  <name>SlipStreamServer/metering</name>
   <url>http://sixsq.com/</url>
 
   <parent>
