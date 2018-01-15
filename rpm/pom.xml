@@ -493,6 +493,7 @@
               <username>slipstream</username>
               <groupname>slipstream</groupname>
               <configuration>true</configuration>
+              <configuration>noreplace</configuration>
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
