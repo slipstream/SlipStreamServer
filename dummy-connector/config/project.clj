@@ -29,7 +29,7 @@
 
   :profiles
   {:test
-   {:dependencies [[com.sixsq.slipstream/SlipStreamCljResourcesTests-jar]
+   {:dependencies [[com.sixsq.slipstream/SlipStreamCljResourcesTests-jar :classifier "tests"]
                    [com.sixsq.slipstream/SlipStreamDbTesting-jar]
                    [peridot]
                    [commons-logging]
