@@ -158,7 +158,7 @@
         sr/json-response)))
 
 (defmulti set-subtype-ops
-          :cloudServiceType)
+          (fn [resource _] (:cloudServiceType resource)))
 
 (defmethod set-subtype-ops :default
   [resource request]
