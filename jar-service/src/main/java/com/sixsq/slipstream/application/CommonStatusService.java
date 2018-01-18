@@ -104,7 +104,7 @@ public class CommonStatusService extends StatusService {
 		if (CookieUtils.verifyAuthnCookie(cookie) == Verifier.RESULT_VALID) {
 			String username = CookieUtils.getCookieUsername(cookie);
 			try {
-				user = User.loadByName(username);
+				user = User.loadByNameNoParams(username);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

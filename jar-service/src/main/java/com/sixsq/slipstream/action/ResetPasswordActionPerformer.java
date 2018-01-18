@@ -55,7 +55,7 @@ public class ResetPasswordActionPerformer extends OneShotActionPerformer {
 		Form form = getForm();
 		String userResourceUrl = form.getFirst("userResourceUrl").getValue();
 
-		User user = User.load(userResourceUrl);
+		User user = User.loadNoParams(userResourceUrl);
 		user.randomizePassword();
 
 		try {

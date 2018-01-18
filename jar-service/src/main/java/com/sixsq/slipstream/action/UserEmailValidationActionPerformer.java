@@ -56,7 +56,7 @@ public class UserEmailValidationActionPerformer extends OneShotActionPerformer {
 		Form form = getForm();
 		String userResourceUrl = form.getFirst("userResourceUrl").getValue();
 
-		User user = User.load(userResourceUrl);
+		User user = User.loadNoParams(userResourceUrl);
 
 		if (user.getState() != User.State.NEW) {
 			throw new ValidationException("User not new. Did you already validate this user?");

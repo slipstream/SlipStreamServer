@@ -91,7 +91,7 @@ public class Users {
 	}
 
     public static User loadSuper() throws ValidationException {
-		return User.loadByName(SUPER_USERNAME);
+		return User.loadByNameNoParams(SUPER_USERNAME);
 	}
 
 	private static User createUser(String name) {

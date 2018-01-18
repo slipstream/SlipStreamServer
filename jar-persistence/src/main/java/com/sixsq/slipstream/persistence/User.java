@@ -482,44 +482,31 @@ public class User extends Metadata {
 
     }
 
-    public static User loadByName(String name) throws ConfigurationException,
-            ValidationException {
-        return loadByName(name, null);
+    public static User loadByName(String name) throws ConfigurationException, ValidationException {
+        return load(User.constructResourceUri(name));
     }
 
-    public static User loadByName(String name, ServiceConfiguration sc)
-            throws ConfigurationException, ValidationException {
-        return load(User.constructResourceUri(name), sc);
-    }
-
-    public static User load(String resourceUrl, ServiceConfiguration sc)
-            throws ConfigurationException, ValidationException {
-        User user = load(resourceUrl);
-
-        if (sc != null && user != null) {
-            user.addSystemParametersIntoUser(sc);
-        }
-
-        return user;
+    public static User loadByNameNoParams(String name) throws ConfigurationException {
+        return loadNoParams(User.constructResourceUri(name));
     }
 
     public static User load(String resourceUrl) throws ConfigurationException,
             ValidationException {
-        String url = SscljProxy.BASE_RESOURCE + resourceUrl;
-        Response resp = SscljProxy.get(url, USERNAME_ROLE);
-        if (SscljProxy.isError(resp)) {
-            logger.warning("Error retrieving user from URL: " + url);
-            return null;
-        }
-        User user = gson.fromJson(resp.getEntityAsText(), User.class);
+        User user = loadNoParams(resourceUrl);
         if (null == user) {
-            logger.warning("Could not parse user document JSON from " + url);
             return null;
         }
         user.parameters = loadParameters(user);
         return user;
     }
 
+    public static User loadNoParams(String resourceUri) {
+        Response resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + resourceUri, USERNAME_ROLE);
+        if (SscljProxy.isError(resp)) {
+            return null;
+        }
+        return  gson.fromJson(resp.getEntityAsText(), User.class);
+    }
 
     private static CloudCredentialCollection findCloudCredentials(User user) {
         return User.findCloudCredentials(user, "");
