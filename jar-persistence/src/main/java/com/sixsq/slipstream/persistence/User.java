@@ -505,13 +505,16 @@ public class User extends Metadata {
 
     public static User load(String resourceUrl) throws ConfigurationException,
             ValidationException {
-        Response resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + resourceUrl, USERNAME_ROLE);
+        String url = SscljProxy.BASE_RESOURCE + resourceUrl;
+        Response resp = SscljProxy.get(url, USERNAME_ROLE);
         if (SscljProxy.isError(resp)) {
+            logger.warning("Error retrieving user from URL: " + url);
             return null;
         }
         User user = gson.fromJson(resp.getEntityAsText(), User.class);
         if (null == user) {
-            return user;
+            logger.warning("Could not parse user document JSON from " + url);
+            return null;
         }
         user.parameters = loadParameters(user);
         return user;
@@ -578,12 +581,17 @@ public class User extends Metadata {
 	}
 
     private static Map<String, UserParameter> loadCloudCredentials(User user) throws ValidationException {
-        CloudCredentialCollection creds = User.findCloudCredentials(user);
-        if (null != creds && creds.getCount() >= 1 && null != user) {
-            return loadCloudCredentials(creds.getCredentials(), user);
-        } else {
-            logger.warning("No cloud credentials for user " + user.getName() + ".");
+        if (user == null) {
             return new HashMap<>();
+        } else {
+            CloudCredentialCollection creds = User.findCloudCredentials(user);
+            if (null != creds && creds.getCount() >= 1) {
+                logger.fine("Found " + creds.getCount() + "cloud credentials for user " + user.getName() + ".");
+                return loadCloudCredentials(creds.getCredentials(), user);
+            } else {
+                logger.fine("No cloud credentials for user " + user.getName() + ".");
+                return new HashMap<>();
+            }
         }
     }
 
@@ -650,11 +658,17 @@ public class User extends Metadata {
     public static List<User> list() {
         Response resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + RESOURCE_NAME, USERNAME_ROLE);
 
-        if (SscljProxy.isError(resp)) return new ArrayList<>();
+        if (SscljProxy.isError(resp)) {
+            logger.warning("Error retrieving list of users.");
+            return new ArrayList<>();
+        }
 
         Users records = Users.fromJson(resp.getEntityAsText());
 
-        if (records == null) return new ArrayList<>();
+        if (records == null) {
+            logger.warning("Cannot parse JSON from user list document.");
+            return new ArrayList<>();
+        }
 
         return records.getUsers();
     }
@@ -678,13 +692,20 @@ public class User extends Metadata {
 
     @SuppressWarnings("unchecked")
     public static List<UserView> viewList() {
-        Response resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + RESOURCE_NAME, USERNAME_ROLE);
+        String url = SscljProxy.BASE_RESOURCE + RESOURCE_NAME;
+        Response resp = SscljProxy.get(url, USERNAME_ROLE);
 
-        if (SscljProxy.isError(resp)) return new ArrayList<>();
+        if (SscljProxy.isError(resp)) {
+            logger.warning("Error retrieving document from " + url);
+            return new ArrayList<>();
+        }
 
         UsersView records = UsersView.fromJson(resp.getEntityAsText());
 
-        if (records == null) return new ArrayList<>();
+        if (records == null) {
+            logger.warning("Could not parse JSON document from " + url);
+            return new ArrayList<>();
+        }
 
         return records.getUsers();
     }

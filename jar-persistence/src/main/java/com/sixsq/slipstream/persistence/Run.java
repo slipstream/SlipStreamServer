@@ -85,6 +85,7 @@ import com.sixsq.slipstream.metrics.MetricsTimer;
         @NamedQuery(name = "allRuns", query = "SELECT r FROM Run r ORDER BY r.startTime DESC"),
         @NamedQuery(name = "runWithRuntimeParameters", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.uuid = :uuid"),
         @NamedQuery(name = "oldInStatesRuns", query = "SELECT r FROM Run r WHERE r.user_ = :user AND r.lastStateChangeTime < :before AND r.state IN (:states)"),
+        @NamedQuery(name = "allInStates", query = "SELECT r FROM Run r WHERE r.state IN (:states)"),
         @NamedQuery(name = "runByInstanceId", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.user_ = :user AND p.name_ = :instanceidkey AND p.value = :instanceidvalue ORDER BY r.startTime DESC")})
 public class Run extends Parameterized<Run, RunParameter> {
 
@@ -493,6 +494,15 @@ public class Run extends Parameterized<Run, RunParameter> {
         Query q = createNamedQuery(em, "oldInStatesRuns");
         q.setParameter("user", user.getName());
         q.setParameter("before", back);
+        q.setParameter("states", States.transition());
+        List<Run> runs = q.getResultList();
+        em.close();
+        return runs;
+    }
+
+    public static List<Run> listAllTransient() throws ConfigurationException {
+        EntityManager em = PersistenceUtil.createEntityManager();
+        Query q = createNamedQuery(em, "oldInStatesRuns");
         q.setParameter("states", States.transition());
         List<Run> runs = q.getResultList();
         em.close();
