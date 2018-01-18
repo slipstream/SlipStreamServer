@@ -89,10 +89,6 @@ public class CookieAuthenticator extends AuthenticatorBase {
 		setUserInRequest(user, request);
 		setRolesInRequest(CookieUtils.getCookieRoles(cookie), request);
 
-		if (!CookieUtils.isMachine(cookie)) {
-			setLastOnline(user);
-		}
-
 		return true;
 	}
 
