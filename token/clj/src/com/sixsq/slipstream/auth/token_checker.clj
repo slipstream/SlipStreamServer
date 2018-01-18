@@ -43,12 +43,15 @@
   "Validates the given token and returns the embedded claims.  If the token
    is not valid, then a warning is logged and an empty claims map is returned.
    This method facilitates token checking from Java. For clojure, use the
-   validation functions directly."
+   validation functions directly.  An empty claims map will be silently
+   returned if the token is nil."
   [^String token]
   (try
-    (-> token
-        sign/unsign-claims
-        walk/stringify-keys)
+    (if token
+      (-> token
+          sign/unsign-claims
+          walk/stringify-keys)
+      {})
     (catch Exception e
       (log/warn "invalid authentication token: " token ", cause" e)
       {})))
