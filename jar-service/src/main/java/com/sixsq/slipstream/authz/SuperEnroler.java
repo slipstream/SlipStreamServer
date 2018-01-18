@@ -42,11 +42,9 @@ public class SuperEnroler implements Enroler {
 	public void enrole(ClientInfo clientInfo) {
 		User user = null;
 		try {
-			user = User.loadByName(clientInfo.getUser().getIdentifier());
+			user = User.loadByNameNoParams(clientInfo.getUser().getIdentifier());
 		} catch (ConfigurationException e) {
 			Util.throwConfigurationException(e);
-		} catch (ValidationException e) {
-			Util.throwClientValidationError(e.getMessage());
 		}
 		if (user != null && user.isSuper()) {
 			clientInfo.getRoles().add(Super);

@@ -401,15 +401,6 @@ public class CookieUtils {
 		return cloudServiceName;
 	}
 
-	public static User getCookieUser(Cookie cookie)
-			throws ConfigurationException, ValidationException {
-		String userName = getCookieUsername(cookie);
-		if (userName != null) {
-			return User.loadByName(userName);
-		}
-		return null;
-	}
-
 	private static Date dateFromExpiryString(String expiryString) {
 		try {
 			return new Date(Long.parseLong(expiryString));

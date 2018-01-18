@@ -138,7 +138,7 @@ public class RegistrationResource extends SimpleRepresentationBaseResource {
 	public void checkUserDoesntExist(User user) throws ConfigurationException,
 			ValidationException {
 
-		if (User.loadByName(user.getName()) != null) {
+		if (User.loadByNameNoParams(user.getName()) != null) {
 			throw new ResourceException(Status.CLIENT_ERROR_FORBIDDEN,
 					"Sorry but user " + user.getName()
 							+ " already exists. Please choose another.");

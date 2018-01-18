@@ -54,8 +54,6 @@ public class Dashboard {
 
 	public void populate(User user) throws SlipStreamException {
 
-		user = User.loadByName(user.getName());  // ensure user is loaded from database
-
 		clouds = ConnectorFactory.getCloudServiceNamesList();
 
 		CloudUsage allClouds = new CloudUsage("All Clouds");
