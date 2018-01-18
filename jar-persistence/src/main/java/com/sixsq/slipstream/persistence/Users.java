@@ -26,6 +26,8 @@ import java.util.List;
  */
 public class Users {
 
+    private static final Gson gson = new Gson();
+
     private List<User> users = new ArrayList<>();
 
     public List<User> getUsers() {
@@ -33,7 +35,7 @@ public class Users {
     }
 
     public static Users fromJson(String jsonRecords) {
-        return (new Gson()).fromJson(jsonRecords, Users.class);
+        return gson.fromJson(jsonRecords, Users.class);
     }
 
 

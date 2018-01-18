@@ -41,6 +41,8 @@ import com.sixsq.slipstream.util.SerializationUtil;
 
 public class ResultsDirectory extends Directory {
 
+    private static final Gson gson = new Gson();
+
     public ResultsDirectory(Context context, Reference rootLocalReference) {
         super(context, rootLocalReference);
         setDefaults();
@@ -89,7 +91,6 @@ public class ResultsDirectory extends Directory {
 
         FilePropertiesList data = new FilePropertiesList(indexContent);
 
-        Gson gson = new Gson();
         String result = gson.toJson(data);
 
         return new StringRepresentation(result, APPLICATION_JSON);

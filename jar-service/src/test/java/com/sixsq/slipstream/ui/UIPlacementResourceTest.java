@@ -1,7 +1,6 @@
 package com.sixsq.slipstream.ui;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
@@ -22,6 +21,8 @@ import static org.junit.Assert.assertThat;
 /**
  */
 public class UIPlacementResourceTest extends ResourceTestBase {
+
+    private static final Gson gson = new Gson();
 
     public static String imageName = "test-image";
     public static String projectName = "test-project";
@@ -85,7 +86,6 @@ public class UIPlacementResourceTest extends ResourceTestBase {
 
         Response response = putUIPlacement(data);
 
-        Gson gson = new GsonBuilder().create();
         System.out.println("RESPONSE: " + response.getEntityAsText());
         Object fromJson = gson.fromJson(response.getEntityAsText(), Object.class);
 

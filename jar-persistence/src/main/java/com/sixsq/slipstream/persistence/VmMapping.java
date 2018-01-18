@@ -12,6 +12,8 @@ public class VmMapping {
 
     private static final Logger logger = Logger.getLogger(VmMapping.class.getName());
 
+    private static final Gson gson = new Gson();
+
     @SuppressWarnings("unused")
     @SerializedName("cloud")
     private String cloud;
@@ -55,12 +57,10 @@ public class VmMapping {
     }
 
     public String toJson() {
-        Gson gson = new Gson();
         return gson.toJson(this);
     }
 
     public static VmMapping fromJson(String json) {
-        Gson gson = new Gson();
         return gson.fromJson(json, VmMapping.class);
     }
 

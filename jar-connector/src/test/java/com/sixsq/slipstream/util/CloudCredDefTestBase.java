@@ -17,6 +17,8 @@ import static org.junit.Assert.assertTrue;
 
 public class CloudCredDefTestBase {
 
+    private static final Gson gson = new Gson();
+
     @BeforeClass
     public static void setupClass() {
         SscljTestServer.start();
@@ -54,7 +56,7 @@ public class CloudCredDefTestBase {
 
         SscljTestServer.refresh();
 
-        HashMap<String, String> response = (new Gson()).fromJson(resp.getEntityAsText(), HashMap.class);
+        HashMap<String, String> response = gson.fromJson(resp.getEntityAsText(), HashMap.class);
         String resourceId = response.get("resource-id");
         resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + resourceId, "test USER");
         assertFalse(resp.toString(), SscljProxy.isError(resp));

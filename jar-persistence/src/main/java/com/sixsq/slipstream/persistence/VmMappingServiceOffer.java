@@ -5,6 +5,8 @@ import com.google.gson.annotations.SerializedName;
 
 public class VmMappingServiceOffer {
 
+    private static final Gson gson = new Gson();
+
     @SuppressWarnings("unused")
     @SerializedName("href")
     private String href;
@@ -17,12 +19,10 @@ public class VmMappingServiceOffer {
     }
 
     public String toJson() {
-        Gson gson = new Gson();
         return gson.toJson(this);
     }
 
     public static VmMappingServiceOffer fromJson(String json) {
-        Gson gson = new Gson();
         return gson.fromJson(json, VmMappingServiceOffer.class);
     }
 

@@ -27,6 +27,8 @@ import java.util.List;
  */
 public class VirtualMachines {
 
+    private static final Gson gson = new Gson();
+
     private List<VirtualMachine> virtualMachines = new ArrayList<>();
 
     public List<VirtualMachine> getVirtualMachines() {
@@ -34,7 +36,6 @@ public class VirtualMachines {
     }
 
     public static VirtualMachines fromJson(String jsonRecords) {
-        Gson gson = new Gson();
         return gson.fromJson(jsonRecords, VirtualMachines.class);
     }
 
