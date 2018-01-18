@@ -20,27 +20,6 @@ public abstract class AuthenticatorBase extends Authenticator {
 		super(context, optional);
 	}
 
-	protected void setLastOnline(User user) {
-		user.setLastOnline();
-	}
-
-	protected void setLastOnline(Cookie cookie) {
-
-		User user = null;
-
-		try {
-			user = CookieUtils.getCookieUser(cookie);
-		} catch (ValidationException e) {
-			throw new ResourceException(Status.CLIENT_ERROR_UNAUTHORIZED);
-		}
-
-		if (user == null) {
-			throw new ResourceException(Status.CLIENT_ERROR_UNAUTHORIZED);
-		}
-
-		setLastOnline(user);
-	}
-
 	static public void setUserInRequest(User user, Request request) {
 		request.getAttributes().put(User.REQUEST_KEY, user);
 	}

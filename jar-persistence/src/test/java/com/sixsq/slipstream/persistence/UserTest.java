@@ -228,7 +228,6 @@ public class UserTest {
 
 		User user3 = UserTest.createUser("user3");
 		user3.setState(State.ACTIVE);
-		user3.setLastExecute();
 		user3.setLastModified();
 		user3.store();
 
@@ -246,16 +245,12 @@ public class UserTest {
 
 		User user = UserTest.createUser("user").store();
 		user.setState(State.ACTIVE);
-		user.setLastExecute();
-		user.setLastOnline();
 		user.setLastModified();
 		user.store();
 
 		List<UserView> userViewList = User.viewList();
 		UserView userView = userViewList.get(1);
 		assertNotNull(userView.activeSince);
-		assertNotNull(userView.lastExecute);
-		assertNotNull(userView.lastOnline);
 	}
 
 	@Test
@@ -320,17 +315,6 @@ public class UserTest {
 		} catch (ValidationException e) {
 			return false;
 		}
-	}
-
-	@Test
-	public void online() {
-		assertThat(user.isOnline(), is(false));
-
-		user.setLastOnline();
-		assertThat(user.isOnline(), is(true));
-
-		user.setLastOnline(new Date(1)); // a long time ago
-		assertThat(user.isOnline(), is(false));
 	}
 
 	@Test

@@ -120,7 +120,8 @@ public class UserView {
 
 	@Attribute(required = false)
 	public boolean isOnline() {
-		return User.isOnline(lastOnline);
+		// unused
+		return false;
 	}
 
 }

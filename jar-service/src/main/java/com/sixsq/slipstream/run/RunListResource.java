@@ -202,8 +202,6 @@ public class RunListResource extends BaseResource {
 
 			launch(run);
 
-			setLastExecute(user);
-
 			run.postEventCreated();
 
 		} catch (SlipStreamClientException ex) {
@@ -231,16 +229,6 @@ public class RunListResource extends BaseResource {
 		String absolutePath = RequestUtil.constructAbsolutePath(getRequest(), location);
 
 		getResponse().setLocationRef(absolutePath);
-	}
-
-	private void setLastExecute(User user) {
-		user.setLastExecute();
-		try {
-			user = user.store();
-		} catch (StaleObjectStateException e) {
-		} catch (RollbackException e) {
-		} catch (OptimisticLockException e) {
-		}
 	}
 
 	private void setKeepRunning(Run run, Form form) throws ValidationException {
