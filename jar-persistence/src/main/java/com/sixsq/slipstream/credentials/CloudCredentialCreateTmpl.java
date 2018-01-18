@@ -3,6 +3,9 @@ package com.sixsq.slipstream.credentials;
 import com.google.gson.Gson;
 
 public class CloudCredentialCreateTmpl {
+
+    private static final Gson gson = new Gson();
+
     public ICloudCredential credentialTemplate;
 
     public CloudCredentialCreateTmpl(ICloudCredential cd) {
@@ -13,12 +16,10 @@ public class CloudCredentialCreateTmpl {
     }
 
     public String toJson() {
-        Gson gson = new Gson();
         return gson.toJson(this);
     }
 
     public static CloudCredentialCreateTmpl fromJson(String json) {
-        Gson gson = new Gson();
         return gson.fromJson(json, CloudCredentialCreateTmpl.class);
     }
 }

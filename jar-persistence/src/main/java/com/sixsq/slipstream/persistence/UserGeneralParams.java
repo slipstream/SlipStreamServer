@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 public class UserGeneralParams {
+    private static final Gson gson = new Gson();
     public Integer timeout = 30;
     public Integer verbosityLevel = Integer.parseInt(ExecutionControlUserParametersFactory.VERBOSITY_LEVEL_DEFAULT);
     public String defaultCloudService = "";
@@ -37,7 +38,7 @@ public class UserGeneralParams {
     }
 
     public static UserGeneralParams fromJson(String jsonRecords) {
-        return (new Gson()).fromJson(jsonRecords, UserGeneralParams.class);
+        return gson.fromJson(jsonRecords, UserGeneralParams.class);
     }
 
     public void setParameter(UserParameter param) {

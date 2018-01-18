@@ -26,6 +26,8 @@ import java.util.List;
  */
 public class UserGeneralParamsCollection {
 
+    private static final Gson gson = new Gson();
+
     private List<UserGeneralParams> userParam = new ArrayList<>();
     private Integer count;
 
@@ -38,7 +40,6 @@ public class UserGeneralParamsCollection {
     }
 
     public static UserGeneralParamsCollection fromJson(String jsonRecords) {
-        Gson gson = new Gson();
         return gson.fromJson(jsonRecords, UserGeneralParamsCollection.class);
     }
 }

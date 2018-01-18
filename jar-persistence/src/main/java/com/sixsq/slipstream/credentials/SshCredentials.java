@@ -26,6 +26,8 @@ import java.util.List;
  */
 public class SshCredentials {
 
+    private static final Gson gson = new Gson();
+
     private List<ISshCredential> credentials = new ArrayList<>();
     private Integer count;
 
@@ -38,7 +40,6 @@ public class SshCredentials {
     }
 
     public static Object fromJson(String jsonRecords, Class klass) {
-        Gson gson = new Gson();
         return gson.fromJson(jsonRecords, klass);
     }
 }

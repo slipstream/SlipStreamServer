@@ -14,6 +14,9 @@ import java.util.List;
 import java.util.Map;
 
 public class SshCredential<T> implements ISshCredential<T> {
+
+    public static final Gson gson = new Gson();
+
     public String href = "credential-template/import-ssh-public-key";
 
     public String id;
@@ -34,11 +37,11 @@ public class SshCredential<T> implements ISshCredential<T> {
     }
 
     public String toJson() {
-        return (new Gson()).toJson(this);
+        return gson.toJson(this);
     }
 
     public static Object fromJson(String json, Class klass) {
-        return (new Gson()).fromJson(json, klass);
+        return gson.fromJson(json, klass);
     }
 
     @Override

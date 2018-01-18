@@ -1,7 +1,6 @@
 package com.sixsq.slipstream.ui;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ModuleCategory;
@@ -21,6 +20,8 @@ import java.util.logging.Logger;
 public class PlacementRequest {
 
     private static Logger logger = Logger.getLogger(PlacementRequest.class.getName());
+
+    private static final Gson gson = new Gson();
 
     private String moduleUri;
 
@@ -74,7 +75,6 @@ public class PlacementRequest {
     }
 
     public static PlacementRequest fromJson(String json) throws ValidationException {
-        Gson gson = new GsonBuilder().create();
         PlacementRequest placementRequest = gson.fromJson(json, PlacementRequest.class);
 
         validateFromJSON(placementRequest);

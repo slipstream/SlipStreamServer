@@ -65,6 +65,8 @@ import java.util.logging.Logger;
 @SuppressWarnings("serial")
 public class User extends Metadata {
 
+    private static final Gson gson = new Gson();
+
     private static final String USERNAME = "internal";
     private static final String ROLE = "ADMIN";
     private static final String USERNAME_ROLE = USERNAME + " " + ROLE;
@@ -521,7 +523,7 @@ public class User extends Metadata {
         if (SscljProxy.isError(resp)) {
             return null;
         }
-        User user = (new Gson()).fromJson(resp.getEntityAsText(), User.class);
+        User user = gson.fromJson(resp.getEntityAsText(), User.class);
         if (null == user) {
             return user;
         }
@@ -827,14 +829,14 @@ public class User extends Metadata {
             throw new SlipStreamDatabaseException("Failed to persist User: "
                     + SscljProxy.respToString(resp));
         }
-        User user = (new Gson()).fromJson(resp.getEntityAsText(), User.class);
+        User user = gson.fromJson(resp.getEntityAsText(), User.class);
         if (null == user || null == user.name) {
             resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + resourceUri, USERNAME_ROLE);
             if (SscljProxy.isError(resp) || null == resp.getEntityAsText()) {
                 throw new SlipStreamDatabaseException("Failed to persist User: "
                         + SscljProxy.respToString(resp));
             }
-            user = (new Gson()).fromJson(resp.getEntityAsText(), User.class);
+            user = gson.fromJson(resp.getEntityAsText(), User.class);
         }
         try {
             user.parameters = loadParameters(user);

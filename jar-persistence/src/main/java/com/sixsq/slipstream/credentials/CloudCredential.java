@@ -21,6 +21,9 @@ import java.util.List;
 import java.util.Map;
 
 public class CloudCredential<T> implements ICloudCredential<T> {
+
+    private static final Gson gson = new Gson();
+
     public String id;
 
     public String href = null;
@@ -62,11 +65,11 @@ public class CloudCredential<T> implements ICloudCredential<T> {
     }
 
     public String toJson() {
-        return (new Gson()).toJson(this);
+        return gson.toJson(this);
     }
 
     public static Object fromJson(String json, Class klass) {
-        return (new Gson()).fromJson(json, klass);
+        return gson.fromJson(json, klass);
     }
 
     public boolean equalsTo(ICloudCredential<T> other) {
