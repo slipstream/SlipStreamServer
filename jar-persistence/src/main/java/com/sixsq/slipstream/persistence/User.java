@@ -212,21 +212,7 @@ public class User extends Metadata {
     }
 
     public boolean isOnline() {
-        return isOnline(lastOnline);
-    }
-
-    public static boolean isOnline(Date lastOnline) {
-        if (lastOnline == null) {
-            return false;
-        }
-
-        boolean isOnline = false;
-
-        Date now = new Date();
-        if (millisecondsToMinutes(now.getTime() - lastOnline.getTime()) < ACTIVE_TIMEOUT_MINUTES) {
-            isOnline = true;
-        }
-        return isOnline;
+        return false;
     }
 
     private static long millisecondsToMinutes(long milliseconds) {
@@ -845,20 +831,28 @@ public class User extends Metadata {
         return user;
     }
 
+    @Deprecated
     public Date getLastOnline() {
-        return lastOnline;
+        // unused
+        return null;
     }
 
+    @Deprecated
     public void setLastOnline(Date date) {
-        this.lastOnline = date;
+        // no-op; unused
+        this.lastOnline = null;
     }
 
+    @Deprecated
     public void setLastOnline() {
-        this.lastOnline = new Date();
+        // no-op; unused
+        this.lastOnline = null;
     }
 
+    @Deprecated
     public void setLastExecute() {
-        this.lastExecute = new Date();
+        // no-op; unused
+        this.lastExecute = null;
     }
 
 
