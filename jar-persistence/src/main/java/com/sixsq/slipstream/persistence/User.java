@@ -484,7 +484,7 @@ public class User extends Metadata {
 
     }
 
-    private static final MetricsTimer loadByNameTimer = Metrics.newTimer(Run.class, "loadByName");
+    private static final MetricsTimer loadByNameTimer = Metrics.newTimer(User.class, "loadByName");
 
     public static User loadByName(String name) throws ConfigurationException, ValidationException {
         loadByNameTimer.start();
@@ -495,7 +495,7 @@ public class User extends Metadata {
         }
     }
 
-    private static final MetricsTimer loadByNameNoParamsTimer = Metrics.newTimer(Run.class, "loadByNameNoParams");
+    private static final MetricsTimer loadByNameNoParamsTimer = Metrics.newTimer(User.class, "loadByNameNoParams");
 
     public static User loadByNameNoParams(String name) throws ConfigurationException {
         loadByNameNoParamsTimer.start();
@@ -822,7 +822,7 @@ public class User extends Metadata {
         }
     }
 
-    private static final MetricsTimer storeTimer = Metrics.newTimer(Run.class, "store");
+    private static final MetricsTimer storeTimer = Metrics.newTimer(User.class, "store");
 
     public User store() {
         storeTimer.start();
