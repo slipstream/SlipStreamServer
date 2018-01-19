@@ -408,53 +408,12 @@
             </mapping>
 
             <mapping>
-              <directory>/opt/slipstream/webui</directory>
-              <filemode>644</filemode>
-              <directoryIncluded>false</directoryIncluded>
-              <sources>
-                <source>
-                  <location>target/public/webui</location>
-                  <excludes>
-                    <exclude>META-INF</exclude>
-                    <exclude>META-INF/**/*</exclude>
-                  </excludes>
-                </source>
-              </sources>
-            </mapping>
-
-            <mapping>
-              <directory>/opt/slipstream/authn</directory>
-              <filemode>644</filemode>
-              <directoryIncluded>false</directoryIncluded>
-              <sources>
-                <source>
-                  <location>target/public/authn</location>
-                  <excludes>
-                    <exclude>META-INF</exclude>
-                    <exclude>META-INF/**/*</exclude>
-                  </excludes>
-                </source>
-              </sources>
-            </mapping>
-
-            <mapping>
-              <directory>${installation.dir}/webapps/slipstream.war/static-content/css</directory>
+              <directory>${installation.dir}/webapps/slipstream.war/static-content/</directory>
               <filemode>664</filemode>
-              <directoryIncluded>false</directoryIncluded>
+              <directoryIncluded>true</directoryIncluded>
               <sources>
                 <source>
-                  <location>target/public/legacy/css</location>
-                </source>
-              </sources>
-            </mapping>
-
-            <mapping>
-              <directory>${installation.dir}/webapps/slipstream.war/static-content/js</directory>
-              <filemode>664</filemode>
-              <directoryIncluded>false</directoryIncluded>
-              <sources>
-                <source>
-                  <location>target/public/legacy/js/legacy.js</location>
+                  <location>target/public/</location>
                 </source>
               </sources>
             </mapping>
