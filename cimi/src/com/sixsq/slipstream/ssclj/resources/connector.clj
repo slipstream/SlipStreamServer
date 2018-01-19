@@ -159,24 +159,24 @@
       (ex-data ei))))
 
 
-;;; Set-compromised operation
-(defmulti set-compromised-subtype
+;;; Quarantine operation
+(defmulti quarantine-subtype
           (fn [resource _] (:cloudServiceType resource)))
 
-(defmethod set-compromised-subtype :default
+(defmethod quarantine-subtype :default
   [resource _]
   (let [err-msg (str "unknown Connector type: " (:cloudServiceType resource))]
     (throw (ex-info err-msg {:status  400
                         :message err-msg
                         :body    resource}))))
 
-(defmethod crud/do-action [resource-url "set-compromised"]
+(defmethod crud/do-action [resource-url "quarantine"]
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
       (-> (crud/retrieve-by-id id {:user-name  "INTERNAL"
                                    :user-roles ["ADMIN"]})
-          (set-compromised-subtype request)))
+          (quarantine-subtype request)))
     (catch ExceptionInfo ei
       (ex-data ei))))
 

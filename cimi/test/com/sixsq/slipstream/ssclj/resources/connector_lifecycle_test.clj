@@ -108,7 +108,7 @@
                 (ltu/is-operation-present "delete")
                 (ltu/is-operation-present "edit")
                 (ltu/is-operation-absent "activate")
-                (ltu/is-operation-absent "set-compromised")
+                (ltu/is-operation-absent "quarantine")
                 (ltu/is-status 200)
                 (ltu/is-id id)))))
 
