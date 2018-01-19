@@ -153,7 +153,7 @@ public class UserResourceTest extends ResourceTestBase {
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 
-		User modifiedUser = User.load(user.getResourceUri());
+		User modifiedUser = User.loadByName(user.getName());
 
 		assertThat(getPersistedPassword(modifiedUser),
 				is(Passwords.hash(NEW_PASSWORD)));
@@ -176,7 +176,7 @@ public class UserResourceTest extends ResourceTestBase {
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 
-		User modifiedUser = User.load(user.getResourceUri());
+		User modifiedUser = User.loadByName(user.getName());
 
 		assertThat(getPersistedPassword(modifiedUser),
 				is(Passwords.hash(NEW_PASSWORD)));
@@ -226,7 +226,7 @@ public class UserResourceTest extends ResourceTestBase {
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 
-		user = User.load(user.getResourceUri());
+		user = User.loadByName(user.getName());
 		assertThat(user.getHashedPassword(), is(Passwords.hash(NEW_PASSWORD)));
 	}
 
@@ -358,7 +358,7 @@ public class UserResourceTest extends ResourceTestBase {
 
 	private String getPersistedPassword(User user)
 			throws ConfigurationException, ValidationException {
-		User restoredUser = User.load(user.getResourceUri());
+		User restoredUser = User.loadByName(user.getName());
 		return restoredUser.getHashedPassword();
 	}
 
@@ -408,7 +408,7 @@ public class UserResourceTest extends ResourceTestBase {
 
 		assertThat(response.getStatus(), is(Status.SUCCESS_OK));
 
-		User updated = User.load(user.getResourceUri());
+		User updated = User.loadByName(user.getName());
 
 		assertThat(updated.getParameter(paramName).getValue(), is(LocalConnector.CLOUD_SERVICE_NAME));
 	}
