@@ -5,7 +5,7 @@
 
   <artifactId>SlipStreamToolsCli-jar-dep</artifactId>
   <packaging>pom</packaging>
-  <name>SlipStreamServer/ssclj/tools</name>
+  <name>SlipStreamServer/cimi-tools</name>
   <url>http://sixsq.com</url>
 
   <parent>

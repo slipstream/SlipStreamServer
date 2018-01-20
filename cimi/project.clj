@@ -15,7 +15,10 @@
             [lein-environ "1.1.0"]]
 
   :parent-project {:coords  [com.sixsq.slipstream/parent "3.43-SNAPSHOT"]
-                   :inherit [:min-lein-version :managed-dependencies :repositories :deploy-repositories]}
+                   :inherit [:min-lein-version
+                             :managed-dependencies
+                             :repositories
+                             :deploy-repositories]}
 
   :source-paths ["src"]
 
@@ -63,6 +66,7 @@
    [com.sixsq.slipstream/utils]
    [com.sixsq.slipstream/SlipStreamDbBinding-jar]
    [com.sixsq.slipstream/SlipStreamClientAPI-jar]
+   [com.sixsq.slipstream/SlipStreamCljResourcesTests-jar]
    [com.sixsq.slipstream/token]
    ;; needed for migration scripts
    [korma]

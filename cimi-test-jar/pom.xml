@@ -5,12 +5,12 @@
 
   <artifactId>SlipStreamCljResourcesTests-jar-dep</artifactId>
   <packaging>pom</packaging>
-  <name>SlipStreamServer/ssclj/test-jar</name>
+  <name>SlipStreamServer/cimi-test-jar</name>
   <url>http://sixsq.com</url>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
-    <artifactId>SlipStreamCljResources</artifactId>
+    <artifactId>SlipStreamServer</artifactId>
     <version>3.43-SNAPSHOT</version>
   </parent>
 

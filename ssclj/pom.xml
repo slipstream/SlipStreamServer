@@ -16,35 +16,9 @@
   </parent>
 
   <modules>
-    <module>jar</module>
     <module>test-jar</module>
     <module>test-server-jar</module>
     <module>tools</module>
   </modules>
-
-  <profiles>
-    <profile>
-      <id>build-rpm</id>
-      <activation>
-        <file>
-          <exists>/usr/bin/rpmbuild</exists>
-        </file>
-      </activation>
-      <modules>
-        <module>rpm</module>
-      </modules>
-    </profile>
-    <profile>
-      <id>build-rpm-local</id>
-      <activation>
-        <file>
-          <exists>/usr/local/bin/rpmbuild</exists>
-        </file>
-      </activation>
-      <modules>
-        <module>rpm</module>
-      </modules>
-    </profile>
-  </profiles>
 
 </project>
