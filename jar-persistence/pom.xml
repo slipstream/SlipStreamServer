@@ -39,6 +39,7 @@
       <artifactId>SlipStreamCljResourcesTestServer-jar-dep</artifactId>
       <type>pom</type>
       <version>${project.version}</version>
+      <scope>provided</scope>
     </dependency>
     
     <dependency>

@@ -34,6 +34,7 @@
       <artifactId>SlipStreamDbBinding-jar-dep</artifactId>
       <version>${project.version}</version>
       <type>pom</type>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 
