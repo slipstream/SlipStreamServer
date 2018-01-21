@@ -1,4 +1,4 @@
-(def +version+ "3.43-SNAPSHOT")
+(def +version+ "3.43")
 
 ;; FIXME: Provide HTTPS access to Nexus.
 (require 'cemerick.pomegranate.aether)
@@ -7,13 +7,13 @@
 
 (defproject
   com.sixsq.slipstream/SlipStreamPlacementLib-jar
-  "3.43-SNAPSHOT"
+  "3.43"
   :license
   {"commercial" "http://sixsq.com"}
 
   :plugins [[lein-parent "0.3.2"]]
 
-  :parent-project {:coords  [com.sixsq.slipstream/parent "3.43-SNAPSHOT"]
+  :parent-project {:coords  [com.sixsq.slipstream/parent "3.43"]
                    :inherit [:min-lein-version :managed-dependencies :repositories :deploy-repositories]}
 
   :source-paths ["src"]
