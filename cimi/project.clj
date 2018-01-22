@@ -71,7 +71,10 @@
    ;; needed for migration scripts
    [korma]
    [org.hsqldb/hsqldb]
-   [org.clojure/java.jdbc]]
+   [org.clojure/java.jdbc]
+
+   [org.clojure/test.check] ; FIXME: Needed for spec.gen.alpha. Fix "Could not locate clojure/test/check/generators__init.class"
+   ]
 
   :profiles
   {
