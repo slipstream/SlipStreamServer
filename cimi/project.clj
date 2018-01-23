@@ -68,19 +68,13 @@
    [com.sixsq.slipstream/SlipStreamClientAPI-jar]
    [com.sixsq.slipstream/SlipStreamCljResourcesTests-jar]
    [com.sixsq.slipstream/token]
-   ;; needed for migration scripts
-   [korma]
-   [org.hsqldb/hsqldb]
-   [org.clojure/java.jdbc]
 
    [org.clojure/test.check] ; FIXME: Needed for spec.gen.alpha. Fix "Could not locate clojure/test/check/generators__init.class"
    ]
 
   :profiles
   {
-   :provided {:aot [com.sixsq.slipstream.ssclj.app.main
-                    com.sixsq.slipstream.ssclj.util.userparamsdesc
-                    com.sixsq.slipstream.ssclj.migrate.user-cred]}
+   :provided {:aot [com.sixsq.slipstream.ssclj.app.main]}
    :test     {:dependencies   [[peridot]
                                [honeysql]
                                [org.clojure/test.check]
@@ -89,7 +83,7 @@
                                [org.apache.curator/curator-test]
                                [com.sixsq.slipstream/SlipStreamDbTesting-jar]]
               :resource-paths ["test-resources"]
-              :env            {:config-name      "config-hsqldb.edn"
+              :env            {:config-name      "config-params.edn"
                                :auth-private-key "test-resources/auth_privkey.pem"
                                :auth-public-key  "test-resources/auth_pubkey.pem"}
               :aot            :all}
