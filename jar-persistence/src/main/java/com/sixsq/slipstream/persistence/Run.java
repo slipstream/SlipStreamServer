@@ -502,7 +502,7 @@ public class Run extends Parameterized<Run, RunParameter> {
 
     public static List<Run> listAllTransient() throws ConfigurationException {
         EntityManager em = PersistenceUtil.createEntityManager();
-        Query q = createNamedQuery(em, "oldInStatesRuns");
+        Query q = createNamedQuery(em, "allInStates");
         q.setParameter("states", States.transition());
         List<Run> runs = q.getResultList();
         em.close();
