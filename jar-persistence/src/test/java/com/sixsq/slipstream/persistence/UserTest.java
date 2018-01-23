@@ -116,7 +116,6 @@ public class UserTest {
 	public void storeRetrieveAndDelete() throws SlipStreamClientException {
 
 		String name = "dummy";
-		String resourceUrl = User.constructResourceUri(name);
 
 		User user = UserTest.createUser(name);
 		user.store();
@@ -128,13 +127,13 @@ public class UserTest {
 		assertEquals(user.getName(), userRestored.getName());
 		assertEquals(user.getResourceUri(), userRestored.getResourceUri());
 
-		userRestored = User.load(resourceUrl);
+		userRestored = User.loadByName(name);
 
 		assertEquals(user.getName(), userRestored.getName());
 		assertEquals(user.getResourceUri(), userRestored.getResourceUri());
 
 		userRestored.remove();
-		userRestored = User.load(resourceUrl);
+		userRestored = User.loadByName(name);
 		assertNull(userRestored);
 	}
 
@@ -160,7 +159,7 @@ public class UserTest {
 		user.store();
 		SscljTestServer.refresh();
 
-		User restored = User.load(resourceUrl);
+		User restored = User.loadByName(username);
 		assertNotNull(restored);
 
 		Map<String, UserParameter> parameters = restored.getParameters();
@@ -175,7 +174,7 @@ public class UserTest {
 
 		restored.remove();
 		SscljTestServer.refresh();
-		user = User.load(resourceUrl);
+		user = User.loadByName(username);
 		assertNull(user);
 	}
 

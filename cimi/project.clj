@@ -1,4 +1,4 @@
-(def +version+ "3.43-SNAPSHOT")
+(def +version+ "3.44-SNAPSHOT")
 
 ;; FIXME: Provide HTTPS access to Nexus.
 (require 'cemerick.pomegranate.aether)
@@ -7,15 +7,18 @@
 
 (defproject
   com.sixsq.slipstream/SlipStreamCljResources-jar
-  "3.43-SNAPSHOT"
+  "3.44-SNAPSHOT"
   :license
   {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
 
   :plugins [[lein-parent "0.3.2"]
             [lein-environ "1.1.0"]]
 
-  :parent-project {:coords  [com.sixsq.slipstream/parent "3.43-SNAPSHOT"]
-                   :inherit [:min-lein-version :managed-dependencies :repositories :deploy-repositories]}
+  :parent-project {:coords  [com.sixsq.slipstream/parent "3.44-SNAPSHOT"]
+                   :inherit [:min-lein-version
+                             :managed-dependencies
+                             :repositories
+                             :deploy-repositories]}
 
   :source-paths ["src"]
 
@@ -63,11 +66,15 @@
    [com.sixsq.slipstream/utils]
    [com.sixsq.slipstream/SlipStreamDbBinding-jar]
    [com.sixsq.slipstream/SlipStreamClientAPI-jar]
+   [com.sixsq.slipstream/SlipStreamCljResourcesTests-jar]
    [com.sixsq.slipstream/token]
    ;; needed for migration scripts
    [korma]
    [org.hsqldb/hsqldb]
-   [org.clojure/java.jdbc]]
+   [org.clojure/java.jdbc]
+
+   [org.clojure/test.check] ; FIXME: Needed for spec.gen.alpha. Fix "Could not locate clojure/test/check/generators__init.class"
+   ]
 
   :profiles
   {

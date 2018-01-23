@@ -5,14 +5,14 @@
 
   <artifactId>SlipStreamCljResources-jar-dep</artifactId>
   <packaging>pom</packaging>
-  <version>3.43-SNAPSHOT</version>
+  <version>3.44-SNAPSHOT</version>
   <name>SlipStreamServer/cimi</name>
   <url>http://sixsq.com</url>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.43-SNAPSHOT</version>
+    <version>3.44-SNAPSHOT</version>
   </parent>
 
   <licenses>
@@ -46,6 +46,13 @@
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
       <artifactId>SlipStreamDbTesting-jar-dep</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamCljResourcesTests-jar-dep</artifactId>
       <version>${project.version}</version>
       <type>pom</type>
       <scope>test</scope>

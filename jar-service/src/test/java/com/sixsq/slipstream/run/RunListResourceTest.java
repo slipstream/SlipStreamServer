@@ -151,6 +151,7 @@ public class RunListResourceTest extends ResourceTestBase {
 
 	}
 
+	@Ignore
 	@Test
 	public void testPagination() throws ValidationException, SAXException, ParserConfigurationException, IOException {
 		listAllRuns("Runs before test.");

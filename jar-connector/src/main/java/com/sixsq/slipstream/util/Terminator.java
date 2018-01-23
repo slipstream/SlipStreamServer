@@ -1,6 +1,11 @@
 package com.sixsq.slipstream.util;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,29 +35,53 @@ public class Terminator {
 	private static MetricsTimer purgeTimer = Metrics.newTimer(Terminator.class, "purge");
 
 	public static int purge() throws ConfigurationException, ValidationException {
-		int runPurged =0;
+		// This method has been rewritten to minimize the number of users queried and
+		// the number of times a user object is loaded.
 
+		int runPurged = 0;
 		purgeTimer.start();
-		try {
-			List<User> users = User.list();
-			for (User u: users) {
-				u = User.loadByName(u.getName());
-				int timeout = u.getTimeout();
 
-				List<Run> old = Run.listOldTransient(u, timeout);
-				for (Run r : old) {
-					EntityManager em = PersistenceUtil.createEntityManager();
-					try {
-						r = Run.load(r.getResourceUri(), em);
-						purgeRun(r);
-					} catch (SlipStreamException e) {
-						Logger.getLogger("garbage-collector").log(Level.SEVERE, e.getMessage(), e.getCause());
-					} finally {
-						em.close();
+		try {
+			List<Run> runs = Run.listAllTransient();
+
+			HashMap<String, List<Run>> batchedRuns = new HashMap<>();
+			for (Run r: runs) {
+				String username = r.getUser();
+				if (batchedRuns.containsKey(username)) {
+					List<Run> userRuns = batchedRuns.get(username);
+					userRuns.add(r);
+				} else {
+					List<Run> userRuns = new ArrayList<>();
+					userRuns.add(r);
+					batchedRuns.put(username, userRuns);
+				}
+			}
+
+			for (String username: batchedRuns.keySet()) {
+				User user = User.loadByName(username);
+				int timeout = user.getTimeout();
+
+				Calendar calendar = Calendar.getInstance();
+				calendar.add(Calendar.MINUTE, -timeout);
+				Date timeoutDate = calendar.getTime();
+
+				for (Run r: batchedRuns.get(username)) {
+					Date lastStateChange = r.getLastStateChange();
+					if (lastStateChange.before(timeoutDate)) {
+						EntityManager em = PersistenceUtil.createEntityManager();
+						try {
+							r = Run.load(r.getResourceUri(), em);
+							purgeRun(r, user);
+							runPurged += 1;
+						} catch (SlipStreamException e) {
+							Logger.getLogger("garbage-collector").log(Level.SEVERE, e.getMessage(), e.getCause());
+						} finally {
+							em.close();
+						}
 					}
 				}
-				runPurged += old.size();
 			}
+
 		} finally {
 			purgeTimer.stop();
 		}
@@ -60,7 +89,10 @@ public class Terminator {
 		return runPurged;
 	}
 
-	public static void purgeRun(Run run) throws SlipStreamException {
+	/*
+	    This method is expected to be run from within an hibernate context.
+	 */
+	public static void purgeRun(Run run, User user) throws SlipStreamException {
 		Run.abort("The run has timed out", run.getUuid());
 
 		boolean isGarbageCollected = Run.isGarbageCollected(run);
@@ -74,12 +106,32 @@ public class Terminator {
 		if (! Boolean.parseBoolean(onErrorKeepRunning) &&
 				! run.isMutable() &&
 				(run.getState() == States.Initializing || isGarbageCollected)) {
-			terminate(run.getResourceUri());
+			terminateInsideTransaction(run, user);
 			run.postEventGarbageCollectorTerminated();
 		} else if (!isGarbageCollected) {
 			run.postEventGarbageCollectorTimedOut();
 		}
 
+	}
+
+	/*
+	    This version of the terminate method is expected to run from within a
+	    hibernate transactions.  You have been warned.
+	 */
+	public static void terminateInsideTransaction(Run run, User user) throws SlipStreamException {
+
+		StateMachine sc = StateMachine.createStateMachine(run);
+
+		if (sc.canCancel()) {
+			sc.tryAdvanceToCancelled();
+			terminateInstances(run, user);
+		} else {
+			if (sc.getState() == States.Ready) {
+				sc.tryAdvanceToFinalizing();
+			}
+			terminateInstances(run, user);
+			sc.tryAdvanceState(true);
+		}
 	}
 
 	public static void terminate(String runResourceUri) throws SlipStreamException {

@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>SlipStreamServer</artifactId>
-  <version>3.43-SNAPSHOT</version>
+  <version>3.44-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>SlipStreamServer</name>
   <url>http://sixsq.com/</url>
@@ -10,7 +10,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamCommunity</artifactId>
-    <version>3.43-SNAPSHOT</version>
+    <version>3.44-SNAPSHOT</version>
     <relativePath>../SlipStream/community</relativePath>
   </parent>
 
@@ -27,6 +27,9 @@
     <module>jar-placement-lib</module>
     <module>prs</module>
     <module>cimi</module>
+    <module>cimi-tools</module>
+    <module>cimi-test-jar</module>
+    <module>cimi-test-server</module>
     <module>db-binding</module>
     <module>db-testing</module>
     <module>db-serializers</module>

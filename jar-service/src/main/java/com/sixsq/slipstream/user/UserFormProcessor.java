@@ -68,13 +68,11 @@ public class UserFormProcessor extends UserParameterizedFormProcessor {
 		user.setOrganization(getForm().getFirstValue("organization"));
 		parseState(getForm(), user);
 
-		User dbUser = User.loadByName(name);
-
 		processIsSuper(getForm());
 
 		processRoles(getForm());
 
-		processPassword(getForm(), dbUser);
+		processPassword(getForm());
 	}
 
 	private void processRoles(Form form) throws ValidationException {
@@ -117,7 +115,7 @@ public class UserFormProcessor extends UserParameterizedFormProcessor {
 		return parameter;
 	}
 
-	private void processPassword(Form form, User dbUser)
+	private void processPassword(Form form)
 			throws ValidationException {
 
 		Passwords passwords;
@@ -130,6 +128,8 @@ public class UserFormProcessor extends UserParameterizedFormProcessor {
 			e.printStackTrace();
 			throw new ValidationException(e.getMessage());
 		}
+
+		User dbUser = User.loadByNameNoParams(form.getFirstValue("name"));
 
 		boolean changePassword = shouldChangePassword(passwords, dbUser);
 

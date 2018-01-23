@@ -50,7 +50,7 @@ public class ResetPasswordResource extends SimpleRepresentationBaseResource {
 
 		User user = null;
 		try {
-			user = retrieveNamedUser(entity);
+			user = retrieveNamedUserNoParams(entity);
 		} catch (ConfigurationException e) {
 			throwServerError(e.getMessage());
 		} catch (ValidationException e) {
@@ -102,14 +102,14 @@ public class ResetPasswordResource extends SimpleRepresentationBaseResource {
 		return action;
 	}
 
-	public User retrieveNamedUser(Representation entity)
+	private User retrieveNamedUserNoParams(Representation entity)
 			throws ResourceException, ConfigurationException,
 			ValidationException {
 
 		Form form = new Form(entity);
 		String username = form.getFirstValue("username");
 
-		return User.loadByName(username);
+		return User.loadByNameNoParams(username);
 	}
 
 	@Override

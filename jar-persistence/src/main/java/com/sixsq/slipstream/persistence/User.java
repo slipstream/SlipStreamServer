@@ -31,6 +31,8 @@ import com.sixsq.slipstream.exceptions.InvalidElementException;
 import com.sixsq.slipstream.exceptions.SlipStreamDatabaseException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.metrics.Metrics;
+import com.sixsq.slipstream.metrics.MetricsTimer;
 import com.sixsq.slipstream.user.Passwords;
 import com.sixsq.slipstream.user.UserView;
 import com.sixsq.slipstream.util.SscljProxy;
@@ -482,41 +484,45 @@ public class User extends Metadata {
 
     }
 
-    public static User loadByName(String name) throws ConfigurationException,
-            ValidationException {
-        return loadByName(name, null);
-    }
+    private static final MetricsTimer loadByNameTimer = Metrics.newTimer(User.class, "loadByName");
 
-    public static User loadByName(String name, ServiceConfiguration sc)
-            throws ConfigurationException, ValidationException {
-        return load(User.constructResourceUri(name), sc);
-    }
-
-    public static User load(String resourceUrl, ServiceConfiguration sc)
-            throws ConfigurationException, ValidationException {
-        User user = load(resourceUrl);
-
-        if (sc != null && user != null) {
-            user.addSystemParametersIntoUser(sc);
+    public static User loadByName(String name) throws ConfigurationException, ValidationException {
+        loadByNameTimer.start();
+        try {
+            return load(User.constructResourceUri(name));
+        } finally {
+            loadByNameTimer.stop();
         }
-
-        return user;
     }
 
-    public static User load(String resourceUrl) throws ConfigurationException,
-            ValidationException {
-        Response resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + resourceUrl, USERNAME_ROLE);
-        if (SscljProxy.isError(resp)) {
-            return null;
+    private static final MetricsTimer loadByNameNoParamsTimer = Metrics.newTimer(User.class, "loadByNameNoParams");
+
+    public static User loadByNameNoParams(String name) throws ConfigurationException {
+        loadByNameNoParamsTimer.start();
+        try {
+            return loadNoParams(User.constructResourceUri(name));
+        } finally {
+            loadByNameNoParamsTimer.stop();
         }
-        User user = gson.fromJson(resp.getEntityAsText(), User.class);
+    }
+
+    private static User load(String resourceUrl) throws ConfigurationException,
+            ValidationException {
+        User user = loadNoParams(resourceUrl);
         if (null == user) {
-            return user;
+            return null;
         }
         user.parameters = loadParameters(user);
         return user;
     }
 
+    public static User loadNoParams(String resourceUri) {
+        Response resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + resourceUri, USERNAME_ROLE);
+        if (SscljProxy.isError(resp)) {
+            return null;
+        }
+        return  gson.fromJson(resp.getEntityAsText(), User.class);
+    }
 
     private static CloudCredentialCollection findCloudCredentials(User user) {
         return User.findCloudCredentials(user, "");
@@ -578,12 +584,17 @@ public class User extends Metadata {
 	}
 
     private static Map<String, UserParameter> loadCloudCredentials(User user) throws ValidationException {
-        CloudCredentialCollection creds = User.findCloudCredentials(user);
-        if (null != creds && creds.getCount() >= 1 && null != user) {
-            return loadCloudCredentials(creds.getCredentials(), user);
-        } else {
-            logger.warning("No cloud credentials for user " + user.getName() + ".");
+        if (user == null) {
             return new HashMap<>();
+        } else {
+            CloudCredentialCollection creds = User.findCloudCredentials(user);
+            if (null != creds && creds.getCount() >= 1) {
+                logger.fine("Found " + creds.getCount() + "cloud credentials for user " + user.getName() + ".");
+                return loadCloudCredentials(creds.getCredentials(), user);
+            } else {
+                logger.fine("No cloud credentials for user " + user.getName() + ".");
+                return new HashMap<>();
+            }
         }
     }
 
@@ -650,11 +661,17 @@ public class User extends Metadata {
     public static List<User> list() {
         Response resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + RESOURCE_NAME, USERNAME_ROLE);
 
-        if (SscljProxy.isError(resp)) return new ArrayList<>();
+        if (SscljProxy.isError(resp)) {
+            logger.warning("Error retrieving list of users.");
+            return new ArrayList<>();
+        }
 
         Users records = Users.fromJson(resp.getEntityAsText());
 
-        if (records == null) return new ArrayList<>();
+        if (records == null) {
+            logger.warning("Cannot parse JSON from user list document.");
+            return new ArrayList<>();
+        }
 
         return records.getUsers();
     }
@@ -678,13 +695,20 @@ public class User extends Metadata {
 
     @SuppressWarnings("unchecked")
     public static List<UserView> viewList() {
-        Response resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + RESOURCE_NAME, USERNAME_ROLE);
+        String url = SscljProxy.BASE_RESOURCE + RESOURCE_NAME;
+        Response resp = SscljProxy.get(url, USERNAME_ROLE);
 
-        if (SscljProxy.isError(resp)) return new ArrayList<>();
+        if (SscljProxy.isError(resp)) {
+            logger.warning("Error retrieving document from " + url);
+            return new ArrayList<>();
+        }
 
         UsersView records = UsersView.fromJson(resp.getEntityAsText());
 
-        if (records == null) return new ArrayList<>();
+        if (records == null) {
+            logger.warning("Could not parse JSON document from " + url);
+            return new ArrayList<>();
+        }
 
         return records.getUsers();
     }
@@ -798,39 +822,46 @@ public class User extends Metadata {
         }
     }
 
+    private static final MetricsTimer storeTimer = Metrics.newTimer(User.class, "store");
+
     public User store() {
+        storeTimer.start();
         try {
-            storeParameters();
-        } catch (ValidationException e) {
-            e.printStackTrace();
-            throw new SlipStreamDatabaseException("Failed to persist User parameters: " + e.getMessage());
-        }
-        Response resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + resourceUri, USERNAME_ROLE);
-        if (SscljProxy.isError(resp)) {
-            resp = SscljProxy.post(SscljProxy.BASE_RESOURCE + RESOURCE_NAME, USERNAME_ROLE, new UserTemplate(this));
-        } else {
-            resp = SscljProxy.put(SscljProxy.BASE_RESOURCE + resourceUri, USERNAME_ROLE, this);
-        }
-        if (SscljProxy.isError(resp) || null == resp.getEntityAsText()) {
-            throw new SlipStreamDatabaseException("Failed to persist User: "
-                    + SscljProxy.respToString(resp));
-        }
-        User user = gson.fromJson(resp.getEntityAsText(), User.class);
-        if (null == user || null == user.name) {
-            resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + resourceUri, USERNAME_ROLE);
+            try {
+                storeParameters();
+            } catch (ValidationException e) {
+                e.printStackTrace();
+                throw new SlipStreamDatabaseException("Failed to persist User parameters: " + e.getMessage());
+            }
+            Response resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + resourceUri, USERNAME_ROLE);
+            if (SscljProxy.isError(resp)) {
+                resp = SscljProxy.post(SscljProxy.BASE_RESOURCE + RESOURCE_NAME, USERNAME_ROLE, new UserTemplate(this));
+            } else {
+                resp = SscljProxy.put(SscljProxy.BASE_RESOURCE + resourceUri, USERNAME_ROLE, this);
+            }
             if (SscljProxy.isError(resp) || null == resp.getEntityAsText()) {
                 throw new SlipStreamDatabaseException("Failed to persist User: "
                         + SscljProxy.respToString(resp));
             }
-            user = gson.fromJson(resp.getEntityAsText(), User.class);
+            User user = gson.fromJson(resp.getEntityAsText(), User.class);
+            if (null == user || null == user.getName()) {
+                resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + resourceUri, USERNAME_ROLE);
+                if (SscljProxy.isError(resp) || null == resp.getEntityAsText()) {
+                    throw new SlipStreamDatabaseException("Failed to persist User: "
+                            + SscljProxy.respToString(resp));
+                }
+                user = gson.fromJson(resp.getEntityAsText(), User.class);
+            }
+            try {
+                user.parameters = loadParameters(user);
+            } catch (ValidationException e) {
+                e.printStackTrace();
+                throw new SlipStreamDatabaseException("Failed to load User parameters: " + e.getMessage());
+            }
+            return user;
+        } finally {
+            storeTimer.stop();
         }
-        try {
-            user.parameters = loadParameters(user);
-        } catch (ValidationException e) {
-            e.printStackTrace();
-            throw new SlipStreamDatabaseException("Failed to load User parameters: " + e.getMessage());
-        }
-        return user;
     }
 
     @Deprecated

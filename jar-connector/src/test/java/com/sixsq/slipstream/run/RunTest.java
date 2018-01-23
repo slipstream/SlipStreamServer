@@ -479,17 +479,17 @@ public class RunTest extends RunTestBase {
 		String resourceUri = run.getResourceUri();
 
 		run = setRunState(run, States.Initializing);
-		Terminator.purgeRun(run);
+		Terminator.purgeRun(run, user);
 		run = Run.load(resourceUri);
 		assertThat(run.getState(), is(States.Cancelled));
 
 		run = setRunState(run, States.Executing);
-		Terminator.purgeRun(run);
+		Terminator.purgeRun(run, user);
 		run = Run.load(resourceUri);
 		assertThat(run.getState(), is(States.Cancelled));
 
 		run = setRunState(run, States.Ready);
-		Terminator.purgeRun(run);
+		Terminator.purgeRun(run, user);
 		run = Run.load(resourceUri);
 		assertThat(run.getState(), is(States.Done));
 
@@ -499,8 +499,8 @@ public class RunTest extends RunTestBase {
 				new RuntimeParameter(run, RuntimeParameter.GLOBAL_ABORT_KEY,
 						"Kaboom", ""));
 		run.store();
-//		setRuntimeParameterState(run, RuntimeParameter.GLOBAL_STATE_KEY, States.Aborting);
-		Terminator.purgeRun(run);
+		//		setRuntimeParameterState(run, RuntimeParameter.GLOBAL_STATE_KEY, States.Aborting);
+		Terminator.purgeRun(run, user);
 		run = Run.load(resourceUri);
 		assertThat(run.getState(), is(States.Aborted));
 

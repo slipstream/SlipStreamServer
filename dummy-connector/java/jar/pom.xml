@@ -9,7 +9,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamConnector-Dummy-java</artifactId>
-    <version>3.43-SNAPSHOT</version>
+    <version>3.44-SNAPSHOT</version>
   </parent>
 
   <dependencies>
@@ -40,9 +40,14 @@
     when a project for separately building the above jar is implemented. -->
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamCljResourcesTestServer-jar-dep</artifactId>
+      <type>pom</type>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
       <artifactId>SlipStreamCljResourcesTestServer-jar</artifactId>
       <scope>test</scope>
-      <classifier>tests</classifier>
       <version>${project.version}</version>
     </dependency>
 
