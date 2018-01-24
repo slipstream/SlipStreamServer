@@ -72,6 +72,9 @@
    [org.clojure/test.check] ; FIXME: Needed for spec.gen.alpha. Fix "Could not locate clojure/test/check/generators__init.class"
    ]
 
+  :aot [com.sixsq.slipstream.ssclj.app.main
+        com.sixsq.slipstream.ssclj.util.userparamsdesc]
+
   :profiles
   {
    :provided {:aot [com.sixsq.slipstream.ssclj.app.main]}
