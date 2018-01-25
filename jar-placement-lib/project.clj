@@ -30,5 +30,5 @@
   [[org.clojure/data.json]
    [environ]
    [com.sixsq.slipstream/SlipStreamPricingLib-jar]
-   [com.sixsq.slipstream/SlipStreamClientAPI-jar]])
+   [com.sixsq.slipstream/SlipStreamClojureAPI-cimi]])
 

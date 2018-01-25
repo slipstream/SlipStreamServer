@@ -40,7 +40,7 @@
   :dependencies [[org.clojure/clojure]
                  [com.sixsq.slipstream/SlipStreamPersistence]
                  [com.sixsq.slipstream/SlipStreamConnector]
-                 [com.sixsq.slipstream/SlipStreamClientAPI-jar]
+                 [com.sixsq.slipstream/SlipStreamClojureAPI-cimi]
                  [org.clojure/data.json]
                  [org.clojure/tools.logging]]
 

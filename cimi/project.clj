@@ -65,7 +65,7 @@
    [peridot]
    [com.sixsq.slipstream/utils]
    [com.sixsq.slipstream/SlipStreamDbBinding-jar]
-   [com.sixsq.slipstream/SlipStreamClientAPI-jar]
+   [com.sixsq.slipstream/SlipStreamClojureAPI-cimi]
    [com.sixsq.slipstream/SlipStreamCljResourcesTests-jar]
    [com.sixsq.slipstream/token]
 
