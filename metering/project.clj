@@ -27,7 +27,7 @@
    [org.clojure/tools.logging]
    [org.clojure/data.json]
    [log4j]
-   [com.sixsq.slipstream/SlipStreamClientAPI-jar]
+   [com.sixsq.slipstream/SlipStreamClojureAPI-cimi]
    [aleph]
    [cc.qbits/spandex]
    [environ]
