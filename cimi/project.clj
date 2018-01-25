@@ -79,7 +79,6 @@
   {
    :provided {:aot [com.sixsq.slipstream.ssclj.app.main]}
    :test     {:dependencies   [[peridot]
-                               [honeysql]
                                [org.clojure/test.check]
                                [org.slf4j/slf4j-log4j12]
                                [com.cemerick/url]
