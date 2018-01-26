@@ -1,19 +1,14 @@
-(def +version+ "3.44-SNAPSHOT")
-
-;; FIXME: Provide HTTPS access to Nexus.
-(require 'cemerick.pomegranate.aether)
-(cemerick.pomegranate.aether/register-wagon-factory!
-  "http" #(org.apache.maven.wagon.providers.http.HttpWagon.))
+(def +version+ "3.45-SNAPSHOT")
 
 (defproject
   com.sixsq.slipstream/SlipStreamPlacementLib-jar
-  "3.44-SNAPSHOT"
+  "3.45-SNAPSHOT"
   :license
   {"commercial" "http://sixsq.com"}
 
   :plugins [[lein-parent "0.3.2"]]
 
-  :parent-project {:coords  [com.sixsq.slipstream/parent "3.44-SNAPSHOT"]
+  :parent-project {:coords  [com.sixsq.slipstream/parent "3.45-SNAPSHOT"]
                    :inherit [:min-lein-version :managed-dependencies :repositories :deploy-repositories]}
 
   :source-paths ["src"]
@@ -30,5 +25,5 @@
   [[org.clojure/data.json]
    [environ]
    [com.sixsq.slipstream/SlipStreamPricingLib-jar]
-   [com.sixsq.slipstream/SlipStreamClientAPI-jar]])
+   [com.sixsq.slipstream/SlipStreamClojureAPI-cimi]])
 

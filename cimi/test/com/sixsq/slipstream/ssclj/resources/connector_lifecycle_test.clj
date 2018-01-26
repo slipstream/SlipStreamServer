@@ -105,6 +105,10 @@
             (-> session-admin
                 (request entry-uri)
                 (ltu/body->edn)
+                (ltu/is-operation-present "delete")
+                (ltu/is-operation-present "edit")
+                (ltu/is-operation-absent "activate")
+                (ltu/is-operation-absent "quarantine")
                 (ltu/is-status 200)
                 (ltu/is-id id)))))
 

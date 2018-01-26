@@ -5,7 +5,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.auth.acl :as a]))
+    [com.sixsq.slipstream.auth.acl :as a])
+  (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-tag :connectors)
 
@@ -134,3 +135,58 @@
   [resource resource-name]
   (if-let [new-id (:instanceName resource)]
     (assoc resource :id (str (u/de-camelcase resource-name) "/" new-id))))
+
+;;; Activate operation
+
+(defmulti activate-subtype
+          (fn [resource _] (:cloudServiceType resource)))
+
+(defmethod activate-subtype :default
+  [resource _]
+  (let [err-msg (str "unknown Connector type: " (:cloudServiceType resource))]
+    (throw (ex-info err-msg {:status  400
+                             :message err-msg
+                             :body    resource}))))
+
+(defmethod crud/do-action [resource-url "activate"]
+  [{{uuid :uuid} :params :as request}]
+  (try
+    (let [id (str resource-url "/" uuid)]
+      (-> (crud/retrieve-by-id id {:user-name  "INTERNAL"
+                                   :user-roles ["ADMIN"]})
+          (activate-subtype request)))
+    (catch ExceptionInfo ei
+      (ex-data ei))))
+
+
+;;; Quarantine operation
+(defmulti quarantine-subtype
+          (fn [resource _] (:cloudServiceType resource)))
+
+(defmethod quarantine-subtype :default
+  [resource _]
+  (let [err-msg (str "unknown Connector type: " (:cloudServiceType resource))]
+    (throw (ex-info err-msg {:status  400
+                        :message err-msg
+                        :body    resource}))))
+
+(defmethod crud/do-action [resource-url "quarantine"]
+  [{{uuid :uuid} :params :as request}]
+  (try
+    (let [id (str resource-url "/" uuid)]
+      (-> (crud/retrieve-by-id id {:user-name  "INTERNAL"
+                                   :user-roles ["ADMIN"]})
+          (quarantine-subtype request)))
+    (catch ExceptionInfo ei
+      (ex-data ei))))
+
+(defmulti set-subtype-ops
+          (fn [resource _] (:cloudServiceType resource)))
+
+(defmethod set-subtype-ops :default
+  [resource request]
+  (crud/set-standard-operations resource request))
+
+(defmethod crud/set-operations resource-uri
+  [resource request]
+  (set-subtype-ops resource request))
