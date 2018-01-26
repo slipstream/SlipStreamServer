@@ -244,19 +244,54 @@
    client bound to the Elasticsearch client binding, and then clean up the
    allocated resources by closing both the client and the node."
   [& body]
-  `(with-open [node# (esut/create-test-node)
-               client# (-> node#
-                           esu/node-client
-                           esb/wait-client-create-index)]
-     (binding [esb/*client* client#]
-       (db/set-impl! (esb/get-instance))
-       (esu/reset-index esb/*client* esb/index-name)
-       ~@body)))
+  `(do
+     (println "CREATING NODE AND CLIENT")
+     (with-open [node# (esut/create-test-node)
+                 client# (-> node#
+                             esu/node-client
+                             esb/wait-client-create-index)]
+       (println "CREATED NODE AND CLIENT")
+       (binding [esb/*client* client#]
+         (println "SETTING INSTANCE")
+         (db/set-impl! (esb/get-instance))
+         (println "CLEARING INDEX")
+         (esu/reset-index esb/*client* esb/index-name)
+         (println "READY!")
+         ~@body))))
+
+
+(defn create-node-client
+  []
+  (let [node (esut/create-test-node)
+        client (-> node
+                   esu/node-client
+                   esb/wait-client-create-index)]
+    [node client]))
+
+
+(defonce es-node-client (delay (create-node-client)))
+
+(defmacro with-test-es-client-singleton
+  "Creates an Elasticsearch test client, executes the body with the created
+   client bound to the Elasticsearch client binding, and then clean up the
+   allocated resources by closing both the client and the node."
+  [& body]
+  `(do
+     (println "CREATING NODE AND CLIENT")
+     (let [[node# client#] @es-node-client]
+       (println "CREATED NODE AND CLIENT")
+       (binding [esb/*client* client#]
+         (println "SETTING INSTANCE")
+         (db/set-impl! (esb/get-instance))
+         (println "CLEARING INDEX")
+         (esu/reset-index esb/*client* esb/index-name)
+         (println "READY!")
+         ~@body))))
 
 
 (defn with-test-es-client-fixture
   [f]
-  (with-test-es-client
+  (with-test-es-client-singleton
     (f)))
 
 
@@ -277,10 +312,13 @@
   (esu/refresh-all-indices esb/*client*))
 
 
+(defonce ring-app-instance (delay (make-ring-app (concat-routes [(routes/get-main-routes)]))))
+
 (defn ring-app
   "Creates a standard ring application with the CIMI server routes."
   []
-  (make-ring-app (concat-routes [(routes/get-main-routes)])))
+  @ring-app-instance
+  #_(make-ring-app (concat-routes [(routes/get-main-routes)])))
 
 
 (defn strip-unwanted-attrs
