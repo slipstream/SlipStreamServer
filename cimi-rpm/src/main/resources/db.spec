@@ -1,10 +1,4 @@
-{:auth-db                 {
-                           :classname   "org.hsqldb.jdbc.JDBCDriver"
-                           :subprotocol "hsqldb"
-                           :subname     "hsql://localhost:9001/slipstream"
-                           :make-pool?  true}
-
- :token-nb-minutes-expiry 10080
+{:token-nb-minutes-expiry 10080
 
  ;; Used by front server when redirecting (URL accessed only locally)
  :upstream-server         "http://localhost:8182"
