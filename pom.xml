@@ -27,6 +27,7 @@
     <module>jar-placement-lib</module>
     <module>prs</module>
     <module>cimi</module>
+    <module>cimi-resources</module>
     <module>cimi-tools</module>
     <module>cimi-test-jar</module>
     <module>cimi-test-server</module>
@@ -49,6 +50,7 @@
       </activation>
       <modules>
         <module>cimi-rpm</module>
+        <module>cimi-resources-rpm</module>
         <module>rpm</module>
         <module>metering-rpm</module>
         <module>prs-rpm</module>
@@ -64,6 +66,7 @@
       </activation>
       <modules>
         <module>cimi-rpm</module>
+        <module>cimi-resources-rpm</module>
         <module>rpm</module>
         <module>metering-rpm</module>
         <module>prs-rpm</module>
