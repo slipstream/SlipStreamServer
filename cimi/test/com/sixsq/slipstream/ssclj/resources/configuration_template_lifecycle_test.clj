@@ -18,8 +18,6 @@
 
 (def base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
 
-;; initialize must to called to pull in ConfigurationTemplate resources
-#_(dyn/initialize)
 
 (deftest retrieve-by-id
   (test-utils/check-retrieve-by-id slipstream/service)

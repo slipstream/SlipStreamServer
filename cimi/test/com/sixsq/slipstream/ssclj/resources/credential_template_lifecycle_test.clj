@@ -20,8 +20,6 @@
 
 (def base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
 
-;; initialize must to called to pull in CredentialTemplate resources
-#_(dyn/initialize)
 
 (deftest check-retrieve-by-id
   (doseq [registration-method [spk/method skp/method akey/method]]

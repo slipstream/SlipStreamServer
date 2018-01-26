@@ -15,8 +15,6 @@
 
 (def base-uri (str p/service-context (u/de-camelcase st/resource-name)))
 
-;; initialize must to called to pull in SessionTemplate descriptions
-#_(dyn/initialize)
 
 (def valid-template {:method      cyclone/authn-method
                      :instance    cyclone/authn-method

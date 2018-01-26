@@ -18,8 +18,6 @@
 
 (def base-uri (str p/service-context (u/de-camelcase user/resource-name)))
 
-;; initialize must to called to pull in SessionTemplate test examples
-#_(dyn/initialize)
 
 (deftest lifecycle
   (let [uname "120720737412@eduid.chhttps://eduid.ch/idp/shibboleth!https://fed-id.nuv.la/samlbridge/module.php/saml/sp/metadata.php/sixsq-saml-bridge!iqqrh4oiyshzcw9o40cvo0+pgka="

@@ -20,8 +20,6 @@
 
 (def base-uri (str p/service-context (u/de-camelcase upt/resource-name)))
 
-;; initialize must to called to pull in ConnectorTemplate test examples
-#_(dyn/initialize)
 
 (deftest lifecycle
 

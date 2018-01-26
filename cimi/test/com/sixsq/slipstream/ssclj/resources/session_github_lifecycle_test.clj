@@ -31,8 +31,6 @@
 
 (def session-template-base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
 
-;; initialize must to called to pull in SessionTemplate test examples
-#_(dyn/initialize)
 
 (def instance "test-github")
 (def session-template-github {:method      github/authn-method

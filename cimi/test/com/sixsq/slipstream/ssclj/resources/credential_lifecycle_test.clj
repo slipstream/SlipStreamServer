@@ -14,8 +14,6 @@
 
 (def base-uri (str p/service-context credential/resource-url))
 
-;; initialize must to called to pull in CredentialTemplate resources
-#_(dyn/initialize)
 
 (deftest bad-methods
   (let [resource-uri (str p/service-context (u/new-resource-id credential/resource-url))]

@@ -22,8 +22,6 @@
 
 (def base-uri (str p/service-context (u/de-camelcase up/resource-name)))
 
-;; initialize must to called to pull in SessionTemplate test examples
-#_(dyn/initialize)
 
 (deftest lifecycle
   (let [href (str ct/resource-url "/" exec/params-type)

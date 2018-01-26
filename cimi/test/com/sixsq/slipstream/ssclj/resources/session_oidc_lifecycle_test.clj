@@ -29,9 +29,6 @@
 
 (def session-template-base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
 
-;; initialize must to called to pull in SessionTemplate test examples
-#_(dyn/initialize)
-
 (def instance "test-oidc")
 (def session-template-oidc {:method      oidc/authn-method
                             :instance    instance

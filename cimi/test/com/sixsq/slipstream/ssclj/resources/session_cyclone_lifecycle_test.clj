@@ -31,9 +31,6 @@
 
 (def session-template-base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
 
-;; initialize must to called to pull in SessionTemplate test examples
-#_(dyn/initialize)
-
 (def instance "test-cyclone")
 (def session-template-cyclone {:method      cyclone/authn-method
                                :instance    instance

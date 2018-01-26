@@ -21,8 +21,6 @@
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
-;; initialize must to called to pull in UserTemplate resources
-#_(dyn/initialize)
 
 (deftest check-retrieve-by-id
   (doseq [registration-method [direct/registration-method

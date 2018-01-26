@@ -20,7 +20,6 @@
 
 (def base-uri (str p/service-context (u/de-camelcase user/resource-name)))
 
-#_(dyn/initialize)
 
 (deftest bad-methods
   (let [resource-uri (str p/service-context (u/new-resource-id user/resource-name))]

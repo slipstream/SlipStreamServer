@@ -11,9 +11,6 @@
 (use-fixtures :each ltu/with-test-es-client-fixture)
 (use-fixtures :once ltu/setup-embedded-zk)
 
-;; initialize must to called to pull in ConfigurationTemplate test examples
-#_(dyn/initialize)
-
 ;; run tests separately to avoid contamination of the database between tests
 
 (deftest lifecycle-slipstream

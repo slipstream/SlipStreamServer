@@ -19,8 +19,6 @@
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
-;; initialize must to called to pull in ConfigurationTemplate resources
-#_(dyn/initialize)
 
 (defn check-retrieve-by-id
   [service]

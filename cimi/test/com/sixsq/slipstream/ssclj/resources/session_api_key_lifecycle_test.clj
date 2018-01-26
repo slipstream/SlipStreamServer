@@ -30,8 +30,6 @@
 
 (def session-template-base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
 
-;; initialize must to called to pull in SessionTemplate test examples
-#_(dyn/initialize)
 
 (def session-template-api-key {:method      api-key/authn-method
                                :instance    api-key/authn-method

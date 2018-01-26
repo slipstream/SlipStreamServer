@@ -22,8 +22,6 @@
 
 (def base-uri (str p/service-context (u/de-camelcase credential/resource-url)))
 
-;; initialize must to called to pull in CredentialTemplate resources
-#_(dyn/initialize)
 
 (deftest lifecycle-import
   (let [session (-> (ltu/ring-app)

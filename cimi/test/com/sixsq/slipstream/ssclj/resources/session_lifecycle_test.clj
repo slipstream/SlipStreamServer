@@ -14,8 +14,6 @@
 
 (def base-uri (str p/service-context (u/de-camelcase session/resource-name)))
 
-;; initialize must to called to pull in SessionTemplate test examples
-#_(dyn/initialize)
 
 (deftest bad-methods
   (let [resource-uri (str p/service-context (u/new-resource-id session/resource-name))]
