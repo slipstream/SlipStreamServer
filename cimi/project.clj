@@ -84,5 +84,6 @@
                                :auth-private-key "test-resources/auth_privkey.pem"
                                :auth-public-key  "test-resources/auth_pubkey.pem"}
               :aot            :all}
-   :dev      {:dependencies [[com.sixsq.slipstream/slipstream-ring-container]]}
+   :dev      {:resource-paths ["test-resources"]
+              :dependencies [[com.sixsq.slipstream/slipstream-ring-container]]}
    })
