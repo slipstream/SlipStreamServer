@@ -1,5 +1,3 @@
-(println "DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG: LOADING JOB RESOURCE")
-
 (ns com.sixsq.slipstream.ssclj.resources.job
   (:require
     [superstring.core :as str]
@@ -32,7 +30,6 @@
                               :right     "VIEW"}]})
 
 (defn initialize []
-  (println "DEBUG DEBUG DEBUG DEBUG: CREATING JOB QUEUE")
   (ju/create-job-queue))
 
 ;;
@@ -145,5 +142,3 @@
         (db/edit request))
     (catch ExceptionInfo ei
       (ex-data ei))))
-
-(println "DEBUG DEBUG DEBUG DEBUG DEBUG: FINISHED LOADING JOB RESOURCE")

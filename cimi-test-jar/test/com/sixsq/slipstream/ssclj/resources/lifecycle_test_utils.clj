@@ -396,7 +396,7 @@
   ;; compare-and-set! can't be used because we want to avoid unnecessary
   ;; creation of ring application instances.
   (swap! ring-app-cache (fn [current] (or current
-                                          (setup-embedded-zk #(make-ring-app (concat-routes [(routes/get-main-routes)])))))))
+                                          (make-ring-app (concat-routes [(routes/get-main-routes)]))))))
 
 
 (defn clear-ring-app-cache

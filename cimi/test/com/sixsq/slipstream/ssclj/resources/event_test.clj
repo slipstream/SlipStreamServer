@@ -32,7 +32,9 @@
 
 (defn insert-some-events
   []
-  (let [state (-> (session (ltu/ring-app))
+  (let [app (ltu/ring-app)
+        state (-> app
+                  (session)
                   (content-type "application/json")
                   (header authn-info-header "joe"))]
     (doseq [valid-event valid-events]
