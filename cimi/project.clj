@@ -88,6 +88,6 @@
               :env            {:config-name      "config-params.edn"
                                :auth-private-key "test-resources/auth_privkey.pem"
                                :auth-public-key  "test-resources/auth_pubkey.pem"}
-              :aot            :all}
+              #_:aot            #_:all}
    :dev      {:dependencies [[com.sixsq.slipstream/slipstream-ring-container]]}
    })

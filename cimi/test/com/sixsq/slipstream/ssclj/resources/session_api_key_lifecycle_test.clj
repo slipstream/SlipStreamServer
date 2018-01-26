@@ -24,13 +24,14 @@
     [com.sixsq.slipstream.ssclj.resources.credential.key-utils :as key-utils]))
 
 (use-fixtures :each ltu/with-test-es-client-fixture)
+(use-fixtures :once ltu/setup-embedded-zk)
 
 (def base-uri (str p/service-context (u/de-camelcase session/resource-name)))
 
 (def session-template-base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
 
 ;; initialize must to called to pull in SessionTemplate test examples
-(dyn/initialize)
+#_(dyn/initialize)
 
 (def session-template-api-key {:method      api-key/authn-method
                                :instance    api-key/authn-method

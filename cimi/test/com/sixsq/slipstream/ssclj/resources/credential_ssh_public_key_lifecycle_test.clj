@@ -18,11 +18,12 @@
     [com.sixsq.slipstream.ssclj.resources.credential-template-ssh-key-pair :as skp]))
 
 (use-fixtures :each ltu/with-test-es-client-fixture)
+(use-fixtures :once ltu/setup-embedded-zk)
 
 (def base-uri (str p/service-context (u/de-camelcase credential/resource-url)))
 
 ;; initialize must to called to pull in CredentialTemplate resources
-(dyn/initialize)
+#_(dyn/initialize)
 
 (deftest lifecycle-import
   (let [session (-> (ltu/ring-app)

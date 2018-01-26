@@ -3,9 +3,11 @@
     [clojure.test :refer :all]
     [com.sixsq.slipstream.auth.internal :as t]
     [com.sixsq.slipstream.auth.test-helper :as th]
-    [com.sixsq.slipstream.auth.utils.db :as db]))
+    [com.sixsq.slipstream.auth.utils.db :as db]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]))
 
 (use-fixtures :each th/ssclj-server-fixture)
+(use-fixtures :once ltu/setup-embedded-zk)
 
 (def valid-creds-super {:username "super" :password "supeRsupeR"})
 (def valid-creds-jane {:username "jane" :password "tarzan"})

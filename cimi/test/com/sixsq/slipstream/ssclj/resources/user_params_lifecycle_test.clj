@@ -10,10 +10,11 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 (use-fixtures :each ltu/with-test-es-client-fixture)
+(use-fixtures :once ltu/setup-embedded-zk)
 
 (def base-uri (str p/service-context (u/de-camelcase up/resource-name)))
 
-(dyn/initialize)
+#_(dyn/initialize)
 
 (deftest bad-methods
   (let [resource-uri (str p/service-context (u/new-resource-id up/resource-name))]

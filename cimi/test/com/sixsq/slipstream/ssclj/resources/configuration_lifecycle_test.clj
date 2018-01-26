@@ -9,9 +9,10 @@
     [com.sixsq.slipstream.ssclj.resources.configuration-lifecycle-test-utils :as test-utils]))
 
 (use-fixtures :each ltu/with-test-es-client-fixture)
+(use-fixtures :once ltu/setup-embedded-zk)
 
 ;; initialize must to called to pull in ConfigurationTemplate test examples
-(dyn/initialize)
+#_(dyn/initialize)
 
 ;; run tests separately to avoid contamination of the database between tests
 

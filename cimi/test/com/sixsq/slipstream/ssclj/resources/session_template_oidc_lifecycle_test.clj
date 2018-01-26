@@ -12,11 +12,12 @@
     [com.sixsq.slipstream.ssclj.resources.session-template-lifecycle-test-utils :as stu]))
 
 (use-fixtures :each ltu/with-test-es-client-fixture)
+(use-fixtures :once ltu/setup-embedded-zk)
 
 (def base-uri (str p/service-context (u/de-camelcase st/resource-name)))
 
 ;; initialize must to called to pull in SessionTemplate descriptions
-(dyn/initialize)
+#_(dyn/initialize)
 
 (def valid-template {:method      oidc/authn-method
                      :instance    oidc/authn-method

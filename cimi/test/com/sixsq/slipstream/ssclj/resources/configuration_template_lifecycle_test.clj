@@ -14,11 +14,12 @@
     [com.sixsq.slipstream.ssclj.resources.configuration-template-lifecycle-test-utils :as test-utils]))
 
 (use-fixtures :each ltu/with-test-es-client-fixture)
+(use-fixtures :once ltu/setup-embedded-zk)
 
 (def base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
 
 ;; initialize must to called to pull in ConfigurationTemplate resources
-(dyn/initialize)
+#_(dyn/initialize)
 
 (deftest retrieve-by-id
   (test-utils/check-retrieve-by-id slipstream/service)

@@ -16,7 +16,7 @@
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
 ;; initialize must to called to pull in ConfigurationTemplate test examples
-(dyn/initialize)
+#_(dyn/initialize)
 
 (defn check-lifecycle
   [service attr-kw attr-value attr-new-value]

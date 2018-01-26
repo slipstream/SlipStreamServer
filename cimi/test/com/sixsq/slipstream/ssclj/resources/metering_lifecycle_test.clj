@@ -16,6 +16,7 @@
     [clj-time.core :as t]))
 
 (use-fixtures :each ltu/with-test-es-client-fixture)
+(use-fixtures :once ltu/setup-embedded-zk)
 
 (def base-uri (str p/service-context (u/de-camelcase m/resource-url)))
 

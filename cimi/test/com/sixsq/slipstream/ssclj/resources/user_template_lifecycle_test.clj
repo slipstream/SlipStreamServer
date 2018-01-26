@@ -17,11 +17,12 @@
     [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
 
 (use-fixtures :each ltu/with-test-es-client-fixture)
+(use-fixtures :once ltu/setup-embedded-zk)
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
 ;; initialize must to called to pull in UserTemplate resources
-(dyn/initialize)
+#_(dyn/initialize)
 
 (deftest check-retrieve-by-id
   (doseq [registration-method [direct/registration-method

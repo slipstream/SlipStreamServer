@@ -3,9 +3,11 @@
     [clojure.test :refer :all]
     [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.auth.external :refer :all]
-    [com.sixsq.slipstream.auth.test-helper :as th]))
+    [com.sixsq.slipstream.auth.test-helper :as th]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]))
 
 (use-fixtures :each th/ssclj-server-fixture)
+(use-fixtures :once ltu/setup-embedded-zk)
 
 (deftest match-new-github-user-github
   (is (= [] (db/get-all-users)))

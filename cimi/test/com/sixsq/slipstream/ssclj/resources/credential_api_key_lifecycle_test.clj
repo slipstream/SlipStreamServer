@@ -15,11 +15,12 @@
     [com.sixsq.slipstream.ssclj.resources.credential.key-utils :as key-utils]))
 
 (use-fixtures :each ltu/with-test-es-client-fixture)
+(use-fixtures :once ltu/setup-embedded-zk)
 
 (def base-uri (str p/service-context (u/de-camelcase credential/resource-url)))
 
 ;; initialize must to called to pull in CredentialTemplate resources
-(dyn/initialize)
+#_(dyn/initialize)
 
 (deftest check-strip-session-role
   (is (= ["alpha" "beta"] (t/strip-session-role ["alpha" "session/2d273461-2778-4a66-9017-668f6fed43ae" "beta"])))

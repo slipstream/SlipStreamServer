@@ -15,11 +15,12 @@
   (:import (clojure.lang ExceptionInfo)))
 
 (use-fixtures :each ltu/with-test-es-client-fixture)
+(use-fixtures :once ltu/setup-embedded-zk)
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
 ;; initialize must to called to pull in ConnectorTemplate test examples
-(dyn/initialize)
+#_(dyn/initialize)
 
 (deftest check-retrieve-by-id
   (let [id (str resource-url "/" example/cloud-service-type)

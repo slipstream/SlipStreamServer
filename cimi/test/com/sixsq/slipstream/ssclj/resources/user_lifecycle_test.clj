@@ -16,10 +16,11 @@
     [clojure.spec.alpha :as s]))
 
 (use-fixtures :each ltu/with-test-es-client-fixture)
+(use-fixtures :once ltu/setup-embedded-zk)
 
 (def base-uri (str p/service-context (u/de-camelcase user/resource-name)))
 
-(dyn/initialize)
+#_(dyn/initialize)
 
 (deftest bad-methods
   (let [resource-uri (str p/service-context (u/new-resource-id user/resource-name))]

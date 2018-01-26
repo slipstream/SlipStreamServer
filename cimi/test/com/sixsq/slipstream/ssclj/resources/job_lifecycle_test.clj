@@ -15,7 +15,7 @@
 
 (use-fixtures :each t/with-test-es-client-fixture)
 
-(use-fixtures :once t/setup-embedded-zk)
+(use-fixtures :once ltu/setup-embedded-zk)
 
 (def base-uri (str p/service-context resource-url))
 

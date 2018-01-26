@@ -13,6 +13,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]))
 
 (use-fixtures :each ltu/with-test-es-client-fixture)
+(use-fixtures :once ltu/setup-embedded-zk)
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
