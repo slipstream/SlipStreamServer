@@ -6,8 +6,7 @@
     [com.sixsq.slipstream.auth.test-helper :as th]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]))
 
-(use-fixtures :each th/ssclj-server-fixture)
-(use-fixtures :once ltu/setup-embedded-zk)
+(use-fixtures :each ltu/with-test-server-fixture)
 
 (deftest match-new-github-user-github
   (is (= [] (db/get-all-users)))

@@ -8,14 +8,12 @@
     [com.sixsq.slipstream.ssclj.resources.credential-api-key :as t]
     [com.sixsq.slipstream.ssclj.resources.credential-template-api-key :as akey]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.credential.key-utils :as key-utils]))
 
-(use-fixtures :each ltu/with-test-es-client-fixture)
-(use-fixtures :once ltu/setup-embedded-zk)
+(use-fixtures :each ltu/with-test-server-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase credential/resource-url)))
 

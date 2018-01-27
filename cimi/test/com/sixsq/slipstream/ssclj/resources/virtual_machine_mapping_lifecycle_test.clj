@@ -6,15 +6,10 @@
     [com.sixsq.slipstream.ssclj.resources.virtual-machine-mapping :as vmm]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-    [com.sixsq.slipstream.auth.internal :as auth-internal]
-    [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
-(use-fixtures :each ltu/with-test-es-client-fixture)
-(use-fixtures :once ltu/setup-embedded-zk)
+(use-fixtures :each ltu/with-test-server-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase vmm/resource-url)))
 

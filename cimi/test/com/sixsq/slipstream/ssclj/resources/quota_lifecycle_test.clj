@@ -9,11 +9,9 @@
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.quota :as quota]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]))
 
-(use-fixtures :each ltu/with-test-es-client-fixture)
-(use-fixtures :once ltu/setup-embedded-zk)
+(use-fixtures :each ltu/with-test-server-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 

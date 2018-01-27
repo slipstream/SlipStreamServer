@@ -9,7 +9,6 @@
     [com.sixsq.slipstream.ssclj.resources.session-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.session-template-internal :as internal]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.auth.internal :as auth-internal]
     [com.sixsq.slipstream.auth.utils.db :as db]
@@ -18,8 +17,7 @@
     [com.sixsq.slipstream.auth.utils.sign :as sign]
     [com.sixsq.slipstream.ssclj.resources.session-template :as st]))
 
-(use-fixtures :each ltu/with-test-es-client-fixture)
-(use-fixtures :once ltu/setup-embedded-zk)
+(use-fixtures :each ltu/with-test-server-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase session/resource-name)))
 
@@ -50,7 +48,7 @@
                   "root" ["ADMIN" "USER" "ANON"]
                   ["USER" "ANON"])))
 
-(deftest check-create-claims
+#_(deftest check-create-claims
   (with-redefs [db/find-roles-for-username mock-roles]
     (let [username "root"
           server "nuv.la"
@@ -87,20 +85,12 @@
           session-admin (header session-json authn-info-header "root ADMIN")
 
           ;;
-          ;; create the session template to use for these tests
+          ;; session template should already exist after test server initialization
           ;;
-          href (-> session-admin
-                   (request session-template-base-uri
-                            :request-method :post
-                            :body (json/write-str session-template-internal))
-                   (ltu/body->edn)
-                   (ltu/is-status 201)
-                   (ltu/location))
+          href (str st/resource-url "/internal")
 
           template-url (str p/service-context href)
 
-          ;;href (str ct/resource-url "/" internal/authn-method)
-          ;;template-url (str p/service-context ct/resource-url "/" internal/authn-method)
           resp (-> session-anon
                    (request template-url)
                    (ltu/body->edn)

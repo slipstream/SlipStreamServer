@@ -4,8 +4,7 @@
     [com.sixsq.slipstream.ssclj.resources.connector :as p]
     [com.sixsq.slipstream.ssclj.resources.connector-template-alpha-example :as tpl]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 (def ^:const cloud-service-type "alpha")
 

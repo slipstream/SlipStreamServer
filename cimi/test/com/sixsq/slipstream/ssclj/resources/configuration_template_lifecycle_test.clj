@@ -1,9 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.configuration-template-lifecycle-test
   (:require
     [clojure.test :refer :all]
-    [clojure.data.json :as json]
     [peridot.core :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream :as slipstream]
     [com.sixsq.slipstream.ssclj.resources.configuration-template-session-oidc :as oidc]
@@ -13,8 +11,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration-template-lifecycle-test-utils :as test-utils]))
 
-(use-fixtures :each ltu/with-test-es-client-fixture)
-(use-fixtures :once ltu/setup-embedded-zk)
+(use-fixtures :each ltu/with-test-server-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
 

@@ -12,8 +12,7 @@
     [com.sixsq.slipstream.ssclj.resources.email.utils :as email-utils]
     [postal.core :as postal]))
 
-(use-fixtures :each ltu/with-test-es-client-fixture)
-(use-fixtures :once ltu/setup-embedded-zk)
+(use-fixtures :each ltu/with-test-server-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase t/resource-url)))
 
