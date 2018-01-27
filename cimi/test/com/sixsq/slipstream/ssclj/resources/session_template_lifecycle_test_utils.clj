@@ -1,23 +1,18 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-template-lifecycle-test-utils
   (:require
     [clojure.test :refer :all]
-    [clojure.set :as set]
     [clojure.data.json :as json]
     [peridot.core :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.resources.session-template :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.session-template-internal :as internal]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
-(defn session-template-lifecycle [base-uri ring-app valid-template]
+(defn session-template-lifecycle [base-uri valid-template]
 
-  (let [session (-> ring-app
+  (let [method (:method valid-template)
+        session (-> (ltu/ring-app)
                     session
                     (content-type "application/json"))
         session-admin (header session authn-info-header "root ADMIN USER ANON")
@@ -25,12 +20,12 @@
         session-anon (header session authn-info-header "unknown ANON")]
 
     ;; all view actions should be available to anonymous users
+    ;; count may not be zero because of session template initialization
     (-> session-anon
         (request base-uri)
         (ltu/body->edn)
         (ltu/is-status 200)
         (ltu/is-resource-uri collection-uri)
-        (ltu/is-count zero?)
         (ltu/is-operation-absent "add")
         (ltu/is-operation-absent "delete")
         (ltu/is-operation-absent "edit")
@@ -42,7 +37,6 @@
         (ltu/body->edn)
         (ltu/is-status 200)
         (ltu/is-resource-uri collection-uri)
-        (ltu/is-count zero?)
         (ltu/is-operation-present "add")
         (ltu/is-operation-absent "delete")
         (ltu/is-operation-absent "edit")
@@ -137,12 +131,13 @@
           (is (not= (:updated orig-template) (:updated reread-template)))))
 
       ;; session template should be visible via query as well
-      (-> session-anon
-          (request base-uri)
-          (ltu/body->edn)
-          (ltu/is-status 200)
-          (ltu/is-resource-uri collection-uri)
-          (ltu/is-count #(= 1 %)))
+      (let [entries (-> session-anon
+                        (request base-uri)
+                        (ltu/body->edn)
+                        (ltu/is-status 200)
+                        (ltu/is-resource-uri collection-uri)
+                        (ltu/entries :sessionTemplates))]
+        (is (= 1 (count (filter #(= method (:method %)) entries)))))
 
       ;; delete the template
       (-> session-admin
@@ -158,16 +153,16 @@
 
       ;; session template should not be there anymore
       (ltu/refresh-es-indices)
-      (-> session-anon
-          (request base-uri)
-          (ltu/body->edn)
-          (ltu/is-status 200)
-          (ltu/is-resource-uri collection-uri)
-          (ltu/is-count zero?)))))
+      (let [entries (-> session-anon
+                        (request base-uri)
+                        (ltu/body->edn)
+                        (ltu/is-status 200)
+                        (ltu/is-resource-uri collection-uri)
+                        (ltu/entries :sessionTemplates))]
+        (is (zero? (count (filter #(= method (:method %)) entries))))))))
 
-(defn bad-methods [base-uri ring-app]
-  (let [resource-uri (str p/service-context (u/new-resource-id resource-name))
-        session (session ring-app)]
+(defn bad-methods [base-uri]
+  (let [resource-uri (str p/service-context (u/new-resource-id resource-name))]
     (ltu/verify-405-status [[base-uri :options]
                             [base-uri :delete]
                             [resource-uri :options]

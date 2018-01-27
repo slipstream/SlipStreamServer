@@ -5,18 +5,13 @@
     [peridot.core :refer :all]
     [com.sixsq.slipstream.ssclj.resources.configuration :refer :all]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as ct]
-    [com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream :as example]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
-;; initialize must to called to pull in ConfigurationTemplate test examples
-(dyn/initialize)
 
 (defn check-lifecycle
   [service attr-kw attr-value attr-new-value]
@@ -105,14 +100,15 @@
           (ltu/is-status 403))
 
       ;; admin query succeeds
-      (let [entries (-> session-admin
+      (let [service-matches? (fn [{entry-service :service}] (= service entry-service))
+            entries (-> session-admin
                         (request base-uri)
                         (ltu/body->edn)
                         (ltu/is-status 200)
                         (ltu/is-resource-uri collection-uri)
-                        (ltu/is-count #(= 1 %))
                         (ltu/entries resource-tag))]
         (is ((set (map :id entries)) uri))
+        (is (= 1 (count (filter service-matches? entries))))
 
         ;; verify that all entries are accessible
         (let [pair-fn (juxt :id #(str p/service-context (:id %)))
@@ -183,6 +179,7 @@
           (request abs-uri)
           (ltu/body->edn)
           (ltu/is-status 404)))))
+
 
 (defn check-bad-methods
   []

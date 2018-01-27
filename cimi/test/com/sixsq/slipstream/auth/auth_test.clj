@@ -2,9 +2,10 @@
   (:require
     [clojure.test :refer :all]
     [com.sixsq.slipstream.auth.auth :as auth]
-    [com.sixsq.slipstream.auth.test-helper :as th]))
+    [com.sixsq.slipstream.auth.test-helper :as th]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]))
 
-(use-fixtures :each th/ssclj-server-fixture)
+(use-fixtures :each ltu/with-test-server-fixture)
 
 (def valid-credentials {:username "super"
                         :password "supeRsupeR"

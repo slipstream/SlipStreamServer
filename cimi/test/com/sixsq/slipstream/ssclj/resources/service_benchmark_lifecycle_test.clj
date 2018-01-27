@@ -12,7 +12,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]))
 
-(use-fixtures :each t/with-test-es-client-fixture)
+(use-fixtures :each t/with-test-server-fixture)
 
 (def base-uri (str p/service-context resource-url))
 

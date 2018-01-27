@@ -23,7 +23,7 @@ package com.sixsq.slipstream.module;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import com.sixsq.slipstream.ssclj.app.SscljTestServer;
+import com.sixsq.slipstream.ssclj.app.CIMITestServer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -48,14 +48,14 @@ public class DeploymentFormProcesorTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		SscljTestServer.start();
+		CIMITestServer.start();
 		user = UserTest.createUser("test");
 		UserTest.storeUser(user);
 	}
 
 	@AfterClass
 	public static void teardownClass() throws Exception {
-		SscljTestServer.stop();
+		CIMITestServer.stop();
     }
 
 	@Test

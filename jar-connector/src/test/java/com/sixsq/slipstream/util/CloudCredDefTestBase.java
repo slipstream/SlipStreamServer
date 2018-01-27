@@ -5,7 +5,7 @@ import com.sixsq.slipstream.connector.SystemConfigurationParametersFactoryBase;
 import com.sixsq.slipstream.credentials.CloudCredential;
 import com.sixsq.slipstream.credentials.CloudCredentialCreateTmpl;
 import com.sixsq.slipstream.credentials.ICloudCredential;
-import com.sixsq.slipstream.ssclj.app.SscljTestServer;
+import com.sixsq.slipstream.ssclj.app.CIMITestServer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.restlet.Response;
@@ -21,12 +21,12 @@ public class CloudCredDefTestBase {
 
     @BeforeClass
     public static void setupClass() {
-        SscljTestServer.start();
+        CIMITestServer.start();
     }
 
     @AfterClass
     public static void teardownClass() {
-        SscljTestServer.stop();
+        CIMITestServer.stop();
     }
 
     public String CONNECTOR_NAME = "foo-bar-baz";
@@ -54,7 +54,7 @@ public class CloudCredDefTestBase {
                 "test USER", cloudCredentialCreateTmpl);
         assertFalse(resp.toString(), SscljProxy.isError(resp));
 
-        SscljTestServer.refresh();
+        CIMITestServer.refresh();
 
         HashMap<String, String> response = gson.fromJson(resp.getEntityAsText(), HashMap.class);
         String resourceId = response.get("resource-id");

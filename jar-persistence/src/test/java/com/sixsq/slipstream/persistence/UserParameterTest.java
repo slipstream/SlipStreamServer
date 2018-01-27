@@ -26,7 +26,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
-import com.sixsq.slipstream.ssclj.app.SscljTestServer;
+import com.sixsq.slipstream.ssclj.app.CIMITestServer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -40,12 +40,12 @@ public class UserParameterTest {
 
 	@BeforeClass
 	public static void setupClass() {
-		SscljTestServer.start();
+		CIMITestServer.start();
 	}
 
 	@AfterClass
 	public static void teardownClass() {
-		SscljTestServer.stop();
+		CIMITestServer.stop();
 	}
 
 	@Test(expected = ValidationException.class)

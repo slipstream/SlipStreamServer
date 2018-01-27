@@ -4,6 +4,7 @@
     [clojure.java.io :as io]
     [clojure.string :as str]
     [clojure.test :refer [is]]
+    [clojure.tools.logging :as log]
     [clojure.pprint :refer [pprint]]
     [peridot.core :refer [session request]]
     [compojure.core :as cc]
@@ -19,6 +20,7 @@
     [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer [wrap-cimi-params]]
     [com.sixsq.slipstream.ssclj.middleware.exception-handler :refer [wrap-exceptions]]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [wrap-authn-info-header]]
+    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.db.es.binding :as esb]
     [com.sixsq.slipstream.db.es.utils :as esu]
     [com.sixsq.slipstream.dbtest.es.utils :as esut]
@@ -198,19 +200,6 @@
   (apply cc/routes rs))
 
 
-(defn make-ring-app [resource-routes]
-  (db/set-impl! (esb/get-instance))
-  (-> resource-routes
-      wrap-cimi-params
-      wrap-keyword-params
-      wrap-nested-params
-      wrap-params
-      wrap-base-uri
-      wrap-authn-info-header
-      wrap-exceptions
-      (wrap-json-body {:keywords? true})
-      (wrap-json-response {:pretty true :escape-non-ascii true})
-      wrap-logger))
 
 
 (defn dump
@@ -239,48 +228,9 @@
   request)
 
 
-(defmacro with-test-es-client
-  "Creates an Elasticsearch test client, executes the body with the created
-   client bound to the Elasticsearch client binding, and then clean up the
-   allocated resources by closing both the client and the node."
-  [& body]
-  `(with-open [node# (esut/create-test-node)
-               client# (-> node#
-                           esu/node-client
-                           esb/wait-client-create-index)]
-     (binding [esb/*client* client#]
-       (db/set-impl! (esb/get-instance))
-       (esu/reset-index esb/*client* esb/index-name)
-       ~@body)))
-
-
-(defn with-test-es-client-fixture
-  [f]
-  (with-test-es-client
-    (f)))
-
-
-(defn setup-embedded-zk [f]
-  (let [port 21810]
-    (with-open [server (TestingServer. port)]
-      (uzk/set-client! (zk/connect (str "127.0.0.1:" port)))
-      (try
-        (f)
-        (finally
-          (try
-            (uzk/close-client!)
-            (catch Exception _)))))))                       ; ignore exceptions when closing client
-
-
 (defn refresh-es-indices
   []
   (esu/refresh-all-indices esb/*client*))
-
-
-(defn ring-app
-  "Creates a standard ring application with the CIMI server routes."
-  []
-  (make-ring-app (concat-routes [(routes/get-main-routes)])))
 
 
 (defn strip-unwanted-attrs
@@ -291,6 +241,195 @@
                    :created :updated :name :description :properties}]
     (into {} (remove #(unwanted (first %)) m))))
 
+
+;;
+;; Handling of Zookeeper server and client
+;;
+
+(defn create-zk-client-server
+  []
+  (let [port 21810]
+    (log/info "creating zookeeper server on port" port)
+    (let [server (TestingServer. port)
+          client (zk/connect (str "127.0.0.1:" port))]
+      (uzk/set-client! client)
+      [client server])))
+
+
+(def ^:private zk-client-server-cache (atom nil))
+
+
+(defn set-zk-client-server-cache
+  "Sets the value of the cached Elasticsearch node and client. If the current
+   value is nil, then a new node and a new client are created and cached. If
+   the value is not nil, then the cache is set to the same value. This returns
+   the tuple with the node and client, which should never be nil."
+  []
+  ;; Implementation note: It is unfortunate that the atom will constantly be
+  ;; reset to the current value because swap! is used.  Unfortunately,
+  ;; compare-and-set! can't be used because we want to avoid unnecessary
+  ;; creation of ring application instances.
+  (swap! zk-client-server-cache (fn [current] (or current (create-zk-client-server)))))
+
+
+(defn clear-zk-client-server-cache
+  "Unconditionally clears the cached Elasticsearch node and client. Can be
+   used to force the re-initialization of the node and client. If the current
+   values are not nil, then the node and client will be closed, with errors
+   silently ignored."
+  []
+  (let [[[client server] _] (swap-vals! zk-client-server-cache (constantly nil))]
+    (when client
+      (try
+        (.close client)
+        (catch Exception _)))
+    (when server
+      (try
+        (.close server)
+        (catch Exception _)))))
+
+
+;;
+;; Handling of Elasticsearch node and client for tests
+;;
+
+(defn create-es-node-client
+  []
+  (log/info "creating elasticsearch node and client")
+  (let [node (esut/create-test-node)
+        client (-> node
+                   esu/node-client
+                   esb/wait-client-create-index)]
+    [node client]))
+
+
+(def ^:private es-node-client-cache (atom nil))
+
+
+(defn set-es-node-client-cache
+  "Sets the value of the cached Elasticsearch node and client. If the current
+   value is nil, then a new node and a new client are created and cached. If
+   the value is not nil, then the cache is set to the same value. This returns
+   the tuple with the node and client, which should never be nil."
+  []
+  ;; Implementation note: It is unfortunate that the atom will constantly be
+  ;; reset to the current value because swap! is used.  Unfortunately,
+  ;; compare-and-set! can't be used because we want to avoid unnecessary
+  ;; creation of ring application instances.
+  (swap! es-node-client-cache (fn [current] (or current (create-es-node-client)))))
+
+
+(defn clear-es-node-client-cache
+  "Unconditionally clears the cached Elasticsearch node and client. Can be
+   used to force the re-initialization of the node and client. If the current
+   values are not nil, then the node and client will be closed, with errors
+   silently ignored."
+  []
+  (let [[[node client] _] (swap-vals! es-node-client-cache (constantly nil))]
+    (when client
+      (try
+        (.close client)
+        (catch Exception _)))
+    (when node
+      (try
+        (.close node)
+        (catch Exception _)))))
+
+
+(defmacro with-test-es-client
+  "Creates an Elasticsearch test client, executes the body with the created
+   client bound to the Elasticsearch client binding, and then clean up the
+   allocated resources by closing both the client and the node."
+  [& body]
+  `(let [client# (second (set-es-node-client-cache))]
+     (binding [esb/*client* client#]
+       (db/set-impl! (esb/get-instance))
+       (esu/reset-index esb/*client* esb/index-name)
+       ~@body)))
+
+
+(defn with-test-es-client-fixture
+  [f]
+  (log/error "DEPRECATED: with-test-es-client-fixture")
+  (set-zk-client-server-cache)                              ;; always setup the zookeeper client and server
+  (with-test-es-client
+    (f)))
+
+
+;;
+;; Ring Application Management
+;;
+
+(defn make-ring-app [resource-routes]
+  (log/info "creating ring application")
+  (db/set-impl! (esb/get-instance))
+  (-> resource-routes
+      wrap-cimi-params
+      wrap-keyword-params
+      wrap-nested-params
+      wrap-params
+      wrap-base-uri
+      wrap-authn-info-header
+      wrap-exceptions
+      (wrap-json-body {:keywords? true})
+      (wrap-json-response {:pretty true :escape-non-ascii true})
+      wrap-logger))
+
+
+(def ^:private ring-app-cache (atom nil))
+
+(defn set-ring-app-cache
+  "Sets the value of the cached ring application. If the current value is nil,
+   then a new ring application is created and cached. If the value is not nil,
+   then the cache is set to the same value. This returns the ring application
+   value, which should never be nil."
+  []
+  ;; Implementation note: It is unfortunate that the atom will constantly be
+  ;; reset to the current value because swap! is used.  Unfortunately,
+  ;; compare-and-set! can't be used because we want to avoid unnecessary
+  ;; creation of ring application instances.
+  (swap! ring-app-cache (fn [current] (or current
+                                          (make-ring-app (concat-routes [(routes/get-main-routes)]))))))
+
+
+(defn clear-ring-app-cache
+  "Unconditionally clears the cached ring application instance.  Can be used
+   to force the re-initialization of the ring application."
+  []
+  (reset! ring-app-cache (constantly nil)))
+
+
+(defn ring-app
+  "Returns a standard ring application with the CIMI server routes. By
+   default, only a single instance will be created and cached. The cache can be
+   cleared with the `clean-ring-app-cache` function."
+  []
+  (set-ring-app-cache))
+
+
+;;
+;; test fixture to ensure that all parts of the test server are started
+;; (elasticsearch, zookeeper, ring application)
+;;
+
+(defn with-test-server-fixture
+  "This fixture will ensure that Elasticsearch and zookeeper instances are
+   running. It will also create a ring application and initialize it. The
+   servers and application are cached to eliminate unnecessary instance
+   creation."
+  [f]
+  (log/debug "executing with-test-server-fixture")
+  (set-zk-client-server-cache)                              ;; always setup the zookeeper client and server
+  (with-test-es-client
+    (ring-app)
+    (log/info "forced initialization of ring application")
+    (dyn/initialize)                                        ;; must always reinitialize after database has been cleared
+    (f)))
+
+
+;;
+;; miscellaneous utilities
+;;
 
 (defn verify-405-status
   "The url-methods parameter must be a list of URL/method tuples. It is
@@ -305,3 +444,5 @@
                    :request-method method
                    :body (json/write-str {:dummy "value"}))
           (is-status 405)))))
+
+

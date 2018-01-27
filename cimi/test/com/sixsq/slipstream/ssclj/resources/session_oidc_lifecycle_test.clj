@@ -15,21 +15,17 @@
     [com.sixsq.slipstream.ssclj.resources.session-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.session-template-oidc :as oidc]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.session-template :as st]))
 
-(use-fixtures :each ltu/with-test-es-client-fixture)
+(use-fixtures :each ltu/with-test-server-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase session/resource-name)))
 
 (def configuration-base-uri (str p/service-context (u/de-camelcase configuration/resource-name)))
 
 (def session-template-base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
-
-;; initialize must to called to pull in SessionTemplate test examples
-(dyn/initialize)
 
 (def instance "test-oidc")
 (def session-template-oidc {:method      oidc/authn-method
