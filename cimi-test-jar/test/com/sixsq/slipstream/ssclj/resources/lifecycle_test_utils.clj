@@ -4,6 +4,7 @@
     [clojure.java.io :as io]
     [clojure.string :as str]
     [clojure.test :refer [is]]
+    [clojure.tools.logging :as log]
     [clojure.pprint :refer [pprint]]
     [peridot.core :refer [session request]]
     [compojure.core :as cc]
@@ -19,6 +20,7 @@
     [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer [wrap-cimi-params]]
     [com.sixsq.slipstream.ssclj.middleware.exception-handler :refer [wrap-exceptions]]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [wrap-authn-info-header]]
+    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.db.es.binding :as esb]
     [com.sixsq.slipstream.db.es.utils :as esu]
     [com.sixsq.slipstream.dbtest.es.utils :as esut]
@@ -226,19 +228,6 @@
   request)
 
 
-(defn setup-embedded-zk [f]
-  nil                                                       ;; now a no-op
-  #_(let [port 21810]
-    (with-open [server (TestingServer. port)]
-      (uzk/set-client! (zk/connect (str "127.0.0.1:" port)))
-      (try
-        (f)
-        (finally
-          (try
-            (uzk/close-client!)
-            (catch Exception _)))))))                       ; ignore exceptions when closing client
-
-
 (defn refresh-es-indices
   []
   (esu/refresh-all-indices esb/*client*))
@@ -259,11 +248,12 @@
 
 (defn create-zk-client-server
   []
-  (let [port 21810
-        server (TestingServer. port)
-        client (zk/connect (str "127.0.0.1:" port))]
-    (uzk/set-client! client)
-    [client server]))
+  (let [port 21810]
+    (log/info "creating zookeeper server on port" port)
+    (let [server (TestingServer. port)
+          client (zk/connect (str "127.0.0.1:" port))]
+      (uzk/set-client! client)
+      [client server])))
 
 
 (def ^:private zk-client-server-cache (atom nil))
@@ -305,6 +295,7 @@
 
 (defn create-es-node-client
   []
+  (log/info "creating elasticsearch node and client")
   (let [node (esut/create-test-node)
         client (-> node
                    esu/node-client
@@ -359,6 +350,7 @@
 
 (defn with-test-es-client-fixture
   [f]
+  (log/error "DEPRECATED: with-test-es-client-fixture")
   (set-zk-client-server-cache)                              ;; always setup the zookeeper client and server
   (with-test-es-client
     (f)))
@@ -369,6 +361,7 @@
 ;;
 
 (defn make-ring-app [resource-routes]
+  (log/info "creating ring application")
   (db/set-impl! (esb/get-instance))
   (-> resource-routes
       wrap-cimi-params
@@ -412,6 +405,26 @@
    cleared with the `clean-ring-app-cache` function."
   []
   (set-ring-app-cache))
+
+
+;;
+;; test fixture to ensure that all parts of the test server are started
+;; (elasticsearch, zookeeper, ring application)
+;;
+
+(defn with-test-server-fixture
+  "This fixture will ensure that Elasticsearch and zookeeper instances are
+   running. It will also create a ring application and initialize it. The
+   servers and application are cached to eliminate unnecessary instance
+   creation."
+  [f]
+  (log/debug "executing with-test-server-fixture")
+  (set-zk-client-server-cache)                              ;; always setup the zookeeper client and server
+  (with-test-es-client
+    (ring-app)
+    (log/info "forced initialization of ring application")
+    (dyn/initialize)                                        ;; must always reinitialize after database has been cleared
+    (f)))
 
 
 ;;
