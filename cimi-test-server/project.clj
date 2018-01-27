@@ -9,13 +9,16 @@
   :plugins [[lein-parent "0.3.2"]]
 
   :parent-project {:coords  [com.sixsq.slipstream/parent "3.45-SNAPSHOT"]
-                   :inherit [:min-lein-version :managed-dependencies :repositories :deploy-repositories]}
+                   :inherit [:min-lein-version
+                             :managed-dependencies
+                             :repositories
+                             :deploy-repositories]}
 
-  :source-paths ["test"]
+  :source-paths ["src"]
 
   :pom-location "target/"
 
-  :aot [com.sixsq.slipstream.ssclj.app.SscljTestServer]
+  :aot [com.sixsq.slipstream.ssclj.app.CIMITestServer]
 
   :dependencies [[org.apache.curator/curator-test :scope "compile"]
                  [com.sixsq.slipstream/SlipStreamCljResources-jar]

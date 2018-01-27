@@ -35,6 +35,12 @@
       <artifactId>SlipStreamCljResources-jar</artifactId>
       <version>${project.version}</version>
       <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
@@ -72,6 +78,12 @@
       <artifactId>SlipStreamCljResourcesTestServer-jar</artifactId>
       <scope>test</scope>
       <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
@@ -158,6 +170,8 @@
             <slipstream.config.dir>${project.build.directory}/configuration</slipstream.config.dir>
             <es.host>localhost</es.host>
             <es.port>12002</es.port>
+            <!-- turns off most logging from restlet and others; change file to lower logging level -->
+            <java.util.logging.config.file>${basedir}/src/test/resources/logging.properties</java.util.logging.config.file>
           </systemPropertyVariables>
           <useSystemClassLoader>false</useSystemClassLoader>
           <excludes>

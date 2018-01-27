@@ -14,10 +14,15 @@
                              :repositories
                              :deploy-repositories]}
 
-  :source-paths ["test"]
+  :source-paths ["src"]
 
   :pom-location "target/"
 
-  :dependencies [[org.apache.curator/curator-test :scope "compile"]
+  :dependencies [[com.sixsq.slipstream/SlipStreamDbBinding-jar]
+                 [com.sixsq.slipstream/SlipStreamDbTesting-jar :scope "compile"]
+                 [org.apache.curator/curator-test :scope "compile"]
+                 [peridot "0.5.0" :scope "compile"]
+                 [org.clojure/data.json]
+                 [compojure]
                  [com.cemerick/url]
                  [com.sixsq.slipstream/slipstream-ring-container]])

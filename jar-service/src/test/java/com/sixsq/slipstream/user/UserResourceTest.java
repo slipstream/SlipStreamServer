@@ -31,7 +31,7 @@ import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.User.State;
 import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.persistence.UserTest;
-import com.sixsq.slipstream.ssclj.app.SscljTestServer;
+import com.sixsq.slipstream.ssclj.app.CIMITestServer;
 import com.sixsq.slipstream.util.ResourceTestBase;
 import com.sixsq.slipstream.util.SerializationUtil;
 import com.sixsq.slipstream.util.XmlUtil;
@@ -84,7 +84,7 @@ public class UserResourceTest extends ResourceTestBase {
 		user = UserTest.storeUser(user);
 		UserTest.storeUser(otherUser);
 		superUser.store();
-		SscljTestServer.refresh();
+		CIMITestServer.refresh();
 		superUser.setSuper(true);
 		superUser.store();
 	}

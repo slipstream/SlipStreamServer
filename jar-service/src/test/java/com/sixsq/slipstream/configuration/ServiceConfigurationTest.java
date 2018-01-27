@@ -25,7 +25,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.sixsq.slipstream.ssclj.app.SscljTestServer;
+import com.sixsq.slipstream.ssclj.app.CIMITestServer;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.BeforeClass;
@@ -41,13 +41,13 @@ public class ServiceConfigurationTest {
 
 	@BeforeClass
 	public static void setupClass(){
-		SscljTestServer.start();
+		CIMITestServer.start();
 		CljElasticsearchHelper.initTestDb();
 	}
 
 	@AfterClass
 	public static void teardownClass(){
-		SscljTestServer.stop();
+		CIMITestServer.stop();
 	}
 
 	@Test(expected = IllegalArgumentException.class)

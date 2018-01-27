@@ -5,7 +5,7 @@ import com.sixsq.slipstream.credentials.SshCredential;
 import static org.junit.Assert.*;
 
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.ssclj.app.SscljTestServer;
+import com.sixsq.slipstream.ssclj.app.CIMITestServer;
 import com.sixsq.slipstream.util.UserTestUtil;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -28,24 +28,24 @@ public class SshCredentialsTest {
 
     @BeforeClass
     public static void setupClass() {
-        SscljTestServer.start();
+        CIMITestServer.start();
     }
 
     @AfterClass
     public static void teardownClass() {
-        SscljTestServer.stop();
+        CIMITestServer.stop();
     }
 
     @Before
     public void before() throws ValidationException {
         user = UserTestUtil.createMinimalUser("test", "password");
-        SscljTestServer.refresh();
+        CIMITestServer.refresh();
     }
 
     @After
     public void after() {
         new SshCredential().removeAll(user);
-        SscljTestServer.refresh();
+        CIMITestServer.refresh();
     }
 
     @Test
@@ -104,7 +104,7 @@ public class SshCredentialsTest {
         params.put(sshParamKey, p);
         user.setParameter(p);
         user.store();
-        SscljTestServer.refresh();
+        CIMITestServer.refresh();
 
         User u2 = User.loadByName(user.getName());
         p = u2.getParameter(sshParamKey);
