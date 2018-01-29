@@ -57,4 +57,7 @@
    ;; ring/ring-json pull in an old version of ring-core that
    ;; conflicts with the more recent one.
    ;;
-   [ring/ring-core]])
+   [ring/ring-core]]
+
+  :profiles {:test {:dependencies [[org.slf4j/slf4j-log4j12]]
+                    :resource-paths ["test-resources"]}})
