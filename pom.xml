@@ -75,14 +75,6 @@
     </profile>
   </profiles>
 
-  <repositories>
-    <repository>
-      <id>maven-restlet</id>
-      <name>Public online Restlet repository</name>
-      <url>http://maven.restlet.org</url>
-    </repository>
-  </repositories>
-
   <scm>
     <connection>${scm.read}/SlipStreamServer.git</connection>
     <developerConnection>${scm.write}/SlipStreamServer.git</developerConnection>
