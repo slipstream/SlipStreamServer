@@ -21,8 +21,8 @@
       <type>war</type>
     </dependency>
     <dependency>
-      <groupId>sixsq.slipstream</groupId>
-      <artifactId>webui-dep</artifactId>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamWebUI-dep</artifactId>
       <version>${project.version}</version>
       <type>pom</type>
       <scope>provided</scope>
@@ -141,8 +141,8 @@
               <outputDirectory>target</outputDirectory>
               <artifactItems>
                 <artifactItem>
-                  <groupId>sixsq.slipstream</groupId>
-                  <artifactId>webui</artifactId>
+                  <groupId>com.sixsq.slipstream</groupId>
+                  <artifactId>SlipStreamWebUI</artifactId>
                   <version>${project.version}</version>
                   <type>jar</type>
                 </artifactItem>
