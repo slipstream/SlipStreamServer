@@ -9,8 +9,7 @@
     [com.sixsq.slipstream.db.es.utils :as esu]
     [com.sixsq.slipstream.db.es.acl :as acl]
     [com.sixsq.slipstream.db.binding :refer [Binding]])
-  (:import (org.elasticsearch.index.engine VersionConflictEngineException)
-           (clojure.lang ExceptionInfo)))
+  (:import (org.elasticsearch.index.engine VersionConflictEngineException)))
 
 (def ^:const index-name "resources-index")
 

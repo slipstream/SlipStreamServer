@@ -5,7 +5,6 @@
     [clojure.data.json :as json]
     [clojure.tools.logging :as log]
     [environ.core :as env]
-    [me.raynes.fs :as fs]
     [com.sixsq.slipstream.db.utils.common :as cu]
     [com.sixsq.slipstream.db.es.pagination :as pg]
     [com.sixsq.slipstream.db.es.acl :as acl]
@@ -16,14 +15,13 @@
   (:import
     (java.net InetAddress)
     (java.util UUID)
-    (org.elasticsearch.action ActionRequestBuilder)
     (org.elasticsearch.action.admin.indices.create CreateIndexResponse)
     (org.elasticsearch.action.admin.indices.delete DeleteIndexRequest)
     (org.elasticsearch.action.admin.indices.exists.indices IndicesExistsRequest)
     (org.elasticsearch.action.admin.indices.get GetIndexRequest)
     (org.elasticsearch.action.bulk BulkRequestBuilder BulkResponse)
     (org.elasticsearch.action.search SearchType SearchPhaseExecutionException SearchResponse SearchRequestBuilder)
-    (org.elasticsearch.action.support WriteRequest$RefreshPolicy WriteRequest)
+    (org.elasticsearch.action.support WriteRequest$RefreshPolicy)
     (org.elasticsearch.common.settings Settings)
     (org.elasticsearch.common.transport InetSocketTransportAddress)
     (org.elasticsearch.common.unit TimeValue)
@@ -32,12 +30,7 @@
     (org.elasticsearch.index IndexNotFoundException)
     (org.elasticsearch.index.query QueryBuilders)
     (org.elasticsearch.node Node)
-    #_(org.elasticsearch.test ESIntegTestCase)
-    #_(com.carrotsearch.randomizedtesting RandomizedContext)
-    (org.elasticsearch.plugins Plugin)
-    (org.elasticsearch.transport Netty4Plugin)
-    (org.elasticsearch.transport.client PreBuiltTransportClient)
-    (org.elasticsearch.env Environment)))
+    (org.elasticsearch.transport.client PreBuiltTransportClient)))
 
 (def ^:const max-result-window 200000)
 
@@ -152,32 +145,6 @@
 ;;
 ;; Util functions
 ;;
-
-
-#_(defn create-test-node
-  "Creates a local elasticsearch node that holds data but cannot be accessed
-   through the HTTP protocol."
-  ([]
-   (create-test-node (cu/random-uuid)))
-  ([^String cluster-name]
-   (let [tempDir (str (fs/temp-dir "es-data-"))
-         settings (.. (Settings/builder)
-                      (put "cluster.name" cluster-name)
-                      (put "path.home" tempDir)
-                      (put "transport.netty.worker_count" 3)
-                      (put "node.data" true)
-                      (put "http.enabled" true)
-                      (put "logger.level" "INFO")
-                      (put "http.type" "netty4")
-                      (put "http.port" "9200-9300")
-                      (put "transport.type" "netty4")
-                      (put "network.host" "127.0.0.1")
-                      (build))
-         plugins [Netty4Plugin]
-         ]
-     (.. (MockNode. ^Settings settings plugins)
-         (start)))))
-
 
 
 (def ^:const mapping-not-analyzed
@@ -313,14 +280,3 @@
    random UUID, although that is an implementation detail."
   []
   (str (UUID/randomUUID)))
-
-#_(defmacro with-es-test-client
-  "Creates a new elasticsearch node, client, and test index, executes the body
-   with `node`, `client`, and `index` vars bound to the values, and then
-   reliably closes the node and client."
-  [& body]
-  `(with-open [~'node (create-test-node)
-               ~'client (node-client ~'node)]
-     (let [~'index (random-index-name)]
-       (create-index ~'client ~'index)
-       ~@body)))

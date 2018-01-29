@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.db.es.filter
   (:require
     [clojure.walk :as w]
-    [superstring.core :as s]
+    [clojure.string :as s]
     [com.sixsq.slipstream.db.utils.time-utils :as uu])
   (:import
     [org.elasticsearch.index.query QueryBuilders]))
@@ -63,7 +63,7 @@
 
 (defn- strip-quotes
   [s]
-  (s/substring s 1 (dec (s/length s))))
+  (subs s 1 (dec (count s))))
 
 (defmulti convert
           (fn [v]
