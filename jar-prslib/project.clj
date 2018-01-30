@@ -3,6 +3,7 @@
 (defproject com.sixsq.slipstream/SlipStreamServerPRSlib-jar "3.45-SNAPSHOT"
 
   :description "Placement and Ranking Service"
+
   :url "https://github.com/slipstream/SlipStreamServer"
 
   :license {:name "Apache 2.0"

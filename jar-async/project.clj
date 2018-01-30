@@ -3,6 +3,7 @@
 (defproject com.sixsq.slipstream/SlipStreamAsync "3.45-SNAPSHOT"
 
   :description "utilities for asynchronous actions"
+
   :url "https://github.com/slipstream/SlipStreamServer"
   
   :license {:name "Apache 2.0"

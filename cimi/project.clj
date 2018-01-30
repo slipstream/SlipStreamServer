@@ -1,10 +1,14 @@
 (def +version+ "3.45-SNAPSHOT")
 
-(defproject
-  com.sixsq.slipstream/SlipStreamCljResources-jar
-  "3.45-SNAPSHOT"
-  :license
-  {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
+(defproject com.sixsq.slipstream/SlipStreamCljResources-jar "3.45-SNAPSHOT"
+
+  :description "core cimi server"
+
+  :url "https://github.com/slipstream/SlipStreamServer"
+
+  :license {:name "Apache 2.0"
+            :url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            :distribution :repo}
 
   :plugins [[lein-parent "0.3.2"]
             [lein-environ "1.1.0"]]

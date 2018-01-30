@@ -3,6 +3,7 @@
 (defproject com.sixsq.slipstream/SlipStreamDbBinding-jar "3.45-SNAPSHOT"
 
   :description "bindings for (persistent) database backends"
+
   :url "https://github.com/slipstream/SlipStreamServer"
 
   :license {:name "Apache 2.0"

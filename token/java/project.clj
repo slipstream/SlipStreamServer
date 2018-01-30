@@ -3,6 +3,7 @@
 (defproject com.sixsq.slipstream/token-java "3.45-SNAPSHOT"
 
   :description "token management utilities for java"
+
   :url "https://github.com/slipstream/SlipStreamServer"
   
   :license {:name "Apache 2.0"

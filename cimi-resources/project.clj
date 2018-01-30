@@ -1,10 +1,14 @@
 (def +version+ "3.45-SNAPSHOT")
 
-(defproject
-  com.sixsq.slipstream/SlipStreamServer-cimi-resources
-  "3.45-SNAPSHOT"
-  :license
-  {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
+(defproject com.sixsq.slipstream/SlipStreamServer-cimi-resources "3.45-SNAPSHOT"
+
+  :description "CIMI resources"
+
+  :url "https://github.com/slipstream/SlipStreamServer"
+
+  :license {:name "Apache 2.0"
+            :url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            :distribution :repo}
 
   :plugins [[lein-parent "0.3.2"]
             [lein-environ "1.1.0"]]
@@ -18,9 +22,6 @@
   :source-paths ["src"]
 
   :pom-location "target/"
-
-  :dependencies
-  [[org.clojure/clojure]]
 
   :profiles {:provided {:dependencies [[org.clojure/clojure]]}
              :test     {:aot :all}})

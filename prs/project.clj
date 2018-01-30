@@ -3,6 +3,7 @@
 (defproject com.sixsq.slipstream/SlipStreamPricingService-jar "3.45-SNAPSHOT"
 
   :description "pricing service"
+
   :url "https://github.com/slipstream/SlipStreamServer"
   
   :license {:name "Apache 2.0"

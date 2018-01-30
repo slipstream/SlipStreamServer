@@ -3,6 +3,7 @@
 (defproject com.sixsq.slipstream/SlipStreamConnector-Dummy-conf "3.45-SNAPSHOT"
 
   :description "dummy connector for testing"
+
   :url "https://github.com/slipstream/SlipStreamServer"
 
   :license {:name "Apache 2.0"

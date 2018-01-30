@@ -3,6 +3,7 @@
 (defproject com.sixsq.slipstream/token "3.45-SNAPSHOT"
 
   :description "token handling utilities in Clojure"
+
   :url "https://github.com/slipstream/SlipStreamServer"
 
   :license {:name "Apache 2.0"
