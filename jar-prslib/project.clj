@@ -1,10 +1,13 @@
 (def +version+ "3.45-SNAPSHOT")
 
-(defproject
-  com.sixsq.slipstream/SlipStreamServerPRSlib-jar
-  "3.45-SNAPSHOT"
-  :license
-  {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
+(defproject com.sixsq.slipstream/SlipStreamServerPRSlib-jar "3.45-SNAPSHOT"
+
+  :description "Placement and Ranking Service"
+  :url "https://github.com/slipstream/SlipStreamServer"
+
+  :license {:name "Apache 2.0"
+            :url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            :distribution :repo}
 
   :plugins [[lein-parent "0.3.2"]
             [kirasystems/lein-codox "0.10.4"]
@@ -12,7 +15,10 @@
             [lein-localrepo "0.5.4"]]
 
   :parent-project {:coords  [com.sixsq.slipstream/parent "3.45-SNAPSHOT"]
-                   :inherit [:min-lein-version :managed-dependencies :repositories :deploy-repositories]}
+                   :inherit [:min-lein-version
+                             :managed-dependencies
+                             :repositories
+                             :deploy-repositories]}
 
   :source-paths ["src/clj"]
 
