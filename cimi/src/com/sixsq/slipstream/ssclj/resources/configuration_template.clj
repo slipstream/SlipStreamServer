@@ -96,7 +96,8 @@
                      :type        "string"
                      :mandatory   false
                      :readOnly    false
-                     :order       11}}))
+                     :order       11}
+          }))
 ;;
 ;; multimethods for validation
 ;;
@@ -164,7 +165,8 @@
 ;;
 ;; actions
 ;;
-(defmethod crud/do-action [resource-url "describe"]
+
+(defn describe-impl
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
@@ -173,5 +175,9 @@
           (r/json-response)))
     (catch ExceptionInfo ei
       (ex-data ei))))
+
+(defmethod crud/do-action [resource-url "describe"]
+  [request]
+  (describe-impl request))
 
 

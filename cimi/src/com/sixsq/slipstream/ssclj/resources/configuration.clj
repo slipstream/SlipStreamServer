@@ -4,7 +4,9 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.auth.acl :as a]))
+    [com.sixsq.slipstream.ssclj.resources.configuration-template :as conf-tmpl]
+    [com.sixsq.slipstream.auth.acl :as a]
+    [clojure.tools.logging :as log]))
 
 (def ^:const resource-tag :configurations)
 
@@ -76,8 +78,9 @@
 
 ;; default implementation just removes href and updates the resourceURI
 (defmethod tpl->configuration :default
-  [resource]
+  [{:keys [href] :as resource}]
   (-> resource
+      (assoc :configurationTemplate {:href href})
       (dissoc :href)
       (assoc :resourceURI resource-uri)))
 
@@ -94,7 +97,7 @@
         desc-attrs (u/select-desc-keys body)
         body (-> body
                  (assoc :resourceURI create-uri)
-                 (std-crud/resolve-hrefs idmap)
+                 (std-crud/resolve-hrefs idmap true)
                  (update-in [:configurationTemplate] merge desc-attrs) ;; validate desc attrs
                  (crud/validate)
                  (:configurationTemplate)
@@ -124,6 +127,17 @@
 (defmethod crud/query resource-name
   [request]
   (query-impl request))
+
+;;
+;; actions
+;;
+
+(defmethod crud/do-action [resource-url "describe"]
+  [{{uuid :uuid} :params :as request}]
+  (-> request
+      (retrieve-impl)
+      (log/info))
+  #_(conf-tmpl/describe-impl request))
 
 ;;
 ;; use service as the identifier

@@ -12,6 +12,9 @@
 (def configuration-template-regex #"^configuration-template/[a-z0-9]+(-[a-z0-9]+)*$")
 (s/def :cimi.configuration-template/href (s/and string? #(re-matches configuration-template-regex %)))
 
+(s/def :cimi.configuration-template/configurationTemplate (su/only-keys-maps
+                                                            {:req-un [:cimi.configuration-template/href]}))
+
 ;;
 ;; Keys specifications for configuration-template resources.
 ;; As this is a "base class" for configuration-template resources, there
@@ -19,7 +22,8 @@
 ;;
 
 (def configuration-template-keys-spec {:req-un [:cimi.configuration-template/service]
-                                       :opt-un [:cimi.configuration-template/instance]})
+                                       :opt-un [:cimi.configuration-template/instance
+                                                :cimi.configuration-template/configurationTemplate]})
 
 (def resource-keys-spec
   (su/merge-keys-specs [c/common-attrs configuration-template-keys-spec]))
