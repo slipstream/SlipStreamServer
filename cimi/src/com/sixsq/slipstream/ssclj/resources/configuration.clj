@@ -6,7 +6,9 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as conf-tmpl]
     [com.sixsq.slipstream.auth.acl :as a]
-    [clojure.tools.logging :as log]))
+    [clojure.tools.logging :as log]
+    [com.sixsq.slipstream.util.response :as r])
+  (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-tag :configurations)
 
@@ -132,12 +134,24 @@
 ;; actions
 ;;
 
+(defmethod crud/set-operations resource-uri
+  [{:keys [id resourceURI username configurationTemplate] :as resource} request]
+  (let [href (str id "/describe")
+        describe-op {:rel (:describe c/action-uri) :href href}]
+    (cond-> (crud/set-standard-operations resource request)
+            (get configurationTemplate :href) (update-in [:operations] conj describe-op))))
+
 (defmethod crud/do-action [resource-url "describe"]
   [{{uuid :uuid} :params :as request}]
-  (-> request
-      (retrieve-impl)
-      (log/info))
-  #_(conf-tmpl/describe-impl request))
+  (try
+    (let [template-id (-> request
+                          (retrieve-impl)
+                          (get-in [:body :configurationTemplate :href]))]
+      (-> (get @conf-tmpl/descriptions template-id)
+          (a/can-view? request)
+          (r/json-response)))
+    (catch ExceptionInfo ei
+      (ex-data ei))))
 
 ;;
 ;; use service as the identifier
