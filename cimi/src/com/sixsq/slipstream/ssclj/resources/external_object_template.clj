@@ -29,7 +29,7 @@
 
 (def collection-acl {:owner {:principal "ADMIN"
                              :type      "ROLE"}
-                     :rules [{:principal "USER"
+                     :rules [{:principal "ADMIN"
                               :type      "ROLE"
                               :right     "VIEW"}]})
 
@@ -163,7 +163,6 @@
 
 (defmethod crud/add resource-name
   [{{:keys [objectType]} :body :as request}]
-  (clojure.pprint/pprint (str "ELG eot add-impl " request))
   (if (get @descriptions objectType)
     (add-impl request)
     (throw (r/ex-bad-request (str "invalid external object type '" objectType "'")))))

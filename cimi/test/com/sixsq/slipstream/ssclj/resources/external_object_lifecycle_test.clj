@@ -147,3 +147,10 @@
           (request abs-uri)
           (ltu/body->edn)
           (ltu/is-status 404)))))
+
+(deftest bad-methods
+  (let [resource-uri (str p/service-context (u/new-resource-id resource-name))]
+    (ltu/verify-405-status [[base-uri :options]
+                            [base-uri :delete]
+                            [resource-uri :options]
+                            [resource-uri :post]])))

@@ -63,7 +63,7 @@
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi.external-object-template.alpha))
+(def validate-fn (u/create-spec-validation-fn :cimi/external-object-template.alpha))
 (defmethod eo/validate-subtype objectType
   [resource]
   (validate-fn resource))
