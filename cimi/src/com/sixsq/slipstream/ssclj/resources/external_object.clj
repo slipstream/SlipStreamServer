@@ -4,7 +4,8 @@
             [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
             [com.sixsq.slipstream.auth.acl :as a]
             [com.sixsq.slipstream.db.impl :as db]
-            [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]))
+            [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud])
+  (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-tag :externalObjects)
 
@@ -100,7 +101,10 @@
     (a/can-modify? resource request)
     (if (.endsWith resourceURI "Collection")
       [{:rel (:add c/action-uri) :href id}]
-      [{:rel (:delete c/action-uri) :href id}])
+      [{:rel (:delete c/action-uri) :href id}
+       {:rel (:uploadURL c/action-uri) :href id}
+       {:rel (:downloadURL c/action-uri) :href id}
+       ])
     (catch Exception _
       nil)))
 
@@ -181,3 +185,48 @@
   [resource resource-name]
   (if-let [new-id (:instanceName resource)]
     (assoc resource :id (str (u/de-camelcase resource-name) "/" new-id))))
+
+
+;;; Upload URL operation
+
+(defmulti uploadURL-subtype
+          (fn [resource _] (:objectType resource)))
+
+(defmethod uploadURL-subtype :default
+  [resource _]
+  (let [err-msg (str "unknown External Object type: " (:objectType resource))]
+    (throw (ex-info err-msg {:status  400
+                             :message err-msg
+                             :body    resource}))))
+
+(defmethod crud/do-action [resource-url "uploadURL"]
+  [{{uuid :uuid} :params :as request}]
+  (try
+    (let [id (str resource-url "/" uuid)]
+      (-> (crud/retrieve-by-id id {:user-name  "INTERNAL"
+                                   :user-roles ["ADMIN"]})
+          (uploadURL-subtype request)))
+    (catch ExceptionInfo ei
+      (ex-data ei))))
+
+;;; Upload URL operation
+
+(defmulti downloadURL-subtype
+          (fn [resource _] (:objectType resource)))
+
+(defmethod downloadURL-subtype :default
+  [resource _]
+  (let [err-msg (str "unknown External Object type: " (:objectType resource))]
+    (throw (ex-info err-msg {:status  400
+                             :message err-msg
+                             :body    resource}))))
+
+(defmethod crud/do-action [resource-url "downloadURL"]
+  [{{uuid :uuid} :params :as request}]
+  (try
+    (let [id (str resource-url "/" uuid)]
+      (-> (crud/retrieve-by-id id {:user-name  "INTERNAL"
+                                   :user-roles ["ADMIN"]})
+          (uploadURL-subtype request)))
+    (catch ExceptionInfo ei
+      (ex-data ei))))

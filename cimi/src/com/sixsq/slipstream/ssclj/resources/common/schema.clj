@@ -23,7 +23,15 @@
 ;; implementation-specific resource actions have a prefix
 (def ^:const impl-action-prefix (str slipstream-schema-uri "action/"))
 (def ^:const impl-prefixed-actions
-  #{:describe :validate :collect :execute :activate :quarantine})
+  #{:describe
+    :validate
+    :collect
+    :execute
+    :activate
+    :quarantine
+    :uploadURL
+    :downloadURL
+    })
 
 (def ^:const action-uri
   (doall

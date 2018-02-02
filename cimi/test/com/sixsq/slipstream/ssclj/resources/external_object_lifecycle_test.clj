@@ -4,6 +4,7 @@
             [com.sixsq.slipstream.ssclj.resources.external-object :refer :all]
             [com.sixsq.slipstream.ssclj.resources.external-object-template-alpha-example :as example]
             [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
+            [com.sixsq.slipstream.ssclj.resources.external-object-test-utils :as tu]
             [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
             [com.sixsq.slipstream.ssclj.app.params :as p]
             [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
@@ -107,6 +108,8 @@
                 (request entry-uri)
                 (ltu/body->edn)
                 (ltu/is-operation-present "delete")
+                (ltu/is-operation-present "uploadURL")
+                (ltu/is-operation-present "downloadURL")
                 (ltu/is-operation-absent "edit")
                 (ltu/is-status 200)
                 (ltu/is-id id)))))
@@ -154,3 +157,148 @@
                             [base-uri :delete]
                             [resource-uri :options]
                             [resource-uri :post]])))
+
+(deftest downloadURL-operation
+  (let [href (str eot/resource-url "/" example/objectType)
+        template-url (str p/service-context eot/resource-url "/" example/objectType)
+        session-anon (-> (ltu/ring-app)
+                         session
+                         (content-type "application/json"))
+        session-user (header session-anon authn-info-header "jane USER")
+        session-admin (header session-anon authn-info-header "root ADMIN")
+
+        resp (-> session-admin
+                 (request template-url)
+                 (ltu/body->edn)
+                 (ltu/is-status 200))
+
+        ;; anonymous query is not authorized
+        resp-anon (-> session-anon
+                      (request template-url)
+                      (ltu/body->edn)
+                      (ltu/is-status 403))
+
+        ;; user query is not authorized
+        resp-user (-> session-user
+                      (request template-url)
+                      (ltu/body->edn)
+                      (ltu/is-status 403))
+
+        template (get-in resp [:response :body])
+
+        valid-create {:externalObjectTemplate (ltu/strip-unwanted-attrs (merge template {:alphaKey     2002
+                                                                                         :instanceName "alpha-gamma"}))}
+
+        (let [uri (-> session-admin
+                      (request tu/base-uri
+                               :request-method :post
+                               :body (json/write-str valid-create))
+                      (ltu/body->edn)
+                      (ltu/is-status 201)
+                      (ltu/location))
+
+              ])
+
+        ])
+
+  )
+
+
+#_(deftest activate-operation
+  (let [
+
+
+
+
+
+    (let [uri (-> session-admin
+                  (request tu/base-uri
+                           :request-method :post
+                           :body (json/write-str valid-create))
+                  (ltu/body->edn)
+                  (ltu/is-status 201)
+                  (ltu/location))
+          ;; anonymous create should fail
+          uri-anon (-> session-anon
+                       (request tu/base-uri
+                                :request-method :post
+                                :body (json/write-str valid-create))
+                       (ltu/body->edn)
+                       (ltu/is-status 403))
+          ;; user create should fail
+          uri-user (-> session-user
+                       (request tu/base-uri
+                                :request-method :post
+                                :body (json/write-str valid-create))
+                       (ltu/body->edn)
+                       (ltu/is-status 403))
+          abs-uri (str p/service-context (u/de-camelcase uri))
+          activate-op (-> session-admin
+                          (request abs-uri)
+                          (ltu/body->edn)
+                          (ltu/is-operation-present "activate")
+                          (ltu/is-status 200)
+                          (ltu/get-op "activate"))
+
+          abs-activate-uri (str p/service-context (u/de-camelcase activate-op))
+          ;;activate should be possible for ADMIN
+          activate-resp-nokey (-> session-admin
+                                  (request abs-activate-uri
+                                           :request-method :post)
+                                  (ltu/body->edn)
+                                  (ltu/is-status 400)
+                                  :response
+                                  :body)
+          ;;fail if wrong key is provided
+          activate-resp-wrongkey (-> session-admin
+                                     (request abs-activate-uri
+                                              :request-method :post
+                                              :body (json/write-str {:sshPublicKey "wrong"}))
+                                     (ltu/body->edn)
+                                     :response
+                                     :body)
+          activate-resp (-> session-admin
+                            (request abs-activate-uri
+                                     :request-method :post
+                                     :body (json/write-str {:sshPublicKey sshPublicKey}))
+                            (ltu/body->edn)
+                            (ltu/is-status 200)
+                            :response
+                            :body)
+
+
+          reset! (fn [] (reset-state! session-admin abs-uri))]
+
+      ;;activate should be possible for ANON
+      (reset!)
+      (-> session-anon
+          (request abs-activate-uri
+                   :request-method :post
+                   :body (json/write-str {:sshPublicKey sshPublicKey}))
+          (ltu/body->edn)
+          (ltu/is-status 200)
+          :response
+          :body)
+
+      ;;activate should  be possible for any authenticated user
+      (reset!)
+      (-> session-user
+          (request abs-activate-uri
+                   :request-method :post
+                   :body (json/write-str {:sshPublicKey sshPublicKey}))
+          (ltu/body->edn)
+          (ltu/is-status 200)
+          :response
+          :body)
+
+      ;;new state is "activated"
+      (is (= nb/state-activated (:state activate-resp)))
+
+      ;;once activated, it is not possible to re-activate
+      (-> session-admin
+          (request abs-activate-uri
+                   :request-method :post)
+          (ltu/body->edn)
+          (ltu/is-status 400)
+          :response
+          :body))))
