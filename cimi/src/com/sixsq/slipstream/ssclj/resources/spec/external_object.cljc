@@ -1,9 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.external-object
-
     (:require
       [clojure.spec.alpha :as s]
-      [com.sixsq.slipstream.ssclj.resources.spec.external-object-template])
-    )
+      [com.sixsq.slipstream.ssclj.resources.spec.external-object-template]))
 
 ;;
 ;; Note that all of the keys and keys specs are already defined

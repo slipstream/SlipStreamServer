@@ -30,3 +30,5 @@
     (is (s/valid? :cimi.test/connector root))
     (doseq [k (into #{} (keys (dissoc root :id :resourceURI)))]
       (is (not (s/valid? :cimi.test/connector (dissoc root k)))))))
+
+

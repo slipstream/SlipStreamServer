@@ -2,16 +2,14 @@
     (:require
       [clojure.spec.alpha :as s]
       [com.sixsq.slipstream.ssclj.util.spec :as su]
-      [com.sixsq.slipstream.ssclj.resources.spec.common :as c])
-
-    )
+      [com.sixsq.slipstream.ssclj.resources.spec.common :as c]))
 
 ;; All external object resources must have a 'type' attribute.
-(s/def :cimi.external-object-template/type :cimi.core/identifier)
+(s/def :cimi.external-object-template/objectType :cimi.core/identifier)
 
 ;; All external object resources must have a 'instance' attribute that is used in
 ;; the template identifier.
-(s/def :cimi.external-object-template/instance :cimi.core/identifier)
+(s/def :cimi.external-object-template/instanceName :cimi.core/identifier)
 
 
 ;;External object resources may have a 'uri' attribute to keep track
@@ -30,8 +28,8 @@
 ;;
 ;; Keys specifications for ExternalObjectTemplate resources.
 
-(def external-object-template-keys-spec {:req-un [:cimi.external-object-template/type
-                                                  :cimi.external-object-template/instance]
+(def external-object-template-keys-spec {:req-un [:cimi.external-object-template/objectType
+                                                  :cimi.external-object-template/instanceName]
                                          :opt-un [:cimi.external-object-template/uri
                                                   :cimi.external-object-template/state]})
 (def resource-keys-spec
@@ -44,4 +42,5 @@
 (def template-keys-spec
   (su/merge-keys-specs [c/template-attrs
                         external-object-template-keys-spec
-                        {:req-un [:cimi.external-object-template/href]}]))
+                        {:opt-un [:cimi.external-object-template/href]}]))
+

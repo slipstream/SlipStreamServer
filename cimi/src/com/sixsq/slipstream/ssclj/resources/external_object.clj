@@ -24,21 +24,21 @@
                              :type      "ROLE"}
                      :rules [{:principal "ADMIN"
                               :type      "ROLE"
-                              :right     "MODIFY"}
+                              :right     "VIEW"}
                              {:principal "USER"
                               :type      "ROLE"
-                              :right     "MODIFY"}]})
+                              :right     "VIEW"}]})
 
 ;;
 ;; validate subclasses of externalObject
 ;;
 
 (defmulti validate-subtype
-          :type)
+          :objectType)
 
 (defmethod validate-subtype :default
   [resource]
-  (throw (ex-info (str "unknown External object type: '" (:type resource) "'") resource)))
+  (throw (ex-info (str "unknown External object type: '" (:objectType resource) "'") resource)))
 
 (defmethod crud/validate resource-uri
   [resource]
@@ -49,13 +49,13 @@
 ;;
 
 (defn dispatch-on-object-type [resource]
-  (get-in resource [:externalObjectTemplate :type]))
+  (get-in resource [:externalObjectTemplate :objectType]))
 
 (defmulti create-validate-subtype dispatch-on-object-type)
 
 (defmethod create-validate-subtype :default
   [resource]
-  (throw (ex-info (str "unknown External Session create type: " (dispatch-on-object-type resource) resource) resource)))
+  (throw (ex-info (str "unknown External Object create type: " (dispatch-on-object-type resource) resource) resource)))
 
 (defmethod crud/validate create-uri
   [resource]
@@ -66,30 +66,34 @@
 ;; multimethod for ACLs
 ;;
 
-(defn create-acl
-  [id]
-  {:owner {:principal id
+(defn create-acl [id]
+  {:owner {:principal "ADMIN"
            :type      "ROLE"}
-   :rules [{:principal "ADMIN"
-            :type      "ROLE"
+   :rules [{:principal id
+            :type      "USER"
             :right     "VIEW"}]})
 
 (defmethod crud/add-acl resource-uri
-  [{:keys [id acl] :as resource} request]
-  (assoc
-    resource
-    :acl
-    (or acl (create-acl id))))
+  [resource request]
+  (a/add-acl resource request))
 
+(defmethod crud/add-acl resource-uri
+  [{:keys [acl] :as resource} request]
+  (if acl
+    resource
+    (let [user-id (:identity (a/current-authentication request))]
+        (assoc resource :acl (create-acl user-id)))))
+
+;;;;;;;;
 (defn dispatch-conversion
   "Dispatches on the External object type for multimethods
    that take the resource and request as arguments."
   [resource _]
-  (:type resource))
+  (:objectType resource))
 
 (defn standard-external-object-operations
   "Provides a list of the standard external object operations, depending
-   on the user's authentication and whether this is an ExternalObject or
+   on the user's authentication and whether this is a ExternalObject or
    a ExternalObjectCollection."
   [{:keys [id resourceURI] :as resource} request]
   (try
@@ -103,54 +107,43 @@
 ;; Sets the operations for the given resources.  This is a
 ;; multi-method because different types of external object resources
 ;; may require different operations
-(defmulti set-session-operations dispatch-conversion)
+(defmulti set-external-object-operations dispatch-conversion)
 
 ;; Default implementation adds the standard external object operations
 ;; by ALWAYS replacing the :operations value.  If there are no
 ;; operations, the key is removed from the resource.
-(defmethod set-session-operations :default
+(defmethod set-external-object-operations :default
   [resource request]
   (let [ops (standard-external-object-operations resource request)]
     (cond-> (dissoc resource :operations)
             (seq ops) (assoc :operations ops))))
 
-;; Just triggers the ExternalObject-level multimethod for adding operations
-;; to the External object resource.
+;; Just triggers the Session-level multimethod for adding operations
+;; to the Session resource.
 (defmethod crud/set-operations resource-uri
   [resource request]
-  (set-session-operations resource request))
+  (set-external-object-operations resource request))
 
-;; template processing
-
-(defmulti tpl->externalObject dispatch-conversion)
-
-;; All concrete external objects types MUST provide an implementation of this
-;; multimethod. The default implementation will throw an 'internal
-;; server error' exception.
 ;;
+;; template processing
+;;
+
+(defmulti tpl->externalObject
+          "Transforms the ExternalObjectTemplate into a ExternalObject resource."
+          :objectType)
+
+;; default implementation just updates the resourceURI
 (defmethod tpl->externalObject :default
-  [resource request]
-  [{:status 500, :message "invalid external object resource implementation"} nil])
+  [resource]
+  (assoc resource :resourceURI resource-uri))
 
 ;;
 ;; CRUD operations
 ;;
 
-(defn add-impl [{:keys [id body] :as request}]
-  (a/can-modify? {:acl collection-acl} request)
-  (db/add
-    resource-name
-    (-> body
-        u/strip-service-attrs
-        (assoc :id id)
-        (assoc :resourceURI resource-uri)
-        u/update-timestamps
-        (crud/add-acl request)
-        crud/validate)
-    {}))
+(def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
-; requires a ExternalObjectTemplate to create new External object
-;; requires a ConnectorTemplate to create new Connector
+;; requires a ExternalObjectTemplate to create new ExternalObject
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
   (let [idmap {:identity (:identity request)}
@@ -168,11 +161,11 @@
   (retrieve-impl request))
 
 
-(def delete-impl (std-crud/delete-fn resource-name))
+
+  (def delete-impl (std-crud/delete-fn resource-name))
 (defmethod crud/delete resource-name
   [request]
-  (delete-impl request)
-  )
+  (delete-impl request))
 
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
 

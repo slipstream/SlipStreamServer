@@ -20,20 +20,19 @@
               :created     timestamp
               :updated     timestamp
               :acl         valid-acl
-              :type        "report"
-              :instance    "report"
+              :objectType        "report"
+              :instanceName    "report"
               :uri         "https://sos-ch-dk-2.exo.io/slipstream-bucket-name/key-name"
-              :state       "new"
-              }]
+              :state       "new"}]
+
     (is (s/valid? :cimi.test/external-object-template root))
 
     ;;mandatory keywords
-    (doseq [k #{:type :instance :id :resourceURI}]
+    (doseq [k #{:objectType :instanceName :id :resourceURI}]
       (is (not (s/valid? :cimi.test/external-object-template (dissoc root k)))))
 
     ;; optional keywords
     (doseq [k #{:state :uri}]
-      (is (s/valid? :cimi.test/external-object-template (dissoc root k))))
-    ))
+      (is (s/valid? :cimi.test/external-object-template (dissoc root k))))))
 
 

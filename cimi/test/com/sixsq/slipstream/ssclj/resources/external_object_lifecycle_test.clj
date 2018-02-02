@@ -1,15 +1,14 @@
-(ns com.sixsq.slipstream.ssclj.resources.connector-lifecycle-test
-  (:require
-    [clojure.test :refer :all]
-    [clojure.data.json :as json]
-    [peridot.core :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.connector :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.connector-template :as ct]
-    [com.sixsq.slipstream.ssclj.resources.connector-template-alpha-example :as example]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-    [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+(ns com.sixsq.slipstream.ssclj.resources.external-object-lifecycle-test
+  (:require [clojure.test :refer :all]
+            [peridot.core :refer :all]
+            [com.sixsq.slipstream.ssclj.resources.external-object :refer :all]
+            [com.sixsq.slipstream.ssclj.resources.external-object-template-alpha-example :as example]
+            [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
+            [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+            [com.sixsq.slipstream.ssclj.app.params :as p]
+            [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
+            [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+            [clojure.data.json :as json]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 
@@ -17,10 +16,8 @@
 
 
 (deftest lifecycle
-
-  (let [href (str ct/resource-url "/" example/cloud-service-type)
-        template-url (str p/service-context ct/resource-url "/" example/cloud-service-type)
-
+  (let [href (str eot/resource-url "/" example/objectType)
+        template-url (str p/service-context eot/resource-url "/" example/objectType)
         session-anon (-> (ltu/ring-app)
                          session
                          (content-type "application/json"))
@@ -32,12 +29,13 @@
                  (ltu/body->edn)
                  (ltu/is-status 200))
         template (get-in resp [:response :body])
-        valid-create {:connectorTemplate (ltu/strip-unwanted-attrs (merge template {:alphaKey     2001
-                                                                                    :instanceName "alpha-omega"}))}
-        href-create {:connectorTemplate {:href         href
-                                         :alphaKey     3001
-                                         :instanceName "alpha-omega"}}
-        invalid-create (assoc-in valid-create [:connectorTemplate :invalid] "BAD")]
+        valid-create {:externalObjectTemplate (ltu/strip-unwanted-attrs (merge template {:alphaKey     2001
+                                                                                         :instanceName "alpha-omega"}))}
+        href-create {:externalObjectTemplate {:href         href
+                                              :alphaKey     3001
+                                              :instanceName "alpha-omega"}}
+        invalid-create (assoc-in valid-create [:externalObjectTemplate :invalid] "BAD")]
+
 
     ;; anonymous create should fail
     (-> session-anon
@@ -63,7 +61,7 @@
         (ltu/body->edn)
         (ltu/is-status 400))
 
-    ;; full connector lifecycle as administrator should work
+    ;; full external object lifecycle as administrator should work
     (let [uri (-> session-admin
                   (request base-uri
                            :request-method :post
@@ -78,6 +76,12 @@
           (request abs-uri)
           (ltu/body->edn)
           (ltu/is-status 200))
+
+      ;; user query fails
+      (-> session-user
+          (request abs-uri)
+          (ltu/body->edn)
+          (ltu/is-status 403))
 
       ;; anonymous query fails
       (-> session-anon
@@ -103,9 +107,7 @@
                 (request entry-uri)
                 (ltu/body->edn)
                 (ltu/is-operation-present "delete")
-                (ltu/is-operation-present "edit")
-                (ltu/is-operation-absent "activate")
-                (ltu/is-operation-absent "quarantine")
+                (ltu/is-operation-absent "edit")
                 (ltu/is-status 200)
                 (ltu/is-id id)))))
 
@@ -121,6 +123,7 @@
           (request abs-uri)
           (ltu/body->edn)
           (ltu/is-status 404)))
+
 
     ;; abbreviated lifecycle using href to template instead of copy
     (let [uri (-> session-admin
@@ -143,13 +146,4 @@
       (-> session-admin
           (request abs-uri)
           (ltu/body->edn)
-          (ltu/is-status 404)))
-
-    ))
-
-(deftest bad-methods
-  (let [resource-uri (str p/service-context (u/new-resource-id resource-name))]
-    (ltu/verify-405-status [[base-uri :options]
-                            [base-uri :delete]
-                            [resource-uri :options]
-                            [resource-uri :post]])))
+          (ltu/is-status 404)))))
