@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sixsq.slipstream.es.CljElasticsearchHelper;
-import com.sixsq.slipstream.ssclj.app.SscljTestServer;
+import com.sixsq.slipstream.ssclj.app.CIMITestServer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.restlet.Request;
@@ -62,7 +62,7 @@ public class ResourceTestBase extends RunTestBase {
 
 	@BeforeClass
 	public static void createTestElasticsearchDb(){
-		SscljTestServer.start();
+		CIMITestServer.start();
 		CljElasticsearchHelper.initTestDb();
 		user = UserTest.createUser("test");
 		user.store();
@@ -70,7 +70,7 @@ public class ResourceTestBase extends RunTestBase {
 
 	@AfterClass
 	public static void stopTestElasticsearchDb(){
-	    SscljTestServer.stop();
+	    CIMITestServer.stop();
 	}
 
 	protected static final String TEST_REQUEST_NAME = "/test/request";

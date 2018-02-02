@@ -27,7 +27,7 @@ import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserTest;
-import com.sixsq.slipstream.ssclj.app.SscljTestServer;
+import com.sixsq.slipstream.ssclj.app.CIMITestServer;
 import com.sixsq.slipstream.util.ResourceTestBase;
 import org.junit.*;
 import org.restlet.Request;

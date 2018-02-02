@@ -1,10 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential-template-lifecycle-test
   (:require
     [clojure.test :refer [deftest is use-fixtures]]
-    [clojure.data.json :as json]
     [peridot.core :refer :all]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.resources.credential-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.credential-template-ssh-public-key :as spk]
     [com.sixsq.slipstream.ssclj.resources.credential-template-ssh-key-pair :as skp]
@@ -15,12 +13,10 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]))
 
-(use-fixtures :each ltu/with-test-es-client-fixture)
+(use-fixtures :each ltu/with-test-server-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
 
-;; initialize must to called to pull in CredentialTemplate resources
-(dyn/initialize)
 
 (deftest check-retrieve-by-id
   (doseq [registration-method [spk/method skp/method akey/method]]

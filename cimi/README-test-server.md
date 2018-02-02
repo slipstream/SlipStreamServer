@@ -22,7 +22,7 @@ The following dependencies should be added to the POM file of you module.
 
 To start the server, import the class:
 
-    com.sixsq.slipstream.ssclj.app.SscljTestServer
+    com.sixsq.slipstream.ssclj.app.CIMITestServer
 
 You can then call the **static** methods `start` and `stop` to start
 and stop the server, respectively. The following services will be
@@ -61,9 +61,3 @@ refresh of all the indices (for example from unit tests), call the
     // get and assert no longer exists
     vmResource = VirtualMachineHandler.fetchVirtualMachine("cloud", instanceID);
     Assert.assertEquals(null, vmResource);
-
-**NOTE:** The hsqldb database is **not** started.  As long as you
-avoid username/password authentication with the server, this should
-not be a problem.  Use the internal authentication header
-(`slipstream-authn-info`) to work around this (easily).
-  

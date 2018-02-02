@@ -7,17 +7,14 @@
     [com.sixsq.slipstream.ssclj.resources.connector-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.connector-template-alpha-example :as example]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
-(use-fixtures :each ltu/with-test-es-client-fixture)
+(use-fixtures :each ltu/with-test-server-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
-;; initialize must to called to pull in ConnectorTemplate test examples
-(dyn/initialize)
 
 (deftest lifecycle
 
@@ -105,6 +102,10 @@
             (-> session-admin
                 (request entry-uri)
                 (ltu/body->edn)
+                (ltu/is-operation-present "delete")
+                (ltu/is-operation-present "edit")
+                (ltu/is-operation-absent "activate")
+                (ltu/is-operation-absent "quarantine")
                 (ltu/is-status 200)
                 (ltu/is-id id)))))
 

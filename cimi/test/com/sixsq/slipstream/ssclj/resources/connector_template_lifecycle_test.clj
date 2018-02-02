@@ -1,10 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.connector-template-lifecycle-test
   (:require
     [clojure.test :refer :all]
-    [clojure.data.json :as json]
     [peridot.core :refer :all]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.resources.connector-template :refer :all]
     [com.sixsq.slipstream.ssclj.resources.connector-template-alpha-example :as example]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
@@ -14,12 +12,10 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c])
   (:import (clojure.lang ExceptionInfo)))
 
-(use-fixtures :each ltu/with-test-es-client-fixture)
+(use-fixtures :each ltu/with-test-server-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
-;; initialize must to called to pull in ConnectorTemplate test examples
-(dyn/initialize)
 
 (deftest check-retrieve-by-id
   (let [id (str resource-url "/" example/cloud-service-type)

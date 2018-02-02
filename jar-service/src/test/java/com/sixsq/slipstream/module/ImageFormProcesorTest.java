@@ -25,7 +25,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import com.sixsq.slipstream.connector.local.LocalConnector;
-import com.sixsq.slipstream.ssclj.app.SscljTestServer;
+import com.sixsq.slipstream.ssclj.app.CIMITestServer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -46,7 +46,7 @@ public class ImageFormProcesorTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		SscljTestServer.start();
+		CIMITestServer.start();
 		user = UserTest.createUser("test");
 		UserTest.storeUser(user);
 		ResourceTestBase.resetAndLoadConnector(LocalConnector.class);
@@ -54,7 +54,7 @@ public class ImageFormProcesorTest {
 
 	@AfterClass
 	public static void teardownClass() throws Exception {
-		SscljTestServer.stop();
+		CIMITestServer.stop();
     }
 
 	@Test

@@ -76,7 +76,7 @@
   (str "[" start " / " end "]"))
 
 (defn- log-and-throw
-  [msg-error]
+  [^String msg-error]
   (log/error msg-error)
   (throw (IllegalArgumentException. msg-error)))
 

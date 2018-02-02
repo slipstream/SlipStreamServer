@@ -7,20 +7,13 @@
     [com.sixsq.slipstream.ssclj.resources.user-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.user-template-direct :as direct]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-    [com.sixsq.slipstream.auth.internal :as auth-internal]
-    [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [clojure.spec.alpha :as s]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
-(use-fixtures :each ltu/with-test-es-client-fixture)
+(use-fixtures :each ltu/with-test-server-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase user/resource-name)))
-
-;; initialize must to called to pull in SessionTemplate test examples
-(dyn/initialize)
 
 (deftest lifecycle
   (let [uname "120720737412@eduid.chhttps://eduid.ch/idp/shibboleth!https://fed-id.nuv.la/samlbridge/module.php/saml/sp/metadata.php/sixsq-saml-bridge!iqqrh4oiyshzcw9o40cvo0+pgka="

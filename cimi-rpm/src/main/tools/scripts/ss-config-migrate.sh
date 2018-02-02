@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-CONF=/etc/default/ssclj-tools-cli
+CONF=/etc/default/cimi-tools-cli
 [ -f $CONF ] || { >&2 echo "Missing required config file" $CONF; exit 1; }
 source $CONF
 

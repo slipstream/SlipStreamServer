@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>ssclj-server-rpm</artifactId>
+  <artifactId>cimi-server-rpm</artifactId>
   <name>SlipStreamServer/cimi-rpm</name>
 
   <packaging>pom</packaging>
@@ -10,12 +10,11 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.44-SNAPSHOT</version>
+    <version>3.45-SNAPSHOT</version>
   </parent>
 
-  <!-- NOTE: This project MUST have same version as proxy module. -->
   <properties>
-    <installation.dir>/opt/slipstream/ssclj</installation.dir>
+    <installation.dir>/opt/slipstream/cimi</installation.dir>
   </properties>
 
   <dependencies>
@@ -103,7 +102,7 @@
                 <resource>
                   <directory>${basedir}/src/main/resources/</directory>
                   <includes>
-                    <include>etc-default-ssclj</include>
+                    <include>etc-default-cimi</include>
                   </includes>
                   <filtering>true</filtering>
                 </resource>
@@ -111,7 +110,7 @@
             </configuration>
           </execution>
           <execution>
-            <id>copy-ssclj.service</id>
+            <id>copy-cimi.service</id>
             <phase>package</phase>
             <goals>
               <goal>copy-resources</goal>
@@ -123,7 +122,7 @@
                 <resource>
                   <directory>${basedir}/src/main/systemd</directory>
                   <includes>
-                    <include>ssclj.service</include>
+                    <include>cimi.service</include>
                   </includes>
                   <filtering>true</filtering>
                 </resource>
@@ -143,7 +142,7 @@
                 <resource>
                   <directory>${basedir}/src/main/tools/config</directory>
                   <includes>
-                    <include>ssclj-tools-cli</include>
+                    <include>cimi-tools-cli</include>
                   </includes>
                   <filtering>true</filtering>
                 </resource>
@@ -175,7 +174,7 @@
           </execution>
 
           <execution>
-            <id>copy-ssclj-tools</id>
+            <id>copy-cimi-tools</id>
             <goals>
               <goal>copy-dependencies</goal>
             </goals>
@@ -197,39 +196,35 @@
         <configuration>
           <classifier>${package.os}</classifier>
           <release>${BUILD_NUMBER}.${package.os}</release>
-          <summary>SlipStream SSCLJ Server</summary>
-          <name>slipstream-ssclj</name>
+          <summary>SlipStream CIMI Server</summary>
+          <name>slipstream-cimi</name>
           <group>System</group>
           <vendor>SlipStream</vendor>
           <packager>SlipStream</packager>
           <license>Apache 2.0</license>
           <url>http://sixsq.com</url>
           <needarch>noarch</needarch>
-          <description>
-            SlipStream SSCLJ server
-          </description>
+          <description>SlipStream CIMI server</description>
           <requires>
             <require>jre-headless &gt;= ${server.jre.version}</require>
             <require>slipstream-useradd</require>
             <require>slipstream-ring-container</require>
           </requires>
           <obsoletes>
-            <obsolete>slipstream-service-catalog</obsolete>
-            <obsolete>slipstream-ssclj-community</obsolete>
-            <obsolete>slipstream-ssclj-enterprise</obsolete>
+            <obsolete>slipstream-ssclj</obsolete>
           </obsoletes>
 
           <postinstallScriptlet>
             <script>
 ${installation.dir}/bin/generate-auth-keys.sh
-/usr/bin/systemctl enable ssclj.service
+/usr/bin/systemctl enable cimi.service
             </script>
           </postinstallScriptlet>
 
           <preremoveScriptlet>
             <script>
-/usr/bin/systemctl stop ssclj.service || true
-/usr/bin/systemctl disable ssclj.service || true
+/usr/bin/systemctl stop cimi.service || true
+/usr/bin/systemctl disable cimi.service || true
             </script>
           </preremoveScriptlet>
 
@@ -241,7 +236,7 @@ ${installation.dir}/bin/generate-auth-keys.sh
           <mappings>
 
             <mapping>
-              <directory>/var/log/slipstream/ssclj</directory>
+              <directory>/var/log/slipstream/cimi</directory>
               <directoryIncluded>true</directoryIncluded>
               <filemode>755</filemode>
               <username>slipstream</username>
@@ -254,8 +249,8 @@ ${installation.dir}/bin/generate-auth-keys.sh
               <configuration>noreplace</configuration>
               <sources>
                 <source>
-                  <location>target/etc-default-ssclj</location>
-                  <destination>ssclj</destination>
+                  <location>target/etc-default-cimi</location>
+                  <destination>cimi</destination>
                 </source>
               </sources>
             </mapping>
@@ -286,7 +281,7 @@ ${installation.dir}/bin/generate-auth-keys.sh
               <configuration>noreplace</configuration>
               <sources>
                 <source>
-                  <location>target/ssclj-tools-cli</location>
+                  <location>target/cimi-tools-cli</location>
                 </source>
               </sources>
             </mapping>
@@ -385,7 +380,7 @@ ${installation.dir}/bin/generate-auth-keys.sh
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
-                  <location>${project.build.directory}/ssclj.service</location>
+                  <location>${project.build.directory}/cimi.service</location>
                 </source>
               </sources>
             </mapping>

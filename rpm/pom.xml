@@ -8,7 +8,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.44-SNAPSHOT</version>
+    <version>3.45-SNAPSHOT</version>
   </parent>
   <properties>
     <slipstream.logs.dir>/var/log/slipstream/server</slipstream.logs.dir>
@@ -21,8 +21,8 @@
       <type>war</type>
     </dependency>
     <dependency>
-      <groupId>sixsq.slipstream</groupId>
-      <artifactId>webui-dep</artifactId>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamWebUI-dep</artifactId>
       <version>${project.version}</version>
       <type>pom</type>
       <scope>provided</scope>
@@ -141,8 +141,8 @@
               <outputDirectory>target</outputDirectory>
               <artifactItems>
                 <artifactItem>
-                  <groupId>sixsq.slipstream</groupId>
-                  <artifactId>webui</artifactId>
+                  <groupId>com.sixsq.slipstream</groupId>
+                  <artifactId>SlipStreamWebUI</artifactId>
                   <version>${project.version}</version>
                   <type>jar</type>
                 </artifactItem>
@@ -258,7 +258,7 @@
             <require>slipstream-useradd</require>
             <require>slipstream-client &gt;= 1.3</require>
             <require>slipstream-client-clojure</require>
-            <require>slipstream-ssclj</require>
+            <require>slipstream-cimi-resources</require>
             <require>libcloud-slipstream-downloads</require>
             <!-- For v3.41->3.42 migration: 020_migrate_users_to_cimi.py -->
             <require>python-lxml</require>
@@ -408,53 +408,12 @@
             </mapping>
 
             <mapping>
-              <directory>/opt/slipstream/webui</directory>
-              <filemode>644</filemode>
-              <directoryIncluded>false</directoryIncluded>
-              <sources>
-                <source>
-                  <location>target/public/webui</location>
-                  <excludes>
-                    <exclude>META-INF</exclude>
-                    <exclude>META-INF/**/*</exclude>
-                  </excludes>
-                </source>
-              </sources>
-            </mapping>
-
-            <mapping>
-              <directory>/opt/slipstream/authn</directory>
-              <filemode>644</filemode>
-              <directoryIncluded>false</directoryIncluded>
-              <sources>
-                <source>
-                  <location>target/public/authn</location>
-                  <excludes>
-                    <exclude>META-INF</exclude>
-                    <exclude>META-INF/**/*</exclude>
-                  </excludes>
-                </source>
-              </sources>
-            </mapping>
-
-            <mapping>
-              <directory>${installation.dir}/webapps/slipstream.war/static-content/css</directory>
+              <directory>${installation.dir}/webapps/slipstream.war/static-content/</directory>
               <filemode>664</filemode>
-              <directoryIncluded>false</directoryIncluded>
+              <directoryIncluded>true</directoryIncluded>
               <sources>
                 <source>
-                  <location>target/public/legacy/css</location>
-                </source>
-              </sources>
-            </mapping>
-
-            <mapping>
-              <directory>${installation.dir}/webapps/slipstream.war/static-content/js</directory>
-              <filemode>664</filemode>
-              <directoryIncluded>false</directoryIncluded>
-              <sources>
-                <source>
-                  <location>target/public/legacy/js/legacy.js</location>
+                  <location>target/public/</location>
                 </source>
               </sources>
             </mapping>

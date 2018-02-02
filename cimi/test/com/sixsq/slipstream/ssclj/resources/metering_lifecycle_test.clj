@@ -7,15 +7,13 @@
     [com.sixsq.slipstream.ssclj.resources.metering :as m]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-    [com.sixsq.slipstream.auth.internal :as auth-internal]
-    [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [clj-time.core :as time]
     [clojure.spec.alpha :as s]
     [clj-time.core :as t]))
 
-(use-fixtures :each ltu/with-test-es-client-fixture)
+(use-fixtures :each ltu/with-test-server-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase m/resource-url)))
 

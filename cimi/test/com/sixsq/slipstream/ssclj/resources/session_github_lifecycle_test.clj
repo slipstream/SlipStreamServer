@@ -5,7 +5,6 @@
     [peridot.core :refer :all]
     [ring.util.codec :as codec]
 
-    [com.sixsq.slipstream.auth.internal :as auth-internal]
     [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
@@ -13,7 +12,6 @@
     [com.sixsq.slipstream.ssclj.resources.session-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.session-template-github :as github]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.auth.github :as auth-github]
@@ -22,7 +20,7 @@
     [com.sixsq.slipstream.ssclj.resources.session-template :as st]
     [com.sixsq.slipstream.ssclj.resources.configuration :as configuration]))
 
-(use-fixtures :each ltu/with-test-es-client-fixture)
+(use-fixtures :each ltu/with-test-server-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase session/resource-name)))
 
@@ -30,8 +28,6 @@
 
 (def session-template-base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
 
-;; initialize must to called to pull in SessionTemplate test examples
-(dyn/initialize)
 
 (def instance "test-github")
 (def session-template-github {:method      github/authn-method

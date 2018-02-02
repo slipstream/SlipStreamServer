@@ -1,23 +1,25 @@
-(def +version+ "3.44-SNAPSHOT")
+(def +version+ "3.45-SNAPSHOT")
 
-;; FIXME: Provide HTTPS access to Nexus.
-(require 'cemerick.pomegranate.aether)
-(cemerick.pomegranate.aether/register-wagon-factory!
-  "http" #(org.apache.maven.wagon.providers.http.HttpWagon.))
+(defproject com.sixsq.slipstream/SlipStreamServerPRSlib-jar "3.45-SNAPSHOT"
 
-(defproject
-  com.sixsq.slipstream/SlipStreamServerPRSlib-jar
-  "3.44-SNAPSHOT"
-  :license
-  {"Apache 2.0" "http://www.apache.org/licenses/LICENSE-2.0.txt"}
+  :description "Placement and Ranking Service"
+
+  :url "https://github.com/slipstream/SlipStreamServer"
+
+  :license {:name "Apache 2.0"
+            :url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            :distribution :repo}
 
   :plugins [[lein-parent "0.3.2"]
             [kirasystems/lein-codox "0.10.4"]
             [lein-shell "0.5.0"]
             [lein-localrepo "0.5.4"]]
 
-  :parent-project {:coords  [com.sixsq.slipstream/parent "3.44-SNAPSHOT"]
-                   :inherit [:min-lein-version :managed-dependencies :repositories :deploy-repositories]}
+  :parent-project {:coords  [com.sixsq.slipstream/parent "3.45-SNAPSHOT"]
+                   :inherit [:min-lein-version
+                             :managed-dependencies
+                             :repositories
+                             :deploy-repositories]}
 
   :source-paths ["src/clj"]
 
@@ -40,7 +42,7 @@
   :dependencies [[org.clojure/clojure]
                  [com.sixsq.slipstream/SlipStreamPersistence]
                  [com.sixsq.slipstream/SlipStreamConnector]
-                 [com.sixsq.slipstream/SlipStreamClientAPI-jar]
+                 [com.sixsq.slipstream/SlipStreamClojureAPI-cimi]
                  [org.clojure/data.json]
                  [org.clojure/tools.logging]]
 
