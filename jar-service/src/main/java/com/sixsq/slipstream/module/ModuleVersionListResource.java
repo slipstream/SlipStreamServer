@@ -25,6 +25,8 @@ import java.util.List;
 import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.util.*;
+import org.json.JSONObject;
+import org.json.XML;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
@@ -70,20 +72,27 @@ public class ModuleVersionListResource extends BaseResource {
 		throwClientForbiddenError("Not allowed to access: " + resourceUri);
 	}
 
+	private String toXmlString() {
+		ModuleVersionViewList list = new ModuleVersionViewList(
+				Module.viewListAllVersions(resourceUri));
+		return SerializationUtil.toXmlString(list);
+	}
+
 	@Get("txt")
 	public Representation toTxt() {
-
 		String viewList = serialized(Module.viewListAllVersions(resourceUri));
 		return new StringRepresentation(viewList);
 	}
 
 	@Get("xml")
 	public Representation toXml() {
+		return new StringRepresentation(toXmlString(), MediaType.APPLICATION_XML);
+	}
 
-		ModuleVersionViewList list = new ModuleVersionViewList(
-				Module.viewListAllVersions(resourceUri));
-		String result = SerializationUtil.toXmlString(list);
-		return new StringRepresentation(result, MediaType.APPLICATION_XML);
+	@Get("json")
+	public Representation toJson() {
+		JSONObject obj = XML.toJSONObject(toXmlString());
+		return new StringRepresentation(obj.toString(), MediaType.APPLICATION_JSON);
 	}
 
 	@Get("html")
