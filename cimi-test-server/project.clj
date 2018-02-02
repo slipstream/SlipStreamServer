@@ -1,6 +1,6 @@
-(def +version+ "3.45-SNAPSHOT")
+(def +version+ "3.45")
 
-(defproject com.sixsq.slipstream/SlipStreamCljResourcesTestServer-jar "3.45-SNAPSHOT"
+(defproject com.sixsq.slipstream/SlipStreamCljResourcesTestServer-jar "3.45"
 
   :description "complete test server"
 
@@ -12,7 +12,7 @@
 
   :plugins [[lein-parent "0.3.2"]]
 
-  :parent-project {:coords  [com.sixsq.slipstream/parent "3.45-SNAPSHOT"]
+  :parent-project {:coords  [com.sixsq.slipstream/parent "3.45"]
                    :inherit [:min-lein-version
                              :managed-dependencies
                              :repositories
