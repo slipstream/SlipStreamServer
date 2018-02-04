@@ -2,7 +2,7 @@
 
   <modelVersion>4.0.0</modelVersion>
   <artifactId>token-parent</artifactId>
-  <version>3.45</version>
+  <version>3.46-SNAPSHOT</version>
   <name>SlipStreamServer/token</name>
 
   <packaging>pom</packaging>
@@ -10,7 +10,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.45</version>
+    <version>3.46-SNAPSHOT</version>
   </parent>
 
   <modules>
