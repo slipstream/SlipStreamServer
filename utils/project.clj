@@ -2,12 +2,12 @@
 
 (defproject com.sixsq.slipstream/utils "3.46-SNAPSHOT"
 
-  :description "server utilities"
+  :description "general server utilities"
 
   :url "https://github.com/slipstream/SlipStreamServer"
 
-  :license {:name "Apache 2.0"
-            :url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+  :license {:name         "Apache 2.0"
+            :url          "http://www.apache.org/licenses/LICENSE-2.0.txt"
             :distribution :repo}
 
   :plugins [[lein-parent "0.3.2"]]
@@ -24,10 +24,6 @@
 
   :dependencies
   [[org.clojure/clojure]
-   [log4j]
-   [org.clojure/data.json]
-   [org.clojure/tools.logging]
-   [org.clojure/java.jdbc]
    [ring/ring-core]]
 
   :profiles {:test {:aot            :all
