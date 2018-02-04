@@ -34,3 +34,10 @@
 (defmethod eo/create-validate-subtype objectType
   [resource]
   (create-validate-fn resource))
+
+(defmethod eo/upload-subtype objectType
+  [resource request]
+  {:body {:uploadUri "filezz://foo"}}
+  )
+
+

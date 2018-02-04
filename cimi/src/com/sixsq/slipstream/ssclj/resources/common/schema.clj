@@ -29,8 +29,8 @@
     :execute
     :activate
     :quarantine
-    :uploadURL
-    :downloadURL
+    :upload
+    :download
     })
 
 (def ^:const action-uri

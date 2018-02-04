@@ -108,8 +108,8 @@
                 (request entry-uri)
                 (ltu/body->edn)
                 (ltu/is-operation-present "delete")
-                (ltu/is-operation-present "uploadURL")
-                (ltu/is-operation-present "downloadURL")
+                (ltu/is-operation-present "upload")
+                (ltu/is-operation-present "download")
                 (ltu/is-operation-absent "edit")
                 (ltu/is-status 200)
                 (ltu/is-id id)))))
@@ -158,7 +158,7 @@
                             [resource-uri :options]
                             [resource-uri :post]])))
 
-(deftest downloadURL-operation
+(deftest upload-operation
   (let [href (str eot/resource-url "/" example/objectType)
         template-url (str p/service-context eot/resource-url "/" example/objectType)
         session-anon (-> (ltu/ring-app)
@@ -189,27 +189,7 @@
         valid-create {:externalObjectTemplate (ltu/strip-unwanted-attrs (merge template {:alphaKey     2002
                                                                                          :instanceName "alpha-gamma"}))}
 
-        (let [uri (-> session-admin
-                      (request tu/base-uri
-                               :request-method :post
-                               :body (json/write-str valid-create))
-                      (ltu/body->edn)
-                      (ltu/is-status 201)
-                      (ltu/location))
-
-              ])
-
-        ])
-
-  )
-
-
-#_(deftest activate-operation
-  (let [
-
-
-
-
+        ]
 
     (let [uri (-> session-admin
                   (request tu/base-uri
@@ -218,6 +198,7 @@
                   (ltu/body->edn)
                   (ltu/is-status 201)
                   (ltu/location))
+
           ;; anonymous create should fail
           uri-anon (-> session-anon
                        (request tu/base-uri
@@ -233,72 +214,186 @@
                        (ltu/body->edn)
                        (ltu/is-status 403))
           abs-uri (str p/service-context (u/de-camelcase uri))
-          activate-op (-> session-admin
-                          (request abs-uri)
+
+          upload-op (-> session-admin
+                        (request abs-uri)
+                        (ltu/body->edn)
+                        #_(ltu/dump)
+                        (ltu/is-operation-present "upload")
+                        (ltu/is-status 200)
+                        (ltu/get-op "upload"))
+
+          abs-upload-uri (str p/service-context (u/de-camelcase upload-op))
+
+          ;;upload should be possible for ADMIN
+          upload-resp (-> session-admin
+                          (request abs-upload-uri
+                                   :request-method :post
+                                   )
                           (ltu/body->edn)
-                          (ltu/is-operation-present "activate")
+                          (ltu/dump)
                           (ltu/is-status 200)
-                          (ltu/get-op "activate"))
+                          :response
+                          :body)
 
-          abs-activate-uri (str p/service-context (u/de-camelcase activate-op))
-          ;;activate should be possible for ADMIN
-          activate-resp-nokey (-> session-admin
-                                  (request abs-activate-uri
-                                           :request-method :post)
-                                  (ltu/body->edn)
-                                  (ltu/is-status 400)
-                                  :response
-                                  :body)
-          ;;fail if wrong key is provided
-          activate-resp-wrongkey (-> session-admin
-                                     (request abs-activate-uri
-                                              :request-method :post
-                                              :body (json/write-str {:sshPublicKey "wrong"}))
-                                     (ltu/body->edn)
-                                     :response
-                                     :body)
-          activate-resp (-> session-admin
-                            (request abs-activate-uri
-                                     :request-method :post
-                                     :body (json/write-str {:sshPublicKey sshPublicKey}))
-                            (ltu/body->edn)
-                            (ltu/is-status 200)
-                            :response
-                            :body)
+          ]
 
-
-          reset! (fn [] (reset-state! session-admin abs-uri))]
-
-      ;;activate should be possible for ANON
-      (reset!)
       (-> session-anon
-          (request abs-activate-uri
+          (request abs-upload-uri
                    :request-method :post
-                   :body (json/write-str {:sshPublicKey sshPublicKey}))
+                   )
           (ltu/body->edn)
+          (ltu/dump)
           (ltu/is-status 200)
           :response
           :body)
 
-      ;;activate should  be possible for any authenticated user
-      (reset!)
       (-> session-user
-          (request abs-activate-uri
+          (request abs-upload-uri
                    :request-method :post
-                   :body (json/write-str {:sshPublicKey sshPublicKey}))
+                   )
           (ltu/body->edn)
+          (ltu/dump)
           (ltu/is-status 200)
           :response
           :body)
 
-      ;;new state is "activated"
-      (is (= nb/state-activated (:state activate-resp)))
 
-      ;;once activated, it is not possible to re-activate
+      ;;the reponse of an upload operation contains the uploadUri
+      (is (:uploadUri upload-resp))
+
+      ;;the upload operation should only be ran once
       (-> session-admin
-          (request abs-activate-uri
-                   :request-method :post)
+          (request abs-upload-uri
+                   :request-method :post
+                   )
           (ltu/body->edn)
           (ltu/is-status 400)
           :response
-          :body))))
+          :body)
+
+      )
+    )
+
+  )
+
+(deftest download-operation
+  (let [href (str eot/resource-url "/" example/objectType)
+        template-url (str p/service-context eot/resource-url "/" example/objectType)
+        session-anon (-> (ltu/ring-app)
+                         session
+                         (content-type "application/json"))
+        session-user (header session-anon authn-info-header "jane USER")
+        session-admin (header session-anon authn-info-header "root ADMIN")
+
+        resp (-> session-admin
+                 (request template-url)
+                 (ltu/body->edn)
+                 (ltu/is-status 200))
+
+        ;; anonymous query is not authorized
+        resp-anon (-> session-anon
+                      (request template-url)
+                      (ltu/body->edn)
+                      (ltu/is-status 403))
+
+        ;; user query is not authorized
+        resp-user (-> session-user
+                      (request template-url)
+                      (ltu/body->edn)
+                      (ltu/is-status 403))
+
+        template (get-in resp [:response :body])
+
+        valid-create {:externalObjectTemplate (ltu/strip-unwanted-attrs (merge template {:alphaKey     2002
+                                                                                         :instanceName "alpha-gamma"}))}
+
+        ]
+
+    (let [uri (-> session-admin
+                  (request tu/base-uri
+                           :request-method :post
+                           :body (json/write-str valid-create))
+                  (ltu/body->edn)
+                  (ltu/is-status 201)
+                  (ltu/location))
+
+          ;; anonymous create should fail
+          uri-anon (-> session-anon
+                       (request tu/base-uri
+                                :request-method :post
+                                :body (json/write-str valid-create))
+                       (ltu/body->edn)
+                       (ltu/is-status 403))
+          ;; user create should fail
+          uri-user (-> session-user
+                       (request tu/base-uri
+                                :request-method :post
+                                :body (json/write-str valid-create))
+                       (ltu/body->edn)
+                       (ltu/is-status 403))
+          abs-uri (str p/service-context (u/de-camelcase uri))
+
+          download-op (-> session-admin
+                        (request abs-uri)
+                        (ltu/body->edn)
+                        #_(ltu/dump)
+                        (ltu/is-operation-present "download")
+                        (ltu/is-status 200)
+                        (ltu/get-op "download"))
+
+          abs-download-uri (str p/service-context (u/de-camelcase download-op))
+
+          ;;download operation should be possible for ADMIN
+          download-resp (-> session-admin
+                          (request abs-download-uri
+                                   :request-method :post
+                                   )
+                          (ltu/body->edn)
+                          (ltu/dump)
+                          (ltu/is-status 200)
+                          :response
+                          :body)
+
+          ]
+
+      (clojure.pprint/pprint (str "download-op " download-op))
+
+      (-> session-anon
+          (request abs-download-uri
+                   :request-method :post
+                   )
+          (ltu/body->edn)
+          (ltu/dump)
+          (ltu/is-status 200)
+          :response
+          :body)
+
+      (-> session-user
+          (request abs-download-uri
+                   :request-method :post
+                   )
+          (ltu/body->edn)
+          (ltu/dump)
+          (ltu/is-status 200)
+          :response
+          :body)
+
+
+      ;;the download operation can be repeated
+      (-> session-admin
+          (request abs-download-uri
+                   :request-method :post
+                   )
+          (ltu/body->edn)
+          (ltu/dump)
+          (ltu/is-status 200)
+          :response
+          :body)
+
+      )
+    )
+
+  )
+
+

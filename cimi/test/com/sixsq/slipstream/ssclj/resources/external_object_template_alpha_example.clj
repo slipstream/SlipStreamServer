@@ -67,3 +67,8 @@
 (defmethod eo/validate-subtype objectType
   [resource]
   (validate-fn resource))
+
+
+
+
+

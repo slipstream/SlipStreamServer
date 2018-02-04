@@ -30,6 +30,9 @@
                               :type      "ROLE"
                               :right     "VIEW"}]})
 
+
+(def ^:const state-new "new")
+(def ^:const state-new "new")
 ;;
 ;; validate subclasses of externalObject
 ;;
@@ -102,8 +105,8 @@
     (if (.endsWith resourceURI "Collection")
       [{:rel (:add c/action-uri) :href id}]
       [{:rel (:delete c/action-uri) :href id}
-       {:rel (:uploadURL c/action-uri) :href id}
-       {:rel (:downloadURL c/action-uri) :href id}
+       {:rel (:upload c/action-uri) :href (str id "/upload")}
+       {:rel (:download c/action-uri) :href (str id "/download")}
        ])
     (catch Exception _
       nil)))
@@ -189,44 +192,44 @@
 
 ;;; Upload URL operation
 
-(defmulti uploadURL-subtype
+(defmulti upload-subtype
           (fn [resource _] (:objectType resource)))
 
-(defmethod uploadURL-subtype :default
+(defmethod upload-subtype :default
   [resource _]
   (let [err-msg (str "unknown External Object type: " (:objectType resource))]
     (throw (ex-info err-msg {:status  400
                              :message err-msg
                              :body    resource}))))
 
-(defmethod crud/do-action [resource-url "uploadURL"]
+(defmethod crud/do-action [resource-url "upload"]
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
       (-> (crud/retrieve-by-id id {:user-name  "INTERNAL"
                                    :user-roles ["ADMIN"]})
-          (uploadURL-subtype request)))
+          (upload-subtype request)))
     (catch ExceptionInfo ei
       (ex-data ei))))
 
 ;;; Upload URL operation
 
-(defmulti downloadURL-subtype
+(defmulti download-subtype
           (fn [resource _] (:objectType resource)))
 
-(defmethod downloadURL-subtype :default
+(defmethod download-subtype :default
   [resource _]
   (let [err-msg (str "unknown External Object type: " (:objectType resource))]
     (throw (ex-info err-msg {:status  400
                              :message err-msg
                              :body    resource}))))
 
-(defmethod crud/do-action [resource-url "downloadURL"]
+(defmethod crud/do-action [resource-url "download"]
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
       (-> (crud/retrieve-by-id id {:user-name  "INTERNAL"
                                    :user-roles ["ADMIN"]})
-          (uploadURL-subtype request)))
+          (upload-subtype request)))
     (catch ExceptionInfo ei
       (ex-data ei))))
