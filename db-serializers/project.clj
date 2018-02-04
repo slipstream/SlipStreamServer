@@ -38,4 +38,7 @@
   :profiles
   {:test     {:source-paths   ["test"]
               :resource-paths ["test-resources"]}
-   :provided {:dependencies [[com.sixsq.slipstream/SlipStreamCljResources-jar]]}})
+   :provided {:dependencies [
+                             [com.sixsq.slipstream/SlipStreamCljResources-jar]
+                             [com.sixsq.slipstream/SlipStreamServer-cimi-resources]
+                             ]}})
