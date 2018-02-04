@@ -9,7 +9,7 @@
     [com.sixsq.slipstream.ssclj.resources.event :refer :all]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.resources.test-utils :as tu :refer [urlencode-params is-count exec-request]]
+    [com.sixsq.slipstream.ssclj.resources.event.utils :as tu :refer [urlencode-params is-count exec-request]]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))

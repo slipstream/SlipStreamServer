@@ -23,5 +23,21 @@
 
   :pom-location "target/"
 
+  :dependencies [[com.sixsq.slipstream/SlipStreamCljResources-jar]
+                 [org.clojure/test.check] ; FIXME: Needed for spec.gen.alpha. Fix "Could not locate clojure/test/check/generators__init.class"
+]
+
   :profiles {:provided {:dependencies [[org.clojure/clojure]]}
-             :test     {:aot :all}})
+             :test     {:dependencies   [[peridot]
+                                         [org.clojure/test.check]
+                                         [org.slf4j/slf4j-log4j12]
+                                         [com.cemerick/url]
+                                         [org.apache.curator/curator-test]
+                                         [com.sixsq.slipstream/SlipStreamDbTesting-jar]
+                                         [com.sixsq.slipstream/SlipStreamCljResourcesTests-jar]
+                                         ]
+                        :resource-paths ["test-resources"]
+                        :env            {:config-name      "config-params.edn"
+                                         :auth-private-key "test-resources/auth_privkey.pem"
+                                         :auth-public-key  "test-resources/auth_pubkey.pem"}
+                        :aot            :all}})
