@@ -8,7 +8,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.45-SNAPSHOT</version>
+    <version>3.45</version>
   </parent>
   <properties>
     <slipstream.logs.dir>/var/log/slipstream/server</slipstream.logs.dir>
