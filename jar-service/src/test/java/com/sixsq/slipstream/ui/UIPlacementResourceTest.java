@@ -86,7 +86,6 @@ public class UIPlacementResourceTest extends ResourceTestBase {
 
         Response response = putUIPlacement(data);
 
-        System.out.println("RESPONSE: " + response.getEntityAsText());
         Object fromJson = gson.fromJson(response.getEntityAsText(), Object.class);
 
         assertThat(response.getStatus(), is(Status.SUCCESS_OK));
