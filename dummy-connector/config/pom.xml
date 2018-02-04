@@ -11,7 +11,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamConnector-Dummy</artifactId>
-    <version>3.46-SNAPSHOT</version>
+    <version>3.45-SNAPSHOT</version>
   </parent>
 
   <licenses>
