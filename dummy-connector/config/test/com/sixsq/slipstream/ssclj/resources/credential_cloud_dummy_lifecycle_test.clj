@@ -10,10 +10,8 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]))
 
-(use-fixtures :each ltu/with-test-es-client-fixture)
+(use-fixtures :each ltu/with-test-server-fixture)
 
-;; initialize must to called to pull in CredentialTemplate resources
-(ltu/with-test-es-client-fixture dyn/initialize)
 
 (deftest lifecycle
   (cclt/cloud-cred-lifecycle {:href        (str ct/resource-url "/" cloud-dummy/method)

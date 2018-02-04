@@ -35,7 +35,9 @@
                    [com.sixsq.slipstream/SlipStreamDbTesting-jar]
                    [peridot]
                    [commons-logging]
-                   [org.clojure/test.check]]}
+                   [org.clojure/test.check]
+                   [org.slf4j/slf4j-log4j12]]
+    :resource-paths ["test-resources"]}
    :provided
    {:dependencies [[superstring]
                    [com.sixsq.slipstream/SlipStreamCljResources-jar]]}})
