@@ -1,11 +1,13 @@
 (ns com.sixsq.slipstream.ssclj.middleware.logger-test
   (:require
     [clojure.test :refer :all]
-    [superstring.core :as str]
+    [clojure.string :as str]
     [com.sixsq.slipstream.ssclj.middleware.logger :refer :all]))
 
 (def start 1450701200947)
 (def end 1450701203089)
+
+(def test-url "api/resource")
 
 (defn header-authn-info
   [user roles]
@@ -14,7 +16,7 @@
 (defn req
   [{:keys [user roles query-string]}]
   {:request-method :get
-   :uri            "auth/login"
+   :uri            test-url
    :headers        (header-authn-info user roles)
    :query-string   query-string
    :body           "body-content"})
@@ -23,28 +25,28 @@
   [expected & {:as req-params}]
   (is (= expected (format-request (req req-params)))))
 
-(defn is-reponse-formatted
+(defn is-response-formatted
   [expected & {:keys [:start :end :status] :as response-params}]
   (is (= expected (format-response
                     (format-request (req response-params))
                     {:status status} start end))))
 
 (deftest log-does-not-display-password
-  (is-request-formatted "GET auth/login [super/ADMIN] ?a=1&b=2"
+  (is-request-formatted (str "GET " test-url " [super/ADMIN] ?a=1&b=2")
                         :user "super" :roles ["ADMIN"] :query-string "a=1&password=secret&b=2"))
 
 (deftest test-formatting
-  (is-reponse-formatted (format "200 (%d ms) GET auth/login [super/ADMIN] ?a=1&b=2" (- end start))
-                        :user "super" :roles ["ADMIN"] :query-string "a=1&password=secret&b=2"
-                        :start start :end end :status 200)
+  (is-response-formatted (format (str "200 (%d ms) GET " test-url " [super/ADMIN] ?a=1&b=2") (- end start))
+                         :user "super" :roles ["ADMIN"] :query-string "a=1&password=secret&b=2"
+                         :start start :end end :status 200)
 
-  (is-request-formatted "GET auth/login [joe/] ?c=3"
+  (is-request-formatted (str "GET " test-url " [joe/] ?c=3")
                         :user "joe" :query-string "c=3")
 
-  (is-request-formatted "GET auth/login [joe/] ?"
+  (is-request-formatted (str "GET " test-url " [joe/] ?")
                         :user "joe")
 
-  (is-request-formatted "GET auth/login [joe/R1,R2] ?"
+  (is-request-formatted (str "GET " test-url " [joe/R1,R2] ?")
                         :user "joe" :roles ["R1" "R2"]))
 
 
