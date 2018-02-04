@@ -50,7 +50,9 @@
              {:dependencies [[com.sixsq.slipstream/SlipStreamDbBinding-jar]
                              [com.sixsq.slipstream/SlipStreamDbSerializers-jar]
                              [com.sixsq.slipstream/SlipStreamCljResources-jar]
-                             [com.sixsq.slipstream/SlipStreamDbTesting-jar]]}}
+                             [com.sixsq.slipstream/SlipStreamDbTesting-jar]]
+              :resource-paths ["test-resources"]
+              :jvm-opts ["-Djava.util.logging.config.file=test-resources/logging.properties"]}}
 
   :aliases {"install" [["do"
                         ["uberjar"]
