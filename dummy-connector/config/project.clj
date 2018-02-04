@@ -37,8 +37,5 @@
                    [commons-logging]
                    [org.clojure/test.check]]}
    :provided
-   {:dependencies [[superstring]
-                   [com.sixsq.slipstream/SlipStreamCljResources-jar]
-                   [com.sixsq.slipstream/SlipStreamServer-cimi-resources]
-                   ]}})
+   {:dependencies [[com.sixsq.slipstream/SlipStreamServer-cimi-resources]]}})
 
