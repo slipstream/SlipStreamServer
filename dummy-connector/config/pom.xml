@@ -30,7 +30,7 @@
     </dependency>
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>SlipStreamCljResources-jar-dep</artifactId>
+      <artifactId>SlipStreamServer-cimi-resources-dep</artifactId>
       <version>${project.version}</version>
       <type>pom</type>
       <scope>provided</scope>

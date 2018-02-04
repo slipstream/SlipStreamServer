@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.test-utils
+(ns com.sixsq.slipstream.ssclj.resources.event.test-utils
   (:require
     [clojure.test :refer [is]]
     [peridot.core :refer :all]

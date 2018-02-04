@@ -39,6 +39,5 @@
                    [org.slf4j/slf4j-log4j12]]
     :resource-paths ["test-resources"]}
    :provided
-   {:dependencies [[superstring]
-                   [com.sixsq.slipstream/SlipStreamCljResources-jar]]}})
+   {:dependencies [[com.sixsq.slipstream/SlipStreamServer-cimi-resources]]}})
 
