@@ -4,8 +4,8 @@
 (ns com.sixsq.slipstream.db.es.binding
   (:require
     [ring.util.response :as r]
-    [clojure.string :as str]
     [com.sixsq.slipstream.db.utils.common :as cu]
+    [com.sixsq.slipstream.db.utils.responses :as responses]
     [com.sixsq.slipstream.db.es.utils :as esu]
     [com.sixsq.slipstream.db.es.acl :as acl]
     [com.sixsq.slipstream.db.binding :refer [Binding]])
@@ -44,15 +44,6 @@
   [data]
   (update-in data [:acl :rules] #(vec (set (conj % {:type "ROLE" :principal "ADMIN" :right "ALL"})))))
 
-(defn- split-id
-  "Split id in [type docid].
-  id is usually in the form type/docid.
-  Exception for cloud-entry-point: in this case id is only type (there is only one cloud-entry-point)"
-  [id]
-  ;; FIXME: this fails with NPE if `id` is `nil`.
-  (let [[type docid] (str/split id #"/")]
-    [type (or docid type)]))
-
 (defn- prepare-data
   "Prepares the data by adding the ADMIN role with ALL rights, denormalizing
    the ACL, and turning the document into JSON."
@@ -66,7 +57,7 @@
   "Provides the tuple of id, uuid, and prepared JSON document. "
   [data]
   (let [id (:id data)
-        uuid (second (split-id id))
+        uuid (second (cu/split-id id))
         json (prepare-data data)]
     [id uuid json]))
 
@@ -80,38 +71,38 @@
 (defn- response-created
   [id]
   (-> (str "created " id)
-      (cu/map-response 201 id)
+      (responses/map-response 201 id)
       (r/header "Location" id)))
 
 (defn response-error
   []
-  (cu/map-response "Resource not created" 500 nil))
+  (responses/map-response "Resource not created" 500 nil))
 
 (defn response-conflict
   [id]
-  (cu/map-response (str "Conflict for " id) 409 id))
+  (responses/map-response (str "Conflict for " id) 409 id))
 
 (defn- response-deleted
   [id]
-  (cu/map-response (str id " deleted") 200 id))
+  (responses/map-response (str id " deleted") 200 id))
 
 (defn- response-not-found
   [id]
-  (cu/map-response (str id " not found") 404 id))
+  (responses/map-response (str id " not found") 404 id))
 
 (defn- response-updated
   [id]
-  (cu/map-response (str "updated " id) 200 id))
+  (responses/map-response (str "updated " id) 200 id))
 
 (defn- throw-if-not-found
   [data id]
   (if-not data
-    (throw (cu/ex-not-found id))
+    (throw (responses/ex-not-found id))
     data))
 
 (defn- find-data
-  [client index id options action]
-  (let [[type docid] (split-id id)]
+  [client index id options]
+  (let [[type docid] (cu/split-id id)]
     (-> (esu/read client index type docid options)
         (.getSourceAsString)
         doc->data
@@ -119,32 +110,35 @@
 
 (deftype ESBinding []
   Binding
+
   (add [_ type data options]
     (let [[id uuid json] (data->doc data)]
       (try
         (if (esu/create *client* index-name (cu/de-camelcase type) uuid json)
           (response-created id)
           (response-error))
-        (catch VersionConflictEngineException e
+        (catch VersionConflictEngineException _
           (response-conflict id)))))
 
 
   (retrieve [_ id options]
-    (find-data *client* index-name id options "VIEW"))
+    (find-data *client* index-name id options))
+
 
   (delete [_ {:keys [id]} options]
-    (find-data *client* index-name id options "MODIFY")
-    (let [[type docid] (split-id id)]
+    (find-data *client* index-name id options)
+    (let [[type docid] (cu/split-id id)]
       (.status (esu/delete *client* index-name type docid)))
     (response-deleted id))
 
+
   (edit [_ {:keys [id] :as data} options]
-    (find-data *client* index-name id options "MODIFY")
-    (let [[type docid] (split-id id)
+    (let [[type docid] (cu/split-id id)
           updated-doc (prepare-data data)]
       (if (esu/update *client* index-name type docid updated-doc)
-        (cu/json-response data)                             ;; FIXME: return updated data from database?
+        (responses/json-content-type data)
         (response-conflict id))))
+
 
   (query [_ collection-id options]
     (let [result (esu/search *client* index-name collection-id options)
@@ -158,6 +152,7 @@
                     (map :_source)
                     (map acl/normalize-acl))]
       [meta hits])))
+
 
 (defn get-instance
   []
