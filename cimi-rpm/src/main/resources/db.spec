@@ -14,7 +14,7 @@
  ;; Application must be registered on Github
  ;; See https://github.com/settings/applications/new
  ;; Homepage URL can be <SlipStream end point>
- ;; The Authorization callback URL must be <SlipStream end point>/auth/callback-github
+ ;; The Authorization callback URL must be <SlipStream end point>/api/session/
 
  :github-client-id        "Github 'Client ID'"
  :github-client-secret    "Github 'Client Secret'"}
