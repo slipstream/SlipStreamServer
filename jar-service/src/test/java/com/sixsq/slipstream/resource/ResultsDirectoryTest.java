@@ -91,7 +91,7 @@ public class ResultsDirectoryTest {
 
         assertNotNull(xml);
 
-        xml.write(System.err);
+        //xml.write(System.err);
 
         Document doc = isValidXml(xml.getText());
 
@@ -120,7 +120,7 @@ public class ResultsDirectoryTest {
 
         assertNotNull(json);
 
-        json.write(System.err);
+        //json.write(System.err);
         FilePropertiesList list = isValidJson(json.getText());
 
         assertNotNull(list);
