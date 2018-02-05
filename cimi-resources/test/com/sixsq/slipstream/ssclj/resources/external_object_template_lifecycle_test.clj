@@ -8,7 +8,8 @@
             [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
             [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
             [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-            [com.sixsq.slipstream.ssclj.resources.common.schema :as c])
+            [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+            [com.sixsq.slipstream.ssclj.resources.external-object-template-report :as report])
   (:import (clojure.lang ExceptionInfo)))
 
 
@@ -57,8 +58,11 @@
                       (ltu/entries resource-tag))
           ids (set (map :id entries))
           types (set (map :objectType entries))]
-      (is (= #{(str resource-url "/" example/objectType)} ids))
-      (is (= #{example/objectType} types))
+      (is (= #{(str resource-url "/" example/objectType)
+               (str resource-url "/" report/objectType)
+               } ids))
+      (is (= #{example/objectType
+               report/objectType} types))
 
       (doseq [entry entries]
         (let [ops (ltu/operations->map entry)
@@ -117,8 +121,12 @@
                       (ltu/entries resource-tag))
           ids (set (map :id entries))
           types (set (map :objectType entries))]
-      (is (= #{(str resource-url "/" example/objectType)} ids))
-      (is (= #{example/objectType} types))
+      (is (= #{(str resource-url "/" example/objectType)
+               (str resource-url "/" report/objectType)
+               } ids))
+      (is (= #{example/objectType
+               report/objectType} types))
+
 
       (doseq [entry entries]
         (let [ops (ltu/operations->map entry)

@@ -54,7 +54,7 @@
 (def ^:const desc ExternalObjectTemplateAlphaDescription)
 
 ;;
-;; initialization: register this connector template
+;; initialization: register this external object template
 ;;
 (defn initialize
   []
