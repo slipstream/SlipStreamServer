@@ -125,7 +125,7 @@
                        :mandatory   false
                        :readOnly    false
                        :order       12
-                       :enum        ["new" "stored"]}}))
+                       :enum        ["new" "ready"]}}))
 
 ;;
 ;; multimethods for validation

@@ -5,7 +5,11 @@
     [com.sixsq.slipstream.ssclj.resources.external-object-template-alpha-example :as tpl]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    ))
+    [com.sixsq.slipstream.db.impl :as db]
+    [clojure.tools.logging :as log]
+    [com.sixsq.slipstream.ssclj.util.log :as logu]
+    [com.sixsq.slipstream.auth.acl :as a])
+  (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const objectType "alpha")
 
@@ -35,9 +39,47 @@
   [resource]
   (create-validate-fn resource))
 
+
+
+(defn upload-fn
+  [{state :state id :id :as resource} request]
+  (if (= state eo/state-new)
+    (do
+      (log/warn "Requesting upload url for external object : " id)
+      (assoc resource :state eo/state-ready :uploadUri "file://foo"))
+    (logu/log-and-throw-400 "Upload url request is not allowed")))
+
 (defmethod eo/upload-subtype objectType
-  [resource request]
-  {:body {:uploadUri "filezz://foo"}}
-  )
+  [resource {{uuid :uuid} :params :as request}]
+  (try
+    (a/can-modify? resource request)
+    (let [id (str (u/de-camelcase eo/resource-name) "/" uuid)]
+      (-> (db/retrieve id request)
+          (upload-fn request)
+          (db/edit request)))
+    (catch ExceptionInfo ei
+      (ex-data ei))))
+
+
+(defn download-fn
+  [{state :state id :id :as resource} request]
+  (if (= state eo/state-ready)
+    (do
+      (log/warn "Requesting download url for external object : " id)
+      (assoc resource :downloadUri "file://foo/bar"))
+    (logu/log-and-throw-400 "Getting download  url request is not allowed")))
+
+(defmethod eo/download-subtype objectType
+  [resource {{uuid :uuid} :params :as request}]
+  (try
+    (a/can-modify? resource request)
+    (let [id (str (u/de-camelcase eo/resource-name) "/" uuid)]
+      (-> (db/retrieve id request)
+          (download-fn request)
+          (db/edit request)))
+    (catch ExceptionInfo ei
+      (ex-data ei))))
+
+
 
 

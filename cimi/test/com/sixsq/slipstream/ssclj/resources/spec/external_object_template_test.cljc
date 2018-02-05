@@ -28,11 +28,11 @@
     (is (s/valid? :cimi.test/external-object-template root))
 
     ;;mandatory keywords
-    (doseq [k #{:objectType :instanceName :id :resourceURI}]
+    (doseq [k #{:objectType :instanceName :id :resourceURI :state}]
       (is (not (s/valid? :cimi.test/external-object-template (dissoc root k)))))
 
     ;; optional keywords
-    (doseq [k #{:state :uri}]
+    (doseq [k #{ :uri}]
       (is (s/valid? :cimi.test/external-object-template (dissoc root k))))))
 
 

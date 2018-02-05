@@ -25,14 +25,14 @@
                              :type      "ROLE"}
                      :rules [{:principal "ADMIN"
                               :type      "ROLE"
-                              :right     "VIEW"}
+                              :right     "MODIFY"}
                              {:principal "USER"
                               :type      "ROLE"
-                              :right     "VIEW"}]})
+                              :right     "MODIFY"}]})
 
 
 (def ^:const state-new "new")
-(def ^:const state-new "new")
+(def ^:const state-ready "ready")
 ;;
 ;; validate subclasses of externalObject
 ;;
@@ -75,7 +75,7 @@
            :type      "ROLE"}
    :rules [{:principal id
             :type      "USER"
-            :right     "VIEW"}]})
+            :right     "MODIFY"}]})
 
 (defmethod crud/add-acl resource-uri
   [resource request]
@@ -86,7 +86,7 @@
   (if acl
     resource
     (let [user-id (:identity (a/current-authentication request))]
-        (assoc resource :acl (create-acl user-id)))))
+      (assoc resource :acl (create-acl user-id)))))
 
 ;;;;;;;;
 (defn dispatch-conversion
@@ -169,7 +169,7 @@
 
 
 
-  (def delete-impl (std-crud/delete-fn resource-name))
+(def delete-impl (std-crud/delete-fn resource-name))
 (defmethod crud/delete resource-name
   [request]
   (delete-impl request))
@@ -212,7 +212,7 @@
     (catch ExceptionInfo ei
       (ex-data ei))))
 
-;;; Upload URL operation
+;;; Download URL operation
 
 (defmulti download-subtype
           (fn [resource _] (:objectType resource)))
@@ -230,6 +230,6 @@
     (let [id (str resource-url "/" uuid)]
       (-> (crud/retrieve-by-id id {:user-name  "INTERNAL"
                                    :user-roles ["ADMIN"]})
-          (upload-subtype request)))
+          (download-subtype request)))
     (catch ExceptionInfo ei
       (ex-data ei))))

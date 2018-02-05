@@ -45,7 +45,8 @@
 ;;
 (def ^:const resource
   {:objectType objectType
-   :alphaKey         1001})
+   :alphaKey         1001
+   :state "new"})
 
 ;;
 ;; description
