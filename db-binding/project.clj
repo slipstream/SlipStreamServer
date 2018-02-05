@@ -29,6 +29,8 @@
   :dependencies
   [[cheshire]                                               ;; to avoid transient dependency conflicts
    [clj-time]
+   [com.rpl/specter]
+   [duratom]
    [environ]
    [org.apache.logging.log4j/log4j-core]                    ;; required for Elasticsearch logging
    [org.clojure/data.json]
