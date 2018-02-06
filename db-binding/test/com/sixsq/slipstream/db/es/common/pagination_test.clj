@@ -1,8 +1,8 @@
-(ns com.sixsq.slipstream.db.es.pagination-test
+(ns com.sixsq.slipstream.db.es.common.pagination-test
   (:refer-clojure :exclude [read update])
   (:require
     [clojure.test :refer [deftest is are]]
-    [com.sixsq.slipstream.db.es.pagination :as t]))
+    [com.sixsq.slipstream.db.es.common.pagination :as t]))
 
 (deftest check-es-paging-params
   (are [args expected] (= expected (apply t/es-paging-params args))

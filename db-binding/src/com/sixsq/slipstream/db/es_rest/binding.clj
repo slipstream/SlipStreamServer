@@ -4,6 +4,9 @@
   (:require
     [com.sixsq.slipstream.db.utils.common :as cu]
     [com.sixsq.slipstream.util.response :as response]
+    [com.sixsq.slipstream.db.es-rest.pagination :as paging]
+    [com.sixsq.slipstream.db.es-rest.order :as order]
+    [com.sixsq.slipstream.db.es-rest.select :as select]
     [com.sixsq.slipstream.db.binding :refer [Binding]]
     [qbits.spandex :as spandex]
     [clojure.pprint :refer [pprint]])
@@ -89,11 +92,14 @@
 
 
 (defn query-data
-  [client collection-id options]
-  (let [query {:query {:match_all {}}}
+  [client collection-id {:keys [cimi-params] :as options}]
+  (let [paging (paging/add-paging cimi-params)
+        orderby (order/add-sorters cimi-params)
+        selected (select/add-selected-keys cimi-params)
+        query {:query {:match_all {}}}
         response (spandex/request client {:url    [index-name collection-id :_search]
                                           :method :post
-                                          :body   query})
+                                          :body   (merge paging orderby selected query)})
         success? (-> response :body :_shards :successful pos?)
         count-before-pagination (-> response :body :hits :total)
         aggregations (-> response :body :hits :aggregations)
