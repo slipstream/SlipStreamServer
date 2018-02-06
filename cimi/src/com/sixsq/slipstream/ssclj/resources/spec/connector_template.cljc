@@ -30,6 +30,9 @@
 (def connector-template-regex #"^connector-template/[a-z0-9]+(-[a-z0-9]+)*$")
 (s/def :cimi.connector-template/href (s/and string? #(re-matches connector-template-regex %)))
 
+
+(s/def :cimi.configuration-template/configurationTemplate (su/only-keys-maps
+                                                            {:req-un [:cimi.connector-template/href]}))
 ;;
 ;; Keys specifications for ConnectorTemplate resources.
 ;; As this is a "base class" for ConnectorTemplate resources, there
@@ -40,7 +43,8 @@
                                             :cimi.connector-template/instanceName
                                             :cimi.connector-template/orchestratorImageid
                                             :cimi.connector-template/quotaVm
-                                            :cimi.connector-template/maxIaasWorkers]})
+                                            :cimi.connector-template/maxIaasWorkers]
+                                   :opt-un [:cimi.configuration-template/connectorTemplate]})
 
 (def resource-keys-spec
   (su/merge-keys-specs [c/common-attrs connector-template-keys-spec]))
