@@ -48,6 +48,32 @@
        resp))))
 
 
+(defn response-deleted
+  [id]
+  (map-response (str id " deleted") 200 id))
+
+
+(defn response-updated
+  [id]
+  (map-response (str "updated " id) 200 id))
+
+
+(defn response-not-found
+  [id]
+  (-> (str id " not found")
+      (map-response 404 id)))
+
+
+(defn response-error
+  [msg]
+  (map-response (str "unexpected error occurred: " msg) 500 nil))
+
+
+(defn response-conflict
+  [id]
+  (map-response (str "conflict with " id) 409 id))
+
+
 (defn ex-response
   "Provides a generic exception response with the given message, status,
    resource identifier, and location information."
@@ -63,24 +89,24 @@
   "Provides an ExceptionInfo exception when the input is not valid. This is a
    400 status response. If the message is not provided, a generic one is used."
   [& [msg]]
-  (let [msg (or msg "invalid request")]
-    (ex-response msg 400)))
+  (-> (or msg "invalid request")
+      (ex-response msg 400)))
 
 
 (defn ex-not-found
   "Provides an ExceptionInfo exception when a resource is not found. This is a
    404 status response and the provided id should be the resource identifier."
   [id]
-  (let [msg (str id " not found")]
-    (ex-response msg 404 id)))
+  (-> (str id " not found")
+      (ex-response 404 id)))
 
 
 (defn ex-conflict
   "Provides an ExceptionInfo exception when there is a conflict. This is a 409
    status response and the provided id should be the resource identifier."
   [id]
-  (let [msg (str "conflict with " id)]
-    (ex-response msg 409 id)))
+  (-> (str "conflict with " id)
+      (ex-response 409 id)))
 
 
 (defn ex-unauthorized
@@ -88,8 +114,8 @@
    access the resource. This is a 403 status response and the provided id
    should be the resource identifier or the username."
   [id]
-  (let [msg (str "invalid credentials for '" id "'")]
-    (ex-response msg 403 id)))
+  (-> (str "invalid credentials for '" id "'")
+      (ex-response 403 id)))
 
 
 (defn ex-bad-method
@@ -97,9 +123,8 @@
    resource. This is a 405 status code. Information from the request is used to
    provide a reasonable message."
   [{:keys [uri request-method] :as request}]
-  (ex-response
-    (str "invalid method (" (name (or request-method "UNKNOWN")) ") for " (or uri "UNKNOWN"))
-    405 uri))
+  (-> (str "invalid method (" (name (or request-method "UNKNOWN")) ") for " (or uri "UNKNOWN"))
+      (ex-response 405 uri)))
 
 
 (defn ex-bad-action
@@ -107,9 +132,8 @@
    used. This is a 404 status code. Information from the request and the action
    are used to provide a reasonable message."
   [{:keys [uri request-method] :as request} action]
-  (ex-response
-    (str "undefined action (" (name (or request-method "UNKNOWN")) ", " action ") for " (or uri "UNKNOWN"))
-    404 uri))
+  (-> (str "undefined action (" (name (or request-method "UNKNOWN")) ", " action ") for " (or uri "UNKNOWN"))
+      (ex-response 404 uri)))
 
 
 (defn ex-bad-CIMI-filter

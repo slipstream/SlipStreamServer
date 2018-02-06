@@ -55,7 +55,6 @@
    [org.elasticsearch.test/framework]
 
    [ring/ring-json]
-   [superstring]
 
    [com.sixsq.slipstream/SlipStreamDbBinding-jar]
    ;;
