@@ -9,7 +9,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamConnector-Dummy-java</artifactId>
-    <version>3.45-SNAPSHOT</version>
+    <version>3.46-SNAPSHOT</version>
   </parent>
 
   <dependencies>
@@ -49,6 +49,12 @@
       <artifactId>SlipStreamCljResourcesTestServer-jar</artifactId>
       <scope>test</scope>
       <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
@@ -98,11 +104,9 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <systemPropertyVariables>
-            <property>
-              <name>slipstream.config.dir</name>
-              <value>${project.build.directory}/configuration
-              </value>
-            </property>
+            <slipstream.config.dir>${project.build.directory}/configuration</slipstream.config.dir>
+            <!-- turns off most logging from restlet and others; change file to lower logging level -->
+            <java.util.logging.config.file>${basedir}/src/test/resources/logging.properties</java.util.logging.config.file>
           </systemPropertyVariables>
           <useSystemClassLoader>false</useSystemClassLoader>
         </configuration>

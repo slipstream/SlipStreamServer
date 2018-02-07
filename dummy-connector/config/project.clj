@@ -1,6 +1,6 @@
-(def +version+ "3.45-SNAPSHOT")
+(def +version+ "3.46-SNAPSHOT")
 
-(defproject com.sixsq.slipstream/SlipStreamConnector-Dummy-conf "3.45-SNAPSHOT"
+(defproject com.sixsq.slipstream/SlipStreamConnector-Dummy-conf "3.46-SNAPSHOT"
 
   :description "dummy connector for testing"
 
@@ -12,7 +12,7 @@
 
   :plugins [[lein-parent "0.3.2"]]
 
-  :parent-project {:coords  [com.sixsq.slipstream/parent "3.45-SNAPSHOT"]
+  :parent-project {:coords  [com.sixsq.slipstream/parent "3.46-SNAPSHOT"]
                    :inherit [:min-lein-version
                              :managed-dependencies
                              :repositories
@@ -35,8 +35,9 @@
                    [com.sixsq.slipstream/SlipStreamDbTesting-jar]
                    [peridot]
                    [commons-logging]
-                   [org.clojure/test.check]]}
+                   [org.clojure/test.check]
+                   [org.slf4j/slf4j-log4j12]]
+    :resource-paths ["test-resources"]}
    :provided
-   {:dependencies [[superstring]
-                   [com.sixsq.slipstream/SlipStreamCljResources-jar]]}})
+   {:dependencies [[com.sixsq.slipstream/SlipStreamServer-cimi-resources]]}})
 

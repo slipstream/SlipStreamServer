@@ -5,6 +5,7 @@
   (:import
     [java.util ArrayList HashMap]))
 
+
 (deftest walk-clojurify-should-recursively-keywordize-a-java-map
   (is (=
         {:A 42 :c {:B [{:Z 111} {:e 1515}]}}

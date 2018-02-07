@@ -1,6 +1,6 @@
-(def +version+ "3.45-SNAPSHOT")
+(def +version+ "3.46-SNAPSHOT")
 
-(defproject com.sixsq.slipstream/SlipStreamDbSerializers-jar "3.45-SNAPSHOT"
+(defproject com.sixsq.slipstream/SlipStreamDbSerializers-jar "3.46-SNAPSHOT"
 
   :description "utilities for serializing objects to a database"
   
@@ -12,7 +12,7 @@
 
   :plugins [[lein-parent "0.3.2"]]
 
-  :parent-project {:coords  [com.sixsq.slipstream/parent "3.45-SNAPSHOT"]
+  :parent-project {:coords  [com.sixsq.slipstream/parent "3.46-SNAPSHOT"]
                    :inherit [:min-lein-version
                              :managed-dependencies
                              :repositories
@@ -38,4 +38,4 @@
   :profiles
   {:test     {:source-paths   ["test"]
               :resource-paths ["test-resources"]}
-   :provided {:dependencies [[com.sixsq.slipstream/SlipStreamCljResources-jar]]}})
+   :provided {:dependencies [[com.sixsq.slipstream/SlipStreamServer-cimi-resources]]}})

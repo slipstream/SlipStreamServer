@@ -18,23 +18,11 @@
 (def ^:private cyclone-base-url
   "https://federation.cyclone-project.eu/auth/realms/master/protocol/openid-connect")
 
+
 (defn- redirect_uri
   []
   (str (cf/mandatory-property-value :auth-server) "/auth/callback-cyclone"))
 
-(defn- cyclone-code-url
-  []
-  (str cyclone-base-url
-       (format "/auth?client_id=slipstream&redirect_uri=%s&response_type=code" (redirect_uri))))
-
-(defn- cyclone-token-url
-  []
-  (str cyclone-base-url "/token"))
-
-(defn login
-  []
-  (log/debug "Starting CYCLONE authentication.")
-  (uh/response-redirect (cyclone-code-url)))
 
 (defn login-name
   [claims]
@@ -43,6 +31,7 @@
        (remove empty?)
        first
        ex/sanitize-login-name))
+
 
 (defn get-oidc-access-token
   [oidc-client-id oidc-base-url oidc-code redirect-uri]
@@ -55,6 +44,7 @@
       :body
       (json/read-str :key-fn keyword)
       :access_token))
+
 
 (defn callback-cyclone
   [request redirect-server]

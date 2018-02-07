@@ -1,6 +1,6 @@
-(def +version+ "3.45-SNAPSHOT")
+(def +version+ "3.46-SNAPSHOT")
 
-(defproject com.sixsq.slipstream/SlipStreamServerPRSlib-jar "3.45-SNAPSHOT"
+(defproject com.sixsq.slipstream/SlipStreamServerPRSlib-jar "3.46-SNAPSHOT"
 
   :description "Placement and Ranking Service"
 
@@ -15,7 +15,7 @@
             [lein-shell "0.5.0"]
             [lein-localrepo "0.5.4"]]
 
-  :parent-project {:coords  [com.sixsq.slipstream/parent "3.45-SNAPSHOT"]
+  :parent-project {:coords  [com.sixsq.slipstream/parent "3.46-SNAPSHOT"]
                    :inherit [:min-lein-version
                              :managed-dependencies
                              :repositories
@@ -50,7 +50,9 @@
              {:dependencies [[com.sixsq.slipstream/SlipStreamDbBinding-jar]
                              [com.sixsq.slipstream/SlipStreamDbSerializers-jar]
                              [com.sixsq.slipstream/SlipStreamCljResources-jar]
-                             [com.sixsq.slipstream/SlipStreamDbTesting-jar]]}}
+                             [com.sixsq.slipstream/SlipStreamDbTesting-jar]]
+              :resource-paths ["test-resources"]
+              :jvm-opts ["-Djava.util.logging.config.file=test-resources/logging.properties"]}}
 
   :aliases {"install" [["do"
                         ["uberjar"]

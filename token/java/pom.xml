@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>token-java</artifactId>
+  <artifactId>token-java-dep</artifactId>
   <packaging>pom</packaging>
-  <version>3.45-SNAPSHOT</version>
+  <version>3.46-SNAPSHOT</version>
   <name>SlipStreamServer/token/java</name>
   <description>SlipStreamServer/token/java</description>
   <url>http://sixsq.com</url>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
-    <artifactId>token-dep</artifactId>
-    <version>3.45-SNAPSHOT</version>
+    <artifactId>token-parent</artifactId>
+    <version>3.46-SNAPSHOT</version>
   </parent>
 
   <licenses>

@@ -11,7 +11,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.45-SNAPSHOT</version>
+    <version>3.46-SNAPSHOT</version>
   </parent>
 
   <licenses>
@@ -34,6 +34,12 @@
       <version>${project.version}</version>
       <type>pom</type>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamServer-cimi-resources-dep</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
     </dependency>
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>

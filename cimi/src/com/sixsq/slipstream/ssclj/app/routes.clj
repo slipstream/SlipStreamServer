@@ -53,13 +53,11 @@
   (let-routes [uri-login (str p/auth-context "login")
                uri-logout (str p/auth-context "logout")
 
-               uri-github (str p/auth-context "callback-github")
                uri-cyclone (str p/auth-context "callback-cyclone")]
 
     (POST uri-login request (auth/login request))
     (POST uri-logout request (auth/logout request))
 
-    (GET uri-github request (gh/callback-github request (cf/property-value :main-server)))
     (GET uri-cyclone request (cy/callback-cyclone request (cf/property-value :main-server)))))
 
 (def user-routes

@@ -3,7 +3,7 @@
 
   <artifactId>metering-dep</artifactId>
   <packaging>pom</packaging>
-  <version>3.45-SNAPSHOT</version>
+  <version>3.46-SNAPSHOT</version>
   <name>SlipStreamServer/metering</name>
   <description>SlipStream Metering (DEP)</description>
   <url>http://sixsq.com</url>
@@ -11,7 +11,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.45-SNAPSHOT</version>
+    <version>3.46-SNAPSHOT</version>
   </parent>
 
   <licenses>
