@@ -85,10 +85,10 @@
 ;; default implementation just updates the resourceURI
 (defmethod tpl->connector :default
   [{:keys [href] :as resource}]
-  (-> resource
-      (assoc :connectorTemplate {:href href})
-      (assoc :resourceURI resource-uri)
-      (dissoc :href)))
+  (cond-> resource
+          href (assoc :connectorTemplate {:href href})
+          true (dissoc :href)
+          true (assoc :resourceURI resource-uri)))
 
 ;;
 ;; CRUD operations
@@ -209,5 +209,5 @@
   (let [href (str id "/describe")
         describe-op {:rel (:describe c/action-uri) :href href}]
     (cond-> (set-subtype-ops resource request)
-      (get connectorTemplate :href) (update-in [:operations] conj describe-op))))
+            (get connectorTemplate :href) (update-in [:operations] conj describe-op))))
 

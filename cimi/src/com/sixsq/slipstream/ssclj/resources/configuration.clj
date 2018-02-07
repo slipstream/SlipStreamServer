@@ -80,10 +80,10 @@
 ;; default implementation just removes href and updates the resourceURI
 (defmethod tpl->configuration :default
   [{:keys [href] :as resource}]
-  (-> resource
-      (assoc :configurationTemplate {:href href})
-      (dissoc :href)
-      (assoc :resourceURI resource-uri)))
+  (cond-> resource
+      href (assoc :configurationTemplate {:href href})
+      true (dissoc :href)
+      true (assoc :resourceURI resource-uri)))
 
 ;;
 ;; CRUD operations
