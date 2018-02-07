@@ -6,7 +6,6 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as conf-tmpl]
     [com.sixsq.slipstream.auth.acl :as a]
-    [clojure.tools.logging :as log]
     [com.sixsq.slipstream.util.response :as r])
   (:import (clojure.lang ExceptionInfo)))
 

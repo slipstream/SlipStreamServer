@@ -7,8 +7,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.util.response :as r]
-    [com.sixsq.slipstream.ssclj.resources.connector-template :as connector-tmpl]
-    [taoensso.timbre :as log])
+    [com.sixsq.slipstream.ssclj.resources.connector-template :as connector-tmpl])
   (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-tag :connectors)
@@ -208,11 +207,7 @@
 (defmethod crud/set-operations resource-uri
   [{:keys [id resourceURI username connectorTemplate] :as resource} request]
   (let [href (str id "/describe")
-        describe-op {:rel (:describe c/action-uri) :href href}
-        ops (cond-> (set-subtype-ops resource request)
-                (get connectorTemplate :href) (update-in [:operations] conj describe-op))]
-    (log/info "operations: " (:operations ops))
-    ops
-    ))
-
+        describe-op {:rel (:describe c/action-uri) :href href}]
+    (cond-> (set-subtype-ops resource request)
+      (get connectorTemplate :href) (update-in [:operations] conj describe-op))))
 
