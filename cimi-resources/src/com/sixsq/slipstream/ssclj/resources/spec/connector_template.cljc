@@ -31,8 +31,8 @@
 (s/def :cimi.connector-template/href (s/and string? #(re-matches connector-template-regex %)))
 
 
-(s/def :cimi.configuration-template/configurationTemplate (su/only-keys-maps
-                                                            {:req-un [:cimi.connector-template/href]}))
+(s/def :cimi.connector-template/connectorTemplate (su/only-keys-maps
+                                                    {:req-un [:cimi.connector-template/href]}))
 ;;
 ;; Keys specifications for ConnectorTemplate resources.
 ;; As this is a "base class" for ConnectorTemplate resources, there
@@ -44,7 +44,7 @@
                                             :cimi.connector-template/orchestratorImageid
                                             :cimi.connector-template/quotaVm
                                             :cimi.connector-template/maxIaasWorkers]
-                                   :opt-un [:cimi.configuration-template/connectorTemplate]})
+                                   :opt-un [:cimi.connector-template/connectorTemplate]})
 
 (def resource-keys-spec
   (su/merge-keys-specs [c/common-attrs connector-template-keys-spec]))
