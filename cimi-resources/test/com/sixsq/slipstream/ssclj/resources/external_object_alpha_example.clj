@@ -17,8 +17,7 @@
 ;; resource may have different schemas for the template and resource.
 (s/def :cimi/external-object.alpha :cimi/external-object-template.alpha)
 
-(def ExternalObjectAlphaDescription
-  tpl/ExternalObjectTemplateAlphaDescription)
+(def ExternalObjectAlphaDescription tpl/ExternalObjectTemplateAlphaDescription)
 
 ;;
 ;; description
@@ -38,8 +37,6 @@
 (defmethod eo/create-validate-subtype objectType
   [resource]
   (create-validate-fn resource))
-
-
 
 (defn upload-fn
   [{state :state id :id :as resource} request]
@@ -79,7 +76,4 @@
           (db/edit request)))
     (catch ExceptionInfo ei
       (ex-data ei))))
-
-
-
 

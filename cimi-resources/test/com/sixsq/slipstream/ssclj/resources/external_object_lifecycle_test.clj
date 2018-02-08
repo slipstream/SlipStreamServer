@@ -17,7 +17,6 @@
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
-
 (deftest lifecycle
   (let [href (str eot/resource-url "/" example/objectType)
         template-url (str p/service-context eot/resource-url "/" example/objectType)
@@ -35,10 +34,8 @@
         valid-create {:externalObjectTemplate (ltu/strip-unwanted-attrs (merge template {:alphaKey     2001
                                                                                          :state        "new"}))}
         href-create {:externalObjectTemplate {:href         href
-                                              :alphaKey     3001
-                                              }}
+                                              :alphaKey     3001}}
         invalid-create (assoc-in valid-create [:externalObjectTemplate :invalid] "BAD")]
-
 
     ;; anonymous create should fail
     (-> session-anon
@@ -130,7 +127,6 @@
           (ltu/body->edn)
           (ltu/is-status 404)))
 
-
     ;; abbreviated lifecycle using href to template instead of copy
     (let [uri (-> session-admin
                   (request base-uri
@@ -140,7 +136,6 @@
                   (ltu/is-status 201)
                   (ltu/location))
           abs-uri (str p/service-context (u/de-camelcase uri))]
-
 
       ;; admin delete succeeds
       (-> session-admin
@@ -174,8 +169,7 @@
                    :response
                    :body
                    (assoc :state eo/state-new)
-                   (dissoc :uploadUri)
-                   )]
+                   (dissoc :uri))]
     (db/edit new-eo (:request m))))
 
 ;; Upload url request operation
@@ -208,9 +202,7 @@
 
         template (get-in resp [:response :body])
 
-        valid-create {:externalObjectTemplate (ltu/strip-unwanted-attrs (merge template {:alphaKey     2002}))}
-
-        ]
+        valid-create {:externalObjectTemplate (ltu/strip-unwanted-attrs (merge template {:alphaKey     2002}))}]
 
     (let [uri (-> session-admin
                   (request tu/base-uri
@@ -235,25 +227,21 @@
                                                           (assoc-in [:externalObjectTemplate :alphaKey] 2003))))
                        (ltu/body->edn)
                        (ltu/is-status 201)
-                       (ltu/location)
-                       )
+                       (ltu/location))
           abs-uri (str p/service-context (u/de-camelcase uri))
           abs-uri-user (str p/service-context (u/de-camelcase uri-user))
-
           upload-op (-> session-admin
                         (request abs-uri)
                         (ltu/body->edn)
                         (ltu/is-operation-present "upload")
                         (ltu/is-status 200)
                         (ltu/get-op "upload"))
-
           upload-op-user (-> session-user
                              (request abs-uri-user)
                              (ltu/body->edn)
                              (ltu/is-operation-present "upload")
                              (ltu/is-status 200)
                              (ltu/get-op "upload"))
-
           abs-upload-uri (str p/service-context (u/de-camelcase upload-op))
 
           ;;upload should be possible for ADMIN
@@ -269,8 +257,7 @@
       (reset!)
       (-> session-anon
           (request abs-upload-uri
-                   :request-method :post
-                   )
+                   :request-method :post)
           (ltu/body->edn)
           (ltu/is-status 403)
           :response
@@ -279,24 +266,20 @@
       (reset!)
       (-> session-user
           (request abs-upload-uri
-                   :request-method :post
-                   )
+                   :request-method :post)
           (ltu/body->edn)
           (ltu/is-status 403)
           :response
           :body)
 
-
-      ;;the reponse of an upload operation contains the uploadUri
+      ;;the reponse of an upload operation contains the upload URL
       (is (:uri upload-resp))
-
 
       ;;Check that you can now request upload twice
       ;; (state has been set to ready after first request)
       (-> session-admin
           (request abs-upload-uri
-                   :request-method :post
-                   )
+                   :request-method :post)
           (ltu/body->edn)
           (ltu/is-status 200)
           :response
@@ -307,10 +290,7 @@
           (ltu/body->edn)
           (ltu/is-status 400)
           :response
-          :body)
-      )
-    )
-  )
+          :body))))
 
 ;; Download request
 
@@ -342,9 +322,7 @@
 
         template (get-in resp [:response :body])
 
-        valid-create {:externalObjectTemplate (ltu/strip-unwanted-attrs (merge template {:alphaKey     3002}))}
-
-        ]
+        valid-create {:externalObjectTemplate (ltu/strip-unwanted-attrs (merge template {:alphaKey  3002}))}]
 
     (let [uri (-> session-admin
                   (request tu/base-uri
@@ -392,8 +370,7 @@
           ;;download operation should not be possible without prior upload
           wrong-download-resp (-> session-admin
                                   (request abs-download-uri
-                                           :request-method :post
-                                           )
+                                           :request-method :post)
                                   (ltu/body->edn)
                                   (ltu/is-status 400)
                                   :response
@@ -402,8 +379,7 @@
           ;;pre-required  upload
           upload-resp (-> session-admin
                           (request abs-upload-uri
-                                   :request-method :post
-                                   )
+                                   :request-method :post)
                           (ltu/body->edn)
                           (ltu/is-status 200)
                           :response
@@ -421,9 +397,8 @@
                         :response
                         :body)]
         ;;download response should contain the download URL link
-        (is (:uri dl-resp))
+        (is (:uri dl-resp)))
 
-        )
       (-> session-admin
           (request abs-download-uri
                    :request-method :post)
@@ -431,7 +406,6 @@
           (ltu/is-status 200)
           :response
           :body)
-
 
       (-> session-anon
           (request abs-download-uri
@@ -451,20 +425,13 @@
           :response
           :body)
 
-
       ;;the download operation can be repeated
       (-> session-admin
           (request abs-download-uri
-                   :request-method :post
-                   )
+                   :request-method :post)
           (ltu/body->edn)
           (ltu/is-status 200)
           :response
-          :body)
-
-      )
-    )
-
-  )
+          :body))))
 
 

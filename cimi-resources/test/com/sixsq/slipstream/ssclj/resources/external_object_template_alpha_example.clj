@@ -6,7 +6,6 @@
             [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
             [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
-
 (def ^:const objectType "alpha")
 
 ;;

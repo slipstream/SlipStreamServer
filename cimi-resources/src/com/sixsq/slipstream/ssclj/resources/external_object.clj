@@ -65,7 +65,6 @@
   [resource]
   (create-validate-subtype resource))
 
-
 ;;
 ;; multimethod for ACLs
 ;;
@@ -167,8 +166,6 @@
   [request]
   (retrieve-impl request))
 
-
-
 (def delete-impl (std-crud/delete-fn resource-name))
 (defmethod crud/delete resource-name
   [request]
@@ -179,8 +176,6 @@
 (defmethod crud/query resource-name
   [request]
   (query-impl request))
-
-
 
 ;;; Upload URL operation
 

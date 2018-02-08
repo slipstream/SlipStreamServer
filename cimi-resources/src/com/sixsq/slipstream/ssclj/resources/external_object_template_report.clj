@@ -4,13 +4,9 @@
     [com.sixsq.slipstream.ssclj.resources.external-object-template :as eo]
     [com.sixsq.slipstream.ssclj.resources.spec.external-object-template :as eot]
     [com.sixsq.slipstream.ssclj.util.spec :as su]
-    [clojure.spec.alpha :as s])
-  )
+    [clojure.spec.alpha :as s]))
 
 (def ^:const objectType "report")
-
-
-
 
 ;; Defines the contents of the report ExternalObjectTemplate resource itself.
 (s/def :cimi/external-object-template.report
@@ -25,7 +21,6 @@
   (su/only-keys-maps eot/create-keys-spec
                      {:opt-un [:cimi.external-object-template.report/externalObjectTemplate]}))
 
-
 (def ExternalObjectTemplateReportDescription eo/ExternalObjectTemplateDescription)
 
 ;;
@@ -34,7 +29,6 @@
 (def ^:const resource
   {:objectType objectType
    :state "new"})
-
 
 ;;
 ;; description

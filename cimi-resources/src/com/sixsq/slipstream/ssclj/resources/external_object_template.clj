@@ -33,12 +33,9 @@
                               :type      "ROLE"
                               :right     "VIEW"}]})
 
-
 ;;
 ;; Resource defaults
 ;;
-
-
 
 (def external-object-reference-attrs-defaults
   {:state "new"})
@@ -139,7 +136,6 @@
   resource-uri
   [resource]
   (validate-subtype resource))
-
 
 ;;
 ;; CRUD operations

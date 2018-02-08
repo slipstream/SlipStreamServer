@@ -17,7 +17,6 @@
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
-
 (deftest lifecycle
   (let [href (str eot/resource-url "/" report/objectType)
         template-url (str p/service-context eot/resource-url "/" report/objectType)
@@ -36,9 +35,7 @@
         valid-create {:externalObjectTemplate (ltu/strip-unwanted-attrs (merge template {:state "new"}))}
 
         href-create {:externalObjectTemplate {:href href}}
-        invalid-create (assoc-in valid-create [:externalObjectTemplate :invalid] "BAD")
-
-        ]
+        invalid-create (assoc-in valid-create [:externalObjectTemplate :invalid] "BAD")]
 
     ;; anonymous create should fail
     (-> session-anon
@@ -139,7 +136,6 @@
                   (ltu/location))
           abs-uri (str p/service-context (u/de-camelcase uri))]
 
-
       ;; admin delete succeeds
       (-> session-admin
           (request abs-uri
@@ -203,9 +199,7 @@
 
         template (get-in resp [:response :body])
 
-        valid-create {:externalObjectTemplate (ltu/strip-unwanted-attrs template)}
-
-        ]
+        valid-create {:externalObjectTemplate (ltu/strip-unwanted-attrs template)}]
 
     (let [uri (-> session-admin
                   (request base-uri
