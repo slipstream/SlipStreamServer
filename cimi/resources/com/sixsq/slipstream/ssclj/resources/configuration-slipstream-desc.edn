@@ -48,7 +48,7 @@
 
  :mailPort
  {:displayName "slipstream.mail.port"
-  :type "int"
+  :type "string"
   :category "SlipStream_Support"
   :description "Port on SMTP server (defaults to standard ports)."
   :mandatory true
