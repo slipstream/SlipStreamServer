@@ -89,7 +89,7 @@
           (is (:acl desc-body))
 
           #_(is (thrown-with-msg? ExceptionInfo #".*resource does not satisfy defined schema.*" (crud/validate entry-body)))
-          (is (crud/validate (assoc entry-body :instanceName "alpha-omega")))
+          (is (crud/validate entry-body ))
 
           ;; anonymous access not permitted
           (-> session-anon
@@ -152,8 +152,8 @@
           (is (:objectType desc-body))
           (is (:acl desc-body))
 
-          (is (thrown-with-msg? ExceptionInfo #".*resource does not satisfy defined schema.*" (crud/validate entry-body)))
-          (is (crud/validate (assoc entry-body :instanceName "alpha-omega")))
+
+          (is (crud/validate entry-body ))
 
           ;; anonymous access not permitted
           (-> session-anon

@@ -33,11 +33,10 @@
                  (ltu/is-status 200))
         template (get-in resp [:response :body])
         valid-create {:externalObjectTemplate (ltu/strip-unwanted-attrs (merge template {:alphaKey     2001
-                                                                                         :instanceName "alpha-omega"
                                                                                          :state        "new"}))}
         href-create {:externalObjectTemplate {:href         href
                                               :alphaKey     3001
-                                              :instanceName "alpha-omega"}}
+                                              }}
         invalid-create (assoc-in valid-create [:externalObjectTemplate :invalid] "BAD")]
 
 
@@ -54,8 +53,7 @@
         (request base-uri
                  :request-method :post
                  :body (json/write-str (-> valid-create
-                                           (assoc-in [:externalObjectTemplate :alphaKey] 2003)
-                                           (assoc-in [:externalObjectTemplate :instanceName] "alpha-user"))))
+                                           (assoc-in [:externalObjectTemplate :alphaKey] 2003))))
         (ltu/body->edn)
         (ltu/is-status 201))
 
@@ -210,8 +208,7 @@
 
         template (get-in resp [:response :body])
 
-        valid-create {:externalObjectTemplate (ltu/strip-unwanted-attrs (merge template {:alphaKey     2002
-                                                                                         :instanceName "alpha-gamma"}))}
+        valid-create {:externalObjectTemplate (ltu/strip-unwanted-attrs (merge template {:alphaKey     2002}))}
 
         ]
 
@@ -235,8 +232,7 @@
                        (request tu/base-uri
                                 :request-method :post
                                 :body (json/write-str (-> valid-create
-                                                          (assoc-in [:externalObjectTemplate :alphaKey] 2003)
-                                                          (assoc-in [:externalObjectTemplate :instanceName] "alpha-user"))))
+                                                          (assoc-in [:externalObjectTemplate :alphaKey] 2003))))
                        (ltu/body->edn)
                        (ltu/is-status 201)
                        (ltu/location)
@@ -263,8 +259,7 @@
           ;;upload should be possible for ADMIN
           upload-resp (-> session-admin
                           (request abs-upload-uri
-                                   :request-method :post
-                                   )
+                                   :request-method :post)
                           (ltu/body->edn)
                           (ltu/is-status 200)
                           :response
@@ -293,7 +288,7 @@
 
 
       ;;the reponse of an upload operation contains the uploadUri
-      (is (:uploadUri upload-resp))
+      (is (:uri upload-resp))
 
 
       ;;Check that you can now request upload twice
@@ -308,8 +303,7 @@
           :body)
       (-> session-admin
           (request abs-upload-uri
-                   :request-method :post
-                   )
+                   :request-method :post)
           (ltu/body->edn)
           (ltu/is-status 400)
           :response
@@ -348,8 +342,7 @@
 
         template (get-in resp [:response :body])
 
-        valid-create {:externalObjectTemplate (ltu/strip-unwanted-attrs (merge template {:alphaKey     3002
-                                                                                         :instanceName "alpha-delta"}))}
+        valid-create {:externalObjectTemplate (ltu/strip-unwanted-attrs (merge template {:alphaKey     3002}))}
 
         ]
 
@@ -373,8 +366,7 @@
                        (request tu/base-uri
                                 :request-method :post
                                 :body (json/write-str (-> valid-create
-                                                          (assoc-in [:externalObjectTemplate :alphaKey] 2003)
-                                                          (assoc-in [:externalObjectTemplate :instanceName] "alpha-user"))))
+                                                          (assoc-in [:externalObjectTemplate :alphaKey] 2003))))
                        (ltu/body->edn)
                        (ltu/is-status 201))
           abs-uri (str p/service-context (u/de-camelcase uri))
@@ -421,11 +413,20 @@
 
           ]
 
+      (let [dl-resp (-> session-admin
+                        (request abs-download-uri
+                                 :request-method :post)
+                        (ltu/body->edn)
+                        (ltu/is-status 200)
+                        :response
+                        :body)]
+        ;;download response should contain the download URL link
+        (is (:uri dl-resp))
 
+        )
       (-> session-admin
           (request abs-download-uri
-                   :request-method :post
-                   )
+                   :request-method :post)
           (ltu/body->edn)
           (ltu/is-status 200)
           :response

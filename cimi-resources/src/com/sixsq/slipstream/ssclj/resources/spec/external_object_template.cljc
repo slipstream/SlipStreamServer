@@ -7,10 +7,6 @@
 ;; All external object resources must have a 'type' attribute.
 (s/def :cimi.external-object-template/objectType :cimi.core/identifier)
 
-;; All external object resources must have a 'instance' attribute that is used in
-;; the template identifier.
-(s/def :cimi.external-object-template/instanceName :cimi.core/identifier)
-
 
 ;;External object resources may have a 'uri' attribute to keep track
 ;;of their location
@@ -29,7 +25,6 @@
 ;; Keys specifications for ExternalObjectTemplate resources.
 
 (def external-object-template-keys-spec {:req-un [:cimi.external-object-template/objectType
-                                                  :cimi.external-object-template/instanceName
                                                   :cimi.external-object-template/state
                                                   ]
                                          :opt-un [:cimi.external-object-template/uri]})

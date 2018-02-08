@@ -46,7 +46,7 @@
   (if (= state eo/state-new)
     (do
       (log/warn "Requesting upload url for external object : " id)
-      (assoc resource :state eo/state-ready :uploadUri "file://foo"))
+      (assoc resource :state eo/state-ready :uri "file://foo"))
     (logu/log-and-throw-400 "Upload url request is not allowed")))
 
 (defmethod eo/upload-subtype objectType
@@ -66,7 +66,7 @@
   (if (= state eo/state-ready)
     (do
       (log/warn "Requesting download url for external object : " id)
-      (assoc resource :downloadUri "file://foo/bar"))
+      (assoc resource :uri "file://foo/bar"))
     (logu/log-and-throw-400 "Getting download  url request is not allowed")))
 
 (defmethod eo/download-subtype objectType

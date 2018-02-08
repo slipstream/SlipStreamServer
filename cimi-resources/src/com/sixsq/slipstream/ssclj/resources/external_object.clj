@@ -180,14 +180,6 @@
   [request]
   (query-impl request))
 
-;;
-;; use name as the identifier
-;;
-
-(defmethod crud/new-identifier resource-name
-  [resource resource-name]
-  (if-let [new-id (:instanceName resource)]
-    (assoc resource :id (str (u/de-camelcase resource-name) "/" new-id))))
 
 
 ;;; Upload URL operation

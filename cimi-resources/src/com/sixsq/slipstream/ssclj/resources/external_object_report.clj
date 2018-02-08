@@ -3,6 +3,7 @@
     [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
     [com.sixsq.slipstream.ssclj.resources.external-object-template-report :as tpl]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.external-object.utils :as s3]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.auth.acl :as a]
     [clojure.tools.logging :as log]
@@ -11,7 +12,6 @@
 
 (def ^:const objectType "report")
 
-
 (def ExternalObjectReportDescription
   tpl/ExternalObjectTemplateReportDescription)
 
@@ -19,6 +19,10 @@
 ;; description
 ;;
 (def ^:const desc ExternalObjectReportDescription)
+
+;; S3 pre-signed-URLs
+(def ^:const report-bucket "slipstream-reports") ;;single bucket containing reports, must exist
+(def ^:const default-ttl 15) ;; presigned URL time in mn before expiration
 
 ;;
 ;; multimethods for validation
@@ -36,11 +40,12 @@
 
 ;; Upload URL request operation
 (defn upload-fn
-  [{state :state id :id :as resource} request]
+  [{state :state id :id :as resource} {{ttl :ttl} :body :as request}]
+  (clojure.pprint/pprint ttl)
   (if (= state eo/state-new)
     (do
       (log/warn "Requesting upload url for report  : " id)
-      (assoc resource :state eo/state-ready :uploadUri "file://foo"))
+      (assoc resource :state eo/state-ready :uri (s3/generate-url report-bucket id (or ttl default-ttl) true)))
     (logu/log-and-throw-400 "Upload url request is not allowed")))
 
 (defmethod eo/upload-subtype objectType
@@ -56,11 +61,11 @@
 
 ;; Download URL request operation
 (defn download-fn
-  [{state :state id :id :as resource} request]
+  [{state :state id :id :as resource}  {{ttl :ttl} :body :as request}]
   (if (= state eo/state-ready)
     (do
       (log/warn "Requesting download url for report : " id)
-      (assoc resource :downloadUri "file://foo/bar"))
+      (assoc resource :uri (s3/generate-url report-bucket id (or ttl default-ttl))))
     (logu/log-and-throw-400 "Getting download  url request is not allowed")))
 
 (defmethod eo/download-subtype objectType

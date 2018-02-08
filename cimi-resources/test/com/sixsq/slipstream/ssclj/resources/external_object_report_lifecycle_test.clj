@@ -13,7 +13,6 @@
             [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
             [com.sixsq.slipstream.db.impl :as db]))
 
-
 (use-fixtures :each ltu/with-test-server-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
@@ -34,16 +33,10 @@
                  (ltu/body->edn)
                  (ltu/is-status 200))
         template (get-in resp [:response :body])
-        valid-create {:externalObjectTemplate (ltu/strip-unwanted-attrs (merge template {:reportKey     2
-                                                                                         :instanceName "report-a"
-                                                                                         :state        "new"}))}
+        valid-create {:externalObjectTemplate (ltu/strip-unwanted-attrs (merge template {:state "new"}))}
 
-        href-create {:externalObjectTemplate {:href         href
-                                              :reportKey     3
-                                              :instanceName "report-b"}}
+        href-create {:externalObjectTemplate {:href href}}
         invalid-create (assoc-in valid-create [:externalObjectTemplate :invalid] "BAD")
-
-
 
         ]
 
@@ -59,9 +52,7 @@
     (-> session-user
         (request base-uri
                  :request-method :post
-                 :body (json/write-str (-> valid-create
-                                           (assoc-in [:externalObjectTemplate :reportKey] 4)
-                                           (assoc-in [:externalObjectTemplate :instanceName] "report-user"))))
+                 :body (json/write-str valid-create))
         (ltu/body->edn)
         (ltu/is-status 201))
 
@@ -175,14 +166,11 @@
   (let [m (-> s
               (request uri)
               (ltu/body->edn))
-
         new-report (-> m
-                   :response
-                   :body
-                   (assoc :state eo/state-new)
-                   (dissoc :uploadUri)
-                   )]
-
+                       :response
+                       :body
+                       (assoc :state eo/state-new)
+                       (dissoc :uri))]
     (db/edit new-report (:request m))))
 
 ;; Upload url request operation
@@ -215,8 +203,7 @@
 
         template (get-in resp [:response :body])
 
-        valid-create {:externalObjectTemplate (ltu/strip-unwanted-attrs (merge template {:reportKey     2002
-                                                                                         :instanceName "report-upl"}))}
+        valid-create {:externalObjectTemplate (ltu/strip-unwanted-attrs template)}
 
         ]
 
@@ -239,9 +226,7 @@
           uri-user (-> session-user
                        (request tu/base-uri
                                 :request-method :post
-                                :body (json/write-str (-> valid-create
-                                                          (assoc-in [:externalObjectTemplate :reportKey] 2003)
-                                                          (assoc-in [:externalObjectTemplate :instanceName] "report-user-ul"))))
+                                :body (json/write-str valid-create))
                        (ltu/body->edn)
                        (ltu/is-status 201)
                        (ltu/location)
@@ -297,16 +282,16 @@
           :body)
 
 
-      ;;the reponse of an upload operation contains the uploadUri
-      (is (:uploadUri upload-resp))
+      ;;the reponse of an upload operation contains the uri
+      (is (:uri upload-resp))
 
 
-      ;;Check that you can now request upload twice
+      ;;Check that you can not request upload twice (no reset! called here)
       ;; (state has been set to ready after first request)
       (-> session-admin
           (request abs-upload-uri
                    :request-method :post
-                   )
+                   :body (json/write-str {:ttl 15}))        ;; upload URL valid for the next 15 mn
           (ltu/body->edn)
           (ltu/is-status 200)
           :response
@@ -353,8 +338,7 @@
 
         template (get-in resp [:response :body])
 
-        valid-create {:externalObjectTemplate (ltu/strip-unwanted-attrs (merge template {:reportKey     3002
-                                                                                         :instanceName "report-dnl"}))}
+        valid-create {:externalObjectTemplate (ltu/strip-unwanted-attrs template)}
 
         ]
 
@@ -377,9 +361,7 @@
           uri-user (-> session-user
                        (request tu/base-uri
                                 :request-method :post
-                                :body (json/write-str (-> valid-create
-                                                          (assoc-in [:externalObjectTemplate :reportKey] 2003)
-                                                          (assoc-in [:externalObjectTemplate :instanceName] "report-user-dl"))))
+                                :body (json/write-str valid-create))
                        (ltu/body->edn)
                        (ltu/is-status 201))
           abs-uri (str p/service-context (u/de-camelcase uri))
@@ -416,7 +398,7 @@
           upload-resp (-> session-admin
                           (request abs-upload-uri
                                    :request-method :post
-                                   )
+                                   :body (json/write-str {:ttl 15})) ;; upload URL valid for the next 15 mn
                           (ltu/body->edn)
                           (ltu/is-status 200)
                           :response
@@ -430,7 +412,7 @@
       (-> session-admin
           (request abs-download-uri
                    :request-method :post
-                   )
+                   :body (json/write-str {:ttl 15}))        ;; URL valid for the next 15 mn
           (ltu/body->edn)
           (ltu/is-status 200)
           :response
@@ -460,13 +442,8 @@
       (-> session-admin
           (request abs-download-uri
                    :request-method :post
-                   )
+                   :body (json/write-str {:ttl 15}))        ;;  URL valid for the next 15 mn
           (ltu/body->edn)
           (ltu/is-status 200)
           :response
-          :body)
-
-      )
-    )
-
-  )
+          :body))))

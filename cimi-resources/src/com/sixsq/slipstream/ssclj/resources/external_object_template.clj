@@ -38,11 +38,7 @@
 ;; Resource defaults
 ;;
 
-(def external-object-instance-name-default
-  {:instanceName "Provide valid external instance name."})
 
-(def external-object-mandatory-reference-attrs-defaults
-  {})
 
 (def external-object-reference-attrs-defaults
   {:state "new"})
@@ -79,8 +75,7 @@
                   :resourceURI resource-uri
                   :acl         resource-acl
                   :operations  ops})
-          (merge external-object-mandatory-reference-attrs-defaults)
-          (merge external-object-instance-name-default)
+          (merge external-object-reference-attrs-defaults)
           u/update-timestamps))))
 
 (defn register
@@ -145,15 +140,6 @@
   [resource]
   (validate-subtype resource))
 
-
-;;
-;; identifiers for these resources are the same as the :instanceName value
-;;
-(defmethod crud/new-identifier resource-name
-  [{:keys [instanceName] :as resource} resource-name]
-  (->> instanceName
-       (str resource-url "/")
-       (assoc resource :id)))
 
 ;;
 ;; CRUD operations

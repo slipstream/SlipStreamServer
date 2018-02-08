@@ -22,7 +22,6 @@
               :created             timestamp
               :updated             timestamp
               :acl                 valid-acl
-              :instanceName           "foo"
               :objectType               "report"
               :state "new"}]
 
@@ -30,7 +29,7 @@
     (is (s/valid? :cimi.test/externalObject root))
 
     ;;mandatory keywords
-    (doseq [k #{:objectType :instanceName :id :resourceURI :state}]
+    (doseq [k #{:objectType :id :resourceURI :state}]
       (is (not (s/valid? :cimi.test/externalObject (dissoc root k)))))
 
     ;; optional keywords
