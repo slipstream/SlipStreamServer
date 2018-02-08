@@ -4,7 +4,10 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.auth.acl :as a]))
+    [com.sixsq.slipstream.ssclj.resources.configuration-template :as conf-tmpl]
+    [com.sixsq.slipstream.auth.acl :as a]
+    [com.sixsq.slipstream.util.response :as r])
+  (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-tag :configurations)
 
@@ -76,10 +79,11 @@
 
 ;; default implementation just removes href and updates the resourceURI
 (defmethod tpl->configuration :default
-  [resource]
-  (-> resource
-      (dissoc :href)
-      (assoc :resourceURI resource-uri)))
+  [{:keys [href] :as resource}]
+  (cond-> resource
+      href (assoc :configurationTemplate {:href href})
+      true (dissoc :href)
+      true (assoc :resourceURI resource-uri)))
 
 ;;
 ;; CRUD operations
@@ -94,7 +98,7 @@
         desc-attrs (u/select-desc-keys body)
         body (-> body
                  (assoc :resourceURI create-uri)
-                 (std-crud/resolve-hrefs idmap)
+                 (std-crud/resolve-hrefs idmap true)
                  (update-in [:configurationTemplate] merge desc-attrs) ;; validate desc attrs
                  (crud/validate)
                  (:configurationTemplate)
@@ -124,6 +128,29 @@
 (defmethod crud/query resource-name
   [request]
   (query-impl request))
+
+;;
+;; actions
+;;
+
+(defmethod crud/set-operations resource-uri
+  [{:keys [id resourceURI username configurationTemplate] :as resource} request]
+  (let [href (str id "/describe")
+        describe-op {:rel (:describe c/action-uri) :href href}]
+    (cond-> (crud/set-standard-operations resource request)
+            (get configurationTemplate :href) (update-in [:operations] conj describe-op))))
+
+(defmethod crud/do-action [resource-url "describe"]
+  [{{uuid :uuid} :params :as request}]
+  (try
+    (let [template-id (-> request
+                          (retrieve-impl)
+                          (get-in [:body :configurationTemplate :href]))]
+      (-> (get @conf-tmpl/descriptions template-id)
+          (a/can-view? request)
+          (r/json-response)))
+    (catch ExceptionInfo ei
+      (ex-data ei))))
 
 ;;
 ;; use service as the identifier
