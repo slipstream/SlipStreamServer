@@ -41,7 +41,7 @@
 ;; Upload URL request operation
 (defn upload-fn
   [{state :state id :id :as resource} {{ttl :ttl} :body :as request}]
-  (clojure.pprint/pprint ttl)
+
   (if (= state eo/state-new)
     (do
       (log/warn "Requesting upload url for report  : " id)
