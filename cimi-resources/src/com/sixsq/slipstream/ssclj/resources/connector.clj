@@ -5,7 +5,9 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.auth.acl :as a])
+    [com.sixsq.slipstream.auth.acl :as a]
+    [com.sixsq.slipstream.util.response :as r]
+    [com.sixsq.slipstream.ssclj.resources.connector-template :as connector-tmpl])
   (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-tag :connectors)
@@ -82,8 +84,11 @@
 
 ;; default implementation just updates the resourceURI
 (defmethod tpl->connector :default
-  [resource]
-  (assoc resource :resourceURI resource-uri))
+  [{:keys [href] :as resource}]
+  (cond-> resource
+          href (assoc :connectorTemplate {:href href})
+          true (dissoc :href)
+          true (assoc :resourceURI resource-uri)))
 
 ;;
 ;; CRUD operations
@@ -97,7 +102,7 @@
   (let [idmap {:identity (:identity request)}
         body (-> body
                  (assoc :resourceURI create-uri)
-                 (std-crud/resolve-hrefs idmap)
+                 (std-crud/resolve-hrefs idmap true)
                  (crud/validate)
                  (:connectorTemplate)
                  (tpl->connector))]
@@ -167,8 +172,8 @@
   [resource _]
   (let [err-msg (str "unknown Connector type: " (:cloudServiceType resource))]
     (throw (ex-info err-msg {:status  400
-                        :message err-msg
-                        :body    resource}))))
+                             :message err-msg
+                             :body    resource}))))
 
 (defmethod crud/do-action [resource-url "quarantine"]
   [{{uuid :uuid} :params :as request}]
@@ -180,6 +185,18 @@
     (catch ExceptionInfo ei
       (ex-data ei))))
 
+(defmethod crud/do-action [resource-url "describe"]
+  [{{uuid :uuid} :params :as request}]
+  (try
+    (let [template-id (-> request
+                          (retrieve-impl)
+                          (get-in [:body :connectorTemplate :href]))]
+      (-> (get @connector-tmpl/descriptions template-id)
+          (a/can-view? request)
+          (r/json-response)))
+    (catch ExceptionInfo ei
+      (ex-data ei))))
+
 (defmulti set-subtype-ops
           (fn [resource _] (:cloudServiceType resource)))
 
@@ -188,5 +205,9 @@
   (crud/set-standard-operations resource request))
 
 (defmethod crud/set-operations resource-uri
-  [resource request]
-  (set-subtype-ops resource request))
+  [{:keys [id resourceURI username connectorTemplate] :as resource} request]
+  (let [href (str id "/describe")
+        describe-op {:rel (:describe c/action-uri) :href href}]
+    (cond-> (set-subtype-ops resource request)
+            (get connectorTemplate :href) (update-in [:operations] conj describe-op))))
+
