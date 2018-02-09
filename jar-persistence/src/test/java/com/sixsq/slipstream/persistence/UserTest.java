@@ -24,7 +24,7 @@ import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.exceptions.*;
 import com.sixsq.slipstream.persistence.User.State;
-import com.sixsq.slipstream.ssclj.app.SscljTestServer;
+import com.sixsq.slipstream.ssclj.app.CIMITestServer;
 import com.sixsq.slipstream.user.UserView;
 import com.sixsq.slipstream.util.SerializationUtil;
 import org.junit.After;
@@ -49,19 +49,19 @@ public class UserTest {
 
 	@BeforeClass
 	public static void setupClass() {
-		SscljTestServer.start();
+		CIMITestServer.start();
 	}
 
 	@AfterClass
 	public static void teardownClass() {
-		SscljTestServer.stop();
+		CIMITestServer.stop();
 	}
 
 	@Before
 	public void setup() {
 		user = createUser("test");
 		user = storeUser(user);
-		SscljTestServer.refresh();
+		CIMITestServer.refresh();
 	}
 
 	public static User storeUser(User user) {
@@ -74,11 +74,11 @@ public class UserTest {
 	}
 
 	public void removeAllUsers() {
-		SscljTestServer.refresh();
+		CIMITestServer.refresh();
 		for(User u : User.list()) {
 			u.remove();
 		}
-		SscljTestServer.refresh();
+		CIMITestServer.refresh();
 	}
 
 	@Test
@@ -119,7 +119,7 @@ public class UserTest {
 
 		User user = UserTest.createUser(name);
 		user.store();
-		SscljTestServer.refresh();
+		CIMITestServer.refresh();
 
 		User userRestored = User.loadByName(name);
 		assertNotNull(userRestored);
@@ -143,7 +143,7 @@ public class UserTest {
 		String username = "dummy";
 
 		User user = UserTest.createUser(username).store();
-		SscljTestServer.refresh();
+		CIMITestServer.refresh();
 
 		String resourceUrl = user.getResourceUri();
 
@@ -157,7 +157,7 @@ public class UserTest {
 		user.setParameter(parameter);
 
 		user.store();
-		SscljTestServer.refresh();
+		CIMITestServer.refresh();
 
 		User restored = User.loadByName(username);
 		assertNotNull(restored);
@@ -173,7 +173,7 @@ public class UserTest {
 		assertFalse(parameter.getDescription().isEmpty());
 
 		restored.remove();
-		SscljTestServer.refresh();
+		CIMITestServer.refresh();
 		user = User.loadByName(username);
 		assertNull(user);
 	}
@@ -321,14 +321,14 @@ public class UserTest {
 		removeAllUsers();
 		assertFalse(User.isSuperAlone());
 		UserTest.createUser("user").store();
-		SscljTestServer.refresh();
+		CIMITestServer.refresh();
 		assertFalse(User.isSuperAlone());
 		UserTest.createUser("super").store();
-		SscljTestServer.refresh();
+		CIMITestServer.refresh();
 		assertFalse(User.isSuperAlone());
 		removeAllUsers();
 		UserTest.createUser("super").store();
-		SscljTestServer.refresh();
+		CIMITestServer.refresh();
 		assertTrue(User.isSuperAlone());
 	}
 
@@ -342,7 +342,7 @@ public class UserTest {
 		}
 		if (user != null) {
 			user.remove();
-			SscljTestServer.refresh();
+			CIMITestServer.refresh();
 		}
 		try {
 			user = new User(name);

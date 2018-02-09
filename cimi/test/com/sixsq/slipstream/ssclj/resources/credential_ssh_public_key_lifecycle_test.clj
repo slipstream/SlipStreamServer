@@ -7,22 +7,17 @@
     [com.sixsq.slipstream.ssclj.resources.credential-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.credential-template-ssh-public-key :as spk]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-    [com.sixsq.slipstream.auth.internal :as auth-internal]
-    [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.credential.ssh-utils :as ssh-utils]
     [com.sixsq.slipstream.ssclj.resources.credential-template-ssh-key-pair :as skp]))
 
-(use-fixtures :each ltu/with-test-es-client-fixture)
+(use-fixtures :each ltu/with-test-server-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase credential/resource-url)))
 
-;; initialize must to called to pull in CredentialTemplate resources
-(dyn/initialize)
 
 (deftest lifecycle-import
   (let [session (-> (ltu/ring-app)

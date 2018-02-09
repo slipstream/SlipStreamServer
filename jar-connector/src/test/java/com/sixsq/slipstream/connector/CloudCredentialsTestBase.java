@@ -30,7 +30,7 @@ import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
-import com.sixsq.slipstream.ssclj.app.SscljTestServer;
+import com.sixsq.slipstream.ssclj.app.CIMITestServer;
 import com.sixsq.slipstream.util.CommonTestUtil;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -58,7 +58,7 @@ public abstract class CloudCredentialsTestBase implements
 
 	@BeforeClass
 	public static void setupClass() throws ValidationException {
-		SscljTestServer.start();
+		CIMITestServer.start();
 		CljElasticsearchHelper.initTestDb();
 		enableQuota();
 	}
@@ -70,19 +70,19 @@ public abstract class CloudCredentialsTestBase implements
 		quotaParam.setValue("true");
 		sc.setParameter(quotaParam);
 		sc.store();
-		SscljTestServer.refresh();
+		CIMITestServer.refresh();
 	}
 
 	@AfterClass
 	public static void teardownClass() {
-		SscljTestServer.stop();
+		CIMITestServer.stop();
 	}
 
 	@Before
 	public void setup() {
 		user = createUser("test");
 		user = storeUser(user);
-		SscljTestServer.refresh();
+		CIMITestServer.refresh();
 
 		// Create connector.
 		try {
@@ -121,11 +121,11 @@ public abstract class CloudCredentialsTestBase implements
 	}
 
 	public void removeAllUsers() {
-		SscljTestServer.refresh();
+		CIMITestServer.refresh();
 		for(User u : User.list()) {
 			u.remove();
 		}
-		SscljTestServer.refresh();
+		CIMITestServer.refresh();
 	}
 
 	public static boolean isInteger(String v) {
@@ -141,7 +141,7 @@ public abstract class CloudCredentialsTestBase implements
 	public void cloudCredentialsLifecycle() throws ValidationException {
 
 		Map<String, UserParameter> params = createAndStoreCloudCredentials();
-		SscljTestServer.refresh();
+		CIMITestServer.refresh();
 
 		// Loaded user has the cloud credential parameters.
 		User u1 = User.loadByName(user.getName());
@@ -164,7 +164,7 @@ public abstract class CloudCredentialsTestBase implements
 			p.setValue(newValue);
 			user.setParameter(p);
 			user.store();
-			SscljTestServer.refresh();
+			CIMITestServer.refresh();
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
@@ -187,7 +187,7 @@ public abstract class CloudCredentialsTestBase implements
 		}
 		if (user != null) {
 			user.remove();
-			SscljTestServer.refresh();
+			CIMITestServer.refresh();
 		}
 		try {
 			user = new User(name);

@@ -7,7 +7,6 @@
 
     [com.sixsq.slipstream.auth.cyclone :as auth-cyclone]
     [com.sixsq.slipstream.auth.external :as ex]
-    [com.sixsq.slipstream.auth.internal :as auth-internal]
     [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.auth.utils.sign :as sign]
     [com.sixsq.slipstream.ssclj.app.params :as p]
@@ -16,22 +15,18 @@
     [com.sixsq.slipstream.ssclj.resources.session-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.session-template-cyclone :as cyclone]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.session-template :as st]
     [com.sixsq.slipstream.ssclj.resources.configuration :as configuration]))
 
-(use-fixtures :each ltu/with-test-es-client-fixture)
+(use-fixtures :each ltu/with-test-server-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase session/resource-name)))
 
 (def configuration-base-uri (str p/service-context (u/de-camelcase configuration/resource-name)))
 
 (def session-template-base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
-
-;; initialize must to called to pull in SessionTemplate test examples
-(dyn/initialize)
 
 (def instance "test-cyclone")
 (def session-template-cyclone {:method      cyclone/authn-method

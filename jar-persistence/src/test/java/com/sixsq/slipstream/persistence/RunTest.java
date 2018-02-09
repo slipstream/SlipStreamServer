@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.sixsq.slipstream.event.Event;
-import com.sixsq.slipstream.ssclj.app.SscljTestServer;
+import com.sixsq.slipstream.ssclj.app.CIMITestServer;
 import org.hibernate.LazyInitializationException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -50,13 +50,13 @@ public class RunTest {
 
 	@BeforeClass
 	public static void setupClass() {
-		SscljTestServer.start();
+		CIMITestServer.start();
 		Event.muteForTests();
 	}
 
 	@AfterClass
 	public static void teardownClass() {
-		SscljTestServer.stop();
+		CIMITestServer.stop();
 	}
 
 	@Test

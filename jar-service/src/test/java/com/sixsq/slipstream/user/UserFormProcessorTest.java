@@ -25,7 +25,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
-import com.sixsq.slipstream.ssclj.app.SscljTestServer;
+import com.sixsq.slipstream.ssclj.app.CIMITestServer;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -51,12 +51,12 @@ public class UserFormProcessorTest {
 
 	@BeforeClass
 	public static void setupClass() throws Exception {
-		SscljTestServer.start();
+		CIMITestServer.start();
 	}
 
 	@AfterClass
 	public static void teardownClass() throws Exception {
-		SscljTestServer.stop();
+		CIMITestServer.stop();
 	}
 
 	@Before

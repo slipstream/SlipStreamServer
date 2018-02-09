@@ -95,8 +95,6 @@
    precedence. Common attributes in the referenced resource are stripped. If
    :href doesn't exist the argument is returned unchanged.
 
-   The :href attributes are removed from the result.
-
    If a referenced document doesn't exist or if the user doesn't have read
    access to the document, then the method will throw."
   [{:keys [href] :as resource} idmap]

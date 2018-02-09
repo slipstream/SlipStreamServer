@@ -1,18 +1,12 @@
 (ns com.sixsq.slipstream.auth.test-helper
   (:refer-clojure :exclude [update])
   (:require
-    [clojure.test :refer :all]
-    [clojure.tools.logging :as log]
-    [clojure.string :as str]
     [com.sixsq.slipstream.db.es.utils :as esu]
     [com.sixsq.slipstream.db.es.binding :as esb]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.user :as ur]
     [com.sixsq.slipstream.ssclj.resources.user-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.user-template-auto :as auto]
-    [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.auth.internal :as ia]))
 
 (def rname ur/resource-url)
@@ -33,6 +27,7 @@
                    :route-params {:resource-name rname}
                    :body         req-template})
 
+
 (defn- user-request
   [user]
   (let [with-hashed-pass (assoc user :password (ia/hash-password (:password user)))
@@ -40,18 +35,11 @@
                                     with-hashed-pass)]
     request))
 
+
 (defn add-user-for-test!
   [user]
   (crud/add (user-request user)))
 
-(defn initialize-fixture
-  [f]
-  (dyn/initialize)
-  (f))
-
-(def ssclj-server-fixture (compose-fixtures
-                            ltu/with-test-es-client-fixture
-                            initialize-fixture))
 
 (defn es-db-dump
   [type]

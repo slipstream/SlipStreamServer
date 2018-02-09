@@ -3,6 +3,7 @@
     [clojure.test :refer [deftest are is]]
     [com.sixsq.slipstream.util.response :as r]))
 
+
 (deftest check-response-created
   (let [id "RESOURCE_ID"
         r (r/response-created id)]

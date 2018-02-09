@@ -21,7 +21,7 @@ package com.sixsq.slipstream.connector;
  */
 
 import com.sixsq.slipstream.es.CljElasticsearchHelper;
-import com.sixsq.slipstream.ssclj.app.SscljTestServer;
+import com.sixsq.slipstream.ssclj.app.CIMITestServer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
@@ -33,7 +33,7 @@ public class ConnectorTestBase {
     }
 
     public static void setupBackend() {
-        SscljTestServer.start();
+        CIMITestServer.start();
         CljElasticsearchHelper.initTestDb();
     }
 
@@ -43,6 +43,6 @@ public class ConnectorTestBase {
     }
 
     public static void teardownBackend() {
-        SscljTestServer.stop();
+        CIMITestServer.stop();
     }
 }

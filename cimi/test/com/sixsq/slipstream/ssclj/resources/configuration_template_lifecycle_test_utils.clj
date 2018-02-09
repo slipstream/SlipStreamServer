@@ -1,25 +1,19 @@
 (ns com.sixsq.slipstream.ssclj.resources.configuration-template-lifecycle-test-utils
   (:require
     [clojure.test :refer :all]
-    [clojure.data.json :as json]
     [peridot.core :refer :all]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream :as slipstream]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]))
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]))
 
-(use-fixtures :each ltu/with-test-es-client-fixture)
+(use-fixtures :each ltu/with-test-server-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 
-;; initialize must to called to pull in ConfigurationTemplate resources
-(dyn/initialize)
 
 (defn check-retrieve-by-id
   [service]

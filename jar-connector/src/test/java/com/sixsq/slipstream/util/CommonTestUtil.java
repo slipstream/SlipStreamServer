@@ -42,7 +42,7 @@ import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
-import com.sixsq.slipstream.ssclj.app.SscljTestServer;
+import com.sixsq.slipstream.ssclj.app.CIMITestServer;
 import org.restlet.Response;
 
 import java.io.UnsupportedEncodingException;
@@ -253,7 +253,7 @@ public abstract class CommonTestUtil {
 		try {
 			CommonTestUtil.lockAndLoadConnector(connectorName + ":" + cloudServiceName, cloudServiceName,
 					systemParamsFactory);
-			SscljTestServer.refresh();
+			CIMITestServer.refresh();
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("Failed to create connector " + connectorName + " with: " +

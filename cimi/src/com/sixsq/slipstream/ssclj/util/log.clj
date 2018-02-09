@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.util.log
-  (:require [clojure.tools.logging :as log]
-            [clojure.string :as str]
-            [com.sixsq.slipstream.util.response :as r]
-            [ring.util.response :as ring-resp]))
+  (:require
+    [clojure.tools.logging :as log]
+    [com.sixsq.slipstream.util.response :as r]
+    [ring.util.response :as ring-resp]))
 
 (defn log-and-throw
   "Logs the given message and returns an error response with the given status
