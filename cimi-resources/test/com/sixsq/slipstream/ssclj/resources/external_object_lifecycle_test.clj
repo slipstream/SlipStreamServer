@@ -4,7 +4,6 @@
             [com.sixsq.slipstream.ssclj.resources.external-object :refer :all]
             [com.sixsq.slipstream.ssclj.resources.external-object-template-alpha-example :as example]
             [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
-            [com.sixsq.slipstream.ssclj.resources.external-object-test-utils :as tu]
             [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
             [com.sixsq.slipstream.ssclj.app.params :as p]
             [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
@@ -205,7 +204,7 @@
         valid-create {:externalObjectTemplate (ltu/strip-unwanted-attrs (merge template {:alphaKey     2002}))}]
 
     (let [uri (-> session-admin
-                  (request tu/base-uri
+                  (request base-uri
                            :request-method :post
                            :body (json/write-str valid-create))
                   (ltu/body->edn)
@@ -214,14 +213,14 @@
 
           ;; anonymous create should fail
           uri-anon (-> session-anon
-                       (request tu/base-uri
+                       (request base-uri
                                 :request-method :post
                                 :body (json/write-str valid-create))
                        (ltu/body->edn)
                        (ltu/is-status 403))
           ;; user create should work
           uri-user (-> session-user
-                       (request tu/base-uri
+                       (request base-uri
                                 :request-method :post
                                 :body (json/write-str (-> valid-create
                                                           (assoc-in [:externalObjectTemplate :alphaKey] 2003))))
@@ -325,7 +324,7 @@
         valid-create {:externalObjectTemplate (ltu/strip-unwanted-attrs (merge template {:alphaKey  3002}))}]
 
     (let [uri (-> session-admin
-                  (request tu/base-uri
+                  (request base-uri
                            :request-method :post
                            :body (json/write-str valid-create))
                   (ltu/body->edn)
@@ -334,14 +333,14 @@
 
           ;; anonymous create should fail
           uri-anon (-> session-anon
-                       (request tu/base-uri
+                       (request base-uri
                                 :request-method :post
                                 :body (json/write-str valid-create))
                        (ltu/body->edn)
                        (ltu/is-status 403))
           ;; user create should work
           uri-user (-> session-user
-                       (request tu/base-uri
+                       (request base-uri
                                 :request-method :post
                                 :body (json/write-str (-> valid-create
                                                           (assoc-in [:externalObjectTemplate :alphaKey] 2003))))

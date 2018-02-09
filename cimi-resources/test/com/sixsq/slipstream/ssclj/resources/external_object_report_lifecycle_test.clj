@@ -8,7 +8,6 @@
             [com.sixsq.slipstream.ssclj.app.params :as p]
             [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
             [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
-            [com.sixsq.slipstream.ssclj.resources.external-object-test-utils :as tu]
             [clojure.data.json :as json]
             [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
             [com.sixsq.slipstream.db.impl :as db]))
@@ -211,14 +210,14 @@
 
           ;; anonymous create should fail
           uri-anon (-> session-anon
-                       (request tu/base-uri
+                       (request base-uri
                                 :request-method :post
                                 :body (json/write-str valid-create))
                        (ltu/body->edn)
                        (ltu/is-status 403))
           ;; user create should work
           uri-user (-> session-user
-                       (request tu/base-uri
+                       (request base-uri
                                 :request-method :post
                                 :body (json/write-str valid-create))
                        (ltu/body->edn)
@@ -302,7 +301,7 @@
         ]
 
     (let [uri (-> session-admin
-                  (request tu/base-uri
+                  (request base-uri
                            :request-method :post
                            :body (json/write-str valid-create))
                   (ltu/body->edn)
@@ -311,14 +310,14 @@
 
           ;; anonymous create should fail
           uri-anon (-> session-anon
-                       (request tu/base-uri
+                       (request base-uri
                                 :request-method :post
                                 :body (json/write-str valid-create))
                        (ltu/body->edn)
                        (ltu/is-status 403))
           ;; user create should work
           uri-user (-> session-user
-                       (request tu/base-uri
+                       (request base-uri
                                 :request-method :post
                                 :body (json/write-str valid-create))
                        (ltu/body->edn)
