@@ -35,6 +35,7 @@
          endpoint :endpoint})
       config)))
 
+
 (defn generate-url
   ([bucket k mn]
    (generate-url bucket k mn false))
@@ -44,6 +45,17 @@
        (if write?
          (generate-presigned-url (get-s3-cred) bucket k expiry "PUT")
          (generate-presigned-url (get-s3-cred) bucket k expiry))))))
+
+(defn delete-s3-object
+  [bucket k]
+  (let [cred (get-s3-cred)]
+    (with-credential [(:access-key cred)
+                      (:secret-key cred)
+                      (:endpoint cred)]
+                     (when (does-object-exist cred bucket k)
+                       (delete-object bucket k)))))
+
+
 
 
 

@@ -166,10 +166,7 @@
   [request]
   (retrieve-impl request))
 
-(def delete-impl (std-crud/delete-fn resource-name))
-(defmethod crud/delete resource-name
-  [request]
-  (delete-impl request))
+
 
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
 
@@ -220,3 +217,25 @@
           (download-subtype request)))
     (catch ExceptionInfo ei
       (ex-data ei))))
+
+
+(def delete-impl (std-crud/delete-fn resource-name))
+
+
+(defmulti delete-subtype
+          (fn [resource _] (:objectType resource)))
+
+(defmethod delete-subtype :default
+  [_ request]
+  (delete-impl request))
+
+(defmethod crud/delete resource-name
+  [{{uuid :uuid} :params :as request}]
+  (try
+    (let [id (str resource-url "/" uuid)]
+      (-> (crud/retrieve-by-id id {:user-name  "INTERNAL"
+                                   :user-roles ["ADMIN"]})
+          (delete-subtype request)))
+    (catch ExceptionInfo ei
+      (ex-data ei))))
+
