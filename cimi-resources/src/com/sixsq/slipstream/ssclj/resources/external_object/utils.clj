@@ -7,7 +7,8 @@
             [clj-time.core :as t]
             [clj-http.client :as client]))
 
-(def ^:const cred
+(defn get-s3-cred
+  []
   (let [access "aws_access_key_id"
         secret "aws_secret_access_key"
         endpoint "aws_endpoint"
@@ -38,11 +39,11 @@
   ([bucket k mn]
    (generate-url bucket k mn false))
   ([bucket k mn write?]
-    (let [expiry (-> mn t/minutes t/from-now)]
-   (.toString
-     (if write?
-       (generate-presigned-url cred bucket k expiry "PUT")
-       (generate-presigned-url cred bucket k expiry))))))
+   (let [expiry (-> mn t/minutes t/from-now)]
+     (.toString
+       (if write?
+         (generate-presigned-url (get-s3-cred) bucket k expiry "PUT")
+         (generate-presigned-url (get-s3-cred) bucket k expiry))))))
 
 
 

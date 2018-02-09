@@ -244,15 +244,7 @@
 
           abs-upload-uri (str p/service-context (u/de-camelcase upload-op))
 
-          ;;upload should be possible for ADMIN
-          upload-resp (-> session-admin
-                          (request abs-upload-uri
-                                   :request-method :post
-                                   )
-                          (ltu/body->edn)
-                          (ltu/is-status 200)
-                          :response
-                          :body)
+
           reset! (fn [] (reset-state! session-admin abs-uri))]
 
       (reset!)
@@ -275,32 +267,8 @@
           :response
           :body)
 
-
-      ;;the reponse of an upload operation contains the uri
-      (is (:uri upload-resp))
-
-
-      ;;Check that you can not request upload twice (no reset! called here)
-      ;; (state has been set to ready after first request)
-      (-> session-admin
-          (request abs-upload-uri
-                   :request-method :post
-                   :body (json/write-str {:ttl 15}))        ;; upload URL valid for the next 15 mn
-          (ltu/body->edn)
-          (ltu/is-status 200)
-          :response
-          :body)
-      (-> session-admin
-          (request abs-upload-uri
-                   :request-method :post
-                   )
-          (ltu/body->edn)
-          (ltu/is-status 400)
-          :response
-          :body)
       )
-    )
-  )
+    ))
 
 ;; Download request
 
@@ -388,35 +356,11 @@
                                   :response
                                   :body)
 
-          ;;pre-required  upload
-          upload-resp (-> session-admin
-                          (request abs-upload-uri
-                                   :request-method :post
-                                   :body (json/write-str {:ttl 15})) ;; upload URL valid for the next 15 mn
-                          (ltu/body->edn)
-                          (ltu/is-status 200)
-                          :response
-                          :body)
-
-          reset! (fn [] (reset-state! session-admin abs-uri))
-
-          ]
-
-
-      (-> session-admin
-          (request abs-download-uri
-                   :request-method :post
-                   :body (json/write-str {:ttl 15}))        ;; URL valid for the next 15 mn
-          (ltu/body->edn)
-          (ltu/is-status 200)
-          :response
-          :body)
-
+          reset! (fn [] (reset-state! session-admin abs-uri))]
 
       (-> session-anon
           (request abs-download-uri
-                   :request-method :post
-                   )
+                   :request-method :post)
           (ltu/body->edn)
           (ltu/is-status 403)
           :response
@@ -424,20 +368,8 @@
 
       (-> session-user
           (request abs-download-uri
-                   :request-method :post
-                   )
+                   :request-method :post)
           (ltu/body->edn)
           (ltu/is-status 403)
-          :response
-          :body)
-
-
-      ;;the download operation can be repeated
-      (-> session-admin
-          (request abs-download-uri
-                   :request-method :post
-                   :body (json/write-str {:ttl 15}))        ;;  URL valid for the next 15 mn
-          (ltu/body->edn)
-          (ltu/is-status 200)
           :response
           :body))))
