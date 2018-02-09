@@ -25,11 +25,18 @@
                            :type      "ROLE"}
                    :rules [{:principal "ADMIN"
                             :type      "ROLE"
-                            :right     "VIEW"}]})
+                            :right     "VIEW"}
+                           {:principal "USER"
+                            :type      "ROLE"
+                            :right     "VIEW"}
+                           ]})
 
 (def collection-acl {:owner {:principal "ADMIN"
                              :type      "ROLE"}
                      :rules [{:principal "ADMIN"
+                              :type      "ROLE"
+                              :right     "VIEW"}
+                             {:principal "USER"
                               :type      "ROLE"
                               :right     "VIEW"}]})
 

@@ -41,12 +41,13 @@
 
 ;; Upload URL request operation
 (defn upload-fn
-  [{state :state id :id :as resource} {{ttl :ttl} :body :as request}]
+  [{state :state oid :id :as resource} {{ttl :ttl} :body :as request}]
+  (let [ id (second (clojure.string/split oid #"/"))]
   (if (= state eo/state-new)
     (do
       (log/warn "Requesting upload url for report  : " id)
       (assoc resource :state eo/state-ready :uri (s3/generate-url report-bucket id (or ttl default-ttl) true)))
-    (logu/log-and-throw-400 "Upload url request is not allowed")))
+    (logu/log-and-throw-400 "Upload url request is not allowed"))))
 
 (defmethod eo/upload-subtype objectType
   [resource {{uuid :uuid} :params :as request}]
@@ -61,12 +62,13 @@
 
 ;; Download URL request operation
 (defn download-fn
-  [{state :state id :id :as resource}  {{ttl :ttl} :body :as request}]
+  [{state :state oid :id :as resource}  {{ttl :ttl} :body :as request}]
+  (let [ id (second (clojure.string/split oid #"/"))]
   (if (= state eo/state-ready)
     (do
       (log/warn "Requesting download url for report : " id)
       (assoc resource :uri (s3/generate-url report-bucket id (or ttl default-ttl))))
-    (logu/log-and-throw-400 "Getting download  url request is not allowed")))
+    (logu/log-and-throw-400 "Getting download  url request is not allowed"))))
 
 (defmethod eo/download-subtype objectType
   [resource {{uuid :uuid} :params :as request}]

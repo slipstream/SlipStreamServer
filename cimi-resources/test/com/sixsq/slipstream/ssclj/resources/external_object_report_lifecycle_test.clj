@@ -191,11 +191,11 @@
                       (ltu/body->edn)
                       (ltu/is-status 403))
 
-        ;; user query is not authorized
+        ;; user query is  authorized
         resp-user (-> session-user
                       (request template-url)
                       (ltu/body->edn)
-                      (ltu/is-status 403))
+                      (ltu/is-status 200))
 
         template (get-in resp [:response :body])
 
@@ -265,10 +265,7 @@
           (ltu/body->edn)
           (ltu/is-status 403)
           :response
-          :body)
-
-      )
-    ))
+          :body))))
 
 ;; Download request
 
@@ -292,11 +289,11 @@
                       (ltu/body->edn)
                       (ltu/is-status 403))
 
-        ;; user query is not authorized
+        ;; user query is authorized
         resp-user (-> session-user
                       (request template-url)
                       (ltu/body->edn)
-                      (ltu/is-status 403))
+                      (ltu/is-status 200))
 
         template (get-in resp [:response :body])
 

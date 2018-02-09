@@ -37,11 +37,11 @@
         (ltu/body->edn)
         (ltu/is-status 403))
 
-    ;; user query is not authorized
+    ;; user query is authorized
     (-> session-user
         (request base-uri)
         (ltu/body->edn)
-        (ltu/is-status 403))
+        (ltu/is-status 200))
 
 
     ;; query as ADMIN should work correctly
@@ -99,13 +99,13 @@
               (request describe-url)
               (ltu/is-status 403))
 
-          ;; user cannot access
+          ;; user can access
           (-> session-user
               (request entry-url)
-              (ltu/is-status 403))
+              (ltu/is-status 200))
           (-> session-user
               (request describe-url)
-              (ltu/is-status 403)))))
+              (ltu/is-status 200)))))
 
     ;; query as ADMIN should work correctly
     (let [entries (-> session-admin
@@ -163,10 +163,10 @@
               (request describe-url)
               (ltu/is-status 403))
 
-          ;; user cannot access
+          ;; user can access
           (-> session-user
               (request entry-url)
-              (ltu/is-status 403))
+              (ltu/is-status 200))
           (-> session-user
               (request describe-url)
-              (ltu/is-status 403)))))))
+              (ltu/is-status 200)))))))
