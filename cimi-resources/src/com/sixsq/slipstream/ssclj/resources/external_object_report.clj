@@ -3,6 +3,7 @@
     [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
     [com.sixsq.slipstream.ssclj.resources.external-object-template-report :as tpl]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.spec.external-object-report]
     [com.sixsq.slipstream.ssclj.resources.external-object.utils :as s3]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.auth.acl :as a]
