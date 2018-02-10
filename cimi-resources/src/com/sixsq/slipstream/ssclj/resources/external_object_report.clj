@@ -89,9 +89,10 @@
 (def delete-impl (std-crud/delete-fn eo/resource-name))
 
 (defmethod eo/delete-subtype objectType
-  [{id :id :as resource} request]
+  [{id :id :as resource} {{keep? :keep-s3-object} :body :as request}]
   (let [keyname (id->uuid id)]
-    (s3/delete-s3-object report-bucket keyname)  ;;also delete the S3 object
+    (when-not keep?
+      (s3/delete-s3-object report-bucket keyname))          ;;delete the S3 object
     (delete-impl request)))
 
 

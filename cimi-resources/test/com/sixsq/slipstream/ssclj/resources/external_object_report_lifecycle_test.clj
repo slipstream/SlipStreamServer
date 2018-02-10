@@ -115,7 +115,8 @@
       ;; admin delete succeeds
       (-> session-admin
           (request abs-uri
-                   :request-method :delete)
+                   :request-method :delete
+                   :body (json/write-str{:keep-s3-object true})) ;;no s3 deletion while testing
           (ltu/body->edn)
           (ltu/is-status 200))
 
@@ -138,7 +139,8 @@
       ;; admin delete succeeds
       (-> session-admin
           (request abs-uri
-                   :request-method :delete)
+                   :request-method :delete
+                   :body (json/write-str{:keep-s3-object true})) ;;no s3 deletion while testing
           (ltu/body->edn)
           (ltu/is-status 200))
 
