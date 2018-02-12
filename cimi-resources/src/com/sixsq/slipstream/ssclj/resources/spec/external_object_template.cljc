@@ -25,8 +25,7 @@
 ;; Keys specifications for ExternalObjectTemplate resources.
 
 (def external-object-template-keys-spec {:req-un [:cimi.external-object-template/objectType
-                                                  :cimi.external-object-template/state
-                                                  ]
+                                                  :cimi.external-object-template/state]
                                          :opt-un [:cimi.external-object-template/uri]})
 (def resource-keys-spec
   (su/merge-keys-specs [c/common-attrs

@@ -1,6 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.external-object
     (:require
-      [clojure.spec.alpha :as s]
       [com.sixsq.slipstream.ssclj.resources.spec.external-object-template]))
 
 ;;

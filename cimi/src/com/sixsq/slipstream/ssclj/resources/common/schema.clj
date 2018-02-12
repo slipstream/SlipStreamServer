@@ -30,8 +30,7 @@
     :activate
     :quarantine
     :upload
-    :download
-    })
+    :download})
 
 (def ^:const action-uri
   (doall

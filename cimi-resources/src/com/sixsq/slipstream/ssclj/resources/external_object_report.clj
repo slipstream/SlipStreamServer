@@ -9,10 +9,13 @@
     [com.sixsq.slipstream.auth.acl :as a]
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.ssclj.util.log :as logu]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud])
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu])
   (:import (clojure.lang ExceptionInfo)))
 
+
 (def ^:const objectType "report")
+
 
 (def ExternalObjectReportDescription
   tpl/ExternalObjectTemplateReportDescription)
@@ -21,6 +24,7 @@
 ;; description
 ;;
 (def ^:const desc ExternalObjectReportDescription)
+
 
 ;; S3 pre-signed-URLs
 (def ^:const report-bucket "slipstream-reports")            ;;single bucket containing reports, must exist
@@ -35,24 +39,23 @@
   [resource]
   (validate-fn resource))
 
+
 (def create-validate-fn (u/create-spec-validation-fn :cimi/external-object-template.report-create))
 (defmethod eo/create-validate-subtype objectType
   [resource]
   (create-validate-fn resource))
 
-(defn- id->uuid
-  [id]
-  (second (clojure.string/split id #"/")))
 
 ;; Upload URL request operation
 (defn upload-fn
   [{state :state id :id :as resource} {{ttl :ttl} :body :as request}]
-  (let [report-id (id->uuid id)]
+  (let [report-id (cu/document-id id)]
     (if (= state eo/state-new)
       (do
-        (log/warn "Requesting upload url for report  : " report-id)
+        (log/warn "Requesting upload url for report:" report-id)
         (assoc resource :state eo/state-ready :uri (s3/generate-url report-bucket report-id (or ttl default-ttl) true)))
       (logu/log-and-throw-400 "Upload url request is not allowed"))))
+
 
 (defmethod eo/upload-subtype objectType
   [resource {{uuid :uuid} :params :as request}]
@@ -65,15 +68,17 @@
     (catch ExceptionInfo ei
       (ex-data ei))))
 
+
 ;; Download URL request operation
 (defn download-fn
   [{state :state id :id :as resource} {{ttl :ttl} :body :as request}]
-  (let [report-id (id->uuid id)]
+  (let [report-id (cu/document-id id)]
     (if (= state eo/state-ready)
       (do
         (log/warn "Requesting download url for report : " report-id)
         (assoc resource :uri (s3/generate-url report-bucket report-id (or ttl default-ttl))))
       (logu/log-and-throw-400 "Getting download  url request is not allowed"))))
+
 
 (defmethod eo/download-subtype objectType
   [resource {{uuid :uuid} :params :as request}]
@@ -86,13 +91,13 @@
     (catch ExceptionInfo ei
       (ex-data ei))))
 
+
 (def delete-impl (std-crud/delete-fn eo/resource-name))
+
 
 (defmethod eo/delete-subtype objectType
   [{id :id :as resource} {{keep? :keep-s3-object} :body :as request}]
-  (let [keyname (id->uuid id)]
+  (let [keyname (cu/document-id id)]
     (when-not keep?
-      (s3/delete-s3-object report-bucket keyname))          ;;delete the S3 object
+      (s3/delete-s3-object report-bucket keyname))          ;; delete the S3 object
     (delete-impl request)))
-
-

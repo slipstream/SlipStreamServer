@@ -1,25 +1,25 @@
 (ns com.sixsq.slipstream.ssclj.resources.external-object-template-lifecycle-test
-  (:require [clojure.test :refer :all]
-            [peridot.core :refer :all]
-            [com.sixsq.slipstream.ssclj.resources.external-object-template :refer :all]
-            [com.sixsq.slipstream.ssclj.resources.external-object-template-alpha-example :as example]
-            [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-            [com.sixsq.slipstream.ssclj.app.params :as p]
-            [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-            [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-            [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-            [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-            [com.sixsq.slipstream.ssclj.resources.external-object-template-report :as report])
-  (:import (clojure.lang ExceptionInfo)))
+  (:require
+    [clojure.test :refer [deftest is are use-fixtures]]
+    [peridot.core :refer [session header request content-type]]
+    [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
+    [com.sixsq.slipstream.ssclj.resources.external-object-template-alpha-example :as example]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
+    [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.resources.external-object-template-report :as report]))
 
 
 (use-fixtures :each ltu/with-test-server-fixture)
 
-(def base-uri (str p/service-context (u/de-camelcase resource-name)))
+(def base-uri (str p/service-context (u/de-camelcase eot/resource-name)))
 
 
 (deftest check-retrieve-by-id
-  (let [id (str resource-url "/" example/objectType)
+  (let [id (str eot/resource-url "/" example/objectType)
         doc (crud/retrieve-by-id id)]
     (is (= id (:id doc)))))
 
@@ -49,20 +49,21 @@
                       (request base-uri)
                       (ltu/body->edn)
                       (ltu/is-status 200)
-                      (ltu/is-resource-uri collection-uri)
+                      (ltu/is-resource-uri eot/collection-uri)
                       (ltu/is-count pos?)
                       (ltu/is-operation-absent "add")
                       (ltu/is-operation-absent "delete")
                       (ltu/is-operation-absent "edit")
                       (ltu/is-operation-absent "describe")
-                      (ltu/entries resource-tag))
+                      (ltu/entries eot/resource-tag))
           ids (set (map :id entries))
           types (set (map :objectType entries))]
-      (is (= #{(str resource-url "/" example/objectType)
-               (str resource-url "/" report/objectType)
-               } ids))
+      (is (= #{(str eot/resource-url "/" example/objectType)
+               (str eot/resource-url "/" report/objectType)}
+             ids))
       (is (= #{example/objectType
-               report/objectType} types))
+               report/objectType}
+             types))
 
       (doseq [entry entries]
         (let [ops (ltu/operations->map entry)
@@ -89,7 +90,7 @@
           (is (:acl desc-body))
 
           #_(is (thrown-with-msg? ExceptionInfo #".*resource does not satisfy defined schema.*" (crud/validate entry-body)))
-          (is (crud/validate entry-body ))
+          (is (crud/validate entry-body))
 
           ;; anonymous access not permitted
           (-> session-anon
@@ -112,20 +113,21 @@
                       (request base-uri)
                       (ltu/body->edn)
                       (ltu/is-status 200)
-                      (ltu/is-resource-uri collection-uri)
+                      (ltu/is-resource-uri eot/collection-uri)
                       (ltu/is-count pos?)
                       (ltu/is-operation-absent "add")
                       (ltu/is-operation-absent "delete")
                       (ltu/is-operation-absent "edit")
                       (ltu/is-operation-absent "describe")
-                      (ltu/entries resource-tag))
+                      (ltu/entries eot/resource-tag))
           ids (set (map :id entries))
           types (set (map :objectType entries))]
-      (is (= #{(str resource-url "/" example/objectType)
-               (str resource-url "/" report/objectType)
-               } ids))
+      (is (= #{(str eot/resource-url "/" example/objectType)
+               (str eot/resource-url "/" report/objectType)}
+             ids))
       (is (= #{example/objectType
-               report/objectType} types))
+               report/objectType}
+             types))
 
 
       (doseq [entry entries]
@@ -153,7 +155,7 @@
           (is (:acl desc-body))
 
 
-          (is (crud/validate entry-body ))
+          (is (crud/validate entry-body))
 
           ;; anonymous access not permitted
           (-> session-anon

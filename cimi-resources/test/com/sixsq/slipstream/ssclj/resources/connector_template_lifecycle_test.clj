@@ -99,9 +99,7 @@
               (ltu/is-status 403))
           (-> session-user
               (request describe-url)
-              (ltu/is-status 403)))))
-
-    ))
+              (ltu/is-status 403)))))))
 
 (deftest bad-methods
   (let [resource-uri (str p/service-context (u/new-resource-id resource-name))]

@@ -3,7 +3,6 @@
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
     [com.sixsq.slipstream.ssclj.resources.external-object-template-alpha-example :as tpl]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.db.impl :as db]
     [clojure.tools.logging :as log]
@@ -28,15 +27,22 @@
 ;; multimethods for validation
 ;;
 
+
 (def validate-fn (u/create-spec-validation-fn :cimi/external-object.alpha))
+
+
 (defmethod eo/validate-subtype objectType
   [resource]
   (validate-fn resource))
 
+
 (def create-validate-fn (u/create-spec-validation-fn :cimi/external-object-template.alpha-create))
+
+
 (defmethod eo/create-validate-subtype objectType
   [resource]
   (create-validate-fn resource))
+
 
 (defn upload-fn
   [{state :state id :id :as resource} request]
@@ -45,6 +51,7 @@
       (log/warn "Requesting upload url for external object : " id)
       (assoc resource :state eo/state-ready :uri "file://foo"))
     (logu/log-and-throw-400 "Upload url request is not allowed")))
+
 
 (defmethod eo/upload-subtype objectType
   [resource {{uuid :uuid} :params :as request}]
@@ -65,6 +72,7 @@
       (log/warn "Requesting download url for external object : " id)
       (assoc resource :uri "file://foo/bar"))
     (logu/log-and-throw-400 "Getting download  url request is not allowed")))
+
 
 (defmethod eo/download-subtype objectType
   [resource {{uuid :uuid} :params :as request}]

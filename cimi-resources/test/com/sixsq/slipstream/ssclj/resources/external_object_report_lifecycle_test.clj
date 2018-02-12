@@ -1,20 +1,20 @@
 (ns com.sixsq.slipstream.ssclj.resources.external-object-report-lifecycle-test
-  (:require [clojure.test :refer :all]
-            [peridot.core :refer :all]
-            [com.sixsq.slipstream.ssclj.resources.external-object :refer :all]
-            [com.sixsq.slipstream.ssclj.resources.external-object-template-report :as report]
-            [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-            [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-            [com.sixsq.slipstream.ssclj.app.params :as p]
-            [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-            [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
-            [clojure.data.json :as json]
-            [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
-            [com.sixsq.slipstream.db.impl :as db]))
+  (:require
+    [clojure.test :refer [deftest is are use-fixtures]]
+    [peridot.core :refer [session header request content-type]]
+    [com.sixsq.slipstream.ssclj.resources.external-object-template-report :as report]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
+    [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
+    [clojure.data.json :as json]
+    [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
+    [com.sixsq.slipstream.db.impl :as db]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 
-(def base-uri (str p/service-context (u/de-camelcase resource-name)))
+(def base-uri (str p/service-context (u/de-camelcase eo/resource-name)))
 
 (deftest lifecycle
   (let [href (str eot/resource-url "/" report/objectType)
@@ -93,9 +93,9 @@
                         (request base-uri)
                         (ltu/body->edn)
                         (ltu/is-status 200)
-                        (ltu/is-resource-uri collection-uri)
+                        (ltu/is-resource-uri eo/collection-uri)
                         (ltu/is-count #(= 2 %))
-                        (ltu/entries resource-tag))]
+                        (ltu/entries eo/resource-tag))]
         (is ((set (map :id entries)) uri))
 
         ;; verify that all entries are accessible
@@ -116,7 +116,7 @@
       (-> session-admin
           (request abs-uri
                    :request-method :delete
-                   :body (json/write-str{:keep-s3-object true})) ;;no s3 deletion while testing
+                   :body (json/write-str {:keep-s3-object true})) ;;no s3 deletion while testing
           (ltu/body->edn)
           (ltu/is-status 200))
 
@@ -140,7 +140,7 @@
       (-> session-admin
           (request abs-uri
                    :request-method :delete
-                   :body (json/write-str{:keep-s3-object true})) ;;no s3 deletion while testing
+                   :body (json/write-str {:keep-s3-object true})) ;;no s3 deletion while testing
           (ltu/body->edn)
           (ltu/is-status 200))
 
@@ -151,7 +151,7 @@
           (ltu/is-status 404)))))
 
 (deftest bad-methods
-  (let [resource-uri (str p/service-context (u/new-resource-id resource-name))]
+  (let [resource-uri (str p/service-context (u/new-resource-id eo/resource-name))]
     (ltu/verify-405-status [[base-uri :options]
                             [base-uri :delete]
                             [resource-uri :options]

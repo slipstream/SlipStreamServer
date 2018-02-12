@@ -1,11 +1,13 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.external-object-template-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.test :refer [deftest is]]
             [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
             [com.sixsq.slipstream.ssclj.resources.spec.external-object-template :as eots]
             [clojure.spec.alpha :as s]
             [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
+
 (s/def :cimi.test/external-object-template (su/only-keys-maps eots/resource-keys-spec))
+
 
 (def valid-acl {:owner {:principal "ADMIN"
                         :type      "ROLE"}

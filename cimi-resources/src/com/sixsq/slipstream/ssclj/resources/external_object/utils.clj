@@ -1,11 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.external-object.utils
-  (:use
-
-    [amazonica.core]
-    [amazonica.aws.s3 :as s3])
-  (:require [environ.core :as env]
-            [clj-time.core :as t]
-            [clj-http.client :as client]))
+  (:require
+    [amazonica.core :as aws]
+    [amazonica.aws.s3 :as s3]
+    [clj-time.core :as time]))
 
 (defn get-s3-cred
   []
@@ -40,20 +37,19 @@
   ([bucket k mn]
    (generate-url bucket k mn false))
   ([bucket k mn write?]
-   (let [expiry (-> mn t/minutes t/from-now)]
+   (let [expiry (-> mn time/minutes time/from-now)
+         method (if write? "PUT" "GET")]
      (.toString
-       (if write?
-         (generate-presigned-url (get-s3-cred) bucket k expiry "PUT")
-         (generate-presigned-url (get-s3-cred) bucket k expiry))))))
+       (s3/generate-presigned-url (get-s3-cred) bucket k expiry method)))))
 
 (defn delete-s3-object
   [bucket k]
   (let [cred (get-s3-cred)]
-    (with-credential [(:access-key cred)
-                      (:secret-key cred)
-                      (:endpoint cred)]
-                     (when (does-object-exist cred bucket k)
-                       (delete-object bucket k)))))
+    (aws/with-credential [(:access-key cred)
+                          (:secret-key cred)
+                          (:endpoint cred)]
+                         (when (s3/does-object-exist cred bucket k)
+                           (s3/delete-object bucket k)))))
 
 
 

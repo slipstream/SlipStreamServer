@@ -143,9 +143,7 @@
       (-> session-admin
           (request abs-uri)
           (ltu/body->edn)
-          (ltu/is-status 404)))
-
-    ))
+          (ltu/is-status 404)))))
 
 (deftest bad-methods
   (let [resource-uri (str p/service-context (u/new-resource-id resource-name))]

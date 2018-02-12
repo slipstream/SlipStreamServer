@@ -1,11 +1,12 @@
 (ns com.sixsq.slipstream.ssclj.resources.external-object-template
-  (:require [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-            [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-            [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-            [clojure.tools.logging :as log]
-            [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
-            [com.sixsq.slipstream.util.response :as r]
-            [com.sixsq.slipstream.auth.acl :as a])
+  (:require
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [clojure.tools.logging :as log]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
+    [com.sixsq.slipstream.util.response :as r]
+    [com.sixsq.slipstream.auth.acl :as a])
   (:import (clojure.lang ExceptionInfo)))
 
 
@@ -55,6 +56,7 @@
 (def descriptions (atom {}))
 (def name->kw (atom {}))
 
+
 (defn collection-wrapper-fn
   "Specialized version of this function that removes the adding
    of operations to the collection and entries.  These are already
@@ -65,6 +67,7 @@
                     :resourceURI collection-uri
                     :id          (u/de-camelcase resource-name)}]
       (assoc skeleton collection-key entries))))
+
 
 (defn complete-resource
   "Completes the given document with server-managed information:
@@ -81,6 +84,7 @@
                   :operations  ops})
           (merge external-object-reference-attrs-defaults)
           u/update-timestamps))))
+
 
 (defn register
   "Registers a given ExternalObjectTemplate resource and its description
@@ -100,6 +104,7 @@
       (when name-kw-map
         (swap! name->kw assoc id name-kw-map)
         (log/info "added name->kw mapping from ExternalObjectTemplate" id)))))
+
 
 (def ExternalObjectTemplateDescription
   (merge c/CommonParameterDescription
@@ -135,9 +140,11 @@
            ExternalObjectTemplate subtype schema."
           :objectType)
 
+
 (defmethod validate-subtype :default
   [resource]
   (throw (ex-info (str "unknown ExternalObjectTemplate type: " (:objectType resource)) resource)))
+
 
 (defmethod crud/validate
   resource-uri
@@ -150,11 +157,13 @@
 
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
+
 (defmethod crud/add resource-name
   [{{:keys [objectType]} :body :as request}]
   (if (get @descriptions objectType)
     (add-impl request)
     (throw (r/ex-bad-request (str "invalid external object type '" objectType "'")))))
+
 
 (defmethod crud/retrieve resource-name
   [{{uuid :uuid} :params :as request}]
@@ -166,6 +175,7 @@
     (catch ExceptionInfo ei
       (ex-data ei))))
 
+
 ;; must override the default implementation so that the
 ;; data can be pulled from the atom rather than the database
 (defmethod crud/retrieve-by-id resource-url
@@ -175,15 +185,19 @@
     (catch ExceptionInfo ei
       (ex-data ei))))
 
+
 (defmethod crud/edit resource-name
   [request]
   (throw (r/ex-bad-method request)))
 
+
 (def delete-impl (std-crud/delete-fn resource-name))
+
 
 (defmethod crud/delete resource-name
   [request]
   (delete-impl request))
+
 
 (defmethod crud/query resource-name
   [request]
@@ -195,6 +209,7 @@
         wrapped-entries (wrapper-fn request entries)
         entries-and-count (assoc wrapped-entries :count count-before-pagination)]
     (r/json-response entries-and-count)))
+
 
 ;;
 ;; actions
