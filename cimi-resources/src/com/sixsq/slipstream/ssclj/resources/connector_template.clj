@@ -118,6 +118,14 @@
                                 :readOnly    true
                                 :order       0}
 
+          :instanceName        {:displayName "Connector Instance Name"
+                                :category    "general"
+                                :description "Connector Instance Name"
+                                :type        "string"
+                                :mandatory   true
+                                :readOnly    false
+                                :order       1}
+
           ; Mandatory reference attributes. Can go into a separate .edn.
           :orchestratorImageid {:displayName "orchestrator.imageid"
                                 :type        "string"
