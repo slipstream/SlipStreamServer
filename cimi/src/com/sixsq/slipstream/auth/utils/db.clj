@@ -1,7 +1,5 @@
 (ns com.sixsq.slipstream.auth.utils.db
   (:require
-    [clojure.string :as s]
-    [clojure.tools.logging :as log]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.filter.parser :as parser])
@@ -77,7 +75,7 @@
                                  :user-roles  ["ADMIN"]})
                second
                first)
-           (catch ExceptionInfo e {})))))
+           (catch ExceptionInfo _ {})))))
 
 (defn user-exists?
   "Verifies that a user with the given username exists in the database and
@@ -187,14 +185,7 @@
   [username]
   (:password (get-active-user-by-name username)))
 
-(defn build-roles [super? roles-string]
-  (let [initial-role (if super? ["ADMIN" "USER" "ANON"] ["USER" "ANON"])
-        roles        (->> (s/split (or roles-string "") #"[\s,]+")
-                          (remove nil?)
-                          (remove s/blank?))]
-    (s/join " " (concat initial-role roles))))
-
 (defn find-roles-for-username
   [username]
-  (let [user-entry (get-active-user-by-name username)]
-    (build-roles (:isSuperUser user-entry) (:roles user-entry))))
+  (let [{super? :isSuperUser} (get-active-user-by-name username)]
+    (if super? ["ADMIN" "USER" "ANON"] ["USER" "ANON"])))

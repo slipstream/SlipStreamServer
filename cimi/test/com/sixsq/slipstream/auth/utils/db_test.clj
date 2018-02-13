@@ -82,19 +82,6 @@
   (is (= "joe_11" (db/name-no-collision "joe_10" ["joe_10"])))
   (is (= "joe_1_2_4" (db/name-no-collision "joe_1_2_3" ["joe_1_2_3"]))))
 
-(deftest test-build-roles
-  (are [x super? roles] (= x (db/build-roles super? roles))
-                        "ADMIN USER ANON" true nil
-                        "USER ANON" false nil
-                        "ADMIN USER ANON" true ""
-                        "USER ANON" false ""
-                        "ADMIN USER ANON" true " , , "
-                        "USER ANON" false " , , "
-                        "ADMIN USER ANON a" true "a"
-                        "USER ANON a" false "a"
-                        "ADMIN USER ANON a b" true ", a, ,  ,  b,  ,"
-                        "USER ANON a b" false ", a, ,  ,  b,  ,"))
-
 (deftest test-users-by-email-skips-deleted
   (th/add-user-for-test! {:username     "jack"
                           :password     "123456"
