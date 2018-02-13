@@ -242,10 +242,12 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		    try {
 				SscljProxy.delete(SscljProxy.BASE_RESOURCE + key, user.getName() + " USER", true);
 			} catch (Exception e) {
-				log.warning("Failed to delete API key " + key + " on run " + run.getUuid());
+				log.warning(String.format("Failed to delete API key %s on run %s with: %s",
+						key, run.getUuid(), e.getMessage()));
 			}
 		} else {
-			log.warning("No API key in " + RuntimeParameter.GLOBAL_RUN_APIKEY_KEY + " on run " + run.getUuid());
+			log.warning(String.format("No API key in %s on run %s.",
+					RuntimeParameter.GLOBAL_RUN_APIKEY_KEY, run.getUuid()));
 		}
 	}
 
