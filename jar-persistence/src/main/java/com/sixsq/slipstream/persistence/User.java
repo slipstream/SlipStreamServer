@@ -542,7 +542,7 @@ public class User extends Metadata {
                     "query to find user cloud credentials.", e);
         }
         String resource = SscljProxy.BASE_RESOURCE + "credential?$filter=" + query;
-        Response resp = SscljProxy.get(resource, user.getName() + " USER", true);
+        Response resp = SscljProxy.get(resource, getCimiAuthnInfoUser(user), true);
         return (CloudCredentialCollection) CloudCredentialCollection.fromJson(resp.getEntityAsText(),
                 CloudCredentialCollection.class);
     }
@@ -556,6 +556,7 @@ public class User extends Metadata {
 		for (CloudCredential cred : creds) {
 			Response resp;
 			try {
+			    // Loading connectors requires super user with ADMIN role.
 				resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + cred.connector.href, "super ADMIN", true);
 			} catch (Exception e) {
 				logger.warning("Failed to get connector document " + cred.connector.href + " with: " + e.getMessage());
@@ -570,7 +571,7 @@ public class User extends Metadata {
 				logger.warning("Failed to load connector " + conn.instanceName + " with: " + e.getMessage());
 				continue;
 			}
-			resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + cred.id, user.getName() + " USER");
+			resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + cred.id, getCimiAuthnInfoUser(user));
 			try {
 				Credentials cloudCredTmpl = connector.getCredentials(user);
 				cloudCredParams.putAll(cloudCredTmpl.setUserParametersValues(resp.getEntityAsText()));
@@ -724,7 +725,7 @@ public class User extends Metadata {
     }
 
     private static UserGeneralParams getGeneralParamsFromBackend(User user) {
-        String authn = user.getName() + " USER";
+        String authn = getCimiAuthnInfoUser(user);
         Response resp = SscljProxy.get(RESOURCE_USER_PARAMS_COLLECTION, authn);
         UserGeneralParamsCollection pColl = UserGeneralParamsCollection.fromJson(resp.getEntityAsText());
         if (null == pColl || pColl.getCount() == null || pColl.getCount() == 0) {
@@ -740,7 +741,7 @@ public class User extends Metadata {
 
     private void storeGeneralParameters() {
         Response resp;
-        String authn = this.getName() + " USER";
+        String authn = getCimiAuthnInfoUser();
         Collection<UserParameter> newParams = getParameters(
                 ParameterCategory.General.toString()).values();
         UserGeneralParams params = getGeneralParamsFromBackend(this);
@@ -792,11 +793,11 @@ public class User extends Metadata {
     }
 
     private void addCloudCred(Object credObj) {
-        SscljProxy.post(SscljProxy.BASE_RESOURCE + "credential", this.getName() + " USER", credObj);
+        SscljProxy.post(SscljProxy.BASE_RESOURCE + "credential", getCimiAuthnInfoUser(), credObj);
     }
 
     private void updateCloudCred(CloudCredential cred, Object credObj) {
-        SscljProxy.delete(SscljProxy.BASE_RESOURCE + cred.id, this.getName() + " USER", true);
+        SscljProxy.delete(SscljProxy.BASE_RESOURCE + cred.id, getCimiAuthnInfoUser(), true);
         addCloudCred(credObj);
     }
 
@@ -949,7 +950,7 @@ public class User extends Metadata {
         if (roles == null || roles.isEmpty()) {
             return;
         }
-        for (String role : roles.split(",")) {
+        for (String role : roles.split(" ")) {
             String trimedUppercaseRole = role.trim().toUpperCase();
             if (FORBIDDEN_ROLES.contains(trimedUppercaseRole)) {
                 throw new ValidationException("List of roles '" + roles + "' contains forbidden role : '" + trimedUppercaseRole + "'");
@@ -957,10 +958,10 @@ public class User extends Metadata {
         }
     }
 
-    private void checkValidRoles(String roles) throws ValidationException {
-        String validRole = "(([a-zA-Z][\\w\\d._-]*))*";
-        String spacesCommaSpaces = "(\\s)*,(\\s)*";
-        boolean isValid = Pattern.matches(validRole + "(" + spacesCommaSpaces + validRole + ")*", roles);
+    protected void checkValidRoles(String roles) throws ValidationException {
+        String validRole = "([^\\s,;]*)*";
+        String spaces = "(\\s)*";
+        boolean isValid = Pattern.matches(validRole + "(" + spaces + validRole + ")*", roles);
 
         if (!isValid) {
             throw new ValidationException("Invalid roles " + roles);
@@ -975,6 +976,25 @@ public class User extends Metadata {
 
     public void unsetDeleted() {
         deleted = false;
+    }
+
+    public static String getCimiAuthnInfoUser(User user) {
+       return getCimiAuthnInfo(user, "USER");
+    }
+
+    public static String getCimiAuthnInfo(User user, String primaryRole) {
+        String roles = user.getRoles();
+        return user.getName() +
+                ((primaryRole == null || primaryRole.isEmpty()) ? "" : " " + primaryRole) +
+                ((roles == null || roles.isEmpty()) ? "" : " " + roles);
+    }
+
+    private String getCimiAuthnInfoUser() {
+        return getCimiAuthnInfo(this, "USER");
+    }
+
+    private String getCimiAuthnInfoAdmin() {
+        return getCimiAuthnInfo(this, "ADMIN");
     }
 }
 

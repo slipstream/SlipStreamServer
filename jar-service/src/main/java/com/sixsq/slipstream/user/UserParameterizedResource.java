@@ -20,6 +20,7 @@ package com.sixsq.slipstream.user;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -29,6 +30,7 @@ import com.sixsq.slipstream.util.ModuleUriUtil;
 import com.sixsq.slipstream.util.RequestUtil;
 import com.sixsq.slipstream.util.ResourceUriUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
+import org.restlet.data.Cookie;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
@@ -131,6 +133,10 @@ public abstract class UserParameterizedResource extends BaseResource {
 
 		if (getParameterized() == null) {
 			setExisting(false);
+		} else {
+			Cookie cookie = CookieUtils.extractAuthnCookie(getRequest());
+			String roles = CookieUtils.getCookieRoles(cookie);
+			parameterized.setRoles(roles);
 		}
 	}
 
