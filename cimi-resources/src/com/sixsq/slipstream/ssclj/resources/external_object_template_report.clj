@@ -19,7 +19,7 @@
           :component {:displayName "Component name"
                       :category    "general"
                       :description "Component which created this report"
-                      :type        "enum"
+                      :type        "string"
                       :mandatory   true
                       :readOnly    false
                       :order       21}}))
