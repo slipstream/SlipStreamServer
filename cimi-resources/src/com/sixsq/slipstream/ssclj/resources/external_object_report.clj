@@ -10,7 +10,8 @@
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.ssclj.util.log :as logu]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu])
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
+    [com.sixsq.slipstream.util.response :as r])
   (:import (clojure.lang ExceptionInfo)))
 
 
@@ -52,8 +53,8 @@
   (let [report-id (cu/document-id id)]
     (if (= state eo/state-new)
       (do
-        (log/warn "Requesting upload url for report:" report-id)
-        (assoc resource :state eo/state-ready :uri (s3/generate-url report-bucket report-id (or ttl default-ttl) true)))
+        (log/info "Requesting upload url for report:" report-id)
+        (s3/generate-url report-bucket report-id (or ttl default-ttl) true))
       (logu/log-and-throw-400 "Upload url request is not allowed"))))
 
 
@@ -61,10 +62,10 @@
   [resource {{uuid :uuid} :params :as request}]
   (try
     (a/can-modify? resource request)
-    (let [id (str (u/de-camelcase eo/resource-name) "/" uuid)]
-      (-> (db/retrieve id request)
-          (upload-fn request)
-          (db/edit request)))
+    (let [upload-uri (upload-fn resource request)]
+      (-> (assoc resource :state eo/state-ready)
+          (db/edit request))
+      (r/json-response {:uri upload-uri}))
     (catch ExceptionInfo ei
       (ex-data ei))))
 
@@ -75,19 +76,16 @@
   (let [report-id (cu/document-id id)]
     (if (= state eo/state-ready)
       (do
-        (log/warn "Requesting download url for report : " report-id)
-        (assoc resource :uri (s3/generate-url report-bucket report-id (or ttl default-ttl))))
-      (logu/log-and-throw-400 "Getting download  url request is not allowed"))))
+        (log/info "Requesting download url for report : " report-id)
+        (s3/generate-url report-bucket report-id (or ttl default-ttl)))
+      (logu/log-and-throw-400 "Report object is not in ready to be downloaded!"))))
 
 
 (defmethod eo/download-subtype objectType
   [resource {{uuid :uuid} :params :as request}]
   (try
     (a/can-modify? resource request)
-    (let [id (str (u/de-camelcase eo/resource-name) "/" uuid)]
-      (-> (db/retrieve id request)
-          (download-fn request)
-          (db/edit request)))
+    (r/json-response {:uri (download-fn resource request)})
     (catch ExceptionInfo ei
       (ex-data ei))))
 

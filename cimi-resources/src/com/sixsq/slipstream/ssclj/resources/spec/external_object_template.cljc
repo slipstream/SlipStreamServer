@@ -7,11 +7,6 @@
 ;; All external object resources must have a 'type' attribute.
 (s/def :cimi.external-object-template/objectType :cimi.core/identifier)
 
-
-;;External object resources may have a 'uri' attribute to keep track
-;;of their location
-(s/def :cimi.external-object-template/uri :cimi.core/nonblank-string)
-
 ;;External object resources may have a 'state' attribute e.g to know
 ;;if the above points to an existing object
 (s/def :cimi.external-object-template/state :cimi.core/nonblank-string)
@@ -25,8 +20,7 @@
 ;; Keys specifications for ExternalObjectTemplate resources.
 
 (def external-object-template-keys-spec {:req-un [:cimi.external-object-template/objectType
-                                                  :cimi.external-object-template/state]
-                                         :opt-un [:cimi.external-object-template/uri]})
+                                                  :cimi.external-object-template/state]})
 (def resource-keys-spec
   (su/merge-keys-specs [c/common-attrs
                         external-object-template-keys-spec]))

@@ -7,7 +7,22 @@
 (def ^:const objectType "report")
 
 
-(def ExternalObjectTemplateReportDescription eo/ExternalObjectTemplateDescription)
+(def ExternalObjectTemplateReportDescription
+  (merge eo/ExternalObjectTemplateDescription
+         {:runUUID   {:displayName "Deployment UUID"
+                      :category    "general"
+                      :description "Deployment UUID"
+                      :type        "string"
+                      :mandatory   true
+                      :readOnly    false
+                      :order       20}
+          :component {:displayName "Component name"
+                      :category    "general"
+                      :description "Component which created this report"
+                      :type        "enum"
+                      :mandatory   true
+                      :readOnly    false
+                      :order       21}}))
 
 
 ;;
@@ -15,7 +30,7 @@
 ;;
 (def ^:const resource
   {:objectType objectType
-   :state "new"})
+   :state      "new"})
 
 
 ;;

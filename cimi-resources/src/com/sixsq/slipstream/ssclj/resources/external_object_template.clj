@@ -115,20 +115,13 @@
                        :mandatory   true
                        :readOnly    true
                        :order       10}
-          :uri        {:displayName "S3 bucket location"
-                       :category    "general"
-                       :description "optional path to S3 bucket where the object is stored"
-                       :type        "string"
-                       :mandatory   false
-                       :readOnly    false
-                       :order       11}
           :state      {:displayName "External object state"
                        :category    "general"
                        :description "optional state of the external object"
                        :type        "enum"
                        :mandatory   false
-                       :readOnly    false
-                       :order       12
+                       :readOnly    true
+                       :order       11
                        :enum        ["new" "ready"]}}))
 
 ;;
