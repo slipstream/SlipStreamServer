@@ -21,28 +21,17 @@ package com.sixsq.slipstream.connector;
  */
 
 import com.google.gson.Gson;
-import com.sixsq.slipstream.exceptions.AbortException;
-import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
-import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.factory.DeploymentFactory;
 import com.sixsq.slipstream.factory.RunFactory;
-import com.sixsq.slipstream.persistence.DeploymentModule;
 import com.sixsq.slipstream.persistence.ImageModule;
-import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.ModuleParameter;
-import com.sixsq.slipstream.persistence.Node;
-import com.sixsq.slipstream.persistence.NodeParameter;
 import com.sixsq.slipstream.persistence.Parameter;
-import com.sixsq.slipstream.persistence.ParameterCategory;
 import com.sixsq.slipstream.persistence.Run;
 import com.sixsq.slipstream.persistence.RunType;
 import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.run.RunTestBase;
 import com.sixsq.slipstream.ssclj.app.CIMITestServer;
-import com.sixsq.slipstream.statemachine.States;
 import com.sixsq.slipstream.util.SscljProxy;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -50,12 +39,9 @@ import org.junit.Test;
 import org.restlet.Response;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import static org.hamcrest.Matchers.is;
@@ -186,16 +172,18 @@ public class CliConnectorBaseTest {
         String cloudServiceName = "testcloud";
         ImageModule image = new ImageModule("test/image");
         image.setImageId("123", cloudServiceName);
-        image.setModuleReference(new ImageModule("base/image"));
-        DeploymentModule deployment = new DeploymentModule("test/module");
+        image.setIsBase(true);
+        image.store();
 
-        Node node;
-        node = new Node("node1", image);
-        node.setCloudService(cloudServiceName);
-        deployment.setNode(node);
-        deployment.store();
+        HashMap<String, List<Parameter<?>>> userChoices = new HashMap<>();
 
-        Run run = RunFactory.getRun(deployment, RunType.Orchestration, new User(userName));
+        Parameter<?> cloudService = new ModuleParameter(RuntimeParameter.CLOUD_SERVICE_NAME);
+        cloudService.setValue(cloudServiceName);
+
+        userChoices.put(Run.MACHINE_NAME, new ArrayList<>());
+        userChoices.get(Run.MACHINE_NAME).add(cloudService);
+
+        Run run = RunFactory.getRun(image, RunType.Run, new User(userName), userChoices);
         return run.store();
     }
 }
