@@ -188,4 +188,4 @@
 (defn find-roles-for-username
   [username]
   (let [{super? :isSuperUser} (get-active-user-by-name username)]
-    (if super? ["ADMIN" "USER" "ANON"] ["USER" "ANON"])))
+    (if super? "ADMIN USER ANON" "USER ANON")))

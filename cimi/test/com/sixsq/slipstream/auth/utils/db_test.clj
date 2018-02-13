@@ -30,7 +30,7 @@
     (is (= "last" (:lastName user)))
     (is (:password user))
     (is (:created user))
-    (is (= "USER ANON alpha-role beta-role" (db/find-roles-for-username "st")))))
+    (is (= "USER ANON" (db/find-roles-for-username "st")))))
 
 (deftest test-user-creation-avoids-user-same-name
   (th/add-user-for-test! {:username     "stef"
@@ -181,10 +181,9 @@
   (let [username "testuser"
         user     {:username    username
                   :password    "password"
-                  :isSuperUser false
-                  :roles       "alpha-role, beta-role"}]
+                  :isSuperUser false}]
     (th/add-user-for-test! user)
-    (is (= "USER ANON alpha-role beta-role" (db/find-roles-for-username username))))
+    (is (= "USER ANON" (db/find-roles-for-username username))))
 
   ; FIXME: requires direct user creation by super to be able to set isSuperUser to true
   #_(let [username "super"
