@@ -59,8 +59,8 @@ public abstract class CliConnectorBase extends ConnectorBase {
 
 	public static final String CLI_LOCATION = "/usr/bin";
 	// Indefinite lifetime.
-    private static final int CREDENTIAL_APIKEYSECRET_TTL = 0;
-    private static final String API_KEY_KEY = "key";
+	private static final int CREDENTIAL_APIKEYSECRET_TTL = 0;
+	private static final String API_KEY_KEY = "key";
 	private static final String API_SECRET_KEY = "secret";
 
 	protected Logger log;
