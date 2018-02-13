@@ -20,18 +20,43 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
-import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.google.gson.Gson;
+import com.sixsq.slipstream.exceptions.AbortException;
+import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
+import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.factory.DeploymentFactory;
+import com.sixsq.slipstream.factory.RunFactory;
+import com.sixsq.slipstream.persistence.DeploymentModule;
+import com.sixsq.slipstream.persistence.ImageModule;
+import com.sixsq.slipstream.persistence.Module;
+import com.sixsq.slipstream.persistence.ModuleParameter;
+import com.sixsq.slipstream.persistence.Node;
+import com.sixsq.slipstream.persistence.NodeParameter;
+import com.sixsq.slipstream.persistence.Parameter;
+import com.sixsq.slipstream.persistence.ParameterCategory;
 import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.RunType;
+import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
-import com.sixsq.slipstream.util.CommonTestUtil;
-import com.sixsq.slipstream.util.Logger;
+import com.sixsq.slipstream.run.RunTestBase;
+import com.sixsq.slipstream.ssclj.app.CIMITestServer;
+import com.sixsq.slipstream.statemachine.States;
+import com.sixsq.slipstream.util.SscljProxy;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.restlet.Response;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
@@ -40,6 +65,16 @@ import static org.junit.Assert.assertTrue;
 
 
 public class CliConnectorBaseTest {
+
+    @BeforeClass
+    public static void setupClass() {
+        CIMITestServer.start();
+    }
+
+    @AfterClass
+    public static void teardownClass() {
+        CIMITestServer.stop();
+    }
 
     private void parseRunInstanceResultExpectException(String output) {
         boolean exception = false;
@@ -57,19 +92,19 @@ public class CliConnectorBaseTest {
         String ip = "127.0.0.1";
 
         ArrayList<String> outputs = new ArrayList<>();
-        outputs.add(id+","+ip);
-        outputs.add(id+",");
-        outputs.add("\n"+id+","+ip);
-        outputs.add("\n"+id+","+ip+"\n");
-        outputs.add("\n"+id+","+ip+"\n"+id+","+ip);
-        outputs.add(id+",\n"+id+","+ip);
-        outputs.add(id+",\n"+id+","+ip+"\n");
-        outputs.add("ERROR: 1+1 not equal to 2 !!!\n"+id);
-        outputs.add("\n"+id+","+ip+"\n,"+ip);
-        outputs.add("\n"+id+",\n,"+ip);
-        outputs.add("\n"+id+","+ip+"\n,");
+        outputs.add(id + "," + ip);
+        outputs.add(id + ",");
+        outputs.add("\n" + id + "," + ip);
+        outputs.add("\n" + id + "," + ip + "\n");
+        outputs.add("\n" + id + "," + ip + "\n" + id + "," + ip);
+        outputs.add(id + ",\n" + id + "," + ip);
+        outputs.add(id + ",\n" + id + "," + ip + "\n");
+        outputs.add("ERROR: 1+1 not equal to 2 !!!\n" + id);
+        outputs.add("\n" + id + "," + ip + "\n," + ip);
+        outputs.add("\n" + id + ",\n," + ip);
+        outputs.add("\n" + id + "," + ip + "\n,");
 
-        for (String output: outputs) {
+        for (String output : outputs) {
             String[] result = CliConnectorBase.parseRunInstanceResult(output);
             String resId = result[0];
             String resIp = result[1];
@@ -82,12 +117,85 @@ public class CliConnectorBaseTest {
         ArrayList<String> outputsWithException = new ArrayList<>();
         outputsWithException.add(",");
         outputsWithException.add("");
-        outputsWithException.add(","+ip);
+        outputsWithException.add("," + ip);
 
-        for (String output: outputsWithException) {
+        for (String output : outputsWithException) {
             parseRunInstanceResultExpectException(output);
         }
 
     }
 
+    @Test
+    public void credentialTemplateTest() {
+        Gson gson = new Gson();
+        HashMap<String, Object> credTmpl = CliConnectorBase.getCredentialTemplateApiKeySecret(0);
+        assertTrue(credTmpl.containsKey("credentialTemplate"));
+        HashMap<String, Object> tmpl = (HashMap<String, Object>) credTmpl.get("credentialTemplate");
+        assertEquals(0, tmpl.get("ttl"));
+        HashMap credTmplConverted = gson.fromJson(gson.toJson(credTmpl), HashMap.class);
+        assertTrue(credTmplConverted.containsKey("credentialTemplate"));
+        Map<String, Object> tmplConverted = (Map<String, Object>) credTmplConverted.get("credentialTemplate");
+        assertEquals(0, Math.round((Double) tmplConverted.get("ttl")));
+    }
+
+    @Test
+    public void generateApiKeySecretPairTest() {
+        Map<String, String> keySecretPair = CliConnectorBase.generateApiKeySecretPair("testuser", "1-2-3-4-5");
+        assertTrue(keySecretPair.containsKey("key"));
+        assertTrue(keySecretPair.get("key").startsWith("credential/"));
+        assertTrue(keySecretPair.containsKey("secret"));
+        assertTrue(!keySecretPair.get("secret").isEmpty());
+    }
+
+    @Test
+    public void runApiKeyLifecycleTest() throws SlipStreamException {
+
+        Map<String, String> environment = new HashMap();
+        String userName = "user";
+
+        Run run = createAndStoreRun(userName);
+
+        assertTrue(run.getRuntimeParameters().containsKey(RuntimeParameter.GLOBAL_RUN_APIKEY_KEY));
+
+        CliConnectorBase.genAndSetRunApiKey(run, userName, environment);
+
+        // Set in environment for CLI.
+        assertTrue(environment.containsKey("SLIPSTREAM_API_KEY"));
+        assertTrue(environment.containsKey("SLIPSTREAM_API_SECRET"));
+        assertTrue(!environment.get("SLIPSTREAM_API_KEY").isEmpty());
+
+        // Persisted as RTP.
+        run = Run.loadRunWithRuntimeParameters(run.getUuid());
+        String key = run.getRuntimeParameterValue(RuntimeParameter.GLOBAL_RUN_APIKEY_KEY);
+        assertThat(key, is(environment.get("SLIPSTREAM_API_KEY")));
+
+        // Persisted as CIMI resource.
+        Response resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + key, userName + " USER");
+        assertTrue(resp.getStatus().isSuccess());
+        Gson gson = new Gson();
+        HashMap apiKey = gson.fromJson(resp.getEntityAsText(), HashMap.class);
+        assertThat(key, is(apiKey.get("id")));
+
+        // Delete API key/secret resource.
+        CliConnectorBase.deleteApiKeySecret(run, new User(userName), Logger.getLogger("test"));
+        resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + key, userName + " USER");
+        assertTrue(resp.getStatus().isError());
+    }
+
+    private Run createAndStoreRun(String userName) throws SlipStreamClientException {
+        String cloudServiceName = "testcloud";
+        ImageModule image = new ImageModule("test/image");
+        image.setImageId("123", cloudServiceName);
+        image.setModuleReference(new ImageModule("base/image"));
+        DeploymentModule deployment = new DeploymentModule("test/module");
+
+        Node node;
+        node = new Node("node1", image);
+        node.setCloudService(cloudServiceName);
+        deployment.setNode(node);
+        deployment.store();
+
+        Run run = RunFactory.getRun(deployment, RunType.Orchestration, new User(userName));
+        return run.store();
+    }
 }
