@@ -1,16 +1,14 @@
-(ns com.sixsq.slipstream.ssclj.resources.version
+(ns com.sixsq.slipstream.ssclj.resources.module-version
   (:require
     [superstring.core :as str]
     [com.sixsq.slipstream.auth.acl :as a]
-    [com.sixsq.slipstream.ssclj.resources.spec.version]
+    [com.sixsq.slipstream.ssclj.resources.spec.module-version]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.db.impl :as db])
-  (:import (clojure.lang ExceptionInfo)))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
-(def ^:const resource-name "Version")
+(def ^:const resource-name "ModuleVersion")
 
 (def ^:const resource-tag (keyword (str (str/camel-case resource-name) "s")))
 
@@ -26,49 +24,56 @@
                              :type      "ROLE"}
                      :rules [{:principal "USER"
                               :type      "ROLE"
-                              :right     "VIEW"}]})
+                              :right     "MODIFY"}]})
 
 ;;
 ;; multimethods for validation and operations
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi/version))
+(def validate-fn (u/create-spec-validation-fn :cimi/module-version))
 (defmethod crud/validate resource-uri
-           [resource]
-           (validate-fn resource))
+  [resource]
+  (validate-fn resource))
 
 ;;
 ;; use default ACL method
 ;;
 
 (defmethod crud/add-acl resource-uri
-           [resource request]
-           (a/add-acl resource request))
+  [resource request]
+  (a/add-acl resource request))
 
 ;;
 ;; CRUD operations
 ;;
 
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
+
+
 (defmethod crud/add resource-name
-           [request]
-           (add-impl request))
+  [request]
+  (add-impl request))
+
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
+
+
 (defmethod crud/retrieve resource-name
-           [request]
-           (retrieve-impl request))
+  [request]
+  (retrieve-impl request))
+
 
 (def delete-impl (std-crud/delete-fn resource-name))
+
+
 (defmethod crud/delete resource-name
-           [request]
-           (delete-impl request))
+  [request]
+  (delete-impl request))
+
 
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
+
+
 (defmethod crud/query resource-name
-           [request]
-           (query-impl request))
-
-
-
-
+  [request]
+  (query-impl request))

@@ -6,9 +6,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.db.impl :as db])
-  (:import (clojure.lang ExceptionInfo)))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 (def ^:const resource-name "Module")
 
@@ -26,7 +24,7 @@
                              :type      "ROLE"}
                      :rules [{:principal "USER"
                               :type      "ROLE"
-                              :right     "VIEW"}]})
+                              :right     "MODIFY"}]})
 
 ;;
 ;; multimethods for validation and operations
@@ -50,30 +48,40 @@
 ;;
 
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
+
+
 (defmethod crud/add resource-name
-           [request]
-           (add-impl request))
+  [request]
+  (add-impl request))
+
 
 (def edit-impl (std-crud/edit-fn resource-name))
+
+
 (defmethod crud/edit resource-name
-           [request]
-           (edit-impl request))
+  [request]
+  (edit-impl request))
+
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
+
+
 (defmethod crud/retrieve resource-name
-           [request]
-           (retrieve-impl request))
+  [request]
+  (retrieve-impl request))
+
 
 (def delete-impl (std-crud/delete-fn resource-name))
+
+
 (defmethod crud/delete resource-name
   [request]
   (delete-impl request))
 
+
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
+
+
 (defmethod crud/query resource-name
   [request]
   (query-impl request))
-
-
-
-
