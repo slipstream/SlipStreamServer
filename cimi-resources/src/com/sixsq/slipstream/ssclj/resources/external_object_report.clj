@@ -55,7 +55,7 @@
       (do
         (log/info "Requesting upload url for report:" report-id)
         (s3/generate-url report-bucket report-id (or ttl default-ttl) true))
-      (logu/log-and-throw-400 "Upload url request is not allowed"))))
+      (logu/log-and-throw-400 "Report object is not in new state to be uploaded!"))))
 
 
 (defmethod eo/upload-subtype objectType
@@ -78,7 +78,7 @@
       (do
         (log/info "Requesting download url for report : " report-id)
         (s3/generate-url report-bucket report-id (or ttl default-ttl)))
-      (logu/log-and-throw-400 "Report object is not in ready to be downloaded!"))))
+      (logu/log-and-throw-400 "Report object is not in ready state to be downloaded!"))))
 
 
 (defmethod eo/download-subtype objectType
