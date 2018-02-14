@@ -86,44 +86,44 @@ public class SscljProxy {
     private static final String MUTED_MESSAGE = "You should NOT see this message in production: request to SSCLJ " +
             "won't be made";
 
-    public static Response get(String resource, String username) {
-        return request(Method.GET, resource, null, username, null, null, null);
+    public static Response get(String resource, String authnInfo) {
+        return request(Method.GET, resource, null, authnInfo, null, null, null);
     }
 
-    public static Response get(String resource, String username, Form queryParameters) {
-        return request(Method.GET, resource, null, username, queryParameters, null, null);
+    public static Response get(String resource, String authnInfo, Form queryParameters) {
+        return request(Method.GET, resource, null, authnInfo, queryParameters, null, null);
     }
 
-    public static Response get(String resource, String username, Form queryParameters, Boolean throwException) {
-        return request(Method.GET, resource, null, username, queryParameters, null, throwException);
+    public static Response get(String resource, String authnInfo, Form queryParameters, Boolean throwException) {
+        return request(Method.GET, resource, null, authnInfo, queryParameters, null, throwException);
     }
 
-    public static Response get(String resource, String username, Boolean throwException) {
-        return request(Method.GET, resource, null, username, null, null, throwException);
+    public static Response get(String resource, String authnInfo, Boolean throwException) {
+        return request(Method.GET, resource, null, authnInfo, null, null, throwException);
     }
 
-    public static Response put(String resource, String username, Object obj) {
-        return request(Method.PUT, resource, obj, username, null, null, null);
+    public static Response put(String resource, String authnInfo, Object obj) {
+        return request(Method.PUT, resource, obj, authnInfo, null, null, null);
     }
 
-    public static Response put(String resource, String username, Object obj, boolean throwException) {
-        return request(Method.PUT, resource, obj, username, null, null, throwException);
+    public static Response put(String resource, String authnInfo, Object obj, boolean throwException) {
+        return request(Method.PUT, resource, obj, authnInfo, null, null, throwException);
     }
 
     public static Response post(String resource, Object obj) {
         return request(Method.POST, resource, obj, null, null, null, null);
     }
 
-    public static Response post(String resource, String username, Object obj) {
-        return request(Method.POST, resource, obj, username, null, null, null);
+    public static Response post(String resource, String authnInfo, Object obj) {
+        return request(Method.POST, resource, obj, authnInfo, null, null, null);
     }
 
-    public static Response post(String resource, String username, Boolean throwException) {
-        return request(Method.POST, resource, null, username, null, null, throwException);
+    public static Response post(String resource, String authnInfo, Boolean throwException) {
+        return request(Method.POST, resource, null, authnInfo, null, null, throwException);
     }
 
-    public static Response post(String resource, String username, Object obj, Boolean throwException) {
-        return request(Method.POST, resource, obj, username, null, null, throwException);
+    public static Response post(String resource, String authnInfo, Object obj, Boolean throwException) {
+        return request(Method.POST, resource, obj, authnInfo, null, null, throwException);
     }
 
     public static Response post(String resource, MediaType mediaType, Boolean throwException) {
@@ -134,20 +134,20 @@ public class SscljProxy {
         return request(Method.POST, resource, null, null, queryParameters, mediaType, throwException);
     }
 
-    public static Response delete(String resource, String username) {
-        return request(Method.DELETE, resource, null, username, null, null, null);
+    public static Response delete(String resource, String authnInfo) {
+        return request(Method.DELETE, resource, null, authnInfo, null, null, null);
     }
 
-    public static Response delete(String resource, String username, Form queryParameters) {
-        return request(Method.DELETE, resource, null, username, queryParameters, null, null);
+    public static Response delete(String resource, String authnInfo, Form queryParameters) {
+        return request(Method.DELETE, resource, null, authnInfo, queryParameters, null, null);
     }
 
-    public static Response delete(String resource, String username, Form queryParameters, Boolean throwException) {
-        return request(Method.DELETE, resource, null, username, queryParameters, null, throwException);
+    public static Response delete(String resource, String authnInfo, Form queryParameters, Boolean throwException) {
+        return request(Method.DELETE, resource, null, authnInfo, queryParameters, null, throwException);
     }
 
-    public static Response delete(String resource, String username, Boolean throwException) {
-        return request(Method.DELETE, resource, null, username, null, null, throwException);
+    public static Response delete(String resource, String authnInfo, Boolean throwException) {
+        return request(Method.DELETE, resource, null, authnInfo, null, null, throwException);
     }
 
     private static String getSscljEndpoint() {
@@ -173,7 +173,7 @@ public class SscljProxy {
         return params.append("]").toString();
     }
 
-    private static Response request(Method method, String resource, Object obj, String username,
+    private static Response request(Method method, String resource, Object obj, String authnInfo,
                                     Iterable<Parameter> queryParameters, MediaType mediaType,
                                     Boolean throwExceptions) {
         if (isMuted) {
@@ -194,7 +194,7 @@ public class SscljProxy {
         String requestParamsLog = "method=" + String.valueOf(method)
                 + ", resource=" + resource
                 + ", object=" + String.valueOf(obj)
-                + ", username=" + username
+                + ", authnInfo=" + authnInfo
                 + ", queryParameters=" + queryParametersToString(queryParameters)
                 + ", mediaType=" + String.valueOf(mediaType);
         logger.finest("Calling SSCLJ " + sscljEndpoint + " with: " + requestParamsLog);
@@ -214,9 +214,9 @@ public class SscljProxy {
 
             }
 
-            if (username != null) {
+            if (authnInfo != null) {
                 Series<Header> headers = getHeaders(client);
-                headers.add("slipstream-authn-info", username);
+                headers.add("slipstream-authn-info", authnInfo);
             }
 
             switch (method) {
