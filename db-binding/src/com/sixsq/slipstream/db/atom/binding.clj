@@ -20,7 +20,8 @@
   (:require
     [com.sixsq.slipstream.db.utils.common :as cu]
     [com.sixsq.slipstream.util.response :as response]
-    [com.sixsq.slipstream.db.binding :refer [Binding]])
+    [com.sixsq.slipstream.db.binding :refer [Binding]]
+    [com.sixsq.slipstream.db.utils.acl :as acl-utils])
   (:import
     (java.io Closeable)))
 
@@ -28,7 +29,7 @@
 (defn atomic-retrieve [data-atom id]
   (when-let [path (cu/split-id-kw id)]
     (or (get-in @data-atom path)
-        (response/response-not-found id))))
+        (throw (response/ex-not-found id)))))
 
 
 (defn atomic-add
@@ -36,7 +37,9 @@
   (if-let [path (cu/split-id-kw id)]
     (if (get-in db path)
       (throw (response/ex-conflict id))
-      (assoc-in db path data))
+      (->> data
+           acl-utils/force-admin-role-right-all
+           (assoc-in db path)))
     (throw (response/ex-bad-request "invalid document id"))))
 
 
@@ -52,7 +55,9 @@
   [db {:keys [id] :as data}]
   (if-let [path (cu/split-id-kw id)]
     (if (get-in db path)
-      (assoc-in db path data)
+      (->> data
+           acl-utils/force-admin-role-right-all
+           (assoc-in db path))
       (throw (response/ex-not-found id)))
     (throw (response/ex-bad-request "invalid document id"))))
 
@@ -75,11 +80,8 @@
 
 
 (defn delete-data [data-atom {:keys [id] :as data}]
-  (try
-    (swap! data-atom atomic-delete data)
-    (response/response-deleted id)
-    (catch Exception e
-      (ex-data e))))
+  (swap! data-atom atomic-delete data)
+  (response/response-deleted id))
 
 
 (defn query-info

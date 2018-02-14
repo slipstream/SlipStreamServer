@@ -9,7 +9,8 @@
     [com.sixsq.slipstream.db.es-rest.select :as select]
     [com.sixsq.slipstream.db.binding :refer [Binding]]
     [qbits.spandex :as spandex]
-    [clojure.pprint :refer [pprint]])
+    [clojure.pprint :refer [pprint]]
+    [com.sixsq.slipstream.db.utils.acl :as acl-utils])
   (:import
     (java.io Closeable)))
 
@@ -22,13 +23,18 @@
   (spandex/client options))
 
 
+(defn prepare-data [data]
+  (->> data
+       acl-utils/force-admin-role-right-all))
+
+
 (defn add-data
   [client {:keys [id] :as data}]
   (try
     (let [[collection-id uuid] (cu/split-id id)
           response (spandex/request client {:url    [index-name collection-id uuid :_create]
                                             :method :put
-                                            :body   data})
+                                            :body   (prepare-data data)})
           success? (pos? (get-in response [:body :_shards :successful]))]
       (if success?
         (response/response-created id)
@@ -45,7 +51,7 @@
   (let [[collection-id uuid] (cu/split-id id)
         response (spandex/request client {:url    [index-name collection-id uuid]
                                           :method :put
-                                          :body   data})
+                                          :body   (prepare-data data)})
         success? (pos? (get-in response [:body :_shards :successful]))]
     (if success?
       (response/response-updated id)
@@ -61,12 +67,12 @@
           found? (get-in response [:body :found])]
       (if found?
         (get-in response [:body :_source])
-        (response/response-not-found id)))
+        (throw (response/ex-not-found id))))
     (catch Exception e
       (let [response (ex-data e)
             status (:status response)]
         (if (= 404 status)
-          (response/response-not-found id)
+          (throw (response/ex-not-found id))
           (response/response-error (str "unexpected error retrieving " id)))))))
 
 
@@ -82,12 +88,12 @@
         (if success?
           (response/response-deleted id)
           (response/response-error (str "could not delete document " id)))
-        (response/response-not-found id)))
+        (throw (response/ex-not-found id))))
     (catch Exception e
       (let [response (ex-data e)
             status (:status response)]
         (if (= 404 status)
-          (response/response-not-found id)
+          (throw (response/ex-not-found id))
           (response/response-error (str "unexpected error deleting " id)))))))
 
 

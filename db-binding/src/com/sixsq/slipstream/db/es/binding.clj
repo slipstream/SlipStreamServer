@@ -1,15 +1,17 @@
 ;;
-;; Elastic Search implementation of Binding protocol
+;; Elasticsearch implementation of Binding protocol
 ;;
 (ns com.sixsq.slipstream.db.es.binding
   (:require
     [com.sixsq.slipstream.db.utils.common :as cu]
     [com.sixsq.slipstream.util.response :as response]
     [com.sixsq.slipstream.db.es.utils :as esu]
-    [com.sixsq.slipstream.db.es.acl :as acl]
+    [com.sixsq.slipstream.db.utils.acl :as acl-utils]
     [com.sixsq.slipstream.db.binding :refer [Binding]])
-  (:import (org.elasticsearch.index.engine VersionConflictEngineException)
-           (java.io Closeable)))
+  (:import
+    (org.elasticsearch.client Client)
+    (org.elasticsearch.index.engine VersionConflictEngineException)
+    (java.io Closeable)))
 
 
 (def ^:const index-name "resources-index")
@@ -48,18 +50,13 @@
   (unset-client!))
 
 
-(defn force-admin-role-right-all
-  [data]
-  (update-in data [:acl :rules] #(vec (set (conj % {:type "ROLE" :principal "ADMIN" :right "ALL"})))))
-
-
 (defn- prepare-data
   "Prepares the data by adding the ADMIN role with ALL rights, denormalizing
    the ACL, and turning the document into JSON."
   [data]
   (-> data
-      force-admin-role-right-all
-      acl/denormalize-acl
+      acl-utils/force-admin-role-right-all
+      acl-utils/denormalize-acl
       esu/edn->json))
 
 
@@ -76,7 +73,7 @@
   [doc]
   (-> doc
       esu/json->edn
-      acl/normalize-acl))
+      acl-utils/normalize-acl))
 
 
 (defn- throw-if-not-found
@@ -94,10 +91,10 @@
 
 
 (defn- add-data
-  [data]
+  [client data]
   (let [[id collection-id uuid json] (data->doc data)]
     (try
-      (if (esu/create *client* index-name collection-id uuid json)
+      (if (esu/create client index-name collection-id uuid json)
         (response/response-created id)
         (response/response-error "resource not created"))
       (catch VersionConflictEngineException _
@@ -108,11 +105,11 @@
   Binding
 
   (add [_ data options]
-    (add-data data))
+    (add-data *client* data))
 
 
   (add [_ collection-id data options]
-    (add-data data))
+    (add-data *client* data))
 
 
   (retrieve [_ id options]
@@ -144,7 +141,7 @@
                     :hits
                     :hits
                     (map :_source)
-                    (map acl/normalize-acl))]
+                    (map acl-utils/normalize-acl))]
       [meta hits]))
 
   Closeable
@@ -155,3 +152,57 @@
 (defn get-instance
   []
   (ESBinding.))
+
+
+(deftype ESBindingLocal [^Client client]
+  Binding
+
+  (add [_ data options]
+    (add-data client data))
+
+
+  (add [_ collection-id data options]
+    (add-data client data))
+
+
+  (retrieve [_ id options]
+    (find-data client index-name id options))
+
+
+  (delete [_ {:keys [id]} options]
+    (find-data client index-name id options)
+    (let [[type docid] (cu/split-id id)]
+      (.status (esu/delete client index-name type docid)))
+    (response/response-deleted id))
+
+
+  (edit [_ {:keys [id] :as data} options]
+    (let [[type docid] (cu/split-id id)
+          updated-doc (prepare-data data)]
+      (if (esu/update client index-name type docid updated-doc)
+        (response/json-response data)
+        (response/response-conflict id))))
+
+
+  (query [_ collection-id options]
+    (let [result (esu/search client index-name collection-id options)
+          count-before-pagination (-> result :hits :total)
+          aggregations (:aggregations result)
+          meta (cond-> {:count count-before-pagination}
+                       aggregations (assoc :aggregations aggregations))
+          hits (->> result
+                    :hits
+                    :hits
+                    (map :_source)
+                    (map acl-utils/normalize-acl))]
+      [meta hits]))
+
+  Closeable
+  (close [_]
+    (try
+      (.close client)
+      (catch Exception _ nil)
+      (finally nil))))
+
+
+
