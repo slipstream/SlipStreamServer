@@ -94,8 +94,6 @@ public class User extends Metadata {
         NEW, ACTIVE, DELETED, SUSPENDED
     }
 
-    private static transient final List<String> FORBIDDEN_ROLES = Arrays.asList("ADMIN", "USER", "ROLE", "ANON");
-
     private String href;
 
     @Attribute
@@ -486,6 +484,16 @@ public class User extends Metadata {
 
     private static final MetricsTimer loadByNameTimer = Metrics.newTimer(User.class, "loadByName");
 
+    public static User loadByName(String name, String userRoles) throws ValidationException {
+        User user = loadByNameNoParams(name);
+        if (null == user) {
+            return null;
+        }
+        user.setRoles(userRoles);
+        user.parameters = loadParameters(user);
+        return user;
+    }
+
     public static User loadByName(String name) throws ConfigurationException, ValidationException {
         loadByNameTimer.start();
         try {
@@ -613,7 +621,7 @@ public class User extends Metadata {
         return userGeneralParams.toParameters();
     }
 
-    private static Map<String, UserParameter> loadParameters(User user) throws ValidationException {
+    public static Map<String, UserParameter> loadParameters(User user) throws ValidationException {
         Map<String, UserParameter> params = new HashMap<>();
         if (null == user) {
             return params;
@@ -725,7 +733,7 @@ public class User extends Metadata {
     }
 
     private static UserGeneralParams getGeneralParamsFromBackend(User user) {
-        String authn = getCimiAuthnInfoUser(user);
+        String authn = user.getName() + " USER";
         Response resp = SscljProxy.get(RESOURCE_USER_PARAMS_COLLECTION, authn);
         UserGeneralParamsCollection pColl = UserGeneralParamsCollection.fromJson(resp.getEntityAsText());
         if (null == pColl || pColl.getCount() == null || pColl.getCount() == 0) {
@@ -741,7 +749,7 @@ public class User extends Metadata {
 
     private void storeGeneralParameters() {
         Response resp;
-        String authn = getCimiAuthnInfoUser();
+        String authn = this.getName() + " USER";
         Collection<UserParameter> newParams = getParameters(
                 ParameterCategory.General.toString()).values();
         UserGeneralParams params = getGeneralParamsFromBackend(this);
@@ -758,8 +766,7 @@ public class User extends Metadata {
         } else {
             // editing
             params.setParameters(newParams);
-            resp = SscljProxy.put(SscljProxy.BASE_RESOURCE + params.id,
-                    authn, params);
+            resp = SscljProxy.put(SscljProxy.BASE_RESOURCE + params.id, authn, params);
             if (SscljProxy.isError(resp)) {
                 throw new SlipStreamDatabaseException("Failed to edit user" +
                         " General params: " + resp.toString());
@@ -946,27 +953,11 @@ public class User extends Metadata {
         this.roles = roles;
     }
 
-    private void checkNoForbiddenRoles(String roles) throws ValidationException {
-        if (roles == null || roles.isEmpty()) {
-            return;
-        }
-        for (String role : roles.split(" ")) {
-            String trimedUppercaseRole = role.trim().toUpperCase();
-            if (FORBIDDEN_ROLES.contains(trimedUppercaseRole)) {
-                throw new ValidationException("List of roles '" + roles + "' contains forbidden role : '" + trimedUppercaseRole + "'");
-            }
-        }
-    }
-
     protected void checkValidRoles(String roles) throws ValidationException {
         String validRole = "([^\\s,;]*)*";
         String spaces = "(\\s)*";
-        boolean isValid = Pattern.matches(validRole + "(" + spaces + validRole + ")*", roles);
-
-        if (!isValid) {
+        if (!Pattern.matches(validRole + "(" + spaces + validRole + ")*", roles)) {
             throw new ValidationException("Invalid roles " + roles);
-        } else {
-            checkNoForbiddenRoles(roles);
         }
     }
 
@@ -991,10 +982,6 @@ public class User extends Metadata {
 
     private String getCimiAuthnInfoUser() {
         return getCimiAuthnInfo(this, "USER");
-    }
-
-    private String getCimiAuthnInfoAdmin() {
-        return getCimiAuthnInfo(this, "ADMIN");
     }
 }
 

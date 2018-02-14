@@ -297,22 +297,13 @@ public class UserTest {
 	}
 
 	@Test
-	public void forbiddenRolesAreRejected() {
-		assertFalse(validateRoles("ADMIN"));
-		assertFalse(validateRoles("USER"));
-		assertFalse(validateRoles("ROLE"));
-		assertFalse(validateRoles("ANON"));
-		assertFalse(validateRoles("role1 ANON"));
-		assertFalse(validateRoles("ANON  role1"));
-	}
-
-	@Test
 	public void getCimiAuthnInfoTest() throws ValidationException {
 		User user = new User("user");
 		user.setRoles("");
 		assertThat(User.getCimiAuthnInfo(user, null), is("user"));
+		assertThat(User.getCimiAuthnInfo(user, ""), is("user"));
 		assertThat(User.getCimiAuthnInfo(user, "USER"), is("user USER"));
-		String roles = "role1 ROLE2 RoLe3 session/abc123 SixSq:foo/bar";
+		String roles = "USER role1 ROLE2 RoLe3 session/abc123 SixSq:foo/bar";
 		user.setRoles(roles);
 		assertThat(User.getCimiAuthnInfo(user, "USER"), is("user USER " + roles));
 	}

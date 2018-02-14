@@ -133,10 +133,6 @@ public abstract class UserParameterizedResource extends BaseResource {
 
 		if (getParameterized() == null) {
 			setExisting(false);
-		} else {
-			Cookie cookie = CookieUtils.extractAuthnCookie(getRequest());
-			String roles = CookieUtils.getCookieRoles(cookie);
-			parameterized.setRoles(roles);
 		}
 	}
 
