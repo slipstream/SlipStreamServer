@@ -14,6 +14,7 @@ import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.util.SscljProxy;
 import org.restlet.Response;
 import org.restlet.data.Form;
+import org.restlet.resource.ResourceException;
 
 import java.util.logging.Logger;
 import java.util.HashMap;
@@ -91,7 +92,7 @@ public class CloudCredential<T> implements ICloudCredential<T> {
         queryParameters.add("$orderby", "updated:desc");
         queryParameters.add("$last", "1");
 
-        String authz = user.getName() + " USER";
+        String authz = User.getCimiAuthnInfoUser(user);
 
         Response resp = SscljProxy.get(SscljProxy.CREDENTIAL_RESOURCE, authz, queryParameters);
         CloudCredentialCollection cc = (CloudCredentialCollection) fromJson(resp.getEntityAsText(), CloudCredentialCollection.class);
@@ -110,7 +111,14 @@ public class CloudCredential<T> implements ICloudCredential<T> {
             CloudCredential credOld = cc.getCredentials().get(0);
             merge(credOld);
             removeHref();
-            SscljProxy.put(SscljProxy.BASE_RESOURCE + credOld.id, authz, this, true);
+            try {
+                SscljProxy.put(SscljProxy.BASE_RESOURCE + credOld.id, authz, this, true);
+            } catch (ResourceException re) {
+                // Skip authz issue. This is highly likely shared credential.
+                if (re.getStatus().getCode() != 403) {
+                    throw re;
+                }
+            }
         }
     }
 
