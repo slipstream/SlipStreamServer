@@ -121,8 +121,3 @@
   Closeable
   (close [_]
     nil))
-
-
-(defn get-instance
-  []
-  (AtomBinding. (atom {})))

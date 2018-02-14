@@ -2,36 +2,13 @@
   "General utilities for dealing with resources."
   (:require
     [clojure.tools.logging :as log]
-    [clojure.edn :as edn]
     [superstring.core :as s]
-    [clojure.string :as str])
-  (:import
-    [javax.xml.bind DatatypeConverter]))
+    [clojure.string :as str]))
 
 ;; NOTE: this cannot be replaced with s/lisp-case because it
 ;; will treat a '/' in a resource name as a word separator.
 (defn de-camelcase [str]
   (str/join "-" (map str/lower-case (str/split str #"(?=[A-Z])"))))
-
-
-(defn encode-base64
-  "Encodes a clojure value or data structure (EDN) into a base64
-   string representation."
-  [m]
-  (-> m
-      (pr-str)
-      (.getBytes)
-      (DatatypeConverter/printBase64Binary)))
-
-
-(defn decode-base64
-  "Decodes a base64 string representation of a clojure value or
-   data structure (EDN) into a clojure value."
-  [b64]
-  (-> b64
-      (DatatypeConverter/parseBase64Binary)
-      (String.)
-      (edn/read-string)))
 
 
 (defn- lisp-cased?

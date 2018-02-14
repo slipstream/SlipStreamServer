@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.db.es.binding-test
   (:require
-    [clojure.test :refer :all]
+    [clojure.test :refer [deftest is]]
     [com.sixsq.slipstream.db.es.binding :as eb]))
 
 (deftest test-set-close-es-client

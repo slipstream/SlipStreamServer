@@ -149,17 +149,11 @@
 ;; Util functions
 ;;
 
-(defn random-uuid
-  "Provides the string representation of a pseudo-random UUID."
-  []
-  (str (UUID/randomUUID)))
-
-
 (defn create-test-node
-  "Creates a local elasticsearch node that holds data but cannot be accessed
-   through the HTTP protocol."
+  "Creates a local elasticsearch node that holds data that can be access
+   through the native or HTTP protocols."
   ([]
-   (create-test-node (random-uuid)))
+   (create-test-node (str (UUID/randomUUID))))
   ([^String cluster-name]
    (let [tempDir (str (fs/temp-dir "es-data-"))
          settings (.. (Settings/builder)

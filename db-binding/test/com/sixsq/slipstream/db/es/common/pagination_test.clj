@@ -1,5 +1,4 @@
 (ns com.sixsq.slipstream.db.es.common.pagination-test
-  (:refer-clojure :exclude [read update])
   (:require
     [clojure.test :refer [deftest is are]]
     [com.sixsq.slipstream.db.es.common.pagination :as t]))
@@ -9,13 +8,13 @@
                        [1 1] [0 1]                          ;; first value only
                        [1 10] [0 10]                        ;; normal range
                        [10 10] [9 1]                        ;; single value
-                       [1 t/max-size] [0 t/max-size] ;; maximum size
+                       [1 t/max-size] [0 t/max-size]        ;; maximum size
                        [100 0] [99 0]                       ;; zero last -> zero size, always
                        [10 1] [9 0]                         ;; last smaller than first
                        [-1 10] [0 10]                       ;; invalid first defaults to 1
-                       [nil nil] [0 t/max-size]      ;; default values when missing args
+                       [nil nil] [0 t/max-size]             ;; default values when missing args
                        [nil 10] [0 10]                      ;; missing first value
-                       [3 nil] [2 t/max-size]        ;; missing last value
+                       [3 nil] [2 t/max-size]               ;; missing last value
 
                        [0 1] [0 1]                          ;; invalid first defaults to 1
                        [1 0] [0 0]                          ;; zero last -> zero size, always

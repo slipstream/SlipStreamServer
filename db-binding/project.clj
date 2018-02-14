@@ -45,8 +45,9 @@
    [superstring]                                            ;; needed for pascal case conversion function
    ]
 
-  :profiles {:test     {                                    ;:aot            :all
+  :profiles {:test     {:aot            :all
                         :resource-paths ["test-resources"]
                         :dependencies   [[org.slf4j/slf4j-log4j12]
-                                         [com.sixsq.slipstream/SlipStreamDbTesting-jar]]}
+                                         [me.raynes/fs]
+                                         [org.elasticsearch.test/framework]]}
              :provided {:dependencies [[org.clojure/clojure]]}})

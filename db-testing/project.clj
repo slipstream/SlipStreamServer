@@ -57,6 +57,7 @@
    [ring/ring-json]
 
    [com.sixsq.slipstream/SlipStreamDbBinding-jar]
+
    ;;
    ;; This dependency is included explicitly to avoid having
    ;; ring/ring-json pull in an old version of ring-core that
