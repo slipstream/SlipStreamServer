@@ -50,8 +50,3 @@
                           (:endpoint cred)]
                          (when (s3/does-object-exist cred bucket k)
                            (s3/delete-object bucket k)))))
-
-
-
-
-

@@ -22,18 +22,13 @@
               :created     timestamp
               :updated     timestamp
               :acl         valid-acl
-              :objectType        "report"
-              :uri         "https://sos-ch-dk-2.exo.io/my-bucket-name/key-name"
+              :objectType  "alpha"
               :state       "new"}]
+
+    (print (s/explain :cimi.test/external-object-template root))
 
     (is (s/valid? :cimi.test/external-object-template root))
 
     ;;mandatory keywords
     (doseq [k #{:objectType :id :resourceURI :state}]
-      (is (not (s/valid? :cimi.test/external-object-template (dissoc root k)))))
-
-    ;; optional keywords
-    (doseq [k #{ :uri}]
-      (is (s/valid? :cimi.test/external-object-template (dissoc root k))))))
-
-
+      (is (not (s/valid? :cimi.test/external-object-template (dissoc root k)))))))
