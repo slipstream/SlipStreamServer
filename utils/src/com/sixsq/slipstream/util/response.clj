@@ -11,7 +11,11 @@
    identifier and provides the Set-Cookie header with the given cookie, if
    the cookie value is not nil."
   [id & [[cookie-name cookie]]]
-  (cond-> {:status 201, :headers {"Location" id}}
+  (cond-> {:status 201
+           :headers {"Location" id}
+           :body {:status 201
+                  :message (str id " created")
+                  :resource-id id}}
           cookie (assoc :cookies {cookie-name cookie})))
 
 
