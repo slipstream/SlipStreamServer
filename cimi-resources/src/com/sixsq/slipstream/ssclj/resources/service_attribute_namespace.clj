@@ -7,6 +7,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.util.response :as response]
     [com.sixsq.slipstream.ssclj.filter.parser :as parser]))
 
 (def ^:const resource-name "ServiceAttributeNamespace")
@@ -88,7 +89,7 @@
 (defmethod crud/add resource-name
   [{{:keys [prefix uri]} :body :as request}]
   (if-let [id (colliding-id prefix uri)]
-    (esb/response-conflict id)
+    (response/response-conflict id)
     (add-impl request)))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))

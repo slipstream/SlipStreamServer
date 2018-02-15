@@ -83,7 +83,7 @@
           (t/body->edn)
           (t/is-status 409)
           (get-in [:response :body :message])
-          (= (str "Conflict for " uri))
+          (= (str "conflict with " uri))
           is)
 
       ;; trying to create another namespace with same uri is forbidden
@@ -94,7 +94,7 @@
           (t/body->edn)
           (t/is-status 409)
           (get-in [:response :body :message])
-          (= (str "Conflict for " uri))
+          (= (str "conflict with " uri))
           is)
 
       ;; trying to create another namespace with other name and URI is ok
