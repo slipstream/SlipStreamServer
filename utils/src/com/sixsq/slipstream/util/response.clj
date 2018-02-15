@@ -1,4 +1,3 @@
-;; old namespace:  com.sixsq.slipstream.ssclj.util.response
 (ns com.sixsq.slipstream.util.response
   "Utilities for creating ring responses and exceptions with embedded ring
    responses."
@@ -34,6 +33,8 @@
 
 
 (defn map-response
+  "Provides a generic map response with the given message, status, resource
+   ID, and location. Only the message and status are required."
   ([msg status]
    (map-response msg status nil nil))
   ([msg status id]
@@ -45,6 +46,17 @@
                   (r/status status))]
      (cond-> resp
              location (update-in [:headers "Location"] (constantly location))))))
+
+
+(defn ex-response
+  "Provides a generic exception response with the given message, status,
+   resource identifier, and location information."
+  ([msg status]
+   (ex-info msg (map-response msg status)))
+  ([msg status id]
+   (ex-info msg (map-response msg status id)))
+  ([msg status id location]
+   (ex-info msg (map-response msg status id location))))
 
 
 (defn response-deleted
@@ -65,23 +77,12 @@
 
 (defn response-error
   [msg]
-  (map-response (str "unexpected error occurred: " msg) 500 nil))
+  (map-response (str "unexpected error occurred: " msg) 500))
 
 
 (defn response-conflict
   [id]
   (map-response (str "conflict with " id) 409 id))
-
-
-(defn ex-response
-  "Provides a generic exception response with the given message, status,
-   resource identifier, and location information."
-  ([msg status]
-   (ex-info msg (map-response msg status)))
-  ([msg status id]
-   (ex-info msg (map-response msg status id)))
-  ([msg status id location]
-   (ex-info msg (map-response msg status id location))))
 
 
 (defn ex-bad-request
@@ -113,8 +114,10 @@
    access the resource. This is a 403 status response and the provided id
    should be the resource identifier or the username."
   [id]
-  (-> (str "invalid credentials for '" id "'")
-      (ex-response 403 id)))
+  (let [msg (if id
+              (str "invalid credentials for '" id "'")
+              "credentials required")]
+    (ex-response msg 403 id)))
 
 
 (defn ex-bad-method
