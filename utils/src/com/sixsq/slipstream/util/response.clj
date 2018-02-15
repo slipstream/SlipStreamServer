@@ -43,9 +43,8 @@
                           id (assoc :resource-id id))
                   json-response
                   (r/status status))]
-     (if location
-       (update-in resp [:headers "Location"] (constantly location))
-       resp))))
+     (cond-> resp
+             location (update-in [:headers "Location"] (constantly location))))))
 
 
 (defn response-deleted
@@ -90,7 +89,7 @@
    400 status response. If the message is not provided, a generic one is used."
   [& [msg]]
   (-> (or msg "invalid request")
-      (ex-response msg 400)))
+      (ex-response 400)))
 
 
 (defn ex-not-found
