@@ -6,8 +6,8 @@
 
   :url "https://github.com/slipstream/SlipStreamServer"
 
-  :license {:name "Apache 2.0"
-            :url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+  :license {:name         "Apache 2.0"
+            :url          "http://www.apache.org/licenses/LICENSE-2.0.txt"
             :distribution :repo}
 
   :plugins [[lein-parent "0.3.2"]]
@@ -27,8 +27,13 @@
   :pom-location "target/"
 
   :dependencies
-  [[cheshire]                                               ;; to avoid transient dependency conflicts
+  [[cc.qbits/spandex]
+   [org.clojure/tools.reader]                               ;; required by spandex through core.async
+   [cheshire]                                               ;; to avoid transient dependency conflicts
    [clj-time]
+   [com.rpl/specter]
+   [com.sixsq.slipstream/utils]
+   [duratom]
    [environ]
    [org.apache.logging.log4j/log4j-core]                    ;; required for Elasticsearch logging
    [org.clojure/data.json]
@@ -42,5 +47,7 @@
 
   :profiles {:test     {:aot            :all
                         :resource-paths ["test-resources"]
-                        :dependencies   [[org.slf4j/slf4j-log4j12]]}
+                        :dependencies   [[org.slf4j/slf4j-log4j12]
+                                         [me.raynes/fs]
+                                         [org.elasticsearch.test/framework]]}
              :provided {:dependencies [[org.clojure/clojure]]}})

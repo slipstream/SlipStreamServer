@@ -1,19 +1,26 @@
-(ns com.sixsq.slipstream.db.binding
-  (:refer-clojure :exclude [update]))
+(ns com.sixsq.slipstream.db.binding)
 
 (defprotocol Binding
   "This protocol defines the core interface to the underlying database.
    All of the functions accept and return native clojure data structures.
    The functions must handle all necessary conversions for the database.
 
+   For those functions that have a data argument, the id of the document
+   is taken from the value of the :id attribute in the data.
+
    On errors, the functions must throw an ex-info with an error ring
    response.  This simplifies the logic and code of the client using this
    protocol."
 
   (add
+    [this data options]
     [this collection-id data options]
     "This function adds the given resource to the database.  The resource
      must not already exist in the database.
+
+     The older 4-argument function that includes the collection-id is
+     deprecated.  The collection id is included in the document id, so
+     the separate argument isn't needed.
 
      On success, the function must return a 201 ring response with the
      relative URL of the new resource as the Location.
@@ -46,7 +53,9 @@
 
   (delete
     [this data options]
-    "This function removes the given resource in the database.
+    "This function removes the given resource in the database. Note that
+     you can remove a document by id by providing data of the form:
+     {:id \"collection/uuid\"}.
 
      On success, the function must return a 200 ring response with a map
      containing status, message, and resource ID.
@@ -69,6 +78,5 @@
      On failure, the function must throw an ex-info containing the error
      ring response.  If the resource-id does not correspond to a Collection,
      then a 400 (bad-request) response must be returned.  Other appropriate
-     error codes can also be thrown.")
-  )
+     error codes can also be thrown."))
 
