@@ -219,7 +219,6 @@
 
     (is (= 404 (:status response)))
     (is (zero? (str/index-of (-> response :body :message) "undefined action (")))
-    (clojure.pprint/pprint response)
     (is (pos? (str/index-of (-> response :body :message) uri)))
     (is (pos? (str/index-of (-> response :body :message) method)))
     (is (pos? (str/index-of (-> response :body :message) action)))
