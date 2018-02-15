@@ -68,14 +68,35 @@ class MainProgram(CommandBase):
         after_time = now - months_to_seconds
         return [report for report in reports if os.path.getmtime(report) > after_time]
 
-    def createExternalObjectReport(self, uuid, node_name, owner):
+    def create_external_object_report(self, report):
+        report_path_split = str.split(report, '/')
+        uuid = report_path_split[5]
+        report_name = report_path_split[6]
+        node_name = str.split(report_name, '_')[0]
+        owner = self.db.execute("select USER_ from RUN where UUID='{}'".format(uuid)).fetchone()[0]
         resp = self.api.cimi_add('externalObjects',
                                  {'externalObjectTemplate': {'href': 'external-object-template/report',
                                                              'runUUID': uuid,
-                                                             'component': node_name}})
+                                                             'component': node_name,
+                                                             'name': report_name,
+                                                             'acl': {
+                                                                 'owner': {
+                                                                     'principal': owner,
+                                                                     'type': 'USER'
+                                                                 },
+                                                                 'rules': [{
+                                                                     'principal': owner,
+                                                                     'right': 'MODIFY',
+                                                                     'type': 'USER'
+                                                                 }, {
+                                                                     'principal': 'ADMIN',
+                                                                     'right': 'ALL',
+                                                                     'type': 'ROLE'
+                                                                 }]
+                                                             }}})
         return resp.json['resource-id']
 
-    def generateUploadUrlExternalObjectReport(self, resource_id):
+    def generate_upload_url_external_object_report(self, resource_id):
         resp = self.api.cimi_operation(resource_id, "http://sixsq.com/slipstream/1/action/upload", {'ttl': 5})
         return resp.json['uri']
 
@@ -85,12 +106,8 @@ class MainProgram(CommandBase):
         put(url, body, accept="*/*")
 
     def migrate_report(self, report):
-        report_path_split = str.split(report, '/')
-        uuid = report_path_split[5]
-        node_name = str.split(report_path_split[6], '_')[0]
-        owner = self.db.execute("select USER_ from RUN where UUID='{}'".format(uuid)).fetchone()[0]
-        resource_id = self.createExternalObjectReport(uuid, node_name, owner)
-        upload_url = self.generateUploadUrlExternalObjectReport(resource_id)
+        resource_id = self.create_external_object_report(report)
+        upload_url = self.generate_upload_url_external_object_report(resource_id)
         self.upload_report(upload_url, report)
 
     def doWork(self):
