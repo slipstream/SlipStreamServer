@@ -257,7 +257,6 @@
             <require>jre-headless &gt;= ${server.jre.version}</require>
             <require>slipstream-useradd</require>
             <require>slipstream-client &gt;= 1.3</require>
-            <require>slipstream-client-clojure</require>
             <require>slipstream-cimi-resources</require>
             <require>libcloud-slipstream-downloads</require>
             <!-- For v3.41->3.42 migration: 020_migrate_users_to_cimi.py -->
