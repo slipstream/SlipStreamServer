@@ -27,6 +27,7 @@
   :dependencies
   [[org.clojure/clojure]
    [org.clojure/tools.nrepl]
+   [cheshire] ;; newer version needed
    [com.sixsq.slipstream/SlipStreamPlacementLib-jar]
    [com.sixsq.slipstream/token]
    [compojure]
