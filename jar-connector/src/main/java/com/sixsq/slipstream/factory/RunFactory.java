@@ -38,10 +38,6 @@ import static com.sixsq.slipstream.util.ServiceOffersUtil.getServiceOfferAttribu
 
 public abstract class RunFactory {
 
-	public final Run createRun(Module module, User user) throws SlipStreamClientException {
-		return createRun(module, user, null);
-	}
-
 	public final Run createRun(Module module, User user, Map<String, List<Parameter<?>>> userChoices)
 			throws SlipStreamClientException {
 
@@ -257,6 +253,9 @@ public abstract class RunFactory {
 
 		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_RECOVERY_MODE_KEY, "false",
 				RuntimeParameter.GLOBAL_RECOVERY_MDDE_DESCRIPTION);
+
+		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_RUN_APIKEY_KEY, "",
+				RuntimeParameter.GLOBAL_RUN_APIKEY_DESCRIPTION);
 	}
 
 	private static void initializeOrchestratorParameters(Run run, String cloudService) throws ValidationException {

@@ -167,7 +167,7 @@ public class RunTestBase {
 		return createAndStoreRun(module, USER_DEFAULT, type);
 	}
 
-	protected static Run createAndStoreRun(Module module, String user)
+	public static Run createAndStoreRun(Module module, String user)
 			throws SlipStreamException {
 
 		return createAndStoreRun(module, user, RunType.Orchestration);
