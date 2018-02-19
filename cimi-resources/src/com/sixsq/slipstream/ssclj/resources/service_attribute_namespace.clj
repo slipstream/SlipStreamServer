@@ -89,7 +89,7 @@
 (defmethod crud/add resource-name
   [{{:keys [prefix uri]} :body :as request}]
   (if-let [id (colliding-id prefix uri)]
-    (response/response-conflict id)
+    (response/ex-conflict id)
     (add-impl request)))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))

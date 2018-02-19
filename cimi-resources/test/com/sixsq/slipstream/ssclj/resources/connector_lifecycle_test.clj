@@ -79,6 +79,27 @@
           (ltu/body->edn)
           (ltu/is-status 200))
 
+      ;; user get succeeds
+      (-> session-user
+          (request abs-uri)
+          (ltu/body->edn)
+          (ltu/is-status 200))
+
+      ;; user update fails
+      (-> session-user
+          (request abs-uri
+                   :request-method :put
+                   :body (json/write-str {}))
+          (ltu/body->edn)
+          (ltu/is-status 403))
+
+      ;; user delete fails
+      (-> session-user
+          (request abs-uri
+                   :request-method :delete)
+          (ltu/body->edn)
+          (ltu/is-status 403))
+
       ;; anonymous query fails
       (-> session-anon
           (request base-uri)

@@ -30,6 +30,11 @@
                               :type      "ROLE"
                               :right     "MODIFY"}]})
 
+(def acl-user-can-view {:principal "USER"
+                        :type      "ROLE"
+                        :right     "VIEW"})
+(def resource-acl (update-in collection-acl [:rules] conj acl-user-can-view))
+
 ;;
 ;; validate subclasses of connectors
 ;;
@@ -88,7 +93,8 @@
   (cond-> resource
           href (assoc :connectorTemplate {:href href})
           true (dissoc :href)
-          true (assoc :resourceURI resource-uri)))
+          true (assoc :resourceURI resource-uri)
+          true (assoc :acl resource-acl)))
 
 ;;
 ;; CRUD operations
