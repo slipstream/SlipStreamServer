@@ -116,8 +116,7 @@ public class Terminator {
 		String onErrorKeepRunning = run.getParameterValue(Parameter
 				.constructKey(ParameterCategory.General.toString(),
 						UserParameter.KEY_ON_ERROR_RUN_FOREVER), "false");
-
-
+		
 		if (! Boolean.parseBoolean(onErrorKeepRunning) &&
 				! run.isMutable() &&
 				(run.getState() == States.Initializing || isGarbageCollected)) {
