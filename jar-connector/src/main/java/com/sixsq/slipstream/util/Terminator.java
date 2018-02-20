@@ -34,7 +34,7 @@ public class Terminator {
 
 	private static MetricsTimer purgeTimer = Metrics.newTimer(Terminator.class, "purge");
 
-	private static final Logger logger = Logger.getLogger("garbage-collector");
+	private static final Logger logger = Logger.getLogger(Terminator.class.getName());
 
 	private static final String threadInfoFormatStart = "START purge run: %s, thread name: %s, thread id: %ld";
 
@@ -82,7 +82,7 @@ public class Terminator {
 							purgeRun(r, user);
 							runPurged += 1;
 						} catch (SlipStreamException e) {
-							Logger.getLogger("garbage-collector").log(Level.SEVERE, e.getMessage(), e.getCause());
+							logger.log(Level.SEVERE, e.getMessage(), e.getCause());
 						} finally {
 							logger.log(Level.INFO, threadInfoFormatEnd
 									.format(r.getUuid(), Thread.currentThread().getName(), Thread.currentThread().getId()));
