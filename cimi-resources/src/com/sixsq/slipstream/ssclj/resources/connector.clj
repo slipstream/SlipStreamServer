@@ -90,11 +90,11 @@
 ;; default implementation just updates the resourceURI
 (defmethod tpl->connector :default
   [{:keys [href] :as resource}]
-  (cond-> resource
-          href (assoc :connectorTemplate {:href href})
-          true (dissoc :href)
-          true (assoc :resourceURI resource-uri)
-          true (assoc :acl resource-acl)))
+  (-> resource
+      (dissoc :href)
+      (assoc :resourceURI resource-uri
+             :acl resource-acl)
+      (cond-> href (assoc :connectorTemplate {:href href}))))
 
 ;;
 ;; CRUD operations
