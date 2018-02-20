@@ -34,6 +34,12 @@ public class Terminator {
 
 	private static MetricsTimer purgeTimer = Metrics.newTimer(Terminator.class, "purge");
 
+	private static final Logger logger = Logger.getLogger(Terminator.class.getName());
+
+	private static final String threadInfoFormatStart = "START purge run: %s, username: %s, thread name: %s, thread id: %d";
+
+	private static final String threadInfoFormatEnd = "END purge run: %s, username: %s, thread name: %s, thread id: %d";
+
 	public static int purge() throws ConfigurationException, ValidationException {
 		// This method has been rewritten to minimize the number of users queried and
 		// the number of times a user object is loaded.
@@ -59,26 +65,35 @@ public class Terminator {
 
 			for (String username: batchedRuns.keySet()) {
 				User user = User.loadByName(username);
-				int timeout = user.getTimeout();
+				if (user != null) {
+					int timeout = user.getTimeout();
 
-				Calendar calendar = Calendar.getInstance();
-				calendar.add(Calendar.MINUTE, -timeout);
-				Date timeoutDate = calendar.getTime();
+					Calendar calendar = Calendar.getInstance();
+					calendar.add(Calendar.MINUTE, -timeout);
+					Date timeoutDate = calendar.getTime();
 
-				for (Run r: batchedRuns.get(username)) {
-					Date lastStateChange = r.getLastStateChange();
-					if (lastStateChange.before(timeoutDate)) {
-						EntityManager em = PersistenceUtil.createEntityManager();
-						try {
-							r = Run.load(r.getResourceUri(), em);
-							purgeRun(r, user);
-							runPurged += 1;
-						} catch (SlipStreamException e) {
-							Logger.getLogger("garbage-collector").log(Level.SEVERE, e.getMessage(), e.getCause());
-						} finally {
-							em.close();
+					for (Run r : batchedRuns.get(username)) {
+						Date lastStateChange = r.getLastStateChange();
+						if (lastStateChange.before(timeoutDate)) {
+							EntityManager em = PersistenceUtil.createEntityManager();
+							logger.log(Level.INFO,
+									String.format(threadInfoFormatStart, r.getUuid(), username, Thread.currentThread().getName(),
+											Thread.currentThread().getId()));
+							try {
+								r = Run.load(r.getResourceUri(), em);
+								purgeRun(r, user);
+								runPurged += 1;
+							} catch (SlipStreamException e) {
+								logger.log(Level.SEVERE, e.getMessage(), e.getCause());
+							} finally {
+								logger.log(Level.INFO, String.format(threadInfoFormatEnd, r.getUuid(), username,
+										Thread.currentThread().getName(), Thread.currentThread().getId()));
+								em.close();
+							}
 						}
 					}
+				} else {
+					logger.log(Level.SEVERE, "could not load user " + username + " when trying to purge runs");
 				}
 			}
 
@@ -97,7 +112,6 @@ public class Terminator {
 
 		boolean isGarbageCollected = Run.isGarbageCollected(run);
 		Run.setGarbageCollected(run);
-		run = run.store();
 
 		String onErrorKeepRunning = run.getParameterValue(Parameter
 				.constructKey(ParameterCategory.General.toString(),
@@ -111,6 +125,13 @@ public class Terminator {
 		} else if (!isGarbageCollected) {
 			run.postEventGarbageCollectorTimedOut();
 		}
+
+		// This method will open a transaction, store the modified run, close the transaction,
+		// and return the run that was created by the EntityManager use to store the modified
+		// run.  Because that EntityManager closed its Session, further lazy loading of
+		// parameters WILL FAIL.  Do this after the run termination and ignore the returned
+		// run to avoid problems!
+		run.store();
 
 	}
 
