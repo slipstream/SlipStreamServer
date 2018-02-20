@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
  SlipStream Client
  =====
@@ -28,10 +29,12 @@ from requests import put
 try:
     import jaydebeapi
 except ImportError:
-    print("Please install following dependency: pip install jaydebeapi")
+    print("Please install following dependency: yum install -y gcc-c++; pip install jaydebeapi")
     exit(-1)
 
 from slipstream.command.CommandBase import CommandBase
+
+SEPARATOR = '\n=====================================================================\n'
 
 
 class MainProgram(CommandBase):
@@ -39,9 +42,8 @@ class MainProgram(CommandBase):
 
     def __init__(self, argv=None):
         self.api = Api('https://localhost', insecure=True)
-        self.db = jaydebeapi.connect("org.hsqldb.jdbcDriver", "jdbc:hsqldb:hsql://localhost/slipstream", ["SA", ""],
-                                     "/Users/khaledbasbous//.m2/repository/org/hsqldb/hsqldb/2.3.4/hsqldb-2.3.4.jar")
-
+        self.conn = jaydebeapi.connect("org.hsqldb.jdbcDriver", "jdbc:hsqldb:hsql://localhost/slipstream", ["SA", ""],
+                                       "/opt/slipstream/cimi/lib/hsqldb-2.3.4.jar")
         super(MainProgram, self).__init__(argv)
 
     def parse(self):
@@ -73,57 +75,66 @@ class MainProgram(CommandBase):
         uuid = report_path_split[5]
         report_name = report_path_split[6]
         node_name = str.split(report_name, '_')[0]
-        owner = self.db.execute("select USER_ from RUN where UUID='{}'".format(uuid)).fetchone()[0]
-        resp = self.api.cimi_add('externalObjects',
-                                 {'externalObjectTemplate': {'href': 'external-object-template/report',
-                                                             'runUUID': uuid,
-                                                             'component': node_name,
-                                                             'name': report_name,
-                                                             'acl': {
-                                                                 'owner': {
-                                                                     'principal': owner,
-                                                                     'type': 'USER'
-                                                                 },
-                                                                 'rules': [{
-                                                                     'principal': owner,
-                                                                     'right': 'MODIFY',
-                                                                     'type': 'USER'
-                                                                 }, {
-                                                                     'principal': 'ADMIN',
-                                                                     'right': 'ALL',
-                                                                     'type': 'ROLE'
-                                                                 }]
-                                                             }}})
+        self.db = self.conn.cursor()
+        self.db.execute("select USER_ from RUN where UUID='{}'".format(uuid))
+        db_res = self.db.fetchone()
+        if db_res is None:
+            raise Exception('Warning: owner not found for following report: {}'.format(uuid))
+        else:
+            owner = db_res[0]
+        report_object = {'externalObjectTemplate': {'href': 'external-object-template/report',
+                                                    'runUUID': uuid,
+                                                    'component': node_name,
+                                                    'name': report_name,
+                                                    'acl': {
+                                                        'owner': {
+                                                            'principal': owner,
+                                                            'type': 'USER'
+                                                        },
+                                                        'rules': [{
+                                                            'principal': owner,
+                                                            'right': 'MODIFY',
+                                                            'type': 'USER'
+                                                        }, {
+                                                            'principal': 'ADMIN',
+                                                            'right': 'ALL',
+                                                            'type': 'ROLE'
+                                                        }]
+                                                    }}}
+        resp = self.api.cimi_add('externalObjects', report_object)
         return resp.json['resource-id']
 
     def generate_upload_url_external_object_report(self, resource_id):
-        resp = self.api.cimi_operation(resource_id, "http://sixsq.com/slipstream/1/action/upload", {'ttl': 5})
+        resp = self.api.cimi_operation(resource_id, "http://sixsq.com/slipstream/1/action/upload")
         return resp.json['uri']
 
     def upload_report(self, url, report):
-        print('Uploading report: {}' % report)
-        body = open(report, 'rb').read()
-        put(url, body, accept="*/*")
+        report_file_data = open(report, 'rb').read()
+        put(url, files={'file': report_file_data})
 
     def migrate_report(self, report):
+        print('Migrating {}'.format(report))
         resource_id = self.create_external_object_report(report)
         upload_url = self.generate_upload_url_external_object_report(resource_id)
         self.upload_report(upload_url, report)
 
     def doWork(self):
+        print(SEPARATOR + 'Starting migration of reports...' + SEPARATOR)
         all_reports = self.get_all_existing_reports()
         print('All reports count: {}'.format(len(all_reports)))
         reports_to_migrate = self.filter_reports_updated_since_less_than(all_reports, self.options.months)
-        print('Number of reports updated in last {} months: {}'.format(self.options.months, len(all_reports)))
-        print('Starting migration of reports...')
+        print('Number of reports updated in last {} months: {}'.format(self.options.months, len(all_reports))
+              + SEPARATOR)
+
         success = 0
         for report in reports_to_migrate:
             try:
                 self.migrate_report(report)
                 success += 1
-            except:
-                print("Failed to migrate this report: {}".format(report))
-        print("Congratulation, {}/{} reports successfully migrated!".format(success, len(reports_to_migrate)))
+            except Exception as e:
+                print("Failed to migrate this report: {} with error => {}".format(report, e.message))
+        print(SEPARATOR +
+              "Migration completed, {}/{} reports successfully migrated!".format(success, len(reports_to_migrate)))
         exit(0)
 
 
