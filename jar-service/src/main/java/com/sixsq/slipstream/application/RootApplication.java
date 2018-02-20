@@ -31,7 +31,6 @@ import com.sixsq.slipstream.authn.ResetPasswordResource;
 import com.sixsq.slipstream.authz.SuperEnroler;
 import com.sixsq.slipstream.cloudusage.CloudUsageRouter;
 import com.sixsq.slipstream.configuration.Configuration;
-import com.sixsq.slipstream.connector.Connector;
 import com.sixsq.slipstream.connector.DiscoverableConnectorServiceLoader;
 import com.sixsq.slipstream.dashboard.DashboardRouter;
 import com.sixsq.slipstream.es.CljElasticsearchHelper;
@@ -53,7 +52,6 @@ import com.sixsq.slipstream.persistence.Module;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.AppStoreResource;
 import com.sixsq.slipstream.resource.ModulesChooserResource;
-import com.sixsq.slipstream.resource.ReportRouter;
 import com.sixsq.slipstream.resource.RootRedirectResource;
 import com.sixsq.slipstream.resource.configuration.ServiceConfigurationResource;
 import com.sixsq.slipstream.resource.NuvlaboxAdminRouter;
@@ -85,7 +83,6 @@ import slipstream.async.GarbageCollector;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.ServiceLoader;
 
 public class RootApplication extends Application {
 
@@ -245,7 +242,6 @@ public class RootApplication extends Application {
 			attachLogin(router);
 			attachLogout(router);
 			attachConfiguration(router);
-			attachReports(router);
 			attachEvent(router);
 			attachUsage(router);
 			attachCloudUsage(router);
@@ -302,10 +298,6 @@ public class RootApplication extends Application {
 		Directory directory = new Directory(getContext(), staticContentLocation);
 		directory.setModifiable(false);
 		return directory;
-	}
-
-	private void attachReports(RootRouter router) throws ConfigurationException, ValidationException {
-		router.attach("/reports", new ReportRouter(getContext(), router.getApplication()));
 	}
 
 	private void attachTeapot(RootRouter router) throws ConfigurationException, ValidationException {

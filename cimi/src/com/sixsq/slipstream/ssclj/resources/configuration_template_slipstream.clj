@@ -19,7 +19,6 @@
    :name                       "SlipStream"
    :description                "SlipStream Service Configuration"
    :serviceURL                 "https://localhost"
-   :reportsLocation            "/var/tmp/slipstream/reports"
    :supportEmail               "support@example.com"
    :clientBootstrapURL         "https://localhost/downloads/slipstream.bootstrap"
    :clientURL                  "https://localhost/downloads/slipstreamclient.tgz"

@@ -4,7 +4,7 @@
   :category "SlipStream_Advanced"
   :description
   "Location where the deployments and build reports are saved"
-  :mandatory true
+  :mandatory false
   :readOnly false
   :order 20}
 

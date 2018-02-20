@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.configuration-template-slipstream
-  (:require
-    [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]
-    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template :as ps]))
+    (:require
+      [clojure.spec.alpha :as s]
+      [com.sixsq.slipstream.ssclj.util.spec :as su]
+      [com.sixsq.slipstream.ssclj.resources.spec.configuration-template :as ps]))
 
 (s/def :cimi.configuration-template.slipstream/slipstreamVersion :cimi.core/nonblank-string)
 (s/def :cimi.configuration-template.slipstream/serviceURL :cimi.core/nonblank-string)
@@ -40,7 +40,6 @@
 (def configuration-template-keys-spec-req
   {:req-un [:cimi.configuration-template.slipstream/slipstreamVersion
             :cimi.configuration-template.slipstream/serviceURL
-            :cimi.configuration-template.slipstream/reportsLocation
             :cimi.configuration-template.slipstream/supportEmail
             :cimi.configuration-template.slipstream/clientBootstrapURL
             :cimi.configuration-template.slipstream/clientURL
@@ -68,7 +67,8 @@
             :cimi.configuration-template.slipstream/cloudConnectorClass
 
             :cimi.configuration-template.slipstream/metricsLoggerEnable
-            :cimi.configuration-template.slipstream/metricsGraphiteEnable]})
+            :cimi.configuration-template.slipstream/metricsGraphiteEnable]
+   :opt-un [:cimi.configuration-template.slipstream/reportsLocation]}) ; reportsLocation is deprecated
 
 ;; FIXME: Treats all parameters as optional.  Instead those without reasonable defaults should be required.
 (def configuration-template-keys-spec-opt
