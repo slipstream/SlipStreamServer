@@ -22,10 +22,27 @@ package com.sixsq.slipstream.connector;
 
 import com.google.gson.JsonObject;
 import com.sixsq.slipstream.configuration.Configuration;
-import com.sixsq.slipstream.cookie.CookieUtils;
 import com.sixsq.slipstream.credentials.Credentials;
-import com.sixsq.slipstream.exceptions.*;
-import com.sixsq.slipstream.persistence.*;
+import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.InvalidElementException;
+import com.sixsq.slipstream.exceptions.NotFoundException;
+import com.sixsq.slipstream.exceptions.NotImplementedException;
+import com.sixsq.slipstream.exceptions.ServerExecutionEnginePluginException;
+import com.sixsq.slipstream.exceptions.SlipStreamClientException;
+import com.sixsq.slipstream.exceptions.SlipStreamException;
+import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.persistence.ExtraDisk;
+import com.sixsq.slipstream.persistence.ImageModule;
+import com.sixsq.slipstream.persistence.ModuleCategory;
+import com.sixsq.slipstream.persistence.ModuleParameter;
+import com.sixsq.slipstream.persistence.Parameter;
+import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.RunType;
+import com.sixsq.slipstream.persistence.RuntimeParameter;
+import com.sixsq.slipstream.persistence.ServiceConfiguration;
+import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
+import com.sixsq.slipstream.persistence.User;
+import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.run.RuntimeParameterMediator;
 import com.sixsq.slipstream.util.FileUtil;
 import com.sixsq.slipstream.util.ServiceOffersUtil;
@@ -34,7 +51,12 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 public abstract class ConnectorBase implements Connector {
@@ -185,7 +207,7 @@ public abstract class ConnectorBase implements Connector {
         setRuntimeParameterValue(machineInstanceUrlSshKey, url, run);
     }
 
-    private void setRuntimeParameterValue(String key, String value, Run run) {
+    private static void setRuntimeParameterValue(String key, String value, Run run) {
         RuntimeParameter p = RuntimeParameter.loadFromUuidAndKey(run.getUuid(), key);
         p.setValue(value);
         RuntimeParameterMediator.processSpecialValue(p);
@@ -207,6 +229,10 @@ public abstract class ConnectorBase implements Connector {
 
         String url = getSshUrl(run, instanceHostname);
         setRuntimeParameterValue(MACHINE_INSTANCE_URL_SSH, url, run);
+    }
+
+    protected static void setApiKeyOnRun(Run run, String key) {
+        setRuntimeParameterValue(RuntimeParameter.GLOBAL_RUN_APIKEY_KEY, key, run);
     }
 
     private String getSshUrl(Run run, String instanceHostname) {
@@ -360,23 +386,6 @@ public abstract class ConnectorBase implements Connector {
 
     public Map<String, ModuleParameter> getImageParametersTemplate() throws ValidationException {
         return new HashMap<String, ModuleParameter>();
-    }
-
-    protected String generateCookie(String identifier, String runId) {
-        Properties extraProperties = new Properties();
-        extraProperties.put(CookieUtils.COOKIE_IS_MACHINE, "true");
-        extraProperties.put(CookieUtils.COOKIE_RUN_ID, runId);
-        extraProperties.put(CookieUtils.COOKIE_EXPIRY_DATE, "0");
-
-        String cookie = CookieUtils.createCookie(identifier, getConnectorInstanceName(), extraProperties);
-
-        getLog().info("Generated cookie = " + cookie);
-
-        return cookie;
-    }
-
-    protected String getCookieForEnvironmentVariable(String identifier, String runId) {
-        return "\"" + generateCookie(identifier, runId) + "\"";
     }
 
     protected abstract String constructKey(String key) throws ValidationException;

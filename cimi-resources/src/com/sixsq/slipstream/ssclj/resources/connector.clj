@@ -30,6 +30,11 @@
                               :type      "ROLE"
                               :right     "MODIFY"}]})
 
+(def acl-user-can-view {:principal "USER"
+                        :type      "ROLE"
+                        :right     "VIEW"})
+(def resource-acl (update-in collection-acl [:rules] conj acl-user-can-view))
+
 ;;
 ;; validate subclasses of connectors
 ;;
@@ -85,10 +90,11 @@
 ;; default implementation just updates the resourceURI
 (defmethod tpl->connector :default
   [{:keys [href] :as resource}]
-  (cond-> resource
-          href (assoc :connectorTemplate {:href href})
-          true (dissoc :href)
-          true (assoc :resourceURI resource-uri)))
+  (-> resource
+      (dissoc :href)
+      (assoc :resourceURI resource-uri
+             :acl resource-acl)
+      (cond-> href (assoc :connectorTemplate {:href href}))))
 
 ;;
 ;; CRUD operations

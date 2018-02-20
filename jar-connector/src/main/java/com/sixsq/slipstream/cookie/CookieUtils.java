@@ -132,17 +132,6 @@ public class CookieUtils {
 		return cookieSetting;
 	}
 
-	public static String createCookie(String username, String cloudServiceName,
-									  Properties extraProperties) {
-		Properties properties = generateCloudServiceNameProperties(cloudServiceName);
-		if (extraProperties != null) {
-			properties.putAll(extraProperties);
-		}
-		return getCookieName() + "="
-				+ CookieUtils.createCookieValue("local", username, properties)
-				+ "; Path:/";
-	}
-
 	private static Properties generateCloudServiceNameProperties(
 			String cloudServiceName) {
 		Properties properties = new Properties();
@@ -150,8 +139,8 @@ public class CookieUtils {
 		return properties;
 	}
 
-	public static String createCookieValue(String idType, String identifier,
-										   Properties properties) {
+	private static String createCookieValue(String idType, String identifier,
+											Properties properties) {
 		// Create the expiration date for the cookie. This is added to be sure
 		// that the server has control over this even if a malicious client
 		// extends the date of a cookie.

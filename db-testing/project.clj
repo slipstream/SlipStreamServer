@@ -55,9 +55,9 @@
    [org.elasticsearch.test/framework]
 
    [ring/ring-json]
-   [superstring]
 
    [com.sixsq.slipstream/SlipStreamDbBinding-jar]
+
    ;;
    ;; This dependency is included explicitly to avoid having
    ;; ring/ring-json pull in an old version of ring-core that

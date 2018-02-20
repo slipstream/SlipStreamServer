@@ -16,14 +16,13 @@
   (:import
     (java.net InetAddress)
     (java.util UUID)
-    (org.elasticsearch.action ActionRequestBuilder)
     (org.elasticsearch.action.admin.indices.create CreateIndexResponse)
     (org.elasticsearch.action.admin.indices.delete DeleteIndexRequest)
     (org.elasticsearch.action.admin.indices.exists.indices IndicesExistsRequest)
     (org.elasticsearch.action.admin.indices.get GetIndexRequest)
     (org.elasticsearch.action.bulk BulkRequestBuilder BulkResponse)
     (org.elasticsearch.action.search SearchType SearchPhaseExecutionException SearchResponse SearchRequestBuilder)
-    (org.elasticsearch.action.support WriteRequest$RefreshPolicy WriteRequest)
+    (org.elasticsearch.action.support WriteRequest$RefreshPolicy)
     (org.elasticsearch.common.settings Settings)
     (org.elasticsearch.common.transport InetSocketTransportAddress)
     (org.elasticsearch.common.unit TimeValue)
@@ -32,12 +31,8 @@
     (org.elasticsearch.index IndexNotFoundException)
     (org.elasticsearch.index.query QueryBuilders)
     (org.elasticsearch.node Node MockNode)
-    (org.elasticsearch.test ESIntegTestCase)
-    (com.carrotsearch.randomizedtesting RandomizedContext)
-    (org.elasticsearch.plugins Plugin)
     (org.elasticsearch.transport Netty4Plugin)
     (org.elasticsearch.transport.client PreBuiltTransportClient)
-    (org.elasticsearch.env Environment)
     (org.elasticsearch.common.logging LogConfigurator)))
 
 (def ^:const max-result-window 200000)
@@ -154,12 +149,11 @@
 ;; Util functions
 ;;
 
-
 (defn create-test-node
-  "Creates a local elasticsearch node that holds data but cannot be accessed
-   through the HTTP protocol."
+  "Creates a local elasticsearch node that holds data that can be access
+   through the native or HTTP protocols."
   ([]
-   (create-test-node (cu/random-uuid)))
+   (create-test-node (str (UUID/randomUUID))))
   ([^String cluster-name]
    (let [tempDir (str (fs/temp-dir "es-data-"))
          settings (.. (Settings/builder)
@@ -305,11 +299,11 @@
 
 (defn refresh-index
   [^Client client index]
-   (.. client
-       (admin)
-       (indices)
-       (prepareRefresh (into-array String [index]))
-       (get)))
+  (.. client
+      (admin)
+      (indices)
+      (prepareRefresh (into-array String [index]))
+      (get)))
 
 (defn random-index-name
   "Creates a random value for an index name. The name is the string value of a

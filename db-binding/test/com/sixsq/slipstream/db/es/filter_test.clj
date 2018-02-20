@@ -1,7 +1,6 @@
 (ns com.sixsq.slipstream.db.es.filter-test
-  (:refer-clojure :exclude [read update])
   (:require
-    [clojure.test :refer :all]
+    [clojure.test :refer [deftest is]]
     [com.sixsq.slipstream.db.es.filter :as t]))
 
 (deftest test-attribute-conversion

@@ -279,30 +279,33 @@ public class UserTest {
 	}
 
 	@Test
-	public void rolesShouldBeValidNamesCommaSeparated() {
+	public void rolesShouldBeValidNamesSpaceSeparated() {
 		assert(validateRoles(""));
 		assert(validateRoles("A"));
 		assert(validateRoles("cyclone-fr1"));
-		assert(validateRoles("exoscale,  cyclone-fr1"));
-		assert(validateRoles("exoscale  		,	  	cyclone-fr1")); // tabs
-		assert(validateRoles("exoscale, cyclone-fr1, ec2-ap-northeast-1, ec2-ap-southeast-1"));
+		assert(validateRoles("exoscale  cyclone-fr1"));
+		assert(validateRoles("exoscale  			  	cyclone-fr1")); // tabs
+		assert(validateRoles("exoscale cyclone-fr1 ec2-ap-northeast-1 ec2-ap-southeast-1"));
 
-		assert(validateRoles(",,,"));
+		assert(validateRoles("   "));
 		assert(validateRoles("cyclone._--__...fr1"));
+		assert(validateRoles("exoscale%"));
+		assert(validateRoles("a:b c$d e%f g#h i^j k&l m*n o/p q%r s@t"));
 
-		assertFalse(validateRoles("exoscale  cyclone-fr1"));
-		assertFalse(validateRoles("1abc"));
-		assertFalse(validateRoles("exoscale%"));
+		assertFalse(validateRoles("exoscale, cyclone-fr1"));
+		assertFalse(validateRoles("exoscale,cyclone-fr1"));
 	}
 
 	@Test
-	public void forbiddenRolesAreRejected() {
-		assertFalse(validateRoles("ADMIN"));
-		assertFalse(validateRoles("USER"));
-		assertFalse(validateRoles("ROLE"));
-		assertFalse(validateRoles("ANON"));
-		assertFalse(validateRoles("role1,ANON"));
-		assertFalse(validateRoles("ANON, role1"));
+	public void getCimiAuthnInfoTest() throws ValidationException {
+		User user = new User("user");
+		user.setRoles("");
+		assertThat(User.getCimiAuthnInfo(user, null), is("user"));
+		assertThat(User.getCimiAuthnInfo(user, ""), is("user"));
+		assertThat(User.getCimiAuthnInfo(user, "USER"), is("user USER"));
+		String roles = "USER role1 ROLE2 RoLe3 session/abc123 SixSq:foo/bar";
+		user.setRoles(roles);
+		assertThat(User.getCimiAuthnInfo(user, "USER"), is("user USER " + roles));
 	}
 
 	private boolean validateRoles(String roles) {

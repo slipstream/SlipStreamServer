@@ -57,9 +57,6 @@ import com.sixsq.slipstream.util.ModuleUriUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
 import com.sixsq.slipstream.util.XmlUtil;
 
-/**
- * @see UserResourceTest
- */
 public class UserResource extends UserParameterizedResource {
 
 	public static final String USERNAME_URI_ATTRIBUTE = "user";
@@ -440,7 +437,12 @@ public class UserResource extends UserParameterizedResource {
 	@Override
 	protected User loadParameterized(String targetParameterizedName)
 			throws ConfigurationException, ValidationException {
-		return User.loadByName(targetParameterizedName);
+		User user = (User) getRequest().getAttributes().get(User.REQUEST_KEY);
+		if (null != user && user.getName().equals(targetParameterizedName)) {
+			return user;
+		} else {
+			return User.loadByName(targetParameterizedName);
+		}
 	}
 
 	@Delete

@@ -75,7 +75,7 @@ public class CookieAuthenticator extends AuthenticatorBase {
 
 		com.sixsq.slipstream.persistence.User user = null;
 		try {
-			user = com.sixsq.slipstream.persistence.User.loadByName(username);
+			user = com.sixsq.slipstream.persistence.User.loadByName(username, CookieUtils.getCookieRoles(cookie));
 		} catch (ConfigurationException e) {
 			return false;
 		} catch (ValidationException e) {

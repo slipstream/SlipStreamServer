@@ -20,9 +20,12 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
+import com.google.gson.Gson;
 import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.credentials.Credentials;
+import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ProcessException;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
@@ -32,8 +35,11 @@ import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.ModuleParametersFactoryBase;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.Run;
+import com.sixsq.slipstream.persistence.RuntimeParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.util.ProcessUtils;
+import com.sixsq.slipstream.util.SscljProxy;
+import org.restlet.Response;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -49,7 +55,13 @@ import java.util.logging.Logger;
 
 public abstract class CliConnectorBase extends ConnectorBase {
 
+	private static final Gson gson = new Gson();
+
 	public static final String CLI_LOCATION = "/usr/bin";
+	// Indefinite lifetime.
+	private static final int CREDENTIAL_APIKEYSECRET_TTL = 0;
+	private static final String API_KEY_KEY = "key";
+	private static final String API_SECRET_KEY = "secret";
 
 	protected Logger log;
 
@@ -201,7 +213,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 			if (!tempFile.delete()) {
 				getLog().warning("Cannot delete temporary file: " + tempFile.getPath());
 			}
-			cleanupAfterTerminate();
+			cleanupAfterTerminate(run, user);
 		}
 	}
 
@@ -214,8 +226,29 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		connectorCleanupAfterCliCall();
 	}
 
-	private void cleanupAfterTerminate() {
+	private void cleanupAfterTerminate(Run run, User user) {
+		deleteApiKeySecret(run, user, this.log);
 		connectorCleanupAfterCliCall();
+	}
+
+	public static void deleteApiKeySecret(Run run, User user, Logger log) {
+	    String key = null;
+		try {
+			key = run.getRuntimeParameterValue(RuntimeParameter.GLOBAL_RUN_APIKEY_KEY);
+		} catch (AbortException | NotFoundException e) {
+			e.printStackTrace();
+		}
+		if (null != key && key.startsWith("credential/")) {
+		    try {
+				SscljProxy.delete(SscljProxy.BASE_RESOURCE + key, user.getName() + " USER", true);
+			} catch (Exception e) {
+				log.warning(String.format("Failed to delete API key %s on run %s with: %s",
+						key, run.getUuid(), e.getMessage()));
+			}
+		} else {
+			log.warning(String.format("No API key in %s on run %s.",
+					RuntimeParameter.GLOBAL_RUN_APIKEY_KEY, run.getUuid()));
+		}
 	}
 
 	protected void connectorCleanupAfterCliCall() {
@@ -362,14 +395,22 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		environment.put("SLIPSTREAM_BUNDLE_URL", configuration.getRequiredProperty("slipstream.update.clienturl"));
 		environment.put("SLIPSTREAM_BOOTSTRAP_BIN", configuration.getRequiredProperty("slipstream.update.clientbootstrapurl"));
 
+		genAndSetRunApiKey(run, username, environment);
+
 		environment.put("SLIPSTREAM_USERNAME", username);
-		environment.put("SLIPSTREAM_COOKIE", generateCookie(username, run.getUuid()));
 		environment.put("SLIPSTREAM_VERBOSITY_LEVEL", verbosityLevel);
 
 		environment.put("CLOUDCONNECTOR_BUNDLE_URL", getCloudConnectorBundleUrl(user));
 		environment.put("CLOUDCONNECTOR_PYTHON_MODULENAME", getCloudConnectorPythonModule());
 
 		return environment;
+	}
+
+	static void genAndSetRunApiKey(Run run, String username, Map<String, String> environment) throws ValidationException {
+		HashMap<String, String> apiKeySecret = generateApiKeySecretPair(username, run.getUuid());
+		environment.put("SLIPSTREAM_API_KEY", apiKeySecret.get(API_KEY_KEY));
+		environment.put("SLIPSTREAM_API_SECRET", apiKeySecret.get(API_SECRET_KEY));
+		setApiKeyOnRun(run, apiKeySecret.get(API_KEY_KEY));
 	}
 
 	protected Map<String, String> getCommonEnvironment(User user)
@@ -545,7 +586,30 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		return getCommandGenericPart() + "-describe-instances ";
 	}
 
+	public static HashMap<String, Object> getCredentialTemplateApiKeySecret(int ttl) {
+		Map<String, Object> templ = new HashMap<>();
+		templ.put("href", "credential-template/generate-api-key");
+		templ.put("ttl", ttl);
+		Map<String, Object> credTempl = new HashMap<>();
+		credTempl.put("credentialTemplate", templ);
+		return (HashMap<String, Object>) credTempl;
+	}
 
-
-
+	public static HashMap<String, String> generateApiKeySecretPair(String username, String dplId) {
+		// TODO: use dplId to add to the token as scoped resource.
+        HashMap<String, Object> template = CliConnectorBase.getCredentialTemplateApiKeySecret(CREDENTIAL_APIKEYSECRET_TTL);
+        String resourceUrl = SscljProxy.BASE_RESOURCE + "credential";
+        Response resp = SscljProxy.post(resourceUrl, username + " USER", template, true);
+        String key = "resource-id";
+        String secret = "secretKey";
+        HashMap result = gson.fromJson(resp.getEntityAsText(), HashMap.class);
+        if (!result.containsKey(key) || !result.containsKey(secret)) {
+            throw new SlipStreamRuntimeException("Failed to generate api key/secret pair. Key and/or secret not " +
+					"returned.");
+        }
+        HashMap<String, String> keySecret = new HashMap<>();
+        keySecret.put(API_KEY_KEY, (String) result.get(key));
+        keySecret.put(API_SECRET_KEY, (String) result.get(secret));
+        return keySecret;
+    }
 }

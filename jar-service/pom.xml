@@ -162,7 +162,6 @@
       <groupId>org.elasticsearch</groupId>
       <artifactId>elasticsearch</artifactId>
       <scope>test</scope>
-      <version>5.5.0</version>
     </dependency>
     <!-- required for passing tests on clean build -->
     <dependency>

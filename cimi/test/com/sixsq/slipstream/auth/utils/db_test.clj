@@ -30,7 +30,7 @@
     (is (= "last" (:lastName user)))
     (is (:password user))
     (is (:created user))
-    (is (= "USER ANON alpha-role beta-role" (db/find-roles-for-username "st")))))
+    (is (= "USER ANON" (db/find-roles-for-username "st")))))
 
 (deftest test-user-creation-avoids-user-same-name
   (th/add-user-for-test! {:username     "stef"
@@ -81,19 +81,6 @@
   (is (= "joe_2" (db/name-no-collision "joe_" ["joe", "joe_", "joe_1"])))
   (is (= "joe_11" (db/name-no-collision "joe_10" ["joe_10"])))
   (is (= "joe_1_2_4" (db/name-no-collision "joe_1_2_3" ["joe_1_2_3"]))))
-
-(deftest test-build-roles
-  (are [x super? roles] (= x (db/build-roles super? roles))
-                        "ADMIN USER ANON" true nil
-                        "USER ANON" false nil
-                        "ADMIN USER ANON" true ""
-                        "USER ANON" false ""
-                        "ADMIN USER ANON" true " , , "
-                        "USER ANON" false " , , "
-                        "ADMIN USER ANON a" true "a"
-                        "USER ANON a" false "a"
-                        "ADMIN USER ANON a b" true ", a, ,  ,  b,  ,"
-                        "USER ANON a b" false ", a, ,  ,  b,  ,"))
 
 (deftest test-users-by-email-skips-deleted
   (th/add-user-for-test! {:username     "jack"
@@ -194,10 +181,9 @@
   (let [username "testuser"
         user     {:username    username
                   :password    "password"
-                  :isSuperUser false
-                  :roles       "alpha-role, beta-role"}]
+                  :isSuperUser false}]
     (th/add-user-for-test! user)
-    (is (= "USER ANON alpha-role beta-role" (db/find-roles-for-username username))))
+    (is (= "USER ANON" (db/find-roles-for-username username))))
 
   ; FIXME: requires direct user creation by super to be able to set isSuperUser to true
   #_(let [username "super"
