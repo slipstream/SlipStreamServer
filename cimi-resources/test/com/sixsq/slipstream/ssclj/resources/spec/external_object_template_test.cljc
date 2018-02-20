@@ -24,9 +24,7 @@
               :acl         valid-acl
               :objectType  "alpha"
               :state       "new"}]
-
-    (print (s/explain :cimi.test/external-object-template root))
-
+    
     (is (s/valid? :cimi.test/external-object-template root))
 
     ;;mandatory keywords
