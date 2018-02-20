@@ -34,6 +34,12 @@ public class Terminator {
 
 	private static MetricsTimer purgeTimer = Metrics.newTimer(Terminator.class, "purge");
 
+	private static final Logger logger = Logger.getLogger("garbage-collector");
+
+	private static final String threadInfoFormatStart = "START purge run: %s, thread name: %s, thread id: %ld";
+
+	private static final String threadInfoFormatEnd = "END purge run: %s, thread name: %s, thread id: %ld";
+
 	public static int purge() throws ConfigurationException, ValidationException {
 		// This method has been rewritten to minimize the number of users queried and
 		// the number of times a user object is loaded.
@@ -69,6 +75,8 @@ public class Terminator {
 					Date lastStateChange = r.getLastStateChange();
 					if (lastStateChange.before(timeoutDate)) {
 						EntityManager em = PersistenceUtil.createEntityManager();
+						logger.log(Level.INFO, threadInfoFormatStart
+								.format(r.getUuid(), Thread.currentThread().getName(), Thread.currentThread().getId()));
 						try {
 							r = Run.load(r.getResourceUri(), em);
 							purgeRun(r, user);
@@ -76,6 +84,8 @@ public class Terminator {
 						} catch (SlipStreamException e) {
 							Logger.getLogger("garbage-collector").log(Level.SEVERE, e.getMessage(), e.getCause());
 						} finally {
+							logger.log(Level.INFO, threadInfoFormatEnd
+									.format(r.getUuid(), Thread.currentThread().getName(), Thread.currentThread().getId()));
 							em.close();
 						}
 					}
