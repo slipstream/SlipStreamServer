@@ -126,13 +126,6 @@ public class Terminator {
 			run.postEventGarbageCollectorTimedOut();
 		}
 
-		// This method will open a transaction, store the modified run, close the transaction,
-		// and return the run that was created by the EntityManager use to store the modified
-		// run.  Because that EntityManager closed its Session, further lazy loading of
-		// parameters WILL FAIL.  Do this after the run termination and ignore the returned
-		// run to avoid problems!
-		run.store();
-
 	}
 
 	/*
@@ -142,6 +135,7 @@ public class Terminator {
 	public static void terminateInsideTransaction(Run run, User user) throws SlipStreamException {
 
 		StateMachine sc = StateMachine.createStateMachine(run);
+		run.store();
 
 		if (sc.canCancel()) {
 			sc.tryAdvanceToCancelled();
