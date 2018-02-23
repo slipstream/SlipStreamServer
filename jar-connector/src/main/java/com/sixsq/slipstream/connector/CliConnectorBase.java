@@ -50,6 +50,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -394,6 +395,8 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		environment.put("SLIPSTREAM_CLOUD", getCloudServiceName());
 		environment.put("SLIPSTREAM_BUNDLE_URL", configuration.getRequiredProperty("slipstream.update.clienturl"));
 		environment.put("SLIPSTREAM_BOOTSTRAP_BIN", configuration.getRequiredProperty("slipstream.update.clientbootstrapurl"));
+
+		environment.put("SLIPSTREAM_SS_CACHE_KEY", UUID.randomUUID().toString());
 
 		genAndSetRunApiKey(run, username, environment);
 
