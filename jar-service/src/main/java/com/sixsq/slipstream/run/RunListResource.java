@@ -196,8 +196,6 @@ public class RunListResource extends BaseResource {
 				Quota.validate(user, run, RequestUtil.getRolesFromRequest(getRequest()));
 			}
 
-			createRepositoryResource(run);
-
 			run.store();
 
 			launch(run);
@@ -386,25 +384,6 @@ public class RunListResource extends BaseResource {
 
 		Connector connector = ConnectorFactory.getCurrentConnector(getUser());
 		return connector.getCredentials(getUser());
-	}
-
-	private void createRepositoryResource(Run run)
-			throws ConfigurationException {
-		String repositoryLocation;
-		repositoryLocation = ConfigurationUtil
-				.getConfigurationFromRequest(getRequest())
-				.getRequiredProperty(
-						ServiceConfiguration.RequiredParameters.SLIPSTREAM_REPORTS_LOCATION
-								.getName());
-
-		String absRepositoryLocation = repositoryLocation + "/" + run.getName();
-
-		boolean createdOk = new File(absRepositoryLocation).mkdirs();
-		// Create the repository structure
-		if (!createdOk) {
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL,
-					"Error creating repository structure: " + absRepositoryLocation);
-		}
 	}
 
 	private Module loadReferenceModule() throws ValidationException {

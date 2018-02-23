@@ -76,9 +76,6 @@ public class ServiceConfiguration extends
 		SLIPSTREAM_VERSION(
 				CljElasticsearchHelper.getParameterDescription("slipstream.version")),
 
-		SLIPSTREAM_REPORTS_LOCATION(
-				CljElasticsearchHelper.getParameterDescription("slipstream.reports.location")),
-
 		SLIPSTREAM_REGISTRATION_EMAIL(
 				CljElasticsearchHelper.getParameterDescription("slipstream.registration.email")) {
 			@Override

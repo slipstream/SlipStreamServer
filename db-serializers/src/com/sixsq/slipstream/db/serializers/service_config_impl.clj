@@ -33,7 +33,6 @@
 
 (def rname->param
   {:serviceURL                 "slipstream.base.url"
-   :reportsLocation            "slipstream.reports.location"
    :supportEmail               "slipstream.support.email"
    :clientBootstrapURL         "slipstream.update.clientbootstrapurl"
    :clientURL                  "slipstream.update.clienturl"
