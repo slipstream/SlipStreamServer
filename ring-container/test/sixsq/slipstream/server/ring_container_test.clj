@@ -38,6 +38,15 @@
     (is (thrown-with-msg? ExceptionInfo #"error requiring namespace" (dyn-resolve 'unknown/var)))
     (is (thrown-with-msg? ExceptionInfo #"error requiring namespace" (dyn-resolve "unknown/var")))))
 
+(deftest check-validate-address
+  (are [expected input] (= expected (t/validate-address input))
+                        t/default-address nil
+                        t/default-address 10.2
+                        t/default-address 65537
+                        t/default-address -1
+                        "10" "10"
+                        "0.0.0.0" "0.0.0.0"))
+
 (deftest check-parse-port
   (let [parse-port @#'t/parse-port]
     (are [expected input] (= expected (parse-port input))
