@@ -1,6 +1,6 @@
-(def +version+ "3.46")
+(def +version+ "3.47-SNAPSHOT")
 
-(defproject com.sixsq.slipstream/token-java "3.46"
+(defproject com.sixsq.slipstream/token-java "3.47-SNAPSHOT"
 
   :description "token management utilities for java"
 
@@ -12,7 +12,7 @@
 
   :plugins [[lein-parent "0.3.2"]]
 
-  :parent-project {:coords  [com.sixsq.slipstream/parent "3.46"]
+  :parent-project {:coords  [com.sixsq.slipstream/parent "3.47-SNAPSHOT"]
                    :inherit [:min-lein-version :managed-dependencies :repositories :deploy-repositories]}
 
   :pom-location "target/"

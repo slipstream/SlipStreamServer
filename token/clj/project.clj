@@ -1,6 +1,6 @@
-(def +version+ "3.46")
+(def +version+ "3.47-SNAPSHOT")
 
-(defproject com.sixsq.slipstream/token "3.46"
+(defproject com.sixsq.slipstream/token "3.47-SNAPSHOT"
 
   :description "token handling utilities in Clojure"
 
@@ -13,7 +13,7 @@
   :plugins [[lein-parent "0.3.2"]
             [lein-environ "1.1.0"]]
 
-  :parent-project {:coords  [com.sixsq.slipstream/parent "3.46"]
+  :parent-project {:coords  [com.sixsq.slipstream/parent "3.47-SNAPSHOT"]
                    :inherit [:min-lein-version
                              :managed-dependencies
                              :repositories

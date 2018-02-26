@@ -5,14 +5,14 @@
 
   <artifactId>SlipStreamPricingLib-jar-dep</artifactId>
   <packaging>pom</packaging>
-  <version>3.46</version>
+  <version>3.47-SNAPSHOT</version>
   <name>SlipStreamServer/jar-pricing-lib</name>
   <url>http://sixsq.com</url>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.46</version>
+    <version>3.47-SNAPSHOT</version>
   </parent>
 
   <licenses>
