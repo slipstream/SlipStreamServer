@@ -25,6 +25,7 @@ from glob import glob
 import time
 from slipstream.api import Api
 from requests import put
+import logging
 
 try:
     import jaydebeapi
@@ -33,6 +34,8 @@ except ImportError:
     exit(-1)
 
 from slipstream.command.CommandBase import CommandBase
+
+logging.getLogger("urllib3").setLevel(logging.ERROR)
 
 SEPARATOR = '\n=====================================================================\n'
 
@@ -110,7 +113,8 @@ class MainProgram(CommandBase):
 
     def upload_report(self, url, report):
         report_file_data = open(report, 'rb').read()
-        put(url, files={'file': report_file_data})
+        response = put(url, data=report_file_data)
+        response.raise_for_status()
 
     def migrate_report(self, report):
         print('Migrating {}'.format(report))
@@ -123,7 +127,7 @@ class MainProgram(CommandBase):
         all_reports = self.get_all_existing_reports()
         print('All reports count: {}'.format(len(all_reports)))
         reports_to_migrate = self.filter_reports_updated_since_less_than(all_reports, self.options.months)
-        print('Number of reports updated in last {} months: {}'.format(self.options.months, len(all_reports))
+        print('Number of reports updated in last {} months: {}'.format(self.options.months, len(reports_to_migrate))
               + SEPARATOR)
 
         success = 0
