@@ -1,7 +1,7 @@
 [Unit]
 Description=SlipStream Service
 After=syslog.target network.target
-After=hsqldb.service ssclj.service
+After=hsqldb.service cimi.service
 
 [Service]
 Environment=AUTH_PUBLIC_KEY=/etc/slipstream/auth/auth_pubkey.pem
