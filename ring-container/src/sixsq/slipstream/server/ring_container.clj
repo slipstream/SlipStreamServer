@@ -146,21 +146,21 @@
 (defn start
   "Starts the application and application server. Return a 'stop' function
    that will shutdown the application and server when called."
-  [server-init & [port address]]
+  [server-init & [port host]]
   (let [server-init-fn (dyn-resolve server-init)
         [handler finalization-fn] (server-init-fn)
         port (parse-port port)
-        address (validate-host address)]
+        host (validate-host host)]
 
-    (log/info "starting " server-init "on" address "and port" port)
+    (log/info "starting " server-init "on" host "and port" port)
     (log/info "java vendor: " (System/getProperty "java.vendor"))
     (log/info "java version: " (System/getProperty "java.version"))
     (log/info "java classpath: " (System/getProperty "java.class.path"))
 
-    (let [server (start-container handler port address)
+    (let [server (start-container handler port host)
           shutdown-fn (create-shutdown-fn server finalization-fn)]
 
-      (log/info "started" server-init "on" address "and port" port)
+      (log/info "started" server-init "on" host "and port" port)
       shutdown-fn)))
 
 
@@ -179,22 +179,22 @@
   []
   (let [env (dyn-resolve 'environ.core/env)
         server-port (env :slipstream-ring-container-port)
-        server-address (env :slipstream-ring-container-address)]
+        server-host (env :slipstream-ring-container-host)]
     (if-let [server-init (env :slipstream-ring-container-init)]
-      [server-init server-port server-address]
+      [server-init server-port server-host]
       (let [msg "SLIPSTREAM_RING_CONTAINER_INIT is not defined"]
         (log/error msg)
         (throw (ex-info msg {}))))))
 
 
 (defn -main
-  "Function to start the web application as a daemon. The configuation of the
+  "Function to start the web application as a daemon. The configuration of the
    server is taken from the environment. The environment must have
-   SLIPSTREAM_RING_CONTAINER_INIT and optionally SLIPSTREAM_RING_CONTAINER_PORT
-   defined."
+   SLIPSTREAM_RING_CONTAINER_INIT defined. SLIPSTREAM_RING_CONTAINER_PORT and
+   SLIPSTREAM_RING_CONTAINER_PORT may be defined."
   [& _]
-  (let [[server-init server-port server-address] (server-cfg)
-        shutdown-fn (start server-init server-port server-address)]
+  (let [[server-init server-port server-host] (server-cfg)
+        shutdown-fn (start server-init server-port server-host)]
     (register-shutdown-hook shutdown-fn))
 
   ;; The server (started as a daemon thread) will exit immediately

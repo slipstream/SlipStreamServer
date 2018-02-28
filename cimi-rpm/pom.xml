@@ -493,7 +493,7 @@ ${installation.dir}/bin/generate-auth-keys.sh
                 <env>
                   <SLIPSTREAM_RING_CONTAINER_INIT>com.sixsq.slipstream.ssclj.app.server/init</SLIPSTREAM_RING_CONTAINER_INIT>
                   <SLIPSTREAM_RING_CONTAINER_PORT>8201</SLIPSTREAM_RING_CONTAINER_PORT>
-                  <SLIPSTREAM_RING_CONTAINER_ADDRESS>0.0.0.0</SLIPSTREAM_RING_CONTAINER_ADDRESS>
+                  <SLIPSTREAM_RING_CONTAINER_HOST>0.0.0.0</SLIPSTREAM_RING_CONTAINER_HOST>
                   <SSCLJ_GRAPHITE_HOST>127.0.0.1</SSCLJ_GRAPHITE_HOST>
                   <ES_HOST>elasticsearch</ES_HOST>
                   <ES_PORT>9300</ES_PORT>
