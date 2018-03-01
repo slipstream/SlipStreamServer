@@ -184,7 +184,7 @@
                 <env>
                   <SLIPSTREAM_RING_CONTAINER_INIT>sixsq.slipstream.server.ring-example/init</SLIPSTREAM_RING_CONTAINER_INIT>
                   <SLIPSTREAM_RING_CONTAINER_PORT>5000</SLIPSTREAM_RING_CONTAINER_PORT>
-                  <SLIPSTREAM_RING_CONTAINER_ADDRESS>0.0.0.0</SLIPSTREAM_RING_CONTAINER_ADDRESS>
+                  <SLIPSTREAM_RING_CONTAINER_HOST>0.0.0.0</SLIPSTREAM_RING_CONTAINER_HOST>
                 </env>
                 <ports>
                   <port>5000</port>

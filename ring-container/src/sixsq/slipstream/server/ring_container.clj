@@ -11,7 +11,8 @@
   (:gen-class))
 
 (def ^:const default-port 8200)
-(def ^:const default-address "127.0.0.1")
+(def ^:const default-host "127.0.0.1")
+
 
 (defn- log-and-throw
   "Logs a fatal error and then throws an exception with the given method and
@@ -24,6 +25,7 @@
      (throw (ex-info (str msg "\n" e) {}))
      (throw (ex-info msg {})))))
 
+
 (defn- as-symbol
   "Converts argument to symbol or throws an exception."
   [s]
@@ -31,6 +33,7 @@
     (symbol s)
     (catch Exception e
       (log-and-throw (str "invalid symbol: " s) e))))
+
 
 (defn- ns-and-var
   "Provides the namespace and name of the symbol as symbols. If either is nil,
@@ -41,6 +44,7 @@
       (log-and-throw (str "symbol (" s ") must be a complete, namespaced value"))
       (map symbol result))))
 
+
 (defn- resolve-var
   "Resolves the var in the given namespace or throws a descriptive exception."
   [ns f]
@@ -48,6 +52,7 @@
     (ns-resolve (find-ns ns) f)
     (catch Exception e
       (log-and-throw (str "could not resolve " f " in namespace " ns) e))))
+
 
 (defn- dyn-resolve
   "Dynamically requires the namespace of the given symbol and then resolves
@@ -64,6 +69,7 @@
       result
       (log-and-throw (str "symbol (" s ") was not found")))))
 
+
 (defn- hook
   "Creates a JVM shutdown hook that runs the given stopping function. Note
    that some logging may be lost depending on the state of the JVM when the
@@ -72,12 +78,14 @@
   (proxy [Thread] []
     (run [] (shutdown-fn))))
 
+
 (defn- register-shutdown-hook
   "Registers a shutdown hook in the JVM to shutdown the application and
    application container cleanly."
   [shutdown-fn]
   (.. (Runtime/getRuntime)
       (addShutdownHook (hook shutdown-fn))))
+
 
 (defn- create-shutdown-fn
   [^Closeable server finalization-fn]
@@ -93,28 +101,30 @@
                (catch Exception e
                  (log/error "failure when shutting down ring container:" (str e))))))))
 
+
 (defn- start-container
   "Starts the aleph container with the given ring handler and on the given
    port. Returns the server object that has been started, which can be stopped
    by calling 'close' on the object."
-  [handler ^long port address]
-  (log/info "starting aleph application container on address:port" address ":" port)
+  [handler ^long port host]
+  (log/info "starting aleph application container on host:port" (str host ":" port))
   (let [start-server (dyn-resolve 'aleph.http/start-server)
         server (->> port
-                    (InetSocketAddress. address)
+                    (InetSocketAddress. host)
                     (hash-map :socket-address)
                     (start-server handler))]
-    (log/info "started aleph application container on address:port" address ":" port)
+    (log/info "started aleph application container on host:port" (str host ":" port))
     server))
 
-(defn validate-address
-  "Parses the given value (string or int) as an integer and returns the value
-    if it is a valid port number. For any invalid input, this function returns
-    the default port."
-  [address]
-  (if (and (string? address) (not (str/blank? address)))
-    address
-    default-address))
+
+(defn- validate-host
+  "If the argument is the a valid string representation of an IP address or
+   host, the value is returned. Otherwise, the default host is returned."
+  [host]
+  (if (and (string? host) (not (str/blank? host)))
+    host
+    default-host))
+
 
 (defn- parse-port
   "Parses the given value (string or int) as an integer and returns the value
@@ -132,25 +142,27 @@
     (catch Exception _
       default-port)))
 
+
 (defn start
   "Starts the application and application server. Return a 'stop' function
    that will shutdown the application and server when called."
-  [server-init & [port address]]
+  [server-init & [port host]]
   (let [server-init-fn (dyn-resolve server-init)
         [handler finalization-fn] (server-init-fn)
         port (parse-port port)
-        address (validate-address address)]
+        host (validate-host host)]
 
-    (log/info "starting " server-init "on" address "and port" port)
+    (log/info "starting " server-init "on" host "and port" port)
     (log/info "java vendor: " (System/getProperty "java.vendor"))
     (log/info "java version: " (System/getProperty "java.version"))
     (log/info "java classpath: " (System/getProperty "java.class.path"))
 
-    (let [server (start-container handler port address)
+    (let [server (start-container handler port host)
           shutdown-fn (create-shutdown-fn server finalization-fn)]
 
-      (log/info "started" server-init "on" address "and port" port)
+      (log/info "started" server-init "on" host "and port" port)
       shutdown-fn)))
+
 
 (defn- server-cfg
   "Reads the server configuration from the environment. The variable
@@ -167,21 +179,22 @@
   []
   (let [env (dyn-resolve 'environ.core/env)
         server-port (env :slipstream-ring-container-port)
-        server-address (env :slipstream-ring-container-address)]
+        server-host (env :slipstream-ring-container-host)]
     (if-let [server-init (env :slipstream-ring-container-init)]
-      [server-init server-port server-address]
+      [server-init server-port server-host]
       (let [msg "SLIPSTREAM_RING_CONTAINER_INIT is not defined"]
         (log/error msg)
         (throw (ex-info msg {}))))))
 
+
 (defn -main
-  "Function to start the web application as a daemon. The configuation of the
+  "Function to start the web application as a daemon. The configuration of the
    server is taken from the environment. The environment must have
-   SLIPSTREAM_RING_CONTAINER_INIT and optionally SLIPSTREAM_RING_CONTAINER_PORT
-   defined."
+   SLIPSTREAM_RING_CONTAINER_INIT defined. SLIPSTREAM_RING_CONTAINER_PORT and
+   SLIPSTREAM_RING_CONTAINER_PORT may be defined."
   [& _]
-  (let [[server-init server-port server-address] (server-cfg)
-        shutdown-fn (start server-init server-port server-address)]
+  (let [[server-init server-port server-host] (server-cfg)
+        shutdown-fn (start server-init server-port server-host)]
     (register-shutdown-hook shutdown-fn))
 
   ;; The server (started as a daemon thread) will exit immediately
