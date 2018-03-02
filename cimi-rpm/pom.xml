@@ -401,6 +401,125 @@ ${installation.dir}/bin/generate-auth-keys.sh
 
       </plugin>
 
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <version>0.24.0</version>
+        <configuration>
+          <images>
+            <image>
+              <alias>cimi</alias>
+              <name>sixsq/cimi:${project.version}</name>
+              <build>
+                <from>openjdk:8-jre-alpine</from>
+                <optimise>true</optimise>
+                <assembly>
+                  <targetDir>/</targetDir>
+                  <inline>
+                    <fileSets>
+                      <fileSet>
+                        <directory>target/dependency/lib/ext</directory>
+                        <outputDirectory>${installation.dir}/lib</outputDirectory>
+                        <includes>
+                          <include>*</include>
+                        </includes>
+                      </fileSet>
+                      <fileSet>
+                        <directory>src/main/resources</directory>
+                        <outputDirectory>${installation.dir}/resources</outputDirectory>
+                        <includes>
+                          <include>log4j.properties</include>
+                          <include>db.spec</include>
+                        </includes>
+                      </fileSet>
+                    </fileSets>
+                    <files>
+                      <file>
+                        <source>src/main/tools/config/log4j.properties</source>
+                        <outputDirectory>${installation.dir}/tools/resources</outputDirectory>
+                      </file>
+                      <file>
+                        <source>src/main/resources/cyclone_pubkey.pem</source>
+                        <outputDirectory>/etc/slipstream/auth</outputDirectory>
+                      </file>
+                      <file>
+                        <source>src/main/tools/scripts/ss-config.sh</source>
+                        <outputDirectory>/usr/bin</outputDirectory>
+                        <destName>ss-config</destName>
+                        <fileMode>755</fileMode>
+                      </file>
+                      <file>
+                        <source>src/main/tools/scripts/ss-config-dump.sh</source>
+                        <outputDirectory>/usr/bin</outputDirectory>
+                        <destName>ss-conf-dump</destName>
+                        <fileMode>755</fileMode>
+                      </file>
+                      <file>
+                        <source>src/main/tools/scripts/ss-config-migrate.sh</source>
+                        <outputDirectory>/usr/bin</outputDirectory>
+                        <destName>ss-config-migrate</destName>
+                        <fileMode>755</fileMode>
+                      </file>
+                      <file>
+                        <source>target/dependency/SlipStreamToolsCli-jar-${project.version}.jar</source>
+                        <outputDirectory>${installation.dir}/tools</outputDirectory>
+                      </file>
+                      <file>
+                        <source>target/cimi-tools-cli</source>
+                        <outputDirectory>/etc/default</outputDirectory>
+                      </file>
+                      <file>
+                        <source>src/main/scripts/generate-auth-keys.sh</source>
+                        <outputDirectory>${installation.dir}/bin</outputDirectory>
+                        <fileMode>755</fileMode>
+                      </file>
+                    </files>
+                  </inline>
+                </assembly>
+                <runCmds>
+                  <runCmd>apk update</runCmd>
+                  <runCmd>apk add openssl openssh shadow</runCmd>
+                  <runCmd>/usr/sbin/groupadd -r slipstream</runCmd>
+                  <runCmd>/usr/sbin/useradd -r -d ${installation.dir} -g slipstream slipstream</runCmd>
+                  <runCmd>mkdir -p /opt/slipstream/server/.ssh</runCmd>
+                  <runCmd>chmod 700 /opt/slipstream/server/.ssh</runCmd>
+                  <runCmd>ssh-keygen -q -f /opt/slipstream/server/.ssh/id_rsa -N ""</runCmd>
+                  <runCmd>chown -R slipstream.slipstream /opt/slipstream/server/.ssh</runCmd>
+                  <runCmd>mkdir -p /var/log/slipstream/cimi</runCmd>
+                  <runCmd>chmod 755 /var/log/slipstream/cimi</runCmd>
+                  <runCmd>chown -R slipstream:slipstream /var/log/slipstream/cimi</runCmd>
+                  <runCmd>chown slipstream:slipstream ${installation.dir}/bin/generate-auth-keys.sh</runCmd>
+                </runCmds>
+                <env>
+                  <SLIPSTREAM_RING_CONTAINER_INIT>com.sixsq.slipstream.ssclj.app.server/init</SLIPSTREAM_RING_CONTAINER_INIT>
+                  <SLIPSTREAM_RING_CONTAINER_PORT>8201</SLIPSTREAM_RING_CONTAINER_PORT>
+                  <SLIPSTREAM_RING_CONTAINER_HOST>0.0.0.0</SLIPSTREAM_RING_CONTAINER_HOST>
+                  <SSCLJ_GRAPHITE_HOST>127.0.0.1</SSCLJ_GRAPHITE_HOST>
+                  <ES_HOST>elasticsearch</ES_HOST>
+                  <ES_PORT>9300</ES_PORT>
+                  <AUTH_PRIVATE_KEY>/etc/slipstream/auth/auth_privkey.pem</AUTH_PRIVATE_KEY>
+                  <AUTH_PUBLIC_KEY>/etc/slipstream/auth/auth_pubkey.pem</AUTH_PUBLIC_KEY>
+                  <AUTH_PUBLIC_KEY_CYCLONE>/etc/slipstream/auth/cyclone_pubkey.pem</AUTH_PUBLIC_KEY_CYCLONE>
+                </env>
+                <ports>
+                  <port>8201</port>
+                </ports>
+                <workdir>${installation.dir}</workdir>
+                <cmd>sh ${installation.dir}/bin/generate-auth-keys.sh &amp;&amp; /usr/bin/java -Dconfig.name=db.spec -Dlogfile.path=production -cp "/opt/slipstream/ring-container/lib/*:resources:lib/*" sixsq.slipstream.server.ring_container</cmd>
+              </build>
+            </image>
+          </images>
+        </configuration>
+        <executions>
+          <execution>
+            <id>docker-build</id>
+            <goals>
+              <goal>build</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
 
   </build>
