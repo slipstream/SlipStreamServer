@@ -23,6 +23,7 @@ package com.sixsq.slipstream.connector;
 import com.google.gson.Gson;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
 import com.sixsq.slipstream.persistence.ImageModule;
 import com.sixsq.slipstream.persistence.ModuleParameter;
@@ -125,8 +126,10 @@ public class CliConnectorBaseTest {
     }
 
     @Test
-    public void generateApiKeySecretPairTest() {
-        Map<String, String> keySecretPair = CliConnectorBase.generateApiKeySecretPair("testuser", "1-2-3-4-5");
+    public void generateApiKeySecretPairTest() throws ValidationException {
+        User user = new User("test");
+        user.setRoles("foo:bar foo:/bar/baz");
+        Map<String, String> keySecretPair = CliConnectorBase.generateApiKeySecretPair(user, "1-2-3-4-5");
         assertTrue(keySecretPair.containsKey("key"));
         assertTrue(keySecretPair.get("key").startsWith("credential/"));
         assertTrue(keySecretPair.containsKey("secret"));
@@ -139,11 +142,16 @@ public class CliConnectorBaseTest {
         Map<String, String> environment = new HashMap();
         String userName = "user";
 
+        User user = new User(userName);
+        String role1 = "foo:bar";
+        String role2 = "foo:/bar/baz";
+        user.setRoles(role1 + " " + role2);
+
         Run run = createAndStoreRun(userName);
 
         assertTrue(run.getRuntimeParameters().containsKey(RuntimeParameter.GLOBAL_RUN_APIKEY_KEY));
 
-        CliConnectorBase.genAndSetRunApiKey(run, userName, environment);
+        CliConnectorBase.genAndSetRunApiKey(run, user, environment);
 
         // Set in environment for CLI.
         assertTrue(environment.containsKey("SLIPSTREAM_API_KEY"));
@@ -161,6 +169,10 @@ public class CliConnectorBaseTest {
         Gson gson = new Gson();
         HashMap apiKey = gson.fromJson(resp.getEntityAsText(), HashMap.class);
         assertThat(key, is(apiKey.get("id")));
+        Map<String, Object> claims = (Map<String, Object>) apiKey.get("claims");
+        List<String> roles = (List<String>) claims.get("roles");
+        assertTrue(roles.contains(role1));
+        assertTrue(roles.contains(role2));
 
         // Delete API key/secret resource.
         CliConnectorBase.deleteApiKeySecret(run, new User(userName), Logger.getLogger("test"));

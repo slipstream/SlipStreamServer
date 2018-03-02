@@ -398,7 +398,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 
 		environment.put("SLIPSTREAM_SS_CACHE_KEY", UUID.randomUUID().toString());
 
-		genAndSetRunApiKey(run, username, environment);
+		genAndSetRunApiKey(run, user, environment);
 
 		environment.put("SLIPSTREAM_USERNAME", username);
 		environment.put("SLIPSTREAM_VERBOSITY_LEVEL", verbosityLevel);
@@ -409,8 +409,8 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		return environment;
 	}
 
-	static void genAndSetRunApiKey(Run run, String username, Map<String, String> environment) throws ValidationException {
-		HashMap<String, String> apiKeySecret = generateApiKeySecretPair(username, run.getUuid());
+	static void genAndSetRunApiKey(Run run, User user, Map<String, String> environment) throws ValidationException {
+		HashMap<String, String> apiKeySecret = generateApiKeySecretPair(user, run.getUuid());
 		environment.put("SLIPSTREAM_API_KEY", apiKeySecret.get(API_KEY_KEY));
 		environment.put("SLIPSTREAM_API_SECRET", apiKeySecret.get(API_SECRET_KEY));
 		setApiKeyOnRun(run, apiKeySecret.get(API_KEY_KEY));
@@ -598,11 +598,11 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		return (HashMap<String, Object>) credTempl;
 	}
 
-	public static HashMap<String, String> generateApiKeySecretPair(String username, String dplId) {
+	public static HashMap<String, String> generateApiKeySecretPair(User user, String dplId) {
 		// TODO: use dplId to add to the token as scoped resource.
         HashMap<String, Object> template = CliConnectorBase.getCredentialTemplateApiKeySecret(CREDENTIAL_APIKEYSECRET_TTL);
         String resourceUrl = SscljProxy.BASE_RESOURCE + "credential";
-        Response resp = SscljProxy.post(resourceUrl, username + " USER", template, true);
+        Response resp = SscljProxy.post(resourceUrl, user.getName() + " USER " + user.getRoles(), template, true);
         String key = "resource-id";
         String secret = "secretKey";
         HashMap result = gson.fromJson(resp.getEntityAsText(), HashMap.class);
