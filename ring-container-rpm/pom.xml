@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<project 
-  xmlns="http://maven.apache.org/POM/4.0.0" 
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <artifactId>ring-container-rpm</artifactId>
@@ -29,6 +29,88 @@
       <type>jar</type>
     </dependency>
   </dependencies>
+  <profiles>
+    <profile>
+      <id>cimi-container</id>
+      <activation>
+        <property>
+          <name>!skipContainers</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <!-- docker build -->
+          <plugin>
+            <groupId>io.fabric8</groupId>
+            <artifactId>docker-maven-plugin</artifactId>
+            <version>0.24.0</version>
+            <configuration>
+              <images>
+                <image>
+                  <alias>ring-container</alias>
+                  <name>sixsq/ring-container:${project.version}</name>
+                  <build>
+                    <from>openjdk:8-jre-alpine</from>
+                    <optimise>true</optimise>
+                    <assembly>
+                      <targetDir>/</targetDir>
+                      <inline>
+                        <fileSets>
+                          <fileSet>
+                            <directory>target/dependency/lib</directory>
+                            <outputDirectory>${installation.dir}/lib</outputDirectory>
+                            <includes>
+                              <include>*</include>
+                            </includes>
+                          </fileSet>
+                        </fileSets>
+                        <files>
+                          <file>
+                            <source>src/scripts/log4j.properties</source>
+                            <outputDirectory>/opt/slipstream/ring-example/resources</outputDirectory>
+                          </file>
+                        </files>
+                      </inline>
+                    </assembly>
+                    <runCmds>
+                      <runCmd>apk update</runCmd>
+                      <runCmd>apk add openssl openssh shadow</runCmd>
+                      <runCmd>/usr/sbin/groupadd -r slipstream</runCmd>
+                      <runCmd>/usr/sbin/useradd -r -d ${installation.dir} -g slipstream slipstream</runCmd>
+                      <runCmd>mkdir -p /opt/slipstream/server/.ssh</runCmd>
+                      <runCmd>chmod 700 /opt/slipstream/server/.ssh</runCmd>
+                      <runCmd>ssh-keygen -q -f /opt/slipstream/server/.ssh/id_rsa -N ""</runCmd>
+                      <runCmd>chown -R slipstream.slipstream /opt/slipstream/server/.ssh</runCmd>
+                      <runCmd>mkdir -p /opt/slipstream/ring-example/lib</runCmd>
+                      <runCmd>mkdir -p /var/log/slipstream/ring-example</runCmd>
+                    </runCmds>
+                    <env>
+                      <SLIPSTREAM_RING_CONTAINER_INIT>sixsq.slipstream.server.ring-example/init</SLIPSTREAM_RING_CONTAINER_INIT>
+                      <SLIPSTREAM_RING_CONTAINER_PORT>5000</SLIPSTREAM_RING_CONTAINER_PORT>
+                      <SLIPSTREAM_RING_CONTAINER_HOST>0.0.0.0</SLIPSTREAM_RING_CONTAINER_HOST>
+                    </env>
+                    <ports>
+                      <port>5000</port>
+                    </ports>
+                    <workdir>/opt/slipstream/ring-example</workdir>
+                    <cmd>/usr/bin/java -cp "/opt/slipstream/ring-container/lib/*:resources:lib/*" sixsq.slipstream.server.ring_container</cmd>
+                  </build>
+                </image>
+              </images>
+            </configuration>
+            <executions>
+              <execution>
+                <id>docker-build</id>
+                <goals>
+                  <goal>build</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
   <build>
     <plugins>
       <plugin>
@@ -132,74 +214,6 @@
             <phase>package</phase>
             <goals>
               <goal>attached-rpm</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <!-- docker build -->
-      <plugin>
-        <groupId>io.fabric8</groupId>
-        <artifactId>docker-maven-plugin</artifactId>
-        <version>0.24.0</version>
-        <configuration>
-          <images>
-            <image>
-              <alias>ring-container</alias>
-              <name>sixsq/ring-container:${project.version}</name>
-              <build>
-                <from>openjdk:8-jre-alpine</from>
-                <optimise>true</optimise>
-                <assembly>
-                  <targetDir>/</targetDir>
-                  <inline>
-                    <fileSets>
-                      <fileSet>
-                        <directory>target/dependency/lib</directory>
-                        <outputDirectory>${installation.dir}/lib</outputDirectory>
-                        <includes>
-                          <include>*</include>
-                        </includes>
-                      </fileSet>
-                    </fileSets>
-                    <files>
-                      <file>
-                        <source>src/scripts/log4j.properties</source>
-                        <outputDirectory>/opt/slipstream/ring-example/resources</outputDirectory>
-                      </file>
-                    </files>
-                  </inline>
-                </assembly>
-                <runCmds>
-                  <runCmd>apk update</runCmd>
-                  <runCmd>apk add openssl openssh shadow</runCmd>
-                  <runCmd>/usr/sbin/groupadd -r slipstream</runCmd>
-                  <runCmd>/usr/sbin/useradd -r -d ${installation.dir} -g slipstream slipstream</runCmd>
-                  <runCmd>mkdir -p /opt/slipstream/server/.ssh</runCmd>
-                  <runCmd>chmod 700 /opt/slipstream/server/.ssh</runCmd>
-                  <runCmd>ssh-keygen -q -f /opt/slipstream/server/.ssh/id_rsa -N ""</runCmd>
-                  <runCmd>chown -R slipstream.slipstream /opt/slipstream/server/.ssh</runCmd>
-                  <runCmd>mkdir -p /opt/slipstream/ring-example/lib</runCmd>
-                  <runCmd>mkdir -p /var/log/slipstream/ring-example</runCmd>
-                </runCmds>
-                <env>
-                  <SLIPSTREAM_RING_CONTAINER_INIT>sixsq.slipstream.server.ring-example/init</SLIPSTREAM_RING_CONTAINER_INIT>
-                  <SLIPSTREAM_RING_CONTAINER_PORT>5000</SLIPSTREAM_RING_CONTAINER_PORT>
-                  <SLIPSTREAM_RING_CONTAINER_HOST>0.0.0.0</SLIPSTREAM_RING_CONTAINER_HOST>
-                </env>
-                <ports>
-                  <port>5000</port>
-                </ports>
-                <workdir>/opt/slipstream/ring-example</workdir>
-                <cmd>/usr/bin/java -cp "/opt/slipstream/ring-container/lib/*:resources:lib/*" sixsq.slipstream.server.ring_container</cmd>
-              </build>
-            </image>
-          </images>
-        </configuration>
-        <executions>
-          <execution>
-            <id>docker-build</id>
-            <goals>
-              <goal>build</goal>
             </goals>
           </execution>
         </executions>
