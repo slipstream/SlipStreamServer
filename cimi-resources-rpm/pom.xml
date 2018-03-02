@@ -32,6 +32,72 @@
     </dependency>
   </dependencies>
 
+  <profiles>
+    <profile>
+      <id>cimi-resources-container</id>
+      <activation>
+        <property>
+          <name>!skipContainers</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>io.fabric8</groupId>
+            <artifactId>docker-maven-plugin</artifactId>
+            <version>0.24.0</version>
+            <configuration>
+              <images>
+                <image>
+                  <alias>cimi-resources</alias>
+                  <name>sixsq/cimi-resources:${project.version}</name>
+                  <build>
+                    <from>alpine</from>
+                    <optimise>true</optimise>
+                    <assembly>
+                      <targetDir>/</targetDir>
+                      <inline>
+                        <fileSets>
+                          <fileSet>
+                            <directory>target/dependency/lib</directory>
+                            <outputDirectory>${installation.dir}/lib</outputDirectory>
+                            <includes>
+                              <include>*</include>
+                            </includes>
+                          </fileSet>
+                        </fileSets>
+                      </inline>
+                    </assembly>
+                    <runCmds>
+                      <runCmd>apk update</runCmd>
+                      <runCmd>apk add openssl openssh shadow</runCmd>
+                      <runCmd>/usr/sbin/groupadd -r slipstream</runCmd>
+                      <runCmd>/usr/sbin/useradd -r -d ${installation.dir} -g slipstream slipstream</runCmd>
+                      <runCmd>mkdir -p /opt/slipstream/server/.ssh</runCmd>
+                      <runCmd>chmod 700 /opt/slipstream/server/.ssh</runCmd>
+                      <runCmd>ssh-keygen -q -f /opt/slipstream/server/.ssh/id_rsa -N ""</runCmd>
+                      <runCmd>chown -R slipstream.slipstream /opt/slipstream/server/.ssh</runCmd>
+                    </runCmds>
+                    <workdir>${installation.dir}</workdir>
+                    <cmd>tail -f /dev/null</cmd>
+                  </build>
+                </image>
+              </images>
+            </configuration>
+            <executions>
+              <execution>
+                <id>docker-build</id>
+                <goals>
+                  <goal>build</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
   <build>
 
     <plugins>
@@ -113,59 +179,6 @@
         </executions>
 
       </plugin>
-
-      <plugin>
-        <groupId>io.fabric8</groupId>
-        <artifactId>docker-maven-plugin</artifactId>
-        <version>0.24.0</version>
-        <configuration>
-          <images>
-            <image>
-              <alias>cimi-resources</alias>
-              <name>sixsq/cimi-resources:${project.version}</name>
-              <build>
-                <from>alpine</from>
-                <optimise>true</optimise>
-                <assembly>
-                  <targetDir>/</targetDir>
-                  <inline>
-                    <fileSets>
-                      <fileSet>
-                        <directory>target/dependency/lib</directory>
-                        <outputDirectory>${installation.dir}/lib</outputDirectory>
-                        <includes>
-                          <include>*</include>
-                        </includes>
-                      </fileSet>
-                    </fileSets>
-                  </inline>
-                </assembly>
-                <runCmds>
-                  <runCmd>apk update</runCmd>
-                  <runCmd>apk add openssl openssh shadow</runCmd>
-                  <runCmd>/usr/sbin/groupadd -r slipstream</runCmd>
-                  <runCmd>/usr/sbin/useradd -r -d ${installation.dir} -g slipstream slipstream</runCmd>
-                  <runCmd>mkdir -p /opt/slipstream/server/.ssh</runCmd>
-                  <runCmd>chmod 700 /opt/slipstream/server/.ssh</runCmd>
-                  <runCmd>ssh-keygen -q -f /opt/slipstream/server/.ssh/id_rsa -N ""</runCmd>
-                  <runCmd>chown -R slipstream.slipstream /opt/slipstream/server/.ssh</runCmd>
-                </runCmds>
-                <workdir>${installation.dir}</workdir>
-                <cmd>tail -f /dev/null</cmd>
-              </build>
-            </image>
-          </images>
-        </configuration>
-        <executions>
-          <execution>
-            <id>docker-build</id>
-            <goals>
-              <goal>build</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
 
     </plugins>
 
