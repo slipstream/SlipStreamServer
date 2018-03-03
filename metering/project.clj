@@ -13,7 +13,7 @@
   :plugins [[lein-parent "0.3.2"]
             [lein-shell "0.5.0"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "4.0.0"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.0.0"]
                    :inherit [:min-lein-version
                              :managed-dependencies
                              :repositories
@@ -29,7 +29,7 @@
    [org.clojure/tools.logging]
    [org.clojure/data.json]
    [log4j]
-   [com.sixsq.slipstream/SlipStreamClojureAPI-cimi]
+   [com.sixsq.slipstream/SlipStreamClojureAPI-cimi ~+version+]
    [aleph]
    [cc.qbits/spandex]
    [environ]
@@ -37,8 +37,8 @@
    [ring/ring-json]
    [ring/ring-defaults]]
 
-  :profiles {:test {:dependencies [[com.sixsq.slipstream/slipstream-ring-container]
-                                   [com.sixsq.slipstream/SlipStreamDbTesting-jar]]
+  :profiles {:test {:dependencies [[com.sixsq.slipstream/slipstream-ring-container ~+version+]
+                                   [com.sixsq.slipstream/SlipStreamDbTesting-jar ~+version+]]
                     :source-paths ["test"]
                     :resource-paths ["test-resources"]}
              :provided {:dependencies [[org.slf4j/slf4j-log4j12]]}})

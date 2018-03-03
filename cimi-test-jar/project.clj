@@ -12,7 +12,7 @@
 
   :plugins [[lein-parent "0.3.2"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "4.0.0"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.0.0"]
                    :inherit [:min-lein-version
                              :managed-dependencies
                              :repositories
@@ -22,11 +22,11 @@
 
   :pom-location "target/"
 
-  :dependencies [[com.sixsq.slipstream/SlipStreamDbBinding-jar]
-                 [com.sixsq.slipstream/SlipStreamDbTesting-jar :scope "compile"]
+  :dependencies [[com.sixsq.slipstream/SlipStreamDbBinding-jar ~+version+]
+                 [com.sixsq.slipstream/SlipStreamDbTesting-jar ~+version+ :scope "compile"]
                  [org.apache.curator/curator-test :scope "compile"]
                  [peridot "0.5.0" :scope "compile"]
                  [org.clojure/data.json]
                  [compojure]
                  [com.cemerick/url]
-                 [com.sixsq.slipstream/slipstream-ring-container]])
+                 [com.sixsq.slipstream/slipstream-ring-container ~+version+]])

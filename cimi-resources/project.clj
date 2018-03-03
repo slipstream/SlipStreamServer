@@ -13,7 +13,7 @@
   :plugins [[lein-parent "0.3.2"]
             [lein-environ "1.1.0"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "4.0.0"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.0.0"]
                    :inherit [:min-lein-version
                              :managed-dependencies
                              :repositories
@@ -23,7 +23,7 @@
 
   :pom-location "target/"
 
-  :dependencies [[com.sixsq.slipstream/SlipStreamCljResources-jar]
+  :dependencies [[com.sixsq.slipstream/SlipStreamCljResources-jar ~+version+]
                  [amazonica]
                  [org.clojure/test.check] ; FIXME: Needed for spec.gen.alpha. Fix "Could not locate clojure/test/check/generators__init.class"
                  ]
@@ -34,8 +34,8 @@
                                          [org.slf4j/slf4j-log4j12]
                                          [com.cemerick/url]
                                          [org.apache.curator/curator-test]
-                                         [com.sixsq.slipstream/SlipStreamDbTesting-jar]
-                                         [com.sixsq.slipstream/SlipStreamCljResourcesTests-jar]
+                                         [com.sixsq.slipstream/SlipStreamDbTesting-jar ~+version+] 
+                                         [com.sixsq.slipstream/SlipStreamCljResourcesTests-jar ~+version+]
                                          ]
                         :resource-paths ["test-resources"]
                         :env            {:config-name      "config-params.edn"

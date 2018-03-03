@@ -15,7 +15,7 @@
             [lein-shell "0.5.0"]
             [lein-localrepo "0.5.4"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "4.0.0"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.0.0"]
                    :inherit [:min-lein-version
                              :managed-dependencies
                              :repositories
@@ -40,17 +40,17 @@
                        #"elasticsearch"]
 
   :dependencies [[org.clojure/clojure]
-                 [com.sixsq.slipstream/SlipStreamPersistence]
-                 [com.sixsq.slipstream/SlipStreamConnector]
-                 [com.sixsq.slipstream/SlipStreamClojureAPI-cimi]
+                 [com.sixsq.slipstream/SlipStreamPersistence ~+version+]
+                 [com.sixsq.slipstream/SlipStreamConnector ~+version+]
+                 [com.sixsq.slipstream/SlipStreamClojureAPI-cimi ~+version+]
                  [org.clojure/data.json]
                  [org.clojure/tools.logging]]
 
   :profiles {:test
-             {:dependencies [[com.sixsq.slipstream/SlipStreamDbBinding-jar]
-                             [com.sixsq.slipstream/SlipStreamDbSerializers-jar]
-                             [com.sixsq.slipstream/SlipStreamCljResources-jar]
-                             [com.sixsq.slipstream/SlipStreamDbTesting-jar]]
+             {:dependencies [[com.sixsq.slipstream/SlipStreamDbBinding-jar ~+version+]
+                             [com.sixsq.slipstream/SlipStreamDbSerializers-jar ~+version+]
+                             [com.sixsq.slipstream/SlipStreamCljResources-jar ~+version+]
+                             [com.sixsq.slipstream/SlipStreamDbTesting-jar ~+version+]]
               :resource-paths ["test-resources"]
               :jvm-opts ["-Djava.util.logging.config.file=test-resources/logging.properties"]}}
 

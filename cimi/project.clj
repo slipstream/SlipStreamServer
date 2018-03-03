@@ -13,7 +13,7 @@
   :plugins [[lein-parent "0.3.2"]
             [lein-environ "1.1.0"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "4.0.0"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.0.0"]
                    :inherit [:min-lein-version
                              :managed-dependencies
                              :repositories
@@ -62,11 +62,11 @@
    [buddy/buddy-sign]
    [clj-http]
    [peridot]
-   [com.sixsq.slipstream/utils]
-   [com.sixsq.slipstream/SlipStreamDbBinding-jar]
-   [com.sixsq.slipstream/SlipStreamClojureAPI-cimi]
-   [com.sixsq.slipstream/SlipStreamCljResourcesTests-jar]
-   [com.sixsq.slipstream/token]
+   [com.sixsq.slipstream/utils ~+version+]
+   [com.sixsq.slipstream/SlipStreamDbBinding-jar ~+version+]
+   [com.sixsq.slipstream/SlipStreamClojureAPI-cimi ~+version+]
+   [com.sixsq.slipstream/SlipStreamCljResourcesTests-jar ~+version+]
+   [com.sixsq.slipstream/token ~+version+]
 
    [org.clojure/test.check] ; FIXME: Needed for spec.gen.alpha. Fix "Could not locate clojure/test/check/generators__init.class"
    ]
@@ -82,12 +82,12 @@
                                [org.slf4j/slf4j-log4j12]
                                [com.cemerick/url]
                                [org.apache.curator/curator-test]
-                               [com.sixsq.slipstream/SlipStreamDbTesting-jar]]
+                               [com.sixsq.slipstream/SlipStreamDbTesting-jar ~+version+]]
               :resource-paths ["test-resources"]
               :env            {:config-name      "config-params.edn"
                                :auth-private-key "test-resources/auth_privkey.pem"
                                :auth-public-key  "test-resources/auth_pubkey.pem"}
               :aot            :all}
    :dev      {:resource-paths ["test-resources"]
-              :dependencies [[com.sixsq.slipstream/slipstream-ring-container]]}
+              :dependencies [[com.sixsq.slipstream/slipstream-ring-container ~+version+]]}
    })

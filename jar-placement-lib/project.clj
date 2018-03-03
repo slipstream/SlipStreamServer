@@ -12,7 +12,7 @@
 
   :plugins [[lein-parent "0.3.2"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "4.0.0"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.0.0"]
                    :inherit [:min-lein-version
                              :managed-dependencies
                              :repositories
@@ -31,6 +31,6 @@
   :dependencies
   [[org.clojure/data.json]
    [environ]
-   [com.sixsq.slipstream/SlipStreamPricingLib-jar]
-   [com.sixsq.slipstream/SlipStreamClojureAPI-cimi]])
+   [com.sixsq.slipstream/SlipStreamPricingLib-jar ~+version+]
+   [com.sixsq.slipstream/SlipStreamClojureAPI-cimi ~+version+]])
 

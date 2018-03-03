@@ -12,7 +12,7 @@
 
   :plugins [[lein-parent "0.3.2"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "4.0.0"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.0.0"]
                    :inherit [:min-lein-version
                              :managed-dependencies
                              :repositories
@@ -32,7 +32,7 @@
    [cheshire]                                               ;; to avoid transient dependency conflicts
    [clj-time]
    [com.rpl/specter]
-   [com.sixsq.slipstream/utils]
+   [com.sixsq.slipstream/utils ~+version+]
    [duratom]
    [environ]
    [org.apache.logging.log4j/log4j-core]                    ;; required for Elasticsearch logging

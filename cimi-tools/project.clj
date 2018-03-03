@@ -11,7 +11,7 @@
 
   :plugins [[lein-parent "0.3.2"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "4.0.0"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.0.0"]
                    :inherit [:min-lein-version
                              :managed-dependencies
                              :repositories
@@ -32,15 +32,15 @@
    [org.clojure/data.xml]
    [org.clojure/tools.cli]
 
-   [com.sixsq.slipstream/SlipStreamPersistence :scope "compile"]
-   [com.sixsq.slipstream/SlipStreamCljResources-jar :scope "compile"]
-   [com.sixsq.slipstream/SlipStreamDbBinding-jar :scope "compile"]
+   [com.sixsq.slipstream/SlipStreamPersistence ~+version+ :scope "compile"]
+   [com.sixsq.slipstream/SlipStreamCljResources-jar ~+version+ :scope "compile"]
+   [com.sixsq.slipstream/SlipStreamDbBinding-jar ~+version+ :scope "compile"]
 
-   [com.sixsq.slipstream/SlipStreamDbSerializers-jar nil :scope "compile"]
+   [com.sixsq.slipstream/SlipStreamDbSerializers-jar ~+version+ :scope "compile"]
 
    [superstring]
    [me.raynes/fs]
    [clj-http]]
 
-  :profiles {:test {:dependencies [[com.sixsq.slipstream/SlipStreamDbTesting-jar]]
+  :profiles {:test {:dependencies [[com.sixsq.slipstream/SlipStreamDbTesting-jar ~+version+]]
                     :aot          :all}})

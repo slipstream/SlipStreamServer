@@ -12,7 +12,7 @@
 
   :plugins [[lein-parent "0.3.2"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "4.0.0"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.0.0"]
                    :inherit [:min-lein-version
                              :managed-dependencies
                              :repositories
@@ -27,9 +27,9 @@
   :dependencies
   [[org.clojure/clojure]
    [org.clojure/core.async]
-   [com.sixsq.slipstream/SlipStreamPersistence]
-   [com.sixsq.slipstream/SlipStreamConnector]]
+   [com.sixsq.slipstream/SlipStreamPersistence ~+version+]
+   [com.sixsq.slipstream/SlipStreamConnector ~+version+]]
 
   :profiles
-  {:provided {:dependencies [[com.sixsq.slipstream/SlipStreamCljResources-jar]
-                             [com.sixsq.slipstream/SlipStreamDbTesting-jar]]}})
+  {:provided {:dependencies [[com.sixsq.slipstream/SlipStreamCljResources-jar ~+version+]
+                             [com.sixsq.slipstream/SlipStreamDbTesting-jar ~+version+]]}})

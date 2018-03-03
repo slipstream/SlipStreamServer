@@ -12,7 +12,7 @@
 
   :plugins [[lein-parent "0.3.2"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "4.0.0"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.0.0"]
                    :inherit [:min-lein-version
                              :managed-dependencies
                              :repositories
@@ -32,10 +32,10 @@
                  [org.clojure/data.xml]
                  [superstring]
                  [org.clojure/test.check]
-                 [com.sixsq.slipstream/SlipStreamPersistence]
-                 [com.sixsq.slipstream/SlipStreamDbTesting-jar]]
+                 [com.sixsq.slipstream/SlipStreamPersistence ~+version+]
+                 [com.sixsq.slipstream/SlipStreamDbTesting-jar ~+version+]]
 
   :profiles
   {:test     {:source-paths   ["test"]
               :resource-paths ["test-resources"]}
-   :provided {:dependencies [[com.sixsq.slipstream/SlipStreamServer-cimi-resources]]}})
+   :provided {:dependencies [[com.sixsq.slipstream/SlipStreamServer-cimi-resources ~+version+]]}})

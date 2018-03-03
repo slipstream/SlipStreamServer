@@ -12,7 +12,7 @@
 
   :plugins [[lein-parent "0.3.2"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "4.0.0"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.0.0"]
                    :inherit [:min-lein-version
                              :managed-dependencies
                              :repositories
@@ -28,8 +28,8 @@
   [[org.clojure/clojure]
    [org.clojure/tools.nrepl]
    [cheshire] ;; newer version needed
-   [com.sixsq.slipstream/SlipStreamPlacementLib-jar]
-   [com.sixsq.slipstream/token]
+   [com.sixsq.slipstream/SlipStreamPlacementLib-jar ~+version+]
+   [com.sixsq.slipstream/token ~+version+]
    [compojure]
    [ring/ring-json]
    [ring/ring-defaults]]
