@@ -82,6 +82,16 @@
         action (get rights-keywords action)]
     (some #(isa? rights-hierarchy % action) rights)))
 
+(defn authorized-view?
+  "Returns true if the user can view the resource; returns false otherwise."
+  [resource request]
+  (authorized-do? resource request ::view))
+
+(defn authorized-modify?
+  "Returns true if the user can modify the resource; returns false otherwise."
+  [resource request]
+  (authorized-do? resource request ::modify))
+
 (defn can-do?
   "Determines if the ACL associated with the given resource permits the
    current user (in the request) the given action.  If the action is
@@ -117,10 +127,6 @@
    failure."
   [resource request]
   (can-do? resource request ::view))
-
-(defn authorized-view?
-  [resource request]
-  (authorized-do? resource request ::view))
 
 (defn default-acl
   "Provides a default ACL based on the authentication information.
