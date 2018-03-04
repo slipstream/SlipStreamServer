@@ -26,8 +26,9 @@
 
 
 (deftest check-upload-and-download-operations
-  (eoltu/upload-and-download-operations (str p/service-context eot/resource-url "/" report/objectType)
-                                        fake-deployment-info))
+  (with-redefs [eo-utils/generate-url (constantly "https://s3.example.org/bucket")]
+    (eoltu/upload-and-download-operations (str p/service-context eot/resource-url "/" report/objectType)
+                                          fake-deployment-info)))
 
 
 (deftest bad-methods
