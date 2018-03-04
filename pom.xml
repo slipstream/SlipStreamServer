@@ -108,7 +108,7 @@
       </snapshots>
       <id>slipstream.releases</id>
       <name>SlipStream Releases</name>
-      <url>${nexus}/releases-community${platform.os}</url>
+      <url>https://nexus.sixsq.com/content/repositories/releases-community-rhel7</url>
     </repository>
 
     <repository>
@@ -120,7 +120,7 @@
       </snapshots>
       <id>slipstream.snapshots</id>
       <name>SlipStream Snapshots</name>
-      <url>${nexus}/snapshots-community${platform.os}</url>
+      <url>https://nexus.sixsq.com/content/repositories/snapshots-community-rhel7</url>
     </repository>
 
   </repositories>
