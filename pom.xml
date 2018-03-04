@@ -130,12 +130,17 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
-        <goals>
-          <goal>go-offline</goal>
-        </goals>
-        <configuration>
-          <excludeGroupIds>com.sixsq.slipstream</excludeGroupIds>
-        </configuration>
+        <executions>
+          <execution>
+            <id>offline</id>
+            <goals>
+              <goal>go-offline</goal>
+            </goals>
+            <configuration>
+              <excludeGroupIds>com.sixsq.slipstream</excludeGroupIds>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
