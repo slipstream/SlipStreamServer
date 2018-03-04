@@ -1,5 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.external-object.utils
   (:require
+    [clojure.set :as set]
     [amazonica.core :as aws]
     [amazonica.aws.s3 :as s3]
     [clj-time.core :as time]))
@@ -18,7 +19,7 @@
                   slurp
                   (.split "\n"))]
     (merge
-      (clojure.set/rename-keys
+      (set/rename-keys
         (reduce
           (fn [m e]
             (let [pair (.split e "=")]
