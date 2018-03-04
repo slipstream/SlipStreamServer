@@ -3,6 +3,7 @@
     [clojure.test :refer [deftest is are use-fixtures]]
     [peridot.core :refer [session header request content-type]]
     [com.sixsq.slipstream.ssclj.resources.external-object-template-report :as report]
+    [com.sixsq.slipstream.ssclj.resources.external-object.utils :as eo-utils]
     [com.sixsq.slipstream.ssclj.resources.external-object-lifecycle-test-utils :as eoltu]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
@@ -19,8 +20,9 @@
                            :component "machine.1"})
 
 (deftest lifecycle
-  (eoltu/lifecycle (str p/service-context eot/resource-url "/" report/objectType)
-                   fake-deployment-info))
+  (with-redefs [eo-utils/generate-url (constantly "https://s3.example.org/bucket")]
+    (eoltu/lifecycle (str p/service-context eot/resource-url "/" report/objectType)
+                     fake-deployment-info)))
 
 
 (deftest check-upload-and-download-operations
