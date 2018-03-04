@@ -93,6 +93,8 @@
     <!-- The value should NOT have a trailing slash! -->
     <nexus>https://nexus.sixsq.com/content/repositories</nexus>
 
+    <!-- package platform for the created RPMs -->
+    <platform.os>-rhel7</platform.os>
   </properties>
 
   <repositories>
