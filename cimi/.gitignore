@@ -28,7 +28,6 @@ lib
 #############
 
 sscljdb*
-log4j.properties
 
 # generated files #
 ###################
