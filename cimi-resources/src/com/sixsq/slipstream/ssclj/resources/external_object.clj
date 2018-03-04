@@ -33,6 +33,7 @@
 
 (def ^:const state-new "new")
 (def ^:const state-ready "ready")
+
 ;;
 ;; validate subclasses of externalObject
 ;;
@@ -94,21 +95,32 @@
   [resource _]
   (:objectType resource))
 
+(defn standard-external-object-collection-operations
+  [{:keys [id] :as resource} request]
+  (when (a/authorized-modify? resource request)
+    [{:rel (:add c/action-uri) :href id}]))
+
+(defn standard-external-object-resource-operations
+  [{:keys [id state] :as resource} request]
+  (let [viewable? (a/authorized-view? resource request)
+        modifiable? (a/authorized-modify? resource request)
+        new? (= state-new state)
+        ready? (= state-ready state)
+        ops (cond-> []
+                    modifiable? (conj {:rel (:delete c/action-uri) :href id})
+                    (and new? modifiable?) (conj {:rel (:upload c/action-uri) :href (str id "/upload")})
+                    (and ready? viewable?) (conj {:rel (:download c/action-uri) :href (str id "/download")}))]
+    (when (seq ops)
+      (vec ops))))
+
 (defn standard-external-object-operations
   "Provides a list of the standard external object operations, depending
    on the user's authentication and whether this is a ExternalObject or
    a ExternalObjectCollection."
-  [{:keys [id resourceURI] :as resource} request]
-  (try
-    (a/can-modify? resource request)
-    (if (.endsWith resourceURI "Collection")
-      [{:rel (:add c/action-uri) :href id}]
-      [{:rel (:delete c/action-uri) :href id}
-       {:rel (:upload c/action-uri) :href (str id "/upload")}
-       {:rel (:download c/action-uri) :href (str id "/download")}
-       ])
-    (catch Exception _
-      nil)))
+  [{:keys [resourceURI] :as resource} request]
+  (if (.endsWith resourceURI "Collection")
+    (standard-external-object-collection-operations resource request)
+    (standard-external-object-resource-operations resource request)))
 
 ;; Sets the operations for the given resources.  This is a
 ;; multi-method because different types of external object resources
