@@ -25,12 +25,6 @@
   <dependencies>
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>parent</artifactId>
-      <version>${project.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.sixsq.slipstream</groupId>
       <artifactId>slipstream-ring-container-dep</artifactId>
       <version>${project.version}</version>
       <type>pom</type>
