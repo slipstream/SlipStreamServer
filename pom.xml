@@ -88,8 +88,40 @@
     <logger.filepattern>${project.build.directory}/instance/SlipStreamServer/var/log/slipstream.%g
     </logger.filepattern>
     <server.jre.version>1.8.0</server.jre.version>
+    
+    <!-- root URL for the nexus repositories         -->
+    <!-- The value should NOT have a trailing slash! -->
+    <nexus>https://nexus.sixsq.com/content/repositories</nexus>
 
   </properties>
+
+  <repositories>
+
+    <repository>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <id>slipstream.releases</id>
+      <name>SlipStream Releases</name>
+      <url>${nexus}/releases-community${platform.os}</url>
+    </repository>
+
+    <repository>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <id>slipstream.snapshots</id>
+      <name>SlipStream Snapshots</name>
+      <url>${nexus}/snapshots-community${platform.os}</url>
+    </repository>
+
+  </repositories>
 
   <build>
     <plugins>
