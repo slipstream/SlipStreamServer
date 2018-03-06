@@ -128,4 +128,7 @@ should be sufficient.
 
 To start everything, run `docker-compose up`.  After waiting some time for
 everything to start, you should be able to see the CloudEntryPoint at the 
-address `https://localhost/api/cloud-entry-point`.
+address `https://localhost/api/cloud-entry-point`.  You'll get the usual
+browser warning about the security of the certificates, if you used the 
+self-signed certificates for the server.
+
