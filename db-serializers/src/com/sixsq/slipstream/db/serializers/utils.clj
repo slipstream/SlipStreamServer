@@ -1,10 +1,9 @@
 (ns com.sixsq.slipstream.db.serializers.utils
   (:require
     [clojure.tools.logging :as log]
-    [superstring.core :as s]
+    [clojure.string :as str]
     [com.sixsq.slipstream.db.es.binding :as esb]
     [com.sixsq.slipstream.db.es.utils :as esu]
-    [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :as aih]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn])
   (:import
@@ -33,7 +32,7 @@
       (catch NumberFormatException _
         s)
       (catch RuntimeException ex
-        (if-not (s/starts-with? (.getMessage ex) "Invalid token")
+        (if-not (str/starts-with? (.getMessage ex) "Invalid token")
           (throw ex)
           s)))
     s))
@@ -89,7 +88,7 @@
 
 (defn param-get-cat-and-name
   [p]
-  (s/split (.getName p) #"\." 2))
+  (str/split (.getName p) #"\." 2))
 
 (defn param-get-pname
   "Get unqualified parameter name by removing its category."
@@ -116,7 +115,7 @@
         (when-not (nil? (:mandatory desc))
           (.setMandatory scp (as-boolean (:mandatory desc))))
         (when (:type desc)
-          (.setType scp (ParameterType/valueOf (s/capitalize (:type desc)))))
+          (.setType scp (ParameterType/valueOf (str/capitalize (:type desc)))))
         (when-not (nil? (:readOnly desc))
           (.setReadonly scp (as-boolean (get desc :readOnly (:readOnly desc)))))
         (when (:order desc)
@@ -130,7 +129,7 @@
 (defn desc-from-param
   [p]
   (let [pd {:displayName (param-get-pname p)
-            :type        (s/lower-case (.getType p))
+            :type        (str/lower-case (.getType p))
             :category    (.getCategory p)
             :description (.getDescription p)
             :mandatory   (.isMandatory p)
@@ -153,40 +152,3 @@
 (defn initialize
   []
   @dyn-init)
-
-;;
-;; Following code is used to setup the Elasticsearch database client
-;; and database CRUD implementation from Java code.
-;;
-;; ALL OF THESE FUNCTIONS ARE VERY STRONGLY DEPRECATED.
-;;
-
-(defn ^{:deprecated "3.34"} set-db-crud-impl-uncond
-  "STRONGLY DEPRECATED. Used to set the database CRUD implementation from Java
-   code unconditionally. This must never be called from native clojure code."
-  []
-  (db/set-impl! (esb/get-instance)))
-
-(defn ^{:deprecated "3.34"} set-db-crud-impl
-  "STRONGLY DEPRECATED. Used to set the database CRUD implementation from Java
-   code if needed. This must never be called from native clojure code."
-  []
-  (if (instance? clojure.lang.Var$Unbound db/*impl*)
-    (set-db-crud-impl-uncond)))
-
-;; Connection to a remote ES.
-
-(defn ^{:deprecated "3.34"} create-and-set-es-client
-  "STRONGLY DEPRECATED. Used to set connection to a remote Elasticsearch
-   cluster for Java code. This must never be called from native clojure code.
-   Requires ES_HOST and ES_PORT env vars."
-  []
-  (esb/set-client! (esb/create-client)))
-
-(defn ^{:deprecated "3.34"} db-client-and-crud-impl
-  "STRONGLY DEPRECATED. This function is used from Java code to setup the
-  connection to the database and to set the CRUD implementation. This must
-  never be called from native clojure code."
-  []
-  (set-db-crud-impl)
-  (create-and-set-es-client))
