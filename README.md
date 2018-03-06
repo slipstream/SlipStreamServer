@@ -9,7 +9,7 @@ Let's Encrypt certificates, given that you have a FQDN.
 
 For local testing however, self signed certificates can be used.
 
-1. create the folder components/traefik/cert
+1. create the folder `components/traefik/cert`
 
 `mkdir -p components/traefik/cert`
 
@@ -94,14 +94,14 @@ services:
     ports:
      - "5601:5601"
   rc:
-    image: sixsq/ring-container:3.46-SNAPSHOT
+    image: sixsq/ring-container:3.47-SNAPSHOT
     ports:
      - "5000:5000"
     volumes:
      - ringcontainer:/opt/slipstream/ring-container
      - ringcontainerexample:/opt/slipstream/ring-example
   cimi:
-    image: sixsq/cimi:3.46-SNAPSHOT
+    image: sixsq/cimi:3.47-SNAPSHOT
     ports:
      - "8201:8201"
     labels:
@@ -113,7 +113,7 @@ services:
      - ringcontainerexample:/opt/slipstream/ring-example
      - resources:/opt/slipstream/cimi/lib
   cimi-resources:
-    image: sixsq/cimi-resources:3.46-SNAPSHOT
+    image: sixsq/cimi-resources:3.47-SNAPSHOT
     volumes:
      - resources:/opt/slipstream/cimi/lib
 
@@ -123,4 +123,9 @@ volumes:
   resources: {}
 ```
 
-And run `docker-compose up` 
+Make sure that you've allocated enough memory to Docker; 4-6 GB of memory 
+should be sufficient.
+
+To start everything, run `docker-compose up`.  After waiting some time for
+everything to start, you should be able to see the CloudEntryPoint at the 
+address `https://localhost/api/cloud-entry-point`.
