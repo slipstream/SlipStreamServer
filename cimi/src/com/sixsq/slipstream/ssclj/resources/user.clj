@@ -7,7 +7,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.auth.acl :as a]
-    [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.app.persistent-db :as pdb]
     [com.sixsq.slipstream.ssclj.util.log :as logu])
   (:import
     (clojure.lang ExceptionInfo)))
@@ -206,14 +206,14 @@
   (throw-no-id body)
   (try
     (let [current (-> (:id body)
-                      (db/retrieve request)
+                      (pdb/retrieve request)
                       (a/can-modify? request))
           merged  (merge current (filter-for-regular-user body request))]
       (-> merged
           (dissoc :href)
           (u/update-timestamps)
           (crud/validate)
-          (db/edit request)))
+          (pdb/edit request)))
     (catch ExceptionInfo ei
       (ex-data ei))))
 (defmethod crud/edit resource-name

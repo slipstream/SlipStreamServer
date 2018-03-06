@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.auth.utils.db
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.app.persistent-db :as pdb]
     [com.sixsq.slipstream.ssclj.filter.parser :as parser])
   (:import
     (java.util UUID)
@@ -23,22 +23,22 @@
 
 (defn get-all-users
   []
-  (try (-> (db/query resource-name {:user-roles ["ADMIN"]})
+  (try (-> (pdb/query resource-name {:user-roles ["ADMIN"]})
            second)
        (catch ExceptionInfo e [])))
 
 (defn get-active-users
   []
   (let [filter {:filter (parser/parse-cimi-filter active-user-filter)}]
-    (try (-> (db/query resource-name {:cimi-params filter
-                                      :user-roles  ["ADMIN"]})
+    (try (-> (pdb/query resource-name {:cimi-params filter
+                                      :user-roles   ["ADMIN"]})
              second)
          (catch ExceptionInfo e []))))
 
 (defn get-user
   [username]
   (try
-    (db/retrieve (resource-uri username) {})
+    (pdb/retrieve (resource-uri username) {})
     (catch ExceptionInfo e {})))
 
 (defn find-usernames-by-email
@@ -46,8 +46,8 @@
   (when email
     (let [filter-str    (format "emailAddress='%s' and %s" email active-user-filter)
           filter        {:filter (parser/parse-cimi-filter filter-str)}
-          matched-users (try (-> (db/query resource-name {:cimi-params filter
-                                                          :user-roles  ["ADMIN"]})
+          matched-users (try (-> (pdb/query resource-name {:cimi-params filter
+                                                          :user-roles   ["ADMIN"]})
                                  second)
                              (catch ExceptionInfo e []))]
       (map :username matched-users))))
@@ -57,8 +57,8 @@
   (when (and authn-method authn-id)
     (let [filter-str    (format "%s='%s' and %s" (name authn-method) authn-id active-user-filter)
           filter        {:filter (parser/parse-cimi-filter filter-str)}
-          matched-users (try (-> (db/query resource-name {:cimi-params filter
-                                                          :user-roles  ["ADMIN"]})
+          matched-users (try (-> (pdb/query resource-name {:cimi-params filter
+                                                          :user-roles   ["ADMIN"]})
                                  second)
                              (catch ExceptionInfo e []))]
       (if (> (count matched-users) 1)
@@ -71,8 +71,8 @@
   (when username
     (let [filter-str (format "username='%s' and %s" username active-user-filter)
           filter     {:filter (parser/parse-cimi-filter filter-str)}]
-      (try (-> (db/query "user" {:cimi-params filter
-                                 :user-roles  ["ADMIN"]})
+      (try (-> (pdb/query "user" {:cimi-params filter
+                                 :user-roles   ["ADMIN"]})
                second
                first)
            (catch ExceptionInfo _ {})))))
@@ -130,7 +130,7 @@
 
 (defn existing-user-names
   []
-  (let [users (second (db/query "user" {:user-roles ["ADMIN"]}))]
+  (let [users (second (pdb/query "user" {:user-roles ["ADMIN"]}))]
     (map :username users)))
 
 (defn random-password

@@ -6,7 +6,7 @@
     [com.sixsq.slipstream.util.response :as r]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.db.impl :as db])
+    [com.sixsq.slipstream.ssclj.app.persistent-db :as pdb])
   (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const action-name "email-validation")
@@ -21,7 +21,7 @@
     (-> (crud/retrieve-by-id email-id admin-opts)
         (u/update-timestamps)
         (assoc :validated? true)
-        (db/edit admin-opts))
+        (pdb/edit admin-opts))
     (catch ExceptionInfo ei
       (ex-data ei))))
 

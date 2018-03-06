@@ -4,7 +4,7 @@
     [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
     [com.sixsq.slipstream.ssclj.resources.external-object-template-alpha-example :as tpl]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.app.persistent-db :as pdb]
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.ssclj.util.log :as logu]
     [com.sixsq.slipstream.auth.acl :as a])
@@ -58,9 +58,9 @@
   (try
     (a/can-modify? resource request)
     (let [id (str (u/de-camelcase eo/resource-name) "/" uuid)]
-      (-> (db/retrieve id request)
+      (-> (pdb/retrieve id request)
           (upload-fn request)
-          (db/edit request)))
+          (pdb/edit request)))
     (catch ExceptionInfo ei
       (ex-data ei))))
 
@@ -79,9 +79,9 @@
   (try
     (a/can-modify? resource request)
     (let [id (str (u/de-camelcase eo/resource-name) "/" uuid)]
-      (-> (db/retrieve id request)
+      (-> (pdb/retrieve id request)
           (download-fn request)
-          (db/edit request)))
+          (pdb/edit request)))
     (catch ExceptionInfo ei
       (ex-data ei))))
 

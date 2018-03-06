@@ -2,7 +2,7 @@
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.db.impl :as db])
+    [com.sixsq.slipstream.ssclj.app.persistent-db :as pdb])
   (:import (clojure.lang ExceptionInfo)))
 
 
@@ -19,7 +19,7 @@
       (-> (crud/retrieve-by-id callback-id admin-opts)
           (u/update-timestamps)
           (assoc :state state)
-          (db/edit admin-opts)))
+          (pdb/edit admin-opts)))
     (catch ExceptionInfo ei
       (ex-data ei))))
 

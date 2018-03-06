@@ -7,7 +7,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.app.persistent-db :as pdb]
     [com.sixsq.slipstream.ssclj.resources.job.utils :as ju])
   (:import (clojure.lang ExceptionInfo)))
 
@@ -65,7 +65,7 @@
                                      (crud/add-acl request)
                                      crud/validate)]
     (ju/add-job-to-queue id)
-    (db/add resource-name new-job {})))
+    (pdb/add resource-name new-job {})))
 
 (defmethod crud/add resource-name
   [request]
@@ -81,7 +81,7 @@
 (defn edit-impl [{{uuid :uuid} :params {:keys [statusMessage] :as body} :body :as request}]
   (try
     (let [current (-> (str (u/de-camelcase resource-name) "/" uuid)
-                      (db/retrieve request)
+                      (pdb/retrieve request)
                       (a/can-modify? request)
                       (cond-> statusMessage ju/update-timeOfStatusChange))
           merged (merge current body)]
@@ -89,7 +89,7 @@
           u/update-timestamps
           ju/job-cond->edition
           crud/validate
-          (db/edit request)))
+          (pdb/edit request)))
     (catch ExceptionInfo ei
       (ex-data ei))))
 
@@ -101,10 +101,10 @@
 (defn delete-impl [{{uuid :uuid} :params :as request}]
   (try
     (-> (str (u/de-camelcase resource-name) "/" uuid)
-        (db/retrieve request)
+        (pdb/retrieve request)
         (a/can-modify? request)
         (ju/stop)
-        (db/delete request))
+        (pdb/delete request))
     (catch ExceptionInfo ei
       (ex-data ei))))
 
@@ -136,9 +136,9 @@
   [{{uuid :uuid} :params :as request}]
   (try
     (-> (str (u/de-camelcase resource-name) "/" uuid)
-        (db/retrieve request)
+        (pdb/retrieve request)
         (a/can-modify? request)
         (ju/stop)
-        (db/edit request))
+        (pdb/edit request))
     (catch ExceptionInfo ei
       (ex-data ei))))

@@ -21,7 +21,7 @@
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.app.graphite :as graphite]
-    [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.app.persistent-db :as pdb]
     [com.sixsq.slipstream.db.es.binding :as esb]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as zku]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as resources]))
@@ -29,7 +29,7 @@
 
 (defn- set-persistence-impl
   []
-  (db/set-impl! (esb/get-instance)))
+  (pdb/set-impl! (esb/get-instance)))
 
 
 (defn- create-ring-handler

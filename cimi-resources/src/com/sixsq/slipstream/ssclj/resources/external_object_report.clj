@@ -5,7 +5,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.external-object-report]
     [com.sixsq.slipstream.ssclj.resources.external-object.utils :as s3]
-    [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.app.persistent-db :as pdb]
     [com.sixsq.slipstream.auth.acl :as a]
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.ssclj.util.log :as logu]
@@ -64,7 +64,7 @@
     (a/can-modify? resource request)
     (let [upload-uri (upload-fn resource request)]
       (-> (assoc resource :state eo/state-ready)
-          (db/edit request))
+          (pdb/edit request))
       (r/json-response {:uri upload-uri}))
     (catch ExceptionInfo ei
       (ex-data ei))))

@@ -7,7 +7,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.auth.acl :as a]
-    [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.app.persistent-db :as pdb]
     [com.sixsq.slipstream.ssclj.filter.parser :as parser]
     [com.sixsq.slipstream.ssclj.util.log :as log-util]
     [clojure.walk :as walk])
@@ -158,7 +158,7 @@
 
 (defn add-impl [{:keys [id body] :as request}]
   (a/can-modify? {:acl collection-acl} request)
-  (db/add
+  (pdb/add
     resource-name
     (-> body
         u/strip-service-attrs

@@ -6,7 +6,7 @@
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.app.persistent-db :as pdb]
     [com.sixsq.slipstream.db.es.binding :as esb]
     [com.sixsq.slipstream.util.response :as r])
   (:import (clojure.lang ExceptionInfo)))
@@ -15,7 +15,7 @@
   [resource-name collection-acl resource-uri]
   (fn [{:keys [body] :as request}]
     (a/can-modify? {:acl collection-acl} request)
-    (db/add
+    (pdb/add
       resource-name
       (-> body
           u/strip-service-attrs
@@ -31,7 +31,7 @@
   (fn [{{uuid :uuid} :params :as request}]
     (try
       (-> (str (u/de-camelcase resource-name) "/" uuid)
-          (db/retrieve request)
+          (pdb/retrieve request)
           (a/can-view? request)
           (crud/set-operations request)
           (r/json-response))
@@ -43,13 +43,13 @@
   (fn [{{uuid :uuid} :params body :body :as request}]
     (try
       (let [current (-> (str (u/de-camelcase resource-name) "/" uuid)
-                        (db/retrieve request)
+                        (pdb/retrieve request)
                         (a/can-modify? request))
             merged (merge current body)]
         (-> merged
             (u/update-timestamps)
             (crud/validate)
-            (db/edit request)))
+            (pdb/edit request)))
       (catch ExceptionInfo ei
         (ex-data ei)))))
 
@@ -58,9 +58,9 @@
   (fn [{{uuid :uuid} :params :as request}]
     (try
       (-> (str (u/de-camelcase resource-name) "/" uuid)
-          (db/retrieve request)
+          (pdb/retrieve request)
           (a/can-modify? request)
-          (db/delete request))
+          (pdb/delete request))
       (catch ExceptionInfo ei
         (ex-data ei)))))
 
@@ -81,7 +81,7 @@
     (a/can-view? {:acl collection-acl} request)
     (let [wrapper-fn (collection-wrapper-fn resource-name collection-acl collection-uri collection-key)
           options (select-keys request [:identity :query-params :cimi-params :user-name :user-roles])
-          [metadata entries] (db/query resource-name options)
+          [metadata entries] (pdb/query resource-name options)
           entries-and-count (merge metadata (wrapper-fn request entries))]
       (r/json-response entries-and-count))))
 

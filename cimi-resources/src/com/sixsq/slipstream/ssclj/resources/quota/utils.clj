@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.quota.utils
   (:require
-    [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.app.persistent-db :as pdb]
     [com.sixsq.slipstream.ssclj.middleware.cimi-params.utils :as cimi-params-utils]
     [com.sixsq.slipstream.ssclj.filter.parser :as parser]))
 
@@ -27,7 +27,7 @@
                  :user-roles  ["ADMIN"]
                  :cimi-params (get-cimi-params quota)}]
     (->> options
-         (db/query resource)
+         (pdb/query resource)
          (extract-aggregation aggregation))))
 
 
@@ -36,7 +36,7 @@
                   (select-keys request [:identity :user-name :user-roles])
                   {:cimi-params (get-cimi-params quota)})]
     (->> options
-         (db/query resource)
+         (pdb/query resource)
          (extract-aggregation aggregation))))
 
 
