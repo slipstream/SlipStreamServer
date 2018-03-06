@@ -180,8 +180,7 @@
    :params       {:resource-name "user-param"}
    :route-params {:resource-name "user-param"}
    :user-roles   #{"USER"}
-   :body         {:userParamTemplate up-tmpl-exec/resource}}
-  )
+   :body         {:userParamTemplate up-tmpl-exec/resource}})
 
 (defn create-user-params!
   [user-name]
