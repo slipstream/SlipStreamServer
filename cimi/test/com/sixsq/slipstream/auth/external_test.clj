@@ -116,18 +116,35 @@
     (is (= 1 (count users))))
   (is (= "missing" (create-user-when-missing! {:authn-login "missing"
                                                :email       "ok@example.com"})))
-  (let [users (db/get-all-users)]
-    (is (= 2 (count users))))
+  (let [users (db/get-all-users)
+        user-params (db/get-all-user-params)]
+    (is (= 2 (count users)))
+    (is (= 1 (count user-params))))
   (is (= "deleted" (create-user-when-missing! {:authn-login "deleted"
                                                :email       "ok@example.com"
                                                :state       "DELETED"})))
-  (let [users (db/get-all-users)]
-    (is (= 3 (count users))))
+  (let [users (db/get-all-users)
+        user-params (db/get-all-user-params)]
+    (is (= 3 (count users)))
+    (is (= 2 (count user-params))))
   (is (nil? (create-user-when-missing! {:authn-login       "deleted"
                                         :email             "ok@example.com"
                                         :fail-on-existing? true})))
-  (let [users (db/get-all-users)]
-    (is (= 3 (count users)))))
+  (let [users (db/get-all-users)
+        user-params (db/get-all-user-params)]
+    (is (= 3 (count users)))
+    (is (= 2 (count user-params)))))
+
+(deftest test-new-user-with-params!
+  (let [users (db/get-active-users)]
+    (is (zero? (count users))))
+  (is (= "missing" (create-user-when-missing! {:authn-login "missing"
+                                               :email       "ok@example.com"})))
+  (let [user-params (db/get-all-user-params)]
+    (is (= 1 (count user-params)))
+    (is (= "missing" (-> user-params
+                         first
+                         (get-in [:acl :owner :principal]))))))
 
 (deftest test-sanitize-login-name
   (is (= "st" (sanitize-login-name "st")))
