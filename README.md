@@ -15,7 +15,7 @@ For local testing however, self signed certificates can be used.
 
 2. generate the self signed certificates
 
-`cd components/traefik/cert && openssl req  -nodes -new -x509  -keyout server.pem -out server.cr`
+`cd components/traefik/cert && openssl req  -nodes -new -x509  -keyout server.pem -out server.crt`
 
 3. create the Traefik config for self signed certs
 
