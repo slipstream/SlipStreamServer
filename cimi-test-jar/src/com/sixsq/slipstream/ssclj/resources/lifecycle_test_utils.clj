@@ -2,31 +2,30 @@
   (:require
     [clojure.data.json :as json]
     [clojure.java.io :as io]
+    [clojure.pprint :refer [pprint]]
     [clojure.string :as str]
     [clojure.test :refer [is]]
     [clojure.tools.logging :as log]
-    [clojure.pprint :refer [pprint]]
-    [peridot.core :refer [session request]]
-    [compojure.core :as cc]
-    [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
-    [ring.middleware.params :refer [wrap-params]]
-    [ring.middleware.keyword-params :refer [wrap-keyword-params]]
-    [ring.middleware.nested-params :refer [wrap-nested-params]]
-    [ring.util.codec :as codec]
-    [com.sixsq.slipstream.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer [wrap-cimi-params]]
-    [com.sixsq.slipstream.ssclj.middleware.base-uri :refer [wrap-base-uri]]
-    [com.sixsq.slipstream.ssclj.middleware.logger :refer [wrap-logger]]
-    [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer [wrap-cimi-params]]
-    [com.sixsq.slipstream.ssclj.middleware.exception-handler :refer [wrap-exceptions]]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [wrap-authn-info-header]]
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.db.es.binding :as esb]
     [com.sixsq.slipstream.db.es.utils :as esu]
+    [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.dbtest.es.utils :as esut]
+    [com.sixsq.slipstream.ssclj.app.routes :as routes]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [wrap-authn-info-header]]
+    [com.sixsq.slipstream.ssclj.middleware.base-uri :refer [wrap-base-uri]]
+    [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer [wrap-cimi-params]]
+    [com.sixsq.slipstream.ssclj.middleware.exception-handler :refer [wrap-exceptions]]
+    [com.sixsq.slipstream.ssclj.middleware.logger :refer [wrap-logger]]
+    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
-    [zookeeper :as zk]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes])
+    [compojure.core :as cc]
+    [peridot.core :refer [session request]]
+    [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
+    [ring.middleware.keyword-params :refer [wrap-keyword-params]]
+    [ring.middleware.nested-params :refer [wrap-nested-params]]
+    [ring.middleware.params :refer [wrap-params]]
+    [ring.util.codec :as codec]
+    [zookeeper :as zk])
   (:import [org.apache.curator.test TestingServer]))
 
 
@@ -346,14 +345,6 @@
        (db/set-impl! (esb/get-instance))
        (esu/reset-index esb/*client* esb/index-name)
        ~@body)))
-
-
-(defn with-test-es-client-fixture
-  [f]
-  (log/error "DEPRECATED: with-test-es-client-fixture")
-  (set-zk-client-server-cache)                              ;; always setup the zookeeper client and server
-  (with-test-es-client
-    (f)))
 
 
 ;;

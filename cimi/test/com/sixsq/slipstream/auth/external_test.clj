@@ -59,10 +59,10 @@
                    :githublogin  "st"
                    :emailAddress "st@sixsq.com"
                    :state        "ACTIVE"}
-        _         (th/add-user-for-test! user-info)
-        user      (-> (db/get-all-users)
-                      first
-                      (dissoc :updated))]
+        _ (th/add-user-for-test! user-info)
+        user (-> (db/get-all-users)
+                 first
+                 (dissoc :updated))]
 
     (match-external-user! :github "st" "st@sixsq.com")
     (is (= user (dissoc (first (db/get-all-users)) :updated)))
@@ -80,7 +80,8 @@
     (is (= 1 (count users-before-match))))
   (match-external-user! :github "st" "st@sixsq.com")
   (let [users-after-match (db/get-all-users)
-        new-user          (second users-after-match)]
+        new-user (second users-after-match)
+        _ (with-out-str (clojure.pprint/pprint new-user))]
     (is (= 2 (count users-after-match)))
     (is (= "st" (:githublogin new-user)))
     (is (= "st_1" (:username new-user)))))
