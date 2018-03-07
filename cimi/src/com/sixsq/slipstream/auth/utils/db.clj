@@ -24,35 +24,35 @@
 
 (defn get-all-users
   []
-  (try (-> (db/query resource-name {:user-roles ["ADMIN"]})
-           second)
-       (catch ExceptionInfo e [])))
+  (try
+    (second (db/query resource-name {:user-roles ["ADMIN"]}))
+    (catch ExceptionInfo _ [])))
 
 (defn get-all-user-params
   []
-  (try (-> (db/query "user-param" {:user-roles ["ADMIN"]})
-           second)
-       (catch ExceptionInfo e [])))
+  (try
+    (second (db/query "user-param" {:user-roles ["ADMIN"]}))
+    (catch ExceptionInfo _ [])))
 
 (defn get-active-users
   []
   (let [filter {:filter (parser/parse-cimi-filter active-user-filter)}]
-    (try (-> (db/query resource-name {:cimi-params filter
-                                      :user-roles  ["ADMIN"]})
-             second)
-         (catch ExceptionInfo e []))))
+    (try
+      (second (db/query resource-name {:cimi-params filter
+                                       :user-roles  ["ADMIN"]}))
+      (catch ExceptionInfo _ []))))
 
 (defn get-user
   [username]
   (try
     (db/retrieve (resource-uri username) {})
-    (catch ExceptionInfo e {})))
+    (catch ExceptionInfo _ {})))
 
 (defn find-usernames-by-email
   [email]
   (when email
-    (let [filter-str    (format "emailAddress='%s' and %s" email active-user-filter)
-          filter        {:filter (parser/parse-cimi-filter filter-str)}
+    (let [filter-str (format "emailAddress='%s' and %s" email active-user-filter)
+          filter {:filter (parser/parse-cimi-filter filter-str)}
           matched-users (try (-> (db/query resource-name {:cimi-params filter
                                                           :user-roles  ["ADMIN"]})
                                  second)
@@ -62,8 +62,8 @@
 (defn find-username-by-authn
   [authn-method authn-id]
   (when (and authn-method authn-id)
-    (let [filter-str    (format "%s='%s' and %s" (name authn-method) authn-id active-user-filter)
-          filter        {:filter (parser/parse-cimi-filter filter-str)}
+    (let [filter-str (format "%s='%s' and %s" (name authn-method) authn-id active-user-filter)
+          filter {:filter (parser/parse-cimi-filter filter-str)}
           matched-users (try (-> (db/query resource-name {:cimi-params filter
                                                           :user-roles  ["ADMIN"]})
                                  second)
@@ -77,7 +77,7 @@
   [username]
   (when username
     (let [filter-str (format "username='%s' and %s" username active-user-filter)
-          filter     {:filter (parser/parse-cimi-filter filter-str)}]
+          filter {:filter (parser/parse-cimi-filter filter-str)}]
       (try (-> (db/query "user" {:cimi-params filter
                                  :user-roles  ["ADMIN"]})
                second
@@ -100,9 +100,9 @@
 
 (defn update-user-authn-info
   [authn-method slipstream-username authn-id]
-  (let [body    {:id       (to-resource-id slipstream-username)
-                 :username slipstream-username
-                 (to-am-kw authn-method)   authn-id}
+  (let [body {:id                     (to-resource-id slipstream-username)
+              :username               slipstream-username
+              (to-am-kw authn-method) authn-id}
         request {:identity       {:current slipstream-username
                                   :authentications
                                            {slipstream-username {:roles #{"USER"} :identity slipstream-username}}}
@@ -148,18 +148,18 @@
   [{:keys [authn-login email authn-method firstname lastname roles organization
            state]}]
   (let [slipstream-username (name-no-collision authn-login (existing-user-names))
-        user-resource       (cond-> {:href         "user-template/auto"
-                                     :username     slipstream-username
-                                     :emailAddress email
-                                     :password     (random-password)
-                                     :deleted      false
-                                     :isSuperUser  false
-                                     :state        (or state "ACTIVE")}
-                                    authn-method (assoc (to-am-kw authn-method) authn-login)
-                                    firstname (assoc :firstName firstname)
-                                    lastname (assoc :lastName lastname)
-                                    roles (assoc :roles roles)
-                                    organization (assoc :organization organization))]
+        user-resource (cond-> {:href         "user-template/auto"
+                               :username     slipstream-username
+                               :emailAddress email
+                               :password     (random-password)
+                               :deleted      false
+                               :isSuperUser  false
+                               :state        (or state "ACTIVE")}
+                              authn-method (assoc (to-am-kw authn-method) authn-login)
+                              firstname (assoc :firstName firstname)
+                              lastname (assoc :lastName lastname)
+                              roles (assoc :roles roles)
+                              organization (assoc :organization organization))]
     {:identity     {:current "unknown"
                     :authentications
                              {"unknown" {:roles #{"ANON"}, :identity "unknown"}}}
