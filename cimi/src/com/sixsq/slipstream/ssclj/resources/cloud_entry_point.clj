@@ -5,15 +5,15 @@
     [clojure.tools.logging :as log]
     [compojure.core :refer [defroutes GET POST PUT DELETE ANY]]
     [ring.util.response :as r]
-    [com.sixsq.slipstream.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-    [com.sixsq.slipstream.ssclj.resources.spec.cloud-entry-point] ;; ensure schema is loaded
-    [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.util.response :as sr]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.auth.acl :as a]
+    [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.app.persistent-db :as pdb]
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]))
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.spec.cloud-entry-point] ;; ensure schema is loaded
+    [com.sixsq.slipstream.util.response :as sr]))
 
 ;;
 ;; utilities
@@ -69,11 +69,11 @@
                  {:acl         resource-acl
                   :id          resource-url
                   :resourceURI resource-uri})]
-    (db/add resource-name record {:user-roles ["ANON"]})))
+    (pdb/add resource-name record {:user-roles ["ANON"]})))
 
 (defn retrieve-impl
   [{:keys [base-uri] :as request}]
-  (r/response (-> (db/retrieve resource-url {})
+  (r/response (-> (pdb/retrieve resource-url {})
                   ;; (a/can-view? request)
                   (assoc :baseURI base-uri)
                   (merge resource-links)
@@ -85,7 +85,7 @@
 
 (defn edit-impl
   [{:keys [body] :as request}]
-  (let [current (-> (db/retrieve resource-url {})
+  (let [current (-> (pdb/retrieve resource-url {})
                     (assoc :acl resource-acl)
                     (a/can-modify? request))
         updated (-> body
@@ -97,7 +97,7 @@
                     (crud/set-operations request)
                     (crud/validate))]
 
-    (db/edit updated request)))
+    (pdb/edit updated request)))
 
 (defmethod crud/edit resource-name
   [request]

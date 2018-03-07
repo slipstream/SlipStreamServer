@@ -13,23 +13,23 @@
     [metrics.ring.expose :refer [expose-metrics-as-json]]
     [metrics.jvm.core :refer [instrument-jvm]]
 
-    [com.sixsq.slipstream.ssclj.middleware.logger :refer [wrap-logger]]
-    [com.sixsq.slipstream.ssclj.middleware.base-uri :refer [wrap-base-uri]]
-    [com.sixsq.slipstream.ssclj.middleware.exception-handler :refer [wrap-exceptions]]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [wrap-authn-info-header]]
-    [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer [wrap-cimi-params]]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
-    [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.app.graphite :as graphite]
-    [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.db.es.binding :as esb]
-    [com.sixsq.slipstream.ssclj.util.zookeeper :as zku]
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as resources]))
+    [com.sixsq.slipstream.ssclj.app.graphite :as graphite]
+    [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.app.persistent-db :as pdb]
+    [com.sixsq.slipstream.ssclj.app.routes :as routes]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [wrap-authn-info-header]]
+    [com.sixsq.slipstream.ssclj.middleware.base-uri :refer [wrap-base-uri]]
+    [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer [wrap-cimi-params]]
+    [com.sixsq.slipstream.ssclj.middleware.exception-handler :refer [wrap-exceptions]]
+    [com.sixsq.slipstream.ssclj.middleware.logger :refer [wrap-logger]]
+    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as resources]
+    [com.sixsq.slipstream.ssclj.util.zookeeper :as zku]))
 
 
 (defn- set-persistence-impl
   []
-  (db/set-impl! (esb/get-instance)))
+  (pdb/set-impl! (esb/get-instance)))
 
 
 (defn- create-ring-handler

@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.crud
   (:require
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.auth.acl :as a]
+    [com.sixsq.slipstream.ssclj.app.persistent-db :as pdb]
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.util.response :as r]))
 
 ;;
@@ -52,7 +52,7 @@
 
 (defmethod retrieve-by-id :default
   [resource-id & [options]]
-  (db/retrieve resource-id (or options {})))
+  (pdb/retrieve resource-id (or options {})))
 
 (defmulti edit resource-name-dispatch)
 
