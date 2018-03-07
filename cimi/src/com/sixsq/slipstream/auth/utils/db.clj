@@ -2,7 +2,8 @@
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.filter.parser :as parser])
+    [com.sixsq.slipstream.ssclj.filter.parser :as parser]
+    [com.sixsq.slipstream.ssclj.resources.user-params-template-exec :as up-tmpl-exec])
   (:import
     (java.util UUID)
     (clojure.lang ExceptionInfo)))
@@ -24,6 +25,12 @@
 (defn get-all-users
   []
   (try (-> (db/query resource-name {:user-roles ["ADMIN"]})
+           second)
+       (catch ExceptionInfo e [])))
+
+(defn get-all-user-params
+  []
+  (try (-> (db/query "user-param" {:user-roles ["ADMIN"]})
            second)
        (catch ExceptionInfo e [])))
 
@@ -162,6 +169,22 @@
      :route-params {:resource-name "user"}
      :user-roles   #{"ANON"}
      :body         {:userTemplate user-resource}}))
+
+(defn user-param-create-request
+  [user-name]
+  {:identity     {:current user-name
+                  :authentications
+                           {user-name {:roles #{"USER"}, :identity user-name}}}
+   :sixsq.slipstream.authn/claims
+                 {:username user-name, :roles "USER"}
+   :params       {:resource-name "user-param"}
+   :route-params {:resource-name "user-param"}
+   :user-roles   #{"USER"}
+   :body         {:userParamTemplate up-tmpl-exec/resource}})
+
+(defn create-user-params!
+  [user-name]
+  (crud/add (user-param-create-request user-name)))
 
 (defn create-user!
   "Create a new user in the database. Values for 'email' and 'authn-login'
