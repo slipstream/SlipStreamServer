@@ -103,8 +103,6 @@
         (ltu/is-status 400))
 
     ;; create a user anonymously
-    (println "DEBUG DEBUG DEBUG")
-    (expound/expound :cimi/user-template.self-registration-create href-create)
     (clojure.pprint/pprint href-create)
     (let [resp (-> session-anon
                    (request base-uri
