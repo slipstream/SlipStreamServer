@@ -49,18 +49,13 @@
 (def ^:const desc UserDescription)
 
 ;;
-;; validate subclasses of user
+;; common validation for created users
 ;;
 
-(defmulti validate-subtype :method)
-
-(defmethod validate-subtype :default
-  [resource]
-  (throw (ex-info (str "unknown User type: '" (:method resource) "'") resource)))
-
+(def validate-fn (u/create-spec-validation-fn :cimi/user))
 (defmethod crud/validate resource-uri
   [resource]
-  (validate-subtype resource))
+  (validate-fn resource))
 
 ;;
 ;; validate create requests for subclasses of users
