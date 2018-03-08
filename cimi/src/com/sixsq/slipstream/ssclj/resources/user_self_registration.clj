@@ -22,11 +22,15 @@
 ;; strips method attribute and updates the resource URI
 ;;
 
+(def user-defaults {:resourceURI p/resource-uri
+                    :isSuperUser false
+                    :deleted     false
+                    :state       "NEW"})
+
 ;; FIXME: Setup a callback to verify email address.
 (defmethod p/tpl->user tpl/registration-method
   [{:keys [password] :as resource} request]
   (-> resource
-      (assoc :resourceURI p/resource-uri)
-      (assoc :isSuperUser false)
-      (assoc :password (internal/hash-password password))
-      (dissoc :passwordRepeat)))
+      (merge user-defaults)
+      (dissoc :passwordRepeat)
+      (assoc :password (internal/hash-password password))))

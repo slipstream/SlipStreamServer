@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.user-self-registration-lifecycle-test
   (:require
-    [clojure.test :refer :all]
+    [clojure.test :refer [use-fixtures deftest is]]
     [clojure.data.json :as json]
     [peridot.core :refer :all]
     [com.sixsq.slipstream.ssclj.resources.user :as user]
@@ -103,13 +103,11 @@
         (ltu/is-status 400))
 
     ;; create a user anonymously
-    (clojure.pprint/pprint href-create)
     (let [resp (-> session-anon
                    (request base-uri
                             :request-method :post
                             :body (json/write-str href-create))
                    (ltu/body->edn)
-                   (ltu/dump)
                    (ltu/is-status 201))
           id (get-in resp [:response :body :resource-id])
           uri (-> resp
@@ -132,6 +130,7 @@
           (ltu/is-operation-present "delete")
           (ltu/is-operation-present "edit"))
 
+      ;; user should be able to see, edit, and delete user
       (-> session-user
           (request abs-uri)
           (ltu/body->edn)
