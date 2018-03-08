@@ -29,4 +29,5 @@
   [resource request]
   (-> resource
       (assoc :resourceURI p/resource-uri)
-      (assoc :isSuperUser false)))
+      (assoc :isSuperUser false)
+      (dissoc :passwordRepeat)))                            ;; FIXME: Encode password, check for validity.

@@ -1,6 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.user-template-self-registration-test
   (:require
-    [expound.alpha :as expound]
     [clojure.test :refer [deftest is]]
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.user-template :as st]
@@ -48,6 +47,7 @@
     (is (s/valid? :cimi/user-template.self-registration-create create-tpl))
     (is (s/valid? :cimi/user-template.self-registration-create (assoc-in create-tpl [:userTemplate :href] "user-template/abc")))
     (is (not (s/valid? :cimi/user-template.self-registration-create (assoc-in create-tpl [:userTemplate :href] "bad-reference/abc"))))
+
     (doseq [attr #{:resourceURI :userTemplate}]
       (is (not (s/valid? :cimi/user-template.self-registration-create (dissoc create-tpl attr)))))
     (doseq [attr #{:name :description :properties}]
