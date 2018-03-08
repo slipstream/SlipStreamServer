@@ -6,6 +6,7 @@
     [com.sixsq.slipstream.ssclj.resources.user-template :refer :all]
     [com.sixsq.slipstream.ssclj.resources.user-template-direct :as direct]
     [com.sixsq.slipstream.ssclj.resources.user-template-auto :as auto]
+    [com.sixsq.slipstream.ssclj.resources.user-template-self-registration :as self]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
@@ -19,7 +20,8 @@
 
 (deftest check-retrieve-by-id
   (doseq [registration-method [direct/registration-method
-                               auto/registration-method]]
+                               auto/registration-method
+                               self/registration-method]]
     (let [id (str resource-url "/" registration-method)
           doc (crud/retrieve-by-id id)]
       (is (= id (:id doc))))))
@@ -43,10 +45,12 @@
         ids (set (map :id entries))
         types (set (map :method entries))]
     (is (= #{(str resource-url "/" direct/registration-method)
-             (str resource-url "/" auto/registration-method)}
+             (str resource-url "/" auto/registration-method)
+             (str resource-url "/" self/registration-method)}
            ids))
     (is (= #{direct/registration-method
-             auto/registration-method}
+             auto/registration-method
+             self/registration-method}
            types))
 
     (doseq [entry entries]
@@ -75,7 +79,7 @@
 
         (is (crud/validate entry-body))))))
 
-;; checks that only the auto user-template is visible
+;; checks that only the auto and self-registration user-templates are visible
 (deftest lifecycle-anon
   (let [session (-> (session (ltu/ring-app))
                     (content-type "application/json")
@@ -93,9 +97,11 @@
                     (ltu/entries resource-tag))
         ids (set (map :id entries))
         types (set (map :method entries))]
-    (is (= #{(str resource-url "/" auto/registration-method)}
+    (is (= #{(str resource-url "/" auto/registration-method)
+             (str resource-url "/" self/registration-method)}
            ids))
-    (is (= #{auto/registration-method}
+    (is (= #{auto/registration-method
+             self/registration-method}
            types))))
 
 (deftest bad-methods

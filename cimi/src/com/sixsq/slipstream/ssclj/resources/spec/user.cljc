@@ -1,9 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.user
   (:require
-    [clojure.string :as str]
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]
-    [com.sixsq.slipstream.ssclj.resources.spec.common :as c]))
+    [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
+    [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 (s/def :cimi.user/username :cimi.core/nonblank-string)
 (s/def :cimi.user/emailAddress :cimi.core/nonblank-string)
@@ -20,17 +19,8 @@
             :cimi.user/lastName
             :cimi.user/organization]})
 
-; substitute :cimi.common/id with less strict cimi.user/id
-#_(def user-common-attrs
-    (->> c/common-attrs
-         :req-un
-         (remove #{:cimi.common/id})
-         (concat [:cimi.user/id])
-         (hash-map :req-un)
-         (merge c/common-attrs)))
-; FIXME: fix the above def and remove this copy/paste
 (def ^:const user-common-attrs
-  {:req-un [:cimi.user/id
+  {:req-un [:cimi.user/id                                   ;; less restrictive than :cimi.common/id
             :cimi.common/resourceURI
             :cimi.common/created
             :cimi.common/updated
