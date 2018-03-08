@@ -6,7 +6,6 @@
     [com.sixsq.slipstream.ssclj.resources.user-template :refer :all]
     [com.sixsq.slipstream.ssclj.resources.user-template-direct :as direct]
     [com.sixsq.slipstream.ssclj.resources.user-template-auto :as auto]
-    [com.sixsq.slipstream.ssclj.resources.user-template-self-registration :as self]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
@@ -20,8 +19,7 @@
 
 (deftest check-retrieve-by-id
   (doseq [registration-method [direct/registration-method
-                               auto/registration-method
-                               self/registration-method]]
+                               auto/registration-method]]
     (let [id (str resource-url "/" registration-method)
           doc (crud/retrieve-by-id id)]
       (is (= id (:id doc))))))
@@ -45,12 +43,10 @@
         ids (set (map :id entries))
         types (set (map :method entries))]
     (is (= #{(str resource-url "/" direct/registration-method)
-             (str resource-url "/" auto/registration-method)
-             (str resource-url "/" self/registration-method)}
+             (str resource-url "/" auto/registration-method)}
            ids))
     (is (= #{direct/registration-method
-             auto/registration-method
-             self/registration-method}
+             auto/registration-method}
            types))
 
     (doseq [entry entries]
@@ -97,11 +93,9 @@
                     (ltu/entries resource-tag))
         ids (set (map :id entries))
         types (set (map :method entries))]
-    (is (= #{(str resource-url "/" auto/registration-method)
-             (str resource-url "/" self/registration-method)}
+    (is (= #{(str resource-url "/" auto/registration-method)}
            ids))
-    (is (= #{auto/registration-method
-             self/registration-method}
+    (is (= #{auto/registration-method}
            types))))
 
 (deftest bad-methods
