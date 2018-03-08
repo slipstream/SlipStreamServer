@@ -1,11 +1,18 @@
 (ns com.sixsq.slipstream.ssclj.resources.external-object.utils
   (:require
     [clojure.set :as set]
-    [amazonica.core :as aws]
-    [amazonica.aws.s3 :as s3]
-    [clj-time.core :as time]))
+    [clj-time.coerce :as tc]
+    [clj-time.core :as t])
+  (:import
+    (com.amazonaws.auth BasicAWSCredentials AWSStaticCredentialsProvider)
+    (com.amazonaws.services.s3 AmazonS3ClientBuilder)
+    (com.amazonaws.services.s3.model GeneratePresignedUrlRequest DeleteObjectRequest)
+    (com.amazonaws.regions Regions)
+    (com.amazonaws.client.builder AwsClientBuilder$EndpointConfiguration)
+    (com.amazonaws HttpMethod)))
 
-(defn get-s3-cred
+
+(defn get-s3-client
   []
   (let [access "aws_access_key_id"
         secret "aws_secret_access_key"
@@ -17,37 +24,51 @@
                   System/getProperty
                   (str file)
                   slurp
-                  (.split "\n"))]
-    (merge
-      (set/rename-keys
-        (reduce
-          (fn [m e]
-            (let [pair (.split e "=")]
-              (if (some #{access secret endpoint} [(first pair)])
-                (apply assoc m pair)
-                m)))
-          {}
-          creds)
-        {access   :access-key
-         secret   :secret-key
-         endpoint :endpoint})
-      config)))
+                  (.split "\n"))
 
+        cred (merge
+               (set/rename-keys
+                 (reduce
+                   (fn [m e]
+                     (let [pair (.split e "=")]
+                       (if (some #{access secret endpoint} [(first pair)])
+                         (apply assoc m pair)
+                         m)))
+                   {}
+                   creds)
+                 {access   :access-key
+                  secret   :secret-key
+                  endpoint :endpoint})
+               config)
+        endpoint (AwsClientBuilder$EndpointConfiguration. (:endpoint cred) "us-east-1")
+        credentials (BasicAWSCredentials. (:access-key cred)
+                                          (:secret-key cred))
+        ]
+    (-> (AmazonS3ClientBuilder/standard)
+        (.withEndpointConfiguration endpoint)
+        (.withCredentials (AWSStaticCredentialsProvider. credentials))
+        .build)))
+
+(def ^:const default-content-type "text/plain;charset=UTF-8")
+(def ^:const default-ttl 15)
 
 (defn generate-url
-  ([bucket k mn]
-   (generate-url bucket k mn false))
-  ([bucket k mn write?]
-   (let [expiry (-> mn time/minutes time/from-now)
-         method (if write? "PUT" "GET")]
-     (.toString
-       (s3/generate-presigned-url (get-s3-cred) bucket k expiry method)))))
+  ([bucket key] (generate-url bucket key :get))
+  ([bucket key verb] (generate-url bucket key verb default-ttl))
+  ([bucket key verb mn] (generate-url bucket key verb mn default-content-type))
+  ([bucket key verb mn contentType]
+   (let [expiration (tc/to-date (-> mn t/minutes t/from-now))
+         generate-presigned-url-request (doto (GeneratePresignedUrlRequest. bucket key)
+                                          (.setMethod (if (= verb :put)
+                                                        HttpMethod/PUT
+                                                        HttpMethod/GET))
+                                          (.setExpiration expiration)
+                                          (.setContentType contentType))]
+     (.toString (.generatePresignedUrl (get-s3-client) generate-presigned-url-request)))))
 
-(defn delete-s3-object
-  [bucket k]
-  (let [cred (get-s3-cred)]
-    (aws/with-credential [(:access-key cred)
-                          (:secret-key cred)
-                          (:endpoint cred)]
-                         (when (s3/does-object-exist cred bucket k)
-                           (s3/delete-object bucket k)))))
+(defn delete-s3-object [bucket key]
+  (let [ deleteRequest (DeleteObjectRequest. bucket key)]
+    (.deleteObject (get-s3-client) deleteRequest)))
+
+
+

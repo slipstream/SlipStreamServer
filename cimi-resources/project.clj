@@ -24,7 +24,7 @@
   :pom-location "target/"
 
   :dependencies [[com.sixsq.slipstream/SlipStreamCljResources-jar ~+version+]
-                 [amazonica]
+                 [com.amazonaws/aws-java-sdk]
                  [org.clojure/test.check] ; FIXME: Needed for spec.gen.alpha. Fix "Could not locate clojure/test/check/generators__init.class"
                  ]
 
