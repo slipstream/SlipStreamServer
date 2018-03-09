@@ -49,18 +49,13 @@
 (def ^:const desc UserDescription)
 
 ;;
-;; validate subclasses of user
+;; common validation for created users
 ;;
 
-(defmulti validate-subtype :method)
-
-(defmethod validate-subtype :default
-  [resource]
-  (throw (ex-info (str "unknown User type: '" (:method resource) "'") resource)))
-
+(def validate-fn (u/create-spec-validation-fn :cimi/user))
 (defmethod crud/validate resource-uri
   [resource]
-  (validate-subtype resource))
+  (validate-fn resource))
 
 ;;
 ;; validate create requests for subclasses of users
@@ -116,12 +111,21 @@
   [resource _]
   (:method resource))
 
+;; transforms the user template into a user resource
 (defmulti tpl->user dispatch-conversion)
 
 ;; default implementation throws if the registration method is unknown
 (defmethod tpl->user :default
   [resource request]
   (logu/log-and-throw-400 "missing or invalid UserTemplate reference"))
+
+;; handles any actions that must be taken after the user is added
+(defmulti post-user-add dispatch-conversion)
+
+;; default implementation is a no-op
+(defmethod post-user-add :default
+  [resource request]
+  nil)
 
 ;;
 ;; CRUD operations
@@ -147,7 +151,7 @@
 ;; requires a UserTemplate to create new User
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
-  (let [idmap      {:identity (:identity request)}
+  (let [idmap {:identity (:identity request)}
         desc-attrs (u/select-desc-keys body)
         {:keys [id] :as body} (-> body
                                   (assoc :resourceURI create-uri)
@@ -159,7 +163,10 @@
                                   (merge-with-defaults)
                                   (tpl->user request)
                                   (merge desc-attrs))]      ;; ensure desc attrs are added
-    (add-impl (assoc request :id id :body body))))
+    (let [{{:keys [status resource-id]} :body :as result} (add-impl (assoc request :id id :body body))]
+      (when (and resource-id (= 201 status))
+        (post-user-add (assoc body :id resource-id) request))
+      result)))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 (defmethod crud/retrieve resource-name
@@ -208,7 +215,7 @@
     (let [current (-> (:id body)
                       (db/retrieve request)
                       (a/can-modify? request))
-          merged  (merge current (filter-for-regular-user body request))]
+          merged (merge current (filter-for-regular-user body request))]
       (-> merged
           (dissoc :href)
           (u/update-timestamps)

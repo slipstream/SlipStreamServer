@@ -75,7 +75,7 @@
 
         (is (crud/validate entry-body))))))
 
-;; checks that only the auto user-template is visible
+;; checks that only the auto and self-registration user-templates are visible
 (deftest lifecycle-anon
   (let [session (-> (session (ltu/ring-app))
                     (content-type "application/json")
