@@ -60,6 +60,7 @@ EOF
 ```
 
 Finally, add the following into docker-compose.yml (Kibana is optional, and the sixsq/* container versions should be updated):
+
 ```yaml
 version: '3'
 services:
