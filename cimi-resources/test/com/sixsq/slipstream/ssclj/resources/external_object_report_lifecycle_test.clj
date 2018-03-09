@@ -16,8 +16,8 @@
 
 (def base-uri (str p/service-context (u/de-camelcase eo/resource-name)))
 
-(def fake-deployment-info {:runUUID   "xxxx-deployment-uuid"
-                           :component "machine.1"
+(def fake-deployment-info {:runUUID     "xxxx-deployment-uuid"
+                           :component   "machine.1"
                            :contentType "application/gzip"})
 
 (deftest lifecycle

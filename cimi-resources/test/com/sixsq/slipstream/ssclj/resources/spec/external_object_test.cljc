@@ -1,9 +1,10 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.external-object-test
-  (:require [clojure.test :refer [deftest is]]
-            [clojure.spec.alpha :as s]
-            [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
-            [com.sixsq.slipstream.ssclj.resources.spec.external-object-template :as eot]
-            [com.sixsq.slipstream.ssclj.util.spec :as su]))
+  (:require
+    [clojure.test :refer [deftest is]]
+    [clojure.spec.alpha :as s]
+    [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
+    [com.sixsq.slipstream.ssclj.resources.spec.external-object-template :as eot]
+    [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 
 (s/def :cimi.test/externalObject (su/only-keys-maps eot/resource-keys-spec))
@@ -27,7 +28,6 @@
               :state       "new"
               :contentType "text/html; charset=utf-8"}]
 
-
     (is (s/valid? :cimi.test/externalObject root))
 
     ;; mandatory keywords
@@ -37,4 +37,3 @@
     ;; optional keywords
     (doseq [k #{:contentType}]
       (is (s/valid? :cimi.test/externalObject (dissoc root k))))))
-

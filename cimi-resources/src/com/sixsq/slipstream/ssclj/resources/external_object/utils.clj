@@ -7,9 +7,11 @@
     (com.amazonaws.auth BasicAWSCredentials AWSStaticCredentialsProvider)
     (com.amazonaws.services.s3 AmazonS3ClientBuilder)
     (com.amazonaws.services.s3.model GeneratePresignedUrlRequest DeleteObjectRequest)
-    (com.amazonaws.regions Regions)
     (com.amazonaws.client.builder AwsClientBuilder$EndpointConfiguration)
     (com.amazonaws HttpMethod)))
+
+
+(def ^:const default-ttl 15)
 
 
 (defn get-s3-client
@@ -49,7 +51,6 @@
         (.withCredentials (AWSStaticCredentialsProvider. credentials))
         .build)))
 
-(def ^:const default-ttl 15)
 
 (defn generate-url
   ([bucket key] (generate-url bucket key :get))
@@ -69,6 +70,7 @@
        (.generatePresignedUrl
          (get-s3-client)
          generate-presigned-url-request)))))
+
 
 (defn delete-s3-object [bucket key]
   (let [deleteRequest (DeleteObjectRequest. bucket key)]

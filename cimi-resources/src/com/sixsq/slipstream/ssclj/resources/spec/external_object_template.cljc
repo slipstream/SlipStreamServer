@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.external-object-template
-    (:require
-      [clojure.spec.alpha :as s]
-      [com.sixsq.slipstream.ssclj.util.spec :as su]
-      [com.sixsq.slipstream.ssclj.resources.spec.common :as c]))
+  (:require
+    [clojure.spec.alpha :as s]
+    [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [com.sixsq.slipstream.ssclj.resources.spec.common :as c]))
 
 ;; All external object resources must have a 'type' attribute.
 (s/def :cimi.external-object-template/objectType :cimi.core/identifier)
