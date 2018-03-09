@@ -49,26 +49,29 @@
         (.withCredentials (AWSStaticCredentialsProvider. credentials))
         .build)))
 
-(def ^:const default-content-type "text/plain;charset=UTF-8")
 (def ^:const default-ttl 15)
 
 (defn generate-url
   ([bucket key] (generate-url bucket key :get))
   ([bucket key verb] (generate-url bucket key verb default-ttl))
-  ([bucket key verb mn] (generate-url bucket key verb mn default-content-type))
+  ([bucket key verb mn] (generate-url bucket key verb mn nil))
   ([bucket key verb mn contentType]
    (let [expiration (tc/to-date (-> mn t/minutes t/from-now))
-         generate-presigned-url-request (doto (GeneratePresignedUrlRequest. bucket key)
-                                          (.setMethod (if (= verb :put)
-                                                        HttpMethod/PUT
-                                                        HttpMethod/GET))
-                                          (.setExpiration expiration)
-                                          (.setContentType contentType))]
-     (.toString (.generatePresignedUrl (get-s3-client) generate-presigned-url-request)))))
+         req (doto (GeneratePresignedUrlRequest. bucket key)
+               (.setMethod (if (= verb :put)
+                             HttpMethod/PUT
+                             HttpMethod/GET))
+               (.setExpiration expiration))
+         generate-presigned-url-request (if contentType
+                                          (doto req (.setContentType contentType))
+                                          req)]
+     (str
+       (.generatePresignedUrl
+         (get-s3-client)
+         generate-presigned-url-request)))))
 
 (defn delete-s3-object [bucket key]
-  (let [ deleteRequest (DeleteObjectRequest. bucket key)]
+  (let [deleteRequest (DeleteObjectRequest. bucket key)]
     (.deleteObject (get-s3-client) deleteRequest)))
-
 
 

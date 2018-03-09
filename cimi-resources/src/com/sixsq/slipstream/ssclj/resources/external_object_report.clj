@@ -53,7 +53,7 @@
     (if (= state eo/state-new)
       (do
         (log/info "Requesting upload url for report:" report-id)
-        (s3/generate-url report-bucket report-id :put (or ttl s3/default-ttl) (or contentType s3/default-content-type)))
+        (s3/generate-url report-bucket report-id :put (or ttl s3/default-ttl) contentType)) ;;contentType can safely be nil
       (logu/log-and-throw-400 "Report object is not in new state to be uploaded!"))))
 
 
