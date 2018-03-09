@@ -21,11 +21,7 @@ package com.sixsq.slipstream.run;
  */
 
 import com.sixsq.slipstream.configuration.Configuration;
-import com.sixsq.slipstream.exceptions.AbortException;
-import com.sixsq.slipstream.exceptions.NotFoundException;
-import com.sixsq.slipstream.exceptions.SlipStreamClientException;
-import com.sixsq.slipstream.exceptions.SlipStreamException;
-import com.sixsq.slipstream.exceptions.ValidationException;
+import com.sixsq.slipstream.exceptions.*;
 import com.sixsq.slipstream.factory.DeploymentFactory;
 import com.sixsq.slipstream.persistence.DeploymentModule;
 import com.sixsq.slipstream.persistence.Node;
@@ -135,6 +131,12 @@ public class RunNodeResource extends RunBaseResource {
 			transaction.begin();
 
 			int noOfInst = getNumberOfInstancesToAdd(new Form(entity));
+
+			if (Quota.deploymentLimitsEnabled()) {
+				if (noOfInst > 100) {
+					throw new QuotaException("Limit exceeded. Maximum 100 VMs per scale action.");
+				}
+			}
 
 			Node node = getNode(run, nodename);
 			for (int i = 0; i < noOfInst; i++) {

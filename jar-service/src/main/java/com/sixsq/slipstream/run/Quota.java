@@ -43,6 +43,10 @@ public class Quota {
 
 	private static java.util.logging.Logger logger = Logger.getLogger(ServiceOffersUtil.class.getName());
 
+	public static boolean deploymentLimitsEnabled() {
+		return ! "true".equals(System.getProperty("ignore.deployment.limits", "").toLowerCase());
+	}
+
 	public static void validate(User user, Run run, String roles)
 			throws ValidationException, QuotaException {
 		Map<String, Integer> request = run.getCloudServiceUsage();
@@ -55,6 +59,13 @@ public class Quota {
 	}
 
 	private static void validate(User user, String roles, Run run) throws QuotaException {
+
+		if (deploymentLimitsEnabled()) {
+			int nbVms = run.getNodeInstanceNamesList().size();
+			if (nbVms > 300) {
+				throw new QuotaException("Limit exceeded. Maximum 300 VMs per deployment.");
+			}
+		}
 
 		int nbVms = 0;
 		int nbCpu = 0;
