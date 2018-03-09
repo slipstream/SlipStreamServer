@@ -16,7 +16,7 @@
 (s/def :cimi.user/href string?)
 (s/def :cimi.user/password :cimi.core/nonblank-string)
 (s/def :cimi.user/roles string?)
-(s/def :cimi.user/state #{"NEW" "ACTIVE" "DELETED"})
+(s/def :cimi.user/state #{"NEW" "ACTIVE" "DELETED" "SUSPENDED"})
 (s/def :cimi.user/creation :cimi.core/timestamp)
 (s/def :cimi.user/lastOnline :cimi.core/timestamp)
 (s/def :cimi.user/lastExecute :cimi.core/timestamp)
