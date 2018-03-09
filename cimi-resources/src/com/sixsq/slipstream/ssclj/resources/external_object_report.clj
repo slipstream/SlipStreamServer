@@ -29,7 +29,6 @@
 
 ;; S3 pre-signed-URLs
 (def ^:const report-bucket "slipstream-reports")            ;;single bucket containing reports, must exist
-(def ^:const default-ttl 15)                                ;; presigned URL time in mn before expiration
 
 ;;
 ;; multimethods for validation
@@ -49,12 +48,12 @@
 
 ;; Upload URL request operation
 (defn upload-fn
-  [{:keys [id state] :as resource} {{ttl :ttl} :body :as request}]
+  [{:keys [id state contentType] :as resource} {{ttl :ttl} :body :as request}]
   (let [report-id (cu/document-id id)]
     (if (= state eo/state-new)
       (do
         (log/info "Requesting upload url for report:" report-id)
-        (s3/generate-url report-bucket report-id (or ttl default-ttl) true))
+        (s3/generate-url report-bucket report-id :put (or ttl s3/default-ttl) contentType)) ;;contentType can safely be nil
       (logu/log-and-throw-400 "Report object is not in new state to be uploaded!"))))
 
 
@@ -77,7 +76,7 @@
     (if (= state eo/state-ready)
       (do
         (log/info "Requesting download url for report : " report-id)
-        (s3/generate-url report-bucket report-id (or ttl default-ttl)))
+        (s3/generate-url report-bucket report-id :get (or ttl s3/default-ttl)))
       (logu/log-and-throw-400 "Report object is not in ready state to be downloaded!"))))
 
 
