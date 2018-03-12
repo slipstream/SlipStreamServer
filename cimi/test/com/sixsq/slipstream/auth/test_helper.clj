@@ -6,15 +6,15 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.user :as ur]
     [com.sixsq.slipstream.ssclj.resources.user-template :as ct]
-    [com.sixsq.slipstream.ssclj.resources.user-template-auto :as auto]
+    [com.sixsq.slipstream.ssclj.resources.user-template-direct :as direct]
     [com.sixsq.slipstream.auth.internal :as ia]))
 
 (def rname ur/resource-url)
-(def req-u-name "unknown")
-(def req-u-role "ANON")
+(def req-u-name "internal")
+(def req-u-role "ADMIN")
 (def req-template {:userTemplate
-                   {:href (str ct/resource-url "/" auto/registration-method)
-                    :method "auto"}})
+                   {:href (str ct/resource-url "/" direct/registration-method)
+                    :method "direct"}})
 (def request-base {:identity     {:current req-u-name
                                   :authentications
                                            {req-u-name {:roles    #{req-u-role}
