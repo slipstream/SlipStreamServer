@@ -85,6 +85,7 @@ import com.sixsq.slipstream.metrics.MetricsTimer;
         @NamedQuery(name = "allRuns", query = "SELECT r FROM Run r ORDER BY r.startTime DESC"),
         @NamedQuery(name = "runWithRuntimeParameters", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.uuid = :uuid"),
         @NamedQuery(name = "oldInStatesRuns", query = "SELECT r FROM Run r WHERE r.user_ = :user AND r.lastStateChangeTime < :before AND r.state IN (:states)"),
+        @NamedQuery(name = "allOldRunsInStates", query = "SELECT r FROM Run r WHERE r.startTime < :before AND r.state IN (:states) ORDER BY r.startTime ASC"),
         @NamedQuery(name = "allInStates", query = "SELECT r FROM Run r WHERE r.state IN (:states)"),
         @NamedQuery(name = "runByInstanceId", query = "SELECT r FROM Run r JOIN FETCH r.runtimeParameters p WHERE r.user_ = :user AND p.name_ = :instanceidkey AND p.value = :instanceidvalue ORDER BY r.startTime DESC")})
 public class Run extends Parameterized<Run, RunParameter> {
@@ -470,6 +471,23 @@ public class Run extends Parameterized<Run, RunParameter> {
         EntityManager em = PersistenceUtil.createEntityManager();
         Query q = createNamedQuery(em, "allRuns");
         @SuppressWarnings("unchecked")
+        List<Run> runs = q.getResultList();
+        em.close();
+        return runs;
+    }
+
+    public static List<Run> listAllFinishedBefore(int timeoutMin) throws ConfigurationException {
+        if (timeoutMin <= 0) {
+            timeoutMin = DEFAULT_TIMEOUT;
+        }
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MINUTE, -timeoutMin);
+        Date back = calendar.getTime();
+
+        EntityManager em = PersistenceUtil.createEntityManager();
+        Query q = em.createNamedQuery("allOldRunsInStates");
+        q.setParameter("before", back);
+        q.setParameter("states", States.completed());
         List<Run> runs = q.getResultList();
         em.close();
         return runs;
