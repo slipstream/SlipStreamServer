@@ -13,7 +13,7 @@
   :plugins [[lein-parent "0.3.2"]
             [lein-environ "1.1.0"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "5.0.3"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.1.0"]
                    :inherit [:min-lein-version
                              :managed-dependencies
                              :repositories
@@ -24,7 +24,7 @@
   :pom-location "target/"
 
   :dependencies [[com.sixsq.slipstream/SlipStreamCljResources-jar ~+version+]
-                 [com.amazonaws/aws-java-sdk]
+                 [com.amazonaws/aws-java-sdk-s3]
                  [org.clojure/test.check]                   ; FIXME: Needed for spec.gen.alpha. Fix "Could not locate clojure/test/check/generators__init.class"
                  ]
 
