@@ -47,11 +47,12 @@
   (when s (str/replace s #"[^a-zA-Z0-9_-]" "_")))
 
 (defn create-user-when-missing!
-  [{:keys [authn-login] :as user-record}]
-  (let [user-name (sanitize-login-name authn-login)]
-    (if-not (db/user-exists? user-name)
-     (create-slipstream-user! (assoc user-record :authn-login user-name))
-     user-name)))
+  [{:keys [authn-login fail-on-existing?] :as user-record}]
+  (let [username (sanitize-login-name authn-login)]
+    (if-not (db/user-exists? username)
+     (create-slipstream-user! (assoc user-record :authn-login username))
+     (when-not fail-on-existing?
+       username))))
 
 (defn redirect-with-matched-user
   [authn-method external-login external-email redirect-server]

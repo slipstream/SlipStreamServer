@@ -18,7 +18,7 @@
                                 :lastname     "last"
                                 :organization "myorg"})))
   (let [user-names (db/existing-user-names)
-        user       (db/get-user (first user-names))]
+        user (db/get-user (first user-names))]
     (is (= 1 (count user-names)))
     (is (= "alpha-role, beta-role" (:roles user)))
     (is (= false (:deleted user)))
@@ -149,7 +149,7 @@
                         (db/find-username-by-authn :githublogin "joe"))))
 
 (deftest check-user-exists?
-  (let [test-username         "some-long-random-user-name-that-does-not-exist"
+  (let [test-username "some-long-random-user-name-that-does-not-exist"
         test-username-deleted (str test-username "-deleted")]
     (is (false? (db/user-exists? test-username)))
     (is (false? (db/user-exists? test-username-deleted)))
@@ -166,30 +166,32 @@
                             :lastName     "Tester"
                             :state        "DELETED"})
     (is (true? (db/user-exists? test-username)))
-    (is (false? (db/user-exists? test-username-deleted)))))
+
+    ;; users in any state exist, but should not be listed as active
+    (is (true? (db/user-exists? test-username-deleted)))
+    (is (nil? (db/get-active-user-by-name test-username-deleted)))))
 
 (deftest test-find-password-for-username
-  (let [username  "testuser"
-        password  "password"
+  (let [username "testuser"
+        password "password"
         pass-hash (ia/hash-password password)
-        user      {:username username
-                   :password password}]
+        user {:username username
+              :password password}]
     (th/add-user-for-test! user)
     (is (= pass-hash (db/find-password-for-username username)))))
 
 (deftest test-find-roles-for-username
   (let [username "testuser"
-        user     {:username    username
-                  :password    "password"
-                  :isSuperUser false}]
+        user {:username    username
+              :password    "password"
+              :isSuperUser false}]
     (th/add-user-for-test! user)
     (is (= "USER ANON" (db/find-roles-for-username username))))
 
   ; FIXME: requires direct user creation by super to be able to set isSuperUser to true
   #_(let [username "super"
-          user     {:username    username
-                    :password    "password"
-                    :isSuperUser true
-                    :roles       "alpha-role, beta-role"}]
+          user {:username    username
+                :password    "password"
+                :isSuperUser true}]
       (th/add-user-for-test! user)
-      (is (= "ADMIN USER ANON alpha-role beta-role" (db/find-roles-for-username username)))))
+      (is (= "ADMIN USER ANON" (db/find-roles-for-username username)))))
