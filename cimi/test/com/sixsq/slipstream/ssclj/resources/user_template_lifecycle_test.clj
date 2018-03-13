@@ -5,7 +5,6 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.user-template :refer :all]
     [com.sixsq.slipstream.ssclj.resources.user-template-direct :as direct]
-    [com.sixsq.slipstream.ssclj.resources.user-template-auto :as auto]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
@@ -18,8 +17,7 @@
 
 
 (deftest check-retrieve-by-id
-  (doseq [registration-method [direct/registration-method
-                               auto/registration-method]]
+  (doseq [registration-method [direct/registration-method]]
     (let [id (str resource-url "/" registration-method)
           doc (crud/retrieve-by-id id)]
       (is (= id (:id doc))))))
@@ -42,11 +40,9 @@
                     (ltu/entries resource-tag))
         ids (set (map :id entries))
         types (set (map :method entries))]
-    (is (= #{(str resource-url "/" direct/registration-method)
-             (str resource-url "/" auto/registration-method)}
+    (is (= #{(str resource-url "/" direct/registration-method)}
            ids))
-    (is (= #{direct/registration-method
-             auto/registration-method}
+    (is (= #{direct/registration-method}
            types))
 
     (doseq [entry entries]
@@ -75,28 +71,6 @@
 
         (is (crud/validate entry-body))))))
 
-;; checks that only the auto and self-registration user-templates are visible
-(deftest lifecycle-anon
-  (let [session (-> (session (ltu/ring-app))
-                    (content-type "application/json")
-                    (header authn-info-header "unknown ANON"))
-        entries (-> session
-                    (request base-uri)
-                    (ltu/body->edn)
-                    (ltu/is-status 200)
-                    (ltu/is-resource-uri collection-uri)
-                    (ltu/is-count pos?)
-                    (ltu/is-operation-absent "add")
-                    (ltu/is-operation-absent "delete")
-                    (ltu/is-operation-absent "edit")
-                    (ltu/is-operation-absent "describe")
-                    (ltu/entries resource-tag))
-        ids (set (map :id entries))
-        types (set (map :method entries))]
-    (is (= #{(str resource-url "/" auto/registration-method)}
-           ids))
-    (is (= #{auto/registration-method}
-           types))))
 
 (deftest bad-methods
   (let [resource-uri (str p/service-context (u/new-resource-id resource-name))]
