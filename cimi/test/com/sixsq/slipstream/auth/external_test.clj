@@ -22,7 +22,7 @@
     (is (= "st" (:username created-user)))
     (is (= "user/st" (:id created-user)))
     (is (= "ACTIVE" (:state created-user)))
-    (is (= "auto" (:method created-user)))))
+    (is (= "direct" (:method created-user)))))
 
 (deftest match-new-cyclone-user-github
   (is (= [] (db/get-all-users)))
@@ -38,7 +38,7 @@
     (is (= "st" (:username created-user)))
     (is (= "user/st" (:id created-user)))
     (is (= "ACTIVE" (:state created-user)))
-    (is (= "auto" (:method created-user)))))
+    (is (= "direct" (:method created-user)))))
 
 (deftest match-existing-user
   (th/add-user-for-test! {:username     "joe"

@@ -147,7 +147,7 @@
   [{:keys [authn-login email authn-method firstname lastname roles organization
            state]}]
   (let [slipstream-username (name-no-collision authn-login (existing-user-names))
-        user-resource (cond-> {:href         "user-template/auto"
+        user-resource (cond-> {:href         "user-template/direct"
                                :username     slipstream-username
                                :emailAddress email
                                :password     (random-password)
@@ -159,11 +159,11 @@
                               lastname (assoc :lastName lastname)
                               roles (assoc :roles roles)
                               organization (assoc :organization organization))]
-    {:identity     {:current "unknown"
+    {:identity     {:current "internal"
                     :authentications
-                             {"unknown" {:roles #{"ANON"}, :identity "unknown"}}}
+                             {"internal" {:roles #{"ADMIN"}, :identity "internal"}}}
      :sixsq.slipstream.authn/claims
-                   {:username "unknown", :roles "ANON"}
+                   {:username "internal", :roles "ADMIN"}
      :params       {:resource-name "user"}
      :route-params {:resource-name "user"}
      :user-roles   #{"ANON"}
