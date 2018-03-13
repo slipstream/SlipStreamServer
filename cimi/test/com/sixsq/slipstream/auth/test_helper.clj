@@ -9,12 +9,21 @@
     [com.sixsq.slipstream.ssclj.resources.user-template-direct :as direct]
     [com.sixsq.slipstream.auth.internal :as ia]))
 
+
 (def rname ur/resource-url)
+
+
 (def req-u-name "internal")
+
+
 (def req-u-role "ADMIN")
+
+
 (def req-template {:userTemplate
                    {:href (str ct/resource-url "/" direct/registration-method)
                     :method "direct"}})
+
+
 (def request-base {:identity     {:current req-u-name
                                   :authentications
                                            {req-u-name {:roles    #{req-u-role}
@@ -29,8 +38,9 @@
 
 
 (defn- user-request
-  [{:keys [password] :as user}]
-  (->> (assoc user :password (ia/hash-password password))
+  [{:keys [password state] :as user}]
+  (->> (assoc user :password (ia/hash-password password)
+                   :state (or state "ACTIVE"))
        (update-in request-base [:body :userTemplate] merge)))
 
 
@@ -45,4 +55,3 @@
   (clojure.pprint/pprint
     (esu/dump esb/*client* esb/index-name type))
   (println (apply str (repeat 20 "-"))))
-

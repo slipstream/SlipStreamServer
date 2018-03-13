@@ -76,19 +76,19 @@
 ;; probably an explicit refresh of the ES index is required
 ;;
 #_(deftest match-existing-deleted-user
-  (th/add-user-for-test! {:username     "st"
-                          :password     "secret"
-                          :emailAddress "st@sixsq.com"
-                          :state        "DELETED"})
-  (let [users-before-match (db/get-all-users)]
-    (is (= 1 (count users-before-match))))
-  (match-external-user! :github "st" "st@sixsq.com")
-  (let [users-after-match (db/get-all-users)
-        new-user (second users-after-match)
-        _ (with-out-str (clojure.pprint/pprint new-user))]
-    (is (= 2 (count users-after-match)))
-    (is (= "st" (:githublogin new-user)))
-    (is (= "st_1" (:username new-user)))))
+    (th/add-user-for-test! {:username     "st"
+                            :password     "secret"
+                            :emailAddress "st@sixsq.com"
+                            :state        "DELETED"})
+    (let [users-before-match (db/get-all-users)]
+      (is (= 1 (count users-before-match))))
+    (match-external-user! :github "st" "st@sixsq.com")
+    (let [users-after-match (db/get-all-users)
+          new-user (second users-after-match)
+          _ (with-out-str (clojure.pprint/pprint new-user))]
+      (is (= 2 (count users-after-match)))
+      (is (= "st" (:githublogin new-user)))
+      (is (= "st_1" (:username new-user)))))
 
 (deftest oidc-user-names
   (let [users (db/get-active-users)]
@@ -132,9 +132,11 @@
         user-params (db/get-all-user-params)]
     (is (= 3 (count users)))
     (is (= 2 (count user-params))))
+
   (is (nil? (create-user-when-missing! {:authn-login       "deleted"
                                         :email             "ok@example.com"
                                         :fail-on-existing? true})))
+
   (let [users (db/get-all-users)
         user-params (db/get-all-user-params)]
     (is (= 3 (count users)))

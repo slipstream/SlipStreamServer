@@ -8,13 +8,8 @@
     (java.util UUID)
     (clojure.lang ExceptionInfo)))
 
-(defn in?
-  "true if coll contains elm"
-  [coll elm]
-  (if (some #(= elm %) coll) true false))
-
-(def ^:private active-user ["NEW" "ACTIVE"])
-(def ^:private active-user-filter "(state='NEW' or state='ACTIVE')")
+;; Only ACTIVE users can log in.  All other states (NEW, SUSPENDED, and DELETED) are disallowed
+(def ^:private active-user-filter "(state='ACTIVE')")
 
 (def resource-name "user")
 
@@ -85,10 +80,14 @@
            (catch ExceptionInfo _ {})))))
 
 (defn user-exists?
-  "Verifies that a user with the given username exists in the database and
-   that the account is active."
+  "Verifies that a user with the given username exists in the database no
+   matter what the user state is."
   [username]
-  (in? active-user (:state (get-active-user-by-name username))))
+  (-> username
+      get-user
+      :state
+      nil?
+      not))
 
 (defn- to-resource-id
   [n]
