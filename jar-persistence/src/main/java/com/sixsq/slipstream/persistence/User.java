@@ -826,7 +826,7 @@ public class User extends Metadata {
 
         public UserTemplate(User user) {
             userTemplate = user;
-            userTemplate.href = "user-template/auto";
+            userTemplate.href = "user-template/direct";
         }
     }
 

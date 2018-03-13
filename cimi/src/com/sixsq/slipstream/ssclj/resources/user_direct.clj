@@ -1,5 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.user-direct
   (:require
+    [com.sixsq.slipstream.auth.internal :as ia]
     [com.sixsq.slipstream.ssclj.resources.spec.user]
     [com.sixsq.slipstream.ssclj.resources.spec.user-template-direct]
     [com.sixsq.slipstream.ssclj.resources.user :as p]
@@ -17,12 +18,9 @@
 
 ;;
 ;; transform template into user resource
-;; just strips method attribute and updates the resource URI
+;; just updates the resource URI and sets isSuperUser if not set
 ;;
 (defmethod p/tpl->user tpl/registration-method
-  [resource request]
-  (let [res (assoc resource :resourceURI p/resource-uri)]
-    (if (contains? res :isSuperUser)
-      res
-      (assoc res :isSuperUser false))))
-
+  [{:keys [isSuperUser] :as resource} request]
+  (cond-> (assoc resource :resourceURI p/resource-uri)
+          (nil? isSuperUser) (assoc :isSuperUser false)))

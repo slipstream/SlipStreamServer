@@ -29,11 +29,9 @@
 
 
 (defn- user-request
-  [user]
-  (let [with-hashed-pass (assoc user :password (ia/hash-password (:password user)))
-        request          (update-in request-base [:body :userTemplate] merge
-                                    with-hashed-pass)]
-    request))
+  [{:keys [password] :as user}]
+  (->> (assoc user :password (ia/hash-password password))
+       (update-in request-base [:body :userTemplate] merge)))
 
 
 (defn add-user-for-test!
