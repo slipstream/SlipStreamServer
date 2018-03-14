@@ -216,6 +216,7 @@
 
           ;; check validation of resource
           (let [abs-validation-link (str p/service-context @validation-link)]
+            (is (not (nil? @validation-link)))
             (is (re-matches #"^email.*successfully validated$" (-> session-anon
                                                                    (request abs-validation-link)
                                                                    (ltu/body->edn)

@@ -9,7 +9,7 @@
 
 (s/def :cimi.callback/action :cimi.core/nonblank-string)
 (s/def :cimi.callback/state #{"WAITING" "FAILED" "SUCCEEDED"})
-(s/def :cimi.callback/resource :cimi.common/resource-link)
+(s/def :cimi.callback/targetResource :cimi.common/resource-link)
 (s/def :cimi.callback/data (su/constrained-map keyword? any?))
 (s/def :cimi.common/expires :cimi.core/timestamp)
 
@@ -17,6 +17,6 @@
   (su/only-keys-maps c/common-attrs
                      {:req-un [:cimi.callback/action
                                :cimi.callback/state
-                               :cimi.callback/resource]
+                               :cimi.callback/targetResource]
                       :opt-un [:cimi.callback/data
                                :cimi.callback/expires]}))

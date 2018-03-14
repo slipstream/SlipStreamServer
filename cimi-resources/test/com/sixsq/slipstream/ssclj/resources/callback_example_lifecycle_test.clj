@@ -22,13 +22,13 @@
         session-anon (header session authn-info-header "unknown ANON")]
 
     ;; create a callback as an admin
-    (let [create-callback-succeeds {:action   example/action-name
-                                    :resource {:href "example/resource-x"}
-                                    :data     {:ok? true}}
+    (let [create-callback-succeeds {:action         example/action-name
+                                    :targetResource {:href "example/resource-x"}
+                                    :data           {:ok? true}}
 
-          create-callback-fails {:action   example/action-name
-                                 :resource {:href "example/resource-y"}
-                                 :data     {:ok? false}}
+          create-callback-fails {:action         example/action-name
+                                 :targetResource {:href "example/resource-y"}
+                                 :data           {:ok? false}}
 
           uri-succeeds (str p/service-context (-> session-admin
                                                   (request base-uri

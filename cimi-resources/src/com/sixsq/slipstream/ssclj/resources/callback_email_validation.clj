@@ -27,7 +27,7 @@
 
 
 (defmethod callback/execute action-name
-  [{{:keys [href]} :resource :as resource}]
+  [{{:keys [href]} :targetResource :as resource}]
   (let [{:keys [id validated?] :as email} (crud/retrieve-by-id href admin-opts)]
     (if-not validated?
       (let [msg (str id " successfully validated")]

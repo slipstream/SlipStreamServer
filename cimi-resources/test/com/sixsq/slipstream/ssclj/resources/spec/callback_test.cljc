@@ -14,17 +14,17 @@
 
 (deftest check-callback-schema
   (let [timestamp "1964-08-25T10:00:00.0Z"
-        callback {:id          (str t/resource-url "/test-callback")
-                  :resourceURI t/resource-uri
-                  :created     timestamp
-                  :updated     timestamp
-                  :acl         valid-acl
-                  :action      "validate-something"
-                  :state       "WAITING"
-                  :resource    {:href "email/1230958abdef"}
-                  :expires     timestamp
-                  :data        {:some    "value"
-                                :another "value"}}]
+        callback {:id             (str t/resource-url "/test-callback")
+                  :resourceURI    t/resource-uri
+                  :created        timestamp
+                  :updated        timestamp
+                  :acl            valid-acl
+                  :action         "validate-something"
+                  :state          "WAITING"
+                  :targetResource {:href "email/1230958abdef"}
+                  :expires        timestamp
+                  :data           {:some    "value"
+                                   :another "value"}}]
 
     (is (s/valid? :cimi/callback callback))
     (is (s/valid? :cimi/callback (assoc callback :state "SUCCEEDED")))
