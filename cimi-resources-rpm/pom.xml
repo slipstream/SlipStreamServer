@@ -177,7 +177,7 @@
             <mapping>
               <directory>${slipstream.user.home}/.credentials</directory>
               <directoryIncluded>false</directoryIncluded>
-              <filemode>600</filemode>
+              <filemode>644</filemode>
               <username>slipstream</username>
               <groupname>slipstream</groupname>
               <sources>
