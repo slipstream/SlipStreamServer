@@ -23,13 +23,13 @@
 
 (defn get-s3-client
   []
-  (let [os-conf     (object-store-config)
-        endpoint    (AwsClientBuilder$EndpointConfiguration. (:objectStoreEndpoint os-conf) "us-east-1")
-        credentials (BasicAWSCredentials. (:key os-conf)
-                                          (:secret os-conf))]
+  (let [{:keys [key secret objectStoreEndpoint]} (object-store-config)
+        endpoint (AwsClientBuilder$EndpointConfiguration. objectStoreEndpoint "us-east-1")
+        credentials (-> (BasicAWSCredentials. key secret)
+                        (AWSStaticCredentialsProvider.))]
     (-> (AmazonS3ClientBuilder/standard)
         (.withEndpointConfiguration endpoint)
-        (.withCredentials (AWSStaticCredentialsProvider. credentials))
+        (.withCredentials credentials)
         .build)))
 
 
@@ -38,12 +38,12 @@
   ([bucket key verb] (generate-url bucket key verb default-ttl))
   ([bucket key verb mn] (generate-url bucket key verb mn nil))
   ([bucket key verb mn contentType]
-   (let [expiration                     (tc/to-date (-> mn t/minutes t/from-now))
-         req                            (doto (GeneratePresignedUrlRequest. bucket key)
-                                          (.setMethod (if (= verb :put)
-                                                        HttpMethod/PUT
-                                                        HttpMethod/GET))
-                                          (.setExpiration expiration))
+   (let [expiration (tc/to-date (-> mn t/minutes t/from-now))
+         req (doto (GeneratePresignedUrlRequest. bucket key)
+               (.setMethod (if (= verb :put)
+                             HttpMethod/PUT
+                             HttpMethod/GET))
+               (.setExpiration expiration))
          generate-presigned-url-request (if contentType
                                           (doto req (.setContentType contentType))
                                           req)]
