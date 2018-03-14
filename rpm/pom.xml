@@ -20,16 +20,10 @@
       <version>${project.version}</version>
       <type>war</type>
     </dependency>
-    <dependency>
-      <groupId>com.sixsq.slipstream</groupId>
-      <artifactId>SlipStreamWebUI-dep</artifactId>
-      <version>${project.version}</version>
-      <type>pom</type>
-      <scope>provided</scope>
-    </dependency>
   </dependencies>
   <build>
     <plugins>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
@@ -112,6 +106,7 @@
 
         </executions>
       </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
@@ -132,23 +127,7 @@
               </artifactItems>
             </configuration>
           </execution>
-          <execution>
-            <id>unpack-webui</id>
-            <goals>
-              <goal>unpack</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>target</outputDirectory>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>com.sixsq.slipstream</groupId>
-                  <artifactId>SlipStreamWebUI</artifactId>
-                  <version>${project.version}</version>
-                  <type>jar</type>
-                </artifactItem>
-              </artifactItems>
-            </configuration>
-          </execution>
+
           <execution>
             <id>copy-jars</id>
             <goals>
@@ -158,6 +137,7 @@
               <outputDirectory>${project.build.directory}/dependency/jars</outputDirectory>
             </configuration>
           </execution>
+
           <execution>
             <id>copy-war</id>
             <goals>
@@ -402,17 +382,6 @@
               <sources>
                 <source>
                   <location>target/dependency/webapps/slipstream.war/static-content/themes/helixnebula/errors</location>
-                </source>
-              </sources>
-            </mapping>
-
-            <mapping>
-              <directory>${installation.dir}/webapps/slipstream.war/static-content/</directory>
-              <filemode>664</filemode>
-              <directoryIncluded>true</directoryIncluded>
-              <sources>
-                <source>
-                  <location>target/public/</location>
                 </source>
               </sources>
             </mapping>
