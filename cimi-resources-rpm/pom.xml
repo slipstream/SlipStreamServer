@@ -164,6 +164,27 @@
               </sources>
             </mapping>
 
+            <mapping>
+              <directory>${installation.dir}/.credentials</directory>
+              <directoryIncluded>true</directoryIncluded>
+              <filemode>700</filemode>
+              <username>slipstream</username>
+              <groupname>slipstream</groupname>
+            </mapping>
+
+            <mapping>
+              <directory>${installation.dir}/.credentials</directory>
+              <directoryIncluded>false</directoryIncluded>
+              <filemode>600</filemode>
+              <username>slipstream</username>
+              <groupname>slipstream</groupname>
+              <sources>
+                <source>
+                  <location>src/object-store-conf.edn</location>
+                </source>
+              </sources>
+            </mapping>
+
           </mappings>
 
         </configuration>

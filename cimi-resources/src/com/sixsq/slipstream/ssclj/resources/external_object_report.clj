@@ -26,9 +26,18 @@
 ;;
 (def ^:const desc ExternalObjectReportDescription)
 
+(def ^:dynamic *reports-bucket* nil)
 
-;; S3 pre-signed-URLs
-(def ^:const report-bucket "slipstream-reports")            ;;single bucket containing reports, must exist
+(defn set-reports-bucket!
+  [bucket-name]
+  (alter-var-root #'*reports-bucket* (constantly bucket-name)))
+
+;; single bucket containing reports, must exist
+(defn reports-bucket
+  []
+  (if-not *reports-bucket*
+    (set-reports-bucket! (:reportsBucketName (s3/object-store-config))))
+  *reports-bucket*)
 
 ;;
 ;; multimethods for validation
@@ -53,7 +62,7 @@
     (if (= state eo/state-new)
       (do
         (log/info "Requesting upload url for report:" report-id)
-        (s3/generate-url report-bucket report-id :put (or ttl s3/default-ttl) contentType)) ;;contentType can safely be nil
+        (s3/generate-url (reports-bucket) report-id :put (or ttl s3/default-ttl) contentType))
       (logu/log-and-throw-400 "Report object is not in new state to be uploaded!"))))
 
 
@@ -76,7 +85,7 @@
     (if (= state eo/state-ready)
       (do
         (log/info "Requesting download url for report : " report-id)
-        (s3/generate-url report-bucket report-id :get (or ttl s3/default-ttl)))
+        (s3/generate-url (reports-bucket) report-id :get (or ttl s3/default-ttl)))
       (logu/log-and-throw-400 "Report object is not in ready state to be downloaded!"))))
 
 
@@ -96,5 +105,5 @@
   [{id :id :as resource} {{keep? :keep-s3-object} :body :as request}]
   (let [keyname (cu/document-id id)]
     (when-not keep?
-      (s3/delete-s3-object report-bucket keyname))          ;; delete the S3 object
+      (s3/delete-s3-object (reports-bucket) keyname))         ;; delete the S3 object
     (delete-impl request)))
