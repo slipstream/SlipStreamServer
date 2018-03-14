@@ -42,7 +42,7 @@
 (defn log-response
   [status formatted-message]
   (cond
-    (<= 100 status 399) (log/debug formatted-message)
+    (<= 100 status 399) (log/info formatted-message)
     (<= 400 status 499) (log/warn formatted-message)
     (<= 500 status 599) (log/error formatted-message)
     :else (log/error formatted-message)))
@@ -56,7 +56,7 @@
   (fn [request]
     (let [start (System/currentTimeMillis)
           formatted-request (format-request request)
-          _ (log/trace formatted-request)
+          _ (log/debug formatted-request)
           {:keys [status] :as response} (handler request)
           _ (log-response status (format-response formatted-request response start (System/currentTimeMillis)))]
       response)))
