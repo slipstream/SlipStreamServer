@@ -10,7 +10,13 @@
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
-    [com.sixsq.slipstream.ssclj.resources.external-object :as eo]))
+    [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
+    [com.sixsq.slipstream.ssclj.resources.external-object-report :as eor]
+    [com.sixsq.slipstream.ssclj.resources.external-object.utils :as s3]))
+
+
+(with-redefs [s3/object-store-config (constantly "foo")]
+  @eor/reports-bucket)
 
 (use-fixtures :each ltu/with-test-server-fixture)
 
