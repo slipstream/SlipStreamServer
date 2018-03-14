@@ -23,6 +23,8 @@
 
   :pom-location "target/"
 
+  :jvm-opts ["-Xmx2000m"]
+
   :dependencies [[com.sixsq.slipstream/SlipStreamCljResources-jar ~+version+]
                  [com.amazonaws/aws-java-sdk-s3]
                  [org.clojure/test.check]                   ; FIXME: Needed for spec.gen.alpha. Fix "Could not locate clojure/test/check/generators__init.class"
