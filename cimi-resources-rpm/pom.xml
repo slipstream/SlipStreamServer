@@ -14,7 +14,9 @@
   </parent>
 
   <properties>
-    <installation.dir>/opt/slipstream/cimi</installation.dir>
+    <slipstream.installation.dir>${installation.dir}</slipstream.installation.dir>
+    <slipstream.user.home>${slipstream.installation.dir}</slipstream.user.home>
+    <cimi.installation.dir>${slipstream.base.dir}/cimi</cimi.installation.dir>
   </properties>
 
   <dependencies>
@@ -60,7 +62,7 @@
                         <fileSets>
                           <fileSet>
                             <directory>target/dependency/lib</directory>
-                            <outputDirectory>${installation.dir}/lib</outputDirectory>
+                            <outputDirectory>${cimi.installation.dir}/lib</outputDirectory>
                             <includes>
                               <include>*</include>
                             </includes>
@@ -72,13 +74,13 @@
                       <runCmd>apk update</runCmd>
                       <runCmd>apk add openssl openssh shadow</runCmd>
                       <runCmd>/usr/sbin/groupadd -r slipstream</runCmd>
-                      <runCmd>/usr/sbin/useradd -r -d ${installation.dir} -g slipstream slipstream</runCmd>
-                      <runCmd>mkdir -p /opt/slipstream/server/.ssh</runCmd>
-                      <runCmd>chmod 700 /opt/slipstream/server/.ssh</runCmd>
-                      <runCmd>ssh-keygen -q -f /opt/slipstream/server/.ssh/id_rsa -N ""</runCmd>
-                      <runCmd>chown -R slipstream.slipstream /opt/slipstream/server/.ssh</runCmd>
+                      <runCmd>/usr/sbin/useradd -r -d ${slipstream.user.home} -g slipstream slipstream</runCmd>
+                      <runCmd>mkdir -p ${slipstream.user.home}/.ssh</runCmd>
+                      <runCmd>chmod 700 ${slipstream.user.home}/.ssh</runCmd>
+                      <runCmd>ssh-keygen -q -f ${slipstream.user.home}/.ssh/id_rsa -N ""</runCmd>
+                      <runCmd>chown -R slipstream.slipstream ${slipstream.user.home}/.ssh</runCmd>
                     </runCmds>
-                    <workdir>${installation.dir}</workdir>
+                    <workdir>${cimi.installation.dir}</workdir>
                     <cmd>tail -f /dev/null</cmd>
                   </build>
                 </image>
@@ -155,7 +157,7 @@
           <mappings>
 
             <mapping>
-              <directory>${installation.dir}/lib</directory>
+              <directory>${cimi.installation.dir}/lib</directory>
               <directoryIncluded>false</directoryIncluded>
               <sources>
                 <source>
@@ -165,7 +167,7 @@
             </mapping>
 
             <mapping>
-              <directory>${installation.dir}/.credentials</directory>
+              <directory>${slipstream.user.home}/.credentials</directory>
               <directoryIncluded>true</directoryIncluded>
               <filemode>700</filemode>
               <username>slipstream</username>
@@ -173,14 +175,14 @@
             </mapping>
 
             <mapping>
-              <directory>${installation.dir}/.credentials</directory>
+              <directory>${slipstream.user.home}/.credentials</directory>
               <directoryIncluded>false</directoryIncluded>
               <filemode>600</filemode>
               <username>slipstream</username>
               <groupname>slipstream</groupname>
               <sources>
                 <source>
-                  <location>src/object-store-conf.edn</location>
+                  <location>src/object-store-conf.edn.tmpl</location>
                 </source>
               </sources>
             </mapping>
