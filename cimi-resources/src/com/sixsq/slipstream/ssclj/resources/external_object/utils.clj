@@ -19,7 +19,7 @@
       System/getProperty
       (str "/.credentials/object-store-conf.edn")
       slurp
-      (edn/read-string)))
+      edn/read-string))
 
 (defn get-s3-client
   []
