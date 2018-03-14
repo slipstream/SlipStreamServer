@@ -26,8 +26,10 @@
 ;;
 (def ^:const desc ExternalObjectReportDescription)
 
+(def ^:const reports-bucket-default "slipstream-reports")
+
 ;; single bucket containing reports, must exist
-(def reports-bucket (delay (:reportsBucketName (s3/object-store-config))))
+(def reports-bucket (delay (get (s3/object-store-config) :reportsBucketName reports-bucket-default)))
 
 ;;
 ;; multimethods for validation
