@@ -29,7 +29,7 @@
 
 
 (defmethod callback/execute action-name
-  [{{:keys [href]} :resource :as resource}]
+  [{{:keys [href]} :targetResource :as resource}]
   (let [{:keys [id state] :as user} (crud/retrieve-by-id href admin-opts)]
     (if (= "NEW" state)
       (let [msg (str "email for " id " successfully validated")]

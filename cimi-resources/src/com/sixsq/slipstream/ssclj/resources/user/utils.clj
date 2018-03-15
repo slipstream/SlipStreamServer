@@ -25,8 +25,8 @@
 ;; FIXME: Fix ugliness around needing to create ring requests with authentication!
 (defn create-callback [user-id baseURI]
   (let [callback-request {:params   {:resource-name callback/resource-url}
-                          :body     {:action   user-email-callback/action-name
-                                     :resource {:href user-id}}
+                          :body     {:action         user-email-callback/action-name
+                                     :targetResource {:href user-id}}
                           :identity {:current         "INTERNAL"
                                      :authentications {"INTERNAL" {:identity "INTERNAL"
                                                                    :roles    ["ADMIN"]}}}}
