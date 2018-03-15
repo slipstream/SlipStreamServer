@@ -112,7 +112,7 @@ services:
     volumes:
      - ringcontainer:/opt/slipstream/ring-container
      - ringcontainerexample:/opt/slipstream/ring-example
-     - resources:/opt/slipstream/cimi/lib
+     - resources:/opt/slipstream/cimi/extra-resources
   cimi-resources:
     image: sixsq/cimi-resources:3.47-SNAPSHOT
     volumes:
