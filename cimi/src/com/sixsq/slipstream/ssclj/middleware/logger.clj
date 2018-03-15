@@ -39,6 +39,14 @@
     (display-elapsed-time-millis start current-time-millis)
     formatted-request))
 
+(defn log-response
+  [status formatted-message]
+  (cond
+    (<= 100 status 399) (log/info formatted-message)
+    (<= 400 status 499) (log/warn formatted-message)
+    (<= 500 status 599) (log/error formatted-message)
+    :else (log/error formatted-message)))
+
 (defn wrap-logger
   "Logs both request and response e.g:
   2016-02-02 11:32:19,310 INFO  - GET /vms [no-authn-info] ?cloud=&offset=0&limit=20&moduleResourceUri=&activeOnly=1 no-body
@@ -48,7 +56,7 @@
   (fn [request]
     (let [start (System/currentTimeMillis)
           formatted-request (format-request request)
-          _ (log/info formatted-request)
-          response (handler request)
-          _ (log/info (format-response formatted-request response start (System/currentTimeMillis)))]
+          _ (log/debug formatted-request)
+          {:keys [status] :as response} (handler request)
+          _ (log-response status (format-response formatted-request response start (System/currentTimeMillis)))]
       response)))
