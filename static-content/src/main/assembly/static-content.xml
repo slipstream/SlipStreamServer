@@ -20,6 +20,7 @@
         <include>themes/**/*</include>
         <include>errors/**/*</include>
         <include>/terms.html</include>
+        <include>/webui.html</include>
       </includes>
     </fileSet>
   </fileSets>

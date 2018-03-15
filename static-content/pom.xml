@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>SlipStreamServer-ui-static-content</artifactId>
@@ -11,12 +12,19 @@
     <artifactId>SlipStreamServer</artifactId>
     <version>3.48-SNAPSHOT</version>
   </parent>
-  
+
   <dependencies>
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
       <artifactId>SlipStreamUI-dep</artifactId>
       <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamWebUI-dep</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 
@@ -26,7 +34,7 @@
 
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
-        
+
         <executions>
           <execution>
             <id>copy-common</id>
@@ -34,7 +42,7 @@
               <goal>unpack</goal>
             </goals>
             <configuration>
-              <outputDirectory>target/results</outputDirectory>
+              <outputDirectory>${project.build.directory}/results</outputDirectory>
               <artifactItems>
                 <artifactItem>
                   <groupId>com.sixsq.slipstream</groupId>
@@ -44,29 +52,71 @@
               </artifactItems>
             </configuration>
           </execution>
+
+          <execution>
+            <id>unpack-webui</id>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <includes>public/**</includes>
+              <outputDirectory>${project.build.directory}/dependency/webui</outputDirectory>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>com.sixsq.slipstream</groupId>
+                  <artifactId>SlipStreamWebUI</artifactId>
+                  <version>${project.version}</version>
+                  <type>jar</type>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
 
       <plugin>
-	<artifactId>maven-assembly-plugin</artifactId>
-	
-	<executions>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-webui</id>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <phase>process-resources</phase>
+            <configuration>
+              <outputDirectory>${project.build.directory}/results/static_content/</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${project.build.directory}/dependency/webui/public</directory>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
-	  <execution>
-	    <id>static-content</id>
-	    <goals>
-	      <goal>single</goal>
-	    </goals>
-	    <phase>package</phase>
-	    <configuration>
-	      <appendAssemblyId>false</appendAssemblyId>
-	      <descriptors>
-		<descriptor>${basedir}/src/main/assembly/static-content.xml</descriptor>
-	      </descriptors>
-	    </configuration>
-	  </execution>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
 
-	</executions>
+        <executions>
+
+          <execution>
+            <id>static-content</id>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <appendAssemblyId>false</appendAssemblyId>
+              <descriptors>
+                <descriptor>${basedir}/src/main/assembly/static-content.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </execution>
+
+        </executions>
       </plugin>
 
     </plugins>
