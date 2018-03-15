@@ -105,7 +105,8 @@
       (log/warn "index" index "not found, returning empty search result")
       {})
     (catch SearchPhaseExecutionException spee
-      (log/warn "search failed:" (.getMessage spee) ", returning empty search result")
+      (log/warn "search failed on" index "for" type "with parameters" cimi-params
+                ", returning empty search result; message:" (.getMessage spee))
       {})))
 
 ;;
