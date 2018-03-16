@@ -173,7 +173,7 @@
                       <port>8201</port>
                     </ports>
                     <workdir>${installation.dir}</workdir>
-                    <cmd>sh ${installation.dir}/bin/generate-auth-keys.sh &amp;&amp; /usr/bin/java -Dconfig.name=db.spec -Dlogfile.path=production -cp "/opt/slipstream/ring-container/lib/*:resources:lib/*" sixsq.slipstream.server.ring_container</cmd>
+                    <cmd>sh ${installation.dir}/bin/generate-auth-keys.sh &amp;&amp; /usr/bin/java -Dconfig.name=db.spec -Dlogfile.path=production -cp "/opt/slipstream/ring-container/lib/*:resources:lib/*:extra-resources/*" sixsq.slipstream.server.ring_container</cmd>
                   </build>
                 </image>
               </images>
