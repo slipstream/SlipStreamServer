@@ -8,13 +8,15 @@ containers.
 Ensure that [Docker](https://www.docker.com/) and [Docker
 Compose](https://docs.docker.com/compose/) installed.
 
-Make sure that you've allocated enough memory to Docker; 4-6 GB of
-memory should be sufficient.
+Make sure that you've allocated enough memory to Docker. If you're
+using Elasticsearch for persistent storage, you will need 4-6 GB of
+memory allocated to Docker..
 
 ## Prepare Directory
 
-Create the directory structure you find in the [directory](https://github.com/slipstream/SlipStreamServer/tree/master/cimi-deployment) hosting
-this README file.  Copy the files you also find there.
+Create the directory structure you find in the
+[directory](https://github.com/slipstream/SlipStreamServer/tree/master/cimi-deployment)
+hosting this README file.  Copy the files you also find there.
 
 If you've cloned this repository, you can use the `cimi-deployment`
 directory in your workspace.
