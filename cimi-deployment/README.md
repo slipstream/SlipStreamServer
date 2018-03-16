@@ -72,5 +72,5 @@ certificates, if you used the self-signed certificates for the server.
 
 ## Terminate Service
 
-To terminate everything, run `docker-compose down` from the root
+To terminate everything, `ctrl+c` and run `docker-compose down -v` from the root
 directory.
