@@ -33,7 +33,13 @@ certificates provided by Let's Encrypt.
 
 For **self-signed certificates**, copy
 `components/traefik/cert/traefik-self-signed.toml` to
-`components/traefik/cert/traefik.toml`.
+`components/traefik/cert/traefik.toml`. Then generate a certificate:
+
+```
+$ (cd components/traefik/cert && openssl req  -nodes -new -x509  -keyout server.pem -out server.crt)
+```
+
+You'll need to provide values for some of the requested fields.
 
 For **Let's Encrypt certificates**, copy
 `components/traefik/cert/traefik-lets-encrypt.toml` to
