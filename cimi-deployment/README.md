@@ -13,8 +13,7 @@ memory should be sufficient.
 
 ## Prepare Directory
 
-Create the directory structure you find in the [directory
-hosting](https://github.com/slipstream/SlipStreamServer/tree/master/cimi-deployment)
+Create the directory structure you find in the [directory](https://github.com/slipstream/SlipStreamServer/tree/master/cimi-deployment) hosting
 this README file.  Copy the files you also find there.
 
 If you've cloned this repository, you can use the `cimi-deployment`
