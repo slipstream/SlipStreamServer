@@ -31,14 +31,14 @@ services:
     ports:
      - "5601:5601"
   rc:
-    image: sixsq/ring-container:3.47-SNAPSHOT
+    image: sixsq/ring-container:${SLIPSTREAM_VERSION}
     ports:
      - "5000:5000"
     volumes:
      - ringcontainer:/opt/slipstream/ring-container
      - ringcontainerexample:/opt/slipstream/ring-example
   cimi:
-    image: sixsq/cimi:3.47-SNAPSHOT
+    image: sixsq/cimi:${SLIPSTREAM_VERSION}
     ports:
      - "8201:8201"
     labels:
@@ -50,7 +50,7 @@ services:
      - ringcontainerexample:/opt/slipstream/ring-example
      - resources:/opt/slipstream/cimi/extra-resources
   cimi-resources:
-    image: sixsq/cimi-resources:3.47-SNAPSHOT
+    image: sixsq/cimi-resources:${SLIPSTREAM_VERSION}
     volumes:
      - resources:/opt/slipstream/cimi/lib
 
