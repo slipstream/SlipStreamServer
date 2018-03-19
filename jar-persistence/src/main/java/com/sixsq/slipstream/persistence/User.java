@@ -626,7 +626,9 @@ public class User extends Metadata {
         if (null == user) {
             return params;
         }
-        params.putAll(loadCloudCredentials(user));
+        if (! user.isSuper()) {
+            params.putAll(loadCloudCredentials(user));
+        }
 //        params.putAll(loadSshCredentials(user));
         params.putAll(loadGeneralParameters(user));
         return params;
