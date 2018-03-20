@@ -3,11 +3,11 @@
     [clojure.test :refer [deftest is]]
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
-    [com.sixsq.slipstream.ssclj.resources.spec.external-object-template :as eot]
+    [com.sixsq.slipstream.ssclj.resources.spec.external-object-template :as eots]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 
-(s/def :cimi.test/externalObject (su/only-keys-maps eot/resource-keys-spec))
+(s/def :cimi.test/external-object (su/only-keys-maps eots/resource-keys-spec))
 
 
 (def valid-acl {:owner {:principal "ADMIN"
@@ -24,16 +24,16 @@
               :created     timestamp
               :updated     timestamp
               :acl         valid-acl
-              :objectType  "report"
+              :objectType  "alpha"
               :state       "new"
               :contentType "text/html; charset=utf-8"}]
 
-    (is (s/valid? :cimi.test/externalObject root))
+    (is (s/valid? :cimi.test/external-object root))
 
     ;; mandatory keywords
     (doseq [k #{:objectType :id :resourceURI :state}]
-      (is (not (s/valid? :cimi.test/externalObject (dissoc root k)))))
+      (is (not (s/valid? :cimi.test/external-object (dissoc root k)))))
 
     ;; optional keywords
     (doseq [k #{:contentType}]
-      (is (s/valid? :cimi.test/externalObject (dissoc root k))))))
+      (is (s/valid? :cimi.test/external-object (dissoc root k))))))

@@ -1,8 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.connector-template
   (:require
     [clojure.spec.alpha :as s]
-    [clojure.spec.gen.alpha :as gen]
-    [clojure.string :as str]
     [com.sixsq.slipstream.ssclj.util.spec :as su]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]))
 
@@ -21,6 +19,7 @@
 ;; Common parameters, but which are not used by all.
 ;; Add these to the connector schema as necessary.
 (s/def :cimi.connector-template/endpoint string?)
+(s/def :cimi.connector-template/objectStoreEndpoint string?)
 (s/def :cimi.connector-template/nativeContextualization :cimi.core/nonblank-string)
 (s/def :cimi.connector-template/orchestratorSSHUsername string?)
 (s/def :cimi.connector-template/orchestratorSSHPassword string?)

@@ -227,6 +227,25 @@
   :readOnly false
   :order 43}
 
- }
+ :reportsObjectStoreBucketName
+ {:displayName "slipstream.report.objectstore.bucket.name"
+  :type "Text"
+  :category "SlipStream_Advanced"
+  :description "Reports bucket name on Object Store"
+  :instructions "Selected name should be unique for the Object Store or bucket should already exist."
+  :mandatory true
+  :readOnly false
+  :order 44}
+
+ :reportsObjectStoreCreds
+ {:displayName "slipstream.report.objectstore.creds"
+  :type "Text"
+  :category "SlipStream_Advanced"
+  :description "Object store credentials."
+  :instructions "Existing credential resource ID in the form credntial/<uuid>."
+  :mandatory true
+  :readOnly false
+  :order 45}
+}
 
 

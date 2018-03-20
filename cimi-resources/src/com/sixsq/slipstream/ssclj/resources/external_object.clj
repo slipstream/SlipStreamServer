@@ -1,10 +1,17 @@
 (ns com.sixsq.slipstream.ssclj.resources.external-object
   (:require
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.acl :as a]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud])
+    [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.external-object.utils :as s3]
+    [com.sixsq.slipstream.ssclj.util.log :as logu]
+    [com.sixsq.slipstream.util.response :as r]
+    )
   (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-tag :externalObjects)
@@ -102,14 +109,14 @@
 
 (defn standard-external-object-resource-operations
   [{:keys [id state] :as resource} request]
-  (let [viewable? (a/authorized-view? resource request)
+  (let [viewable?   (a/authorized-view? resource request)
         modifiable? (a/authorized-modify? resource request)
-        new? (= state-new state)
-        ready? (= state-ready state)
-        ops (cond-> []
-                    modifiable? (conj {:rel (:delete c/action-uri) :href id})
-                    (and new? modifiable?) (conj {:rel (:upload c/action-uri) :href (str id "/upload")})
-                    (and ready? viewable?) (conj {:rel (:download c/action-uri) :href (str id "/download")}))]
+        new?        (= state-new state)
+        ready?      (= state-ready state)
+        ops         (cond-> []
+                            modifiable? (conj {:rel (:delete c/action-uri) :href id})
+                            (and new? modifiable?) (conj {:rel (:upload c/action-uri) :href (str id "/upload")})
+                            (and ready? viewable?) (conj {:rel (:download c/action-uri) :href (str id "/download")}))]
     (when (seq ops)
       (vec ops))))
 
@@ -158,6 +165,24 @@
 ;;
 ;; CRUD operations
 ;;
+(defn check-cred-exists
+  [body idmap]
+  (let [href (get-in body [:externalObjectTemplate :objectStoreCred])]
+    (std-crud/resolve-hrefs href idmap))
+  body)
+
+(defn resolve-hrefs
+  [body idmap]
+  (let [os-cred-href (if (contains? (:externalObjectTemplate body) :objectStoreCred)
+                       {:objectStoreCred (get-in body [:externalObjectTemplate :objectStoreCred])}
+                       {})] ;; to put back the unexpanded href after
+    (-> body
+        (check-cred-exists idmap)
+        ;; remove connector href (if any); regular user doesn't have rights to see them
+        (update-in [:externalObjectTemplate] dissoc :objectStoreCred)
+        (std-crud/resolve-hrefs idmap)
+        ;; put back unexpanded connector href
+        (update-in [:externalObjectTemplate] merge os-cred-href))))
 
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
@@ -165,12 +190,12 @@
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
   (let [idmap {:identity (:identity request)}
-        body (-> body
-                 (assoc :resourceURI create-uri)
-                 (std-crud/resolve-hrefs idmap)
-                 (crud/validate)
-                 (:externalObjectTemplate)
-                 (tpl->externalObject))]
+        body  (-> body
+                  (assoc :resourceURI create-uri)
+                  (resolve-hrefs idmap)
+                  (crud/validate)
+                  (:externalObjectTemplate)
+                  (tpl->externalObject))]
     (add-impl (assoc request :body body))))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
@@ -179,24 +204,64 @@
   (retrieve-impl request))
 
 
-
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
 
 (defmethod crud/query resource-name
   [request]
   (query-impl request))
 
+;; URL request operations utils
+
+(defn expand-cred
+  "Returns credential document after expanding `href-obj-store-cred` credential href."
+  [href-obj-store-cred request]
+  (std-crud/resolve-hrefs href-obj-store-cred {:identity (:identity request)} true))
+
+(defn connector-from-cred
+  "Returns connector document after expanding it from `cred` credential."
+  [cred request]
+  (-> cred
+      (std-crud/resolve-hrefs {:identity (:identity request)} true)
+      :connector))
+
+(defn expand-obj-store-creds
+  [href-obj-store-cred request]
+  (let [{:keys [key secret] :as cred} (expand-cred href-obj-store-cred request)
+        connector (connector-from-cred cred request)]
+    {:key      key
+     :secret   secret
+     :endpoint (:objectStoreEndpoint connector)}))
+
+
 ;;; Upload URL operation
+
+(defn upload-fn
+  [{:keys [id state contentType bucketName objectStoreCred] :as resource} {{ttl :ttl} :body :as request}]
+  (let [report-id (cu/document-id id)]
+    (if (= state state-new)
+      (do
+        (log/info "Requesting upload url :" report-id)
+        (s3/generate-url (expand-obj-store-creds objectStoreCred request)
+                         bucketName
+                         report-id
+                         :put
+                         (or ttl s3/default-ttl)
+                         contentType))
+      (logu/log-and-throw-400 "External object is not in new state to be uploaded!"))))
 
 (defmulti upload-subtype
           (fn [resource _] (:objectType resource)))
 
 (defmethod upload-subtype :default
-  [resource _]
-  (let [err-msg (str "unknown External Object type: " (:objectType resource))]
-    (throw (ex-info err-msg {:status  400
-                             :message err-msg
-                             :body    resource}))))
+  [resource request]
+  (try
+    (a/can-modify? resource request)
+    (let [upload-uri (upload-fn resource request)]
+      (-> (assoc resource :state state-ready)
+          (db/edit request))
+      (r/json-response {:uri upload-uri}))
+    (catch ExceptionInfo ei
+      (ex-data ei))))
 
 (defmethod crud/do-action [resource-url "upload"]
   [{{uuid :uuid} :params :as request}]
@@ -210,15 +275,29 @@
 
 ;;; Download URL operation
 
+(defn download-fn
+  [{:keys [id state bucketName objectStoreCred] :as resource} {{ttl :ttl} :body :as request}]
+  (let [report-id (cu/document-id id)]
+    (if (= state state-ready)
+      (do
+        (log/info "Requesting download url for report : " report-id)
+        (s3/generate-url (expand-obj-store-creds objectStoreCred request)
+                         bucketName
+                         report-id
+                         :get
+                         (or ttl s3/default-ttl)))
+      (logu/log-and-throw-400 "External object is not in ready state to be downloaded!"))))
+
 (defmulti download-subtype
           (fn [resource _] (:objectType resource)))
 
 (defmethod download-subtype :default
-  [resource _]
-  (let [err-msg (str "unknown External Object type: " (:objectType resource))]
-    (throw (ex-info err-msg {:status  400
-                             :message err-msg
-                             :body    resource}))))
+  [resource request]
+  (try
+    (a/can-modify? resource request)
+    (r/json-response {:uri (download-fn resource request)})
+    (catch ExceptionInfo ei
+      (ex-data ei))))
 
 (defmethod crud/do-action [resource-url "download"]
   [{{uuid :uuid} :params :as request}]
@@ -230,16 +309,19 @@
     (catch ExceptionInfo ei
       (ex-data ei))))
 
+;;; Delete resource.
 
 (def delete-impl (std-crud/delete-fn resource-name))
-
 
 (defmulti delete-subtype
           (fn [resource _] (:objectType resource)))
 
 (defmethod delete-subtype :default
-  [_ request]
-  (delete-impl request))
+  [{:keys [id bucketName objectStoreCred] :as resource} {{keep? :keep-s3-object} :body :as request}]
+  (let [obj-name (cu/document-id id)]
+    (when-not keep?
+      (s3/delete-s3-object (expand-obj-store-creds objectStoreCred request) bucketName obj-name))
+    (delete-impl request)))
 
 (defmethod crud/delete resource-name
   [{{uuid :uuid} :params :as request}]

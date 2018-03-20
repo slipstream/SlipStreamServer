@@ -16,11 +16,11 @@
 
 (def base-uri (str p/service-context (u/de-camelcase eot/resource-name)))
 
+(def eo-tmpl-id (str eot/resource-url "/" example/objectType))
 
 (deftest check-retrieve-by-id
-  (let [id (str eot/resource-url "/" example/objectType)
-        doc (crud/retrieve-by-id id)]
-    (is (= id (:id doc)))))
+  (let [doc (crud/retrieve-by-id eo-tmpl-id)]
+    (is (= eo-tmpl-id (:id doc)))))
 
 (deftest lifecycle
   (let [session-anon (-> (ltu/ring-app)
@@ -56,8 +56,8 @@
                       (ltu/is-operation-absent "edit")
                       (ltu/is-operation-absent "describe")
                       (ltu/entries eot/resource-tag))
-          ; remove in filtered-entries specific template which have mandatory inputs to create an external object
-          filtered-entries (filter (comp not #{"external-object-template/report"} :id) entries)
+          ; select only our template
+          filtered-entries (filter #(= eo-tmpl-id (:id %)) entries)
           ids (set (map :id filtered-entries))
           types (set (map :objectType filtered-entries))]
       (is (= #{(str eot/resource-url "/" example/objectType)} ids))

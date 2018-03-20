@@ -104,7 +104,7 @@
 
   (is (= [] (db/find-usernames-by-email "unknown@xxx.com")))
   (is (= ["jack"] (db/find-usernames-by-email "jack@sixsq.com")))
-  (is (= ["joe" "joe-alias"] (db/find-usernames-by-email "joe@sixsq.com"))))
+  (is (= #{"joe" "joe-alias"} (set (db/find-usernames-by-email "joe@sixsq.com")))))
 
 (deftest test-users-by-authn-skips-deleted
   (th/add-user-for-test! {:username     "joe-slipstream"

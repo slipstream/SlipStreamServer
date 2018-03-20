@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.external-object-template-test
   (:require
     [clojure.test :refer [deftest is]]
+    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
     [com.sixsq.slipstream.ssclj.resources.spec.external-object-template :as eots]
-    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 

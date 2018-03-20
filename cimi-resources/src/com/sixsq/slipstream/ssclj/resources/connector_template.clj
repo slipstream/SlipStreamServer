@@ -21,17 +21,23 @@
 
 (def ^:const collection-uri (str c/slipstream-schema-uri collection-name))
 
+(def user-can-view {:principal "USER"
+                    :type      "ROLE"
+                    :right     "VIEW"})
+
 (def resource-acl {:owner {:principal "ADMIN"
                            :type      "ROLE"}
                    :rules [{:principal "ADMIN"
                             :type      "ROLE"
-                            :right     "VIEW"}]})
+                            :right     "VIEW"}
+                           user-can-view]})
 
 (def collection-acl {:owner {:principal "ADMIN"
                              :type      "ROLE"}
                      :rules [{:principal "ADMIN"
                               :type      "ROLE"
-                              :right     "VIEW"}]})
+                              :right     "VIEW"}
+                             user-can-view]})
 
 ;;
 ;; Resource defaults
@@ -47,6 +53,7 @@
 
 (def connector-reference-attrs-defaults
   {:endpoint                ""
+   :objectStoreEndpoint     ""
    :nativeContextualization "linux-only"
    :orchestratorSSHUsername ""
    :orchestratorSSHPassword ""
@@ -77,9 +84,9 @@
    resourceURI, timestamps, operations, and ACL."
   [{:keys [cloudServiceType] :as resource}]
   (when cloudServiceType
-    (let [id (str resource-url "/" cloudServiceType)
+    (let [id   (str resource-url "/" cloudServiceType)
           href (str id "/describe")
-          ops [{:rel (:describe c/action-uri) :href href}]]
+          ops  [{:rel (:describe c/action-uri) :href href}]]
       (-> resource
           (merge {:id          id
                   :resourceURI resource-uri
@@ -100,7 +107,7 @@
       (swap! templates assoc id full-resource)
       (log/info "loaded ConnectorTemplate" id)
       (when desc
-        (let [acl (:acl full-resource)
+        (let [acl       (:acl full-resource)
               full-desc (assoc desc :acl acl)]
           (swap! descriptions assoc id full-desc))
         (log/info "loaded ConnectorTemplate description" id))
@@ -155,6 +162,15 @@
     :type        "string"
     :category    ""
     :description "Service endpoint for the connector (e.g. http://example.com:5000)"
+    :mandatory   true
+    :readOnly    false
+    :order       10}
+
+   :objectStoreEndpoint
+   {:displayName "object.store.endpoint"
+    :type        "string"
+    :category    ""
+    :description "Cloud Object Store Service endpoint (e.g. http://s3.example.com:5000)"
     :mandatory   true
     :readOnly    false
     :order       10}
@@ -266,11 +282,11 @@
 (defmethod crud/query resource-name
   [request]
   (a/can-view? {:acl collection-acl} request)
-  (let [wrapper-fn (collection-wrapper-fn resource-name collection-acl collection-uri resource-tag)
+  (let [wrapper-fn        (collection-wrapper-fn resource-name collection-acl collection-uri resource-tag)
         ;; FIXME: At least the paging options should be supported.
-        options (select-keys request [:identity :query-params :cimi-params :user-name :user-roles])
+        options           (select-keys request [:identity :query-params :cimi-params :user-name :user-roles])
         [count-before-pagination entries] ((juxt count vals) @templates)
-        wrapped-entries (wrapper-fn request entries)
+        wrapped-entries   (wrapper-fn request entries)
         entries-and-count (assoc wrapped-entries :count count-before-pagination)]
     (r/json-response entries-and-count)))
 
