@@ -19,6 +19,15 @@
    :quota       20
    :acl         resource-acl-default})
 
+(def connector-template-description
+  {:connector {:displayName "Connector"
+               :category    "general"
+               :description "connector cimi href"
+               :type        "href"
+               :mandatory   true
+               :readOnly    false
+               :order       12}})
+
 (defn cred-type
   [cloud-service-type]
   (str "cloud-cred-" cloud-service-type))
@@ -39,6 +48,7 @@
 (defn gen-description
   [cloud-service-type]
   (merge ct/CredentialTemplateDescription
+         connector-template-description
          (slurp-cloud-cred-desc cloud-service-type)))
 
 (defn register
