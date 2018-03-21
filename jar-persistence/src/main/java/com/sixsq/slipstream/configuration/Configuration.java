@@ -44,6 +44,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This singleton class is the interface to the service configuration. It
@@ -75,7 +78,7 @@ import java.util.Properties;
  * the method.
  *
  */
-public class Configuration {
+public class Configuration implements Runnable {
 
 	/**
 	 * Singleton instance. Since this will not be used heavily after startup use
@@ -131,13 +134,6 @@ public class Configuration {
 		return isEnabled(ServiceConfiguration.RequiredParameters.SLIPSTREAM_METRICS_GRAPHITE_ENABLE.getName());
 	}
 
-	public static boolean getMeteringEnabled() throws ConfigurationException, ValidationException {
-		Configuration config = Configuration.getInstance();
-		Boolean enabled = Boolean.parseBoolean(config.getProperty(
-				ServiceConfiguration.RequiredParameters.SLIPSTREAM_METERING_ENABLE.getName(), "true"));
-		return enabled;
-	}
-
 	/**
 	 * Return the singleton instance of a Configuration object. This method must
 	 * be synchronized to ensure that only one instance of this class is
@@ -166,16 +162,31 @@ public class Configuration {
 	 *             searching for user-specified configuration file
 	 * @throws ValidationException
 	 */
-	private Configuration() throws ConfigurationException, ValidationException {
+	private Configuration() throws ConfigurationException {
+		loadServiceConfiguration();
+		ScheduledExecutorService service = Executors
+				.newSingleThreadScheduledExecutor();
+		service.scheduleAtFixedRate(this, 0, 10, TimeUnit.SECONDS);
+	}
 
+	public void run() {
+	    loadServiceConfiguration();
+	}
+
+	private void loadServiceConfiguration() {
 		try {
 			ServiceConfiguration serviceConfiguration = ServiceConfiguration.load();
 			update(serviceConfiguration.getParameters());
 		} catch (NoResultException ex) {
-			reset();
+			try {
+				reset();
+			} catch (ValidationException e) {
+				e.printStackTrace();
+			}
 			store();
+		} catch (ValidationException e) {
+			e.printStackTrace();
 		}
-
 	}
 
 	private void postProcessParameters() throws ConfigurationException, ValidationException {
