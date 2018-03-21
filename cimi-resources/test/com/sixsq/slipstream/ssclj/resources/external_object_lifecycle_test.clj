@@ -51,27 +51,27 @@
 
 
 (deftest lifecycle-href
-  (let [href-create   {:externalObjectTemplate (assoc (external-object-with-name "my-obj-name")
-                                                 :state eo/state-new
-                                                 :objectType generic/objectType)}]
+  (let [href-create {:externalObjectTemplate (assoc (external-object-with-name "my-obj-name")
+                                               :state eo/state-new
+                                               :objectType generic/objectType)}]
 
     ;; abbreviated lifecycle using href to template instead of copy
-    (let [uri     (-> eoltu/session-admin
-                      (request base-uri
-                               :request-method :post
-                               :body (json/write-str href-create))
-                      (ltu/body->edn)
-                      (ltu/is-status 201)
-                      (ltu/location))
+    (let [uri (-> eoltu/session-admin
+                  (request base-uri
+                           :request-method :post
+                           :body (json/write-str href-create))
+                  (ltu/body->edn)
+                  (ltu/is-status 201)
+                  (ltu/location))
           abs-uri (str p/service-context (u/de-camelcase uri))]
 
       ;; admin delete succeeds
       (with-redefs [s3/delete-s3-object (fn [_ _ _] nil)]
         (-> eoltu/session-admin
-           (request abs-uri
-                    :request-method :delete)
-           (ltu/body->edn)
-           (ltu/is-status 200)))
+            (request abs-uri
+                     :request-method :delete)
+            (ltu/body->edn)
+            (ltu/is-status 200)))
 
       ;; ensure entry is really gone
       (-> eoltu/session-admin

@@ -109,14 +109,14 @@
 
 (defn standard-external-object-resource-operations
   [{:keys [id state] :as resource} request]
-  (let [viewable?   (a/authorized-view? resource request)
+  (let [viewable? (a/authorized-view? resource request)
         modifiable? (a/authorized-modify? resource request)
-        new?        (= state-new state)
-        ready?      (= state-ready state)
-        ops         (cond-> []
-                            modifiable? (conj {:rel (:delete c/action-uri) :href id})
-                            (and new? modifiable?) (conj {:rel (:upload c/action-uri) :href (str id "/upload")})
-                            (and ready? viewable?) (conj {:rel (:download c/action-uri) :href (str id "/download")}))]
+        new? (= state-new state)
+        ready? (= state-ready state)
+        ops (cond-> []
+                    modifiable? (conj {:rel (:delete c/action-uri) :href id})
+                    (and new? modifiable?) (conj {:rel (:upload c/action-uri) :href (str id "/upload")})
+                    (and ready? viewable?) (conj {:rel (:download c/action-uri) :href (str id "/download")}))]
     (when (seq ops)
       (vec ops))))
 
@@ -175,7 +175,7 @@
   [body idmap]
   (let [os-cred-href (if (contains? (:externalObjectTemplate body) :objectStoreCred)
                        {:objectStoreCred (get-in body [:externalObjectTemplate :objectStoreCred])}
-                       {})] ;; to put back the unexpanded href after
+                       {})]                                 ;; to put back the unexpanded href after
     (-> body
         (check-cred-exists idmap)
         ;; remove connector href (if any); regular user doesn't have rights to see them
@@ -190,12 +190,12 @@
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
   (let [idmap {:identity (:identity request)}
-        body  (-> body
-                  (assoc :resourceURI create-uri)
-                  (resolve-hrefs idmap)
-                  (crud/validate)
-                  (:externalObjectTemplate)
-                  (tpl->externalObject))]
+        body (-> body
+                 (assoc :resourceURI create-uri)
+                 (resolve-hrefs idmap)
+                 (crud/validate)
+                 (:externalObjectTemplate)
+                 (tpl->externalObject))]
     (add-impl (assoc request :body body))))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
