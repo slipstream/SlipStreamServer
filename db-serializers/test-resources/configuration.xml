@@ -2956,6 +2956,20 @@ nuvlabox-demo:nuvlabox]]></value>
          </parameter>
       </entry>
       <entry>
+         <string>slipstream.reports.objectstore.bucket.name</string>
+         <parameter name="slipstream.reports.objectstore.bucket.name" description="" category="SlipStream_Advanced" mandatory="true" type="String" readonly="false" order_="44" order="44">
+            <instructions><![CDATA[Selected name should be unique for the Object Store or bucket should already exist.]]></instructions>
+            <value><![CDATA[bucket-name]]></value>
+         </parameter>
+      </entry>
+      <entry>
+         <string>slipstream.reports.objectstore.creds</string>
+         <parameter name="slipstream.reports.objectstore.creds" description="" category="SlipStream_Advanced" mandatory="true" type="String" readonly="false" order_="45" order="45">
+            <instructions><![CDATA[Existing credential resource ID in the form credntial/<uuid>.]]></instructions>
+            <value><![CDATA[credential/1-2-3-4-5]]></value>
+         </parameter>
+      </entry>
+      <entry>
          <string>nuvlabox-albert-einstein.orchestrator.ram.size</string>
          <parameter name="nuvlabox-albert-einstein.orchestrator.ram.size" description="Orchestrator RAM size" category="nuvlabox-albert-einstein" mandatory="true" type="String" readonly="false" order_="0" order="0">
             <value><![CDATA[0.5]]></value>

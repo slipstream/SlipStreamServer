@@ -228,7 +228,7 @@
   :order 43}
 
  :reportsObjectStoreBucketName
- {:displayName "slipstream.report.objectstore.bucket.name"
+ {:displayName "slipstream.reports.objectstore.bucket.name"
   :type "Text"
   :category "SlipStream_Advanced"
   :description "Reports bucket name on Object Store"
@@ -238,7 +238,7 @@
   :order 44}
 
  :reportsObjectStoreCreds
- {:displayName "slipstream.report.objectstore.creds"
+ {:displayName "slipstream.reports.objectstore.creds"
   :type "Text"
   :category "SlipStream_Advanced"
   :description "Object store credentials."
