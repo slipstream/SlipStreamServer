@@ -28,6 +28,7 @@ import com.sixsq.slipstream.persistence.ParameterType;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
+import java.util.logging.Logger;
 import org.restlet.data.Protocol;
 import org.restlet.data.Reference;
 import slipstream.ui.views.Representation;
@@ -105,6 +106,10 @@ public class Configuration implements Runnable {
 	private int defaultPort = 80;
 	private int defaultSecurePort = 443;
 
+	public static int refreshRateSec = 10;
+
+	private static Logger log = Logger.getLogger("Configuration");
+
 	/**
 	 * SlipStream version number derived from the slipstream.version property in
 	 * the property default file.
@@ -162,30 +167,35 @@ public class Configuration implements Runnable {
 	 *             searching for user-specified configuration file
 	 * @throws ValidationException
 	 */
-	private Configuration() throws ConfigurationException {
+	private Configuration() throws ConfigurationException, ValidationException {
 		loadServiceConfiguration();
-		ScheduledExecutorService service = Executors
-				.newSingleThreadScheduledExecutor();
-		service.scheduleAtFixedRate(this, 0, 10, TimeUnit.SECONDS);
+		ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+		service.scheduleAtFixedRate(this, 0, refreshRateSec, TimeUnit.SECONDS);
 	}
 
 	public void run() {
-	    loadServiceConfiguration();
+		// Scheduler doesn't propagate exceptions. Log them instead.
+		try {
+			log.fine("Periodic loading of service configuration from backend...");
+			loadServiceConfiguration();
+			log.fine("Periodic loading of service configuration from backend... success.");
+		} catch (Exception e) {
+			log.warning("Failed loading service configuration: " + e.getMessage());
+			e.printStackTrace();
+		}
 	}
 
-	private void loadServiceConfiguration() {
+	private void loadServiceConfiguration() throws ConfigurationException, ValidationException {
 		try {
 			ServiceConfiguration serviceConfiguration = ServiceConfiguration.load();
 			update(serviceConfiguration.getParameters());
-		} catch (NoResultException ex) {
-			try {
-				reset();
-			} catch (ValidationException e) {
-				e.printStackTrace();
-			}
-			store();
-		} catch (ValidationException e) {
+		} catch (NoResultException e) {
+			log.warning("Failed loading service configuration: " + e.getMessage());
 			e.printStackTrace();
+			log.warning("Resetting service configuration...");
+			reset();
+			store();
+			log.warning("Resetting service configuration... success.");
 		}
 	}
 
