@@ -40,26 +40,26 @@ import static org.junit.Assert.fail;
 
 public class ConfigurationTest {
 
-	@BeforeClass
-	public static void setupClass() {
-		CIMITestServer.start();
-		CljElasticsearchHelper.initTestDb();
-		Event.muteForTests();
-	}
+    @BeforeClass
+    public static void setupClass() {
+        CIMITestServer.start();
+        CljElasticsearchHelper.initTestDb();
+        Event.muteForTests();
+    }
 
-	@AfterClass
-	public static void teardownClass() {
-		CIMITestServer.stop();
-	}
+    @AfterClass
+    public static void teardownClass() {
+        CIMITestServer.stop();
+    }
 
-	@Test
-	public void refreshSuccess() throws ValidationException {
-		Configuration.refreshRateSec = 1;
-	    Configuration config = Configuration.getInstance();
-	    assert 1 == config.refreshRateSec;
+    @Test
+    public void refreshSuccess() throws ValidationException {
+        Configuration.refreshRateSec = 1;
+        Configuration config = Configuration.getInstance();
+        assert 1 == config.refreshRateSec;
         HashMap conf = new HashMap<String, String>();
         String version = "";
-        for (int i=0; i<3; i++) {
+        for (int i = 0; i < 3; i++) {
             version = "0." + i;
 
             conf.put("slipstreamVersion", version);
