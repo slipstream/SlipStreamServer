@@ -34,8 +34,8 @@
 
 
 (defn generate-url
-  [bucket key verb & [{:keys [ttl content-type filename] :or {ttl default-ttl}}]]
-  (let [expiration (tc/to-date (-> ttl t/minutes t/from-now))
+  [bucket key verb & [{:keys [ttl content-type filename]}]]
+  (let [expiration (tc/to-date (-> (or ttl default-ttl) t/minutes t/from-now))
         overrides (when filename
                     (doto (ResponseHeaderOverrides.)
                       (.setContentDisposition (format "attachment; filename=\"%s\"" filename))))

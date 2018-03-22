@@ -18,8 +18,7 @@
 
 (deftest test-schema-check
   (let [timestamp "1964-08-25T10:00:00.0Z"
-        root {:id          (str eot/resource-url "/uuid")
-              :resourceURI eot/resource-uri
+        root {:resourceURI eot/resource-uri
               :created     timestamp
               :updated     timestamp
               :acl         valid-acl
@@ -27,7 +26,8 @@
               :state       "new"
               :contentType "text/html; charset=utf-8"
               :filename    "text.txt"
-              }]
+              :runUUID     "xyz"
+              :component   "machine.1"}]
 
     (expound/expound :cimi.external-object-template.report/externalObjectTemplate root)
     (is (s/valid? :cimi.external-object-template.report/externalObjectTemplate root))))

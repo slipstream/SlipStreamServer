@@ -49,12 +49,12 @@
 
 ;; Upload URL request operation
 (defn upload-fn
-  [{:keys [id state contentType] :as resource} {{ttl :ttl} :body :as request}]
+  [{:keys [id state contentType filename] :as resource} {{ttl :ttl} :body :as request}]
   (let [report-id (cu/document-id id)]
     (if (= state eo/state-new)
       (do
         (log/info "Requesting upload url for report:" report-id)
-        (s3/generate-url @reports-bucket report-id :put {:ttl ttl, :content-type contentType}))
+        (s3/generate-url @reports-bucket report-id :put {:ttl ttl, :content-type contentType, :filename filename}))
       (logu/log-and-throw-400 "Report object is not in new state to be uploaded!"))))
 
 
@@ -72,12 +72,12 @@
 
 ;; Download URL request operation
 (defn download-fn
-  [{state :state id :id :as resource} {{ttl :ttl} :body :as request}]
+  [{:keys [id state filename] :as resource} {{ttl :ttl} :body :as request}]
   (let [report-id (cu/document-id id)]
     (if (= state eo/state-ready)
       (do
         (log/info "Requesting download url for report : " report-id)
-        (s3/generate-url @reports-bucket report-id :get {:ttl ttl}))
+        (s3/generate-url @reports-bucket report-id :get {:ttl ttl, :filename filename}))
       (logu/log-and-throw-400 "Report object is not in ready state to be downloaded!"))))
 
 
