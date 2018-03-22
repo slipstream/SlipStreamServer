@@ -6,7 +6,7 @@
   (:import
     (com.amazonaws.auth BasicAWSCredentials AWSStaticCredentialsProvider)
     (com.amazonaws.services.s3 AmazonS3ClientBuilder)
-    (com.amazonaws.services.s3.model GeneratePresignedUrlRequest DeleteObjectRequest)
+    (com.amazonaws.services.s3.model GeneratePresignedUrlRequest DeleteObjectRequest ResponseHeaderOverrides)
     (com.amazonaws.client.builder AwsClientBuilder$EndpointConfiguration)
     (com.amazonaws HttpMethod)))
 
@@ -34,23 +34,25 @@
 
 
 (defn generate-url
-  ([bucket key] (generate-url bucket key :get))
-  ([bucket key verb] (generate-url bucket key verb default-ttl))
-  ([bucket key verb mn] (generate-url bucket key verb mn nil))
-  ([bucket key verb mn contentType]
-   (let [expiration (tc/to-date (-> mn t/minutes t/from-now))
-         req (doto (GeneratePresignedUrlRequest. bucket key)
-               (.setMethod (if (= verb :put)
-                             HttpMethod/PUT
-                             HttpMethod/GET))
-               (.setExpiration expiration))
-         generate-presigned-url-request (if contentType
-                                          (doto req (.setContentType contentType))
-                                          req)]
-     (str
-       (.generatePresignedUrl
-         (get-s3-client)
-         generate-presigned-url-request)))))
+  [bucket key verb & [{:keys [ttl content-type filename] :or {ttl default-ttl}}]]
+  (let [expiration (tc/to-date (-> ttl t/minutes t/from-now))
+        overrides (when filename
+                    (doto (ResponseHeaderOverrides.)
+                      (.setContentDisposition (format "attachment; filename=\"%s\"" filename))))
+        method (if (= verb :put)
+                 HttpMethod/PUT
+                 HttpMethod/GET)
+
+        req (doto (GeneratePresignedUrlRequest. bucket key)
+              (.setMethod  method)
+              (.setExpiration expiration))]
+
+    ;; mutates the req object!
+    (cond
+      content-type (.setContentType req content-type)
+      overrides (.setResponseHeaders req overrides))
+
+    (str (.generatePresignedUrl (get-s3-client) req))))
 
 
 (defn delete-s3-object [bucket key]
