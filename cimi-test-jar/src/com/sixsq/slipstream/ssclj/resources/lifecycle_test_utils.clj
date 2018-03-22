@@ -215,7 +215,7 @@
   response)
 
 
-(defn dump-es
+#_(defn dump-es
   [type]
   (pprint
     (esu/dump esb/*client* esb/index-name type)))
@@ -343,7 +343,7 @@
   `(let [client# (second (set-es-node-client-cache))]
      (binding [esb/*client* client#]
        (db/set-impl! (esb/get-instance))
-       (esu/reset-index esb/*client* esb/index-name)
+       (esu/reset-index esb/*client* (str esb/index-prefix "*"))
        ~@body)))
 
 

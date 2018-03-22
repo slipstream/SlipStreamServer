@@ -29,6 +29,7 @@
   :dependencies
   [[cc.qbits/spandex]
    [org.clojure/tools.reader]                               ;; required by spandex through core.async
+   [camel-snake-kebab]
    [cheshire]                                               ;; to avoid transient dependency conflicts
    [clj-time]
    [com.rpl/specter]

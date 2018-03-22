@@ -21,6 +21,7 @@
    (let [tempDir (str (fs/temp-dir "es-data-"))
          settings (.. (Settings/builder)
                       (put "cluster.name" cluster-name)
+                      (put "action.auto_create_index" true)
                       (put "path.home" tempDir)
                       (put "transport.netty.worker_count" 3)
                       (put "node.data" true)

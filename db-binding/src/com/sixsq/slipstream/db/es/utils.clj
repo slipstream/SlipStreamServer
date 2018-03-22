@@ -47,7 +47,7 @@
 (defn create
   [^Client client index type docid json]
   (.. client
-      (prepareIndex index type docid)
+      (prepareIndex index (cu/de-camelcase type) docid)
       (setCreate true)
       (setRefreshPolicy WriteRequest$RefreshPolicy/IMMEDIATE)
       (setSource json)
@@ -235,9 +235,8 @@
     (.. client
         (admin)
         (indices)
-        (delete (DeleteIndexRequest. index-name))
-        (get)))
-  (create-index client index-name))
+        (delete (DeleteIndexRequest. "_all"))
+        (get))))
 
 (defn get-all-indices
   "Returns array of index names as strings.  Useful with `refresh-all-indices`.
