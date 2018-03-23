@@ -146,7 +146,7 @@
                     </assembly>
                     <runCmds>
                       <runCmd>apk update</runCmd>
-                      <runCmd>apk add openssl openssh shadow</runCmd>
+                      <runCmd>apk add openssl openssh shadow postfix msmtp</runCmd>
                       <runCmd>/usr/sbin/groupadd -r slipstream</runCmd>
                       <runCmd>/usr/sbin/useradd -r -d ${installation.dir} -g slipstream slipstream</runCmd>
                       <runCmd>mkdir -p /opt/slipstream/server/.ssh</runCmd>
@@ -173,7 +173,7 @@
                       <port>8201</port>
                     </ports>
                     <workdir>${installation.dir}</workdir>
-                    <cmd>sh ${installation.dir}/bin/generate-auth-keys.sh &amp;&amp; /usr/bin/java -Dconfig.name=db.spec -Dlogfile.path=production -cp "/opt/slipstream/ring-container/lib/*:resources:lib/*:extra-resources/*" sixsq.slipstream.server.ring_container</cmd>
+                    <cmd>postfix start &amp;&amp; sh ${installation.dir}/bin/generate-auth-keys.sh &amp;&amp; /usr/bin/java -Dconfig.name=db.spec -Dlogfile.path=production -cp "/opt/slipstream/ring-container/lib/*:resources:lib/*:extra-resources/*" sixsq.slipstream.server.ring_container</cmd>
                   </build>
                 </image>
               </images>
