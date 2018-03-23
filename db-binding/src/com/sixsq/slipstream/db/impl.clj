@@ -12,6 +12,9 @@
   []
   (.unbindRoot #'*impl*))
 
+(defn initialize [collection-id options]
+  (p/initialize *impl* collection-id options))
+
 (defn add [collection-id data options]
   (p/add *impl* collection-id data options))
 
