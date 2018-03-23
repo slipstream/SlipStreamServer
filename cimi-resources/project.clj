@@ -1,6 +1,6 @@
-(def +version+ "3.48-SNAPSHOT")
+(def +version+ "3.48")
 
-(defproject com.sixsq.slipstream/SlipStreamServer-cimi-resources "3.48-SNAPSHOT"
+(defproject com.sixsq.slipstream/SlipStreamServer-cimi-resources "3.48"
 
   :description "CIMI resources"
 

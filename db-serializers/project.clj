@@ -1,6 +1,6 @@
-(def +version+ "3.48-SNAPSHOT")
+(def +version+ "3.48")
 
-(defproject com.sixsq.slipstream/SlipStreamDbSerializers-jar "3.48-SNAPSHOT"
+(defproject com.sixsq.slipstream/SlipStreamDbSerializers-jar "3.48"
 
   :description "utilities for serializing objects to a database"
   
