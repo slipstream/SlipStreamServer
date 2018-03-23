@@ -76,4 +76,5 @@
   "Runs the initialize function for all resources that define it."
   []
   (doall
-    (map (juxt initialize-db-for-resource initialize-resource) (resource-namespaces))))
+    (map
+      (juxt initialize-db-for-resource initialize-resource) (resource-namespaces))))

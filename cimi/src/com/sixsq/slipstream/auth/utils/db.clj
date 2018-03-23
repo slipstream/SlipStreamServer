@@ -52,7 +52,7 @@
                                                           :user-roles  ["ADMIN"]})
                                  second)
                              (catch ExceptionInfo e []))]
-      (map :username matched-users))))
+      (set (map :username matched-users)))))
 
 (defn find-username-by-authn
   [authn-method authn-id]

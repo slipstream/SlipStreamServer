@@ -56,7 +56,7 @@
 ;; DB related.
 ;;
 
-(defn dump
+#_(defn dump
   [resource & [msg]]
   (println "DB DUMP: " (or msg ""))
   (clojure.pprint/pprint (esu/dump esb/*client* esb/index-name resource)))

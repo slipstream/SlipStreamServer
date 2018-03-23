@@ -7,8 +7,6 @@
 
 (def ^:const service "session-oidc")
 
-(def ^:const resource-url (str p/resource-url "/" service))
-
 (def ConfigurationDescription
   tpl/desc)
 

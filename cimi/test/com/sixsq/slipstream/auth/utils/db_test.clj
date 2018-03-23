@@ -88,8 +88,8 @@
                           :emailAddress "jack@sixsq.com"
                           :state        "DELETED"})
 
-  (is (= [] (db/find-usernames-by-email "unknown@xxx.com")))
-  (is (= [] (db/find-usernames-by-email "jack@sixsq.com"))))
+  (is (= #{} (db/find-usernames-by-email "unknown@xxx.com")))
+  (is (= #{} (db/find-usernames-by-email "jack@sixsq.com"))))
 
 (deftest test-users-by-email
   (th/add-user-for-test! {:username     "jack"
@@ -102,9 +102,9 @@
                           :password     "123456"
                           :emailAddress "joe@sixsq.com"})
 
-  (is (= [] (db/find-usernames-by-email "unknown@xxx.com")))
-  (is (= ["jack"] (db/find-usernames-by-email "jack@sixsq.com")))
-  (is (= ["joe" "joe-alias"] (db/find-usernames-by-email "joe@sixsq.com"))))
+  (is (= #{} (db/find-usernames-by-email "unknown@xxx.com")))
+  (is (= #{"jack"} (db/find-usernames-by-email "jack@sixsq.com")))
+  (is (= #{"joe" "joe-alias"} (db/find-usernames-by-email "joe@sixsq.com"))))
 
 (deftest test-users-by-authn-skips-deleted
   (th/add-user-for-test! {:username     "joe-slipstream"
