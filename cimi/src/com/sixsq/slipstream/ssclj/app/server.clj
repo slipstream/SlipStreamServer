@@ -21,16 +21,24 @@
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.app.graphite :as graphite]
-    [com.sixsq.slipstream.db.impl :as db]
-    [com.sixsq.slipstream.db.es.binding :as esb]
-    [com.sixsq.slipstream.ssclj.util.zookeeper :as zku]
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as resources]))
+    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as resources]
+    [com.sixsq.slipstream.ssclj.app.utils :as utils]
+    [environ.core :as env]
+    [clojure.string :as str]))
 
 
-(defn- set-persistence-impl
+(defn get-binding-namespaces
   []
-  (db/set-impl! (esb/get-instance)))
+  (-> :slipstream-db-bindings env/env (str/split #":")))
 
+(defn initialize-bindings
+  []
+  (let [binding-namespaces (get-binding-namespaces)]
+    (doall (map (partial utils/call-fn-from-namespace "initialize") binding-namespaces))))
+
+(defn finalize-bindings
+  []
+  (map (partial utils/call-fn-from-namespace "finalize") (get-binding-namespaces)))
 
 (defn- create-ring-handler
   "Creates a ring handler that wraps all of the service routes
@@ -65,17 +73,7 @@
   []
   (graphite/stop-graphite-reporter)
 
-  (try
-    (zku/close-client!)
-    (log/info "zookeeper client closed")
-    (catch Exception e
-      (log/warn "zookeeper client close failed:" (str e))))
-
-  (try
-    (esb/close-client!)
-    (log/info "elasticsearch client closed")
-    (catch Exception e
-      (log/warn "elasticsearch client close failed:" (str e))))
+  (finalize-bindings)
 
   (try
     (remove-all-metrics)
@@ -83,32 +81,16 @@
     (catch Exception e
       (log/warn "failed removing all instrumentation metrics:" (str e)))))
 
-
 (defn init
   []
-
   (try
     (instrument-jvm default-registry)
     (catch Exception e
       (log/warn "error registering instrumentation metrics:" (str e))))
 
-  (try
-    (esb/set-client! (esb/create-client))
-    (catch Exception e
-      (log/warn "error creating elasticsearch client:" (str e))))
-
-  (try
-    (zku/set-client! (zku/create-client))
-    (catch Exception e
-      (log/warn "error creating zookeeper client:" (str e))))
+  (initialize-bindings)
 
   (let [handler (create-ring-handler)]
-
-    (try
-      (set-persistence-impl)
-      (catch Exception e
-        (log/warn "error setting persistence implementation:" (str e))))
-
     (try
       (resources/initialize)
       (catch Exception e

@@ -1,12 +1,13 @@
 (ns sixsq.slipstream.server.ring-container-test
   (:require
     [clojure.test :refer :all]
-    [sixsq.slipstream.server.ring-container :as t])
+    [sixsq.slipstream.server.ring-container :as t]
+    [sixsq.slipstream.server.namespace-utils :as nu])
   (:import (clojure.lang ExceptionInfo)))
 
 
 (deftest check-as-symbol
-  (let [as-symbol @#'t/as-symbol]
+  (let [as-symbol @#'nu/as-symbol]
     (are [expected input] (= expected (as-symbol input))
                           'environ.core/env "environ.core/env"
                           'environ.core/env 'environ.core/env)
@@ -16,14 +17,14 @@
 
 
 (deftest check-ns-and-var
-  (let [ns-and-var @#'t/ns-and-var]
+  (let [ns-and-var @#'nu/ns-and-var]
     (are [expected input] (= expected (ns-and-var input))
                           '[environ.core env] 'environ.core/env)
     (is (thrown-with-msg? ExceptionInfo #"complete, namespaced" (ns-and-var 'no-namespace)))))
 
 
 (deftest check-resolve-var
-  (let [resolve-var @#'t/resolve-var]
+  (let [resolve-var @#'nu/resolve-var]
     (are [input] (apply resolve-var input)
                  '[environ.core env]
                  '[aleph.http start-server])
@@ -32,7 +33,7 @@
 
 
 (deftest check-dyn-resolve
-  (let [dyn-resolve @#'t/dyn-resolve]
+  (let [dyn-resolve @#'nu/dyn-resolve]
     (are [input] (dyn-resolve input)
                  'environ.core/env
                  "environ.core/env"

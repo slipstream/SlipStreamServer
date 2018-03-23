@@ -6,8 +6,8 @@
 
   :url "https://github.com/slipstream/SlipStreamServer"
 
-  :license {:name "Apache 2.0"
-            :url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+  :license {:name         "Apache 2.0"
+            :url          "http://www.apache.org/licenses/LICENSE-2.0.txt"
             :distribution :repo}
 
   :plugins [[lein-parent "0.3.2"]
@@ -68,7 +68,7 @@
    [com.sixsq.slipstream/SlipStreamCljResourcesTests-jar ~+version+]
    [com.sixsq.slipstream/token ~+version+]
 
-   [org.clojure/test.check] ; FIXME: Needed for spec.gen.alpha. Fix "Could not locate clojure/test/check/generators__init.class"
+   [org.clojure/test.check]                                 ; FIXME: Needed for spec.gen.alpha. Fix "Could not locate clojure/test/check/generators__init.class"
    ]
 
   :aot [com.sixsq.slipstream.ssclj.app.main
@@ -84,10 +84,11 @@
                                [org.apache.curator/curator-test]
                                [com.sixsq.slipstream/SlipStreamDbTesting-jar ~+version+]]
               :resource-paths ["test-resources"]
-              :env            {:config-name      "config-params.edn"
-                               :auth-private-key "test-resources/auth_privkey.pem"
-                               :auth-public-key  "test-resources/auth_pubkey.pem"}
+              :env            {:config-name            "config-params.edn"
+                               :auth-private-key       "test-resources/auth_privkey.pem"
+                               :auth-public-key        "test-resources/auth_pubkey.pem"
+                               :slipstream-db-bindings "com.sixsq.slipstream.ssclj.persistence.elasticsearch-binding:com.sixsq.slipstream.ssclj.persistence.zookeeper-binding"}
               :aot            :all}
    :dev      {:resource-paths ["test-resources"]
-              :dependencies [[com.sixsq.slipstream/slipstream-ring-container ~+version+]]}
+              :dependencies   [[com.sixsq.slipstream/slipstream-ring-container ~+version+]]}
    })

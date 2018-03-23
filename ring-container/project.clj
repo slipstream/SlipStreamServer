@@ -24,7 +24,8 @@
 
   :pom-location "target/"
 
-  :aot [sixsq.slipstream.server.ring-container]
+  :aot [sixsq.slipstream.server.ring-container
+        sixsq.slipstream.server.namespace-utils]
 
   :dependencies
   [[org.clojure/clojure]

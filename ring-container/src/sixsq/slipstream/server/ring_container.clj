@@ -4,7 +4,8 @@
    the 'start' function (e.g. for testing from the REPL)."
   (:require
     [clojure.tools.logging :as log]
-    [clojure.string :as str])
+    [clojure.string :as str]
+    [sixsq.slipstream.server.namespace-utils :as nu])
   (:import
     [java.io Closeable]
     [java.net InetSocketAddress])
@@ -12,62 +13,6 @@
 
 (def ^:const default-port 8200)
 (def ^:const default-host "127.0.0.1")
-
-
-(defn- log-and-throw
-  "Logs a fatal error and then throws an exception with the given method and
-   optional cause."
-  ([msg]
-   (log-and-throw msg nil))
-  ([msg e]
-   (log/fatal msg)
-   (if e
-     (throw (ex-info (str msg "\n" e) {}))
-     (throw (ex-info msg {})))))
-
-
-(defn- as-symbol
-  "Converts argument to symbol or throws an exception."
-  [s]
-  (try
-    (symbol s)
-    (catch Exception e
-      (log-and-throw (str "invalid symbol: " s) e))))
-
-
-(defn- ns-and-var
-  "Provides the namespace and name of the symbol as symbols. If either is nil,
-   then an exception is thrown."
-  [s]
-  (let [result ((juxt namespace name) s)]
-    (if (some nil? result)
-      (log-and-throw (str "symbol (" s ") must be a complete, namespaced value"))
-      (map symbol result))))
-
-
-(defn- resolve-var
-  "Resolves the var in the given namespace or throws a descriptive exception."
-  [ns f]
-  (try
-    (ns-resolve (find-ns ns) f)
-    (catch Exception e
-      (log-and-throw (str "could not resolve " f " in namespace " ns) e))))
-
-
-(defn- dyn-resolve
-  "Dynamically requires the namespace of the given symbol and then resolves
-   the name of the symbol in this namespace. Returns the var for the resolved
-   symbol. Throws an exception if the symbol could not be resolved."
-  [s]
-  (let [[ns f] (ns-and-var (as-symbol s))]
-    (try
-      (require ns)
-      (catch Exception e
-        (log-and-throw (str "error requiring namespace: " ns))))
-
-    (if-let [result (resolve-var ns f)]
-      result
-      (log-and-throw (str "symbol (" s ") was not found")))))
 
 
 (defn- hook
@@ -108,7 +53,7 @@
    by calling 'close' on the object."
   [handler ^long port host]
   (log/info "starting aleph application container on host:port" (str host ":" port))
-  (let [start-server (dyn-resolve 'aleph.http/start-server)
+  (let [start-server (nu/dyn-resolve 'aleph.http/start-server)
         server (->> port
                     (InetSocketAddress. host)
                     (hash-map :socket-address)
@@ -147,7 +92,7 @@
   "Starts the application and application server. Return a 'stop' function
    that will shutdown the application and server when called."
   [server-init & [port host]]
-  (let [server-init-fn (dyn-resolve server-init)
+  (let [server-init-fn (nu/dyn-resolve server-init)
         [handler finalization-fn] (server-init-fn)
         port (parse-port port)
         host (validate-host host)]
@@ -177,7 +122,7 @@
    function. Starting the server from the REPL will use the values given to the
    start function."
   []
-  (let [env (dyn-resolve 'environ.core/env)
+  (let [env (nu/dyn-resolve 'environ.core/env)
         server-port (env :slipstream-ring-container-port)
         server-host (env :slipstream-ring-container-host)]
     (if-let [server-init (env :slipstream-ring-container-init)]
