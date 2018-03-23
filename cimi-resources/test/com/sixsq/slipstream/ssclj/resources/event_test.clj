@@ -42,14 +42,10 @@
                :request-method :post
                :body (json/write-str valid-event)))))
 
-(defn temp [f]
-  (insert-some-events)
-  (f))
-
 (defn fixture-insert-some-events
   [f]
   (ltu/with-test-server-fixture
-    #(temp f)))
+    #((insert-some-events) (f))))
 
 (use-fixtures :once fixture-insert-some-events)
 
