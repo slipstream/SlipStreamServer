@@ -27,6 +27,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.local.LocalConnector;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -71,6 +72,7 @@ public class ModuleResourceCopyToTest extends ResourceTestBase {
 			IllegalAccessException, InvocationTargetException,
 			NoSuchMethodException, ClassNotFoundException {
 
+		Configuration.refreshRateSec = 1;
 		resetAndLoadConnector(LocalConnector.class);
 
 		anotherUser = new User("anotherUser");

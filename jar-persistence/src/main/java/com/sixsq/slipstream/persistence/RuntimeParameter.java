@@ -396,6 +396,9 @@ public class RuntimeParameter extends Metadata {
 		EntityManager em = PersistenceUtil.createEntityManager();
 
 		Run run = Run.load(container.getResourceUri(), em);
+		if (null == run) {
+			throw new NotFoundException("Failed to load run " + container.getResourceUri());
+		}
 		String cloud = run.getRuntimeParameterValueIgnoreAbort(
 				constructParamName(group_, RuntimeParameter.CLOUD_SERVICE_NAME));
 		String instanceId = run.getRuntimeParameterValueIgnoreAbort(

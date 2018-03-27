@@ -20,21 +20,18 @@ package com.sixsq.slipstream.util;
  * -=================================================================-
  */
 
-import com.sixsq.slipstream.configuration.Configuration;
-import com.sixsq.slipstream.connector.ConnectorFactory;
 import com.sixsq.slipstream.connector.UserParametersFactoryBase;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.Parameter;
-import com.sixsq.slipstream.persistence.ParameterCategory;
-import com.sixsq.slipstream.persistence.ServiceConfiguration;
-import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
+import com.sixsq.slipstream.ssclj.app.CIMITestServer;
+import org.restlet.Response;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 
 import static org.junit.Assert.fail;
 
@@ -115,11 +112,14 @@ public abstract class UserTestUtil {
 				.getPublicKeyParameterName(), publicSshKey, "xxx");
 		user.setParameter(userKey);
 
-		String publicSshKey = ServiceConfiguration.CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY;
-		Configuration config = Configuration.getInstance();
-
-		config.getParameters().setParameter(new ServiceConfigurationParameter(publicSshKey, "/dev/null"));
-		config.store();
+		HashMap conf = new HashMap<String, String>();
+		conf.put("connectorOrchPublicSSHKey", "/dev/null");
+		String resource = "configuration/slipstream";
+		Response resp = SscljProxy.put(SscljProxy.BASE_RESOURCE + resource, "super ADMIN", conf);
+		if (SscljProxy.isError(resp)) {
+			fail("Failed to update " + resource + " with: " + resp.getEntityAsText());
+		}
+		CIMITestServer.refresh();
 	}
 
 	// Only static methods. Ensure no instances are created.

@@ -20,7 +20,9 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.es.CljElasticsearchHelper;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.ssclj.app.CIMITestServer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -28,21 +30,30 @@ import org.junit.BeforeClass;
 public class ConnectorTestBase {
 
     @BeforeClass
-    public static void setupClass() {
+    public static void setupClass() throws ValidationException {
         setupBackend();
     }
 
-    public static void setupBackend() {
+    public static void setupBackend() throws ValidationException {
         CIMITestServer.start();
         CljElasticsearchHelper.initTestDb();
+        Configuration.refreshRateSec = 1;
+        Configuration.getInstance().reinitialise();
+        CIMITestServer.refresh();
+        try {
+            Thread.sleep(Configuration.refreshRateSec * 1000 + 100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @AfterClass
-    public static void teardownClass() {
+    public static void teardownClass() throws ValidationException {
         teardownBackend();
     }
 
-    public static void teardownBackend() {
+    public static void teardownBackend() throws ValidationException {
+        Configuration.getInstance().reinitialise();
         CIMITestServer.stop();
     }
 }

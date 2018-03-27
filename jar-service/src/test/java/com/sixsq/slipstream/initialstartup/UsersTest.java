@@ -105,7 +105,6 @@ public class UsersTest {
 		String fn = classLoader.getResource("config/users/test.xml").getFile();
 		File f = new File(fn);
 		Users.loadSingleUser(f);
-		// CljElasticsearchHelper.dumpEsDb("user");
 		User user = User.loadByName("test");
 		assertTrue("test".equals(user.getName()));
 		assertTrue("user/test".equals(user.getResourceUri()));

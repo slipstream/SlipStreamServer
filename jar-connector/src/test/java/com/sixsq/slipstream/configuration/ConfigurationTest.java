@@ -28,9 +28,7 @@ import com.sixsq.slipstream.ssclj.app.CIMITestServer;
 import com.sixsq.slipstream.util.SscljProxy;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.Assert.*;
 import org.restlet.Response;
 
 import java.util.HashMap;
@@ -48,7 +46,8 @@ public class ConfigurationTest {
     }
 
     @AfterClass
-    public static void teardownClass() {
+    public static void teardownClass() throws ValidationException {
+        Configuration.getInstance().reinitialise();
         CIMITestServer.stop();
     }
 

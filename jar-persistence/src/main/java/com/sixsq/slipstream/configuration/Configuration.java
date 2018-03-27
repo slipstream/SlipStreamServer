@@ -28,6 +28,8 @@ import com.sixsq.slipstream.persistence.ParameterType;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
+
+import java.util.concurrent.ScheduledFuture;
 import java.util.logging.Logger;
 import org.restlet.data.Protocol;
 import org.restlet.data.Reference;
@@ -107,6 +109,7 @@ public class Configuration implements Runnable {
 	private int defaultSecurePort = 443;
 
 	public static int refreshRateSec = 10;
+	private static ScheduledFuture<?> refreshTask;
 
 	private static Logger log = Logger.getLogger("Configuration");
 
@@ -170,7 +173,7 @@ public class Configuration implements Runnable {
 	private Configuration() throws ConfigurationException, ValidationException {
 		loadServiceConfiguration();
 		ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
-		service.scheduleAtFixedRate(this, 0, refreshRateSec, TimeUnit.SECONDS);
+		refreshTask = service.scheduleAtFixedRate(this, 0, refreshRateSec, TimeUnit.SECONDS);
 	}
 
 	public void run() {
@@ -185,6 +188,13 @@ public class Configuration implements Runnable {
 		}
 	}
 
+	public void reinitialise() {
+	    if (null != refreshTask) {
+			refreshTask.cancel(false);
+		}
+		instance = null;
+	}
+
 	private void loadServiceConfiguration() throws ConfigurationException, ValidationException {
 		try {
 			ServiceConfiguration serviceConfiguration = ServiceConfiguration.load();
@@ -194,7 +204,6 @@ public class Configuration implements Runnable {
 			e.printStackTrace();
 			log.warning("Resetting service configuration...");
 			reset();
-			store();
 			log.warning("Resetting service configuration... success.");
 		}
 	}
@@ -639,9 +648,5 @@ public class Configuration implements Runnable {
 			target.setInstructions(required.getInstruction());
 			target.setMandatory(true);
 		}
-	}
-
-	public void store() {
-		serviceConfiguration = (ServiceConfiguration) serviceConfiguration.store();
 	}
 }

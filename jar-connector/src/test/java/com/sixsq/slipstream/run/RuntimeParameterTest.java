@@ -68,7 +68,7 @@ public class RuntimeParameterTest {
 	}
 
 	@AfterClass
-	public static void teardownClass() {
+	public static void teardownClass() throws ValidationException {
 		CommonTestUtil.deleteUser(user);
 		ConnectorTestBase.teardownBackend();
 	}
