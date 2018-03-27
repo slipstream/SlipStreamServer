@@ -29,6 +29,7 @@ import java.util.Map;
 import com.sixsq.slipstream.es.CljElasticsearchHelper;
 import com.sixsq.slipstream.ssclj.app.CIMITestServer;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.restlet.Request;
 import org.restlet.Response;
@@ -311,4 +312,32 @@ public class ResourceTestBase extends RunTestBase {
 				new org.restlet.security.User(user.getName()));
 		AuthenticatorBase.setUserInRequest(user, request);
 	}
+
+    protected static void updateServiceConfigurationParameters(
+            SystemConfigurationParametersFactoryBase connectorSystemConfigFactory) throws ValidationException {
+        HashMap conf = new HashMap();
+        conf.put("cloudConnectorClass", connectorSystemConfigFactory.getCategory());
+        String resource = "configuration/slipstream";
+        Response resp = SscljProxy.put("api/" + resource, "super ADMIN", conf);
+        if (SscljProxy.isError(resp)) {
+            Assert.fail("Failed to update " + resource + " with: " + resp.getEntityAsText());
+        }
+        CIMITestServer.refresh();
+        ConnectorFactory.resetConnectors();
+        try {
+            Thread.sleep((long)(Configuration.refreshRateSec * 1000 + 100));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        ServiceConfiguration sc = Configuration.getInstance().getParameters();
+        sc.setParameters(connectorSystemConfigFactory.getParameters());
+        sc.store();
+        CIMITestServer.refresh();
+        try {
+            Thread.sleep((long)(Configuration.refreshRateSec * 1000 + 100));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 }
