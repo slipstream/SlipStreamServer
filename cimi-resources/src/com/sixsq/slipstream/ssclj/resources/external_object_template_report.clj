@@ -2,7 +2,7 @@
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.external-object-template :as eo]
-    [com.sixsq.slipstream.ssclj.resources.spec.external-object-report]))
+    [com.sixsq.slipstream.ssclj.resources.spec.external-object-template-report]))
 
 (def ^:const objectType "report")
 

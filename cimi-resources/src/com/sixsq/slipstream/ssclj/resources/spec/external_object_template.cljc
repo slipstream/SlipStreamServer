@@ -18,13 +18,16 @@
 
 (s/def :cimi.external-object-template/contentType :cimi.core/nonblank-string)
 
+(s/def :cimi.external-object-template/filename :cimi.core/nonblank-string)
+
 ;;
 ;; Keys specifications for ExternalObjectTemplate resources.
 
 (def external-object-template-keys-spec {:req-un [:cimi.external-object-template/objectType
                                                   :cimi.external-object-template/state]
                                          :opt-un [:cimi.external-object-template/href
-                                                  :cimi.external-object-template/contentType]})
+                                                  :cimi.external-object-template/contentType
+                                                  :cimi.external-object-template/filename]})
 (def resource-keys-spec
   (su/merge-keys-specs [c/common-attrs
                         external-object-template-keys-spec]))

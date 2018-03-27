@@ -108,21 +108,35 @@
 
 (def ExternalObjectTemplateDescription
   (merge c/CommonParameterDescription
-         {:objectType {:displayName "External Object type"
-                       :category    "general"
-                       :description "type of external object"
-                       :type        "string"
-                       :mandatory   true
-                       :readOnly    true
-                       :order       10}
-          :state      {:displayName "External object state"
-                       :category    "general"
-                       :description "optional state of the external object"
-                       :type        "enum"
-                       :mandatory   false
-                       :readOnly    true
-                       :order       11
-                       :enum        ["new" "ready"]}}))
+         {:objectType  {:displayName "External Object type"
+                        :category    "general"
+                        :description "type of external object"
+                        :type        "string"
+                        :mandatory   true
+                        :readOnly    true
+                        :order       10}
+          :state       {:displayName "External object state"
+                        :category    "general"
+                        :description "optional state of the external object"
+                        :type        "enum"
+                        :mandatory   false
+                        :readOnly    true
+                        :order       11
+                        :enum        ["new" "ready"]}
+          :contentType {:displayName "External object content type"
+                        :category    "general"
+                        :description "external object content type"
+                        :type        "string"
+                        :mandatory   false
+                        :readOnly    false
+                        :order       12}
+          :filename    {:displayName "External object filename"
+                        :category    "general"
+                        :description "external object filename"
+                        :type        "string"
+                        :mandatory   false
+                        :readOnly    false
+                        :order       13}}))
 
 ;;
 ;; multimethods for validation
