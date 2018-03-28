@@ -30,6 +30,7 @@ import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 
 import java.util.concurrent.ScheduledFuture;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.restlet.data.Protocol;
 import org.restlet.data.Reference;
@@ -182,8 +183,17 @@ public class Configuration implements Runnable {
 			log.fine("Periodic loading of service configuration from backend...");
 			loadServiceConfiguration();
 			log.fine("Periodic loading of service configuration from backend... success.");
+			if (log.getParent().getLevel().equals(Level.FINEST)) {
+				log.finest("===== Service Configuration parameters START =====");
+				StringBuilder sb = new StringBuilder();
+				for (String k: serviceConfiguration.getParameters().keySet()) {
+					sb.append(String.format("name: %s, val: %s\n", k, serviceConfiguration.getParameter(k)));
+				}
+				log.finest(sb.toString());
+				log.finest("===== Service Configuration parameters END =====");
+			}
 		} catch (Exception e) {
-			log.warning("Failed loading service configuration: " + e.getMessage());
+			log.warning("Loading service configuration failed: " + e.getMessage());
 			e.printStackTrace();
 		}
 	}
@@ -648,5 +658,9 @@ public class Configuration implements Runnable {
 			target.setInstructions(required.getInstruction());
 			target.setMandatory(true);
 		}
+	}
+
+	private void printConfiguration() {
+
 	}
 }
