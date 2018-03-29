@@ -44,10 +44,10 @@
 ;;
 
 (defmethod p/post-user-add tpl/registration-method
-  [{:keys [id emailAddress] :as resource} {:keys [baseURI] :as request}]
+  [{:keys [id emailAddress] :as resource} {:keys [base-uri] :as request}]
   (try
     (-> id
-        (user-utils/create-callback baseURI)
+        (user-utils/create-callback base-uri)
         (email-utils/send-validation-email emailAddress))
     (catch Exception e
       (log/error (str e)))))
