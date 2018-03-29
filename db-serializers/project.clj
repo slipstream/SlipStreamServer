@@ -32,7 +32,6 @@
                  [org.clojure/data.xml]
                  [superstring]
                  [org.clojure/test.check]
-                 [com.sixsq.slipstream/SlipStreamPersistence ~+version+]
                  [com.sixsq.slipstream/SlipStreamDbTesting-jar ~+version+]]
 
   :profiles

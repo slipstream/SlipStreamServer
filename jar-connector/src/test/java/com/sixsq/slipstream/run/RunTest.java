@@ -20,8 +20,10 @@ package com.sixsq.slipstream.run;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.ConnectorTestBase;
 import com.sixsq.slipstream.connector.local.LocalConnector;
+import com.sixsq.slipstream.es.CljElasticsearchHelper;
 import com.sixsq.slipstream.event.Event;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
@@ -29,13 +31,17 @@ import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.factory.RunFactory;
 import com.sixsq.slipstream.persistence.*;
+import com.sixsq.slipstream.ssclj.app.CIMITestServer;
 import com.sixsq.slipstream.statemachine.States;
 import com.sixsq.slipstream.util.CommonTestUtil;
 import com.sixsq.slipstream.util.SerializationUtil;
+import com.sixsq.slipstream.util.SscljProxy;
 import com.sixsq.slipstream.util.Terminator;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.restlet.Response;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -53,25 +59,27 @@ public class RunTest extends RunTestBase {
 
 	@BeforeClass
 	public static void setupClass() throws ValidationException,
-			InstantiationException, IllegalAccessException,
-			InvocationTargetException, NoSuchMethodException,
-			ClassNotFoundException {
+            InstantiationException, IllegalAccessException,
+            InvocationTargetException, NoSuchMethodException,
+            ClassNotFoundException, InterruptedException {
 		Event.muteForTests();
 		ConnectorTestBase.setupBackend();
+		Configuration.refreshRateSec = 1;
+		Configuration.getInstance().reinitialise();
 		setupImages();
-		CommonTestUtil
-				.resetAndLoadConnector(LocalConnector.class);
+        Thread.sleep(Configuration.refreshRateSec * 2000 + 100);
+		CommonTestUtil.resetAndLoadConnector(LocalConnector.class);
+		CommonTestUtil.setCloudConnector(LocalConnector.CLOUD_SERVICE_NAME);
 	}
 
 	@AfterClass
-	public static void teardownClass() {
+	public static void teardownClass() throws ValidationException {
 		tearDownImagesAndUser();
 		ConnectorTestBase.teardownBackend();
 	}
 
 	@Test
-	public void verifyCorrectParameters() throws FileNotFoundException,
-			IOException, SlipStreamException {
+	public void verifyCorrectParameters() throws SlipStreamException {
 
 		Run run = RunFactory.getRun(image, RunType.Run, user);
 
@@ -82,8 +90,7 @@ public class RunTest extends RunTestBase {
 	}
 
 	@Test
-	public void storeRetrieveAndDelete() throws FileNotFoundException,
-			IOException, SlipStreamException {
+	public void storeRetrieveAndDelete() throws SlipStreamException {
 
 		Run run = RunFactory.getRun(image, RunType.Run, user);
 		run.store();
@@ -104,8 +111,7 @@ public class RunTest extends RunTestBase {
 	}
 
 	@Test
-	public void runWithOneParameter() throws FileNotFoundException,
-			IOException, SlipStreamException {
+	public void runWithOneParameter() throws SlipStreamException {
 
 		Run run = RunFactory.getRun(image, RunType.Run, user);
 
@@ -142,8 +148,7 @@ public class RunTest extends RunTestBase {
 	}
 
 	@Test
-	public void runWithTwoParameters() throws FileNotFoundException,
-			IOException, SlipStreamException {
+	public void runWithTwoParameters() throws SlipStreamException {
 
 		Run run = RunFactory.getRun(image, RunType.Run, user);
 
@@ -193,8 +198,7 @@ public class RunTest extends RunTestBase {
 	}
 
 	@Test
-	public void assignRuntimeParameters() throws FileNotFoundException,
-			IOException, SlipStreamException {
+	public void assignRuntimeParameters() throws SlipStreamException {
 
 		Run run = RunFactory.getRun(image, RunType.Run, user);
 
@@ -249,8 +253,7 @@ public class RunTest extends RunTestBase {
 	}
 
 	@Test
-	public void createAndRetreive() throws FileNotFoundException, IOException,
-			SlipStreamException {
+	public void createAndRetreive() throws SlipStreamException {
 
 		Run run = new Run(new ImageModule("createAndRetreive"), RunType.Orchestration, cloudServiceNames, user);
 		run.store();
@@ -264,8 +267,7 @@ public class RunTest extends RunTestBase {
 	}
 
 	@Test
-	public void viewListByModule() throws FileNotFoundException, IOException,
-			SlipStreamException {
+	public void viewListByModule() throws SlipStreamException {
 
 		Authz authz;
 		ImageModule findit = new ImageModule("findit");
@@ -300,8 +302,7 @@ public class RunTest extends RunTestBase {
 	}
 
 	@Test
-	public void onlyViewListMyRuns() throws FileNotFoundException, IOException,
-			SlipStreamException {
+	public void onlyViewListMyRuns() throws SlipStreamException {
 
 		Authz authz;
 		ImageModule image = new ImageModule("onlyViewListMyRuns");
@@ -328,8 +329,7 @@ public class RunTest extends RunTestBase {
 	}
 
 	@Test
-	public void checkRunSerialization() throws FileNotFoundException,
-			IOException, SlipStreamException {
+	public void checkRunSerialization() throws SlipStreamException {
 
 		Run run = RunFactory.getRun(image, RunType.Run, user);
 
@@ -337,8 +337,7 @@ public class RunTest extends RunTestBase {
 	}
 
 	@Test
-	public void testParameters() throws SlipStreamException,
-			FileNotFoundException, IOException {
+	public void testParameters() throws SlipStreamException {
 
 		Run run = RunFactory.getRun(image, RunType.Run, user);
 
@@ -358,8 +357,7 @@ public class RunTest extends RunTestBase {
 	}
 
 	@Test
-	public void updateRuntimeParameters() throws SlipStreamException,
-			FileNotFoundException, IOException {
+	public void updateRuntimeParameters() throws SlipStreamException {
 
 		Run run = RunFactory.getRun(image, RunType.Run, user);
 

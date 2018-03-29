@@ -4,9 +4,7 @@
     [clojure.test :refer :all]
     [clojure.data.xml :as xml]
     [me.raynes.fs :as fs]
-    [com.sixsq.slipstream.db.serializers.utils :as u])
-  (:import
-    (com.sixsq.slipstream.persistence ServiceConfiguration)))
+    [com.sixsq.slipstream.db.serializers.utils :as u]))
 
 (defn- xml-params
   [xml]
@@ -60,14 +58,13 @@
 
 (defn conf-xml->sc
   "xml-conf - SlipStream service configuration as XML string."
-  [xml-conf]
-  (let [xml-data (xml/parse-str xml-conf)
-        sc       (ServiceConfiguration.)]
+  [xml-conf serviceConf]
+  (let [xml-data (xml/parse-str xml-conf)]
     (doseq [[attrs value instructions enum-vals] (xml-params-parse xml-data)]
       (let [desc (merge attrs {:instructions instructions
                                :enum         enum-vals})]
-        (.setParameter sc (u/build-sc-param value desc))))
-    sc))
+        (.setParameter serviceConf (u/build-sc-param serviceConf value desc))))
+    serviceConf))
 
 (defn sc-get-param-value
   "sc - ServiceConfiguration

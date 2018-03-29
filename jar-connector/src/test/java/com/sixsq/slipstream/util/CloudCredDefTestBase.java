@@ -1,10 +1,12 @@
 package com.sixsq.slipstream.util;
 
 import com.google.gson.Gson;
+import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.SystemConfigurationParametersFactoryBase;
 import com.sixsq.slipstream.credentials.CloudCredential;
 import com.sixsq.slipstream.credentials.CloudCredentialCreateTmpl;
 import com.sixsq.slipstream.credentials.ICloudCredential;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.ssclj.app.CIMITestServer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -20,8 +22,10 @@ public class CloudCredDefTestBase {
     private static final Gson gson = new Gson();
 
     @BeforeClass
-    public static void setupClass() {
+    public static void setupClass() throws ValidationException {
         CIMITestServer.start();
+        Configuration.refreshRateSec = 1;
+        Configuration.getInstance();
     }
 
     @AfterClass

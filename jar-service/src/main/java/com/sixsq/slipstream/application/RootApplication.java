@@ -53,7 +53,6 @@ import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.resource.AppStoreResource;
 import com.sixsq.slipstream.resource.ModulesChooserResource;
 import com.sixsq.slipstream.resource.RootRedirectResource;
-import com.sixsq.slipstream.resource.configuration.ServiceConfigurationResource;
 import com.sixsq.slipstream.resource.NuvlaboxAdminRouter;
 import com.sixsq.slipstream.run.RunRouter;
 import com.sixsq.slipstream.run.VmsRouter;
@@ -241,7 +240,6 @@ public class RootApplication extends Application {
 			attachRootRedirect(router);
 			attachLogin(router);
 			attachLogout(router);
-			attachConfiguration(router);
 			attachEvent(router);
 			attachUsage(router);
 			attachCloudUsage(router);
@@ -308,11 +306,6 @@ public class RootApplication extends Application {
 				return Filter.STOP;
 			}
 		});
-	}
-
-	private void attachConfiguration(RootRouter router) {
-		String rootUri = ServiceConfigurationResource.CONFIGURATION_PATH.replaceAll("^/",	"");
-		guardAndAttach(router, ServiceConfigurationResource.class, rootUri);
 	}
 
 	private void attachLogout(RootRouter router) {

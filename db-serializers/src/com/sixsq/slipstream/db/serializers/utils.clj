@@ -6,10 +6,7 @@
     [com.sixsq.slipstream.db.es.utils :as esu]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :as aih]
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn])
-  (:import
-    (com.sixsq.slipstream.persistence ServiceConfigurationParameter)
-    (com.sixsq.slipstream.persistence ParameterType)))
+    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]))
 
 (defn throw-on-resp-error
   [resp]
@@ -104,19 +101,16 @@
       n)))
 
 (defn build-sc-param
-  [value desc & [category]]
+  [^Object serviceConf value desc & [category]]
   (when-let [name (qualified-pname desc category)]
-    (let
-      [scp (ServiceConfigurationParameter. name
-                                           (str value)
-                                           (or (:description desc) ""))]
+    (let [scp (.buildServiceConfigParam serviceConf name (str value) (or (:description desc) ""))]
       (when desc
         (when (or category (:category desc))
           (.setCategory scp (or category (:category desc))))
         (when-not (nil? (:mandatory desc))
           (.setMandatory scp (as-boolean (:mandatory desc))))
         (when (:type desc)
-          (.setType scp (ParameterType/valueOf (s/capitalize (:type desc)))))
+          (.setType scp (s/capitalize (:type desc))))
         (when-not (nil? (:readOnly desc))
           (.setReadonly scp (as-boolean (get desc :readOnly (:readOnly desc)))))
         (when (:order desc)

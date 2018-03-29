@@ -76,6 +76,21 @@
 
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamDbSerializers-jar-dep</artifactId>
+      <type>pom</type>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamDbSerializers-jar</artifactId>
+      <type>jar</type>
+      <scope>test</scope>
+    </dependency>
+
+
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
       <artifactId>slipstream-ring-container</artifactId>
       <scope>test</scope>
       <type>jar</type>

@@ -26,29 +26,23 @@ import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotImplementedException;
 import com.sixsq.slipstream.exceptions.SlipStreamRuntimeException;
 import com.sixsq.slipstream.exceptions.ValidationException;
-import com.sixsq.slipstream.persistence.ServiceConfiguration;
-import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 import com.sixsq.slipstream.persistence.User;
 import com.sixsq.slipstream.persistence.UserParameter;
 import com.sixsq.slipstream.ssclj.app.CIMITestServer;
 import com.sixsq.slipstream.util.CommonTestUtil;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import com.sixsq.slipstream.util.SscljProxy;
+import org.junit.*;
+import org.restlet.Response;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
-public abstract class CloudCredentialsTestBase implements
-		ICloudCredentialsTestBase {
+public abstract class CloudCredentialsTestBase implements ICloudCredentialsTestBase {
 
 	protected static User user;
 
@@ -57,24 +51,32 @@ public abstract class CloudCredentialsTestBase implements
 	public static final String CONNECTOR_NAME = "foo-bar-baz";
 
 	@BeforeClass
-	public static void setupClass() throws ValidationException {
+	public static void setupClass() {
 		CIMITestServer.start();
 		CljElasticsearchHelper.initTestDb();
+		Configuration.refreshRateSec = 1;
 		enableQuota();
 	}
 
-	public static void enableQuota() throws ValidationException {
-		ServiceConfiguration sc = Configuration.getInstance().getParameters();
-		String scQuotaParamName = ServiceConfiguration.RequiredParameters.SLIPSTREAM_QUOTA_ENABLE.getName();
-		ServiceConfigurationParameter quotaParam = sc.getParameter(scQuotaParamName);
-		quotaParam.setValue("true");
-		sc.setParameter(quotaParam);
-		sc.store();
+	private static void enableQuota() {
+		HashMap conf = new HashMap<String, String>();
+		conf.put("quotaEnable", true);
+		String resource = "configuration/slipstream";
+		Response resp = SscljProxy.put(SscljProxy.BASE_RESOURCE + resource, "super ADMIN", conf);
+		if (SscljProxy.isError(resp)) {
+			fail("Failed to update " + resource + " with: " + resp.getEntityAsText());
+		}
 		CIMITestServer.refresh();
+		try {
+			Thread.sleep(Configuration.refreshRateSec * 1000 + 100);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@AfterClass
-	public static void teardownClass() {
+	public static void teardownClass() throws ValidationException {
+		Configuration.getInstance().reinitialise();
 		CIMITestServer.stop();
 	}
 

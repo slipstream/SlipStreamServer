@@ -24,6 +24,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.connector.local.LocalConnector;
 import com.sixsq.slipstream.ssclj.app.CIMITestServer;
 import org.junit.AfterClass;
@@ -49,6 +50,7 @@ public class ImageFormProcesorTest {
 		CIMITestServer.start();
 		user = UserTest.createUser("test");
 		UserTest.storeUser(user);
+		Configuration.refreshRateSec = 1;
 		ResourceTestBase.resetAndLoadConnector(LocalConnector.class);
 	}
 
