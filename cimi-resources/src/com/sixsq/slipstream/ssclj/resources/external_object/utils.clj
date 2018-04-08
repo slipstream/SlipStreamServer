@@ -5,7 +5,8 @@
   (:import
     (com.amazonaws.auth BasicAWSCredentials AWSStaticCredentialsProvider)
     (com.amazonaws.services.s3 AmazonS3ClientBuilder)
-    (com.amazonaws.services.s3.model GeneratePresignedUrlRequest DeleteObjectRequest ResponseHeaderOverrides)
+    (com.amazonaws.services.s3.model GeneratePresignedUrlRequest DeleteObjectRequest
+                                     ResponseHeaderOverrides CreateBucketRequest)
     (com.amazonaws.client.builder AwsClientBuilder$EndpointConfiguration)
     (com.amazonaws HttpMethod)))
 
@@ -22,6 +23,12 @@
         (.withCredentials credentials)
         .build)))
 
+(defn create-bucket!
+  [obj-store-conf bucket-name]
+  (let [s3client (get-s3-client obj-store-conf)]
+    (when-not (.doesBucketExist s3client bucket-name)
+      (.createBucket s3client (CreateBucketRequest. bucket-name)))))
+
 (defn generate-url
   [obj-store-conf bucket obj-name verb & [{:keys [ttl content-type filename]}]]
   (let [expiration (tc/to-date (-> (or ttl default-ttl) t/minutes t/from-now))
@@ -33,7 +40,7 @@
                  HttpMethod/GET)
 
         req (doto (GeneratePresignedUrlRequest. bucket obj-name)
-              (.setMethod  method)
+              (.setMethod method)
               (.setExpiration expiration))]
 
     (cond

@@ -16,7 +16,8 @@
 
 (use-fixtures :each (join-fixtures [ltu/with-test-server-fixture
                                     eoltu/create-connector-fixture!
-                                    eoltu/create-cloud-cred-fixture!]))
+                                    eoltu/create-cloud-cred-fixture!
+                                    eoltu/s3-redefs!]))
 
 (def base-uri (str p/service-context (u/de-camelcase eo/resource-name)))
 

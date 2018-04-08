@@ -255,17 +255,21 @@
 
 ;;; Upload URL operation
 
+(def ex-msg-upload-bad-state "External object is not in new state to be uploaded!")
+
 (defn upload-fn
-  "Provided 'resource' and 'request', returns object storage upload URL for 'filename'."
-  [{:keys [id state contentType bucketName objectStoreCred filename]} {{ttl :ttl} :body :as request}]
-  (let [report-id (cu/document-id id)]
-    (if (= state state-new)
-      (do
-        (log/info "Requesting upload url :" report-id)
-        (s3/generate-url (expand-obj-store-creds objectStoreCred request)
-                         bucketName report-id :put
-                         {:ttl (or ttl s3/default-ttl) :content-type contentType :filename filename}))
-      (logu/log-and-throw-400 "External object is not in new state to be uploaded!"))))
+  "Provided 'resource' and 'request', returns object storage upload URL."
+  [{:keys [state contentType bucketName objectName objectStoreCred runUUID filename]} {{ttl :ttl} :body :as request}]
+  (if (= state state-new)
+    (let [object-name (if (not-empty objectName)
+                        objectName
+                        (format "%s/%s" runUUID filename))
+          obj-store-conf (expand-obj-store-creds objectStoreCred request)]
+      (log/info "Requesting upload url:" object-name)
+      (s3/create-bucket! obj-store-conf bucketName)
+      (s3/generate-url obj-store-conf bucketName object-name :put
+                       {:ttl (or ttl s3/default-ttl) :content-type contentType :filename filename}))
+    (logu/log-and-throw-400 ex-msg-upload-bad-state)))
 
 (defmulti upload-subtype
           (fn [resource _] (:objectType resource)))
@@ -293,17 +297,20 @@
 
 ;;; Download URL operation
 
+(def ex-msg-download-bad-state "External object is not in ready state to be downloaded!")
+
 (defn download-fn
-  "Provided 'resource' and 'request', returns object storage download URL for 'filename'."
-  [{:keys [id state bucketName objectStoreCred filename]} {{ttl :ttl} :body :as request}]
-  (let [report-id (cu/document-id id)]
-    (if (= state state-ready)
-      (do
-        (log/info "Requesting download url for report : " report-id)
-        (s3/generate-url (expand-obj-store-creds objectStoreCred request)
-                         bucketName report-id :get
-                         {:ttl (or ttl s3/default-ttl) :filename filename}))
-      (logu/log-and-throw-400 "External object is not in ready state to be downloaded!"))))
+  "Provided 'resource' and 'request', returns object storage download URL."
+  [{:keys [state contentType bucketName objectName objectStoreCred runUUID filename]} {{ttl :ttl} :body :as request}]
+  (if (= state state-ready)
+    (let [object-name (if (not-empty objectName)
+                        objectName
+                        (format "%s/%s" runUUID filename))
+          obj-store-conf (expand-obj-store-creds objectStoreCred request)]
+      (log/info "Requesting download url: " object-name)
+      (s3/generate-url obj-store-conf bucketName object-name :get
+                       {:ttl (or ttl s3/default-ttl) :content-type contentType :filename filename}))
+    (logu/log-and-throw-400 ex-msg-download-bad-state)))
 
 (defmulti download-subtype
           (fn [resource _] (:objectType resource)))

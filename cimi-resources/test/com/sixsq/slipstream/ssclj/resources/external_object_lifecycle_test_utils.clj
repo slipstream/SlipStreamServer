@@ -13,7 +13,8 @@
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.resources.external-object :as eo]))
+    [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
+    [com.sixsq.slipstream.ssclj.resources.external-object.utils :as s3]))
 
 
 (def ^:const user-info-header "jane USER")
@@ -64,6 +65,11 @@
         (ltu/body->edn)
         (ltu/is-status 201)
         (ltu/location))
+    (f)))
+
+(defn s3-redefs!
+  [f]
+  (with-redefs [s3/create-bucket! (fn [_ _] nil)]
     (f)))
 
 (def base-uri (str p/service-context (u/de-camelcase eo/resource-name)))
