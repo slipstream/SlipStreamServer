@@ -118,40 +118,6 @@ public class ServiceConfigurationTest {
 		cfg.validate();
 	}
 
-	@Test
-	public void storeLoadCycle() throws InterruptedException,
-			ConfigurationException, ValidationException {
-
-		ServiceConfiguration cfg = minimalValidConfiguration();
-		cfg.store();
-		String first = cfg.getId();
-
-		Thread.sleep(100);
-
-		ServiceConfiguration recoveredCfg = ServiceConfiguration.load();
-		assertNotNull(recoveredCfg);
-		assertEquals(first, recoveredCfg.getId());
-
-		cfg = minimalValidConfiguration();
-		ServiceConfigurationParameter parameter = new ServiceConfigurationParameter(
-				ServiceConfiguration.RequiredParameters.SLIPSTREAM_MAIL_USERNAME
-						.getName(), "OK", "");
-		cfg.setParameter(parameter);
-		cfg.store();
-		String second = cfg.getId();
-
-		Thread.sleep(1000);
-		recoveredCfg = ServiceConfiguration.load();
-		assertNotNull(recoveredCfg);
-		assertEquals(second, recoveredCfg.getId());
-
-		ServiceConfigurationParameter recoveredParameter = cfg
-				.getParameter(ServiceConfiguration.RequiredParameters.SLIPSTREAM_MAIL_USERNAME
-						.getName());
-		assertNotNull(recoveredParameter);
-		assertEquals("OK", recoveredParameter.getValue());
-	}
-
 	public ServiceConfiguration minimalValidConfiguration()
 			throws ConfigurationException, ValidationException {
 

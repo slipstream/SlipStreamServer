@@ -74,7 +74,7 @@ public class UserResourceTest extends ResourceTestBase {
 	@BeforeClass
 	public static void setupBeforeClass() throws InstantiationException,
 			IllegalAccessException, InvocationTargetException,
-			NoSuchMethodException, ClassNotFoundException {
+			NoSuchMethodException, ClassNotFoundException, ValidationException {
 		resetAndLoadConnector(LocalConnector.class);
 	}
 

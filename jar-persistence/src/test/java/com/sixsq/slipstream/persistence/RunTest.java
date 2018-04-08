@@ -83,7 +83,7 @@ public class RunTest {
 	}
 
 	@Test
-	public void oldRuns() throws ValidationException, NotFoundException, AbortException {
+	public void oldRuns() throws ValidationException {
 
 		Module image = new ImageModule();
 

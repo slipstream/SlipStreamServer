@@ -26,7 +26,7 @@
                                           :user "admin"
                                           :pass "password"})
                   postal/send-message (fn [_ {:keys [body] :as message}]
-                                        (let [url (second (re-matches #"(?s).*-->>\s+(.*?)\n.*" body))]
+                                        (let [url (second (re-matches #"(?s).*-->>\s+http[s]?://.*?(/.*?)\n.*" body))]
                                           (reset! validation-link url))
                                         {:code 0, :error :SUCCESS, :message "OK"})]
 
@@ -215,22 +215,21 @@
                            :isSuperUser))))
 
           ;; check validation of resource
-          (let [abs-validation-link (str p/service-context @validation-link)]
-            (is (not (nil? @validation-link)))
-            (is (re-matches #"^email.*successfully validated$" (-> session-anon
-                                                                   (request abs-validation-link)
-                                                                   (ltu/body->edn)
-                                                                   (ltu/is-status 200)
-                                                                   :response
-                                                                   :body
-                                                                   :message)))
+          (is (not (nil? @validation-link)))
+          (is (re-matches #"^email.*successfully validated$" (-> session-anon
+                                                                 (request @validation-link)
+                                                                 (ltu/body->edn)
+                                                                 (ltu/is-status 200)
+                                                                 :response
+                                                                 :body
+                                                                 :message)))
 
-            (let [{:keys [state] :as user} (-> session-admin
-                                               (request abs-uri)
-                                               (ltu/body->edn)
-                                               :response
-                                               :body)]
-              (is (= "ACTIVE" state))))
+          (let [{:keys [state] :as user} (-> session-admin
+                                             (request abs-uri)
+                                             (ltu/body->edn)
+                                             :response
+                                             :body)]
+            (is (= "ACTIVE" state)))
 
           ;; admin can delete resource
           (-> session-admin

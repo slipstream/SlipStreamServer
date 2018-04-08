@@ -29,6 +29,7 @@ import java.util.Map;
 import com.sixsq.slipstream.es.CljElasticsearchHelper;
 import com.sixsq.slipstream.ssclj.app.CIMITestServer;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.restlet.Request;
 import org.restlet.Response;
@@ -61,9 +62,12 @@ import com.sixsq.slipstream.persistence.UserTest;
 public class ResourceTestBase extends RunTestBase {
 
 	@BeforeClass
-	public static void createTestElasticsearchDb(){
+	public static void createTestElasticsearchDb() throws ValidationException, InterruptedException {
 		CIMITestServer.start();
 		CljElasticsearchHelper.initTestDb();
+		Configuration.refreshRateSec = 1;
+		Configuration.getInstance().reinitialise();
+		Thread.sleep(Configuration.refreshRateSec * 1000 + 100);
 		user = UserTest.createUser("test");
 		user.store();
 	}
@@ -81,13 +85,14 @@ public class ResourceTestBase extends RunTestBase {
 			Class<? extends Connector> connectorClass)
 			throws InstantiationException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException,
-			ClassNotFoundException {
+			ClassNotFoundException, ValidationException {
 
 		// Instantiate the configuration force loading from disk
 		// This is required otherwise the first loading from
 		// disk will reset the connectors
+		Configuration configuration = null;
 		try {
-			Configuration.getInstance();
+			configuration = Configuration.getInstance();
 		} catch (ConfigurationException e) {
 			fail();
 		} catch (ValidationException e) {
@@ -95,10 +100,43 @@ public class ResourceTestBase extends RunTestBase {
 		}
 
 		Map<String, Connector> connectors = new HashMap<String, Connector>();
-		Connector connector = ConnectorFactory
-				.instantiateConnectorFromName(connectorClass.getName());
+		Connector connector = ConnectorFactory.instantiateConnectorFromName(connectorClass.getName());
 		connectors.put(connector.getCloudServiceName(), connector);
 		ConnectorFactory.setConnectors(connectors);
+
+		// Store cloudConnectorClass first.
+		HashMap conf = new HashMap<String, String>();
+		conf.put("cloudConnectorClass", connector.getCloudServiceName());
+		String resource = "configuration/slipstream";
+		Response resp = SscljProxy.put(SscljProxy.BASE_RESOURCE + resource, "super ADMIN", conf);
+		if (SscljProxy.isError(resp)) {
+			fail("Failed to update " + resource + " with: " + resp.getEntityAsText());
+		}
+		CIMITestServer.refresh();
+		ConnectorFactory.resetConnectors();
+		try {
+			Thread.sleep(Configuration.refreshRateSec * 1000 + 100);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		// Store connector.
+		ServiceConfiguration sc = configuration.getParameters();
+		try {
+			sc.setParameter(new ServiceConfigurationParameter(RequiredParameters.CLOUD_CONNECTOR_CLASS.getName(),
+					connector.getCloudServiceName()));
+		} catch (ValidationException e) {
+			fail();
+		}
+		sc.setParameters(connector.getServiceConfigurationParametersTemplate());
+		sc.store();
+		CIMITestServer.refresh();
+		try {
+			Thread.sleep(Configuration.refreshRateSec * 2000 + 100);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	public Request createRequest(Map<String, Object> attributes, Method method)
@@ -275,32 +313,31 @@ public class ResourceTestBase extends RunTestBase {
 		AuthenticatorBase.setUserInRequest(user, request);
 	}
 
-	public static void setCloudConnector(String connectorClassName)
-			throws ConfigurationException {
-		Configuration configuration = null;
-		try {
-			configuration = Configuration.getInstance();
-		} catch (ValidationException e) {
-			fail();
-		}
+    protected static void updateServiceConfigurationParameters(
+            SystemConfigurationParametersFactoryBase connectorSystemConfigFactory) throws ValidationException {
+        HashMap conf = new HashMap();
+        conf.put("cloudConnectorClass", connectorSystemConfigFactory.getCategory());
+        String resource = "configuration/slipstream";
+        Response resp = SscljProxy.put("api/" + resource, "super ADMIN", conf);
+        if (SscljProxy.isError(resp)) {
+            Assert.fail("Failed to update " + resource + " with: " + resp.getEntityAsText());
+        }
+        CIMITestServer.refresh();
+        ConnectorFactory.resetConnectors();
+        try {
+            Thread.sleep((long)(Configuration.refreshRateSec * 1000 + 100));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-		ServiceConfiguration sc = configuration.getParameters();
-		try {
-			sc.setParameter(new ServiceConfigurationParameter(
-					RequiredParameters.CLOUD_CONNECTOR_CLASS.getName(),
-					connectorClassName));
-		} catch (ValidationException e) {
-			fail();
-		}
-		sc.store();
-		ConnectorFactory.resetConnectors();
-	}
-
-	protected static void updateServiceConfigurationParameters(
-			SystemConfigurationParametersFactoryBase connectorSystemConfigFactory)
-			throws ValidationException {
-		ServiceConfiguration sc = Configuration.getInstance().getParameters();
-		sc.setParameters(connectorSystemConfigFactory.getParameters());
-		sc.store();
-	}
+        ServiceConfiguration sc = Configuration.getInstance().getParameters();
+        sc.setParameters(connectorSystemConfigFactory.getParameters());
+        sc.store();
+        CIMITestServer.refresh();
+        try {
+            Thread.sleep((long)(Configuration.refreshRateSec * 1000 + 100));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -21,6 +21,7 @@ package com.sixsq.slipstream.connector;
  */
 
 import com.google.gson.Gson;
+import com.sixsq.slipstream.configuration.Configuration;
 import com.sixsq.slipstream.exceptions.SlipStreamClientException;
 import com.sixsq.slipstream.exceptions.SlipStreamException;
 import com.sixsq.slipstream.exceptions.ValidationException;
@@ -59,7 +60,8 @@ public class CliConnectorBaseTest {
     }
 
     @AfterClass
-    public static void teardownClass() {
+    public static void teardownClass() throws ValidationException {
+        Configuration.getInstance().reinitialise();
         CIMITestServer.stop();
     }
 

@@ -131,11 +131,19 @@ public abstract class CommonTestUtil {
 				.getPublicKeyParameterName(), publicSshKey, "xxx");
 		user.setParameter(userKey);
 
-		String publicSshKey = ServiceConfiguration.CLOUD_CONNECTOR_ORCHESTRATOR_PUBLICSSHKEY;
-		Configuration config = Configuration.getInstance();
-
-		config.getParameters().setParameter(new ServiceConfigurationParameter(publicSshKey, "/dev/null"));
-		config.store();
+		HashMap conf = new HashMap<String, String>();
+		conf.put("connectorOrchPublicSSHKey", "/dev/null");
+		String resource = "configuration/slipstream";
+		Response resp = SscljProxy.put(SscljProxy.BASE_RESOURCE + resource, "super ADMIN", conf);
+		if (SscljProxy.isError(resp)) {
+			fail("Failed to update " + resource + " with: " + resp.getEntityAsText());
+		}
+		CIMITestServer.refresh();
+		try {
+			Thread.sleep(Configuration.refreshRateSec * 1000 + 100);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static DeploymentModule createDeployment() throws ValidationException, NotFoundException {
@@ -220,24 +228,29 @@ public abstract class CommonTestUtil {
 		// forces loading the configuration, such that we can override it
 		ConnectorFactory.getConnectors();
 
-		// update the configuration
-		Configuration configuration = null;
-		try {
-			configuration = Configuration.getInstance();
-		} catch (ValidationException e) {
-			fail();
-		}
+		Configuration configuration = Configuration.getInstance();
+        ServiceConfiguration sc = configuration.getParameters();
+        try {
+            sc.setParameter(new ServiceConfigurationParameter(RequiredParameters.CLOUD_CONNECTOR_CLASS.getName(),
+                    configConnectorName));
+        } catch (ValidationException e) {
+            fail();
+        }
+        sc.setParameters(systemConfigurationFactory.getParameters());
+        sc.store();
+        CIMITestServer.refresh();
+        Thread.sleep(Configuration.refreshRateSec * 2000 + 100);
 
-		ServiceConfiguration sc = configuration.getParameters();
-		try {
-			sc.setParameter(new ServiceConfigurationParameter(RequiredParameters.CLOUD_CONNECTOR_CLASS.getName(),
-					configConnectorName));
-		} catch (ValidationException e) {
-			fail();
+		HashMap conf = new HashMap<String, String>();
+		conf.put("cloudConnectorClass", configConnectorName);
+		String resource = "configuration/slipstream";
+		Response resp = SscljProxy.put(SscljProxy.BASE_RESOURCE + resource, "super ADMIN", conf);
+		if (SscljProxy.isError(resp)) {
+			fail("Failed to update " + resource + " with: " + resp.getEntityAsText());
 		}
-		sc.setParameters(systemConfigurationFactory.getParameters());
-		sc.store();
+		CIMITestServer.refresh();
 		ConnectorFactory.resetConnectors();
+		Thread.sleep(Configuration.refreshRateSec * 1000 + 100);
 
 		// return the loaded connector
 		String connectorInstanceName = cloudServiceName;
@@ -265,37 +278,32 @@ public abstract class CommonTestUtil {
 			fail("Failed to create connector " + connectorName + " with: " +
 					resp.getEntityAsText());
 		}
+		try {
+			Thread.sleep(Configuration.refreshRateSec * 2000 + 100);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
-	// FIXME: duplicate from ResourceTestBase
-	public static void updateServiceConfigurationParameters(
-			SystemConfigurationParametersFactoryBase connectorSystemConfigFactory) throws ValidationException {
-		ServiceConfiguration sc = Configuration.getInstance().getParameters();
-		sc.setParameters(connectorSystemConfigFactory.getParameters());
-		sc.store();
-	}
-
-	// FIXME: duplicate from ResourceTestBase
 	public static void setCloudConnector(String connectorClassName) throws ConfigurationException {
-		Configuration configuration = null;
-		try {
-			configuration = Configuration.getInstance();
-		} catch (ValidationException e) {
-			fail();
-		}
-
-		ServiceConfiguration sc = configuration.getParameters();
-		try {
-			sc.setParameter(new ServiceConfigurationParameter(RequiredParameters.CLOUD_CONNECTOR_CLASS.getName(),
-					connectorClassName));
-		} catch (ValidationException e) {
-			fail();
-		}
-		sc.store();
+        HashMap conf = new HashMap<String, String>();
+        conf.put("cloudConnectorClass", connectorClassName);
+        String resource = "configuration/slipstream";
+        Response resp = SscljProxy.put(SscljProxy.BASE_RESOURCE + resource, "super ADMIN", conf);
+        if (SscljProxy.isError(resp)) {
+            fail("Failed to update " + resource + " with: " + resp.getEntityAsText());
+        }
+        CIMITestServer.refresh();
+        ConnectorFactory.resetConnectors();
+        try {
+            Thread.sleep(Configuration.refreshRateSec * 1000 + 100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 		ConnectorFactory.resetConnectors();
 	}
 
-	public static void assertStringEquals(String expected, String actual) {
+    public static void assertStringEquals(String expected, String actual) {
 		String message = "Expected '" + expected + "' got '" + actual + "' !";
 		boolean condition = expected != null && expected.equals(actual);
 

@@ -39,7 +39,7 @@ import static com.sixsq.slipstream.util.SscljProxy.parseJson;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 
-public class RunFactoryTest extends RunTest {
+public class RunFactoryTest extends RunTestBase {
 
 	protected static ImageModule imageCircular1of2 = null;
 	protected static ImageModule imageCircular2of2 = null;
@@ -125,7 +125,7 @@ public class RunFactoryTest extends RunTest {
 	}
 
 	@AfterClass
-	public static void teardownClass() {
+	public static void teardownClass() throws ValidationException {
 		RunTest.teardownClass();
 
 		if (imageCircular1of2 != null) {

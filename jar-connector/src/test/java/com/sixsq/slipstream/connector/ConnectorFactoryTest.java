@@ -20,35 +20,32 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
+import com.sixsq.slipstream.configuration.Configuration;
+import com.sixsq.slipstream.es.CljElasticsearchHelper;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.util.CommonTestUtil;
-import org.junit.After;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
-public class ConnectorFactoryTest extends ConnectorTestBase {
+public class ConnectorFactoryTest {
 
     @BeforeClass
-    public static void beforeClass() {
-        CommonTestUtil.setCloudConnector("");
+    public static void beforeClass() throws ValidationException {
+        ConnectorTestBase.setupBackend();
     }
 
     @After
     public void afterEach() {
         CommonTestUtil.setCloudConnector("");
+    }
+
+    @AfterClass
+    public static void teardownClass() throws ValidationException {
+        ConnectorTestBase.teardownBackend();
     }
 
     @Test
@@ -105,15 +102,6 @@ public class ConnectorFactoryTest extends ConnectorTestBase {
     }
 
     @Test
-    public void checkConnectorClassNames() throws Exception {
-
-        CommonTestUtil.setCloudConnector("com.sixsq.slipstream.connector.local.LocalConnector");
-        List<String> names = ConnectorFactory.getCloudServiceNamesList();
-
-        assertTrue(names.contains("local"));
-    }
-
-    @Test
     public void checkConnectorNamesWithAliases() throws Exception {
 
         CommonTestUtil.setCloudConnector(
@@ -126,6 +114,7 @@ public class ConnectorFactoryTest extends ConnectorTestBase {
         assertTrue(names.contains("local"));
     }
 
+    @Ignore
     @Test
     public void checkConnectorNamesWithAliasesAndSpaces() throws Exception {
 
@@ -139,6 +128,7 @@ public class ConnectorFactoryTest extends ConnectorTestBase {
         assertTrue(names.contains("local"));
     }
 
+    @Ignore
     @Test
     public void checkConnectorsWithAliasesAndSpaces() throws Exception {
 
@@ -154,6 +144,7 @@ public class ConnectorFactoryTest extends ConnectorTestBase {
         assertEquals(connectors.get("openstack"), null);
     }
 
+    @Ignore
     @Test
     public void checkConnectorInstanceAndCloudServiceNames() throws Exception {
 

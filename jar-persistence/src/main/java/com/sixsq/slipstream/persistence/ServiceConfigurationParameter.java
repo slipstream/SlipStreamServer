@@ -90,4 +90,8 @@ public class ServiceConfigurationParameter extends
 					"Key must start with a letter and contain only letters, digits, dots, dash and underscores.");
 		}
 	}
+
+	public void setType(String type) {
+		setType(ParameterType.valueOf(type));
+	}
 }

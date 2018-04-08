@@ -23,6 +23,7 @@ package com.sixsq.slipstream.es;
 import clojure.java.api.Clojure;
 import clojure.lang.IFn;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
+import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
 
 import java.io.File;
@@ -114,17 +115,20 @@ public class CljElasticsearchHelper {
 
     public static ServiceConfigurationParameter getParameterDescription(String paramName) {
         return (ServiceConfigurationParameter)
-                getFn(NS_SERIALIZERS_SERVICE_CONFIG_IMPL, "get-sc-param-meta-only").invoke(paramName);
+                getFn(NS_SERIALIZERS_SERVICE_CONFIG_IMPL, "get-sc-param-meta-only").invoke(
+                        new ServiceConfiguration(), paramName);
     }
 
     public static ServiceConfigurationParameter getConnectorParameterDescription(String paramName) {
         return (ServiceConfigurationParameter)
-                getFn(NS_SERIALIZERS_SERVICE_CONFIG_IMPL, "get-connector-param-from-template").invoke(paramName);
+                getFn(NS_SERIALIZERS_SERVICE_CONFIG_IMPL, "get-connector-param-from-template").invoke(
+                        new ServiceConfiguration(), paramName);
     }
 
     public static List<ServiceConfigurationParameter> getConnectorParameters(String connectorName) {
         List<ServiceConfigurationParameter> scps = (List<ServiceConfigurationParameter>)
-                getFn(NS_SERIALIZERS_SERVICE_CONFIG_IMPL, "get-connector-params-from-template").invoke(connectorName);
+                getFn(NS_SERIALIZERS_SERVICE_CONFIG_IMPL, "get-connector-params-from-template").invoke(
+                        new ServiceConfiguration(), connectorName);
         if (scps.size() == 0) {
             logger.warning("Loaded 0 connector parameters for connector '" + connectorName + "'");
         }
