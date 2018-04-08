@@ -46,7 +46,23 @@
 ;;
 
 (def external-object-reference-attrs-defaults
-  {:state "new"})
+  {})
+
+
+;;
+;; Template validation
+;;
+
+(defmulti validate-subtype-template :objectType)
+
+(defmethod validate-subtype-template :default
+  [resource]
+  (throw (ex-info (str "unknown External object template type: '" (:objectType resource) "'") resource)))
+
+(defmethod crud/validate resource-uri
+  [resource]
+  (validate-subtype-template resource))
+
 
 ;;
 ;; atom to keep track of the loaded ExternalObjectTemplate resources
@@ -108,41 +124,20 @@
 
 (def ExternalObjectTemplateDescription
   (merge c/CommonParameterDescription
-         {:objectType {:displayName "External Object type"
-                       :category    "general"
-                       :description "type of external object"
-                       :type        "string"
-                       :mandatory   true
-                       :readOnly    true
-                       :order       10}
-          :state      {:displayName "External object state"
-                       :category    "general"
-                       :description "optional state of the external object"
-                       :type        "enum"
-                       :mandatory   false
-                       :readOnly    true
-                       :order       11
-                       :enum        ["new" "ready"]}}))
-
-;;
-;; multimethods for validation
-;;
-
-(defmulti validate-subtype
-          "Validates the given resource against the specific
-           ExternalObjectTemplate subtype schema."
-          :objectType)
-
-
-(defmethod validate-subtype :default
-  [resource]
-  (throw (ex-info (str "unknown ExternalObjectTemplate type: " (:objectType resource)) resource)))
-
-
-(defmethod crud/validate
-  resource-uri
-  [resource]
-  (validate-subtype resource))
+         {:objectType  {:displayName "External Object type"
+                        :category    "general"
+                        :description "type of external object"
+                        :type        "string"
+                        :mandatory   true
+                        :readOnly    true
+                        :order       10}
+          :contentType {:displayName "External object content type"
+                        :category    "general"
+                        :description "external object content type"
+                        :type        "string"
+                        :mandatory   false
+                        :readOnly    false
+                        :order       12}}))
 
 ;;
 ;; CRUD operations

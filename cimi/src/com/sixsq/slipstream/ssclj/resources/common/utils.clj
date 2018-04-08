@@ -175,3 +175,19 @@
 (defn map-multi-line
   [m]
   (str "\n" (clojure.pprint/write m :stream nil :right-margin 50)))
+
+
+(defn remove-in
+  "Removes the set of `rm-set` elements from a list under key `k` in the map `m`."
+  [m k rm-set]
+  (update-in m [k] #(vec (remove rm-set %))))
+
+(defn remove-req
+  "Removes required elements defined in `specs` set from `keys-spec` spec."
+  [keys-spec specs]
+  (remove-in keys-spec :req-un specs))
+
+(defn remove-opt
+  "Removes optional elements defined in `specs` set from `keys-spec` spec."
+  [keys-spec specs]
+  (remove-in keys-spec :opt-un specs))

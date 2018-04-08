@@ -1,6 +1,6 @@
-(def +version+ "3.48-SNAPSHOT")
+(def +version+ "3.49-SNAPSHOT")
 
-(defproject com.sixsq.slipstream/SlipStreamToolsCli-jar "3.48-SNAPSHOT"
+(defproject com.sixsq.slipstream/SlipStreamToolsCli-jar "3.49-SNAPSHOT"
 
   :distribution "command line utilities"
   :url "https://github.com/slipstream/SlipStreamServer"
@@ -11,7 +11,7 @@
 
   :plugins [[lein-parent "0.3.2"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "5.1.0"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.1.1"]
                    :inherit [:min-lein-version
                              :managed-dependencies
                              :repositories

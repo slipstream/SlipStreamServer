@@ -1,9 +1,8 @@
-(ns com.sixsq.slipstream.ssclj.resources.external-object-lifecycle-test
+(ns com.sixsq.slipstream.ssclj.resources.external-object-generic-lifecycle-test
   (:require
     [clojure.test :refer :all]
     [clojure.data.json :as json]
     [peridot.core :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.external-object :refer :all]
     [com.sixsq.slipstream.ssclj.resources.external-object-lifecycle-test-utils :as eoltu]
     [com.sixsq.slipstream.ssclj.resources.external-object-template-generic :as generic]
     [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
@@ -25,11 +24,8 @@
   []
   {:bucketName      "my-bucket"
    :objectStoreCred {:href eoltu/*cred-uri*}
-   :contentType     "application/gzip"})
-
-(defn external-object-with-name
-  [name]
-  (assoc (external-object) :objectName name))
+   :contentType     "application/gzip"
+   :objectName      "my-obj-name"})
 
 (deftest lifecycle
   (eoltu/lifecycle (str p/service-context eot/resource-url "/" generic/objectType)
@@ -42,9 +38,7 @@
 
 
 (deftest lifecycle-href
-  (let [href-create {:externalObjectTemplate (assoc (external-object-with-name "my-obj-name")
-                                               :state eo/state-new
-                                               :objectType generic/objectType)}]
+  (let [href-create {:externalObjectTemplate (assoc (external-object) :objectType generic/objectType)}]
 
     ;; abbreviated lifecycle using href to template instead of copy
     (let [uri (-> eoltu/session-admin
@@ -72,7 +66,7 @@
 
 
 (deftest bad-methods
-  (let [resource-uri (str p/service-context (u/new-resource-id resource-name))]
+  (let [resource-uri (str p/service-context (u/new-resource-id eo/resource-name))]
     (ltu/verify-405-status [[base-uri :options]
                             [base-uri :delete]
                             [resource-uri :options]

@@ -1,17 +1,18 @@
 (ns com.sixsq.slipstream.ssclj.resources.external-object-report
   (:require
+    [clj-time.core :as t]
     [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
-    [com.sixsq.slipstream.ssclj.resources.external-object-template-report :as tpl]
+    [com.sixsq.slipstream.ssclj.resources.external-object-template-report :as eot]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.external-object-report]
+    [com.sixsq.slipstream.ssclj.resources.spec.external-object-template-report]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.configuration :as p]
-    [com.sixsq.slipstream.ssclj.resources.configuration-slipstream :as conf-ss])
-  (:import (clojure.lang ExceptionInfo)))
+    [com.sixsq.slipstream.ssclj.resources.configuration-slipstream :as conf-ss]))
 
 
 (def ExternalObjectReportDescription
-  tpl/ExternalObjectTemplateReportDescription)
+  eot/ExternalObjectTemplateReportDescription)
 
 ;;
 ;; description
@@ -37,23 +38,25 @@
   (let [request (set-uuid-in-request request-admin conf-ss/service)]
     (:body ((std-crud/retrieve-fn p/resource-url) request))))
 
-(defmethod eo/tpl->externalObject tpl/objectType
+(defn object-name
+  [{:keys [runUUID filename]}]
+  (format "%s/%s" runUUID filename))
+
+(defmethod eo/tpl->externalObject eot/objectType
   [resource]
   (let [{:keys [reportsObjectStoreBucketName reportsObjectStoreCreds]} (ss-conf)]
-    (merge resource {:objectStoreCred {:href reportsObjectStoreCreds}
-                     :bucketName      reportsObjectStoreBucketName})))
+    (-> resource
+        (merge {:objectStoreCred {:href reportsObjectStoreCreds}
+                :bucketName      reportsObjectStoreBucketName
+                :objectName      (object-name resource)})
+        (dissoc :filename))))
 
 ;;
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi/external-object-template.report))
-(defmethod eo/validate-subtype tpl/objectType
+(def validate-fn (u/create-spec-validation-fn :cimi/external-object.report))
+(defmethod eo/validate-subtype eot/objectType
   [resource]
   (validate-fn resource))
 
-
-(def create-validate-fn (u/create-spec-validation-fn :cimi/external-object-template.report-create))
-(defmethod eo/create-validate-subtype tpl/objectType
-  [resource]
-  (create-validate-fn resource))

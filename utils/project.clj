@@ -1,6 +1,6 @@
-(def +version+ "3.48-SNAPSHOT")
+(def +version+ "3.49-SNAPSHOT")
 
-(defproject com.sixsq.slipstream/utils "3.48-SNAPSHOT"
+(defproject com.sixsq.slipstream/utils "3.49-SNAPSHOT"
 
   :description "general server utilities"
 
@@ -12,7 +12,7 @@
 
   :plugins [[lein-parent "0.3.2"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "5.1.0"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.1.1"]
                    :inherit [:min-lein-version
                              :managed-dependencies
                              :repositories

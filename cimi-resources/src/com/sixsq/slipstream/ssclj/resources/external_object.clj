@@ -73,6 +73,26 @@
   (create-validate-subtype resource))
 
 ;;
+;; multimethods for validation for the external objects
+;;
+
+(defmulti validate-subtype
+          "Validates the given resource against the specific
+           ExternalObjectTemplate subtype schema."
+          :objectType)
+
+
+(defmethod validate-subtype :default
+  [resource]
+  (throw (ex-info (str "unknown ExternalObjectTemplate type: " (:objectType resource)) resource)))
+
+
+(defmethod crud/validate
+  resource-uri
+  [resource]
+  (validate-subtype resource))
+
+;;
 ;; multimethod for ACLs
 ;;
 
@@ -177,7 +197,7 @@
                        {})]                                 ;; to put back the unexpanded href after
     (-> body
         (check-cred-exists idmap)
-        ;; remove connector href (if any); regular user doesn't have rights to see them
+        ;; remove connector href (if any); regular user MAY NOT have rights to see it
         (update-in [:externalObjectTemplate] dissoc :objectStoreCred)
         (std-crud/resolve-hrefs idmap)
         ;; put back unexpanded connector href
@@ -194,7 +214,8 @@
                  (resolve-hrefs idmap)
                  (crud/validate)
                  (:externalObjectTemplate)
-                 (tpl->externalObject))]
+                 (tpl->externalObject)
+                 (assoc :state state-new))]
     (add-impl (assoc request :body body))))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
@@ -235,17 +256,15 @@
 ;;; Upload URL operation
 
 (defn upload-fn
-  [{:keys [id state contentType bucketName objectStoreCred] :as resource} {{ttl :ttl} :body :as request}]
+  "Provided 'resource' and 'request', returns object storage upload URL for 'filename'."
+  [{:keys [id state contentType bucketName objectStoreCred filename]} {{ttl :ttl} :body :as request}]
   (let [report-id (cu/document-id id)]
     (if (= state state-new)
       (do
         (log/info "Requesting upload url :" report-id)
         (s3/generate-url (expand-obj-store-creds objectStoreCred request)
-                         bucketName
-                         report-id
-                         :put
-                         (or ttl s3/default-ttl)
-                         contentType))
+                         bucketName report-id :put
+                         {:ttl (or ttl s3/default-ttl) :content-type contentType :filename filename}))
       (logu/log-and-throw-400 "External object is not in new state to be uploaded!"))))
 
 (defmulti upload-subtype
@@ -275,16 +294,15 @@
 ;;; Download URL operation
 
 (defn download-fn
-  [{:keys [id state bucketName objectStoreCred] :as resource} {{ttl :ttl} :body :as request}]
+  "Provided 'resource' and 'request', returns object storage download URL for 'filename'."
+  [{:keys [id state bucketName objectStoreCred filename]} {{ttl :ttl} :body :as request}]
   (let [report-id (cu/document-id id)]
     (if (= state state-ready)
       (do
         (log/info "Requesting download url for report : " report-id)
         (s3/generate-url (expand-obj-store-creds objectStoreCred request)
-                         bucketName
-                         report-id
-                         :get
-                         (or ttl s3/default-ttl)))
+                         bucketName report-id :get
+                         {:ttl (or ttl s3/default-ttl) :filename filename}))
       (logu/log-and-throw-400 "External object is not in ready state to be downloaded!"))))
 
 (defmulti download-subtype

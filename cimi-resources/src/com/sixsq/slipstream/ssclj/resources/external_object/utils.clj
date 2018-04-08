@@ -5,7 +5,7 @@
   (:import
     (com.amazonaws.auth BasicAWSCredentials AWSStaticCredentialsProvider)
     (com.amazonaws.services.s3 AmazonS3ClientBuilder)
-    (com.amazonaws.services.s3.model GeneratePresignedUrlRequest DeleteObjectRequest)
+    (com.amazonaws.services.s3.model GeneratePresignedUrlRequest DeleteObjectRequest ResponseHeaderOverrides)
     (com.amazonaws.client.builder AwsClientBuilder$EndpointConfiguration)
     (com.amazonaws HttpMethod)))
 
@@ -23,27 +23,26 @@
         .build)))
 
 (defn generate-url
-  ([obj-store-conf bucket obj-name] (generate-url obj-store-conf bucket obj-name :get))
-  ([obj-store-conf bucket obj-name verb] (generate-url obj-store-conf bucket obj-name verb default-ttl))
-  ([obj-store-conf bucket obj-name verb ttl] (generate-url obj-store-conf bucket obj-name verb ttl nil))
-  ([obj-store-conf bucket obj-name verb ttl contentType]
-   (let [expiration (tc/to-date (-> ttl t/minutes t/from-now))
-         req (doto (GeneratePresignedUrlRequest. bucket obj-name)
-               (.setMethod (if (= verb :put)
-                             HttpMethod/PUT
-                             HttpMethod/GET))
-               (.setExpiration expiration))
-         generate-presigned-url-request (if contentType
-                                          (doto req (.setContentType contentType))
-                                          req)]
-     (str
-       (.generatePresignedUrl
-         (get-s3-client obj-store-conf)
-         generate-presigned-url-request)))))
+  [obj-store-conf bucket obj-name verb & [{:keys [ttl content-type filename]}]]
+  (let [expiration (tc/to-date (-> (or ttl default-ttl) t/minutes t/from-now))
+        overrides (when filename
+                    (doto (ResponseHeaderOverrides.)
+                      (.setContentDisposition (format "attachment; filename=\"%s\"" filename))))
+        method (if (= verb :put)
+                 HttpMethod/PUT
+                 HttpMethod/GET)
 
+        req (doto (GeneratePresignedUrlRequest. bucket obj-name)
+              (.setMethod  method)
+              (.setExpiration expiration))]
+
+    (cond
+      content-type (.setContentType req content-type)
+      overrides (.setResponseHeaders req overrides))
+
+    (str (.generatePresignedUrl (get-s3-client obj-store-conf) req))))
 
 (defn delete-s3-object [obj-store-conf bucket obj-name]
   (let [deleteRequest (DeleteObjectRequest. bucket obj-name)]
     (.deleteObject (get-s3-client obj-store-conf) deleteRequest)))
-
 
