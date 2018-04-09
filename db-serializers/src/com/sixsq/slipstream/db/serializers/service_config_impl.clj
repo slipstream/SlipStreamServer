@@ -74,6 +74,7 @@
 
 (def connector-mandatory-atrrs-kw->pname
   {:endpoint                "endpoint"
+   :objectStoreEndpoint     "object.store.endpoint"
    :nativeContextualization "native-contextualization"
    :orchestratorSSHUsername "orchestrator.ssh.username"
    :orchestratorSSHPassword "orchestrator.ssh.password"
