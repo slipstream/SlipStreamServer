@@ -301,15 +301,13 @@
 
 (defn download-fn
   "Provided 'resource' and 'request', returns object storage download URL."
-  [{:keys [state contentType bucketName objectName objectStoreCred runUUID filename]} {{ttl :ttl} :body :as request}]
+  [{:keys [state bucketName objectName objectStoreCred filename]} {{ttl :ttl} :body :as request}]
   (if (= state state-ready)
-    (let [object-name (if (not-empty objectName)
-                        objectName
-                        (format "%s/%s" runUUID filename))
-          obj-store-conf (expand-obj-store-creds objectStoreCred request)]
-      (log/info "Requesting download url: " object-name)
-      (s3/generate-url obj-store-conf bucketName object-name :get
-                       {:ttl (or ttl s3/default-ttl) :content-type contentType :filename filename}))
+    (do
+      (log/info "Requesting download url: " objectName)
+      (s3/generate-url (expand-obj-store-creds objectStoreCred request)
+                       bucketName objectName :get
+                       {:ttl (or ttl s3/default-ttl) :filename filename}))
     (logu/log-and-throw-400 ex-msg-download-bad-state)))
 
 (defmulti download-subtype
