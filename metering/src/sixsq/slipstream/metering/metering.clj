@@ -74,6 +74,17 @@
   (assoc m :resourceURI metering-resource-uri))
 
 
+(defn complete-index-action
+  "Add the :_id key to the index action so that the Elasticsearch :_id key is
+   consistent with the CIMI resourceID. The :_type key should already be
+   present in the index-action parameter."
+  [index-action {:keys [id] :as v}]
+  (let [action (first (keys index-action))
+        args (first (vals index-action))
+        uuid (second (str/split id #"/"))]
+    [{action (assoc args :_id uuid)} v]))
+
+
 (defn create-actions
   "work on a subset of documents returned by the global query search"
   [timestamp index-action page]
@@ -86,7 +97,7 @@
        (map assoc-price)
        (map (partial update-id timestamp))
        (map replace-resource-uri)
-       (map (fn [v] [index-action v]))))
+       (map (partial complete-index-action index-action))))
 
 
 (defn bulk-insert
