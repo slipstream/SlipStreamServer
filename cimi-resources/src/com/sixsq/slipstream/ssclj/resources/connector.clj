@@ -142,10 +142,19 @@
 ;; use name as the identifier
 ;;
 
-(defmethod crud/new-identifier resource-name
+(defmulti new-identifier-subtype
+          (fn [resource _] (:cloudServiceType resource)))
+
+(defmethod new-identifier-subtype :default
   [resource resource-name]
   (if-let [new-id (:instanceName resource)]
     (assoc resource :id (str (u/de-camelcase resource-name) "/" new-id))))
+
+
+(defmethod crud/new-identifier resource-name
+  [resource resource-name]
+  (new-identifier-subtype resource resource-name))
+
 
 ;;; Activate operation
 
@@ -171,6 +180,7 @@
 
 
 ;;; Quarantine operation
+
 (defmulti quarantine-subtype
           (fn [resource _] (:cloudServiceType resource)))
 
@@ -190,6 +200,9 @@
           (quarantine-subtype request)))
     (catch ExceptionInfo ei
       (ex-data ei))))
+
+
+;;; Describe operation
 
 (defmethod crud/do-action [resource-url "describe"]
   [{{uuid :uuid} :params :as request}]
