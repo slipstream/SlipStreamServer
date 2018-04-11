@@ -22,7 +22,7 @@
                 eo/expand-cred (fn [cred-href _] (get my-cloud-creds (:href cred-href)))
                 eo/connector-from-cred (fn [_ _] {:objectStoreEndpoint s3-endpoint})]
 
-    (is (thrown-with-msg? ExceptionInfo (re-pattern eo/ex-msg-upload-bad-state)
+    (is (thrown-with-msg? ExceptionInfo (re-pattern (eo/error-msg-bad-state "upload" eo/state-new eo/state-ready))
                           (eo/upload-fn {:state eo/state-ready} {})))
 
     ;; generic external object

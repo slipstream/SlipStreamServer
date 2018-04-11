@@ -204,12 +204,13 @@
             (-> session-admin
                 (request entry-uri)
                 (ltu/body->edn)
+                (ltu/is-key-value :state eo/state-new)
                 (ltu/is-operation-present "delete")
                 (ltu/is-operation-present "upload")
+                (ltu/is-operation-absent "ready")
                 (ltu/is-operation-absent "download")
                 (ltu/is-operation-absent "edit")
-                (ltu/is-status 200)
-                (ltu/is-id id)))))
+                (ltu/is-status 200)))))
 
       ;; admin delete succeeds
       (doseq [uri [abs-uri abs-uri-user]]
@@ -294,6 +295,8 @@
                         (request abs-uri)
                         (ltu/body->edn)
                         (ltu/is-operation-present "upload")
+                        (ltu/is-operation-present "delete")
+                        (ltu/is-operation-absent "ready")
                         (ltu/is-operation-absent "download")
                         (ltu/is-status 200)
                         (ltu/get-op "upload"))
@@ -302,6 +305,8 @@
                              (request abs-uri-user)
                              (ltu/body->edn)
                              (ltu/is-operation-present "upload")
+                             (ltu/is-operation-present "delete")
+                             (ltu/is-operation-absent "ready")
                              (ltu/is-operation-absent "download")
                              (ltu/is-status 200)
                              (ltu/get-op "upload"))
@@ -332,24 +337,50 @@
               :body
               :uri))
 
-      ;; doing it again should fail because the object should
-      ;; be in a 'ready' state
+      ;; after getting upload URL the state is set to 'uploading' and only 'ready' action is present
+      (-> session-admin
+          (request abs-uri)
+          (ltu/body->edn)
+          (ltu/is-key-value :state eo/state-uploading)
+          (ltu/is-operation-present "ready")
+          (ltu/is-operation-present "delete")
+          (ltu/is-operation-absent "upload")
+          (ltu/is-operation-absent "download")
+          (ltu/is-status 200))
+
+      ;; doing it again should fail because the object is in 'uploading' state
       (-> session-admin
           (request abs-upload-uri
                    :request-method :post)
           (ltu/body->edn)
           (ltu/is-status 400))
 
-      (let [updated-eo (-> session-admin
-                           (request abs-uri)
-                           (ltu/body->edn)
-                           (ltu/is-operation-absent "upload")
-                           (ltu/is-operation-present "download")
-                           (ltu/is-status 200))
-            download-url-action (str p/service-context (ltu/get-op updated-eo "download"))
-            state (-> updated-eo :response :body :state)]
-        (= eo/state-ready state)
-        (is download-url-action)
+      (let [uploading-eo (-> session-admin
+                             (request abs-uri)
+                             (ltu/body->edn)
+                             (ltu/is-key-value :state eo/state-uploading)
+                             (ltu/is-operation-present "delete")
+                             (ltu/is-operation-present "ready")
+                             (ltu/is-operation-absent "upload")
+                             (ltu/is-operation-absent "download")
+                             (ltu/is-status 200))
+            ;; after upload is done, change object state to 'ready'
+            ready-url-action (str p/service-context (ltu/get-op uploading-eo "ready"))
+            _ (-> session-admin
+                  (request ready-url-action
+                           :request-method :post)
+                  (ltu/body->edn)
+                  (ltu/is-status 200))
+            ready-eo (-> session-admin
+                         (request abs-uri)
+                         (ltu/body->edn)
+                         (ltu/is-key-value :state eo/state-ready)
+                         (ltu/is-operation-present "download")
+                         (ltu/is-operation-present "delete")
+                         (ltu/is-operation-absent "upload")
+                         (ltu/is-operation-absent "ready")
+                         (ltu/is-status 200))
+            download-url-action (str p/service-context (ltu/get-op ready-eo "download"))]
         (is (-> session-admin
                 (request download-url-action
                          :request-method :post)
@@ -369,24 +400,49 @@
               :body
               :uri))
 
-      ;; doing it again should fail because the object should
-      ;; be in a 'ready' state
+      ;; after getting upload URL the state is set to 'uploading' and only 'ready' action is present
+      (-> session-user
+          (request abs-uri-user)
+          (ltu/body->edn)
+          (ltu/is-key-value :state eo/state-uploading)
+          (ltu/is-operation-present "delete")
+          (ltu/is-operation-present "ready")
+          (ltu/is-operation-absent "upload")
+          (ltu/is-operation-absent "download")
+          (ltu/is-status 200))
+
+      ;; doing it again should fail because the object is in 'uploading' state
       (-> session-user
           (request abs-upload-uri-user
                    :request-method :post)
           (ltu/body->edn)
           (ltu/is-status 400))
-
-      (let [updated-eo (-> session-user
-                           (request abs-uri-user)
-                           (ltu/body->edn)
-                           (ltu/is-operation-absent "upload")
-                           (ltu/is-operation-present "download")
-                           (ltu/is-status 200))
-            download-url-action (str p/service-context (ltu/get-op updated-eo "download"))
-            state (-> updated-eo :response :body :state)]
-        (= eo/state-ready state)
-        (is download-url-action)
+      (let [uploading-eo (-> session-user
+                             (request abs-uri-user)
+                             (ltu/body->edn)
+                             (ltu/is-key-value :state eo/state-uploading)
+                             (ltu/is-operation-present "delete")
+                             (ltu/is-operation-present "ready")
+                             (ltu/is-operation-absent "upload")
+                             (ltu/is-operation-absent "download")
+                             (ltu/is-status 200))
+            ;; after upload is done, change object state to 'ready'
+            ready-url-action (str p/service-context (ltu/get-op uploading-eo "ready"))
+            _ (-> session-user
+                  (request ready-url-action
+                           :request-method :post)
+                  (ltu/body->edn)
+                  (ltu/is-status 200))
+            ready-eo (-> session-user
+                         (request abs-uri-user)
+                         (ltu/body->edn)
+                         (ltu/is-key-value :state eo/state-ready)
+                         (ltu/is-operation-present "delete")
+                         (ltu/is-operation-present "download")
+                         (ltu/is-operation-absent "upload")
+                         (ltu/is-operation-absent "ready")
+                         (ltu/is-status 200))
+            download-url-action (str p/service-context (ltu/get-op ready-eo "download"))]
         (is (-> session-user
                 (request download-url-action
                          :request-method :post)

@@ -40,6 +40,7 @@
 
 
 (def ^:const state-new "new")
+(def ^:const state-uploading "uploading")
 (def ^:const state-ready "ready")
 
 ;;
@@ -133,10 +134,12 @@
   (let [viewable? (a/authorized-view? resource request)
         modifiable? (a/authorized-modify? resource request)
         new? (= state-new state)
+        uploading? (= state-uploading state)
         ready? (= state-ready state)
         ops (cond-> []
                     modifiable? (conj {:rel (:delete c/action-uri) :href id})
                     (and new? modifiable?) (conj {:rel (:upload c/action-uri) :href (str id "/upload")})
+                    (and uploading? modifiable?) (conj {:rel (:ready c/action-uri) :href (str id "/ready")})
                     (and ready? viewable?) (conj {:rel (:download c/action-uri) :href (str id "/download")}))]
     (when (seq ops)
       (vec ops))))
@@ -266,7 +269,9 @@
 
 ;;; Upload URL operation
 
-(def ex-msg-upload-bad-state "External object is not in new state to be uploaded!")
+(defn error-msg-bad-state
+  [action sreq scurr]
+  (format "For '%s' action, external object should be in '%s' state! Current state: '%s'." action sreq scurr))
 
 (defn upload-fn
   "Provided 'resource' and 'request', returns object storage upload URL."
@@ -280,7 +285,7 @@
       (s3/create-bucket! obj-store-conf bucketName)
       (s3/generate-url obj-store-conf bucketName object-name :put
                        {:ttl (or ttl s3/default-ttl) :content-type contentType :filename filename}))
-    (logu/log-and-throw-400 ex-msg-upload-bad-state)))
+    (logu/log-and-throw-400 (error-msg-bad-state "upload" state-new state))))
 
 (defmulti upload-subtype
           (fn [resource _] (:objectType resource)))
@@ -290,7 +295,7 @@
   (try
     (a/can-modify? resource request)
     (let [upload-uri (upload-fn resource request)]
-      (-> (assoc resource :state state-ready)
+      (-> (assoc resource :state state-uploading)
           (db/edit request))
       (r/json-response {:uri upload-uri}))
     (catch ExceptionInfo ei
@@ -306,9 +311,25 @@
     (catch ExceptionInfo ei
       (ex-data ei))))
 
+(defmethod crud/do-action [resource-url "ready"]
+  [{{uuid :uuid} :params :as request}]
+  (try
+    (let [resource (crud/retrieve-by-id (str resource-url "/" uuid) {:user-name  "INTERNAL"
+                                                                     :user-roles ["ADMIN"]})
+          state (:state resource)]
+      (a/can-modify? resource request)
+      (if (= state state-uploading)
+        (-> resource
+            (assoc :state state-ready)
+            (db/edit request))
+        (logu/log-and-throw-400 (error-msg-bad-state "ready" state-uploading state))))
+    (catch ExceptionInfo ei
+      (ex-data ei))))
+
 ;;; Download URL operation
 
-(def ex-msg-download-bad-state "External object is not in ready state to be downloaded!")
+(def ex-msg-download-bad-state (format "External object is not in '%s' state to be downloaded!"
+                                       state-ready))
 
 (defn download-fn
   "Provided 'resource' and 'request', returns object storage download URL."
