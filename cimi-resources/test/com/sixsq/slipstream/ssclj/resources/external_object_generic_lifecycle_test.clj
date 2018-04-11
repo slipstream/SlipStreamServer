@@ -21,25 +21,32 @@
 
 (def base-uri (str p/service-context (u/de-camelcase eo/resource-name)))
 
-(defn external-object
+(defn external-object-1
   []
   {:bucketName      "my-bucket"
    :objectStoreCred {:href eoltu/*cred-uri*}
    :contentType     "application/gzip"
-   :objectName      "my-obj-name"})
+   :objectName      "my/obj/name-1"})
+
+(defn external-object-2
+  []
+  {:bucketName      "my-bucket"
+   :objectStoreCred {:href eoltu/*cred-uri*}
+   :contentType     "application/gzip"
+   :objectName      "my/obj/name-2"})
 
 (deftest lifecycle
   (eoltu/lifecycle (str p/service-context eot/resource-url "/" generic/objectType)
-                   (external-object)))
+                   (external-object-1) (external-object-2)))
 
 
 (deftest check-upload-and-download-operations
   (eoltu/upload-and-download-operations (str p/service-context eot/resource-url "/" generic/objectType)
-                                        (external-object)))
+                                        (external-object-1) (external-object-2)))
 
 
 (deftest lifecycle-href
-  (let [href-create {:externalObjectTemplate (assoc (external-object) :objectType generic/objectType)}]
+  (let [href-create {:externalObjectTemplate (assoc (external-object-1) :objectType generic/objectType)}]
 
     ;; abbreviated lifecycle using href to template instead of copy
     (let [uri (-> eoltu/session-admin

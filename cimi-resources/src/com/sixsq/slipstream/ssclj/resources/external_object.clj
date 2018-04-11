@@ -1,6 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.external-object
   (:require
     [clojure.tools.logging :as log]
+    [buddy.core.hash :as ha]
+    [buddy.core.codecs :as co]
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
@@ -168,6 +170,15 @@
   [resource request]
   (set-external-object-operations resource request))
 
+
+;;
+;; Generate ID.
+(defmethod crud/new-identifier resource-name
+  [{:keys [objectName bucketName] :as resource} resource-name]
+  (if-let [new-id (-> (ha/md5 (str objectName bucketName))
+                      co/bytes->hex)]
+    (assoc resource :id (str (u/de-camelcase resource-name) "/" new-id))))
+
 ;;
 ;; template processing
 ;;
@@ -301,13 +312,13 @@
 
 (defn download-fn
   "Provided 'resource' and 'request', returns object storage download URL."
-  [{:keys [state bucketName objectName objectStoreCred filename]} {{ttl :ttl} :body :as request}]
+  [{:keys [state bucketName objectName objectStoreCred]} {{ttl :ttl} :body :as request}]
   (if (= state state-ready)
     (do
       (log/info "Requesting download url: " objectName)
       (s3/generate-url (expand-obj-store-creds objectStoreCred request)
                        bucketName objectName :get
-                       {:ttl (or ttl s3/default-ttl) :filename filename}))
+                       {:ttl (or ttl s3/default-ttl)}))
     (logu/log-and-throw-400 ex-msg-download-bad-state)))
 
 (defmulti download-subtype
@@ -339,11 +350,10 @@
           (fn [resource _] (:objectType resource)))
 
 (defmethod delete-subtype :default
-  [{:keys [id bucketName objectStoreCred] :as resource} {{keep? :keep-s3-object} :body :as request}]
-  (let [obj-name (cu/document-id id)]
-    (when-not keep?
-      (s3/delete-s3-object (expand-obj-store-creds objectStoreCred request) bucketName obj-name))
-    (delete-impl request)))
+  [{:keys [objectName bucketName objectStoreCred] :as resource} {{keep? :keep-s3-object} :body :as request}]
+  (when-not keep?
+    (s3/delete-s3-object (expand-obj-store-creds objectStoreCred request) bucketName objectName))
+  (delete-impl request))
 
 (defmethod crud/delete resource-name
   [{{uuid :uuid} :params :as request}]

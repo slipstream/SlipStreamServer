@@ -14,7 +14,8 @@
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
-    [com.sixsq.slipstream.ssclj.resources.external-object.utils :as s3]))
+    [com.sixsq.slipstream.ssclj.resources.external-object.utils :as s3]
+    [clojure.tools.logging :as log]))
 
 
 (def ^:const user-info-header "jane USER")
@@ -42,13 +43,13 @@
                       :secret    "secret"
                       :quota     7
                       :connector {:href (str c/resource-url "/" connector-name)}}}
-        uri         (-> session-user
-                        (request (str p/service-context (u/de-camelcase cred/resource-name))
-                                 :request-method :post
-                                 :body (json/write-str cred-create))
-                        (ltu/body->edn)
-                        (ltu/is-status 201)
-                        (ltu/location))]
+        uri (-> session-user
+                (request (str p/service-context (u/de-camelcase cred/resource-name))
+                         :request-method :post
+                         :body (json/write-str cred-create))
+                (ltu/body->edn)
+                (ltu/is-status 201)
+                (ltu/location))]
     (alter-var-root #'*cred-uri* (constantly uri))
     (f)))
 
@@ -67,9 +68,18 @@
         (ltu/location))
     (f)))
 
+(defn create-bucket!
+  [obj-store-conf bucket]
+  (log/debug (format "TEST. Creating bucket: %s %s" obj-store-conf bucket)))
+
+(defn delete-s3-object
+  [obj-store-conf bucket obj-name]
+  (log/debug (format "TEST. Deleting s3 object: %s %s %s" obj-store-conf bucket obj-name)))
+
 (defn s3-redefs!
   [f]
-  (with-redefs [s3/create-bucket! (fn [_ _] nil)]
+  (with-redefs [s3/create-bucket! create-bucket!
+                s3/delete-s3-object delete-s3-object]
     (f)))
 
 (def base-uri (str p/service-context (u/de-camelcase eo/resource-name)))
@@ -78,7 +88,7 @@
 ;;; Tests.
 
 (defn lifecycle
-  [template-url template-data]
+  [template-url template-obj-1 template-obj-2]
   (let [session-anon (-> (ltu/ring-app)
                          session
                          (content-type "application/json"))
@@ -91,9 +101,10 @@
                  (ltu/is-status 200))
         template (get-in resp [:response :body])
 
-        valid-create {:externalObjectTemplate (merge (ltu/strip-unwanted-attrs template) template-data)}
+        valid-create-1 {:externalObjectTemplate (merge (ltu/strip-unwanted-attrs template) template-obj-1)}
+        valid-create-2 {:externalObjectTemplate (merge (ltu/strip-unwanted-attrs template) template-obj-2)}
 
-        invalid-create (assoc-in valid-create [:externalObjectTemplate :invalid] "BAD")]
+        invalid-create (assoc-in valid-create-1 [:externalObjectTemplate :invalid] "BAD")]
 
     ;; anonymous create should fail if
     ;; 1. 400 he doesn't have access to the credential
@@ -101,7 +112,7 @@
     (let [status (-> session-anon
                      (request base-uri
                               :request-method :post
-                              :body (json/write-str valid-create))
+                              :body (json/write-str valid-create-1))
                      (ltu/body->edn)
                      (get-in [:response :status]))]
       (is (some #(= status %) #{400 403})))
@@ -114,11 +125,35 @@
         (ltu/body->edn)
         (ltu/is-status 400))
 
+    ;; it is not possible to create the same external object twice
+    (let [uri (-> session-user
+                  (request base-uri
+                           :request-method :post
+                           :body (json/write-str valid-create-1))
+                  (ltu/body->edn)
+                  (ltu/is-status 201)
+                  (ltu/location))
+          abs-uri (str p/service-context (u/de-camelcase uri))]
+
+      (-> session-user
+          (request base-uri
+                   :request-method :post
+                   :body (json/write-str valid-create-1))
+          (ltu/body->edn)
+          (ltu/is-status 409))
+
+      ;; cleanup
+      (-> session-admin
+          (request abs-uri
+                   :request-method :delete)
+          (ltu/body->edn)
+          (ltu/is-status 200)))
+
     ;; full external object lifecycle as administrator/user should work
     (let [uri (-> session-admin
                   (request base-uri
                            :request-method :post
-                           :body (json/write-str valid-create))
+                           :body (json/write-str valid-create-1))
                   (ltu/body->edn)
                   (ltu/is-status 201)
                   (ltu/location))
@@ -127,11 +162,10 @@
           uri-user (-> session-user
                        (request base-uri
                                 :request-method :post
-                                :body (json/write-str valid-create))
+                                :body (json/write-str valid-create-2))
                        (ltu/body->edn)
                        (ltu/is-status 201)
                        (ltu/location))
-
           abs-uri-user (str p/service-context (u/de-camelcase uri-user))]
 
       ;; admin get succeeds
@@ -195,7 +229,7 @@
 
 
 (defn upload-and-download-operations
-  [template-url template-data]
+  [template-url template-obj-1 template-obj-2]
   (let [session-anon (-> (ltu/ring-app)
                          session
                          (content-type "application/json"))
@@ -209,7 +243,8 @@
 
         template (get-in resp [:response :body])
 
-        valid-create {:externalObjectTemplate (merge (ltu/strip-unwanted-attrs template) template-data)}]
+        valid-create-1 {:externalObjectTemplate (merge (ltu/strip-unwanted-attrs template) template-obj-1)}
+        valid-create-2 {:externalObjectTemplate (merge (ltu/strip-unwanted-attrs template) template-obj-2)}]
 
     ;; anonymous query is not authorized
     (-> session-anon
@@ -229,7 +264,7 @@
     (let [status (-> session-anon
                      (request base-uri
                               :request-method :post
-                              :body (json/write-str valid-create))
+                              :body (json/write-str valid-create-1))
                      (ltu/body->edn)
                      (get-in [:response :status]))]
       (is (some #(= status %) #{400 403})))
@@ -237,16 +272,16 @@
     (let [uri (-> session-admin
                   (request base-uri
                            :request-method :post
-                           :body (json/write-str valid-create))
+                           :body (json/write-str valid-create-1))
                   (ltu/body->edn)
                   (ltu/is-status 201)
                   (ltu/location))
 
-          ;; user create should work
+          ;; user create of a different object should work
           uri-user (-> session-user
                        (request base-uri
                                 :request-method :post
-                                :body (json/write-str valid-create))
+                                :body (json/write-str valid-create-2))
                        (ltu/body->edn)
                        (ltu/is-status 201)
                        (ltu/location))

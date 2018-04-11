@@ -51,21 +51,9 @@
     (is (thrown-with-msg? ExceptionInfo (re-pattern eo/ex-msg-download-bad-state)
                           (eo/download-fn {:state eo/state-new} {})))
 
-    ;; generic external object
     (is (s/starts-with? (eo/download-fn {:state           eo/state-ready
-                                         :contentType     "application/tar+gzip"
                                          :bucketName      bucketname
                                          :objectName      objectname
                                          :objectStoreCred {:href "credential/my-cred"}}
                                         {})
-                        (format "https://%s.%s/%s?" bucketname s3-host objectname)))
-
-    ;; external object report
-    (is (s/starts-with? (eo/download-fn {:state           eo/state-ready
-                                         :contentType     "application/tar+gzip"
-                                         :bucketName      bucketname
-                                         :objectStoreCred {:href "credential/my-cred"}
-                                         :runUUID         runUUID
-                                         :filename        filename}
-                                        {})
-                        (format "https://%s.%s/%s/%s?" bucketname s3-host runUUID filename)))))
+                        (format "https://%s.%s/%s?" bucketname s3-host objectname)))))

@@ -31,19 +31,24 @@
 
 (def base-uri (str p/service-context (u/de-camelcase eo/resource-name)))
 
-(def fake-deployment-info {:runUUID     "xxxx-deployment-uuid"
-                           :component   "machine.1"
-                           :filename    "machine.1_report_time.tgz"
-                           :contentType "application/gzip"})
+(def report-obj-1 {:runUUID     "xxxx-deployment-uuid"
+                   :component   "machine.1"
+                   :filename    "machine.1_report_time.tgz"
+                   :contentType "application/gzip"})
+
+(def report-obj-2 {:runUUID     "xxxx-deployment-uuid"
+                   :component   "machine.2"
+                   :filename    "machine.2_report_time.tgz"
+                   :contentType "application/gzip"})
 
 (def template-url (str p/service-context eot/resource-url "/" report/objectType))
 
 (deftest lifecycle
-  (eoltu/lifecycle template-url fake-deployment-info))
+  (eoltu/lifecycle template-url report-obj-1 report-obj-2))
 
 
 (deftest check-upload-and-download-operations
-  (eoltu/upload-and-download-operations template-url fake-deployment-info))
+  (eoltu/upload-and-download-operations template-url report-obj-1 report-obj-2))
 
 
 (deftest bad-methods
