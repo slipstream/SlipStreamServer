@@ -1,7 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.external-object.utils
   (:require
     [clj-time.coerce :as tc]
-    [clj-time.core :as t])
+    [clj-time.core :as t]
+    [clojure.tools.logging :as log])
   (:import
     (com.amazonaws.auth BasicAWSCredentials AWSStaticCredentialsProvider)
     (com.amazonaws.services.s3 AmazonS3ClientBuilder)
@@ -27,7 +28,10 @@
   [obj-store-conf bucket-name]
   (let [s3client (get-s3-client obj-store-conf)]
     (when-not (.doesBucketExist s3client bucket-name)
-      (.createBucket s3client (CreateBucketRequest. bucket-name)))))
+      (try
+        (.createBucket s3client (CreateBucketRequest. bucket-name))
+        (catch Exception e
+          (log/error (format "Error when creating bucket %s: %s" bucket-name (.getMessage e))))))))
 
 (defn generate-url
   [obj-store-conf bucket obj-name verb & [{:keys [ttl content-type filename]}]]
