@@ -34,23 +34,16 @@
           (log/error (format "Error when creating bucket %s: %s" bucket-name (.getMessage e))))))))
 
 (defn generate-url
-  [obj-store-conf bucket obj-name verb & [{:keys [ttl content-type filename]}]]
+  [obj-store-conf bucket obj-name verb & [{:keys [ttl content-type]}]]
   (let [expiration (tc/to-date (-> (or ttl default-ttl) t/minutes t/from-now))
-        overrides (when filename
-                    (doto (ResponseHeaderOverrides.)
-                      (.setContentDisposition (format "attachment; filename=\"%s\"" filename))))
         method (if (= verb :put)
                  HttpMethod/PUT
                  HttpMethod/GET)
-
         req (doto (GeneratePresignedUrlRequest. bucket obj-name)
               (.setMethod method)
               (.setExpiration expiration))]
-
     (cond
-      content-type (.setContentType req content-type)
-      overrides (.setResponseHeaders req overrides))
-
+      content-type (.setContentType req content-type))
     (str (.generatePresignedUrl (get-s3-client obj-store-conf) req))))
 
 (defn delete-s3-object [obj-store-conf bucket obj-name]
