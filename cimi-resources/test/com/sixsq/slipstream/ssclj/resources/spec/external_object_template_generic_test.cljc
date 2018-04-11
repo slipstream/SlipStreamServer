@@ -11,17 +11,17 @@
   (let [root (merge tpl/resource
                     {:href "external-object-template/generic"})]
 
-    (u/is-valid :cimi.external-object-template.generic/externalObjectTemplate root)
+    (u/spec-valid? :cimi.external-object-template.generic/externalObjectTemplate root)
 
     ;; mandatory keywords
     (doseq [k #{:objectType :objectStoreCred :bucketName :objectName}]
-      (u/is-not-valid :cimi.external-object-template.generic/externalObjectTemplate (dissoc root k)))
+      (u/spec-not-valid? :cimi.external-object-template.generic/externalObjectTemplate (dissoc root k)))
 
     ;; optional keywords
     (doseq [k #{:contentType :href}]
-      (u/is-valid :cimi.external-object-template.generic/externalObjectTemplate (dissoc root k)))
+      (u/spec-valid? :cimi.external-object-template.generic/externalObjectTemplate (dissoc root k)))
 
 
     (let [create {:resourceURI            (str eot/resource-uri "Create")
                   :externalObjectTemplate (dissoc root :id)}]
-      (u/is-valid :cimi/external-object-template.generic-create create))))
+      (u/spec-valid? :cimi/external-object-template.generic-create create))))

@@ -4,13 +4,17 @@
     [clojure.spec.alpha :as s]
     [expound.alpha :refer [expound-str]]))
 
-(defn is-valid
+(defmacro spec-valid?
   [spec resource]
-  (is (s/valid? spec resource) (expound-str spec resource)))
+  `((fn [spec# resource#]
+      (is (s/valid? spec# resource#) (expound-str spec# resource#)))
+     ~spec ~resource))
 
-(defn is-not-valid
+(defmacro spec-not-valid?
   [spec resource]
-  (is (not (s/valid? spec resource)) (expound-str spec resource)))
+  `((fn [spec# resource#]
+      (is (not (s/valid? spec# resource#)) (expound-str spec# resource#)))
+     ~spec ~resource))
 
 (defn print-spec
   [spec]

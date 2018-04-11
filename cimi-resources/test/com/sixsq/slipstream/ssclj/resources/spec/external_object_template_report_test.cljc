@@ -12,17 +12,17 @@
                     {:href     "external-object-template/report"
                      :filename "component.1_report_time.tgz"})]
 
-    (u/is-valid :cimi.external-object-template.report/externalObjectTemplate root)
+    (u/spec-valid? :cimi.external-object-template.report/externalObjectTemplate root)
 
     ;; mandatory keywords
     (doseq [k #{:objectType :runUUID :component :filename}]
-      (u/is-not-valid :cimi.external-object-template.report/externalObjectTemplate (dissoc root k)))
+      (u/spec-not-valid? :cimi.external-object-template.report/externalObjectTemplate (dissoc root k)))
 
     ;; optional keywords
     (doseq [k #{:contentType :href}]
-      (u/is-valid :cimi.external-object-template.report/externalObjectTemplate (dissoc root k)))
+      (u/spec-valid? :cimi.external-object-template.report/externalObjectTemplate (dissoc root k)))
 
 
     (let [create {:resourceURI            (str eot/resource-uri "Create")
                   :externalObjectTemplate (dissoc root :id)}]
-      (u/is-valid :cimi/external-object-template.report-create create))))
+      (u/spec-valid? :cimi/external-object-template.report-create create))))

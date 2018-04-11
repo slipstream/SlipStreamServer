@@ -27,13 +27,13 @@
                      :bucketName      "bucket-name"
                      :objectStoreCred {:href "credential/uuid"}})]
 
-    (u/is-valid :cimi/external-object.report root)
+    (u/spec-valid? :cimi/external-object.report root)
 
     ;; mandatory keywords
     (doseq [k #{:id :resourceURI :created :updated :acl
                 :objectType :state :runUUID :component :objectName :bucketName :objectStoreCred}]
-      (u/is-not-valid :cimi/external-object.report (dissoc root k)))
+      (u/spec-not-valid? :cimi/external-object.report (dissoc root k)))
 
     ;; optional keywords
     (doseq [k #{:contentType}]
-      (u/is-valid :cimi/external-object.report (dissoc root k)))))
+      (u/spec-valid? :cimi/external-object.report (dissoc root k)))))

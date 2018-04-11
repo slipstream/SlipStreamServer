@@ -17,13 +17,13 @@
               :objectStoreCred {:href "credential/foo"}
               :contentType     "text/html; charset=utf-8"}]
 
-    (sut/is-valid :cimi.test/external-object root)
+    (sut/spec-valid? :cimi.test/external-object root)
 
     ;; mandatory keywords
     (doseq [k #{:state :objectName :bucketName :objectType :objectStoreCred}]
-      (sut/is-not-valid :cimi.test/external-object (dissoc root k)))
+      (sut/spec-not-valid? :cimi.test/external-object (dissoc root k)))
 
     ;; optional keywords
     (doseq [k #{:href :contentType}]
-      (sut/is-valid :cimi.test/external-object (dissoc root k)))))
+      (sut/spec-valid? :cimi.test/external-object (dissoc root k)))))
 

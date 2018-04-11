@@ -24,13 +24,13 @@
                      :acl             valid-acl
                      :state           eo/state-new})]
 
-    (u/is-valid :cimi/external-object.generic root)
+    (u/spec-valid? :cimi/external-object.generic root)
 
     ;; mandatory keywords
     (doseq [k #{:id :resourceURI :created :updated :acl
                 :objectType :state :objectName :bucketName :objectStoreCred}]
-      (u/is-not-valid :cimi/external-object.generic (dissoc root k)))
+      (u/spec-not-valid? :cimi/external-object.generic (dissoc root k)))
 
     ;; optional keywords
     (doseq [k #{:contentType}]
-      (u/is-valid :cimi/external-object.generic (dissoc root k)))))
+      (u/spec-valid? :cimi/external-object.generic (dissoc root k)))))
