@@ -216,6 +216,8 @@
     (catch ExceptionInfo ei
       (ex-data ei))))
 
+;;; set subtype operations
+
 (defmulti set-subtype-ops
           (fn [resource _] (:cloudServiceType resource)))
 
@@ -224,9 +226,9 @@
   (crud/set-standard-operations resource request))
 
 (defmethod crud/set-operations resource-uri
-  [{:keys [id resourceURI username connectorTemplate] :as resource} request]
-  (let [href (str id "/describe")
-        describe-op {:rel (:describe c/action-uri) :href href}]
+  [{:keys [id connectorTemplate] :as resource} request]
+  (let [describe-href (str id "/describe")
+        describe-op {:rel (:describe c/action-uri) :href describe-href}]
     (cond-> (set-subtype-ops resource request)
-            (get connectorTemplate :href) (update-in [:operations] conj describe-op))))
+            (:href connectorTemplate) (update-in [:operations] conj describe-op))))
 
