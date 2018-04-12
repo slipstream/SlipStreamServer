@@ -24,18 +24,18 @@
 
 (def ^:const create-uri (str c/slipstream-schema-uri resource-name "Create"))
 
-(def acl-user-can-view {:principal "USER"
-                        :type      "ROLE"
-                        :right     "VIEW"})
+(def acl-rule-user-view {:principal "USER"
+                         :type      "ROLE"
+                         :right     "VIEW"})
 
-(def acl-admin-can-modify {:principal "ADMIN"
-                           :type      "ROLE"
-                           :right     "MODIFY"})
+(def acl-rule-admin-modify {:principal "ADMIN"
+                            :type      "ROLE"
+                            :right     "MODIFY"})
 
 (def collection-acl {:owner {:principal "ADMIN"
                              :type      "ROLE"}
-                     :rules [acl-admin-can-modify
-                             acl-user-can-view]})
+                     :rules [acl-rule-admin-modify
+                             acl-rule-user-view]})
 
 (def resource-acl collection-acl)
 
