@@ -466,9 +466,9 @@
   This is done for the compatibility with the current logic of the service."
   [^Object sc]
   (let [cin-cn (sc-connector-names-map sc)]
-    (log/info "Loading connectors" cin-cn)
+    (log/debug "Loading connectors" cin-cn)
     (doseq [[cin cn] cin-cn]
-      (log/info "Loading connector" cin cn)
+      (log/debug "Loading connector" cin cn)
       (let [values (strip-unwanted-attrs (:body (con/retrieve-impl (connector-as-request cin))))
             _ (log/debug "Connector values:" values)
             descs (get @cont/descriptions (str cont/resource-url "/" cn))]
