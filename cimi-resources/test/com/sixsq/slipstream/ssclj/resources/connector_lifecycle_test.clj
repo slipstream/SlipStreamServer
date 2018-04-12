@@ -3,7 +3,7 @@
     [clojure.test :refer :all]
     [clojure.data.json :as json]
     [peridot.core :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.connector :refer :all]
+    [com.sixsq.slipstream.ssclj.resources.connector :as c]
     [com.sixsq.slipstream.ssclj.resources.connector-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.connector-template-alpha-example :as example]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
@@ -13,7 +13,7 @@
 
 (use-fixtures :each ltu/with-test-server-fixture)
 
-(def base-uri (str p/service-context (u/de-camelcase resource-name)))
+(def collection-uri (str p/service-context (u/de-camelcase c/resource-name)))
 
 
 (deftest lifecycle
@@ -41,7 +41,7 @@
 
     ;; anonymous create should fail
     (-> session-anon
-        (request base-uri
+        (request collection-uri
                  :request-method :post
                  :body (json/write-str valid-create))
         (ltu/body->edn)
@@ -49,7 +49,7 @@
 
     ;; user create should also fail
     (-> session-user
-        (request base-uri
+        (request collection-uri
                  :request-method :post
                  :body (json/write-str valid-create))
         (ltu/body->edn)
@@ -57,7 +57,7 @@
 
     ;; admin create with invalid template fails
     (-> session-admin
-        (request base-uri
+        (request collection-uri
                  :request-method :post
                  :body (json/write-str invalid-create))
         (ltu/body->edn)
@@ -65,29 +65,29 @@
 
     ;; full connector lifecycle as administrator should work
     (let [uri (-> session-admin
-                  (request base-uri
+                  (request collection-uri
                            :request-method :post
                            :body (json/write-str valid-create))
                   (ltu/body->edn)
                   (ltu/is-status 201)
                   (ltu/location))
-          abs-uri (str p/service-context (u/de-camelcase uri))]
+          resource-uri (str p/service-context (u/de-camelcase uri))]
 
       ;; admin get succeeds
       (-> session-admin
-          (request abs-uri)
+          (request resource-uri)
           (ltu/body->edn)
           (ltu/is-status 200))
 
       ;; user get succeeds
       (-> session-user
-          (request abs-uri)
+          (request resource-uri)
           (ltu/body->edn)
           (ltu/is-status 200))
 
       ;; user update fails
       (-> session-user
-          (request abs-uri
+          (request resource-uri
                    :request-method :put
                    :body (json/write-str {}))
           (ltu/body->edn)
@@ -95,25 +95,31 @@
 
       ;; user delete fails
       (-> session-user
-          (request abs-uri
+          (request resource-uri
                    :request-method :delete)
           (ltu/body->edn)
           (ltu/is-status 403))
 
+      ;; user query succeeds
+      (-> session-user
+          (request collection-uri)
+          (ltu/body->edn)
+          (ltu/is-status 200))
+
       ;; anonymous query fails
       (-> session-anon
-          (request base-uri)
+          (request collection-uri)
           (ltu/body->edn)
           (ltu/is-status 403))
 
       ;; admin query succeeds
       (let [entries (-> session-admin
-                        (request base-uri)
+                        (request collection-uri)
                         (ltu/body->edn)
                         (ltu/is-status 200)
-                        (ltu/is-resource-uri collection-uri)
+                        (ltu/is-resource-uri c/collection-uri)
                         (ltu/is-count #(= 1 %))
-                        (ltu/entries resource-tag))]
+                        (ltu/entries c/resource-tag))]
         (is ((set (map :id entries)) uri))
 
         ;; verify that all entries are accessible
@@ -132,20 +138,20 @@
 
       ;; admin delete succeeds
       (-> session-admin
-          (request abs-uri
+          (request resource-uri
                    :request-method :delete)
           (ltu/body->edn)
           (ltu/is-status 200))
 
       ;; ensure entry is really gone
       (-> session-admin
-          (request abs-uri)
+          (request resource-uri)
           (ltu/body->edn)
           (ltu/is-status 404)))
 
     ;; abbreviated lifecycle using href to template instead of copy
     (let [uri (-> session-admin
-                  (request base-uri
+                  (request collection-uri
                            :request-method :post
                            :body (json/write-str href-create))
                   (ltu/body->edn)
@@ -167,8 +173,8 @@
           (ltu/is-status 404)))))
 
 (deftest bad-methods
-  (let [resource-uri (str p/service-context (u/new-resource-id resource-name))]
-    (ltu/verify-405-status [[base-uri :options]
-                            [base-uri :delete]
+  (let [resource-uri (str p/service-context (u/new-resource-id c/resource-name))]
+    (ltu/verify-405-status [[collection-uri :options]
+                            [collection-uri :delete]
                             [resource-uri :options]
                             [resource-uri :post]])))
