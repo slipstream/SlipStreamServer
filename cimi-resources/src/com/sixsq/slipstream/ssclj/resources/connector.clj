@@ -24,16 +24,20 @@
 
 (def ^:const create-uri (str c/slipstream-schema-uri resource-name "Create"))
 
+(def acl-rule-user-view {:principal "USER"
+                         :type      "ROLE"
+                         :right     "VIEW"})
+
+(def acl-rule-admin-modify {:principal "ADMIN"
+                            :type      "ROLE"
+                            :right     "MODIFY"})
+
 (def collection-acl {:owner {:principal "ADMIN"
                              :type      "ROLE"}
-                     :rules [{:principal "ADMIN"
-                              :type      "ROLE"
-                              :right     "MODIFY"}]})
+                     :rules [acl-rule-admin-modify
+                             acl-rule-user-view]})
 
-(def acl-user-can-view {:principal "USER"
-                        :type      "ROLE"
-                        :right     "VIEW"})
-(def resource-acl (update-in collection-acl [:rules] conj acl-user-can-view))
+(def resource-acl collection-acl)
 
 ;;
 ;; validate subclasses of connectors
