@@ -24,8 +24,10 @@
 (s/def :cimi.connector-template.dummy/orchestratorInstanceType :cimi.core/nonblank-string)
 (s/def :cimi.connector-template.dummy/zone :cimi.core/nonblank-string)
 (s/def :cimi.connector-template.dummy/orchestratorDisk :cimi.core/nonblank-string)
+(s/def :cimi.connector-template.dummy/objectStoreEndpoint :cimi.connector-template/objectStoreEndpoint)
 
 (def keys-spec {:req-un [:cimi.connector-template/endpoint
+                         :cimi.connector-template.dummy/objectStoreEndpoint
                          :cimi.connector-template/nativeContextualization
                          :cimi.connector-template/orchestratorSSHUsername
                          :cimi.connector-template/orchestratorSSHPassword

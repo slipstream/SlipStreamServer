@@ -235,8 +235,8 @@ public abstract class CliConnectorBase extends ConnectorBase {
 	public static void deleteApiKeySecret(Run run, User user, Logger log) {
 	    String key = null;
 		try {
-			key = run.getRuntimeParameterValueIgnoreAbort(RuntimeParameter.GLOBAL_RUN_APIKEY_KEY);
-		} catch (NotFoundException e) {
+			key = run.getRuntimeParameterValue(RuntimeParameter.GLOBAL_RUN_APIKEY_KEY);
+		} catch (AbortException | NotFoundException e) {
 			e.printStackTrace();
 		}
 		if (null != key && key.startsWith("credential/")) {

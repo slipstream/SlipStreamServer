@@ -30,38 +30,40 @@
 
 
 (def rname->param
-  {:serviceURL                 "slipstream.base.url"
-   :supportEmail               "slipstream.support.email"
-   :clientBootstrapURL         "slipstream.update.clientbootstrapurl"
-   :clientURL                  "slipstream.update.clienturl"
-   :connectorOrchPrivateSSHKey "cloud.connector.orchestrator.privatesshkey"
-   :connectorOrchPublicSSHKey  "cloud.connector.orchestrator.publicsshkey"
-   :connectorLibcloudURL       "cloud.connector.library.libcloud.url"
+  {:serviceURL                   "slipstream.base.url"
+   :supportEmail                 "slipstream.support.email"
+   :clientBootstrapURL           "slipstream.update.clientbootstrapurl"
+   :clientURL                    "slipstream.update.clienturl"
+   :connectorOrchPrivateSSHKey   "cloud.connector.orchestrator.privatesshkey"
+   :connectorOrchPublicSSHKey    "cloud.connector.orchestrator.publicsshkey"
+   :connectorLibcloudURL         "cloud.connector.library.libcloud.url"
 
-   :mailUsername               "slipstream.mail.username"
-   :mailPassword               "slipstream.mail.password"
-   :mailHost                   "slipstream.mail.host"
-   :mailPort                   "slipstream.mail.port"
-   :mailSSL                    "slipstream.mail.ssl"
-   :mailDebug                  "slipstream.mail.debug"
+   :mailUsername                 "slipstream.mail.username"
+   :mailPassword                 "slipstream.mail.password"
+   :mailHost                     "slipstream.mail.host"
+   :mailPort                     "slipstream.mail.port"
+   :mailSSL                      "slipstream.mail.ssl"
+   :mailDebug                    "slipstream.mail.debug"
 
-   :quotaEnable                "slipstream.quota.enable"
+   :quotaEnable                  "slipstream.quota.enable"
 
-   :registrationEnable         "slipstream.registration.enable"
-   :registrationEmail          "slipstream.registration.email"
+   :registrationEnable           "slipstream.registration.enable"
+   :registrationEmail            "slipstream.registration.email"
 
-   :meteringEnable             "slipstream.metering.enable"
-   :meteringEndpoint           "slipstream.metering.hostname"
+   :meteringEnable               "slipstream.metering.enable"
+   :meteringEndpoint             "slipstream.metering.hostname"
 
-   :serviceCatalogEnable       "slipstream.service.catalog.enable"
+   :serviceCatalogEnable         "slipstream.service.catalog.enable"
 
-   :slipstreamVersion          "slipstream.version"
+   :slipstreamVersion            "slipstream.version"
 
-   :cloudConnectorClass        "cloud.connector.class"
+   :cloudConnectorClass          "cloud.connector.class"
 
-   :metricsLoggerEnable        "slipstream.metrics.logger.enable"
-   :metricsGraphiteEnable      "slipstream.metrics.graphite.enable"
-   })
+   :metricsLoggerEnable          "slipstream.metrics.logger.enable"
+   :metricsGraphiteEnable        "slipstream.metrics.graphite.enable"
+
+   :reportsObjectStoreCreds      "slipstream.reports.objectstore.creds"
+   :reportsObjectStoreBucketName "slipstream.reports.objectstore.bucket.name"})
 
 (def param->rname (set/map-invert rname->param))
 
@@ -72,6 +74,7 @@
 
 (def connector-mandatory-atrrs-kw->pname
   {:endpoint                "endpoint"
+   :objectStoreEndpoint     "object.store.endpoint"
    :nativeContextualization "native-contextualization"
    :orchestratorSSHUsername "orchestrator.ssh.username"
    :orchestratorSSHPassword "orchestrator.ssh.password"
@@ -326,7 +329,7 @@
   "Called from com.sixsq.slipstream.es.CljElasticsearchHelper.getConnectorParameterDescription()
   and getConnectorParameters()"
   [^Object serviceConf pname]
-  (let [kw    (get connector-pname->kw pname)
+  (let [kw (get connector-pname->kw pname)
         value (kw cont/connector-mandatory-reference-attrs-defaults)]
     (u/build-sc-param serviceConf value (kw (connector-template-desc)))))
 
@@ -341,9 +344,9 @@
 
 (defn get-connector-params-from-template
   [^Object serviceConf con-name]
-  (let [resource-name      (str cont/resource-url "/" con-name)
+  (let [resource-name (str cont/resource-url "/" con-name)
         connector-template (->> resource-name (get @cont/templates) strip-unwanted-attrs)
-        connector-desc     (get @cont/descriptions resource-name)]
+        connector-desc (get @cont/descriptions resource-name)]
     (for [[k value] connector-template]
       (u/build-sc-param serviceConf value (k connector-desc)))))
 
@@ -425,17 +428,17 @@
 
 (defn store-connectors
   [^Object sc]
-  (let [cin-cn          (sc-connector-names-map sc)
+  (let [cin-cn (sc-connector-names-map sc)
         connectors-vals (sc->connectors-vals-only sc (keys cin-cn))
         ]
     (doseq [[cnamekw cvals] connectors-vals]
-      (let [cname       (name cnamekw)
-            req         (connector-as-request cname (merge cvals {:instanceName     cname
-                                                                  :cloudServiceType (get cin-cn cname)}))
-            _           (log/info "Editing connector instance:" cname)
-            edit-resp   (con/edit-impl req)
+      (let [cname (name cnamekw)
+            req (connector-as-request cname (merge cvals {:instanceName     cname
+                                                          :cloudServiceType (get cin-cn cname)}))
+            _ (log/info "Editing connector instance:" cname)
+            edit-resp (con/edit-impl req)
             edit-status (:status edit-resp)
-            _           (log/info "Edit response status:" edit-status)]
+            _ (log/info "Edit response status:" edit-status)]
         ;; editing may fail because connector instance wasn't instantiated yet.
         (if (= 404 edit-status)
           (do

@@ -120,6 +120,12 @@ public class ServiceConfiguration extends
 			}
 		},
 
+		SLIPSTREAM_REPORTS_OBJECTSTORE_BUCKET_NAME(
+				CljElasticsearchHelper.getParameterDescription("slipstream.reports.objectstore.bucket.name")),
+
+		SLIPSTREAM_REPORTS_OBJECTSTORE_CREDS(
+				CljElasticsearchHelper.getParameterDescription("slipstream.reports.objectstore.creds")),
+
 		SLIPSTREAM_REGISTRATION_ENABLE(
 				CljElasticsearchHelper.getParameterDescription("slipstream.registration.enable")),
 
