@@ -1,8 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.connector-template
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]
-    [com.sixsq.slipstream.ssclj.resources.spec.common :as c]))
+    [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
+    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
+    [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 ;; Generic type definitions.
 
@@ -20,7 +21,7 @@
 ;; Add these to the connector schema as necessary.
 (s/def :cimi.connector-template/endpoint string?)
 (s/def :cimi.connector-template/objectStoreEndpoint string?)
-(s/def :cimi.connector-template/nativeContextualization :cimi.core/nonblank-string)
+(s/def :cimi.connector-template/nativeContextualization ::cimi-core/nonblank-string)
 (s/def :cimi.connector-template/orchestratorSSHUsername string?)
 (s/def :cimi.connector-template/orchestratorSSHPassword string?)
 (s/def :cimi.connector-template/securityGroups string?)

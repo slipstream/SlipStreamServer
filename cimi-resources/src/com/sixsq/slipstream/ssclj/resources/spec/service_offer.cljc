@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.service-offer
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
-    [com.sixsq.slipstream.ssclj.resources.spec.connector-template]))
+    [com.sixsq.slipstream.ssclj.resources.spec.connector-template]
+    [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 ;;
 ;; Must reference the raw name of the connector.  Reference the schema

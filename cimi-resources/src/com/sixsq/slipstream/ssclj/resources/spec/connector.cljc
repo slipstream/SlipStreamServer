@@ -1,7 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.spec.connector
-  (:require
-    [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.resources.spec.connector-template]))
+(ns com.sixsq.slipstream.ssclj.resources.spec.connector)
 
 ;;
 ;; Note that all of the keys and keys specs are already defined

@@ -3,9 +3,10 @@
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
+    [com.sixsq.slipstream.ssclj.resources.spec.external-object-report :as eor]
     [com.sixsq.slipstream.ssclj.resources.spec.external-object]
-    [com.sixsq.slipstream.ssclj.resources.spec.external-object-report :as eor]))
+    [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 
 (def template-resource-keys-spec
@@ -14,7 +15,7 @@
                                                        :cimi.external-object/bucketName
                                                        :cimi.external-object/objectStoreCred}))
 
-(s/def :cimi.external-object-template.report/filename :cimi.core/nonblank-string)
+(s/def :cimi.external-object-template.report/filename ::cimi-core/nonblank-string)
 
 ;; Defines the contents of the generic template used in a create resource.
 ;; NOTE: The name must match the key defined by the resource, :externalObjectTemplate here.
