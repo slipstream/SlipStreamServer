@@ -158,16 +158,19 @@
   (is (= {:resourceURI t/metering-resource-uri} (t/replace-resource-uri {:resourceURI "BAD!"}))))
 
 
-#_(deftest check-create-actions
+(deftest check-create-actions
   (doseq [search-result-doc [{:body {:hits {:hits [{:_source {:a 1}}
                                                    {:_source {:b 2}}]}}}
                              (-> (io/resource "virtual-machines.json")
                                  slurp
                                  (json/read-str :key-fn keyword))]]
-    (let [actions (t/create-actions "timestamp" "action" search-result-doc)]
+    (let [
+          action (t/index-action "index" "type")
+          actions (t/create-actions "timestamp" action search-result-doc)]
       (is (pos? (count actions)))
-      (is (->> actions
+      #_(is (->> actions
                (map first)
+
                (every? #(= "action" %))))
       (is (->> actions
                (map second)
