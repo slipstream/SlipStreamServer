@@ -158,7 +158,7 @@
   (is (= {:resourceURI t/metering-resource-uri} (t/replace-resource-uri {:resourceURI "BAD!"}))))
 
 
-(deftest check-create-actions
+#_(deftest check-create-actions
   (doseq [search-result-doc [{:body {:hits {:hits [{:_source {:a 1}}
                                                    {:_source {:b 2}}]}}}
                              (-> (io/resource "virtual-machines.json")
