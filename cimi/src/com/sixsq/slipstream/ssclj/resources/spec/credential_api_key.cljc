@@ -2,17 +2,18 @@
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.resources.spec.credential :as cred]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template-api-key]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template :as ps]))
 
-(s/def :cimi.credential.api-key/expiry :cimi.core/timestamp)
+(s/def :cimi.credential.api-key/expiry ::cimi-core/timestamp)
 
-(s/def :cimi.credential.api-key/digest :cimi.core/nonblank-string)
+(s/def :cimi.credential.api-key/digest ::cimi-core/nonblank-string)
 
-(s/def :cimi.credential.api-key/identity :cimi.core/nonblank-string)
+(s/def :cimi.credential.api-key/identity ::cimi-core/nonblank-string)
 
-(s/def :cimi.credential.api-key/roles (s/coll-of :cimi.core/nonblank-string
+(s/def :cimi.credential.api-key/roles (s/coll-of ::cimi-core/nonblank-string
                                                  :kind vector?
                                                  :into []
                                                  :min-count 1))

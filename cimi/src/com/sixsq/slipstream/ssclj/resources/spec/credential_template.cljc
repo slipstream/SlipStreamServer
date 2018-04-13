@@ -4,14 +4,15 @@
     [clojure.spec.gen.alpha :as gen]
     [clojure.string :as str]
     [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]))
 
 ;; All credential templates must indicate the type of credential to create.
-(s/def :cimi.credential-template/type :cimi.core/identifier)
+(s/def :cimi.credential-template/type ::cimi-core/identifier)
 
 ;; A given credential may have more than one method for creating it.  All
 ;; credential templates must provide a method name.
-(s/def :cimi.credential-template/method :cimi.core/identifier)
+(s/def :cimi.credential-template/method ::cimi-core/identifier)
 
 (def credential-template-regex #"^credential-template/[a-zA-Z0-9]([a-zA-Z0-9_-]*[a-zA-Z0-9])?$")
 (s/def :cimi.credential-template/href (s/and string? #(re-matches credential-template-regex %)))

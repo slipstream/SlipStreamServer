@@ -2,13 +2,13 @@
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.util.spec :as su]
-    [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
+    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.resources.spec.user-params-template :as ps]))
 
 (s/def :cimi.user-params-template-exec/defaultCloudService string?)
 (s/def :cimi.user-params-template-exec/sshPublicKey string?)
-(s/def :cimi.user-params-template-exec/keepRunning :cimi.core/nonblank-string)
-(s/def :cimi.user-params-template-exec/mailUsage :cimi.core/nonblank-string)
+(s/def :cimi.user-params-template-exec/keepRunning ::cimi-core/nonblank-string)
+(s/def :cimi.user-params-template-exec/mailUsage ::cimi-core/nonblank-string)
 (s/def :cimi.user-params-template-exec/verbosityLevel int?)
 (s/def :cimi.user-params-template-exec/timeout int?)
 
