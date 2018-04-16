@@ -10,7 +10,8 @@
 (def s3-endpoint (str "https://" s3-host))
 
 (def my-cloud-creds {"credential/my-cred" {:key    "key"
-                                           :secret "secret"}})
+                                           :secret "secret"
+                                           :connector {:objectStoreEndpoint s3-endpoint}}})
 
 (def bucketname "bucket-name")
 (def runUUID "1-2-3-4-5")
@@ -19,8 +20,7 @@
 
 (deftest test-upload-fn
   (with-redefs [s3/create-bucket! (fn [_ _] nil)
-                eo/expand-cred (fn [cred-href _] (get my-cloud-creds (:href cred-href)))
-                eo/connector-from-cred (fn [_ _] {:objectStoreEndpoint s3-endpoint})]
+                eo/expand-cred (fn [cred-href _ _] (get my-cloud-creds (:href cred-href)))]
 
     (is (thrown-with-msg? ExceptionInfo (re-pattern (eo/error-msg-bad-state "upload" eo/state-new eo/state-ready))
                           (eo/upload-fn {:state eo/state-ready} {})))
@@ -45,8 +45,7 @@
                         (format "https://%s.%s/%s/%s?" bucketname s3-host runUUID filename)))))
 
 (deftest test-download-fn
-  (with-redefs [eo/expand-cred (fn [cred-href _] (get my-cloud-creds (:href cred-href)))
-                eo/connector-from-cred (fn [_ _] {:objectStoreEndpoint s3-endpoint})]
+  (with-redefs [eo/expand-cred (fn [cred-href _ _] (get my-cloud-creds (:href cred-href)))]
 
     (is (thrown-with-msg? ExceptionInfo (re-pattern eo/ex-msg-download-bad-state)
                           (eo/download-fn {:state eo/state-new} {})))

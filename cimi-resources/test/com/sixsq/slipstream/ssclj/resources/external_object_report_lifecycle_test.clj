@@ -25,7 +25,7 @@
 
 (use-fixtures :each (join-fixtures [ltu/with-test-server-fixture
                                     eoltu/create-connector-fixture!
-                                    eoltu/create-cloud-cred-fixture!
+                                    eoltu/create-cloud-cred-fixture-other-user!
                                     update-server-conf-fixture!
                                     eoltu/s3-redefs!]))
 

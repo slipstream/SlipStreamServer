@@ -51,6 +51,10 @@
                 :objectName      (object-name resource)})
         (dissoc :filename))))
 
+(defmethod eo/expand-cred eot/objectType
+  [href-obj-store-cred _ _]
+  (std-crud/resolve-hrefs href-obj-store-cred request-admin true))
+
 ;;
 ;; multimethods for validation
 ;;
