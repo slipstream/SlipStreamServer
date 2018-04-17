@@ -246,17 +246,22 @@
 
 ;; URL request operations utils
 
-(defmulti expand-cred
-          "Returns credential document after expanding `href-obj-store-cred` credential href.
+(defmulti identity-for-creds
+          (fn [request objectType] objectType))
 
-          Deriving from request is not directly possible as this is a request on action resource.
-          We would need to get resource id, load the resource and get objectType from it.
-          Instead, requiring objectType as parameter. It should be known to the callers."
-          (fn [href-obj-store-cred request objectType] objectType))
+(defmethod identity-for-creds :default
+  [request _]
+  request)
 
-(defmethod expand-cred :default
-  [href-obj-store-cred request _]
-  (std-crud/resolve-hrefs href-obj-store-cred {:identity (:identity request)} true))
+(defn expand-cred
+  "Returns credential document after expanding `href-obj-store-cred` credential href.
+
+  Deriving objectType from request is not directly possible as this is a request on
+  action resource. We would need to get resource id, load the resource and get
+  objectType from it. Instead, requiring objectType as parameter. It should be known
+  to the callers."
+  [href-obj-store-cred request objectType]
+  (std-crud/resolve-hrefs href-obj-store-cred (identity-for-creds request objectType) true))
 
 (defn expand-obj-store-creds
   "Need objectType to dispatch on when loading credentials."
