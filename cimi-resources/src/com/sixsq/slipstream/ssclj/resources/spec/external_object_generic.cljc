@@ -2,8 +2,8 @@
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]
-    [com.sixsq.slipstream.ssclj.resources.spec.external-object :as eo]))
+    [com.sixsq.slipstream.ssclj.resources.spec.external-object :as eo]
+    [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 (def external-object-generic-keys-spec eo/external-object-keys-spec)
 

@@ -1,23 +1,24 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.session-template
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]
-    [com.sixsq.slipstream.ssclj.resources.spec.common :as c]))
+    [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
+    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
+    [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 ;; All session resources must have a 'method' attribute.
-(s/def :cimi.session-template/method :cimi.core/identifier)
+(s/def :cimi.session-template/method ::cimi-core/identifier)
 
 ;; All session resources must have a 'instance' attribute that is used in
 ;; the template identifier.
-(s/def :cimi.session-template/instance :cimi.core/identifier)
+(s/def :cimi.session-template/instance ::cimi-core/identifier)
 
 ;; Session template resources may have a 'group' attribute that is used to group
 ;; authentication methods together.  Primarily geared towards visualization of
 ;; the authentication methods.
-(s/def :cimi.session-template/group :cimi.core/nonblank-string)
+(s/def :cimi.session-template/group ::cimi-core/nonblank-string)
 
 ;; Sessions may provide a redirect URI to be used on successful authentication.
-(s/def :cimi.session-template/redirectURI :cimi.core/nonblank-string)
+(s/def :cimi.session-template/redirectURI ::cimi-core/nonblank-string)
 
 ;; Restrict the href used to create sessions.
 (def session-template-regex #"^session-template/[a-z]+(-[a-z]+)*$")

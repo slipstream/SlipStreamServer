@@ -1,8 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.event
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]
-    [com.sixsq.slipstream.ssclj.resources.spec.common :as c]))
+    [com.sixsq.slipstream.ssclj.resources.spec.common :as cimi-common]
+    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
+    [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 (s/def :cimi.event/severity #{"critical" "high" "medium" "low"})
 (s/def :cimi.event/type #{"state" "alarm" "action" "system"})
@@ -19,17 +20,17 @@
                                                   :cimi.event/state]))
 
 (s/def :cimi/event
-  (su/only-keys :req-un [:cimi.common/id
-                         :cimi.common/resourceURI
-                         :cimi.common/acl
+  (su/only-keys :req-un [::cimi-common/id
+                         ::cimi-common/resourceURI
+                         ::cimi-common/acl
 
-                         :cimi.core/timestamp
+                         ::cimi-core/timestamp
                          :cimi.event/content
                          :cimi.event/type
                          :cimi.event/severity]
-                :opt-un [:cimi.common/created               ;; FIXME: should be required
-                         :cimi.common/updated               ;; FIXME: should be required
-                         :cimi.common/name
-                         :cimi.common/description
-                         :cimi.common/properties
-                         :cimi.common/operations]))
+                :opt-un [::cimi-common/created              ;; FIXME: should be required
+                         ::cimi-common/updated              ;; FIXME: should be required
+                         ::cimi-common/name
+                         ::cimi-common/description
+                         ::cimi-common/properties
+                         ::cimi-common/operations]))

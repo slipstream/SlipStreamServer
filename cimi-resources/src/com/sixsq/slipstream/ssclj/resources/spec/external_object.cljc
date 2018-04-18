@@ -1,15 +1,16 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.external-object
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.resources.spec.common]))
+    [com.sixsq.slipstream.ssclj.resources.spec.common :as cimi-common]
+    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]))
 
-(s/def :cimi.external-object/objectType :cimi.core/identifier)
+(s/def :cimi.external-object/objectType ::cimi-core/identifier)
 (s/def :cimi.external-object/state #{"new" "ready"})
-(s/def :cimi.external-object/objectStoreCred :cimi.common/resource-link)
-(s/def :cimi.external-object/objectName :cimi.core/nonblank-string)
-(s/def :cimi.external-object/bucketName :cimi.core/nonblank-string)
+(s/def :cimi.external-object/objectStoreCred ::cimi-common/resource-link)
+(s/def :cimi.external-object/objectName ::cimi-core/nonblank-string)
+(s/def :cimi.external-object/bucketName ::cimi-core/nonblank-string)
 
-(s/def :cimi.external-object/contentType :cimi.core/nonblank-string)
+(s/def :cimi.external-object/contentType ::cimi-core/nonblank-string)
 
 (def external-object-template-regex #"^external-object-template/[a-z]+(-[a-z]+)*$")
 (s/def :cimi.external-object/href (s/and string? #(re-matches external-object-template-regex %)))

@@ -4,7 +4,8 @@
    of resources."
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.resources.spec.common]
+    [com.sixsq.slipstream.ssclj.resources.spec.common :as cimi-common]
+    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 ;;
@@ -12,15 +13,15 @@
 ;; these definitions are the 'cimi.desc' namespace
 ;;
 
-(s/def :cimi.desc/displayName :cimi.core/nonblank-string)
-(s/def :cimi.desc/category :cimi.core/nonblank-string)
-(s/def :cimi.desc/description :cimi.core/nonblank-string)
+(s/def :cimi.desc/displayName ::cimi-core/nonblank-string)
+(s/def :cimi.desc/category ::cimi-core/nonblank-string)
+(s/def :cimi.desc/description ::cimi-core/nonblank-string)
 (s/def :cimi.desc/type #{"string" "boolean" "int" "float" "timestamp" "enum" "password" "hidden" "map" "list"})
 (s/def :cimi.desc/mandatory boolean?)
 (s/def :cimi.desc/readOnly boolean?)
 (s/def :cimi.desc/order nat-int?)
-(s/def :cimi.desc/enum (s/coll-of :cimi.core/nonblank-string :min-count 1))
-(s/def :cimi.desc/instructions :cimi.core/nonblank-string)
+(s/def :cimi.desc/enum (s/coll-of ::cimi-core/nonblank-string :min-count 1))
+(s/def :cimi.desc/instructions ::cimi-core/nonblank-string)
 
 (s/def :cimi.desc/parameter-description
   (su/only-keys :req-un [:cimi.desc/type]
@@ -34,6 +35,6 @@
                          :cimi.desc/instructions]))
 
 (s/def :cimi.desc/resource-description
-  (s/every (s/or :acl (s/tuple #{:acl} :cimi.common/acl)
+  (s/every (s/or :acl (s/tuple #{:acl} ::cimi-common/acl)
                  :desc (s/tuple keyword? :cimi.desc/parameter-description))))
 

@@ -2,10 +2,11 @@
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.resources.spec.configuration-template :as ps]))
 
-(s/def :cimi.configuration-template.session-github/clientID :cimi.core/token)
-(s/def :cimi.configuration-template.session-github/clientSecret :cimi.core/token)
+(s/def :cimi.configuration-template.session-github/clientID ::cimi-core/token)
+(s/def :cimi.configuration-template.session-github/clientSecret ::cimi-core/token)
 
 (def configuration-template-keys-spec-req
   {:req-un [:cimi.configuration-template/instance

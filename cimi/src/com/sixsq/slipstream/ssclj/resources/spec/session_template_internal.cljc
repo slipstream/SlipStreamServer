@@ -2,10 +2,11 @@
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.resources.spec.session-template :as ps]))
 
-(s/def :cimi.session-template.internal/username :cimi.core/nonblank-string)
-(s/def :cimi.session-template.internal/password :cimi.core/nonblank-string)
+(s/def :cimi.session-template.internal/username ::cimi-core/nonblank-string)
+(s/def :cimi.session-template.internal/password ::cimi-core/nonblank-string)
 
 ;; all parameters must be specified in both the template and the create resource
 (def session-template-keys-spec-req

@@ -2,9 +2,10 @@
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template :as ps]))
 
-(s/def :cimi.credential-template.ssh-public-key/publicKey :cimi.core/nonblank-string)
+(s/def :cimi.credential-template.ssh-public-key/publicKey ::cimi-core/nonblank-string)
 
 (def credential-template-keys-spec
   {:req-un [:cimi.credential-template.ssh-public-key/publicKey]})
