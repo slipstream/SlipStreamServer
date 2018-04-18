@@ -20,6 +20,7 @@
 
 (def ^:const user-info-header "jane USER")
 (def ^:const admin-info-header "root ADMIN")
+(def ^:const user-creds-info-header "creds USER")
 
 (def obj-store-endpoint "https://s3.cloud.com")
 (def connector-name "connector-name")
@@ -32,26 +33,36 @@
 
 (def session-admin (build-session admin-info-header))
 (def session-user (build-session user-info-header))
+(def session-user-creds (build-session user-creds-info-header))
 
 (def ^:dynamic *cred-uri* nil)
 
-(defn create-cloud-cred-fixture!
-  [f]
+(defn create-cloud-cred
+  [user-session]
   (let [cred-create {:credentialTemplate
                      {:href      (str credt/resource-url "/" cred-alpha/method)
                       :key       "key"
                       :secret    "secret"
                       :quota     7
                       :connector {:href (str c/resource-url "/" connector-name)}}}
-        uri (-> session-user
+        uri (-> user-session
                 (request (str p/service-context (u/de-camelcase cred/resource-name))
                          :request-method :post
                          :body (json/write-str cred-create))
                 (ltu/body->edn)
                 (ltu/is-status 201)
                 (ltu/location))]
-    (alter-var-root #'*cred-uri* (constantly uri))
-    (f)))
+    (alter-var-root #'*cred-uri* (constantly uri))))
+
+(defn create-cloud-cred-fixture-other-user!
+  [f]
+  (create-cloud-cred session-user-creds)
+  (f))
+
+(defn create-cloud-cred-fixture!
+  [f]
+  (create-cloud-cred session-user)
+  (f))
 
 (defn create-connector-fixture!
   [f]
@@ -332,10 +343,7 @@
               (request abs-upload-uri
                        :request-method :post)
               (ltu/body->edn)
-              (ltu/is-status 200)
-              :response
-              :body
-              :uri))
+              (ltu/is-status 200)))
 
       ;; after getting upload URL the state is set to 'uploading' and only 'ready' action is present
       (-> session-admin
@@ -385,20 +393,14 @@
                 (request download-url-action
                          :request-method :post)
                 (ltu/body->edn)
-                (ltu/is-status 200)
-                :response
-                :body
-                :uri)))
+                (ltu/is-status 200))))
 
       ;; getting the URL should work
       (is (-> session-user
               (request abs-upload-uri-user
                        :request-method :post)
               (ltu/body->edn)
-              (ltu/is-status 200)
-              :response
-              :body
-              :uri))
+              (ltu/is-status 200)))
 
       ;; after getting upload URL the state is set to 'uploading' and only 'ready' action is present
       (-> session-user
@@ -447,7 +449,4 @@
                 (request download-url-action
                          :request-method :post)
                 (ltu/body->edn)
-                (ltu/is-status 200)
-                :response
-                :body
-                :uri))))))
+                (ltu/is-status 200)))))))
