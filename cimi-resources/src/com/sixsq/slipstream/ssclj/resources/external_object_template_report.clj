@@ -1,14 +1,14 @@
 (ns com.sixsq.slipstream.ssclj.resources.external-object-template-report
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.external-object-template :as eo]
-    [com.sixsq.slipstream.ssclj.resources.spec.external-object-report]))
+    [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
+    [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
+    [com.sixsq.slipstream.ssclj.resources.spec.external-object-template-report]))
 
 (def ^:const objectType "report")
 
-
 (def ExternalObjectTemplateReportDescription
-  (merge eo/ExternalObjectTemplateDescription
+  (merge eot/ExternalObjectTemplateDescription
          {:runUUID   {:displayName "Deployment UUID"
                       :category    "general"
                       :description "Deployment UUID"
@@ -29,9 +29,11 @@
 ;; resource
 ;;
 (def ^:const resource
-  {:objectType objectType
-   :state      "new"})
-
+  {:objectType  objectType
+   :runUUID     "uuid"
+   :component   "component"
+   :filename    "filename"
+   :contentType "content/type"})
 
 ;;
 ;; description
@@ -44,15 +46,24 @@
 ;;
 (defn initialize
   []
-  (eo/register resource desc))
+  (eot/register resource desc))
 
 
 ;;
 ;; multimethods for validation
 ;;
-(def validate-fn (u/create-spec-validation-fn :cimi/external-object-template.report))
-
-
+(def validate-fn (u/create-spec-validation-fn :cimi/external-object.report))
 (defmethod eo/validate-subtype objectType
+  [resource]
+  (validate-fn resource))
+
+
+(def create-validate-fn (u/create-spec-validation-fn :cimi/external-object-template.report-create))
+(defmethod eo/create-validate-subtype objectType
+  [resource]
+  (create-validate-fn resource))
+
+(def validate-fn (u/create-spec-validation-fn :cimi.external-object-template.report/externalObjectTemplate))
+(defmethod eot/validate-subtype-template objectType
   [resource]
   (validate-fn resource))

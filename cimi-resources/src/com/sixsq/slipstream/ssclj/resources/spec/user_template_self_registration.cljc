@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.user-template-self-registration
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.resources.spec.user :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.user-template :as ps]
+    [com.sixsq.slipstream.ssclj.resources.spec.user]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 

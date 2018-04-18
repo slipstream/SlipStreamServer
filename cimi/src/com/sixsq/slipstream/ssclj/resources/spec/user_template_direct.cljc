@@ -1,18 +1,19 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.user-template-direct
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.resources.spec.user :as u]
-    [com.sixsq.slipstream.ssclj.resources.spec.user-template :as ps]))
+    [com.sixsq.slipstream.ssclj.resources.spec.user-template :as ps]
+    [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 (s/def :cimi.user-template.direct/href :cimi.user-template/href)
-(s/def :cimi.user-template.direct/password :cimi.core/nonblank-string)
+(s/def :cimi.user-template.direct/password ::cimi-core/nonblank-string)
 (s/def :cimi.user-template.direct/roles string?)
-(s/def :cimi.user-template.direct/state :cimi.core/nonblank-string)
-(s/def :cimi.user-template.direct/creation :cimi.core/timestamp)
-(s/def :cimi.user-template.direct/lastOnline :cimi.core/timestamp)
-(s/def :cimi.user-template.direct/lastExecute :cimi.core/timestamp)
-(s/def :cimi.user-template.direct/activeSince :cimi.core/timestamp)
+(s/def :cimi.user-template.direct/state ::cimi-core/nonblank-string)
+(s/def :cimi.user-template.direct/creation ::cimi-core/timestamp)
+(s/def :cimi.user-template.direct/lastOnline ::cimi-core/timestamp)
+(s/def :cimi.user-template.direct/lastExecute ::cimi-core/timestamp)
+(s/def :cimi.user-template.direct/activeSince ::cimi-core/timestamp)
 (s/def :cimi.user-template.direct/isSuperUser boolean?)
 (s/def :cimi.user-template.direct/deleted boolean?)
 (s/def :cimi.user-template.direct/githublogin string?)

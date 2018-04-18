@@ -50,6 +50,7 @@
         metering-index (utils/random-uuid)
         metering-type "metering"
         metering-action (t/index-action metering-index metering-type)
+        metering-search-url (t/search-url metering-index metering-type)
         rest-map (spu/provide-mock-rest-client)]
     (with-open [client (:client rest-map)]
       (when (spu/cluster-ready? client)
@@ -75,6 +76,29 @@
               (is (= n (count ids)))
               (is (= n (count db-ids)))
               (is (= ids (set db-ids)))
-              (is (= [n n n] (<!! (t/meter-resources (:hosts rest-map) resource-search-url metering-action))))))
+              (is (= [n n n] (<!! (t/meter-resources (:hosts rest-map) resource-search-url metering-action)))))
+
+            (spu/index-refresh client metering-index)
+
+            (let [ch (spandex/scroll-chan client
+                                          {:url  metering-search-url
+                                           :body {:query {:match_all {}}}})
+                  db-ids (loop [existing-ids []]
+                           (if-let [resp (<!! ch)]
+                             (let [ids (->> (-> resp :body :hits :hits)
+                                            (map (juxt #(str (:_type %) "/" (:_id %)) #(-> % :_source :id))))]
+                               (recur (concat existing-ids ids)))
+                             existing-ids))]
+              (is (= n (count db-ids)))
+
+              ;; check consistency between the CIMI resourceID and the Elasticsearch :_id and :_type keys.
+              (is (apply = (first db-ids)))
+              (is (every? #(apply = %) db-ids))))
+
           (finally
-            (spu/index-delete client resource-index)))))))
+            (try
+              (spu/index-delete client resource-index)
+              (catch Exception _))
+            (try
+              (spu/index-delete client metering-index)
+              (catch Exception _))))))))

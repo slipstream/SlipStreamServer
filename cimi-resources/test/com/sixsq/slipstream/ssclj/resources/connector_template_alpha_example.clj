@@ -5,6 +5,7 @@
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.connector-template :as p]
+    [com.sixsq.slipstream.ssclj.resources.spec.connector-template]
     [com.sixsq.slipstream.ssclj.resources.spec.connector-template :as ps]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
@@ -16,17 +17,20 @@
 ;;
 
 (s/def :cimi.connector-template.alpha/alphaKey pos-int?)
+(s/def :cimi.connector-template.alpha/objectStoreEndpoint :cimi.connector-template/objectStoreEndpoint)
 
 ;; Defines the contents of the alpha ConnectorTemplate resource itself.
 (s/def :cimi/connector-template.alpha
   (su/only-keys-maps ps/resource-keys-spec
-                     {:req-un [:cimi.connector-template.alpha/alphaKey]}))
+                     {:req-un [:cimi.connector-template.alpha/alphaKey]
+                      :opt-un [:cimi.connector-template.alpha/objectStoreEndpoint]}))
 
 ;; Defines the contents of the alpha template used in a create resource.
 ;; NOTE: The name must match the key defined by the resource, :connectorTemplate here.
 (s/def :cimi.connector-template.alpha/connectorTemplate
   (su/only-keys-maps ps/template-keys-spec
-                     {:opt-un [:cimi.connector-template.alpha/alphaKey]}))
+                     {:opt-un [:cimi.connector-template.alpha/alphaKey
+                               :cimi.connector-template.alpha/objectStoreEndpoint]}))
 
 (s/def :cimi/connector-template.alpha-create
   (su/only-keys-maps ps/create-keys-spec

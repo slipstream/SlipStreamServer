@@ -28,6 +28,10 @@ import com.sixsq.slipstream.persistence.ParameterType;
 import com.sixsq.slipstream.persistence.ServiceConfiguration;
 import com.sixsq.slipstream.persistence.ServiceConfiguration.RequiredParameters;
 import com.sixsq.slipstream.persistence.ServiceConfigurationParameter;
+
+import java.util.concurrent.ScheduledFuture;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.restlet.data.Protocol;
 import org.restlet.data.Reference;
 import slipstream.ui.views.Representation;
@@ -44,6 +48,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This singleton class is the interface to the service configuration. It
@@ -75,7 +82,7 @@ import java.util.Properties;
  * the method.
  *
  */
-public class Configuration {
+public class Configuration implements Runnable {
 
 	/**
 	 * Singleton instance. Since this will not be used heavily after startup use
@@ -101,6 +108,11 @@ public class Configuration {
 
 	private int defaultPort = 80;
 	private int defaultSecurePort = 443;
+
+	public static int refreshRateSec = 10;
+	private static ScheduledFuture<?> refreshTask;
+
+	private static Logger log = Logger.getLogger("Configuration");
 
 	/**
 	 * SlipStream version number derived from the slipstream.version property in
@@ -129,13 +141,6 @@ public class Configuration {
 
 	public static boolean isMetricsGraphiteEnabled() throws ValidationException {
 		return isEnabled(ServiceConfiguration.RequiredParameters.SLIPSTREAM_METRICS_GRAPHITE_ENABLE.getName());
-	}
-
-	public static boolean getMeteringEnabled() throws ConfigurationException, ValidationException {
-		Configuration config = Configuration.getInstance();
-		Boolean enabled = Boolean.parseBoolean(config.getProperty(
-				ServiceConfiguration.RequiredParameters.SLIPSTREAM_METERING_ENABLE.getName(), "true"));
-		return enabled;
 	}
 
 	/**
@@ -167,15 +172,50 @@ public class Configuration {
 	 * @throws ValidationException
 	 */
 	private Configuration() throws ConfigurationException, ValidationException {
+		loadServiceConfiguration();
+		ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+		refreshTask = service.scheduleAtFixedRate(this, 0, refreshRateSec, TimeUnit.SECONDS);
+	}
 
+	public void run() {
+		// Scheduler doesn't propagate exceptions. Log them instead.
+		try {
+			log.fine("Periodic loading of service configuration from backend...");
+			loadServiceConfiguration();
+			log.fine("Periodic loading of service configuration from backend... success.");
+			if (log.getParent().getLevel().equals(Level.FINEST)) {
+				log.finest("===== Service Configuration parameters START =====");
+				StringBuilder sb = new StringBuilder();
+				for (String k: serviceConfiguration.getParameters().keySet()) {
+					sb.append(String.format("name: %s, val: %s\n", k, serviceConfiguration.getParameter(k)));
+				}
+				log.finest(sb.toString());
+				log.finest("===== Service Configuration parameters END =====");
+			}
+		} catch (Exception e) {
+			log.warning("Loading service configuration failed: " + e.getMessage());
+			e.printStackTrace();
+		}
+	}
+
+	public void reinitialise() {
+	    if (null != refreshTask) {
+			refreshTask.cancel(false);
+		}
+		instance = null;
+	}
+
+	private void loadServiceConfiguration() throws ConfigurationException, ValidationException {
 		try {
 			ServiceConfiguration serviceConfiguration = ServiceConfiguration.load();
 			update(serviceConfiguration.getParameters());
-		} catch (NoResultException ex) {
+		} catch (NoResultException e) {
+			log.warning("Failed loading service configuration: " + e.getMessage());
+			e.printStackTrace();
+			log.warning("Resetting service configuration...");
 			reset();
-			store();
+			log.warning("Resetting service configuration... success.");
 		}
-
 	}
 
 	private void postProcessParameters() throws ConfigurationException, ValidationException {
@@ -620,7 +660,7 @@ public class Configuration {
 		}
 	}
 
-	public void store() {
-		serviceConfiguration = (ServiceConfiguration) serviceConfiguration.store();
+	private void printConfiguration() {
+
 	}
 }

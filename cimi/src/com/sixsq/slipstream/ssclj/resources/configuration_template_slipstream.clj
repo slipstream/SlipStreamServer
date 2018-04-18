@@ -15,40 +15,43 @@
 ;;
 (def ^:const resource
   {
-   :service                    service
-   :name                       "SlipStream"
-   :description                "SlipStream Service Configuration"
-   :serviceURL                 "https://localhost"
-   :supportEmail               "support@example.com"
-   :clientBootstrapURL         "https://localhost/downloads/slipstream.bootstrap"
-   :clientURL                  "https://localhost/downloads/slipstreamclient.tgz"
-   :connectorOrchPrivateSSHKey "/opt/slipstream/server/.ssh/id_rsa"
-   :connectorOrchPublicSSHKey  "/opt/slipstream/server/.ssh/id_rsa.pub"
-   :connectorLibcloudURL       "https://localhost/downloads/libcloud.tgz"
+   :service                      service
+   :name                         "SlipStream"
+   :description                  "SlipStream Service Configuration"
+   :serviceURL                   "https://localhost"
+   :supportEmail                 "support@example.com"
+   :clientBootstrapURL           "https://localhost/downloads/slipstream.bootstrap"
+   :clientURL                    "https://localhost/downloads/slipstreamclient.tgz"
+   :connectorOrchPrivateSSHKey   "/opt/slipstream/server/.ssh/id_rsa"
+   :connectorOrchPublicSSHKey    "/opt/slipstream/server/.ssh/id_rsa.pub"
+   :connectorLibcloudURL         "https://localhost/downloads/libcloud.tgz"
 
-   :mailUsername               "mailer"
-   :mailPassword               "change-me"
-   :mailHost                   "smtp.example.com"
-   :mailPort                   465
-   :mailSSL                    true
-   :mailDebug                  true
+   :mailUsername                 "mailer"
+   :mailPassword                 "change-me"
+   :mailHost                     "smtp.example.com"
+   :mailPort                     465
+   :mailSSL                      true
+   :mailDebug                    true
 
-   :quotaEnable                true
+   :quotaEnable                  true
 
-   :registrationEnable         true
-   :registrationEmail          "register@sixsq.com"
+   :registrationEnable           true
+   :registrationEmail            "register@sixsq.com"
 
-   :meteringEnable             false
-   :meteringEndpoint           "http://localhost:2005"
+   :meteringEnable               false
+   :meteringEndpoint             "http://localhost:2005"
 
-   :serviceCatalogEnable       false
+   :serviceCatalogEnable         false
 
-   :slipstreamVersion          slipstream-version
+   :slipstreamVersion            slipstream-version
 
-   :cloudConnectorClass        ""
+   :cloudConnectorClass          ""
 
-   :metricsLoggerEnable        false
-   :metricsGraphiteEnable      false})
+   :metricsLoggerEnable          false
+   :metricsGraphiteEnable        false
+
+   :reportsObjectStoreBucketName "slipstream-reports"
+   :reportsObjectStoreCreds      "credential/<CHANGE-ME-UUID>"})
 
 
 ;;

@@ -7,11 +7,6 @@
   [x]
   (and (string? x) (not (empty? x))))
 
-(deftest test-get-param-description
-  (let [pd (sci/get-sc-param-meta-only "slipstream.base.url")]
-    (is (not-empty-string? (.getDescription pd)))))
-
-
 (deftest test-grow-coll-1->2
   (is (= [] (sci/grow-coll-1->2 [])))
   (is (= [:a :b] (sci/grow-coll-1->2 [:a :b])))

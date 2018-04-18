@@ -21,17 +21,23 @@
 
 (def ^:const collection-uri (str c/slipstream-schema-uri collection-name))
 
+(def user-can-view {:principal "USER"
+                    :type      "ROLE"
+                    :right     "VIEW"})
+
 (def resource-acl {:owner {:principal "ADMIN"
                            :type      "ROLE"}
                    :rules [{:principal "ADMIN"
                             :type      "ROLE"
-                            :right     "VIEW"}]})
+                            :right     "VIEW"}
+                           user-can-view]})
 
 (def collection-acl {:owner {:principal "ADMIN"
                              :type      "ROLE"}
                      :rules [{:principal "ADMIN"
                               :type      "ROLE"
-                              :right     "VIEW"}]})
+                              :right     "VIEW"}
+                             user-can-view]})
 
 ;;
 ;; Resource defaults
@@ -47,6 +53,7 @@
 
 (def connector-reference-attrs-defaults
   {:endpoint                ""
+   :objectStoreEndpoint     ""
    :nativeContextualization "linux-only"
    :orchestratorSSHUsername ""
    :orchestratorSSHPassword ""
@@ -155,6 +162,15 @@
     :type        "string"
     :category    ""
     :description "Service endpoint for the connector (e.g. http://example.com:5000)"
+    :mandatory   true
+    :readOnly    false
+    :order       10}
+
+   :objectStoreEndpoint
+   {:displayName "object.store.endpoint"
+    :type        "string"
+    :category    ""
+    :description "Cloud Object Store Service endpoint (e.g. http://s3.example.com:5000)"
     :mandatory   true
     :readOnly    false
     :order       10}

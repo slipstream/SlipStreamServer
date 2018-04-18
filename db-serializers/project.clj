@@ -1,6 +1,6 @@
-(def +version+ "3.48-SNAPSHOT")
+(def +version+ "3.50-SNAPSHOT")
 
-(defproject com.sixsq.slipstream/SlipStreamDbSerializers-jar "3.48-SNAPSHOT"
+(defproject com.sixsq.slipstream/SlipStreamDbSerializers-jar "3.50-SNAPSHOT"
 
   :description "utilities for serializing objects to a database"
   
@@ -12,7 +12,7 @@
 
   :plugins [[lein-parent "0.3.2"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "5.1.0"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.1.1"]
                    :inherit [:min-lein-version
                              :managed-dependencies
                              :repositories
@@ -32,7 +32,6 @@
                  [org.clojure/data.xml]
                  [superstring]
                  [org.clojure/test.check]
-                 [com.sixsq.slipstream/SlipStreamPersistence ~+version+]
                  [com.sixsq.slipstream/SlipStreamDbTesting-jar ~+version+]]
 
   :profiles

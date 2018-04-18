@@ -1,10 +1,12 @@
 (ns com.sixsq.slipstream.ssclj.resources.external-object-template-alpha-example
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.resources.external-object-template :as eo]
-    [com.sixsq.slipstream.ssclj.resources.spec.external-object-template :as eot]
+    [com.sixsq.slipstream.ssclj.util.spec :as su]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]))
+    [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
+    [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
+    [com.sixsq.slipstream.ssclj.resources.spec.external-object :as eos]
+    [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]))
 
 (def ^:const objectType "alpha")
 
@@ -12,63 +14,74 @@
 ;; schemas
 ;;
 
-(s/def :cimi.external-object-template.alpha/alphaKey pos-int?)
+(s/def :cimi.external-object.alpha/alphaKey pos-int?)
+
+(def external-object-keys-spec
+  (u/remove-req eos/external-object-keys-spec #{:cimi.external-object/bucketName
+                                                :cimi.external-object/objectName
+                                                :cimi.external-object/objectStoreCred}))
+
+(def external-object-alpha-keys-spec
+  (su/merge-keys-specs [external-object-keys-spec
+                        {:req-un [:cimi.external-object.alpha/alphaKey]}]))
+
+(def resource-keys-spec
+  (su/merge-keys-specs [c/common-attrs
+                        external-object-alpha-keys-spec]))
+
+(s/def :cimi/external-object.alpha
+  (su/only-keys-maps resource-keys-spec))
 
 
-;; Defines the contents of the alpha ExternalObjectTemplate resource itself.
-(s/def :cimi/external-object-template.alpha
-  (su/only-keys-maps eot/resource-keys-spec
-                     {:req-un [:cimi.external-object-template.alpha/alphaKey]}))
-
-
-;; Defines the contents of the alpha template used in a create resource.
-;; NOTE: The name must match the key defined by the resource, :externalObjectTemplate here.
 (s/def :cimi.external-object-template.alpha/externalObjectTemplate
-  (su/only-keys-maps eot/template-keys-spec
-                     {:opt-un [:cimi.external-object-template.alpha/alphaKey]}))
-
+  (su/only-keys-maps c/template-attrs
+                     (u/remove-req external-object-alpha-keys-spec #{:cimi.external-object/state})))
 
 (s/def :cimi/external-object-template.alpha-create
-  (su/only-keys-maps eot/create-keys-spec
-                     {:opt-un [:cimi.external-object-template.alpha/externalObjectTemplate]}))
-
-
-(def ExternalObjectTemplateAlphaDescription
-  (merge eo/ExternalObjectTemplateDescription
-         {:alphaKey {:displayName "Alpha Key"
-                     :category    "general"
-                     :description "example parameter"
-                     :type        "int"
-                     :mandatory   true
-                     :readOnly    false
-                     :order       1}}))
+  (su/only-keys-maps c/create-attrs
+                     {:req-un [:cimi.external-object-template.alpha/externalObjectTemplate]}))
 
 ;;
-;; resource
+;; template resource
 ;;
-(def ^:const resource
+(def ^:const resource-template
   {:objectType objectType
-   :alphaKey   1001
-   :state      "new"})
+   :alphaKey   1001})
 
 ;;
 ;; description
 ;;
-(def ^:const desc ExternalObjectTemplateAlphaDescription)
+(def ^:const desc (merge eot/ExternalObjectTemplateDescription
+                         {:alphaKey {:displayName "Alpha Key"
+                                     :category    "general"
+                                     :description "example parameter"
+                                     :type        "int"
+                                     :mandatory   true
+                                     :readOnly    false
+                                     :order       1}}))
 
 ;;
 ;; initialization: register this external object template
 ;;
 (defn initialize
   []
-  (eo/register resource desc))
+  (eot/register resource-template desc))
 
 ;;
 ;; multimethods for validation
 ;;
-(def validate-fn (u/create-spec-validation-fn :cimi/external-object-template.alpha))
 
-
+(def validate-fn (u/create-spec-validation-fn :cimi/external-object.alpha))
 (defmethod eo/validate-subtype objectType
+  [resource]
+  (validate-fn resource))
+
+(def validate-fn (u/create-spec-validation-fn :cimi/external-object-template.alpha-create))
+(defmethod eo/create-validate-subtype objectType
+  [resource]
+  (validate-fn resource))
+
+(def validate-fn (u/create-spec-validation-fn :cimi.external-object-template.alpha/externalObjectTemplate))
+(defmethod eot/validate-subtype-template objectType
   [resource]
   (validate-fn resource))

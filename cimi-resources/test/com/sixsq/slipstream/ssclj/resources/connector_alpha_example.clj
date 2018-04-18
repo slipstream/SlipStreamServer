@@ -3,7 +3,6 @@
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.connector :as p]
     [com.sixsq.slipstream.ssclj.resources.connector-template-alpha-example :as tpl]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 (def ^:const cloud-service-type "alpha")

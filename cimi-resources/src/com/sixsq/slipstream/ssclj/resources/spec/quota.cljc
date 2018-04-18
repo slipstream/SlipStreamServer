@@ -2,9 +2,10 @@
   (:require
     [clojure.spec.alpha :as s]
     [instaparse.core :as insta]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [com.sixsq.slipstream.ssclj.filter.parser :as parser]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
-    [com.sixsq.slipstream.ssclj.filter.parser :as parser]))
+    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
+    [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 
 (defn valid-cimi-filter?
@@ -14,9 +15,9 @@
     (catch Throwable _ false)))
 
 
-(s/def :cimi.quota/resource :cimi.core/nonblank-string)
+(s/def :cimi.quota/resource ::cimi-core/nonblank-string)
 (s/def :cimi.quota/selection valid-cimi-filter?)
-(s/def :cimi.quota/aggregation :cimi.core/nonblank-string)
+(s/def :cimi.quota/aggregation ::cimi-core/nonblank-string)
 (s/def :cimi.quota/limit pos-int?)
 
 

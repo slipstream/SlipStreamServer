@@ -23,6 +23,8 @@ package com.sixsq.slipstream.persistence;
 import com.sixsq.slipstream.es.CljElasticsearchHelper;
 import com.sixsq.slipstream.exceptions.NotImplementedException;
 import java.util.logging.Logger;
+
+import com.sixsq.slipstream.exceptions.ValidationException;
 import org.simpleframework.xml.ElementMap;
 
 import javax.mail.internet.AddressException;
@@ -117,6 +119,12 @@ public class ServiceConfiguration extends
 				isValidEmail(value);
 			}
 		},
+
+		SLIPSTREAM_REPORTS_OBJECTSTORE_BUCKET_NAME(
+				CljElasticsearchHelper.getParameterDescription("slipstream.reports.objectstore.bucket.name")),
+
+		SLIPSTREAM_REPORTS_OBJECTSTORE_CREDS(
+				CljElasticsearchHelper.getParameterDescription("slipstream.reports.objectstore.creds")),
 
 		SLIPSTREAM_REGISTRATION_ENABLE(
 				CljElasticsearchHelper.getParameterDescription("slipstream.registration.enable")),
@@ -329,7 +337,7 @@ public class ServiceConfiguration extends
 
 	public static ServiceConfiguration load() {
 		IFn load = CljElasticsearchHelper.getLoadFn(CljElasticsearchHelper.NS_SERIALIZERS_SERVICE_CONFIG);
-		return (ServiceConfiguration) load.invoke();
+		return (ServiceConfiguration) load.invoke(new ServiceConfiguration());
 	}
 
 	public ServiceConfiguration store() {
@@ -355,6 +363,11 @@ public class ServiceConfiguration extends
 	@Override
 	public void remove() {
 		throw (new NotImplementedException());
+	}
+
+	public ServiceConfigurationParameter buildServiceConfigParam(String name, String value, String description)
+			throws ValidationException {
+		return new ServiceConfigurationParameter(name, value, description);
 	}
 
 }

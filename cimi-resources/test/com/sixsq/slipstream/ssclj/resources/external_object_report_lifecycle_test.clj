@@ -1,41 +1,54 @@
 (ns com.sixsq.slipstream.ssclj.resources.external-object-report-lifecycle-test
   (:require
-    [clojure.test :refer [deftest is are use-fixtures]]
-    [peridot.core :refer [session header request content-type]]
-    [com.sixsq.slipstream.ssclj.resources.external-object-template-report :as report]
-    [com.sixsq.slipstream.ssclj.resources.external-object.utils :as eo-utils]
-    [com.sixsq.slipstream.ssclj.resources.external-object-lifecycle-test-utils :as eoltu]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [clojure.data.json :as json]
+    [clojure.test :refer [deftest use-fixtures join-fixtures]]
+    [peridot.core :refer [request]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-    [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
-    [com.sixsq.slipstream.ssclj.resources.external-object-report :as eor]
-    [com.sixsq.slipstream.ssclj.resources.external-object.utils :as s3]))
+    [com.sixsq.slipstream.ssclj.resources.external-object-lifecycle-test-utils :as eoltu]
+    [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
+    [com.sixsq.slipstream.ssclj.resources.external-object-template-report :as report]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]))
 
 
-(with-redefs [s3/object-store-config (constantly "foo")]
-  @eor/reports-bucket)
+(defn update-server-conf-fixture!
+  [f]
+  (-> eoltu/session-admin
+      (request (str p/service-context "configuration/slipstream")
+               :request-method :put
+               :body (json/write-str {:reportsObjectStoreBucketName "test-bucket"
+                                      :reportsObjectStoreCreds      eoltu/*cred-uri*}))
+      (ltu/body->edn)
+      (ltu/is-status 200))
+  (f))
 
-(use-fixtures :each ltu/with-test-server-fixture)
+(use-fixtures :each (join-fixtures [ltu/with-test-server-fixture
+                                    eoltu/create-connector-fixture!
+                                    eoltu/create-cloud-cred-fixture!
+                                    update-server-conf-fixture!
+                                    eoltu/s3-redefs!]))
 
 (def base-uri (str p/service-context (u/de-camelcase eo/resource-name)))
 
-(def fake-deployment-info {:runUUID     "xxxx-deployment-uuid"
-                           :component   "machine.1"
-                           :contentType "application/gzip"})
+(def report-obj-1 {:runUUID     "xxxx-deployment-uuid"
+                   :component   "machine.1"
+                   :filename    "machine.1_report_time.tgz"
+                   :contentType "application/gzip"})
+
+(def report-obj-2 {:runUUID     "xxxx-deployment-uuid"
+                   :component   "machine.2"
+                   :filename    "machine.2_report_time.tgz"
+                   :contentType "application/gzip"})
+
+(def template-url (str p/service-context eot/resource-url "/" report/objectType))
 
 (deftest lifecycle
-  (with-redefs [eo-utils/generate-url (constantly "https://s3.example.org/bucket")]
-    (eoltu/lifecycle (str p/service-context eot/resource-url "/" report/objectType)
-                     fake-deployment-info)))
+  (eoltu/lifecycle template-url report-obj-1 report-obj-2))
 
 
 (deftest check-upload-and-download-operations
-  (with-redefs [eo-utils/generate-url (constantly "https://s3.example.org/bucket")]
-    (eoltu/upload-and-download-operations (str p/service-context eot/resource-url "/" report/objectType)
-                                          fake-deployment-info)))
+  (eoltu/upload-and-download-operations template-url report-obj-1 report-obj-2))
 
 
 (deftest bad-methods

@@ -12,5 +12,7 @@ defaultEntryPoints = ["http", "https"]
 email = "$youremail@yourdomain$"
 storage = "acme.json"
 entryPoint = "https"
+[acme.httpChallenge]
+   entryPoint = "http"
 [[acme.domains]]
    main = "$fqdn$"

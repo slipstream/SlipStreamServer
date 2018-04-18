@@ -1,25 +1,23 @@
 (ns com.sixsq.slipstream.db.serializers.service-config
   (:refer-clojure :exclude [load])
   (:require
-    [com.sixsq.slipstream.db.serializers.service-config-impl :as sci])
-  (:import
-    (com.sixsq.slipstream.persistence ServiceConfiguration)))
+    [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]))
 
 ;;
 ;; Interface to store and load entity as resource.
 ;;
 
 (defn store
-  "Stores ServiceConfiguration global and per connector parameters.
+  "Stores ServiceConfiguration per connector parameters.
   Returns provided ServiceConfiguration."
-  [^ServiceConfiguration sc]
+  [^Object sc]
   (-> sc
-      sci/store-sc
       sci/store-connectors))
 
 (defn load
   "Loads and returns ServiceConfiguration with global and per
   connector parameters."
-  []
-  (-> (sci/load-sc)
+  [^Object sc]
+  (-> sc
+      sci/load-sc
       sci/load-connectors))

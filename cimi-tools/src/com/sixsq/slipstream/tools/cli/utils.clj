@@ -4,8 +4,9 @@
     [clojure.edn :as edn]
     [clj-http.client :as http]
     [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]
-    [com.sixsq.slipstream.db.serializers.service-config-util :as scu]
-    ))
+    [com.sixsq.slipstream.db.serializers.service-config-util :as scu])
+  (:import
+    (com.sixsq.slipstream.persistence ServiceConfiguration)))
 
 (defn- update-val
   [v modifiers]
@@ -81,7 +82,7 @@
   [cfg-path-url creds]
   (-> cfg-path-url
       (conf-xml creds)
-      scu/conf-xml->sc))
+      (scu/conf-xml->sc (ServiceConfiguration.))))
 
 (defn slurp-edn
   [f]

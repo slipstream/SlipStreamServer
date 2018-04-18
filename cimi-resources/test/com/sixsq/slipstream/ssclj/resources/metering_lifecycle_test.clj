@@ -9,9 +9,7 @@
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [clj-time.core :as time]
-    [clojure.spec.alpha :as s]
-    [clj-time.core :as t]))
+    [clj-time.core :as time]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 

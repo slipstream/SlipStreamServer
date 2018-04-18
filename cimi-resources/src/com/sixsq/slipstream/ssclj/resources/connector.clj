@@ -24,16 +24,20 @@
 
 (def ^:const create-uri (str c/slipstream-schema-uri resource-name "Create"))
 
+(def acl-rule-user-view {:principal "USER"
+                         :type      "ROLE"
+                         :right     "VIEW"})
+
+(def acl-rule-admin-modify {:principal "ADMIN"
+                            :type      "ROLE"
+                            :right     "MODIFY"})
+
 (def collection-acl {:owner {:principal "ADMIN"
                              :type      "ROLE"}
-                     :rules [{:principal "ADMIN"
-                              :type      "ROLE"
-                              :right     "MODIFY"}]})
+                     :rules [acl-rule-admin-modify
+                             acl-rule-user-view]})
 
-(def acl-user-can-view {:principal "USER"
-                        :type      "ROLE"
-                        :right     "VIEW"})
-(def resource-acl (update-in collection-acl [:rules] conj acl-user-can-view))
+(def resource-acl collection-acl)
 
 ;;
 ;; validate subclasses of connectors
@@ -142,10 +146,19 @@
 ;; use name as the identifier
 ;;
 
-(defmethod crud/new-identifier resource-name
+(defmulti new-identifier-subtype
+          (fn [resource _] (:cloudServiceType resource)))
+
+(defmethod new-identifier-subtype :default
   [resource resource-name]
   (if-let [new-id (:instanceName resource)]
     (assoc resource :id (str (u/de-camelcase resource-name) "/" new-id))))
+
+
+(defmethod crud/new-identifier resource-name
+  [resource resource-name]
+  (new-identifier-subtype resource resource-name))
+
 
 ;;; Activate operation
 
@@ -171,6 +184,7 @@
 
 
 ;;; Quarantine operation
+
 (defmulti quarantine-subtype
           (fn [resource _] (:cloudServiceType resource)))
 
@@ -191,6 +205,9 @@
     (catch ExceptionInfo ei
       (ex-data ei))))
 
+
+;;; Describe operation
+
 (defmethod crud/do-action [resource-url "describe"]
   [{{uuid :uuid} :params :as request}]
   (try
@@ -203,6 +220,8 @@
     (catch ExceptionInfo ei
       (ex-data ei))))
 
+;;; set subtype operations
+
 (defmulti set-subtype-ops
           (fn [resource _] (:cloudServiceType resource)))
 
@@ -211,9 +230,9 @@
   (crud/set-standard-operations resource request))
 
 (defmethod crud/set-operations resource-uri
-  [{:keys [id resourceURI username connectorTemplate] :as resource} request]
-  (let [href (str id "/describe")
-        describe-op {:rel (:describe c/action-uri) :href href}]
+  [{:keys [id connectorTemplate] :as resource} request]
+  (let [describe-href (str id "/describe")
+        describe-op {:rel (:describe c/action-uri) :href describe-href}]
     (cond-> (set-subtype-ops resource request)
-            (get connectorTemplate :href) (update-in [:operations] conj describe-op))))
+            (:href connectorTemplate) (update-in [:operations] conj describe-op))))
 

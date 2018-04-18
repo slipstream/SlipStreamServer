@@ -2,12 +2,13 @@
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]))
 
 ;; Parameter definitions.
 
-(s/def :cimi.configuration-template/service :cimi.core/identifier)
-(s/def :cimi.configuration-template/instance :cimi.core/identifier)
+(s/def :cimi.configuration-template/service  ::cimi-core/identifier)
+(s/def :cimi.configuration-template/instance ::cimi-core/identifier)
 
 (def configuration-template-regex #"^configuration-template/[a-z0-9]+(-[a-z0-9]+)*$")
 (s/def :cimi.configuration-template/href (s/and string? #(re-matches configuration-template-regex %)))
