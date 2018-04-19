@@ -10,27 +10,27 @@
 
 (def ExternalObjectTemplateGenericDescription
   (merge eot/ExternalObjectTemplateDescription
-         {:objectStoreCred {:displayName "Object Store credentials."
-                            :category    "general"
-                            :description "Link to Object Store credential."
-                            :type        "href"
-                            :mandatory   true
-                            :readOnly    true
-                            :order       23}
-          :bucketName      {:displayName "Object Store bucket name"
+         {:bucketName      {:displayName "Object Store bucket name"
                             :category    "general"
                             :description "Name of the bucket to store the object to"
                             :type        "string"
                             :mandatory   true
-                            :readOnly    true
+                            :readOnly    false
                             :order       21}
           :objectName      {:displayName "Object name"
                             :category    "general"
                             :description "Name of the object to store (/can/be/hierarchical)."
                             :type        "string"
                             :mandatory   true
-                            :readOnly    true
-                            :order       22}}))
+                            :readOnly    false
+                            :order       22}
+          :objectStoreCred {:displayName "Object Store credentials."
+                            :category    "general"
+                            :description "Link to Object Store credential."
+                            :type        "href"
+                            :mandatory   true
+                            :readOnly    false
+                            :order       23}}))
 
 ;;
 ;; resource
