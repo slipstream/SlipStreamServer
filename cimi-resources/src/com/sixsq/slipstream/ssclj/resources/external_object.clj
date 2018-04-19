@@ -246,22 +246,27 @@
 
 ;; URL request operations utils
 
-(defn expand-cred
-  "Returns credential document after expanding `href-obj-store-cred` credential href."
-  [href-obj-store-cred request]
-  (std-crud/resolve-hrefs href-obj-store-cred {:identity (:identity request)} true))
+(defmulti identity-for-creds
+          (fn [request objectType] objectType))
 
-(defn connector-from-cred
-  "Returns connector document after expanding it from `cred` credential."
-  [cred request]
-  (-> cred
-      (std-crud/resolve-hrefs {:identity (:identity request)} true)
-      :connector))
+(defmethod identity-for-creds :default
+  [request _]
+  request)
+
+(defn expand-cred
+  "Returns credential document after expanding `href-obj-store-cred` credential href.
+
+  Deriving objectType from request is not directly possible as this is a request on
+  action resource. We would need to get resource id, load the resource and get
+  objectType from it. Instead, requiring objectType as parameter. It should be known
+  to the callers."
+  [href-obj-store-cred request objectType]
+  (std-crud/resolve-hrefs href-obj-store-cred (identity-for-creds request objectType) true))
 
 (defn expand-obj-store-creds
-  [href-obj-store-cred request]
-  (let [{:keys [key secret] :as cred} (expand-cred href-obj-store-cred request)
-        connector (connector-from-cred cred request)]
+  "Need objectType to dispatch on when loading credentials."
+  [href-obj-store-cred request objectType]
+  (let [{:keys [key secret connector]} (expand-cred href-obj-store-cred request objectType)]
     {:key      key
      :secret   secret
      :endpoint (:objectStoreEndpoint connector)}))
@@ -275,12 +280,12 @@
 
 (defn upload-fn
   "Provided 'resource' and 'request', returns object storage upload URL."
-  [{:keys [state contentType bucketName objectName objectStoreCred runUUID filename]} {{ttl :ttl} :body :as request}]
+  [{:keys [objectType state contentType bucketName objectName objectStoreCred runUUID filename]} {{ttl :ttl} :body :as request}]
   (if (= state state-new)
     (let [object-name (if (not-empty objectName)
                         objectName
                         (format "%s/%s" runUUID filename))
-          obj-store-conf (expand-obj-store-creds objectStoreCred request)]
+          obj-store-conf (expand-obj-store-creds objectStoreCred request objectType)]
       (log/info "Requesting upload url:" object-name)
       (s3/create-bucket! obj-store-conf bucketName)
       (s3/generate-url obj-store-conf bucketName object-name :put
@@ -333,11 +338,11 @@
 
 (defn download-fn
   "Provided 'resource' and 'request', returns object storage download URL."
-  [{:keys [state bucketName objectName objectStoreCred]} {{ttl :ttl} :body :as request}]
+  [{:keys [objectType state bucketName objectName objectStoreCred]} {{ttl :ttl} :body :as request}]
   (if (= state state-ready)
     (do
       (log/info "Requesting download url: " objectName)
-      (s3/generate-url (expand-obj-store-creds objectStoreCred request)
+      (s3/generate-url (expand-obj-store-creds objectStoreCred request objectType)
                        bucketName objectName :get
                        {:ttl (or ttl s3/default-ttl)}))
     (logu/log-and-throw-400 ex-msg-download-bad-state)))
@@ -371,9 +376,9 @@
           (fn [resource _] (:objectType resource)))
 
 (defmethod delete-subtype :default
-  [{:keys [objectName bucketName objectStoreCred] :as resource} {{keep? :keep-s3-object} :body :as request}]
+  [{:keys [objectType objectName bucketName objectStoreCred] :as resource} {{keep? :keep-s3-object} :body :as request}]
   (when-not keep?
-    (s3/delete-s3-object (expand-obj-store-creds objectStoreCred request) bucketName objectName))
+    (s3/delete-s3-object (expand-obj-store-creds objectStoreCred request objectType) bucketName objectName))
   (delete-impl request))
 
 (defmethod crud/delete resource-name
