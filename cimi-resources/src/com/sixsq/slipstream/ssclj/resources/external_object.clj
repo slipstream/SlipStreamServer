@@ -133,14 +133,14 @@
   [{:keys [id state] :as resource} request]
   (let [viewable? (a/authorized-view? resource request)
         modifiable? (a/authorized-modify? resource request)
-        new? (= state-new state)
-        uploading? (= state-uploading state)
-        ready? (= state-ready state)
+        show-upload-op? (and modifiable? (#{state-new state-uploading} state))
+        show-ready-op? (and modifiable? (#{state-uploading} state))
+        show-download-op? (and viewable? (#{state-ready} state))
         ops (cond-> []
                     modifiable? (conj {:rel (:delete c/action-uri) :href id})
-                    (and new? modifiable?) (conj {:rel (:upload c/action-uri) :href (str id "/upload")})
-                    (and uploading? modifiable?) (conj {:rel (:ready c/action-uri) :href (str id "/ready")})
-                    (and ready? viewable?) (conj {:rel (:download c/action-uri) :href (str id "/download")}))]
+                    show-upload-op? (conj {:rel (:upload c/action-uri) :href (str id "/upload")})
+                    show-ready-op? (conj {:rel (:ready c/action-uri) :href (str id "/ready")})
+                    show-download-op? (conj {:rel (:download c/action-uri) :href (str id "/download")}))]
     (when (seq ops)
       (vec ops))))
 

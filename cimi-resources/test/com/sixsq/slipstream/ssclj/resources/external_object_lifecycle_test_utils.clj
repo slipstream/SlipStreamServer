@@ -352,7 +352,7 @@
           (ltu/is-key-value :state eo/state-uploading)
           (ltu/is-operation-present "ready")
           (ltu/is-operation-present "delete")
-          (ltu/is-operation-absent "upload")
+          (ltu/is-operation-present "upload")
           (ltu/is-operation-absent "download")
           (ltu/is-status 200))
 
@@ -369,7 +369,7 @@
                              (ltu/is-key-value :state eo/state-uploading)
                              (ltu/is-operation-present "delete")
                              (ltu/is-operation-present "ready")
-                             (ltu/is-operation-absent "upload")
+                             (ltu/is-operation-present "upload")
                              (ltu/is-operation-absent "download")
                              (ltu/is-status 200))
             ;; after upload is done, change object state to 'ready'
@@ -409,7 +409,7 @@
           (ltu/is-key-value :state eo/state-uploading)
           (ltu/is-operation-present "delete")
           (ltu/is-operation-present "ready")
-          (ltu/is-operation-absent "upload")
+          (ltu/is-operation-present "upload")
           (ltu/is-operation-absent "download")
           (ltu/is-status 200))
 
@@ -425,7 +425,7 @@
                              (ltu/is-key-value :state eo/state-uploading)
                              (ltu/is-operation-present "delete")
                              (ltu/is-operation-present "ready")
-                             (ltu/is-operation-absent "upload")
+                             (ltu/is-operation-present "upload")
                              (ltu/is-operation-absent "download")
                              (ltu/is-status 200))
             ;; after upload is done, change object state to 'ready'
