@@ -8,9 +8,9 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.external-object.utils :as s3]
+    [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
     [com.sixsq.slipstream.ssclj.util.log :as logu]
     [com.sixsq.slipstream.util.response :as r])
   (:import (clojure.lang ExceptionInfo)))
@@ -219,12 +219,26 @@
 
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
+(defn merge-into-tmpl
+  [body]
+  (if-let [href (get-in body [:externalObjectTemplate :href])]
+    (let [tmpl (-> (get @eot/templates href)
+                   u/strip-service-attrs
+                   u/strip-common-attrs
+                   (dissoc :acl))
+          user-resource (-> body
+                            :externalObjectTemplate
+                            (dissoc :href))]
+      (assoc-in body [:externalObjectTemplate] (merge tmpl user-resource)))
+    body))
+
 ;; requires a ExternalObjectTemplate to create new ExternalObject
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
   (let [idmap {:identity (:identity request)}
         body (-> body
                  (assoc :resourceURI create-uri)
+                 (merge-into-tmpl)
                  (resolve-hrefs idmap)
                  (crud/validate)
                  (:externalObjectTemplate)

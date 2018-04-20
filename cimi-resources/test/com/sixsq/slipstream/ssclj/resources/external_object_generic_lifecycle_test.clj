@@ -35,9 +35,17 @@
    :contentType     "application/gzip"
    :objectName      "my/obj/name-2"})
 
+(defn external-object-for-href-create
+  []
+  {:objectStoreCred {:href eoltu/*cred-uri*}})
+
+(deftest test-create-href
+  (eoltu/test-create-href (str p/service-context eot/resource-url "/" generic/objectType)
+                          (external-object-for-href-create)))
+
 (deftest lifecycle
-  (eoltu/lifecycle (str p/service-context eot/resource-url "/" generic/objectType)
-                   (external-object-1) (external-object-2)))
+  (eoltu/lifecycle-object-type (str p/service-context eot/resource-url "/" generic/objectType)
+                               (external-object-1) (external-object-2)))
 
 
 (deftest check-upload-and-download-operations
