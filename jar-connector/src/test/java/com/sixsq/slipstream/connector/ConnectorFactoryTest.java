@@ -20,8 +20,6 @@ package com.sixsq.slipstream.connector;
  * -=================================================================-
  */
 
-import com.sixsq.slipstream.configuration.Configuration;
-import com.sixsq.slipstream.es.CljElasticsearchHelper;
 import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.util.CommonTestUtil;
 import org.junit.*;

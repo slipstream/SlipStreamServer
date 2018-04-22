@@ -53,10 +53,11 @@
 ;; DB related.
 ;;
 
-#_(defn dump
+(defn dump
   [resource & [msg]]
   (println "DB DUMP: " (or msg ""))
-  (clojure.pprint/pprint (esu/dump esb/*client* esb/index-name resource)))
+  (let [index-name (esb/id->index resource)]
+    (clojure.pprint/pprint (esu/dump esb/*client* index-name resource))))
 
 (defn as-boolean
   [maybe-boolean]
