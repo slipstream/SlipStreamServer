@@ -1,6 +1,6 @@
 (def +version+ "3.50-SNAPSHOT")
 
-(defproject com.sixsq.slipstream/SlipStreamDbTesting-jar "3.50-SNAPSHOT"
+(defproject com.sixsq.slipstream/SlipStreamDbTesting-jar +version+
 
   :description "db testing utilities"
 
@@ -12,7 +12,7 @@
 
   :plugins [[lein-parent "0.3.2"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "5.1.1"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.2.0-SNAPSHOT"]
                    :inherit [:min-lein-version
                              :managed-dependencies
                              :repositories

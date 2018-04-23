@@ -23,7 +23,7 @@
     (org.elasticsearch.action.search SearchType SearchPhaseExecutionException SearchResponse SearchRequestBuilder)
     (org.elasticsearch.action.support WriteRequest$RefreshPolicy)
     (org.elasticsearch.common.settings Settings)
-    (org.elasticsearch.common.transport InetSocketTransportAddress)
+    (org.elasticsearch.common.transport TransportAddress)
     (org.elasticsearch.common.unit TimeValue)
     (org.elasticsearch.client Client)
     (org.elasticsearch.cluster.health ClusterHealthStatus)
@@ -212,7 +212,7 @@
 
      (log/info "creating elasticsearch client:" es-host es-port)
      (.. (new PreBuiltTransportClient ^Settings Settings/EMPTY [])
-         (addTransportAddress (InetSocketTransportAddress. (InetAddress/getByName es-host)
+         (addTransportAddress (TransportAddress. (InetAddress/getByName es-host)
                                                            (read-string es-port)))))))
 
 (defn wait-for-cluster

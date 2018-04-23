@@ -15,7 +15,7 @@
             [lein-shell "0.5.0"]
             [lein-localrepo "0.5.4"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "5.1.1"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.2.0-SNAPSHOT"]
                    :inherit [:min-lein-version
                              :managed-dependencies
                              :repositories
