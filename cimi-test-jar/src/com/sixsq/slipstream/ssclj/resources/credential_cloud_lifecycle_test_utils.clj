@@ -11,7 +11,6 @@
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.credential.key-utils :as key-utils]
     [com.sixsq.slipstream.ssclj.resources.connector :as con]
@@ -19,12 +18,6 @@
 
 (def base-uri (str p/service-context (u/de-camelcase credential/resource-url)))
 
-(defn- connector-instance-name
-  [credential-template-data]
-  (-> credential-template-data
-      (get-in [:connector :href])
-      (str/split #"/")
-      (second)))
 
 (defmulti get-connector-template
           (fn [cloud-service-type instanceName]
@@ -44,7 +37,6 @@
                             ltu/strip-unwanted-attrs
                             (assoc :instanceName instanceName))}))
 
- ; create connector instance
 (defn create-connector-instance
   [cloud-service-type instanceName]
   (let [connector-create-uri (str p/service-context con/resource-url)
@@ -57,9 +49,15 @@
                  :request-method :post
                  :body (json/write-str href-create))
         (ltu/body->edn)
-        (ltu/dump)
         (ltu/is-status 201)
         (ltu/location))))
+
+(defn connector-instance-name
+  [credential-template-data]
+  (-> credential-template-data
+      (get-in [:connector :href])
+      (str/split #"/")
+      (second)))
 
 (defn cred-find
   [session conn-inst-name]
@@ -99,7 +97,7 @@
 
 (defn cloud-cred-lifecycle
   [{cloud-method-href :href :as credential-template-data} cloud-service-type]
-  (create-connector-instance cloud-service-type credential-template-data)
+  (create-connector-instance cloud-service-type (connector-instance-name credential-template-data))
   (let [session (-> (ltu/ring-app)
                     session
                     (content-type "application/json"))
