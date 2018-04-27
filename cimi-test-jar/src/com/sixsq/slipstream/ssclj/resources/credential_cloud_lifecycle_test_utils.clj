@@ -18,9 +18,13 @@
 
 (def base-uri (str p/service-context (u/de-camelcase credential/resource-url)))
 
-; create connector instance
-(defn get-connector-template
-  [cloud-service-type connector-instance-name]
+
+(defmulti get-connector-template
+          (fn [cloud-service-type instanceName]
+            cloud-service-type))
+
+(defmethod get-connector-template :default
+  [cloud-service-type instanceName]
   (let [template-url (str p/service-context cont/resource-url "/" cloud-service-type)
         resp (-> (session (ltu/ring-app))
                  (content-type "application/json")
@@ -31,13 +35,13 @@
         template (get-in resp [:response :body])]
     {:connectorTemplate (-> template
                             ltu/strip-unwanted-attrs
-                            (assoc :instanceName connector-instance-name))}))
+                            (assoc :instanceName instanceName))}))
 
 (defn create-connector-instance
-  [cloud-service-type connector-instance-name]
+  [cloud-service-type instanceName]
   (let [connector-create-uri (str p/service-context con/resource-url)
         href (str cont/resource-url "/" cloud-service-type)
-        href-create (get-connector-template cloud-service-type connector-instance-name)]
+        href-create (get-connector-template cloud-service-type instanceName)]
     (-> (session (ltu/ring-app))
         (content-type "application/json")
         (header authn-info-header "internal ADMIN")
