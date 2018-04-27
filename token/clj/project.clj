@@ -1,6 +1,6 @@
-(def +version+ "3.50")
+(def +version+ "3.51-SNAPSHOT")
 
-(defproject com.sixsq.slipstream/token "3.50"
+(defproject com.sixsq.slipstream/token "3.51-SNAPSHOT"
 
   :description "token handling utilities in Clojure"
 
