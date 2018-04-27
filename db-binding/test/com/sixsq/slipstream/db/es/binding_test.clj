@@ -7,8 +7,7 @@
     [com.sixsq.slipstream.db.binding :as db])
   (:import
     (clojure.lang Var$Unbound)
-    (java.io StringWriter)
-    (org.elasticsearch.node Node)))
+    (java.io StringWriter)))
 
 
 (deftest test-set-close-es-client
