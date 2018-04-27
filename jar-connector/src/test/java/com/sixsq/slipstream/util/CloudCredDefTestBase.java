@@ -33,25 +33,33 @@ public class CloudCredDefTestBase {
         CIMITestServer.stop();
     }
 
-    public String CONNECTOR_NAME = "foo-bar-baz";
+    public String DEFAULT_CONNECTOR_NAME = "foo-bar-baz";
 
     public String getConnectorName() {
-        return CONNECTOR_NAME;
+        return DEFAULT_CONNECTOR_NAME;
     }
 
     private void createConnector(String cloudServiceName,
-                                 SystemConfigurationParametersFactoryBase sysConfParamsClass) {
+                                 SystemConfigurationParametersFactoryBase sysConfParamsClass, String connectorName) {
             CommonTestUtil.createConnector(
                     cloudServiceName,
-                    CONNECTOR_NAME,
+                    connectorName,
                     sysConfParamsClass);
     }
 
+
     protected void runCloudCredentialsDirectLifecycle(
-            CloudCredential credCreate, String cloudSerivceName,
+            CloudCredential credCreate, String cloudServiceName,
             SystemConfigurationParametersFactoryBase sysConfParams) {
 
-        createConnector(cloudSerivceName, sysConfParams);
+        runCloudCredentialsDirectLifecycle(credCreate, cloudServiceName,sysConfParams, DEFAULT_CONNECTOR_NAME);
+    }
+
+    protected void runCloudCredentialsDirectLifecycle(
+            CloudCredential credCreate, String cloudServiceName,
+            SystemConfigurationParametersFactoryBase sysConfParams, String connectorName) {
+
+        createConnector(cloudServiceName, sysConfParams, connectorName);
 
         CloudCredentialCreateTmpl cloudCredentialCreateTmpl = new CloudCredentialCreateTmpl(credCreate);
         Response resp = SscljProxy.post(SscljProxy.BASE_RESOURCE + "credential",

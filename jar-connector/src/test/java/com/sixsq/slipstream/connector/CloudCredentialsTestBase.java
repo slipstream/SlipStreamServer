@@ -48,7 +48,9 @@ public abstract class CloudCredentialsTestBase implements ICloudCredentialsTestB
 
 	public static final String PASSWORD = "password";
 
-	public static final String CONNECTOR_NAME = "foo-bar-baz";
+	private static final String DEFAULT_CONNECTOR_NAME = "foo-bar-baz";
+
+	private static String CONNECTOR_NAME;
 
 	@BeforeClass
 	public static void setupClass() {
@@ -82,19 +84,23 @@ public abstract class CloudCredentialsTestBase implements ICloudCredentialsTestB
 
 	@Before
 	public void setup() {
-		user = createUser("test");
+		user = createUser("test", PASSWORD, getConnectorName());
 		user = storeUser(user);
 		CIMITestServer.refresh();
 
 		// Create connector.
 		try {
-			CommonTestUtil.createConnector(getCloudServiceName(), CONNECTOR_NAME,
+			CommonTestUtil.createConnector(getCloudServiceName(), getConnectorName(),
 					getSystemConfParams());
 		} catch (ValidationException e) {
 			e.printStackTrace();
-			fail("Failed to create connector " + CONNECTOR_NAME + " with: " +
+			fail("Failed to create connector " + getConnectorName() + " with: " +
 					e.getMessage());
 		}
+	}
+
+	public  String getConnectorName(){
+		return DEFAULT_CONNECTOR_NAME;
 	}
 
 	@Override
@@ -147,7 +153,7 @@ public abstract class CloudCredentialsTestBase implements ICloudCredentialsTestB
 
 		// Loaded user has the cloud credential parameters.
 		User u1 = User.loadByName(user.getName());
-		Map<String, UserParameter> credParams = u1.getParameters(CONNECTOR_NAME);
+		Map<String, UserParameter> credParams = u1.getParameters(getConnectorName());
 		assertNotNull(credParams);
 		assertTrue(credParams.size() >= params.size());
 		for (String pname: params.keySet()) {
@@ -179,7 +185,15 @@ public abstract class CloudCredentialsTestBase implements ICloudCredentialsTestB
 		}
 	}
 
+
+
+
+
 	public static User createUser(String name, String password) {
+		return createUser(name, password, DEFAULT_CONNECTOR_NAME);
+	}
+
+	public static User createUser(String name, String password, String connectorName) {
 		User user = null;
 		try {
 			user = User.loadByName(name);
@@ -217,7 +231,7 @@ public abstract class CloudCredentialsTestBase implements ICloudCredentialsTestB
 		}
 
 		try {
-			user.setDefaultCloudServiceName(CONNECTOR_NAME);
+			user.setDefaultCloudServiceName(connectorName);
 		} catch (ValidationException e) {
 			throw (new SlipStreamRuntimeException(e));
 		}
@@ -225,8 +239,6 @@ public abstract class CloudCredentialsTestBase implements ICloudCredentialsTestB
 		return user;
 	}
 
-	public static User createUser(String name) {
-		return createUser(name, PASSWORD);
-	}
+
 }
 
