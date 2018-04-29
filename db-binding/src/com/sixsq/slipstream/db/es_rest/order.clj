@@ -17,7 +17,7 @@
   [[field-name direction]]
   {field-name (direction->sort-order direction)})
 
-(defn add-sorters
+(defn sorters
   "Given the sorting information in the :cimi-params parameter, add all of the
    sorting clauses to the sort map."
   [{:keys [orderby] :as cimi-params}]

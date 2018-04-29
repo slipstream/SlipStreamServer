@@ -2,15 +2,15 @@
   "Binding protocol implemented for an Elasticsearch database that makes use
    of the Elasticsearch REST API."
   (:require
-    [com.sixsq.slipstream.db.utils.common :as cu]
-    [com.sixsq.slipstream.util.response :as response]
-    [com.sixsq.slipstream.db.es-rest.pagination :as paging]
-    [com.sixsq.slipstream.db.es-rest.order :as order]
-    [com.sixsq.slipstream.db.es-rest.select :as select]
-    [com.sixsq.slipstream.db.binding :refer [Binding]]
     [qbits.spandex :as spandex]
-    [clojure.pprint :refer [pprint]]
-    [com.sixsq.slipstream.db.utils.acl :as acl-utils])
+    [com.sixsq.slipstream.db.binding :refer [Binding]]
+    [com.sixsq.slipstream.db.es-rest.filter :as filter]
+    [com.sixsq.slipstream.db.es-rest.order :as order]
+    [com.sixsq.slipstream.db.es-rest.pagination :as paging]
+    [com.sixsq.slipstream.db.es-rest.select :as select]
+    [com.sixsq.slipstream.db.utils.common :as cu]
+    [com.sixsq.slipstream.db.utils.acl :as acl-utils]
+    [com.sixsq.slipstream.util.response :as response])
   (:import
     (java.io Closeable)))
 
@@ -99,10 +99,10 @@
 
 (defn query-data
   [client collection-id {:keys [cimi-params] :as options}]
-  (let [paging (paging/add-paging cimi-params)
-        orderby (order/add-sorters cimi-params)
-        selected (select/add-selected-keys cimi-params)
-        query {:query {:match_all {}}}
+  (let [paging (paging/paging cimi-params)
+        orderby (order/sorters cimi-params)
+        selected (select/select cimi-params)
+        query (filter/filter cimi-params)
         response (spandex/request client {:url    [index-name collection-id :_search]
                                           :method :post
                                           :body   (merge paging orderby selected query)})
@@ -111,11 +111,7 @@
         aggregations (-> response :body :hits :aggregations)
         meta (cond-> {:count count-before-pagination}
                      aggregations (assoc :aggregations aggregations))
-        hits (->> response
-                  :body
-                  :hits
-                  :hits
-                  (map :_source))]
+        hits (->> response :body :hits :hits (map :_source))]
     (if success?
       [meta hits]
       (response/response-error "error when querying database"))))

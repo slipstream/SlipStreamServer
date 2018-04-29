@@ -2,7 +2,7 @@
   (:require
     [com.sixsq.slipstream.db.es.common.pagination :as paging]))
 
-(defn add-paging
+(defn paging
   "Creates a map with the from and size parameters to limit the responses from
    an Elasticsearch query."
   [{:keys [first last] :as cimi-params}]
