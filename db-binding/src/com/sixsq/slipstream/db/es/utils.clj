@@ -121,7 +121,7 @@
   (let [new-index (.. client
                       (prepareIndex index doc-type uuid)
                       (setCreate true)
-                      (setSource json))]
+                      (setSource json XContentType/JSON))]
     (.add bulk-request-builder new-index)))
 
 (defn bulk-create
