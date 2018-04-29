@@ -96,21 +96,45 @@
 (def base-uri (str p/service-context (u/de-camelcase eo/resource-name)))
 
 
+(def session-anon (-> (ltu/ring-app)
+                      session
+                      (content-type "application/json")))
+(def session-user (header session-anon authn-info-header user-info-header))
+(def session-admin (header session-anon authn-info-header admin-info-header))
+
+(defn get-template
+  [template-url]
+  (-> session-admin
+      (request template-url)
+      (ltu/body->edn)
+      (ltu/is-status 200)
+      (get-in [:response :body])))
+
 ;;; Tests.
 
-(defn lifecycle
-  [template-url template-obj-1 template-obj-2]
-  (let [session-anon (-> (ltu/ring-app)
-                         session
-                         (content-type "application/json"))
-        session-user (header session-anon authn-info-header user-info-header)
-        session-admin (header session-anon authn-info-header admin-info-header)
+(defn test-create-href
+  [template-url user-resource]
+  (let [template (get-template template-url)
+        tmpl-href (:id template)
+        valid-create-href {:externalObjectTemplate (merge {:href tmpl-href} user-resource)}
+        uri (-> session-user
+                (request base-uri
+                         :request-method :post
+                         :body (json/write-str valid-create-href))
+                (ltu/body->edn)
+                (ltu/is-status 201)
+                (ltu/location))
+        abs-uri (str p/service-context (u/de-camelcase uri))]
+    (-> session-user
+        (request abs-uri
+                 :request-method :delete)
+        (ltu/body->edn)
+        (ltu/is-status 200))))
 
-        resp (-> session-admin
-                 (request template-url)
-                 (ltu/body->edn)
-                 (ltu/is-status 200))
-        template (get-in resp [:response :body])
+
+(defn lifecycle-object-type
+  [template-url template-obj-1 template-obj-2]
+  (let [template (get-template template-url)
 
         valid-create-1 {:externalObjectTemplate (merge (ltu/strip-unwanted-attrs template) template-obj-1)}
         valid-create-2 {:externalObjectTemplate (merge (ltu/strip-unwanted-attrs template) template-obj-2)}
@@ -242,18 +266,7 @@
 
 (defn upload-and-download-operations
   [template-url template-obj-1 template-obj-2]
-  (let [session-anon (-> (ltu/ring-app)
-                         session
-                         (content-type "application/json"))
-        session-user (header session-anon authn-info-header user-info-header)
-        session-admin (header session-anon authn-info-header admin-info-header)
-
-        resp (-> session-admin
-                 (request template-url)
-                 (ltu/body->edn)
-                 (ltu/is-status 200))
-
-        template (get-in resp [:response :body])
+  (let [template (get-template template-url)
 
         valid-create-1 {:externalObjectTemplate (merge (ltu/strip-unwanted-attrs template) template-obj-1)}
         valid-create-2 {:externalObjectTemplate (merge (ltu/strip-unwanted-attrs template) template-obj-2)}]
@@ -352,7 +365,7 @@
           (ltu/is-key-value :state eo/state-uploading)
           (ltu/is-operation-present "ready")
           (ltu/is-operation-present "delete")
-          (ltu/is-operation-absent "upload")
+          (ltu/is-operation-present "upload")
           (ltu/is-operation-absent "download")
           (ltu/is-status 200))
 
@@ -369,7 +382,7 @@
                              (ltu/is-key-value :state eo/state-uploading)
                              (ltu/is-operation-present "delete")
                              (ltu/is-operation-present "ready")
-                             (ltu/is-operation-absent "upload")
+                             (ltu/is-operation-present "upload")
                              (ltu/is-operation-absent "download")
                              (ltu/is-status 200))
             ;; after upload is done, change object state to 'ready'
@@ -409,7 +422,7 @@
           (ltu/is-key-value :state eo/state-uploading)
           (ltu/is-operation-present "delete")
           (ltu/is-operation-present "ready")
-          (ltu/is-operation-absent "upload")
+          (ltu/is-operation-present "upload")
           (ltu/is-operation-absent "download")
           (ltu/is-status 200))
 
@@ -425,7 +438,7 @@
                              (ltu/is-key-value :state eo/state-uploading)
                              (ltu/is-operation-present "delete")
                              (ltu/is-operation-present "ready")
-                             (ltu/is-operation-absent "upload")
+                             (ltu/is-operation-present "upload")
                              (ltu/is-operation-absent "download")
                              (ltu/is-status 200))
             ;; after upload is done, change object state to 'ready'

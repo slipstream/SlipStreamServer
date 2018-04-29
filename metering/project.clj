@@ -1,6 +1,6 @@
-(def +version+ "3.50-SNAPSHOT")
+(def +version+ "3.51-SNAPSHOT")
 
-(defproject com.sixsq.slipstream/metering "3.50-SNAPSHOT"
+(defproject com.sixsq.slipstream/metering "3.51-SNAPSHOT"
 
   :description "metering server"
 
@@ -13,7 +13,7 @@
   :plugins [[lein-parent "0.3.2"]
             [lein-shell "0.5.0"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "5.2.0-SNAPSHOT"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.2.0"]
                    :inherit [:min-lein-version
                              :managed-dependencies
                              :repositories

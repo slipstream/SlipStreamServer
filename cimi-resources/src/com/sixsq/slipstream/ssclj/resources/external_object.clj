@@ -8,9 +8,9 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.external-object.utils :as s3]
+    [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
     [com.sixsq.slipstream.ssclj.util.log :as logu]
     [com.sixsq.slipstream.util.response :as r])
   (:import (clojure.lang ExceptionInfo)))
@@ -133,14 +133,14 @@
   [{:keys [id state] :as resource} request]
   (let [viewable? (a/authorized-view? resource request)
         modifiable? (a/authorized-modify? resource request)
-        new? (= state-new state)
-        uploading? (= state-uploading state)
-        ready? (= state-ready state)
+        show-upload-op? (and modifiable? (#{state-new state-uploading} state))
+        show-ready-op? (and modifiable? (#{state-uploading} state))
+        show-download-op? (and viewable? (#{state-ready} state))
         ops (cond-> []
                     modifiable? (conj {:rel (:delete c/action-uri) :href id})
-                    (and new? modifiable?) (conj {:rel (:upload c/action-uri) :href (str id "/upload")})
-                    (and uploading? modifiable?) (conj {:rel (:ready c/action-uri) :href (str id "/ready")})
-                    (and ready? viewable?) (conj {:rel (:download c/action-uri) :href (str id "/download")}))]
+                    show-upload-op? (conj {:rel (:upload c/action-uri) :href (str id "/upload")})
+                    show-ready-op? (conj {:rel (:ready c/action-uri) :href (str id "/ready")})
+                    show-download-op? (conj {:rel (:download c/action-uri) :href (str id "/download")}))]
     (when (seq ops)
       (vec ops))))
 
@@ -219,12 +219,26 @@
 
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
+(defn merge-into-tmpl
+  [body]
+  (if-let [href (get-in body [:externalObjectTemplate :href])]
+    (let [tmpl (-> (get @eot/templates href)
+                   u/strip-service-attrs
+                   u/strip-common-attrs
+                   (dissoc :acl))
+          user-resource (-> body
+                            :externalObjectTemplate
+                            (dissoc :href))]
+      (assoc-in body [:externalObjectTemplate] (merge tmpl user-resource)))
+    body))
+
 ;; requires a ExternalObjectTemplate to create new ExternalObject
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
   (let [idmap {:identity (:identity request)}
         body (-> body
                  (assoc :resourceURI create-uri)
+                 (merge-into-tmpl)
                  (resolve-hrefs idmap)
                  (crud/validate)
                  (:externalObjectTemplate)

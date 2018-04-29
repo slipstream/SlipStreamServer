@@ -43,8 +43,11 @@
 
 (def template-url (str p/service-context eot/resource-url "/" report/objectType))
 
+(deftest test-create-href
+  (eoltu/test-create-href template-url report-obj-1))
+
 (deftest lifecycle
-  (eoltu/lifecycle template-url report-obj-1 report-obj-2))
+  (eoltu/lifecycle-object-type template-url report-obj-1 report-obj-2))
 
 
 (deftest check-upload-and-download-operations

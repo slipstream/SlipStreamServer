@@ -45,9 +45,9 @@ public class DummyCloudCredentialsTest extends CloudCredentialsTestBase {
 		UserParameter param;
 		String pname;
 		for (String k: paramsKeyVal.keySet()) {
-			pname = UserParameter.constructKey(CONNECTOR_NAME, k);
+        pname = UserParameter.constructKey(getConnectorName(), k);
 			param = new UserParameter(pname, paramsKeyVal.get(k), "");
-			param.setCategory(CONNECTOR_NAME);
+			param.setCategory(getConnectorName());
 			user.setParameter(param);
 			params.put(pname, param);
 		}
@@ -65,7 +65,7 @@ public class DummyCloudCredentialsTest extends CloudCredentialsTestBase {
 	@Override
 	public SystemConfigurationParametersFactoryBase getSystemConfParams()
 			throws ValidationException {
-		return new DummySystemConfigurationParametersFactory(CONNECTOR_NAME);
+      return new DummySystemConfigurationParametersFactory(getConnectorName());
 	}
 }
 
