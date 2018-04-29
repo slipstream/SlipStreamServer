@@ -2,7 +2,7 @@
   (:require
     [clojure.test :refer :all]
     [clojure.string :as str]
-    [com.sixsq.slipstream.ssclj.filter.parser :as parser]))
+    [com.sixsq.slipstream.db.filter.parser :as parser]))
 
 (defn cimi-filter
   [n op]

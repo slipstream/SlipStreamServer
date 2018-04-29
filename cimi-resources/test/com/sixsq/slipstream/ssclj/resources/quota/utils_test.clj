@@ -11,7 +11,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.virtual-machine :as vm]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
-    [com.sixsq.slipstream.ssclj.filter.parser :as parser]))
+    [com.sixsq.slipstream.db.filter.parser :as parser]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 

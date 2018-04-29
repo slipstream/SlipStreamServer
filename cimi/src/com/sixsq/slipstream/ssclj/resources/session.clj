@@ -8,7 +8,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.filter.parser :as parser]
+    [com.sixsq.slipstream.db.filter.parser :as parser]
     [com.sixsq.slipstream.ssclj.util.log :as log-util]
     [clojure.walk :as walk])
   (:import (clojure.lang ExceptionInfo)))

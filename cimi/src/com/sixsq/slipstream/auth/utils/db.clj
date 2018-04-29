@@ -2,7 +2,7 @@
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.filter.parser :as parser]
+    [com.sixsq.slipstream.db.filter.parser :as parser]
     [com.sixsq.slipstream.ssclj.resources.user-params-template-exec :as up-tmpl-exec])
   (:import
     (java.util UUID)
