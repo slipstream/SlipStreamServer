@@ -4,6 +4,7 @@
   (:require
     [qbits.spandex :as spandex]
     [com.sixsq.slipstream.db.binding :refer [Binding]]
+    [com.sixsq.slipstream.db.es-rest.acl :as acl]
     [com.sixsq.slipstream.db.es-rest.filter :as filter]
     [com.sixsq.slipstream.db.es-rest.order :as order]
     [com.sixsq.slipstream.db.es-rest.pagination :as paging]
@@ -25,7 +26,8 @@
 
 (defn prepare-data [data]
   (->> data
-       acl-utils/force-admin-role-right-all))
+       acl-utils/force-admin-role-right-all
+       acl-utils/denormalize-acl))
 
 
 (defn add-data
@@ -66,7 +68,7 @@
                                             :method :get})
           found? (get-in response [:body :found])]
       (if found?
-        (get-in response [:body :_source])
+        (-> response :body :_source acl-utils/normalize-acl)
         (throw (response/ex-not-found id))))
     (catch Exception e
       (let [response (ex-data e)
@@ -102,16 +104,17 @@
   (let [paging (paging/paging cimi-params)
         orderby (order/sorters cimi-params)
         selected (select/select cimi-params)
-        query (filter/filter cimi-params)
+        query {:query (acl/and-acl (filter/filter cimi-params) options)}
+        body (merge paging orderby selected query)
         response (spandex/request client {:url    [index-name collection-id :_search]
                                           :method :post
-                                          :body   (merge paging orderby selected query)})
+                                          :body   body})
         success? (-> response :body :_shards :successful pos?)
         count-before-pagination (-> response :body :hits :total)
         aggregations (-> response :body :hits :aggregations)
         meta (cond-> {:count count-before-pagination}
                      aggregations (assoc :aggregations aggregations))
-        hits (->> response :body :hits :hits (map :_source))]
+        hits (->> response :body :hits :hits (map :_source) (map acl-utils/normalize-acl))]
     (if success?
       [meta hits]
       (response/response-error "error when querying database"))))

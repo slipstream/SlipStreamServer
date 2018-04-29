@@ -22,9 +22,14 @@
   {:term {term value}})
 
 
-(defn ge
+(defn ne
   [term value]
-  {:range {term {:ge value}}})
+  {:bool {:must_not (eq term value)}})
+
+
+(defn gte
+  [term value]
+  {:range {term {:gte value}}})
 
 
 (defn gt
@@ -32,19 +37,14 @@
   {:range {term {:gt value}}})
 
 
-(defn le
+(defn lte
   [term value]
-  {:range {term {:le value}}})
+  {:range {term {:lte value}}})
 
 
 (defn lt
   [term value]
   {:range {term {:lt value}}})
-
-
-(defn ne
-  [term value]
-  {:bool {:must_not (eq term value)}})
 
 
 (defn and
@@ -59,10 +59,16 @@
 
 (defn constant-score-query
   [filter]
-  {:query {:constant_score filter
-           :boost          1.0}})
+  {:constant_score
+   {:filter filter
+    :boost  1.0}})
 
 
 (defn match-all-query
   []
-  {:query {:match_all {:boost 1.0}}})
+  {:match_all {:boost 1.0}})
+
+
+(defn match-none-query
+  []
+  {:query {:match_none {}}})

@@ -7,5 +7,4 @@
    an Elasticsearch query."
   [{:keys [first last] :as cimi-params}]
   (let [[from size] (paging/es-paging-params first last)]
-    {:from from
-     :size size}))
+    {:from from, :size size}))

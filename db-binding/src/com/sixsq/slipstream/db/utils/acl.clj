@@ -33,7 +33,7 @@
 
 (defn denormalize-acl
   "Denormalize doc by exploding :acl in :_acl-users and :_acl-roles
-  in a form easily searchable by Elastic Search"
+  in a form easily searchable by Elasticsearch."
   [doc]
   (-> doc
       (assoc acl-users (-> doc :acl extract-users))

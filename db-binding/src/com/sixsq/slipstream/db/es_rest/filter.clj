@@ -55,9 +55,9 @@
 
           ["^=" :Attribute] (query/prefix Attribute Value)
 
-          [">=" :Attribute] (query/ge Attribute Value)
+          [">=" :Attribute] (query/gte Attribute Value)
           [">" :Attribute] (query/gt Attribute Value)
-          ["<=" :Attribute] (query/le Attribute Value)
+          ["<=" :Attribute] (query/lte Attribute Value)
           ["<" :Attribute] (query/lt Attribute Value)
 
           ["=" :Value] (if (nil? Value) (query/missing Attribute) (query/eq Attribute Value))
@@ -65,9 +65,9 @@
 
           ["^=" :Value] (query/prefix Attribute Value)
 
-          [">=" :Value] (query/le Attribute Value)
+          [">=" :Value] (query/lte Attribute Value)
           [">" :Value] (query/lt Attribute Value)
-          ["<=" :Value] (query/ge Attribute Value)
+          ["<=" :Value] (query/gte Attribute Value)
           ["<" :Value] (query/gt Attribute Value)
 
           m)))))
@@ -105,7 +105,7 @@
 
 
 (defn filter
-  [{{:keys [filter]} :cimi-params}]
+  [{:keys [filter] :as cimi-params}]
   (if filter
     (query/constant-score-query (w/postwalk convert filter))
     (query/match-all-query)))
