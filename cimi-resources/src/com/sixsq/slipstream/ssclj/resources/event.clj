@@ -71,5 +71,5 @@
 ;;
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
 (defmethod crud/query resource-name
-  [request]
-  (query-impl (update-in request [:cimi-params] #(assoc % :orderby [["timestamp" :desc]]))))
+  [{{:keys [orderby]} :cimi-params :as request}]
+  (query-impl (assoc-in request [:cimi-params :orderby] (if (seq orderby) orderby [["timestamp" :desc]]))))
