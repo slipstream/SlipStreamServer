@@ -2,15 +2,16 @@
   "Binding protocol implemented for an Elasticsearch database that makes use
    of the Elasticsearch REST API."
   (:require
-    [com.sixsq.slipstream.db.utils.common :as cu]
-    [com.sixsq.slipstream.util.response :as response]
-    [com.sixsq.slipstream.db.es-rest.pagination :as paging]
-    [com.sixsq.slipstream.db.es-rest.order :as order]
-    [com.sixsq.slipstream.db.es-rest.select :as select]
-    [com.sixsq.slipstream.db.binding :refer [Binding]]
     [qbits.spandex :as spandex]
-    [clojure.pprint :refer [pprint]]
-    [com.sixsq.slipstream.db.utils.acl :as acl-utils])
+    [com.sixsq.slipstream.db.binding :refer [Binding]]
+    [com.sixsq.slipstream.db.es-rest.acl :as acl]
+    [com.sixsq.slipstream.db.es-rest.filter :as filter]
+    [com.sixsq.slipstream.db.es-rest.order :as order]
+    [com.sixsq.slipstream.db.es-rest.pagination :as paging]
+    [com.sixsq.slipstream.db.es-rest.select :as select]
+    [com.sixsq.slipstream.db.utils.common :as cu]
+    [com.sixsq.slipstream.db.utils.acl :as acl-utils]
+    [com.sixsq.slipstream.util.response :as response])
   (:import
     (java.io Closeable)))
 
@@ -25,7 +26,8 @@
 
 (defn prepare-data [data]
   (->> data
-       acl-utils/force-admin-role-right-all))
+       acl-utils/force-admin-role-right-all
+       acl-utils/denormalize-acl))
 
 
 (defn add-data
@@ -66,7 +68,7 @@
                                             :method :get})
           found? (get-in response [:body :found])]
       (if found?
-        (get-in response [:body :_source])
+        (-> response :body :_source acl-utils/normalize-acl)
         (throw (response/ex-not-found id))))
     (catch Exception e
       (let [response (ex-data e)
@@ -99,23 +101,20 @@
 
 (defn query-data
   [client collection-id {:keys [cimi-params] :as options}]
-  (let [paging (paging/add-paging cimi-params)
-        orderby (order/add-sorters cimi-params)
-        selected (select/add-selected-keys cimi-params)
-        query {:query {:match_all {}}}
+  (let [paging (paging/paging cimi-params)
+        orderby (order/sorters cimi-params)
+        selected (select/select cimi-params)
+        query {:query (acl/and-acl (filter/filter cimi-params) options)}
+        body (merge paging orderby selected query)
         response (spandex/request client {:url    [index-name collection-id :_search]
                                           :method :post
-                                          :body   (merge paging orderby selected query)})
+                                          :body   body})
         success? (-> response :body :_shards :successful pos?)
         count-before-pagination (-> response :body :hits :total)
         aggregations (-> response :body :hits :aggregations)
         meta (cond-> {:count count-before-pagination}
                      aggregations (assoc :aggregations aggregations))
-        hits (->> response
-                  :body
-                  :hits
-                  :hits
-                  (map :_source))]
+        hits (->> response :body :hits :hits (map :_source) (map acl-utils/normalize-acl))]
     (if success?
       [meta hits]
       (response/response-error "error when querying database"))))
