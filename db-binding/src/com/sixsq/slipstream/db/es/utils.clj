@@ -23,7 +23,8 @@
     (org.elasticsearch.action.search SearchType SearchPhaseExecutionException SearchResponse SearchRequestBuilder)
     (org.elasticsearch.action.support WriteRequest$RefreshPolicy)
     (org.elasticsearch.common.settings Settings)
-    (org.elasticsearch.common.transport InetSocketTransportAddress)
+    (org.elasticsearch.common.transport TransportAddress)
+    (org.elasticsearch.common.xcontent XContentType)
     (org.elasticsearch.common.unit TimeValue)
     (org.elasticsearch.client Client)
     (org.elasticsearch.cluster.health ClusterHealthStatus)
@@ -40,6 +41,8 @@
 (defn edn->json [edn]
   (json/write-str edn))
 
+(def ^:const doc-type "_doc")
+
 ;;
 ;; Elasticsearch implementations of CRUD actions
 ;;
@@ -47,17 +50,17 @@
 (defn create
   [^Client client index type docid json]
   (.. client
-      (prepareIndex index type docid)
+      (prepareIndex index doc-type docid)
       (setCreate true)
       (setRefreshPolicy WriteRequest$RefreshPolicy/IMMEDIATE)
-      (setSource json)
+      (setSource json XContentType/JSON)
       (get)
       (status)))
 
 (defn read
   [^Client client index type docid {:keys [cimi-params] :as options}]
   (let [get-request-builder (.. client
-                                (prepareGet index type docid))]
+                                (prepareGet index doc-type docid))]
     (-> get-request-builder
         (select/add-selected-keys cimi-params)
         (.get))))
@@ -65,15 +68,15 @@
 (defn update
   [^Client client index type docid json]
   (.. client
-      (prepareUpdate index type docid)
+      (prepareUpdate index doc-type docid)
       (setRefreshPolicy WriteRequest$RefreshPolicy/IMMEDIATE)
-      (setDoc json)
+      (setDoc json XContentType/JSON)
       (get)))
 
 (defn delete
   [^Client client index type docid]
   (.. client
-      (prepareDelete index type docid)
+      (prepareDelete index doc-type docid)
       (get)))
 
 (defn add-query [^SearchRequestBuilder request-builder options]
@@ -88,7 +91,7 @@
   (try
     (let [^SearchRequestBuilder request (-> (.. client
                                                 (prepareSearch (into-array String [index]))
-                                                (setTypes (into-array String [(cu/de-camelcase type)]))
+                                                (setTypes (into-array String [(cu/de-camelcase doc-type)]))
                                                 (setSearchType SearchType/DEFAULT))
                                             (add-query options)
                                             (select/add-selected-keys cimi-params)
@@ -116,9 +119,9 @@
 (defn- add-index
   [client index type ^BulkRequestBuilder bulk-request-builder [uuid json]]
   (let [new-index (.. client
-                      (prepareIndex index type uuid)
+                      (prepareIndex index doc-type uuid)
                       (setCreate true)
-                      (setSource json))]
+                      (setSource json XContentType/JSON))]
     (.add bulk-request-builder new-index)))
 
 (defn bulk-create
@@ -126,14 +129,14 @@
   (let [bulk-request-builder (.. client
                                  (prepareBulk)
                                  (setRefreshPolicy WriteRequest$RefreshPolicy/WAIT_UNTIL))]
-    (.. (reduce (partial add-index client index type) bulk-request-builder uuid-jsons)
+    (.. (reduce (partial add-index client index doc-type) bulk-request-builder uuid-jsons)
         (get))))
 
 (defn dump
   [^Client client index type]
   (-> (.. client
           (prepareSearch (into-array String [index]))
-          (setTypes (into-array String [type]))
+          (setTypes (into-array String [doc-type]))
           (setSearchType SearchType/DEFAULT)
           (setQuery (QueryBuilders/matchAllQuery))
           (setSize 1)
@@ -175,7 +178,7 @@
         (indices)
         (prepareCreate index-name)
         (setSettings settings)
-        (addMapping "_default_" mapping-not-analyzed)
+        (addMapping "_default_" mapping-not-analyzed XContentType/JSON)
         (get))))
 
 (def ^:private ok-health-statuses #{ClusterHealthStatus/GREEN ClusterHealthStatus/YELLOW})
@@ -212,8 +215,8 @@
 
      (log/info "creating elasticsearch client:" es-host es-port)
      (.. (new PreBuiltTransportClient ^Settings Settings/EMPTY [])
-         (addTransportAddress (InetSocketTransportAddress. (InetAddress/getByName es-host)
-                                                           (read-string es-port)))))))
+         (addTransportAddress (TransportAddress. (InetAddress/getByName es-host)
+                                                 (read-string es-port)))))))
 
 (defn wait-for-cluster
   [^Client client]
@@ -235,9 +238,8 @@
     (.. client
         (admin)
         (indices)
-        (delete (DeleteIndexRequest. index-name))
-        (get)))
-  (create-index client index-name))
+        (delete (DeleteIndexRequest. "_all"))
+        (get))))
 
 (defn get-all-indices
   "Returns array of index names as strings.  Useful with `refresh-all-indices`.
@@ -270,11 +272,11 @@
 
 (defn refresh-index
   [^Client client index]
-   (.. client
-       (admin)
-       (indices)
-       (prepareRefresh (into-array String [index]))
-       (get)))
+  (.. client
+      (admin)
+      (indices)
+      (prepareRefresh (into-array String [index]))
+      (get)))
 
 (defn random-index-name
   "Creates a random value for an index name. The name is the string value of a

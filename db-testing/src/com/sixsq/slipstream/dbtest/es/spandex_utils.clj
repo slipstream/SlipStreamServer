@@ -9,7 +9,7 @@
     (org.elasticsearch.client.node NodeClient)
     (org.elasticsearch.client RestClient)
     (org.elasticsearch.action.admin.cluster.node.info NodeInfo NodesInfoResponse)
-    (org.elasticsearch.common.transport InetSocketTransportAddress)))
+    (org.elasticsearch.common.transport TransportAddress)))
 
 
 (defn cluster-ready? [client]
@@ -74,7 +74,7 @@
 
 
 (defn host-address
-  [^InetSocketTransportAddress address]
+  [^TransportAddress address]
   (when address
     (HttpHost. (.getAddress address) (.getPort address) "http")))
 

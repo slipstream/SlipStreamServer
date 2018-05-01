@@ -133,6 +133,13 @@
 
     <dependency>
       <groupId>com.sixsq.slipstream</groupId>
+      <artifactId>SlipStreamServer-cimi-resources</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sixsq.slipstream</groupId>
       <artifactId>SlipStreamCljResourcesTestServer-jar-dep</artifactId>
       <type>pom</type>
       <version>${project.version}</version>

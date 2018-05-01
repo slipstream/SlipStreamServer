@@ -12,7 +12,7 @@
 
 (def ^:const service "slipstream")
 
-(def ^:const resource-url (str p/resource-url "/" service))
+(def ^:const instance-url (str p/resource-url "/" service))
 
 (def ConfigurationDescription
   tpl/desc)
@@ -43,10 +43,10 @@
    resourceURI, timestamps, operations, and ACL."
   [{:keys [service] :as resource}]
   (when service
-    (let [href (str resource-url "/describe")
+    (let [href (str instance-url "/describe")
           ops [{:rel (:describe c/action-uri) :href href}]]
       (-> resource
-          (merge {:id          resource-url
+          (merge {:id          instance-url
                   :resourceURI ct/resource-uri
                   :acl         ct/resource-acl
                   :operations  ops})
@@ -73,6 +73,6 @@
   []
   (try
     (add)
-    (log/info (format "Created %s record" resource-url))
+    (log/info (format "Created %s record" instance-url))
     (catch Exception e
-      (log/warn resource-url "resource not created; may already exist; message: " (str e)))))
+      (log/warn instance-url "resource not created; may already exist; message: " (str e)))))

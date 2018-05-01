@@ -1,7 +1,9 @@
 (ns com.sixsq.slipstream.db.es-rest.order)
 
+
 (def sort-order {:asc  "asc"
                  :desc "desc"})
+
 
 (defn direction->sort-order
   "Returns the elasticsearch SortOrder constant associated with the :asc and
@@ -11,13 +13,15 @@
   (or (sort-order direction)
       (throw (IllegalArgumentException. (str "invalid sorting direction '" direction "', must be :asc or :desc")))))
 
+
 (defn sort-entry
   "Give a tuple with the field-name and direction, adds the sort clause to the
    request builder. Intended to be used in a reduction."
   [[field-name direction]]
   {field-name (direction->sort-order direction)})
 
-(defn add-sorters
+
+(defn sorters
   "Given the sorting information in the :cimi-params parameter, add all of the
    sorting clauses to the sort map."
   [{:keys [orderby] :as cimi-params}]

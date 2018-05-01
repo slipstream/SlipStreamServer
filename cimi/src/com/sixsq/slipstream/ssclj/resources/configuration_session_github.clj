@@ -7,8 +7,6 @@
 
 (def ^:const service "session-github")
 
-(def ^:const resource-url (str p/resource-url "/" service))
-
 (def ConfigurationDescription
   tpl/desc)
 

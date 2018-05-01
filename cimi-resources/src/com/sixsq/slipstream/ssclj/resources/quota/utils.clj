@@ -2,7 +2,7 @@
   (:require
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.middleware.cimi-params.utils :as cimi-params-utils]
-    [com.sixsq.slipstream.ssclj.filter.parser :as parser]))
+    [com.sixsq.slipstream.db.filter.parser :as parser]))
 
 
 (defn extract-aggregation

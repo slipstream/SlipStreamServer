@@ -20,7 +20,7 @@
                            esb/wait-client-create-index)]
      (binding [esb/*client* client#]
        (db/set-impl! (esb/get-instance))
-       (esu/reset-index esb/*client* esb/index-name)
+       (esu/reset-index esb/*client* "_all")
        ~@body)))
 
 (defn test-fixture-es-client-and-db-impl

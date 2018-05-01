@@ -49,7 +49,7 @@
   (crud/add (user-request user)))
 
 
-(defn es-db-dump
+#_(defn es-db-dump
   [type]
   (println "ES DUMP. Doc type:" type)
   (clojure.pprint/pprint

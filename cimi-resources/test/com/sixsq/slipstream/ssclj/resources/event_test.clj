@@ -30,8 +30,8 @@
         (assoc-in [:content :resource :href] (str "run/" i))
         (assoc :timestamp (if (even? i) "2016-01-16T08:05:00.0Z" "2015-01-16T08:05:00.0Z")))))
 
-(defn insert-some-events
-  []
+(defn insert-some-events-fixture!
+  [f]
   (let [app (ltu/ring-app)
         state (-> app
                   (session)
@@ -40,15 +40,11 @@
     (doseq [valid-event valid-events]
       (request state base-uri
                :request-method :post
-               :body (json/write-str valid-event)))))
+               :body (json/write-str valid-event))))
+  (f))
 
-(defn fixture-insert-some-events
-  [f]
-  (ltu/with-test-es-client
-    (insert-some-events)
-    (f)))
-
-(use-fixtures :once fixture-insert-some-events)
+(use-fixtures :each (join-fixtures [ltu/with-test-server-fixture
+                                    insert-some-events-fixture!]))
 
 ;;
 ;; Note that these tests need nb-events > 5

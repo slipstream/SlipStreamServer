@@ -12,6 +12,10 @@
    response.  This simplifies the logic and code of the client using this
    protocol."
 
+  (initialize
+    [this collection-id options]
+    "This function initialize the given resource into the database.")
+
   (add
     [this data options]
     [this collection-id data options]

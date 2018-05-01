@@ -7,22 +7,28 @@
     [com.sixsq.slipstream.util.response :as response]
     [com.sixsq.slipstream.db.es.utils :as esu]
     [com.sixsq.slipstream.db.utils.acl :as acl-utils]
-    [com.sixsq.slipstream.db.binding :refer [Binding]])
+    [com.sixsq.slipstream.db.binding :refer [Binding]]
+    [camel-snake-kebab.core :refer [->kebab-case]])
   (:import
     (org.elasticsearch.client Client)
     (org.elasticsearch.index.engine VersionConflictEngineException)
     (java.io Closeable)))
 
 
-(def ^:const index-name "resources-index")
+(def ^:const index-prefix "slipstream-")
 
+
+(defn id->index
+  [id]
+  (->> id cu/split-id first (str index-prefix)))
+
+(defn collection-id->index
+  [collection-id]
+  (str index-prefix (->kebab-case collection-id)))
 
 (defn wait-client-create-index
   [client]
   (esu/wait-for-cluster client)
-  (when-not (esu/index-exists? client index-name)
-    (esu/create-index client index-name)
-    (esu/wait-for-index client index-name))
   client)
 
 
@@ -94,7 +100,7 @@
   [client data]
   (let [[id collection-id uuid json] (data->doc data)]
     (try
-      (if (esu/create client index-name collection-id uuid json)
+      (if (esu/create client (collection-id->index collection-id) collection-id uuid json)
         (response/response-created id)
         (response/response-error "resource not created"))
       (catch VersionConflictEngineException _
@@ -103,6 +109,13 @@
 
 (deftype ESBinding []
   Binding
+
+  (initialize [_ collection-id options]
+    (let [index (collection-id->index collection-id)]
+      (when-not (esu/index-exists? *client* index)
+        (esu/create-index *client* index)
+        (esu/wait-for-index *client* index))))
+
 
   (add [_ data options]
     (add-data *client* data))
@@ -113,26 +126,26 @@
 
 
   (retrieve [_ id options]
-    (find-data *client* index-name id options))
+    (find-data *client* (id->index id) id options))
 
 
   (delete [_ {:keys [id]} options]
-    (find-data *client* index-name id options)
+    (find-data *client* (id->index id) id options)
     (let [[type docid] (cu/split-id id)]
-      (.status (esu/delete *client* index-name type docid)))
+      (.status (esu/delete *client* (id->index id) type docid)))
     (response/response-deleted id))
 
 
   (edit [_ {:keys [id] :as data} options]
     (let [[type docid] (cu/split-id id)
           updated-doc (prepare-data data)]
-      (if (esu/update *client* index-name type docid updated-doc)
+      (if (esu/update *client* (id->index id) type docid updated-doc)
         (response/json-response data)
         (response/response-conflict id))))
 
 
   (query [_ collection-id options]
-    (let [result (esu/search *client* index-name collection-id options)
+    (let [result (esu/search *client* (collection-id->index collection-id) collection-id options)
           count-before-pagination (-> result :hits :total)
           aggregations (:aggregations result)
           meta (cond-> {:count count-before-pagination}
@@ -153,9 +166,15 @@
   []
   (ESBinding.))
 
-
 (deftype ESBindingLocal [^Client client]
   Binding
+
+  (initialize [_ collection-id options]
+    (let [index (collection-id->index collection-id)]
+      (when-not (esu/index-exists? client index)
+        (esu/create-index client index)
+        (esu/wait-for-index client index))))
+
 
   (add [_ data options]
     (add-data client data))
@@ -166,26 +185,26 @@
 
 
   (retrieve [_ id options]
-    (find-data client index-name id options))
+    (find-data client (id->index id) id options))
 
 
   (delete [_ {:keys [id]} options]
-    (find-data client index-name id options)
+    (find-data client (id->index id) id options)
     (let [[type docid] (cu/split-id id)]
-      (.status (esu/delete client index-name type docid)))
+      (.status (esu/delete client (id->index id) type docid)))
     (response/response-deleted id))
 
 
   (edit [_ {:keys [id] :as data} options]
     (let [[type docid] (cu/split-id id)
           updated-doc (prepare-data data)]
-      (if (esu/update client index-name type docid updated-doc)
+      (if (esu/update client (id->index id) type docid updated-doc)
         (response/json-response data)
         (response/response-conflict id))))
 
 
   (query [_ collection-id options]
-    (let [result (esu/search client index-name collection-id options)
+    (let [result (esu/search client (collection-id->index collection-id) collection-id options)
           count-before-pagination (-> result :hits :total)
           aggregations (:aggregations result)
           meta (cond-> {:count count-before-pagination}
