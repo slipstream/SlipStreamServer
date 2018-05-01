@@ -178,7 +178,7 @@
         (indices)
         (prepareCreate index-name)
         (setSettings settings)
-        (addMapping "_default_" mapping-not-analyzed XContentType/JSON)
+        (addMapping "_doc" mapping-not-analyzed XContentType/JSON)
         (get))))
 
 (def ^:private ok-health-statuses #{ClusterHealthStatus/GREEN ClusterHealthStatus/YELLOW})

@@ -21,165 +21,169 @@
 (defn check-binding-queries [db-impl]
   (with-open [db db-impl]
 
-    ;; create an entry in the database
-    (let [n 2
-          collection "test-collection"
-          admin-docs (doall (for [id (range 0 n)]
-                              {:id       (str collection "/" id)
-                               :sequence id
-                               :attr1    "attr1"
-                               :attr2    "attr2"
-                               :admin    true
-                               :acl      admin-acl}))
-          user-docs (doall (for [id (range n (* 2 n))]
-                             {:id       (str collection "/" id)
-                              :sequence id
-                              :attr1    "attr1"
-                              :attr2    "attr2"
-                              :user     true
-                              :acl      user-acl}))
-          docs (vec (concat admin-docs user-docs))]
+    (let [collection-id "test-collection"]
 
-      ;; add all of the docs to the database
-      (doseq [doc docs]
-        (let [doc-id (:id doc)
-              response (db/add db doc nil)]
-          (is (= 201 (:status response)))
-          (is (= doc-id (get-in response [:headers "Location"])))))
+      ;; initialize the database
+      (db/initialize db collection-id nil)
 
-      ;; ensure that all of them can be retrieved individually
-      (doseq [doc docs]
-        (let [doc-id (:id doc)
-              retrieved-data (db/retrieve db doc-id nil)]
-          (is (= doc retrieved-data))))
+      ;; create an entry in the database
+      (let [n 2
+            collection-id "test-collection"
+            admin-docs (doall (for [uuid (range 0 n)]
+                                {:id       (str collection-id "/" uuid)
+                                 :sequence uuid
+                                 :attr1    "attr1"
+                                 :attr2    "attr2"
+                                 :admin    true
+                                 :acl      admin-acl}))
+            user-docs (doall (for [uuid (range n (* 2 n))]
+                               {:id       (str collection-id "/" uuid)
+                                :sequence uuid
+                                :attr1    "attr1"
+                                :attr2    "attr2"
+                                :user     true
+                                :acl      user-acl}))
+            docs (vec (concat admin-docs user-docs))]
 
-      ;; check that a query with an admin role retrieves everything
-      (let [[query-meta query-hits] (db/query db collection admin-role)]
-        (is (= (* 2 n) (:count query-meta)))
-        (is (= (set docs) (set query-hits))))
+        ;; add all of the docs to the database
+        (doseq [doc docs]
+          (let [doc-id (:id doc)
+                response (db/add db doc nil)]
+            (is (= 201 (:status response)))
+            (is (= doc-id (get-in response [:headers "Location"])))))
 
-      ;; check ascending ordering of the entries
-      (let [options (merge admin-role
-                           {:cimi-params {:orderby [["sequence" :asc]]}})
-            [query-meta query-hits] (db/query db collection options)]
-        (is (= (* 2 n) (:count query-meta)))
-        (is (= docs (vec query-hits))))
+        ;; ensure that all of them can be retrieved individually
+        (doseq [doc docs]
+          (let [doc-id (:id doc)
+                retrieved-data (db/retrieve db doc-id nil)]
+            (is (= doc retrieved-data))))
 
-      ;; check descending ordering of the entries
-      (let [options (merge admin-role
-                           {:cimi-params {:orderby [["sequence" :desc]]}})
-            [query-meta query-hits] (db/query db collection options)]
-        (is (= (* 2 n) (:count query-meta)))
-        (is (= (reverse docs) (vec query-hits))))
+        ;; check that a query with an admin role retrieves everything
+        (let [[query-meta query-hits] (db/query db collection-id admin-role)]
+          (is (= (* 2 n) (:count query-meta)))
+          (is (= (set docs) (set query-hits))))
 
-      ;; check paging
-      (let [n-drop (int (/ n 10))
-            options (merge admin-role
-                           {:cimi-params {:first   (inc n-drop)
-                                          :last    (+ n n-drop)
-                                          :orderby [["sequence" :desc]]}})
-            [query-meta query-hits] (db/query db collection options)]
-        (is (= (* 2 n) (:count query-meta)))
-        (is (= n (count query-hits)))
-        (is (= (vec (take n (drop n-drop (reverse docs)))) (vec query-hits))))
+        ;; check ascending ordering of the entries
+        (let [options (merge admin-role
+                             {:cimi-params {:orderby [["sequence" :asc]]}})
+              [query-meta query-hits] (db/query db collection-id options)]
+          (is (= (* 2 n) (:count query-meta)))
+          (is (= docs (vec query-hits))))
 
-      ;; check selection of attributes
-      (let [options (merge admin-role
-                           {:cimi-params {:select ["attr1" "sequence"]}})
-            [query-meta query-hits] (db/query db collection options)]
-        (is (= (* 2 n) (:count query-meta)))
-        (is (every? :attr1 query-hits))
-        (is (every? :sequence query-hits))
-        (is (every? :acl query-hits))                       ;; always added to select list
-        (is (every? #(nil? (:id %)) query-hits))
-        (is (every? #(nil? (:attr2 %)) query-hits)))
+        ;; check descending ordering of the entries
+        (let [options (merge admin-role
+                             {:cimi-params {:orderby [["sequence" :desc]]}})
+              [query-meta query-hits] (db/query db collection-id options)]
+          (is (= (* 2 n) (:count query-meta)))
+          (is (= (reverse docs) (vec query-hits))))
 
-      ;; attribute exists
-      (let [options (merge admin-role
-                           {:cimi-params {:filter (parser/parse-cimi-filter "admin!=null")}})
-            [query-meta query-hits] (db/query db collection options)]
-        (is (= n (:count query-meta)))
-        (is (= (set admin-docs) (set query-hits))))
+        ;; check paging
+        (let [n-drop (int (/ n 10))
+              options (merge admin-role
+                             {:cimi-params {:first   (inc n-drop)
+                                            :last    (+ n n-drop)
+                                            :orderby [["sequence" :desc]]}})
+              [query-meta query-hits] (db/query db collection-id options)]
+          (is (= (* 2 n) (:count query-meta)))
+          (is (= n (count query-hits)))
+          (is (= (vec (take n (drop n-drop (reverse docs)))) (vec query-hits))))
 
-      ;; attribute missing
-      (let [options (merge admin-role
-                           {:cimi-params {:filter (parser/parse-cimi-filter "admin=null")}})
-            [query-meta query-hits] (db/query db collection options)]
-        (is (= n (:count query-meta)))
-        (is (= (set user-docs) (set query-hits))))
+        ;; check selection of attributes
+        (let [options (merge admin-role
+                             {:cimi-params {:select ["attr1" "sequence"]}})
+              [query-meta query-hits] (db/query db collection-id options)]
+          (is (= (* 2 n) (:count query-meta)))
+          (is (every? :attr1 query-hits))
+          (is (every? :sequence query-hits))
+          (is (every? :acl query-hits))                     ;; always added to select list
+          (is (every? #(nil? (:id %)) query-hits))
+          (is (every? #(nil? (:attr2 %)) query-hits)))
 
-      ;; eq comparison
-      (let [options (merge admin-role
-                           {:cimi-params {:filter (parser/parse-cimi-filter (str "sequence=" n))}})
-            [query-meta query-hits] (db/query db collection options)]
-        (is (= 1 (:count query-meta)))
-        (is (= (first user-docs) (first query-hits))))
+        ;; attribute exists
+        (let [options (merge admin-role
+                             {:cimi-params {:filter (parser/parse-cimi-filter "admin!=null")}})
+              [query-meta query-hits] (db/query db collection-id options)]
+          (is (= n (:count query-meta)))
+          (is (= (set admin-docs) (set query-hits))))
 
-      ;; ne comparison
-      (let [options (merge admin-role
-                           {:cimi-params {:filter (parser/parse-cimi-filter (str "sequence!=" n))}})
-            [query-meta query-hits] (db/query db collection options)]
-        (is (= (dec (* 2 n)) (:count query-meta)))
-        (is (= (set (concat admin-docs (drop 1 user-docs))) (set query-hits))))
+        ;; attribute missing
+        (let [options (merge admin-role
+                             {:cimi-params {:filter (parser/parse-cimi-filter "admin=null")}})
+              [query-meta query-hits] (db/query db collection-id options)]
+          (is (= n (:count query-meta)))
+          (is (= (set user-docs) (set query-hits))))
 
-      ;; gte comparison
-      (let [options (merge admin-role
-                           {:cimi-params {:filter (parser/parse-cimi-filter (str "sequence>=" n))}})
-            [query-meta query-hits] (db/query db collection options)]
-        (is (= n (:count query-meta)))
-        (is (= (set user-docs) (set query-hits))))
+        ;; eq comparison
+        (let [options (merge admin-role
+                             {:cimi-params {:filter (parser/parse-cimi-filter (str "sequence=" n))}})
+              [query-meta query-hits] (db/query db collection-id options)]
+          (is (= 1 (:count query-meta)))
+          (is (= (first user-docs) (first query-hits))))
 
-      ;; gt comparison
-      (let [options (merge admin-role
-                           {:cimi-params {:filter (parser/parse-cimi-filter (str "sequence>" (dec n)))}})
-            [query-meta query-hits] (db/query db collection options)]
-        (is (= n (:count query-meta)))
-        (is (= (set user-docs) (set query-hits))))
+        ;; ne comparison
+        (let [options (merge admin-role
+                             {:cimi-params {:filter (parser/parse-cimi-filter (str "sequence!=" n))}})
+              [query-meta query-hits] (db/query db collection-id options)]
+          (is (= (dec (* 2 n)) (:count query-meta)))
+          (is (= (set (concat admin-docs (drop 1 user-docs))) (set query-hits))))
 
-      ;; lt comparison
-      (let [options (merge admin-role
-                           {:cimi-params {:filter (parser/parse-cimi-filter (str "sequence<" n))}})
-            [query-meta query-hits] (db/query db collection options)]
-        (is (= n (:count query-meta)))
-        (is (= (set admin-docs) (set query-hits))))
+        ;; gte comparison
+        (let [options (merge admin-role
+                             {:cimi-params {:filter (parser/parse-cimi-filter (str "sequence>=" n))}})
+              [query-meta query-hits] (db/query db collection-id options)]
+          (is (= n (:count query-meta)))
+          (is (= (set user-docs) (set query-hits))))
 
-      ;; lte comparison
-      (let [options (merge admin-role
-                           {:cimi-params {:filter (parser/parse-cimi-filter (str "sequence<=" (dec n)))}})
-            [query-meta query-hits] (db/query db collection options)]
-        (is (= n (:count query-meta)))
-        (is (= (set admin-docs) (set query-hits))))
+        ;; gt comparison
+        (let [options (merge admin-role
+                             {:cimi-params {:filter (parser/parse-cimi-filter (str "sequence>" (dec n)))}})
+              [query-meta query-hits] (db/query db collection-id options)]
+          (is (= n (:count query-meta)))
+          (is (= (set user-docs) (set query-hits))))
 
-      ;; or
-      (let [options (merge admin-role
-                           {:cimi-params {:filter (parser/parse-cimi-filter (str "sequence=0 or sequence=" n))}})
-            [query-meta query-hits] (db/query db collection options)]
-        (is (= 2 (:count query-meta)))
-        (is (= #{(first admin-docs) (first user-docs)} (set query-hits))))
+        ;; lt comparison
+        (let [options (merge admin-role
+                             {:cimi-params {:filter (parser/parse-cimi-filter (str "sequence<" n))}})
+              [query-meta query-hits] (db/query db collection-id options)]
+          (is (= n (:count query-meta)))
+          (is (= (set admin-docs) (set query-hits))))
 
-      ;; and
-      (let [options (merge admin-role
-                           {:cimi-params {:filter (parser/parse-cimi-filter (str "(sequence=0 and admin!=null) or (sequence=" n " and admin=null)"))}})
-            [query-meta query-hits] (db/query db collection options)]
-        (is (= 2 (:count query-meta)))
-        (is (= #{(first admin-docs) (first user-docs)} (set query-hits))))
+        ;; lte comparison
+        (let [options (merge admin-role
+                             {:cimi-params {:filter (parser/parse-cimi-filter (str "sequence<=" (dec n)))}})
+              [query-meta query-hits] (db/query db collection-id options)]
+          (is (= n (:count query-meta)))
+          (is (= (set admin-docs) (set query-hits))))
 
-      ;; check that a query with an user role retrieves only user docs
-      (let [[query-meta query-hits] (db/query db collection user-role)]
-        (is (= n (:count query-meta)))
-        (is (= (set user-docs) (set query-hits))))
+        ;; or
+        (let [options (merge admin-role
+                             {:cimi-params {:filter (parser/parse-cimi-filter (str "sequence=0 or sequence=" n))}})
+              [query-meta query-hits] (db/query db collection-id options)]
+          (is (= 2 (:count query-meta)))
+          (is (= #{(first admin-docs) (first user-docs)} (set query-hits))))
 
-      ;; delete all of the docs
-      (doseq [doc docs]
-        (let [response (db/delete db doc nil)]
-          (is (= 200 (:status response)))))
+        ;; and
+        (let [options (merge admin-role
+                             {:cimi-params {:filter (parser/parse-cimi-filter (str "(sequence=0 and admin!=null) or (sequence=" n " and admin=null)"))}})
+              [query-meta query-hits] (db/query db collection-id options)]
+          (is (= 2 (:count query-meta)))
+          (is (= #{(first admin-docs) (first user-docs)} (set query-hits))))
 
-      ;; ensure that all of the docs have been deleted
-      (doseq [doc docs]
-        (try
-          (db/delete db doc nil)
-          (is (nil? "delete of non-existent resource did not throw an exception"))
-          (catch Exception e
-            (let [response (ex-data e)]
-              (is (= 404 (:status response)))))))
-      )))
+        ;; check that a query with an user role retrieves only user docs
+        (let [[query-meta query-hits] (db/query db collection-id user-role)]
+          (is (= n (:count query-meta)))
+          (is (= (set user-docs) (set query-hits))))
+
+        ;; delete all of the docs
+        (doseq [doc docs]
+          (let [response (db/delete db doc nil)]
+            (is (= 200 (:status response)))))
+
+        ;; ensure that all of the docs have been deleted
+        (doseq [doc docs]
+          (try
+            (db/delete db doc nil)
+            (is (nil? "delete of non-existent resource did not throw an exception"))
+            (catch Exception e
+              (let [response (ex-data e)]
+                (is (= 404 (:status response)))))))))))

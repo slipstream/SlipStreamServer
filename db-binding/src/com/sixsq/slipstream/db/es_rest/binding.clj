@@ -19,6 +19,11 @@
 
 ;; FIXME: Need to understand why the refresh parameter must be used to make unit test pass.
 
+(def default-mapping {:dynamic_templates [{:strings {:match              "*"
+                                                     :match_mapping_type "string"
+                                                     :mapping            {:type "keyword"}}}]})
+
+
 (defn create-client
   [options]
   (spandex/client options))
@@ -26,14 +31,37 @@
 
 (defn create-index
   [client index]
-  (let [{:keys [status] :as response} (spandex/request client {:url [index], :method :head})]
-    (case status
-      200 (log/debug index "index already exists")
-      404 (let [{{:keys [acknowledged shards_acknowledged]} :body :as response} (spandex/request client {:url [index]})]
-            (if (and acknowledged shards_acknowledged)
-              (log/info index "index created")
-              (log/warn index "index may or may not have been created")))
-      (log/error "unexpected return code (" status ") from" index "index existence check"))))
+  (try
+    (let [{:keys [status]} (spandex/request client {:url [index], :method :head})]
+      (if (= 200 status)
+        (log/debug index "index already exists")
+        (log/error "unexpected status code when checking" index "index (" status ")")))
+    (catch Exception e
+      (let [{:keys [status]} (ex-data e)]
+        (try
+          (if (= 404 status)
+            (let [{{:keys [acknowledged shards_acknowledged]} :body} (spandex/request client {:url [index], :method :put})]
+              (if (and acknowledged shards_acknowledged)
+                (log/info index "index created")
+                (log/warn index "index may or may not have been created")))
+            (log/error "unexpected status code when checking" index "index (" status ")"))
+          (catch Exception e
+            (let [{:keys [status]} (ex-data e)]
+              (log/error "unexpected status code when creating" index "index (" status ")"))))))))
+
+
+(defn set-index-mapping
+  [client index mapping]
+  (try
+    (let [{:keys [status]} (spandex/request client {:url    [index :_mapping :_doc]
+                                                    :method :put
+                                                    :body   mapping})]
+      (if (= 200 status)
+        (log/info index "mapping updated")
+        (log/warn index "mapping could not be updated (" status ")")))
+    (catch Exception e
+      (let [{:keys [status]} (ex-data e)]
+        (log/warn index "mapping could not be updated (" status ")")))))
 
 
 (defn prepare-data [data]
@@ -142,9 +170,9 @@
   Binding
 
   (initialize [_ collection-id options]
-    (->> collection-id
-         escu/collection-id->index
-         (create-index client)))
+    (let [index (escu/collection-id->index collection-id)]
+      (create-index client index)
+      (set-index-mapping client index default-mapping)))
 
 
   (add [_ data options]

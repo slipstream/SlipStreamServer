@@ -96,6 +96,11 @@
   [data-atom]
 
   Binding
+
+  (initialize [_ collection-id options]
+    nil)
+
+
   (add [_ data options]
     (add-data data-atom data))
 
