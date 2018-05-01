@@ -4,6 +4,7 @@
   (:require
     [qbits.spandex :as spandex]
     [com.sixsq.slipstream.db.binding :refer [Binding]]
+    [com.sixsq.slipstream.db.es.common.utils :as escu]
     [com.sixsq.slipstream.db.es-rest.acl :as acl]
     [com.sixsq.slipstream.db.es-rest.filter :as filter]
     [com.sixsq.slipstream.db.es-rest.order :as order]
@@ -11,21 +12,28 @@
     [com.sixsq.slipstream.db.es-rest.select :as select]
     [com.sixsq.slipstream.db.utils.common :as cu]
     [com.sixsq.slipstream.db.utils.acl :as acl-utils]
-    [com.sixsq.slipstream.util.response :as response])
+    [com.sixsq.slipstream.util.response :as response]
+    [clojure.tools.logging :as log])
   (:import
     (java.io Closeable)))
 
 ;; FIXME: Need to understand why the refresh parameter must be used to make unit test pass.
 
-(def ^:const index-prefix "slipstream-")
-
-(defn index-name
-  [collection-id]
-  (str index-prefix collection-id))
-
 (defn create-client
   [options]
   (spandex/client options))
+
+
+(defn create-index
+  [client index]
+  (let [{:keys [status] :as response} (spandex/request client {:url [index], :method :head})]
+    (case status
+      200 (log/debug index "index already exists")
+      404 (let [{{:keys [acknowledged shards_acknowledged]} :body :as response} (spandex/request client {:url [index]})]
+            (if (and acknowledged shards_acknowledged)
+              (log/info index "index created")
+              (log/warn index "index may or may not have been created")))
+      (log/error "unexpected return code (" status ") from" index "index existence check"))))
 
 
 (defn prepare-data [data]
@@ -38,7 +46,7 @@
   [client {:keys [id] :as data}]
   (try
     (let [[collection-id uuid] (cu/split-id id)
-          index (index-name collection-id)
+          index (escu/collection-id->index collection-id)
           response (spandex/request client {:url          [index :_doc uuid :_create]
                                             :query-string {:refresh "wait_for"}
                                             :method       :put
@@ -57,7 +65,7 @@
 (defn update-data
   [client {:keys [id] :as data}]
   (let [[collection-id uuid] (cu/split-id id)
-        index (index-name collection-id)
+        index (escu/collection-id->index collection-id)
         response (spandex/request client {:url          [index :_doc uuid]
                                           :query-string {:refresh "wait_for"}
                                           :method       :put
@@ -72,7 +80,7 @@
   [client id]
   (try
     (let [[collection-id uuid] (cu/split-id id)
-          index (index-name collection-id)
+          index (escu/collection-id->index collection-id)
           response (spandex/request client {:url    [index :_doc uuid]
                                             :method :get})
           found? (get-in response [:body :found])]
@@ -91,7 +99,7 @@
   [client id]
   (try
     (let [[collection-id uuid] (cu/split-id id)
-          index (index-name collection-id)
+          index (escu/collection-id->index collection-id)
           response (spandex/request client {:url          [index :_doc uuid]
                                             :query-string {:refresh "wait_for"}
                                             :method       :delete})
@@ -110,7 +118,7 @@
 
 (defn query-data
   [client collection-id {:keys [cimi-params] :as options}]
-  (let [index (index-name collection-id)
+  (let [index (escu/collection-id->index collection-id)
         paging (paging/paging cimi-params)
         orderby (order/sorters cimi-params)
         selected (select/select cimi-params)
@@ -132,6 +140,12 @@
 
 (deftype ElasticsearchRestBinding [client]
   Binding
+
+  (initialize [_ collection-id options]
+    (->> collection-id
+         escu/collection-id->index
+         (create-index client)))
+
 
   (add [_ data options]
     (add-data client data))
