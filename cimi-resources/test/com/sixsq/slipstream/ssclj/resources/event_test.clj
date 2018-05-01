@@ -65,6 +65,12 @@
        tu/ordered-desc?
        is))
 
+(deftest check-events-can-be-reordered
+  (->> (get-in (exec-request base-uri "?$orderby=timestamp:asc" "joe") [:response :body :events])
+       (map :timestamp)
+       tu/ordered-asc?
+       is))
+
 (defn timestamp-paginate-single
   [n]
   (-> (exec-request base-uri (str "?$first=" n "&$last=" n) "joe")
@@ -80,7 +86,7 @@
 
 (deftest resources-pagination
   (are-counts nb-events "")
-  ;; two differents count are checked
+  ;; two different counts are checked
   ;; first one should be not impacted by pagination (so we expect nb-events)
   ;; second is the count after pagination (0 in that case with a bogus pagination)
   (are-counts nb-events 0 "?$first=10&$last=5")

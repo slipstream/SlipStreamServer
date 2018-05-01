@@ -8,7 +8,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.util.response :as response]
-    [com.sixsq.slipstream.ssclj.filter.parser :as parser]))
+    [com.sixsq.slipstream.db.filter.parser :as parser]))
 
 (def ^:const resource-name "ServiceAttributeNamespace")
 

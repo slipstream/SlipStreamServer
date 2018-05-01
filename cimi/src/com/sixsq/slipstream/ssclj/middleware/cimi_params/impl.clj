@@ -4,7 +4,7 @@
    database layer."
   (:require
     [clojure.string :as str]
-    [com.sixsq.slipstream.ssclj.filter.parser :as parser]
+    [com.sixsq.slipstream.db.filter.parser :as parser]
     [com.sixsq.slipstream.ssclj.middleware.cimi-params.mime :as mime]
     [com.sixsq.slipstream.ssclj.middleware.cimi-params.utils :as utils]))
 

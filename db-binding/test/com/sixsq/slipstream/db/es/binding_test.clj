@@ -4,7 +4,7 @@
     [com.sixsq.slipstream.db.es.binding :as t]
     [com.sixsq.slipstream.db.es.es-node :as es-node]
     [com.sixsq.slipstream.db.binding-lifecycle :as lifecycle]
-    [com.sixsq.slipstream.db.binding :as db])
+    [com.sixsq.slipstream.db.binding-queries :as queries])
   (:import
     (clojure.lang Var$Unbound)
     (java.io StringWriter)))
@@ -23,6 +23,14 @@
               client (-> test-node
                          (.client)
                          t/wait-client-create-index)]
-    (let [binding (t/->ESBindingLocal client)]
-      (db/initialize binding "my-collection" nil)
-      (lifecycle/check-binding-lifecycle binding))))
+    (-> client
+        t/->ESBindingLocal
+        lifecycle/check-binding-lifecycle))
+
+  (with-open [test-node (es-node/create-test-node)
+              client (-> test-node
+                         (.client)
+                         t/wait-client-create-index)]
+    (-> client
+        t/->ESBindingLocal
+        queries/check-binding-queries)))

@@ -28,7 +28,6 @@
 
   :dependencies
   [[cc.qbits/spandex]
-   [org.clojure/tools.reader]                               ;; required by spandex through core.async
    [camel-snake-kebab]
    [cheshire]                                               ;; to avoid transient dependency conflicts
    [clj-time]
@@ -36,9 +35,11 @@
    [com.sixsq.slipstream/utils ~+version+]
    [duratom]
    [environ]
+   [instaparse]
    [org.apache.logging.log4j/log4j-core]                    ;; required for Elasticsearch logging
    [org.clojure/data.json]
    [org.clojure/tools.logging]
+   [org.clojure/tools.reader]                               ;; required by spandex through core.async
    [org.elasticsearch/elasticsearch]
    [org.elasticsearch.client/transport]
    [org.slf4j/slf4j-api]

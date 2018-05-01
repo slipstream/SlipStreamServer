@@ -85,3 +85,11 @@
   (every? (fn [[a b]] (not-before? (to-time a) (to-time b))) (partition 2 1 timestamps)))
 
 
+(def not-after? (complement time/after?))
+
+
+(defn ordered-asc?
+  [timestamps]
+  (every? (fn [[a b]] (not-after? (to-time a) (to-time b))) (partition 2 1 timestamps)))
+
+
