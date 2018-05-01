@@ -15,6 +15,7 @@
   (:import
     (java.io Closeable)))
 
+;; FIXME: Need to understand why the refresh parameter must be used to make unit test pass.
 
 (def ^:const index-prefix "slipstream-")
 
