@@ -8,7 +8,7 @@
     [com.sixsq.slipstream.db.es-rest.test-utils :as test-utils]))
 
 
-(deftest check-spandex
+(deftest check-es-rest-protocol
 
   (with-open [test-node (es-node/create-test-node)
               client (t/create-client {:hosts ["localhost:9200"]})]

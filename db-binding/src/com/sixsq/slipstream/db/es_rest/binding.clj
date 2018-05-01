@@ -16,8 +16,11 @@
     (java.io Closeable)))
 
 
-(def ^:const index-name "resources-index")
+(def ^:const index-prefix "slipstream-")
 
+(defn index-name
+  [collection-id]
+  (str index-prefix collection-id))
 
 (defn create-client
   [options]
@@ -34,9 +37,11 @@
   [client {:keys [id] :as data}]
   (try
     (let [[collection-id uuid] (cu/split-id id)
-          response (spandex/request client {:url    [index-name collection-id uuid :_create]
-                                            :method :put
-                                            :body   (prepare-data data)})
+          index (index-name collection-id)
+          response (spandex/request client {:url          [index :_doc uuid :_create]
+                                            :query-string {:refresh "wait_for"}
+                                            :method       :put
+                                            :body         (prepare-data data)})
           success? (pos? (get-in response [:body :_shards :successful]))]
       (if success?
         (response/response-created id)
@@ -51,9 +56,11 @@
 (defn update-data
   [client {:keys [id] :as data}]
   (let [[collection-id uuid] (cu/split-id id)
-        response (spandex/request client {:url    [index-name collection-id uuid]
-                                          :method :put
-                                          :body   (prepare-data data)})
+        index (index-name collection-id)
+        response (spandex/request client {:url          [index :_doc uuid]
+                                          :query-string {:refresh "wait_for"}
+                                          :method       :put
+                                          :body         (prepare-data data)})
         success? (pos? (get-in response [:body :_shards :successful]))]
     (if success?
       (response/response-updated id)
@@ -64,7 +71,8 @@
   [client id]
   (try
     (let [[collection-id uuid] (cu/split-id id)
-          response (spandex/request client {:url    [index-name collection-id uuid]
+          index (index-name collection-id)
+          response (spandex/request client {:url    [index :_doc uuid]
                                             :method :get})
           found? (get-in response [:body :found])]
       (if found?
@@ -82,15 +90,15 @@
   [client id]
   (try
     (let [[collection-id uuid] (cu/split-id id)
-          response (spandex/request client {:url    [index-name collection-id uuid]
-                                            :method :delete})
+          index (index-name collection-id)
+          response (spandex/request client {:url          [index :_doc uuid]
+                                            :query-string {:refresh "wait_for"}
+                                            :method       :delete})
           success? (pos? (get-in response [:body :_shards :successful]))
-          found? (get-in response [:body :found])]
-      (if found?
-        (if success?
-          (response/response-deleted id)
-          (response/response-error (str "could not delete document " id)))
-        (throw (response/ex-not-found id))))
+          deleted? (= "deleted" (get-in response [:body :result]))]
+      (if (and success? deleted?)
+        (response/response-deleted id)
+        (response/response-error (str "could not delete document " id))))
     (catch Exception e
       (let [response (ex-data e)
             status (:status response)]
@@ -101,12 +109,13 @@
 
 (defn query-data
   [client collection-id {:keys [cimi-params] :as options}]
-  (let [paging (paging/paging cimi-params)
+  (let [index (index-name collection-id)
+        paging (paging/paging cimi-params)
         orderby (order/sorters cimi-params)
         selected (select/select cimi-params)
         query {:query (acl/and-acl (filter/filter cimi-params) options)}
         body (merge paging orderby selected query)
-        response (spandex/request client {:url    [index-name collection-id :_search]
+        response (spandex/request client {:url    [index :_doc :_search]
                                           :method :post
                                           :body   body})
         success? (-> response :body :_shards :successful pos?)
