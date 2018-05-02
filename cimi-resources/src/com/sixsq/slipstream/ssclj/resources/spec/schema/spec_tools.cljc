@@ -13,6 +13,14 @@
     (:items x)
     x))
 
+(defn remove-enum-schema [x]
+(if (s/valid? :es/enum x)
+  (-> x
+      (dissoc :enum)
+      (assoc :type "keyword")
+      )
+  x))
+
 (defn remove-required-key [x]
   (if (:required x)
     (dissoc x :required)
@@ -34,6 +42,7 @@
 (defn transform [m]
   (->> m
        (w/postwalk #(remove-array-schema %))
+       (w/postwalk #(remove-enum-schema %))
        (w/postwalk #(remove-required-key %))
        (w/postwalk #(remove-title-key %))
        (w/postwalk #(deprecated-string-type %))
@@ -57,6 +66,8 @@
 
 (s/def :es/type-array #(= "array" (:type %)))
 (s/def :es/type-string #(= "string" (:type %)))
+
+(s/def :es/enum #(vector? (:enum %)))
 (s/def :es/items-map #(-> %
                           :items
                           :type
