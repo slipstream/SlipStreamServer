@@ -16,16 +16,24 @@
 
 (defn remove-required-key [x]
   (if (:required x)
-      (dissoc x :required)
+    (dissoc x :required)
     x)
   )
 
+(defn deprecated-string-type [x]
+  (if (s/valid? :es/type-string x)
+    (assoc x :type "keyword")
+    x
+    )
+  )
 
 
 (defn transform [m]
   (->> m
        (w/postwalk #(remove-array-schema %))
-       (w/postwalk #(remove-required-key %))))
+       (w/postwalk #(remove-required-key %))
+       (w/postwalk #(deprecated-string-type %))
+       ))
 
 (defn spec->es-mapping
   [spec]

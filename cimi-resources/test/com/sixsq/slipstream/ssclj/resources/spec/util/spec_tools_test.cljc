@@ -31,6 +31,17 @@
                       {:required "required"} {}
                       ))
 
+(deftest deprecated-string-type
+  (are [input expect] (= (t/deprecated-string-type input) expect)
+                      :key :key
+                      "value" "value"
+                      {:k "v"} {:k "v"}
+                      {:k "v" :type "other"} {:k "v" :type "other"}
+                      {:type "other"} {:type "other"}
+                      {:type "string"} {:type "keyword"}
+                      {:type "string" :other "other"}{:type "keyword" :other "other"}
+                      ))
+
 (deftest transform
   (are [input expect] (= (t/transform input) expect)
                       :key :key
@@ -40,7 +51,9 @@
                       nil nil
                       {:k "v" :required "required"} {:k "v"}
                       {:required "required"} {}
+                      {:embedded {:required "req"}} {:embedded {}}
                       {:type "array" :items {:type "ok" :other "other"}} {:type "ok" :other "other"}
+                      {:properties {:example {:type "string"}}} {:properties {:example {:type "keyword"}}}
                       ))
 
 (deftest mappings
@@ -51,38 +64,38 @@
                       ::cimi-core/identifier empty
                       ::cimi-core/resource-href empty
                       ::c/acl {:mappings {:_doc {:properties {:owner {:type "object",
-                                                              :properties {"principal" {:type "string"}, "type" {:enum ["USER" "ROLE"]}}},
-                                                      :rules {:type "object",
-                                                              :properties {"principal" {:type "string"},
-                                                                           "type" {:enum ["USER" "ROLE"]},
-                                                                           "right" {:enum ["DELETE"
-                                                                                           "MANAGE"
-                                                                                           "VIEW_DATA"
-                                                                                           "EDIT_META"
-                                                                                           "MODIFY"
-                                                                                           "VIEW"
-                                                                                           "VIEW_META"
-                                                                                           "VIEW_ACL"
-                                                                                           "ALL"
-                                                                                           "EDIT_DATA"
-                                                                                           "EDIT_ACL"]}}}}}}}
+                                                                      :properties {"principal" {:type "keyword"}, "type" {:enum ["USER" "ROLE"]}}},
+                                                              :rules {:type "object",
+                                                                      :properties {"principal" {:type "keyword"},
+                                                                                   "type" {:enum ["USER" "ROLE"]},
+                                                                                   "right" {:enum ["DELETE"
+                                                                                                   "MANAGE"
+                                                                                                   "VIEW_DATA"
+                                                                                                   "EDIT_META"
+                                                                                                   "MODIFY"
+                                                                                                   "VIEW"
+                                                                                                   "VIEW_META"
+                                                                                                   "VIEW_ACL"
+                                                                                                   "ALL"
+                                                                                                   "EDIT_DATA"
+                                                                                                   "EDIT_ACL"]}}}}}}}
                       ::c/created empty
                       ::c/operations empty
                       ::c/resource-links empty
-                      (s/def :cimi.test/common-attrs (su/only-keys-maps c/common-attrs)) {:mappings {:_doc {:properties {:description {:type "string"},
+                      (s/def :cimi.test/common-attrs (su/only-keys-maps c/common-attrs)) {:mappings {:_doc {:properties {:description {:type "keyword"},
                                                                                                                          :properties {:type "object",
-                                                                                                                                      :additionalProperties {:type "string"},
+                                                                                                                                      :additionalProperties {:type "keyword"},
                                                                                                                                       :title "com.sixsq.slipstream.ssclj.resources.spec.common/properties"},
-                                                                                                                         :updated {:type "string"},
-                                                                                                                         :name {:type "string"},
-                                                                                                                         :created {:type "string"},
-                                                                                                                         :id {:type "string"},
+                                                                                                                         :updated {:type "keyword"},
+                                                                                                                         :name {:type "keyword"},
+                                                                                                                         :created {:type "keyword"},
+                                                                                                                         :id {:type "keyword"},
                                                                                                                          :acl {:type "object",
                                                                                                                                :properties {"owner" {:type "object",
-                                                                                                                                                     :properties {"principal" {:type "string"},
+                                                                                                                                                     :properties {"principal" {:type "keyword"},
                                                                                                                                                                   "type" {:enum ["USER" "ROLE"]}}},
                                                                                                                                             "rules" {:type "object",
-                                                                                                                                                     :properties {"principal" {:type "string"},
+                                                                                                                                                     :properties {"principal" {:type "keyword"},
                                                                                                                                                                   "type" {:enum ["USER" "ROLE"]},
                                                                                                                                                                   "right" {:enum ["DELETE"
                                                                                                                                                                                   "MANAGE"
@@ -96,7 +109,7 @@
                                                                                                                                                                                   "EDIT_DATA"
                                                                                                                                                                                   "EDIT_ACL"]}}}}},
                                                                                                                          :operations {:type "object",
-                                                                                                                                      :properties {"href" {:type "string"}, "rel" {:type "string"}}},
-                                                                                                                         :resourceURI {:type "string"}}}}}
+                                                                                                                                      :properties {"href" {:type "keyword"}, "rel" {:type "keyword"}}},
+                                                                                                                         :resourceURI {:type "keyword"}}}}}
                       )))
 
