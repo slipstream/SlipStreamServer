@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.spec.util.spec-tools-test
+(ns com.sixsq.slipstream.ssclj.resources.spec.schema.spec-tools-test
   (:require
     [clojure.test :refer :all]
     [clojure.spec.alpha :as s]
@@ -6,9 +6,7 @@
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.util.spec :as su]
-    [com.sixsq.slipstream.ssclj.resources.spec.util.spec-tools :as t]
-    )
-  )
+    [com.sixsq.slipstream.ssclj.resources.spec.schema.spec-tools :as t]))
 
 (deftest schema-with-array
   (are [input expect] (= (t/remove-array-schema input) expect)
@@ -22,7 +20,7 @@
                       {:type "array" :items {:type "ok" :other "other"}} {:type "ok" :other "other"}
                       ))
 
-(deftest required-keyword
+(deftest remove-required-keyword
   (are [input expect] (= (t/remove-required-key input) expect)
                       :key :key
                       "value" "value"
@@ -30,6 +28,16 @@
                       {:k "v" :required "required"} {:k "v"}
                       {:required "required"} {}
                       ))
+
+(deftest remove-title-keyword
+  (are [input expect] (= (t/remove-title-key input) expect)
+                      :key :key
+                      "value" "value"
+                      {:k "v"} {:k "v"}
+                      {:k "v" :title "title"} {:k "v"}
+                      {:title "title"} {}
+                      ))
+
 
 (deftest deprecated-string-type
   (are [input expect] (= (t/deprecated-string-type input) expect)
@@ -53,7 +61,7 @@
                       {:required "required"} {}
                       {:embedded {:required "req"}} {:embedded {}}
                       {:type "array" :items {:type "ok" :other "other"}} {:type "ok" :other "other"}
-                      {:properties {:example {:type "string"}}} {:properties {:example {:type "keyword"}}}
+                      {:properties {:example {:type "string" :title "a title"}}} {:properties {:example {:type "keyword"}}}
                       ))
 
 (deftest mappings
@@ -84,8 +92,7 @@
                       ::c/resource-links empty
                       (s/def :cimi.test/common-attrs (su/only-keys-maps c/common-attrs)) {:mappings {:_doc {:properties {:description {:type "keyword"},
                                                                                                                          :properties {:type "object",
-                                                                                                                                      :additionalProperties {:type "keyword"},
-                                                                                                                                      :title "com.sixsq.slipstream.ssclj.resources.spec.common/properties"},
+                                                                                                                                      :additionalProperties {:type "keyword"}}
                                                                                                                          :updated {:type "keyword"},
                                                                                                                          :name {:type "keyword"},
                                                                                                                          :created {:type "keyword"},

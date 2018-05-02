@@ -37,7 +37,6 @@
                                                            :method :put
                                                            :body   body})]
     (when-not (= 200 status)
-      (clojure.pprint/pprint (str "[ELG] spandex response " resp))
       (throw (ex-info (str "create index failed: " status) resp)))))
 
 

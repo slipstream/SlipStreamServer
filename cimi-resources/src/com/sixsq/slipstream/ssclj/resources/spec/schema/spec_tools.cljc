@@ -1,9 +1,8 @@
-(ns com.sixsq.slipstream.ssclj.resources.spec.util.spec-tools
+(ns com.sixsq.slipstream.ssclj.resources.spec.schema.spec-tools
 
   (:require [clojure.spec.alpha :as s]
             [spec-tools.json-schema :as jsc]
             [clojure.walk :as w]
-            [com.sixsq.slipstream.ssclj.resources.spec.util.es-tools :as et]
             [com.sixsq.slipstream.ssclj.resources.spec.metering]
 
             )
@@ -17,21 +16,26 @@
 (defn remove-required-key [x]
   (if (:required x)
     (dissoc x :required)
-    x)
-  )
+    x))
+
+(defn remove-title-key [x]
+  (if (:title x)
+    (dissoc x :title)
+    x))
 
 (defn deprecated-string-type [x]
   (if (s/valid? :es/type-string x)
     (assoc x :type "keyword")
-    x
-    )
-  )
+    x))
+
+
 
 
 (defn transform [m]
   (->> m
        (w/postwalk #(remove-array-schema %))
        (w/postwalk #(remove-required-key %))
+       (w/postwalk #(remove-title-key %))
        (w/postwalk #(deprecated-string-type %))
        ))
 
