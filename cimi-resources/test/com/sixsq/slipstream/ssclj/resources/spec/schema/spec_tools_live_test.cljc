@@ -11,8 +11,8 @@
 
 (deftest create-mappings
   (let [index-empty (str (UUID/randomUUID))
-        index-metering (str (UUID/randomUUID))
-        _ (spu/provide-mock-rest-client)
+        index-metering "test-metering"
+        client (:client (spu/provide-mock-rest-client))
         ]
 
     (is (= 200 (-> (scu/create-index index-empty {})
@@ -22,8 +22,9 @@
                    :status)))
 
     (scu/remove-index index-empty)
-    (scu/remove-index index-metering)
+    #_(scu/remove-index index-metering)
 
     )
 
   )
+

@@ -36,7 +36,15 @@
     (assoc x :type "keyword")
     x))
 
-
+(defn additionalProperties [x]
+  (let [typeMap (:additionalProperties x)
+        newMap {:properties {"additionalProperties" typeMap}}
+        ]
+  (if (and typeMap (s/valid? :es/additionalProperties x))
+    (-> x
+        (dissoc :additionalProperties)
+        (merge newMap))
+    x)))
 
 
 (defn transform [m]
@@ -46,7 +54,7 @@
        (w/postwalk #(remove-required-key %))
        (w/postwalk #(remove-title-key %))
        (w/postwalk #(deprecated-string-type %))
-       ))
+       (w/postwalk #(additionalProperties %))))
 
 (defn spec->es-mapping
   [spec]
@@ -60,9 +68,7 @@
                                 [(keyword k) v]))
         map-without-nils (into {} (filter second keywordized-map))
         ]
-
-    {:mappings {:_doc {:properties map-without-nils}}}
-    ))
+    {:mappings {:_doc {:properties map-without-nils}}}))
 
 (s/def :es/type-array #(= "array" (:type %)))
 (s/def :es/type-string #(= "string" (:type %)))
@@ -71,10 +77,11 @@
 (s/def :es/items-map #(-> %
                           :items
                           :type
-                          string?
-                          ))
+                          string?))
 
 (s/def :es/array-map (s/and :es/type-array :es/items-map))
+(s/def :es/additionalProperties #(get-in % [:additionalProperties :type]))
+
 
 
 

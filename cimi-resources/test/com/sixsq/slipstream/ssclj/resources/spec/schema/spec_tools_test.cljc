@@ -59,6 +59,16 @@
                       {:type "string" :other "other"}{:type "keyword" :other "other"}
                       ))
 
+(deftest additionalProperties
+  (are [input expect] (= (t/additionalProperties input) expect)
+                      :key :key
+                      "value" "value"
+                      {:k "v"} {:k "v"}
+                      {:k "v" :type "other"} {:k "v" :type "other"}
+                      {:additionalProperties {:type "mytype"}} {:properties {"additionalProperties" {:type "mytype"}}}
+                      {:additionalProperties {:type "mytype"} :other "other"} {:properties {"additionalProperties" {:type "mytype"}} :other "other"}
+                      ))
+
 (deftest transform
   (are [input expect] (= (t/transform input) expect)
                       :key :key
@@ -72,6 +82,7 @@
                       {:type "array" :items {:type "ok" :other "other"}} {:type "ok" :other "other"}
                       {:properties {:example {:type "string" :title "a title"}}} {:properties {:example {:type "keyword"}}}
                       {:parent {:child "child" :enum ["foo" "bar" "baz"]}} {:parent {:child "child" :type "keyword"}}
+                      {:parent {:additionalProperties {:type "mytype"} :other "other"}} {:parent {:properties {"additionalProperties" {:type "mytype"}} :other "other"}}
                       ))
 
 (deftest mappings
@@ -92,7 +103,7 @@
                       ::c/resource-links empty
                       (s/def :cimi.test/common-attrs (su/only-keys-maps c/common-attrs)) {:mappings {:_doc {:properties {:description {:type "keyword"},
                                                                                                                          :properties {:type "object",
-                                                                                                                                      :additionalProperties {:type "keyword"}}
+                                                                                                                                      :properties {"additionalProperties" {:type "keyword"}}}
                                                                                                                          :updated {:type "keyword"},
                                                                                                                          :name {:type "keyword"},
                                                                                                                          :created {:type "keyword"},
