@@ -161,3 +161,11 @@
   (if-let [new-id (cond-> service
                           instance (str "-" instance))]
     (assoc resource :id (str (u/de-camelcase resource-name) "/" new-id))))
+
+
+;;
+;; initialization: no schema for this parent resource
+;;
+(defn initialize
+  []
+  (std-crud/initialize resource-url nil))

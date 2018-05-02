@@ -5,7 +5,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.credential :as p]
     [com.sixsq.slipstream.ssclj.resources.credential-template-api-key :as tpl]
-    [com.sixsq.slipstream.ssclj.resources.credential.key-utils :as key-utils]))
+    [com.sixsq.slipstream.ssclj.resources.credential.key-utils :as key-utils]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]))
 
 (defn strip-session-role
   [roles]
@@ -47,3 +48,11 @@
 (defmethod p/create-validate-subtype tpl/credential-type
   [resource]
   (create-validate-fn resource))
+
+
+;;
+;; initialization: no schema for this parent resource
+;;
+(defn initialize
+  []
+  (std-crud/initialize p/resource-url :cimi/credential.api-key))

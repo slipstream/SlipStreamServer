@@ -161,3 +161,11 @@
           (throw-no-user-info redirectURI))
         (throw-no-access-token redirectURI))
       (throw-missing-oauth-code redirectURI))))
+
+
+;;
+;; initialization: no schema for this parent resource
+;;
+(defn initialize
+  []
+  (std-crud/initialize p/resource-url :cimi/session))

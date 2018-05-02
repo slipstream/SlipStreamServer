@@ -226,3 +226,11 @@
 (defmethod crud/edit resource-name
   [request]
   (edit-impl request))
+
+
+;;
+;; initialization: common schema for all user creation methods
+;;
+(defn initialize
+  []
+  (std-crud/initialize resource-url :cimi/user))

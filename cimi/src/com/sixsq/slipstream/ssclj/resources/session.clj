@@ -285,5 +285,9 @@
       (ex-data ei))))
 
 
-
-
+;;
+;; initialization: no schema for this parent resource
+;;
+(defn initialize
+  []
+  (std-crud/initialize resource-url nil))

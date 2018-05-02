@@ -8,7 +8,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration :as p]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as ct]
-    [com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream :as tpl]))
+    [com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream :as tpl]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]))
 
 (def ^:const service "slipstream")
 
@@ -67,10 +68,13 @@
       (as-request service user-roles)
       p/add-impl))
 
+
+;;
 ;; initialization: create initial service configuration if necessary
 ;;
 (defn initialize
   []
+  (std-crud/initialize p/resource-url :cimi/configuration-template.slipstream)
   (try
     (add)
     (log/info (format "Created %s record" instance-url))

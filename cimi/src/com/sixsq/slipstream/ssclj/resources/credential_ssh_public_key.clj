@@ -5,7 +5,8 @@
     [com.sixsq.slipstream.ssclj.resources.credential :as p]
     [com.sixsq.slipstream.ssclj.resources.credential-template-ssh-public-key :as tpl]
     [com.sixsq.slipstream.ssclj.resources.credential.ssh-utils :as ssh-utils]
-    [com.sixsq.slipstream.ssclj.util.log :as logu]))
+    [com.sixsq.slipstream.ssclj.util.log :as logu]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]))
 
 (defn import-key [common-info publicKey]
   [nil (-> (ssh-utils/load publicKey)
@@ -44,3 +45,11 @@
 (defmethod p/create-validate-subtype tpl/credential-type
   [resource]
   (create-validate-fn resource))
+
+
+;;
+;; initialization: no schema for this parent resource
+;;
+(defn initialize
+  []
+  (std-crud/initialize p/resource-url :cimi/credential.ssh-public-key))

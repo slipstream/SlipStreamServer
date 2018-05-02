@@ -18,7 +18,8 @@
     [com.sixsq.slipstream.auth.external :as ex]
     [com.sixsq.slipstream.auth.utils.timestamp :as ts]
     [com.sixsq.slipstream.util.response :as r]
-    [clojure.tools.logging :as log]))
+    [clojure.tools.logging :as log]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]))
 
 (def ^:const authn-method "oidc")
 
@@ -122,3 +123,11 @@
             (oidc-utils/throw-invalid-access-code (str e) redirectURI)))
         (oidc-utils/throw-no-access-token redirectURI))
       (oidc-utils/throw-missing-oidc-code redirectURI))))
+
+
+;;
+;; initialization: no schema for this parent resource
+;;
+(defn initialize
+  []
+  (std-crud/initialize p/resource-url :cimi/session))

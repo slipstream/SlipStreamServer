@@ -13,7 +13,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]))
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]))
 
 ;;
 ;; utilities
@@ -108,6 +109,8 @@
 ;;
 (defn initialize
   []
+  (std-crud/initialize resource-url :cimi/cloud-entry-point)
+
   (try
     (add)
     (log/info "Created" resource-name "resource")

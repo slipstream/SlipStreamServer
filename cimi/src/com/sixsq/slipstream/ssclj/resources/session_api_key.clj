@@ -10,7 +10,8 @@
     [com.sixsq.slipstream.ssclj.resources.session-template-api-key :as tpl]
     [com.sixsq.slipstream.ssclj.resources.session.utils :as sutils]
     [com.sixsq.slipstream.util.response :as r]
-    [clojure.string :as str]))
+    [clojure.string :as str]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]))
 
 (def ^:const authn-method "api-key")
 
@@ -97,3 +98,11 @@
       (if redirectURI
         (throw (r/ex-redirect (str "invalid API key/secret credentials for '" key "'") nil redirectURI))
         (throw (r/ex-unauthorized key))))))
+
+
+;;
+;; initialization: no schema for this parent resource
+;;
+(defn initialize
+  []
+  (std-crud/initialize p/resource-url :cimi/session))
