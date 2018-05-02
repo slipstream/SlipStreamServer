@@ -128,3 +128,11 @@
           (r/map-response "cannot re-execute callback" 409 id))))
     (catch ExceptionInfo ei
       (ex-data ei))))
+
+
+;;
+;; initialization: common schema for all subtypes
+;;
+(defn initialize
+  []
+  (std-crud/initialize resource-url :cimi/callback))

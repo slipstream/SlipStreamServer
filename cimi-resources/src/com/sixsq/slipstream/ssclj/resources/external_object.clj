@@ -405,3 +405,10 @@
     (catch ExceptionInfo ei
       (ex-data ei))))
 
+
+;;
+;; initialization: no schema for the parent
+;;
+(defn initialize
+  []
+  (std-crud/initialize resource-url nil))

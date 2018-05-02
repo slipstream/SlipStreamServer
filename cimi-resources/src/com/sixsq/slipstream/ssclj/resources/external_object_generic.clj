@@ -3,7 +3,8 @@
     [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
     [com.sixsq.slipstream.ssclj.resources.external-object-template-generic :as eot]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.spec.external-object-generic]))
+    [com.sixsq.slipstream.ssclj.resources.spec.external-object-generic]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]))
 
 ;; multimethods for validation
 
@@ -13,4 +14,10 @@
   (validate-fn resource))
 
 
+;;
+;; initialization
+;;
+(defn initialize
+  []
+  (std-crud/initialize eo/resource-url :cimi/external-object.generic))
 

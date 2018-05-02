@@ -64,3 +64,10 @@
   [resource]
   (validate-fn resource))
 
+
+;;
+;; initialization
+;;
+(defn initialize
+  []
+  (std-crud/initialize eo/resource-url :cimi/external-object.report))

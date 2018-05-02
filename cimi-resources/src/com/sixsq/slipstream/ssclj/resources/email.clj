@@ -124,3 +124,11 @@
           (catch Exception e
             (.printStackTrace e)))
         (throw (r/ex-bad-request "email address is already validated"))))))
+
+
+;;
+;; initialization
+;;
+(defn initialize
+  []
+  (std-crud/initialize resource-url :cimi/email))
