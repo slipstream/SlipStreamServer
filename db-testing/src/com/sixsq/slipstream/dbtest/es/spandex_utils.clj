@@ -30,6 +30,17 @@
     (when-not (= 200 status)
       (throw (ex-info (str "create index failed: " status) resp)))))
 
+(defn index-create-with-mapping [client index mapping]
+  (let [body (merge mapping {:settings {:index {:number_of_shards   3
+                                                :number_of_replicas 1}}})
+        {:keys [status] :as resp} (spandex/request client {:url    index
+                                                           :method :put
+                                                           :body   body})]
+    (when-not (= 200 status)
+      (clojure.pprint/pprint (str "[ELG] spandex response " resp))
+      (throw (ex-info (str "create index failed: " status) resp)))))
+
+
 
 (defn index-status [client index]
   (let [{:keys [status body] :as resp} (spandex/request client {:url    index
