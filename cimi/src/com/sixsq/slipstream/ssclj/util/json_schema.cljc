@@ -70,40 +70,40 @@
 (defmethod accept-spec 'clojure.core/boolean? [_ _ _ _] {:type "boolean"})
 
 ; string? (string-alphanumeric)
-(defmethod accept-spec 'clojure.core/string? [_ _ _ _] {:type "string"})
+(defmethod accept-spec 'clojure.core/string? [_ _ _ _] {:type "keyword"})
 
 ; ident? (one-of [(keyword-ns) (symbol-ns)])
-(defmethod accept-spec 'clojure.core/ident? [_ _ _ _] {:type "string"})
+(defmethod accept-spec 'clojure.core/ident? [_ _ _ _] {:type "keyword"})
 
 ; simple-ident? (one-of [(keyword) (symbol)])
-(defmethod accept-spec 'clojure.core/simple-ident? [_ _ _ _] {:type "string"})
+(defmethod accept-spec 'clojure.core/simple-ident? [_ _ _ _] {:type "keyword"})
 
 ; qualified-ident? (such-that qualified? (one-of [(keyword-ns) (symbol-ns)]))
-(defmethod accept-spec 'clojure.core/qualified-ident? [_ _ _ _] {:type "string"})
+(defmethod accept-spec 'clojure.core/qualified-ident? [_ _ _ _] {:type "keyword"})
 
 ; keyword? (keyword-ns)
-(defmethod accept-spec 'clojure.core/keyword? [_ _ _ _] {:type "string"})
+(defmethod accept-spec 'clojure.core/keyword? [_ _ _ _] {:type "keyword"})
 
 ; simple-keyword? (keyword)
-(defmethod accept-spec 'clojure.core/simple-keyword? [_ _ _ _] {:type "string"})
+(defmethod accept-spec 'clojure.core/simple-keyword? [_ _ _ _] {:type "keyword"})
 
 ; qualified-keyword? (such-that qualified? (keyword-ns))
-(defmethod accept-spec 'clojure.core/qualified-keyword? [_ _ _ _] {:type "string"})
+(defmethod accept-spec 'clojure.core/qualified-keyword? [_ _ _ _] {:type "keyword"})
 
 ; symbol? (symbol-ns)
-(defmethod accept-spec 'clojure.core/symbol? [_ _ _ _] {:type "string"})
+(defmethod accept-spec 'clojure.core/symbol? [_ _ _ _] {:type "keyword"})
 
 ; simple-symbol? (symbol)
-(defmethod accept-spec 'clojure.core/simple-symbol? [_ _ _ _] {:type "string"})
+(defmethod accept-spec 'clojure.core/simple-symbol? [_ _ _ _] {:type "keyword"})
 
 ; qualified-symbol? (such-that qualified? (symbol-ns))
-(defmethod accept-spec 'clojure.core/qualified-symbol? [_ _ _ _] {:type "string"})
+(defmethod accept-spec 'clojure.core/qualified-symbol? [_ _ _ _] {:type "keyword"})
 
 ; uuid? (uuid)
-(defmethod accept-spec 'clojure.core/uuid? [_ _ _ _] {:type "string" :format "uuid"})
+(defmethod accept-spec 'clojure.core/uuid? [_ _ _ _] {:type "keyword"})
 
 ; uri? (fmap #(java.net.URI/create (str "http://" % ".com")) (uuid))
-(defmethod accept-spec 'clojure.core/uri? [_ _ _ _] {:type "string" :format "uri"})
+(defmethod accept-spec 'clojure.core/uri? [_ _ _ _] {:type "keyword"})
 
 ; bigdec? (fmap #(BigDecimal/valueOf %)
 ;               (double* {:infinite? false :NaN? false}))
@@ -111,7 +111,7 @@
 
 ; inst? (fmap #(java.util.Date. %)
 ;             (large-integer))
-(defmethod accept-spec 'clojure.core/inst? [_ _ _ _] {:type "string" :format "date-time"})
+(defmethod accept-spec 'clojure.core/inst? [_ _ _ _] {:type "keyword"})
 
 ; seqable? (one-of [(return nil)
 ;                   (list simple)
@@ -137,7 +137,7 @@
 (defmethod accept-spec 'clojure.core/seq? [_ _ _ _] {:type "array"})
 
 ; char? (char)
-(defmethod accept-spec 'clojure.core/char? [_ _ _ _] {:type "string"})
+(defmethod accept-spec 'clojure.core/char? [_ _ _ _] {:type "keyword"})
 
 ; set? (set simple)
 (defmethod accept-spec 'clojure.core/set? [_ _ _ _] {:type "array" :uniqueItems true})
@@ -173,7 +173,7 @@
 (defmethod accept-spec 'clojure.core/ratio? [_ _ _ _] {:type "integer"})
 
 ; bytes? (bytes)
-(defmethod accept-spec 'clojure.core/ratio? [_ _ _ _] {:type "string" :format "byte"})
+(defmethod accept-spec 'clojure.core/ratio? [_ _ _ _] {:type "keyword"})
 
 (defmethod accept-spec ::visitor/set [dispatch spec children _]
   {:enum children})
@@ -262,18 +262,8 @@
     {:minimum minimum :maximum maximum}))
 
 (defmethod accept-spec ::visitor/spec [_ spec children _]
-  (let [[_ data] (impl/extract-form spec)
-        json-schema-meta (reduce-kv
-                           (fn [acc k v]
-                             (if (= "json-schema" (namespace k))
-                               (assoc acc (keyword (name k)) v)
-                               acc))
-                           {}
-                           (into {} data))
-        extra-info (-> data
-                       (select-keys [:name :description])
-                       (set/rename-keys {:name :title}))]
-    (merge (impl/unwrap children) extra-info json-schema-meta)))
+  (let [[_ data] (impl/extract-form spec)]
+    (impl/unwrap children)))
 
 (defmethod accept-spec ::default [_ _ _ _]
   {})

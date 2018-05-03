@@ -4,10 +4,8 @@
             [spec-tools.core :as st]
             [spec-tools.data-spec :as ds]
             [spec-tools.spec :as spec]
-            [com.gfredericks.test.chuck.clojure-test :refer [checking]]
-            [spec-tools.json-schema :as jsc]
-            #?(:clj
-               [scjsv.core :as scjsv])))
+            [com.sixsq.slipstream.ssclj.util.json-schema :as t]
+           ))
 
 ;;Borrowed from https://github.com/metosin/spec-tools/blob/master/test/cljc/spec_tools/json_schema_test.cljc
 
@@ -34,41 +32,41 @@
   (testing "primitive predicates"
     ;; You're intented to call jsc/to-json with a registered spec, but to avoid
     ;; boilerplate, we do inline specization here.
-    (is (= (jsc/transform (s/spec int?)) {:type "integer" :format "int64"}))
-    (is (= (jsc/transform (s/spec integer?)) {:type "integer"}))
-    (is (= (jsc/transform (s/spec float?)) {:type "number"}))
-    (is (= (jsc/transform (s/spec double?)) {:type "number"}))
-    (is (= (jsc/transform (s/spec string?)) {:type "string"}))
-    (is (= (jsc/transform (s/spec boolean?)) {:type "boolean"}))
-    #?(:clj (is (= (jsc/transform (s/spec decimal?)) {:type "number" :format "double"})))
-    (is (= (jsc/transform (s/spec inst?)) {:type "string", :format "date-time"}))
-    (is (= (jsc/transform (s/spec nil?)) {:type "null"}))
-    (is (= (jsc/transform #{1 2 3}) {:enum [1 3 2]})))
+    (is (= (t/transform (s/spec int?)) {:type "integer" :format "int64"}))
+    (is (= (t/transform (s/spec integer?)) {:type "integer"}))
+    (is (= (t/transform (s/spec float?)) {:type "number"}))
+    (is (= (t/transform (s/spec double?)) {:type "number"}))
+    (is (= (t/transform (s/spec string?)) {:type "keyword"}))
+    (is (= (t/transform (s/spec boolean?)) {:type "boolean"}))
+    #?(:clj (is (= (t/transform (s/spec decimal?)) {:type "number" :format "double"})))
+    (is (= (t/transform (s/spec inst?)) {:type "keyword"}))
+    (is (= (t/transform (s/spec nil?)) {:type "null"}))
+    (is (= (t/transform #{1 2 3}) {:enum [1 3 2]})))
   (testing "clojure.spec predicates"
-    (is (= (jsc/transform (s/nilable ::string)) {:oneOf [{:type "string"} {:type "null"}]}))
-    (is (= (jsc/transform (s/int-in 1 10)) {:allOf [{:type "integer" :format "int64"} {:minimum 1 :maximum 10}]})))
+    (is (= (t/transform (s/nilable ::string)) {:oneOf [{:type "keyword"} {:type "null"}]}))
+    (is (= (t/transform (s/int-in 1 10)) {:allOf [{:type "integer" :format "int64"} {:minimum 1 :maximum 10}]})))
   (testing "simple specs"
-    (is (= (jsc/transform ::integer) {:type "integer"}))
-    (is (= (jsc/transform ::set) {:enum [1 3 2]})))
+    (is (= (t/transform ::integer) {:type "integer"}))
+    (is (= (t/transform ::set) {:enum [1 3 2]})))
 
   (testing "clojure.specs"
-    (is (= (jsc/transform (s/keys :req-un [::integer] :opt-un [::string]))
+    (is (= (t/transform (s/keys :req-un [::integer] :opt-un [::string]))
            {:type "object"
-            :properties {"integer" {:type "integer"} "string" {:type "string"}}
+            :properties {"integer" {:type "integer"} "string" {:type "keyword"}}
             :required ["integer"]}))
-    (is (= (jsc/transform ::keys)
+    (is (= (t/transform ::keys)
            {:type "object"
             :title "com.sixsq.slipstream.ssclj.util.json-schema-test/keys"
-            :properties {"com.sixsq.slipstream.ssclj.util.json-schema-test/a" {:type "string"}
-                         "com.sixsq.slipstream.ssclj.util.json-schema-test/b" {:type "string"}
-                         "com.sixsq.slipstream.ssclj.util.json-schema-test/c" {:type "string"}
-                         "com.sixsq.slipstream.ssclj.util.json-schema-test/d" {:type "string"}
-                         "com.sixsq.slipstream.ssclj.util.json-schema-test/e" {:type "string"}
-                         "a" {:type "string"}
-                         "b" {:type "string"}
-                         "c" {:type "string"}
-                         "d" {:type "string"}
-                         "e" {:type "string"}}
+            :properties {"com.sixsq.slipstream.ssclj.util.json-schema-test/a" {:type "keyword"}
+                         "com.sixsq.slipstream.ssclj.util.json-schema-test/b" {:type "keyword"}
+                         "com.sixsq.slipstream.ssclj.util.json-schema-test/c" {:type "keyword"}
+                         "com.sixsq.slipstream.ssclj.util.json-schema-test/d" {:type "keyword"}
+                         "com.sixsq.slipstream.ssclj.util.json-schema-test/e" {:type "keyword"}
+                         "a" {:type "keyword"}
+                         "b" {:type "keyword"}
+                         "c" {:type "keyword"}
+                         "d" {:type "keyword"}
+                         "e" {:type "keyword"}}
             :required ["com.sixsq.slipstream.ssclj.util.json-schema-test/a"
                        "com.sixsq.slipstream.ssclj.util.json-schema-test/b"
                        "com.sixsq.slipstream.ssclj.util.json-schema-test/c"
@@ -77,71 +75,52 @@
                        "b"
                        "c"
                        "d"]}))
-    (is (= (jsc/transform ::keys-no-req)
+    (is (= (t/transform ::keys-no-req)
            {:type "object"
             :title "com.sixsq.slipstream.ssclj.util.json-schema-test/keys-no-req"
-            :properties {"com.sixsq.slipstream.ssclj.util.json-schema-test/e" {:type "string"}
-                         "e" {:type "string"}}}))
-    (is (= (jsc/transform (s/or :int integer? :string string?))
-           {:anyOf [{:type "integer"} {:type "string"}]}))
-    (is (= (jsc/transform (s/and integer? pos?))
+            :properties {"com.sixsq.slipstream.ssclj.util.json-schema-test/e" {:type "keyword"}
+                         "e" {:type "keyword"}}}))
+    (is (= (t/transform (s/or :int integer? :string string?))
+           {:anyOf [{:type "integer"} {:type "keyword"}]}))
+    (is (= (t/transform (s/and integer? pos?))
            {:allOf [{:type "integer"} {:minimum 0 :exclusiveMinimum true}]}))
-    (is (= (jsc/transform (s/and spec/integer? pos?))
+    (is (= (t/transform (s/and spec/integer? pos?))
            {:allOf [{:type "integer"} {:minimum 0 :exclusiveMinimum true}]}))
-    (is (= (jsc/transform (s/merge (s/keys :req [::integer])
-                                   (s/keys :req [::string])))
+    (is (= (t/transform (s/merge (s/keys :req [::integer])
+                                 (s/keys :req [::string])))
            {:type "object"
             :properties {"com.sixsq.slipstream.ssclj.util.json-schema-test/integer" {:type "integer"}
-                         "com.sixsq.slipstream.ssclj.util.json-schema-test/string" {:type "string"}}
+                         "com.sixsq.slipstream.ssclj.util.json-schema-test/string" {:type "keyword"}}
             :required ["com.sixsq.slipstream.ssclj.util.json-schema-test/integer"
                        "com.sixsq.slipstream.ssclj.util.json-schema-test/string"]}))
-    (is (= (jsc/transform (s/every integer?)) {:type "array" :items {:type "integer"}}))
-    (is (= (jsc/transform (s/every-kv string? integer?))
+    (is (= (t/transform (s/every integer?)) {:type "array" :items {:type "integer"}}))
+    (is (= (t/transform (s/every-kv string? integer?))
            {:type "object" :additionalProperties {:type "integer"}}))
-    (is (= (jsc/transform (s/coll-of string?)) {:type "array" :items {:type "string"}}))
-    (is (= (jsc/transform (s/coll-of string? :into '())) {:type "array" :items {:type "string"}}))
-    (is (= (jsc/transform (s/coll-of string? :into [])) {:type "array" :items {:type "string"}}))
-    (is (= (jsc/transform (s/coll-of string? :into #{})) {:type "array" :items {:type "string"}, :uniqueItems true}))
-    (is (= (jsc/transform (s/map-of string? integer?))
+    (is (= (t/transform (s/coll-of string?)) {:type "array" :items {:type "keyword"}}))
+    (is (= (t/transform (s/coll-of string? :into '())) {:type "array" :items {:type "keyword"}}))
+    (is (= (t/transform (s/coll-of string? :into [])) {:type "array" :items {:type "keyword"}}))
+    (is (= (t/transform (s/coll-of string? :into #{})) {:type "array" :items {:type "keyword"}, :uniqueItems true}))
+    (is (= (t/transform (s/map-of string? integer?))
            {:type "object" :additionalProperties {:type "integer"}}))
-    (is (= (jsc/transform (s/* integer?)) {:type "array" :items {:type "integer"}}))
-    (is (= (jsc/transform (s/+ integer?)) {:type "array" :items {:type "integer"} :minItems 1}))
-    (is (= (jsc/transform (s/? integer?)) {:type "array" :items {:type "integer"} :minItems 0}))
-    (is (= (jsc/transform (s/alt :int integer? :string string?))
-           {:anyOf [{:type "integer"} {:type "string"}]}))
-    (is (= (jsc/transform (s/cat :int integer? :string string?))
+    (is (= (t/transform (s/* integer?)) {:type "array" :items {:type "integer"}}))
+    (is (= (t/transform (s/+ integer?)) {:type "array" :items {:type "integer"} :minItems 1}))
+    (is (= (t/transform (s/? integer?)) {:type "array" :items {:type "integer"} :minItems 0}))
+    (is (= (t/transform (s/alt :int integer? :string string?))
+           {:anyOf [{:type "integer"} {:type "keyword"}]}))
+    (is (= (t/transform (s/cat :int integer? :string string?))
            {:type "array"
-            :items {:anyOf [{:type "integer"} {:type "string"}]}}))
+            :items {:anyOf [{:type "integer"} {:type "keyword"}]}}))
     ;; & is broken (http://dev.clojure.org/jira/browse/CLJ-2152)
-    (is (= (jsc/transform (s/tuple integer? string?))
-           {:type "array" :items [{:type "integer"} {:type "string"}]}))
+    (is (= (t/transform (s/tuple integer? string?))
+           {:type "array" :items [{:type "integer"} {:type "keyword"}]}))
     ;; keys* is broken (http://dev.clojure.org/jira/browse/CLJ-2152)
-    (is (= (jsc/transform (s/map-of string? clojure.core/integer?))
+    (is (= (t/transform (s/map-of string? clojure.core/integer?))
            {:type "object" :additionalProperties {:type "integer"}}))
-    (is (= (jsc/transform (s/nilable string?))
-           {:oneOf [{:type "string"} {:type "null"}]})))
+    (is (= (t/transform (s/nilable string?))
+           {:oneOf [{:type "keyword"} {:type "null"}]})))
   (testing "failing clojure.specs"
-    (is (not= (jsc/transform (s/coll-of (s/tuple string? any?) :into {}))
-              {:type "object", :additionalProperties {:type "string"}}))))
-
-#?(:clj
-   (defn test-spec-conversion [spec]
-     (let [validate (scjsv/validator (jsc/transform spec))]
-       (testing (str "with spec " spec)
-         (checking "JSON schema accepts the data generated by the spec gen" 100
-                   [x (s/gen spec)]
-                   (is (nil? (validate x)) (str x " (" spec ") does not conform to JSON Schema")))))))
-
-(s/def ::compound (s/keys :req-un [::integer] :opt-un [::string]))
-
-#?(:clj
-   (deftest validating-test
-     (test-spec-conversion ::integer)
-     (test-spec-conversion ::string)
-     (test-spec-conversion ::set)
-     (test-spec-conversion ::compound)
-     (test-spec-conversion (s/nilable ::string))
-     (test-spec-conversion (s/int-in 0 100))))
+    (is (not= (t/transform (s/coll-of (s/tuple string? any?) :into {}))
+              {:type "object", :additionalProperties {:type "keyword"}}))))
 
 ;; Test the example from README
 
@@ -164,21 +143,18 @@
           :properties
           {"com.sixsq.slipstream.ssclj.util.json-schema-test/id" {:type "integer"}
            "age" {:type "integer"}
-           "name" {:type "string"}
+           "name" {:type "keyword"}
            "likes" {:type "object" :additionalProperties {:type "boolean"}}
-           "languages" {:type "array", :items {:type "string"}, :uniqueItems true}
+           "languages" {:type "array", :items {:type "keyword"}, :uniqueItems true}
            "address" {:type "object"
                       :required ["street" "zip"]
-                      :properties {"street" {:type "string"}
-                                   "zip" {:type "string"}}}}}
-         (jsc/transform person-spec))))
+                      :properties {"street" {:type "keyword"}
+                                   "zip" {:type "keyword"}}}}}
+         (t/transform person-spec))))
 
 (deftest additional-json-schema-data-test
-  (is (= {:type "integer"
-          :title "integer"
-          :description "it's an int"
-          :default 42}
-         (jsc/transform
+  (is (= {:type "integer"}
+         (t/transform
            (st/spec
              {:spec integer?
               :name "integer"
@@ -190,8 +166,8 @@
           :items {:type "array"
                   :items {:type "array"
                           :items {:type "array"
-                                  :items {:type "string"}}}}}
-         (jsc/transform
+                                  :items {:type "keyword"}}}}}
+         (t/transform
            (ds/spec
              ::nested
              [[[[string?]]]])))))
@@ -203,8 +179,8 @@
 
 (deftest recursive-spec-test
   (is (= {:type "object",
-          :properties {"name" {:type "string"}
+          :properties {"name" {:type "keyword"}
                        "parent" {:oneOf [{} {:type "null"}]}},
           :required ["name" "parent"],
           :title "com.sixsq.slipstream.ssclj.util.json-schema-test/user"}
-         (jsc/transform ::user))))
+         (t/transform ::user))))
