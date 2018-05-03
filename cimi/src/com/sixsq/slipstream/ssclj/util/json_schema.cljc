@@ -1,10 +1,10 @@
 (ns com.sixsq.slipstream.ssclj.util.json-schema
   "Tools for converting specs into JSON Schema."
-(:require [spec-tools.visitor :as visitor]
-  [spec-tools.parse :as parse]
-  [spec-tools.impl :as impl]
-  [clojure.set :as set]
-  [spec-tools.core :as st]))
+  (:require [spec-tools.visitor :as visitor]
+            [spec-tools.parse :as parse]
+            [spec-tools.impl :as impl]
+            [clojure.set :as set]
+            [spec-tools.core :as st]))
 
 
 ;;Code borrowed from https://github.com/metosin/spec-tools/blob/master/src/spec_tools/json_schema.cljc
@@ -17,6 +17,23 @@
       (empty? subspecs) (dissoc spec :allOf)
       (and (= (count subspecs) 1) (only-entry? :allOf spec)) (first subspecs)
       :else (assoc spec :allOf subspecs))))
+
+
+
+(defn- set-type-from-first-child
+  [children]
+  (let [child (first children)]
+    (when child
+      (cond
+        (string? child) {:type "keyword"}
+        (boolean? child){:type "boolean"}
+        (double? child) {:type "double"}
+        (integer? child) {:type "long"}
+        (int? child) {:type "integer"}
+        (seq? child) {:type "nested"}
+        :else {}
+        ))))
+
 
 (defn- spec-dispatch [dispatch _ _ _] dispatch)
 
@@ -39,32 +56,32 @@
 (defmethod accept-spec 'clojure.core/some? [_ _ _ _] {})
 
 ; number? (one-of [(large-integer) (double)])
-(defmethod accept-spec 'clojure.core/number? [_ _ _ _] {:type "number" :format "double"})
+(defmethod accept-spec 'clojure.core/number? [_ _ _ _] {:type "double"})
 
 (defmethod accept-spec 'clojure.core/pos? [_ _ _ _] {:minimum 0 :exclusiveMinimum true})
 
 (defmethod accept-spec 'clojure.core/neg? [_ _ _ _] {:maximum 0 :exclusiveMaximum true})
 
 ; integer? (large-integer)
-(defmethod accept-spec 'clojure.core/integer? [_ _ _ _] {:type "integer"})
+(defmethod accept-spec 'clojure.core/integer? [_ _ _ _] {:type "long"})
 
 ; int? (large-integer)
-(defmethod accept-spec 'clojure.core/int? [_ _ _ _] {:type "integer" :format "int64"})
+(defmethod accept-spec 'clojure.core/int? [_ _ _ _] {:type "integer"})
 
 ; pos-int? (large-integer* {:min 1})
-(defmethod accept-spec 'clojure.core/pos-int? [_ _ _ _] {:type "integer", :format "int64", :minimum 1})
+(defmethod accept-spec 'clojure.core/pos-int? [_ _ _ _] {:type "integer"})
 
 ; neg-int? (large-integer* {:max -1})
-(defmethod accept-spec 'clojure.core/neg-int? [_ _ _ _] {:type "integer", :format "int64", :maximum -1})
+(defmethod accept-spec 'clojure.core/neg-int? [_ _ _ _] {:type "long"})
 
 ; nat-int? (large-integer* {:min 0})
-(defmethod accept-spec 'clojure.core/nat-int? [_ _ _ _] {:type "integer", :format "int64" :minimum 0})
+(defmethod accept-spec 'clojure.core/nat-int? [_ _ _ _] {:type "long"})
 
 ; float? (double)
-(defmethod accept-spec 'clojure.core/float? [_ _ _ _] {:type "number"})
+(defmethod accept-spec 'clojure.core/float? [_ _ _ _] {:type "float"})
 
 ; double? (double)
-(defmethod accept-spec 'clojure.core/double? [_ _ _ _] {:type "number"})
+(defmethod accept-spec 'clojure.core/double? [_ _ _ _] {:type "double"})
 
 ; boolean? (boolean)
 (defmethod accept-spec 'clojure.core/boolean? [_ _ _ _] {:type "boolean"})
@@ -107,40 +124,17 @@
 
 ; bigdec? (fmap #(BigDecimal/valueOf %)
 ;               (double* {:infinite? false :NaN? false}))
-(defmethod accept-spec 'clojure.core/decimal? [_ _ _ _] {:type "number" :format "double"})
+(defmethod accept-spec 'clojure.core/decimal? [_ _ _ _] {:type "double"})
 
 ; inst? (fmap #(java.util.Date. %)
 ;             (large-integer))
 (defmethod accept-spec 'clojure.core/inst? [_ _ _ _] {:type "keyword"})
 
-; seqable? (one-of [(return nil)
-;                   (list simple)
-;                   (vector simple)
-;                   (map simple simple)
-;                   (set simple)
-;                   (string-alphanumeric)])
-(defmethod accept-spec 'clojure.core/seqable? [_ _ _ _] {:type "array"})
-
-; indexed? (vector simple)
-(defmethod accept-spec 'clojure.core/map? [_ _ _ _] {:type "array"})
-
 ; map? (map simple simple)
 (defmethod accept-spec 'clojure.core/map? [_ _ _ _] {:type "object"})
 
-; vector? (vector simple)
-(defmethod accept-spec 'clojure.core/vector? [_ _ _ _] {:type "array"})
-
-; list? (list simple)
-(defmethod accept-spec 'clojure.core/list? [_ _ _ _] {:type "array"})
-
-; seq? (list simple)
-(defmethod accept-spec 'clojure.core/seq? [_ _ _ _] {:type "array"})
-
 ; char? (char)
 (defmethod accept-spec 'clojure.core/char? [_ _ _ _] {:type "keyword"})
-
-; set? (set simple)
-(defmethod accept-spec 'clojure.core/set? [_ _ _ _] {:type "array" :uniqueItems true})
 
 ; nil? (return nil)
 (defmethod accept-spec 'clojure.core/nil? [_ _ _ _] {:type "null"})
@@ -160,14 +154,8 @@
 ;                (set simple)])
 (defmethod accept-spec 'clojure.core/coll? [_ _ _ _] {:type "object"})
 
-; empty? (elements [nil '() [] {} #{}])
-(defmethod accept-spec 'clojure.core/empty? [_ _ _ _] {:type "array" :maxItems 0 :minItems 0})
-
 ; associative? (one-of [(map simple simple) (vector simple)])
 (defmethod accept-spec 'clojure.core/associative? [_ _ _ _] {:type "object"})
-
-; sequential? (one-of [(list simple) (vector simple)])
-(defmethod accept-spec 'clojure.core/sequential? [_ _ _ _] {:type "array"})
 
 ; ratio? (such-that ratio? (ratio))
 (defmethod accept-spec 'clojure.core/ratio? [_ _ _ _] {:type "integer"})
@@ -176,7 +164,11 @@
 (defmethod accept-spec 'clojure.core/ratio? [_ _ _ _] {:type "keyword"})
 
 (defmethod accept-spec ::visitor/set [dispatch spec children _]
-  {:enum children})
+  ;;{:enum children}
+  (set-type-from-first-child children)
+  )
+
+(defmethod accept-spec 'clojure.core/set? [_ _ _ _] {:type "array" :uniqueItems true})
 
 (defn- maybe-with-title [schema spec]
   (if-let [title (st/spec-name spec)]
@@ -192,7 +184,7 @@
         all-required (not-empty (concat required required-un))]
     (maybe-with-title
       (merge
-        {:type "object"
+        {:type       "object"
          :properties (zipmap (concat names names-un) children)}
         (when all-required
           {:required (vec all-required)}))
@@ -205,9 +197,9 @@
   (simplify-all-of {:allOf children}))
 
 (defmethod accept-spec 'clojure.spec.alpha/merge [_ _ children _]
-  {:type "object"
+  {:type       "object"
    :properties (apply merge (map :properties children))
-   :required (into [] (reduce into (sorted-set) (map :required children)))})
+   :required   (into [] (reduce into (sorted-set) (map :required children)))})
 
 (defmethod accept-spec 'clojure.spec.alpha/every [_ spec children _]
   (let [form (impl/extract-form spec)
@@ -242,13 +234,13 @@
   {:anyOf children})
 
 (defmethod accept-spec 'clojure.spec.alpha/cat [_ _ children _]
-  {:type "array"
+  {:type  "array"
    :items {:anyOf children}})
 
 ; &
 
 (defmethod accept-spec 'clojure.spec.alpha/tuple [_ _ children _]
-  {:type "array"
+  {:type  "array"
    :items children})
 
 ; keys*
