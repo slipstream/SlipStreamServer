@@ -1,11 +1,12 @@
 (ns com.sixsq.slipstream.ssclj.util.json-schema-test
-  (:require [clojure.test :refer [deftest testing is]]
+  (:require [clojure.test :refer [deftest testing is are]]
             [clojure.spec.alpha :as s]
             [spec-tools.core :as st]
             [spec-tools.data-spec :as ds]
             [spec-tools.spec :as spec]
+            [com.sixsq.slipstream.ssclj.resources.spec.common :as common]
             [com.sixsq.slipstream.ssclj.util.json-schema :as t]
-           ))
+            ))
 
 ;;Borrowed from https://github.com/metosin/spec-tools/blob/master/test/cljc/spec_tools/json_schema_test.cljc
 
@@ -55,35 +56,24 @@
 
   (testing "clojure.specs"
     (is (= (t/transform (s/keys :req-un [::integer] :opt-un [::string]))
-           {:type "object"
-            :properties {"integer" {:type "long"} "string" {:type "keyword"}}
-            :required ["integer"]}))
+           {:type       "object"
+            :properties {"integer" {:type "long"} "string" {:type "keyword"}}}))
     (is (= (t/transform ::keys)
-           {:type "object"
-            :title "com.sixsq.slipstream.ssclj.util.json-schema-test/keys"
+           {:type       "object"
             :properties {"com.sixsq.slipstream.ssclj.util.json-schema-test/a" {:type "keyword"}
                          "com.sixsq.slipstream.ssclj.util.json-schema-test/b" {:type "keyword"}
                          "com.sixsq.slipstream.ssclj.util.json-schema-test/c" {:type "keyword"}
                          "com.sixsq.slipstream.ssclj.util.json-schema-test/d" {:type "keyword"}
                          "com.sixsq.slipstream.ssclj.util.json-schema-test/e" {:type "keyword"}
-                         "a" {:type "keyword"}
-                         "b" {:type "keyword"}
-                         "c" {:type "keyword"}
-                         "d" {:type "keyword"}
-                         "e" {:type "keyword"}}
-            :required ["com.sixsq.slipstream.ssclj.util.json-schema-test/a"
-                       "com.sixsq.slipstream.ssclj.util.json-schema-test/b"
-                       "com.sixsq.slipstream.ssclj.util.json-schema-test/c"
-                       "com.sixsq.slipstream.ssclj.util.json-schema-test/d"
-                       "a"
-                       "b"
-                       "c"
-                       "d"]}))
+                         "a"                                                  {:type "keyword"}
+                         "b"                                                  {:type "keyword"}
+                         "c"                                                  {:type "keyword"}
+                         "d"                                                  {:type "keyword"}
+                         "e"                                                  {:type "keyword"}}}))
     (is (= (t/transform ::keys-no-req)
-           {:type "object"
-            :title "com.sixsq.slipstream.ssclj.util.json-schema-test/keys-no-req"
+           {:type       "object"
             :properties {"com.sixsq.slipstream.ssclj.util.json-schema-test/e" {:type "keyword"}
-                         "e" {:type "keyword"}}}))
+                         "e"                                                  {:type "keyword"}}}))
     (is (= (t/transform (s/or :int integer? :string string?))
            {:anyOf [{:type "long"} {:type "keyword"}]}))
     (is (= (t/transform (s/and integer? pos?))
@@ -92,11 +82,9 @@
            {:allOf [{:type "long"} {:minimum 0 :exclusiveMinimum true}]}))
     (is (= (t/transform (s/merge (s/keys :req [::integer])
                                  (s/keys :req [::string])))
-           {:type "object"
+           {:type       "object"
             :properties {"com.sixsq.slipstream.ssclj.util.json-schema-test/integer" {:type "long"}
-                         "com.sixsq.slipstream.ssclj.util.json-schema-test/string" {:type "keyword"}}
-            :required ["com.sixsq.slipstream.ssclj.util.json-schema-test/integer"
-                       "com.sixsq.slipstream.ssclj.util.json-schema-test/string"]}))
+                         "com.sixsq.slipstream.ssclj.util.json-schema-test/string"  {:type "keyword"}}}))
     (is (= (t/transform (s/every integer?)) {:type "array" :items {:type "long"}}))
     (is (= (t/transform (s/every-kv string? integer?))
            {:type "object" :additionalProperties {:type "long"}}))
@@ -112,7 +100,7 @@
     (is (= (t/transform (s/alt :int integer? :string string?))
            {:anyOf [{:type "long"} {:type "keyword"}]}))
     (is (= (t/transform (s/cat :int integer? :string string?))
-           {:type "array"
+           {:type  "array"
             :items {:anyOf [{:type "long"} {:type "keyword"}]}}))
     ;; & is broken (http://dev.clojure.org/jira/browse/CLJ-2152)
     (is (= (t/transform (s/tuple integer? string?))
@@ -133,43 +121,41 @@
 (def person-spec
   (ds/spec
     ::person
-    {::id integer?
-     :age ::age
-     :name string?
-     :likes {string? boolean?}
+    {::id                integer?
+     :age                ::age
+     :name               string?
+     :likes              {string? boolean?}
      (ds/req :languages) #{keyword?}
-     (ds/opt :address) {:street string?
-                        :zip string?}}))
+     (ds/opt :address)   {:street string?
+                          :zip    string?}}))
 
 (deftest readme-test
   (is (= {:type "object"
-          :required ["com.sixsq.slipstream.ssclj.util.json-schema-test/id" "age" "name" "likes" "languages"]
           :properties
-          {"com.sixsq.slipstream.ssclj.util.json-schema-test/id" {:type "long"}
-           "age" {:type "long"}
-           "name" {:type "keyword"}
-           "likes" {:type "object" :additionalProperties {:type "boolean"}}
-           "languages" {:type "array", :items {:type "keyword"}, :uniqueItems true}
-           "address" {:type "object"
-                      :required ["street" "zip"]
-                      :properties {"street" {:type "keyword"}
-                                   "zip" {:type "keyword"}}}}}
+                {"com.sixsq.slipstream.ssclj.util.json-schema-test/id" {:type "long"}
+                 "age"                                                 {:type "long"}
+                 "name"                                                {:type "keyword"}
+                 "likes"                                               {:type "object" :additionalProperties {:type "boolean"}}
+                 "languages"                                           {:type "array", :items {:type "keyword"}, :uniqueItems true}
+                 "address"                                             {:type       "object"
+                                                                        :properties {"street" {:type "keyword"}
+                                                                                     "zip"    {:type "keyword"}}}}}
          (t/transform person-spec))))
 
 (deftest additional-json-schema-data-test
   (is (= {:type "long"}
          (t/transform
            (st/spec
-             {:spec integer?
-              :name "integer"
-              :description "it's an int"
+             {:spec                integer?
+              :name                "integer"
+              :description         "it's an int"
               :json-schema/default 42})))))
 
 (deftest deeply-nested-test
-  (is (= {:type "array"
-          :items {:type "array"
-                  :items {:type "array"
-                          :items {:type "array"
+  (is (= {:type  "array"
+          :items {:type  "array"
+                  :items {:type  "array"
+                          :items {:type  "array"
                                   :items {:type "keyword"}}}}}
          (t/transform
            (ds/spec
@@ -182,9 +168,42 @@
 (s/def ::user (s/keys :req-un [::name ::parent]))
 
 (deftest recursive-spec-test
-  (is (= {:type "object",
-          :properties {"name" {:type "keyword"}
-                       "parent" {:oneOf [{} {:type "null"}]}},
-          :required ["name" "parent"],
-          :title "com.sixsq.slipstream.ssclj.util.json-schema-test/user"}
+  (is (= {:type       "object",
+          :properties {"name"   {:type "keyword"}
+                       "parent" {:oneOf [{} {:type "null"}]}}}
          (t/transform ::user))))
+
+(deftest common-schema
+
+  (are [spec expected] (= (t/transform spec) expected)
+                       common/common-attrs {}
+                       common/create-attrs {}
+                       common/template-attrs {}
+
+                       ::common/acl {:type       "object",
+                                     :properties {"owner" {:type       "object",
+                                                           :properties {"principal" {:type "keyword"}, "type" {:type "keyword"}}},
+                                                  "rules" {:type  "array",
+                                                           :items {:type       "object",
+                                                                   :properties {"principal" {:type "keyword"},
+                                                                                "type"      {:type "keyword"},
+                                                                                "right"     {:type "keyword"}}}}}}
+
+                       ::common/operations {:type "array", :items {:type "object", :properties {"href" {:type "keyword"}, "rel" {:type "keyword"}}}}
+
+
+                       ::common/properties {:type                 "object",
+                                            :additionalProperties {:type "keyword"},
+                                            :title                "com.sixsq.slipstream.ssclj.resources.spec.common/properties"}
+
+                       ::common/id {:type "keyword"}
+                       ::common/resourceURI {:type "keyword"}
+                       ::common/created {:type "keyword"}
+                       ::common/updated {:type "keyword"}
+                       ::common/name {:type "keyword"}
+                       ::common/description {:type "keyword"}
+                       ::common/href {:type "keyword"}
+                       ::common/resource-link {:type "object", :properties {"href" {:type "keyword"}}}
+                       ::common/resource-links {:type "array", :items {:type "object", :properties {"href" {:type "keyword"}}}}
+                       ::common/operation {:type "object", :properties {"href" {:type "keyword"}, "rel" {:type "keyword"}}}
+                       ::common/kw-or-str {:anyOf [{:type "keyword"} {:type "keyword"}]}))

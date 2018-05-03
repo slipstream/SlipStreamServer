@@ -170,25 +170,14 @@
 
 (defmethod accept-spec 'clojure.core/set? [_ _ _ _] {:type "array" :uniqueItems true})
 
-(defn- maybe-with-title [schema spec]
-  (if-let [title (st/spec-name spec)]
-    (assoc schema :title (impl/qualified-name title))
-    schema))
+
 
 (defmethod accept-spec 'clojure.spec.alpha/keys [_ spec children _]
   (let [{:keys [req req-un opt opt-un]} (impl/parse-keys (impl/extract-form spec))
         names-un (map name (concat req-un opt-un))
-        names (map impl/qualified-name (concat req opt))
-        required (map impl/qualified-name req)
-        required-un (map name req-un)
-        all-required (not-empty (concat required required-un))]
-    (maybe-with-title
-      (merge
+        names (map impl/qualified-name (concat req opt))]
         {:type       "object"
-         :properties (zipmap (concat names names-un) children)}
-        (when all-required
-          {:required (vec all-required)}))
-      spec)))
+         :properties (zipmap (concat names names-un) children)}))
 
 (defmethod accept-spec 'clojure.spec.alpha/or [_ _ children _]
   {:anyOf children})
@@ -199,7 +188,7 @@
 (defmethod accept-spec 'clojure.spec.alpha/merge [_ _ children _]
   {:type       "object"
    :properties (apply merge (map :properties children))
-   :required   (into [] (reduce into (sorted-set) (map :required children)))})
+   })
 
 (defmethod accept-spec 'clojure.spec.alpha/every [_ spec children _]
   (let [form (impl/extract-form spec)
