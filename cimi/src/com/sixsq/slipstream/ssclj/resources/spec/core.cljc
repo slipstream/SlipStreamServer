@@ -19,7 +19,7 @@
 (s/def ::port (s/int-in 1 65536))
 
 ;; FIXME: Provide an implementation that works with ClojureScript.
-(s/def ::timestamp (s/with-gen (s/and string? cu/as-datetime)
+(s/def ::timestamp cu/as-datetime #_(s/with-gen cu/as-datetime
                                (constantly (gen/fmap cu/unparse-timestamp-date (gen/gen-for-pred inst?)))))
 
 ;; FIXME: Remove this definition when resources treat the timestamp as optional rather than allowing an empty value.

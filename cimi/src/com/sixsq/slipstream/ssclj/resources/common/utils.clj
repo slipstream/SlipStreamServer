@@ -93,10 +93,11 @@
   "Tries to parse the given string as a DateTime value.  Returns the DateTime
    instance on success and nil on failure."
   [data]
-  (try
-    (time-fmt/parse (:date-time time-fmt/formatters) data)
-    (catch Exception _
-      nil)))
+  (when (string? data)
+    (try
+      (time-fmt/parse (:date-time time-fmt/formatters) data)
+      (catch Exception _
+        nil))))
 
 (defn update-timestamps
   "Sets the updated attribute and optionally the created attribute
