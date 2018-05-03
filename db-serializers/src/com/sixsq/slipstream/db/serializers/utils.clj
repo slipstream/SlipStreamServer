@@ -3,6 +3,7 @@
     [clojure.tools.logging :as log]
     [superstring.core :as s]
     [com.sixsq.slipstream.db.es.binding :as esb]
+    [com.sixsq.slipstream.db.es.common.utils :as escu]
     [com.sixsq.slipstream.db.es.utils :as esu]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :as aih]
@@ -56,7 +57,7 @@
 (defn dump
   [resource & [msg]]
   (println "DB DUMP: " (or msg ""))
-  (let [index-name (esb/id->index resource)]
+  (let [index-name (escu/id->index resource)]
     (clojure.pprint/pprint (esu/dump esb/*client* index-name resource))))
 
 (defn as-boolean
