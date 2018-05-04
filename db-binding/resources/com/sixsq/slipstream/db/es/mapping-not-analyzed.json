@@ -8,6 +8,15 @@
           "type": "keyword"
         }
       }
+    },
+    {
+      "longs": {
+        "match": "*",
+        "match_mapping_type": "long",
+        "mapping": {
+          "type": "long"
+        }
+      }
     }
   ]
 }

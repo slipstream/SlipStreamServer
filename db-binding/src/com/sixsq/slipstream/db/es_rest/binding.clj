@@ -13,6 +13,7 @@
     [com.sixsq.slipstream.db.utils.common :as cu]
     [com.sixsq.slipstream.db.utils.acl :as acl-utils]
     [com.sixsq.slipstream.util.response :as response]
+    [com.sixsq.slipstream.db.es.common.es-mapping :as mapping]
     [clojure.tools.logging :as log])
   (:import
     (java.io Closeable)))
@@ -172,10 +173,10 @@
 (deftype ElasticsearchRestBinding [client]
   Binding
 
-  (initialize [_ collection-id options]
+  (initialize [_ collection-id {:keys [spec] :as options}]
     (let [index (escu/collection-id->index collection-id)]
       (create-index client index)
-      (set-index-mapping client index default-mapping)))
+      (set-index-mapping client index (mapping/mapping spec))))
 
 
   (add [_ data options]

@@ -44,7 +44,7 @@
 (defmethod accept-spec 'com.sixsq.slipstream.ssclj.resources.common.utils/as-datetime [_ _ _ _] {:type   "date"
                                                                                                  :format "strict_date_optional_time||epoch_millis"})
 
-(defmethod accept-spec 'com.sixsq.slipstream.ssclj.resources.common.utils/as-text [_ _ _ _] {:type   "text"})
+(defmethod accept-spec 'com.sixsq.slipstream.ssclj.resources.common.utils/as-text [_ _ _ _] {:type "text"})
 
 
 ;;
@@ -255,13 +255,14 @@
   {})
 
 
-(def default-mapping {:dynamic_templates [{:strings {:match              "*"
-                                                     :match_mapping_type "string"
-                                                     :mapping            {:type "keyword"}}}
-                                          {:longs {:match              "*"
-                                                   :match_mapping_type "long"
-                                                   :mapping            {:type "long"}}}]})
+(def dynamic-templates [{:strings {:match              "*"
+                                   :match_mapping_type "string"
+                                   :mapping            {:type "keyword"}}}
+                        {:longs {:match              "*"
+                                 :match_mapping_type "long"
+                                 :mapping            {:type "long"}}}])
 
 (defn mapping
   [spec]
-  {:mapping {:_doc (merge default-mapping {:mappings (transform spec)})}})
+  (cond-> {:dynamic_templates dynamic-templates}
+          spec {:properties (transform spec)}))
