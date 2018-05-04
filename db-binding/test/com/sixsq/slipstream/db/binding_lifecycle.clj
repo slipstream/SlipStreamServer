@@ -35,7 +35,7 @@
     (let [collection-id "my-collection"]
 
       ;; initialize the database
-      (db/initialize db collection-id nil)
+      (db/initialize db collection-id {:spec ::resource})
 
       ;; create an entry in the database
       (let [my-id (str collection-id "/my-uuid")

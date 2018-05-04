@@ -20,14 +20,6 @@
 
 ;; FIXME: Need to understand why the refresh parameter must be used to make unit test pass.
 
-(def default-mapping {:dynamic_templates [{:strings {:match              "*"
-                                                     :match_mapping_type "string"
-                                                     :mapping            {:type "keyword"}}}
-                                          {:longs {:match              "*"
-                                                   :match_mapping_type "long"
-                                                   :mapping            {:type "long"}}}]})
-
-
 (defn create-client
   [options]
   (spandex/client options))
@@ -174,9 +166,10 @@
   Binding
 
   (initialize [_ collection-id {:keys [spec] :as options}]
-    (let [index (escu/collection-id->index collection-id)]
+    (let [index (escu/collection-id->index collection-id)
+          mapping (mapping/mapping spec)]
       (create-index client index)
-      (set-index-mapping client index (mapping/mapping spec))))
+      (set-index-mapping client index mapping)))
 
 
   (add [_ data options]

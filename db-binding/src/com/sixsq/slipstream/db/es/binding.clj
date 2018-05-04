@@ -99,10 +99,10 @@
 (deftype ESBinding []
   Binding
 
-  (initialize [_ collection-id options]
+  (initialize [_ collection-id {:keys [spec] :as options}]
     (let [index (escu/collection-id->index collection-id)]
       (when-not (esu/index-exists? *client* index)
-        (esu/create-index *client* index)
+        (esu/create-index *client* index spec)
         (esu/wait-for-index *client* index))))
 
 
@@ -158,10 +158,10 @@
 (deftype ESBindingLocal [^Client client]
   Binding
 
-  (initialize [_ collection-id options]
+  (initialize [_ collection-id {:keys [spec] :as options}]
     (let [index (escu/collection-id->index collection-id)]
       (when-not (esu/index-exists? client index)
-        (esu/create-index client index)
+        (esu/create-index client index spec)
         (esu/wait-for-index client index))))
 
 

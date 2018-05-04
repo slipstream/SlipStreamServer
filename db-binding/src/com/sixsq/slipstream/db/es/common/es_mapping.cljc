@@ -265,4 +265,4 @@
 (defn mapping
   [spec]
   (cond-> {:dynamic_templates dynamic-templates}
-          spec {:properties (transform spec)}))
+          spec (merge (dissoc (transform spec) :type))))

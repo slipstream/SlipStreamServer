@@ -11,7 +11,8 @@
     [com.sixsq.slipstream.db.es.order :as order]
     [com.sixsq.slipstream.db.es.aggregation :as agg]
     [com.sixsq.slipstream.db.es.filter :as ef]
-    [com.sixsq.slipstream.db.es.select :as select])
+    [com.sixsq.slipstream.db.es.select :as select]
+    [com.sixsq.slipstream.db.es.common.es-mapping :as mapping])
   (:import
     (java.net InetAddress)
     (java.util UUID)
@@ -150,12 +151,6 @@
 ;; Util functions
 ;;
 
-
-(def ^:const mapping-not-analyzed
-  (-> "com/sixsq/slipstream/db/es/mapping-not-analyzed.json"
-      io/resource
-      slurp))
-
 (defn index-exists?
   [^Client client index-name]
   (.. client
@@ -165,10 +160,17 @@
       (get)
       (isExists)))
 
+(defn json-mapping
+  [spec]
+  (-> spec
+      mapping/mapping
+      edn->json))
+
 (defn create-index
-  ^CreateIndexResponse [^Client client index-name]
+  ^CreateIndexResponse [^Client client index-name spec]
   (log/info "creating index:" index-name)
-  (let [settings (.. (Settings/builder)
+  (let [json-mapping (json-mapping spec)
+        settings (.. (Settings/builder)
                      (put "index.max_result_window" max-result-window)
                      (put "index.number_of_shards" 3)
                      (put "index.number_of_replicas" 0)
@@ -178,7 +180,7 @@
         (indices)
         (prepareCreate index-name)
         (setSettings settings)
-        (addMapping "_doc" mapping-not-analyzed XContentType/JSON)
+        (addMapping "_doc" json-mapping XContentType/JSON)
         (get))))
 
 (def ^:private ok-health-statuses #{ClusterHealthStatus/GREEN ClusterHealthStatus/YELLOW})
