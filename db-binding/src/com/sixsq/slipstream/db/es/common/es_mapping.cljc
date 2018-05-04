@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.util.es-mapping
+(ns com.sixsq.slipstream.db.es.common.es-mapping
   "Utility for converting clojure.spec definitions to Elasticsearch mappings."
   (:require
     [spec-tools.visitor :as visitor]

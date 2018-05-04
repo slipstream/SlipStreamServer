@@ -69,9 +69,6 @@
    [com.sixsq.slipstream/token ~+version+]
 
    [org.clojure/test.check] ; FIXME: Needed for spec.gen.alpha. Fix "Could not locate clojure/test/check/generators__init.class"
-
-   [metosin/spec-tools "0.6.1"]
-
    ]
 
   :aot [com.sixsq.slipstream.ssclj.app.main

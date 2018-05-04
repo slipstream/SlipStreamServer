@@ -36,6 +36,7 @@
    [duratom]
    [environ]
    [instaparse]
+   [metosin/spec-tools "0.6.1"]
    [org.apache.logging.log4j/log4j-core]                    ;; required for Elasticsearch logging
    [org.clojure/data.json]
    [org.clojure/tools.logging]
