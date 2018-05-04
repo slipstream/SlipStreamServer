@@ -1,9 +1,31 @@
 (ns com.sixsq.slipstream.db.binding-lifecycle
   (:require
     [clojure.test :refer [deftest is are]]
+    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.db.binding :as db]))
 
-(def admin-rule {:rules [{:type "ROLE", :principal "ADMIN", :right "ALL"}]})
+(s/def ::id string?)
+(s/def ::long int?)
+(s/def ::boolean boolean?)
+(s/def ::string string?)
+
+(s/def ::resource (s/keys :req-un [::id ::long ::boolean ::string]))
+
+(s/def ::type string?)
+(s/def ::principal string?)
+(s/def ::right string?)
+
+(s/def ::owner (s/keys :req-un [::type ::principal]))
+(s/def ::rule (s/keys :req-un [::type ::principal ::right]))
+(s/def ::rules (s/coll-of ::rule :min-count 1 :kind vector?))
+
+(s/def ::acl (s/keys :req-un [::owner]
+                     :opt-un [::rules]))
+
+(s/def ::resource (s/keys :req-un [::id ::long ::boolean ::string ::acl]))
+
+(def admin-acl {:owner {:type "ROLE", :principal "ADMIN"}
+                :rules [{:type "ROLE", :principal "ADMIN", :right "ALL"}]})
 
 (def admin-role {:user-roles ["ADMIN"]})
 
@@ -17,9 +39,10 @@
 
       ;; create an entry in the database
       (let [my-id (str collection-id "/my-uuid")
-            my-data {:id my-id, :one 1, :two "2"}
-            my-data-with-acl (assoc my-data :acl admin-rule)
-            response (db/add db my-data nil)]
+            my-data {:id my-id, :long 1, :boolean true, :string "ok"}
+            my-data-with-acl (assoc my-data :acl admin-acl)
+            response (db/add db my-data-with-acl nil)]
+        (is (s/valid? ::resource my-data-with-acl))
         (is (= 201 (:status response)))
         (is (= my-id (get-in response [:headers "Location"])))
 
@@ -34,9 +57,10 @@
 
         ;; add a second entry
         (let [my-id-2 (str collection-id "/my-uuid-2")
-              my-data-2 {:id my-id-2, :one 1, :two "2"}
-              my-data-2-with-acl (assoc my-data-2 :acl admin-rule)
-              response (db/add db my-data-2 nil)]
+              my-data-2 {:id my-id-2, :long 2, :boolean false, :string "nok"}
+              my-data-2-with-acl (assoc my-data-2 :acl admin-acl)
+              response (db/add db my-data-2-with-acl nil)]
+          (is (s/valid? ::resource my-data-2-with-acl))
           (is (= 201 (:status response)))
           (is (= my-id-2 (get-in response [:headers "Location"])))
 

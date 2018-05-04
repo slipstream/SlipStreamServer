@@ -1,8 +1,30 @@
 (ns com.sixsq.slipstream.db.binding-queries
   (:require
     [clojure.test :refer [deftest is are]]
+    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.db.binding :as db]
     [com.sixsq.slipstream.db.filter.parser :as parser]))
+
+(s/def ::id string?)
+(s/def ::sequence int?)
+(s/def ::attr1 string?)
+(s/def ::attr2 string?)
+(s/def ::admin boolean?)
+(s/def ::user boolean?)
+
+(s/def ::type string?)
+(s/def ::principal string?)
+(s/def ::right string?)
+
+(s/def ::owner (s/keys :req-un [::type ::principal]))
+(s/def ::rule (s/keys :req-un [::type ::principal ::right]))
+(s/def ::rules (s/coll-of ::rule :min-count 1 :kind vector?))
+
+(s/def ::acl (s/keys :req-un [::owner]
+                     :opt-un [::rules]))
+
+(s/def ::resource (s/keys :req-un [::id ::sequence ::attr1 ::attr2 ::acl]
+                          :opt-un [::admin ::user]))
 
 (def admin-acl {:owner {:type "ROLE", :principal "ADMIN"}
                 :rules [{:type "ROLE", :principal "ADMIN", :right "ALL"}]})
@@ -44,6 +66,10 @@
                                 :user     true
                                 :acl      user-acl}))
             docs (vec (concat admin-docs user-docs))]
+
+        ;; check schemas
+        (doseq [doc docs]
+          (is (s/valid? ::resource doc)))
 
         ;; add all of the docs to the database
         (doseq [doc docs]
