@@ -21,7 +21,10 @@
 
 (def default-mapping {:dynamic_templates [{:strings {:match              "*"
                                                      :match_mapping_type "string"
-                                                     :mapping            {:type "keyword"}}}]})
+                                                     :mapping            {:type "keyword"}}}
+                                          {:longs {:match              "*"
+                                                   :match_mapping_type "long"
+                                                   :mapping            {:type "long"}}}]})
 
 
 (defn create-client

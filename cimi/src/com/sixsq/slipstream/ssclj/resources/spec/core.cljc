@@ -13,6 +13,8 @@
 
 (s/def ::nonblank-string (s/and string? (complement str/blank?)))
 
+(s/def ::text cu/as-text)
+
 (defn token? [s] (re-matches #"^\S+$" s))
 (s/def ::token (s/and string? token?))
 

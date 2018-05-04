@@ -44,6 +44,8 @@
 (defmethod accept-spec 'com.sixsq.slipstream.ssclj.resources.common.utils/as-datetime [_ _ _ _] {:type   "date"
                                                                                                  :format "strict_date_optional_time||epoch_millis"})
 
+(defmethod accept-spec 'com.sixsq.slipstream.ssclj.resources.common.utils/as-text [_ _ _ _] {:type   "text"})
+
 
 ;;
 ;; predicate list taken from https://github.com/clojure/clojure/blob/master/src/clj/clojure/spec/gen.clj
@@ -193,15 +195,15 @@
   (let [form (impl/extract-form spec)
         {:keys [type]} (parse/parse-spec form)]
     (case type
-      :map {:type "object", :additionalProperties (impl/unwrap children)}
+      :map {:type "object", :properties (impl/unwrap children)}
       :set (impl/unwrap children)
       :vector (impl/unwrap children))))
 
 (defmethod accept-spec 'clojure.spec.alpha/every-kv [_ _ children _]
-  {:type "object", :additionalProperties (second children)})
+  {:type "object", :properties (second children)})
 
 (defmethod accept-spec ::visitor/map-of [_ _ children _]
-  {:type "object", :additionalProperties (second children)})
+  {:type "object", :properties (second children)})
 
 (defmethod accept-spec ::visitor/set-of [_ _ children _]
   (impl/unwrap children))
@@ -218,19 +220,27 @@
 (defmethod accept-spec 'clojure.spec.alpha/? [_ _ children _]
   (impl/unwrap children))
 
+;; NOTE: this will not be correct if the types of the children are different.
+;; Such fields cannot be represented in an Elasticsearch mapping.
 (defmethod accept-spec 'clojure.spec.alpha/alt [_ _ children _]
   (first children))
 
+;; NOTE: this will not be correct if the types of the children are different.
+;; Such fields cannot be represented in an Elasticsearch mapping.
 (defmethod accept-spec 'clojure.spec.alpha/cat [_ _ children _]
   (first children))
 
 ; &
 
+;; NOTE: this will not be correct if the types of the children are different.
+;; Such fields cannot be represented in an Elasticsearch mapping.
 (defmethod accept-spec 'clojure.spec.alpha/tuple [_ _ children _]
   (first children))
 
 ; keys*
 
+;; NOTE: all fields in Elasticsearch are nilable, so this just uses the type
+;; of the first child.
 (defmethod accept-spec 'clojure.spec.alpha/nilable [_ _ children _]
   (impl/unwrap children))
 
@@ -243,3 +253,15 @@
 
 (defmethod accept-spec ::default [_ _ _ _]
   {})
+
+
+(def default-mapping {:dynamic_templates [{:strings {:match              "*"
+                                                     :match_mapping_type "string"
+                                                     :mapping            {:type "keyword"}}}
+                                          {:longs {:match              "*"
+                                                   :match_mapping_type "long"
+                                                   :mapping            {:type "long"}}}]})
+
+(defn mapping
+  [spec]
+  {:mapping {:_doc (merge default-mapping {:mappings (transform spec)})}})

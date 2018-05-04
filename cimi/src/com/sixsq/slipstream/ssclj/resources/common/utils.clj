@@ -99,6 +99,11 @@
       (catch Exception _
         nil))))
 
+(defn as-text
+  "A function that marks a field as being parsable text rather than a keyword."
+  [data]
+  (s/and string? (complement str/blank?)))
+
 (defn update-timestamps
   "Sets the updated attribute and optionally the created attribute
    in the request.  The created attribute is only set if the existing value

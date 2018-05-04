@@ -17,7 +17,7 @@
 (s/def ::created ::cimi-core/timestamp)
 (s/def ::updated ::cimi-core/timestamp)
 (s/def ::name ::cimi-core/nonblank-string)
-(s/def ::description ::cimi-core/nonblank-string)
+(s/def ::description ::cimi-core/text)
 
 ;; links between resources
 (s/def ::href ::cimi-core/resource-href)
