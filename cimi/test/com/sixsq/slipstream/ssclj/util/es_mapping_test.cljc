@@ -23,8 +23,7 @@
                        ::common/operations {:type "object", :properties {"href" {:type "keyword"}, "rel" {:type "keyword"}}}
 
 
-                       ::common/properties {:type                 "object",
-                                            :properties {:type "keyword"}}
+                       ::common/properties {:type "object"}
 
                        ::common/id {:type "keyword"}
                        ::common/resourceURI {:type "keyword"}
@@ -36,5 +35,4 @@
                        ::common/resource-link {:type "object", :properties {"href" {:type "keyword"}}}
                        ::common/resource-links {:type "object", :properties {"href" {:type "keyword"}}}
                        ::common/operation {:type "object", :properties {"href" {:type "keyword"}, "rel" {:type "keyword"}}}
-                       ::common/kw-or-str {:type "keyword"}
-                       ))
+                       ::common/kw-or-str {:type "keyword"}))

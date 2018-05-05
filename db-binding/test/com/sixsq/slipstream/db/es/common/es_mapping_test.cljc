@@ -92,23 +92,17 @@
     (is (= (t/transform (s/coll-of string? :into '())) {:type "keyword"}))
     (is (= (t/transform (s/coll-of string? :into [])) {:type "keyword"}))
     (is (= (t/transform (s/coll-of string? :into #{})) {:type "keyword"}))
-    (is (= (t/transform (s/map-of string? integer?))
-           {:type "object" :properties {:type "long"}}))
+    (is (= (t/transform (s/map-of string? integer?)) {:type "object"}))
     (is (= (t/transform (s/* integer?)) {:type "long"}))
     (is (= (t/transform (s/+ integer?)) {:type "long"}))
     (is (= (t/transform (s/? integer?)) {:type "long"}))
-    (is (= (t/transform (s/alt :int integer? :string string?))
-           {:type "long"}))
-    (is (= (t/transform (s/cat :int integer? :string string?))
-           {:type "long"}))
+    (is (= (t/transform (s/alt :int integer? :string string?)) {:type "long"}))
+    (is (= (t/transform (s/cat :int integer? :string string?)) {:type "long"}))
     ;; & is broken (http://dev.clojure.org/jira/browse/CLJ-2152)
-    (is (= (t/transform (s/tuple integer? string?))
-           {:type "long"}))
+    (is (= (t/transform (s/tuple integer? string?)) {:type "long"}))
     ;; keys* is broken (http://dev.clojure.org/jira/browse/CLJ-2152)
-    (is (= (t/transform (s/map-of string? clojure.core/integer?))
-           {:type "object" :properties {:type "long"}}))
-    (is (= (t/transform (s/nilable string?))
-           {:type "keyword"})))
+    (is (= (t/transform (s/map-of string? clojure.core/integer?)) {:type "object"}))
+    (is (= (t/transform (s/nilable string?)) {:type "keyword"})))
   (testing "failing clojure.specs"
     (is (not= (t/transform (s/coll-of (s/tuple string? any?) :into {}))
               {:type "object", :properties {:type "keyword"}}))))
@@ -134,7 +128,7 @@
                 {"com.sixsq.slipstream.db.es.common.es-mapping-test/id" {:type "long"}
                  "age"                                                  {:type "long"}
                  "name"                                                 {:type "keyword"}
-                 "likes"                                                {:type "object" :properties {:type "boolean"}}
+                 "likes"                                                {:type "object"}
                  "languages"                                            {:type "keyword"}
                  "address"                                              {:type       "object"
                                                                          :properties {"street" {:type "keyword"}

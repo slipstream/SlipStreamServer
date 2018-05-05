@@ -202,8 +202,11 @@
 (defmethod accept-spec 'clojure.spec.alpha/every-kv [_ _ children _]
   {:type "object", :properties (second children)})
 
-(defmethod accept-spec ::visitor/map-of [_ _ children _]
-  {:type "object", :properties (second children)})
+;; NOTE: The best that can be done here is to mark the field as an
+;; object because there is no automated way to specify that all
+;; keys and values must have a particular type.
+(defmethod accept-spec ::visitor/map-of [_ _ _ _]
+  {:type "object"})
 
 (defmethod accept-spec ::visitor/set-of [_ _ children _]
   (impl/unwrap children))
