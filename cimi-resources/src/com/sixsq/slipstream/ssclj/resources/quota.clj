@@ -113,5 +113,9 @@
       (ex-data ei))))
 
 
-
-
+;;
+;; initialization
+;;
+(defn initialize
+  []
+  (std-crud/initialize resource-url :cimi/quota))

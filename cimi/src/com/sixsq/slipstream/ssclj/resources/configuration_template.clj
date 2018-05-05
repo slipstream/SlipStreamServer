@@ -6,7 +6,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.auth.acl :as a]
-    [com.sixsq.slipstream.util.response :as r])
+    [com.sixsq.slipstream.util.response :as r]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud])
   (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-tag :configurationTemplates)
@@ -173,5 +174,3 @@
           (r/json-response)))
     (catch ExceptionInfo ei
       (ex-data ei))))
-
-

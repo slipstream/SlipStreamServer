@@ -4,7 +4,6 @@
     [com.sixsq.slipstream.db.es.binding :as t]
     [com.sixsq.slipstream.db.es.es-node :as es-node]
     [com.sixsq.slipstream.db.binding-lifecycle :as lifecycle]
-    [com.sixsq.slipstream.db.binding :as db]
     [com.sixsq.slipstream.db.binding-queries :as queries])
   (:import
     (clojure.lang Var$Unbound)
@@ -21,19 +20,15 @@
 
 (deftest check-es-native-protocol
   (with-open [test-node (es-node/create-test-node)
-              client (-> test-node
-                         (.client)
-                         t/wait-client-create-index)]
-    (let [binding (-> client
-                      t/->ESBindingLocal)]
-      (db/initialize binding "my-collection" nil)
-      (lifecycle/check-binding-lifecycle binding)))
+              binding (-> test-node
+                          (.client)
+                          t/wait-client-create-index
+                          t/->ESBindingLocal)]
+    (lifecycle/check-binding-lifecycle binding))
 
   (with-open [test-node (es-node/create-test-node)
-              client (-> test-node
-                         (.client)
-                         t/wait-client-create-index)]
-    (let [binding (-> client
-                      t/->ESBindingLocal)]
-      (db/initialize binding "test-collection" nil)
-      (queries/check-binding-queries binding))))
+              binding (-> test-node
+                          (.client)
+                          t/wait-client-create-index
+                          t/->ESBindingLocal)]
+    (queries/check-binding-queries binding)))

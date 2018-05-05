@@ -236,3 +236,10 @@
     (cond-> (set-subtype-ops resource request)
             (:href connectorTemplate) (update-in [:operations] conj describe-op))))
 
+
+;;
+;; initialization: no schema for the parent
+;;
+(defn initialize
+  []
+  (std-crud/initialize resource-url nil))

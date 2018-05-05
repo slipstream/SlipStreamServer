@@ -12,7 +12,8 @@
     [com.sixsq.slipstream.auth.utils.sign :as sg]
     [com.sixsq.slipstream.auth.cookies :as cookies]
     [com.sixsq.slipstream.util.response :as r]
-    [clojure.tools.logging :as log]))
+    [clojure.tools.logging :as log]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]))
 
 (def ^:const authn-method "internal")
 
@@ -74,3 +75,10 @@
         (throw (r/ex-redirect (str "invalid credentials for '" username "'") nil redirectURI))
         (throw (r/ex-unauthorized username))))))
 
+
+;;
+;; initialization: no schema for this parent resource
+;;
+(defn initialize
+  []
+  (std-crud/initialize p/resource-url :cimi/session))

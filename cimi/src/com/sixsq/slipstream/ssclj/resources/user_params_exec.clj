@@ -3,7 +3,8 @@
     [com.sixsq.slipstream.ssclj.resources.spec.user-params-template-exec]
     [com.sixsq.slipstream.ssclj.resources.user-params :as p]
     [com.sixsq.slipstream.ssclj.resources.user-params-template-exec :as tpl]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]))
 
 ;;
 ;; multimethods for validation
@@ -26,3 +27,11 @@
   [resource request]
   (-> resource
       (assoc :resourceURI p/resource-uri)))
+
+
+;;
+;; initialization: no schema for this parent resource
+;;
+(defn initialize
+  []
+  (std-crud/initialize p/resource-url :cimi/user-params-template.exec))

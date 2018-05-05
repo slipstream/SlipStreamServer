@@ -122,3 +122,9 @@
     (assoc json :id new-id)))
 
 
+;;
+;; initialization
+;;
+(defn initialize
+  []
+  (std-crud/initialize resource-url :cimi/service-attribute-namespace))

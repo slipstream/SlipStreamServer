@@ -7,6 +7,7 @@
     [clojure.test :refer [is]]
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.db.es.binding :as esb]
+    [com.sixsq.slipstream.db.es.common.utils :as escu]
     [com.sixsq.slipstream.db.es.utils :as esu]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.dbtest.es.utils :as esut]
@@ -343,7 +344,7 @@
   `(let [client# (second (set-es-node-client-cache))]
      (binding [esb/*client* client#]
        (db/set-impl! (esb/get-instance))
-       (esu/reset-index esb/*client* (str esb/index-prefix "*"))
+       (esu/reset-index esb/*client* (str escu/default-index-prefix "*"))
        ~@body)))
 
 

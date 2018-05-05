@@ -29,8 +29,14 @@
                               :type      "ROLE"
                               :right     "VIEW"}]})
 
-(defn initialize []
+;;
+;; initialization
+;;
+(defn initialize
+  []
+  (std-crud/initialize resource-url :cimi/job)
   (ju/create-job-queue))
+
 
 ;;
 ;; multimethods for validation and operations

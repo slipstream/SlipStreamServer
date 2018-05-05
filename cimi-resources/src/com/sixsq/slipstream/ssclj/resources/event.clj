@@ -73,3 +73,11 @@
 (defmethod crud/query resource-name
   [{{:keys [orderby]} :cimi-params :as request}]
   (query-impl (assoc-in request [:cimi-params :orderby] (if (seq orderby) orderby [["timestamp" :desc]]))))
+
+
+;;
+;; initialization
+;;
+(defn initialize
+  []
+  (std-crud/initialize resource-url :cimi/event))

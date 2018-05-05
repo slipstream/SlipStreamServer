@@ -7,7 +7,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.db.impl :as db]
-    [com.sixsq.slipstream.util.response :as r])
+    [com.sixsq.slipstream.util.response :as r]
+    [clojure.tools.logging :as log])
   (:import (clojure.lang ExceptionInfo)))
 
 (defn add-fn
@@ -127,3 +128,14 @@
   [resource idmap & [keep?]]
   (let [f (if keep? resolve-href-keep resolve-href)]
     (w/prewalk #(f % idmap) resource)))
+
+
+(defn initialize
+  "Perform the initialization of the database for a given resource type. If an
+   exception is thrown, it will be logged but then ignored."
+  [resource-url spec]
+  (try
+    (db/initialize resource-url {:spec spec})
+    (catch Exception e
+      (log/errorf "exception when initializing database for %s: %s"
+                  resource-url (.getMessage e)))))
