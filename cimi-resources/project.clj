@@ -10,11 +10,11 @@
             :url          "http://www.apache.org/licenses/LICENSE-2.0.txt"
             :distribution :repo}
 
-  :plugins [[lein-parent "0.3.2"]
-            [lein-environ "1.1.0"]]
+  :plugins [[lein-parent "0.3.2"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "5.3.2"]
-                   :inherit [:min-lein-version
+  :parent-project {:coords  [sixsq/slipstream-parent "5.3.3"]
+                   :inherit [:plugins
+                             :min-lein-version
                              :managed-dependencies
                              :repositories
                              :deploy-repositories]}
