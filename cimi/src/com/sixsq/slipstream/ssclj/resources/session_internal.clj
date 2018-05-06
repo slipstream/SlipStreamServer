@@ -1,19 +1,17 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-internal
   (:require
-    [com.sixsq.slipstream.ssclj.resources.spec.session]
+    [clojure.tools.logging :as log]
+    [com.sixsq.slipstream.auth.cookies :as cookies]
+    [com.sixsq.slipstream.auth.internal :as auth-internal]
+    [com.sixsq.slipstream.auth.utils.timestamp :as ts]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.session.utils :as sutils]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-internal]
     [com.sixsq.slipstream.ssclj.resources.session :as p]
     [com.sixsq.slipstream.ssclj.resources.session-template-internal :as tpl]
-    [com.sixsq.slipstream.auth.internal :as auth-internal]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.auth.utils.sign :as sg]
-    [com.sixsq.slipstream.auth.cookies :as cookies]
-    [com.sixsq.slipstream.util.response :as r]
-    [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]))
+    [com.sixsq.slipstream.ssclj.resources.spec.session]
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-internal]
+    [com.sixsq.slipstream.util.response :as r]))
 
 (def ^:const authn-method "internal")
 
@@ -62,7 +60,7 @@
       (let [session (sutils/create-session (merge credentials {:href href}) headers authn-method)
             claims (create-claims username headers (:id session) (:clientIP session))
             cookie (cookies/claims-cookie claims)
-            expires (:expires cookie)
+            expires (ts/rfc822->iso8601 (:expires cookie))
             claims-roles (:roles claims)
             session (cond-> (assoc session :expiry expires)
                             claims-roles (assoc :roles claims-roles))]

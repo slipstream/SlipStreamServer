@@ -6,15 +6,17 @@
     [clojure.string :as str]
     [clojure.tools.logging :as log]))
 
+
 (defn revoked-cookie
   "Returns a cookie (as a map) that expires immediately and has 'INVALID' as
    the value. Useful for revoking a cookie in the client's cache. If a name
    is provided, then a map is returned with a single entry with the key being
    the name and the value being the cookie."
   ([]
-   {:value "INVALID", :path "/", :max-age 0, :expires (ts/formatted-expiry-now)})
+   {:value "INVALID", :path "/", :max-age 0, :expires (ts/expiry-now-rfc822)})
   ([name]
    {name (revoked-cookie)}))
+
 
 (defn claims-cookie
   "Return a cookie (as a map) that has a token generated from the provided
@@ -28,9 +30,10 @@
      {:value   {:token token}                               ;; FIXME: Remove :token, requires java-side changes as well.
       :secure  true
       :path    "/"
-      :expires (ts/format-timestamp timestamp)}))
+      :expires (ts/rfc822 timestamp)}))
   ([claims name]
    {name (claims-cookie claims)}))
+
 
 (defn extract-claims
   "Extracts the claims from the value of a cookie. Throws an exception if the
@@ -45,6 +48,7 @@
         second                                              ;; FIXME: and this
         sg/unsign-claims)))
 
+
 (defn claims->authn-info
   "Returns a tuple with the username (identifier) and list of roles based on the
    provided claims map."
@@ -56,6 +60,7 @@
                                             (conj session))))]
       [username roles])))
 
+
 (defn extract-cookie-claims
   "Extracts authentication claims from a cookie. Returns nil if no cookie is
    provided or if there is an error when extracting the claims from the cookie."
@@ -66,6 +71,7 @@
     (catch Exception e
       (log/warn "Error in extract-cookie-claims: " (str e))
       nil)))
+
 
 (defn extract-cookie-info
   "Extracts authentication information from a cookie. Returns nil if no cookie is

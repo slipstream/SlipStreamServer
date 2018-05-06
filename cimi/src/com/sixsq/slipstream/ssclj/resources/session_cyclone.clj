@@ -1,24 +1,24 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-cyclone
   (:require
-    [com.sixsq.slipstream.ssclj.resources.spec.session]
-    [com.sixsq.slipstream.ssclj.resources.session.utils :as sutils]
-    [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as oidc-utils]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-cyclone]
-    [com.sixsq.slipstream.ssclj.resources.session :as p]
-    [com.sixsq.slipstream.ssclj.resources.session-template-cyclone :as tpl]
-    [com.sixsq.slipstream.auth.internal :as auth-internal]
-    [com.sixsq.slipstream.auth.cyclone :as auth-cyclone]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [clojure.tools.logging :as log]
+
     [com.sixsq.slipstream.auth.cookies :as cookies]
-    [com.sixsq.slipstream.auth.utils.timestamp :as tsutil]
+    [com.sixsq.slipstream.auth.cyclone :as auth-cyclone]
+    [com.sixsq.slipstream.auth.internal :as auth-internal]
+    [com.sixsq.slipstream.auth.external :as ex]
     [com.sixsq.slipstream.auth.utils.http :as uh]
     [com.sixsq.slipstream.auth.utils.sign :as sign]
-    [com.sixsq.slipstream.auth.external :as ex]
     [com.sixsq.slipstream.auth.utils.timestamp :as ts]
-    [com.sixsq.slipstream.util.response :as r]
-    [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]))
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.session.utils :as sutils]
+    [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as oidc-utils]
+    [com.sixsq.slipstream.ssclj.resources.session :as p]
+    [com.sixsq.slipstream.ssclj.resources.session-template-cyclone :as tpl]
+    [com.sixsq.slipstream.ssclj.resources.spec.session]
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-cyclone]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
+    [com.sixsq.slipstream.util.response :as r]))
 
 (def ^:const authn-method "cyclone")
 
@@ -62,7 +62,7 @@
       (let [session-init (cond-> {:href href}
                                  redirectURI (assoc :redirectURI redirectURI))
             session (sutils/create-session session-init headers authn-method)
-            session (assoc session :expiry (ts/format-timestamp (tsutil/expiry-later login-request-timeout)))
+            session (assoc session :expiry (ts/rfc822->iso8601 (ts/expiry-later-rfc822 login-request-timeout)))
             redirect-url (str base-url (format cyclone-relative-url client-id (sutils/validate-action-url base-uri (:id session))))]
         [{:status 303, :headers {"Location" redirect-url}} session])
       (oidc-utils/throw-bad-client-config authn-method redirectURI))))
@@ -99,7 +99,7 @@
                                        server (assoc :server server)
                                        clientIP (assoc :clientIP clientIP))
                         cookie (cookies/claims-cookie claims)
-                        expires (:expires cookie)
+                        expires (ts/rfc822->iso8601 (:expires cookie))
                         claims-roles (:roles claims)
                         updated-session (cond-> (assoc current-session :username matched-user :expiry expires)
                                                 claims-roles (assoc :roles claims-roles))
