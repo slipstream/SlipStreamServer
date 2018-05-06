@@ -54,7 +54,7 @@
 ;; DB related.
 ;;
 
-(defn dump
+#_(defn dump
   [resource & [msg]]
   (println "DB DUMP: " (or msg ""))
   (let [index-name (escu/id->index resource)]
@@ -149,40 +149,3 @@
 (defn initialize
   []
   @dyn-init)
-
-;;
-;; Following code is used to setup the Elasticsearch database client
-;; and database CRUD implementation from Java code.
-;;
-;; ALL OF THESE FUNCTIONS ARE VERY STRONGLY DEPRECATED.
-;;
-
-(defn ^{:deprecated "3.34"} set-db-crud-impl-uncond
-  "STRONGLY DEPRECATED. Used to set the database CRUD implementation from Java
-   code unconditionally. This must never be called from native clojure code."
-  []
-  (db/set-impl! (esb/get-instance)))
-
-(defn ^{:deprecated "3.34"} set-db-crud-impl
-  "STRONGLY DEPRECATED. Used to set the database CRUD implementation from Java
-   code if needed. This must never be called from native clojure code."
-  []
-  (if (instance? clojure.lang.Var$Unbound db/*impl*)
-    (set-db-crud-impl-uncond)))
-
-;; Connection to a remote ES.
-
-(defn ^{:deprecated "3.34"} create-and-set-es-client
-  "STRONGLY DEPRECATED. Used to set connection to a remote Elasticsearch
-   cluster for Java code. This must never be called from native clojure code.
-   Requires ES_HOST and ES_PORT env vars."
-  []
-  (esb/set-client! (esb/create-client)))
-
-(defn ^{:deprecated "3.34"} db-client-and-crud-impl
-  "STRONGLY DEPRECATED. This function is used from Java code to setup the
-  connection to the database and to set the CRUD implementation. This must
-  never be called from native clojure code."
-  []
-  (set-db-crud-impl)
-  (create-and-set-es-client))

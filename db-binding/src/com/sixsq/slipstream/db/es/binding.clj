@@ -15,36 +15,6 @@
     (org.elasticsearch.index.engine VersionConflictEngineException)))
 
 
-(defn wait-client-create-index
-  [client]
-  (esu/wait-for-cluster client)
-  client)
-
-
-(defn create-client
-  []
-  (wait-client-create-index (esu/create-es-client)))
-
-
-(def ^:dynamic *client*)
-
-
-(defn set-client!
-  [client]
-  (alter-var-root #'*client* (constantly client)))
-
-
-(defn unset-client!
-  []
-  (.unbindRoot #'*client*))
-
-
-(defn close-client!
-  []
-  (.close *client*)
-  (unset-client!))
-
-
 (defn- prepare-data
   "Prepares the data by adding the ADMIN role with ALL rights, denormalizing
    the ACL, and turning the document into JSON."
@@ -95,65 +65,6 @@
       (catch VersionConflictEngineException _
         (response/response-conflict id)))))
 
-
-(deftype ESBinding []
-  Binding
-
-  (initialize [_ collection-id {:keys [spec] :as options}]
-    (let [index (escu/collection-id->index collection-id)]
-      (when-not (esu/index-exists? *client* index)
-        (esu/create-index *client* index spec)
-        (esu/wait-for-index *client* index))))
-
-
-  (add [_ data options]
-    (add-data *client* data))
-
-
-  (add [_ collection-id data options]
-    (add-data *client* data))
-
-
-  (retrieve [_ id options]
-    (find-data *client* (escu/id->index id) id options))
-
-
-  (delete [_ {:keys [id]} options]
-    (find-data *client* (escu/id->index id) id options)
-    (let [[type docid] (cu/split-id id)]
-      (.status (esu/delete *client* (escu/id->index id) type docid)))
-    (response/response-deleted id))
-
-
-  (edit [_ {:keys [id] :as data} options]
-    (let [[type docid] (cu/split-id id)
-          updated-doc (prepare-data data)]
-      (if (esu/update *client* (escu/id->index id) type docid updated-doc)
-        (response/json-response data)
-        (response/response-conflict id))))
-
-
-  (query [_ collection-id options]
-    (let [result (esu/search *client* (escu/collection-id->index collection-id) collection-id options)
-          count-before-pagination (-> result :hits :total)
-          aggregations (:aggregations result)
-          meta (cond-> {:count count-before-pagination}
-                       aggregations (assoc :aggregations aggregations))
-          hits (->> result
-                    :hits
-                    :hits
-                    (map :_source)
-                    (map acl-utils/normalize-acl))]
-      [meta hits]))
-
-  Closeable
-  (close [_]
-    nil))
-
-
-(defn get-instance
-  []
-  (ESBinding.))
 
 (deftype ESBindingLocal [^Client client]
   Binding
