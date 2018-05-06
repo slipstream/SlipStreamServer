@@ -11,11 +11,11 @@
    identifier and provides the Set-Cookie header with the given cookie, if
    the cookie value is not nil."
   [id & [[cookie-name cookie]]]
-  (cond-> {:status 201
+  (cond-> {:status  201
            :headers {"Location" id}
-           :body {:status 201
-                  :message (str id " created")
-                  :resource-id id}}
+           :body    {:status      201
+                     :message     (str id " created")
+                     :resource-id id}}
           cookie (assoc :cookies {cookie-name cookie})))
 
 
@@ -75,8 +75,7 @@
 
 (defn response-not-found
   [id]
-  (-> (str id " not found")
-      (map-response 404 id)))
+  (map-response (str id " not found") 404 id))
 
 
 (defn response-error
@@ -93,24 +92,21 @@
   "Provides an ExceptionInfo exception when the input is not valid. This is a
    400 status response. If the message is not provided, a generic one is used."
   [& [msg]]
-  (-> (or msg "invalid request")
-      (ex-response 400)))
+  (ex-response (or msg "invalid request") 400))
 
 
 (defn ex-not-found
   "Provides an ExceptionInfo exception when a resource is not found. This is a
    404 status response and the provided id should be the resource identifier."
   [id]
-  (-> (str id " not found")
-      (ex-response 404 id)))
+  (ex-response (str id " not found") 404 id))
 
 
 (defn ex-conflict
   "Provides an ExceptionInfo exception when there is a conflict. This is a 409
    status response and the provided id should be the resource identifier."
   [id]
-  (-> (str "conflict with " id)
-      (ex-response 409 id)))
+  (ex-response (str "conflict with " id) 409 id))
 
 
 (defn ex-unauthorized
@@ -129,8 +125,10 @@
    resource. This is a 405 status code. Information from the request is used to
    provide a reasonable message."
   [{:keys [uri request-method] :as request}]
-  (-> (str "invalid method (" (name (or request-method "UNKNOWN")) ") for " (or uri "UNKNOWN"))
-      (ex-response 405 uri)))
+  (let [msg (format "invalid method (%s) for %s"
+                    (name (or request-method "UNKNOWN"))
+                    (or uri "UNKNOWN"))]
+    (ex-response msg 405 uri)))
 
 
 (defn ex-bad-action
@@ -138,8 +136,11 @@
    used. This is a 404 status code. Information from the request and the action
    are used to provide a reasonable message."
   [{:keys [uri request-method] :as request} action]
-  (-> (str "undefined action (" (name (or request-method "UNKNOWN")) ", " action ") for " (or uri "UNKNOWN"))
-      (ex-response 404 uri)))
+  (let [msg (format "undefined action (%s, %s) for %s"
+                    (name (or request-method "UNKNOWN"))
+                    action
+                    (or uri "UNKNOWN"))]
+    (ex-response msg 404 uri)))
 
 
 (defn ex-bad-CIMI-filter
