@@ -25,8 +25,7 @@
 
 (defmethod p/tpl->user-params tpl/params-type
   [resource request]
-  (-> resource
-      (assoc :resourceURI p/resource-uri)))
+  (assoc resource :resourceURI p/resource-uri))
 
 
 ;;

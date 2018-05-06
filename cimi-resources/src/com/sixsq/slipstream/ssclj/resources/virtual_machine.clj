@@ -47,7 +47,7 @@
 (defmethod crud/new-identifier resource-name [json resource-name]
   (let [connector-href (get-in json [:connector :href])
         instanceID (get json :instanceID)
-        id (-> (str connector-href instanceID) u/from-data-uuid)]
+        id (u/from-data-uuid (str connector-href instanceID))]
     (assoc json :id (str resource-url "/" id))))
 
 (def validate-fn (u/create-spec-validation-fn :cimi/virtual-machine))

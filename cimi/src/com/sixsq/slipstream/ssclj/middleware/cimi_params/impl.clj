@@ -12,16 +12,13 @@
   "Calculates the value for the :first key in the CIMI parameters map. If a
    valid value isn't specified, this defaults to 1."
   [{:strs [$first] :as params}]
-  (-> $first
-      utils/first-valid-long
-      (or 1)))
+  (or (utils/first-valid-long $first) 1))
 
 (defn cimi-last
   "Calculates the value for the :last key in the CIMI parameters map. If a
    valid value isn't specified, then the value is nil."
   [{:strs [$last] :as params}]
-  (-> $last
-      utils/first-valid-long))
+  (utils/first-valid-long $last))
 
 (defn cimi-filter
   "Calculates the :filter key for the CIMI parameters map; the value is the

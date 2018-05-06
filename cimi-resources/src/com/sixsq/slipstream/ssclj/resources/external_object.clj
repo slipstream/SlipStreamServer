@@ -178,8 +178,7 @@
 ;; Generate ID.
 (defmethod crud/new-identifier resource-name
   [{:keys [objectName bucketName] :as resource} resource-name]
-  (if-let [new-id (-> (ha/md5 (str objectName bucketName))
-                      co/bytes->hex)]
+  (if-let [new-id (co/bytes->hex (ha/md5 (str objectName bucketName)))]
     (assoc resource :id (str (u/de-camelcase resource-name) "/" new-id))))
 
 ;;
@@ -314,8 +313,7 @@
   (try
     (a/can-modify? resource request)
     (let [upload-uri (upload-fn resource request)]
-      (-> (assoc resource :state state-uploading)
-          (db/edit request))
+      (db/edit (assoc resource :state state-uploading) request)
       (r/json-response {:uri upload-uri}))
     (catch ExceptionInfo ei
       (ex-data ei))))

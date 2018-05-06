@@ -108,7 +108,7 @@
 (defn- resource-ids-str-from-resp
   [resp]
   (->> (get-in resp [:body resource-tag])
-       (map #(:id %))
+       (map :id)
        (s/join ", ")))
 
 (defn conflict-if-exists
@@ -121,7 +121,7 @@
         count       (-> resp
                         (get :body {:count 0})
                         (get :count 0))]
-    (when (> count 0)
+    (when (pos? count)
       (logu/log-and-throw 409
         (format "Resource of type %s for '%s' already exists: %s" params-type
                 (:user-name request) (resource-ids-str-from-resp resp))))))

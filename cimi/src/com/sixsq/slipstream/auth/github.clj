@@ -56,6 +56,6 @@
 
 (defn get-github-user-info
   [access-token]
-  (-> (http/get "https://api.github.com/user"
-                {:headers {"Authorization" (str "token " access-token)}})
-      (parse-github-user)))
+  (parse-github-user
+    (http/get "https://api.github.com/user"
+              {:headers {"Authorization" (str "token " access-token)}})))

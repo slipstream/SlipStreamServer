@@ -1,16 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-oidc.utils
   (:require
     [clojure.string :as str]
-    [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.auth.utils.http :as uh]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.session :as p]
-    [com.sixsq.slipstream.ssclj.util.log :as logu]
-    [com.sixsq.slipstream.util.response :as r]
-    [environ.core :as environ]
-    [ring.util.codec :as codec]))
+    [com.sixsq.slipstream.ssclj.util.log :as logu]))
 
 (defn prefix
   [realm attr]
@@ -41,7 +33,7 @@
   (if-not (str/blank? group)
     (let [terms (remove str/blank? (str/split group #"/"))]
       (doall
-        (for [i (range 1 (+ 1 (count terms)))]
+        (for [i (range 1 (inc (count terms)))]
           (str "/" (str/join "/" (take i terms))))))
     []))
 

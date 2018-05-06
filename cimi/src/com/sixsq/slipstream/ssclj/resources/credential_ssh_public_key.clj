@@ -9,8 +9,7 @@
     [com.sixsq.slipstream.ssclj.util.log :as logu]))
 
 (defn import-key [common-info publicKey]
-  [nil (-> (ssh-utils/load publicKey)
-           (merge common-info))])
+  [nil (merge (ssh-utils/load publicKey) common-info)])
 
 (defn generate-key [common-info algorithm size]
   (let [ssh-key (merge (ssh-utils/generate algorithm size) common-info)]

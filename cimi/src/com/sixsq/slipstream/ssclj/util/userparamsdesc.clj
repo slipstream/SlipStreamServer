@@ -47,7 +47,7 @@
 
 (defn -getExecDesc
   []
-  (if (= 0 (count *user-exec-params-desc*))
+  (if (zero? (count *user-exec-params-desc*))
     (let [params-map (kw-to-str (slurp-exec-params-desc))]
       (set-exec-params! params-map)
       params-map)

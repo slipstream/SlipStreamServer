@@ -48,9 +48,8 @@
   (when email
     (let [filter-str (format "emailAddress='%s' and %s" email active-user-filter)
           filter {:filter (parser/parse-cimi-filter filter-str)}
-          matched-users (try (-> (db/query resource-name {:cimi-params filter
-                                                          :user-roles  ["ADMIN"]})
-                                 second)
+          matched-users (try (second (db/query resource-name {:cimi-params filter
+                                                              :user-roles  ["ADMIN"]}))
                              (catch ExceptionInfo e []))]
       (set (map :username matched-users)))))
 
@@ -59,10 +58,11 @@
   (when (and authn-method authn-id)
     (let [filter-str (format "%s='%s' and %s" (name authn-method) authn-id active-user-filter)
           filter {:filter (parser/parse-cimi-filter filter-str)}
-          matched-users (try (-> (db/query resource-name {:cimi-params filter
-                                                          :user-roles  ["ADMIN"]})
-                                 second)
-                             (catch ExceptionInfo e []))]
+          matched-users (try
+                          (second (db/query resource-name {:cimi-params filter
+                                                           :user-roles  ["ADMIN"]}))
+                          (catch ExceptionInfo _
+                            []))]
       (if (> (count matched-users) 1)
         (throw (Exception. (str "There should be only one result for "
                                 authn-id ". Was " matched-users)))

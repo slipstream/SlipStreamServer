@@ -17,8 +17,7 @@
 (defn get-s3-client
   [{:keys [key secret endpoint]}]
   (let [endpoint (AwsClientBuilder$EndpointConfiguration. endpoint "us-east-1")
-        credentials (-> (BasicAWSCredentials. key secret)
-                        (AWSStaticCredentialsProvider.))]
+        credentials (AWSStaticCredentialsProvider. (BasicAWSCredentials. key secret))]
     (-> (AmazonS3ClientBuilder/standard)
         (.withEndpointConfiguration endpoint)
         (.withCredentials credentials)
