@@ -13,8 +13,7 @@
                                        (s/map-of #{:href} any?)))
 
 ;; expiration time of the cookie
-;; uses cookie timestamp format
-(s/def :cimi.session/expiry ::cimi-core/nonblank-string)
+(s/def :cimi.session/expiry ::cimi-core/timestamp)
 
 ;; username is optional to support external authentication methods
 ;; that usually require creation of stub session for later validation

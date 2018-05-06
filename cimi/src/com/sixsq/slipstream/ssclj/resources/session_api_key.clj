@@ -2,6 +2,7 @@
   (:require
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.cookies :as cookies]
+    [com.sixsq.slipstream.auth.utils.timestamp :as ts]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.credential-template-api-key :as api-key-tpl]
@@ -86,7 +87,7 @@
       (let [session (sutils/create-session {:username identity, :href href} headers authn-method)
             claims (create-claims identity roles headers (:id session) (:clientIP session))
             cookie (cookies/claims-cookie claims)
-            expires (:expires cookie)
+            expires (ts/rfc822->iso8601 (:expires cookie))
             claims-roles (:roles claims)
             session (cond-> (assoc session :expiry expires)
                             claims-roles (assoc :roles claims-roles))]
