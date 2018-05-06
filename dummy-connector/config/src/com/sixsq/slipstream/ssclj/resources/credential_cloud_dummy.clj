@@ -1,10 +1,10 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential-cloud-dummy
   (:require
     [com.sixsq.slipstream.auth.acl :as acl]
-    [com.sixsq.slipstream.ssclj.resources.spec.credential-cloud-dummy]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.credential :as p]
-    [com.sixsq.slipstream.ssclj.resources.credential-template-cloud-dummy :as tpl]))
+    [com.sixsq.slipstream.ssclj.resources.credential-template-cloud-dummy :as tpl]
+    [com.sixsq.slipstream.ssclj.resources.spec.credential-cloud-dummy]))
 
 ;;
 ;; convert template to credential

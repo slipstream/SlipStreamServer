@@ -2,8 +2,8 @@
   "Utilities for creating expiration times for token claims and for formatting
    them correctly for the cookie 'expires' field."
   (:require
-    [clj-time.core :as t]
     [clj-time.coerce :as c]
+    [clj-time.core :as t]
     [clj-time.format :as f]))
 
 

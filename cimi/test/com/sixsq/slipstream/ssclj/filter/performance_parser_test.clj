@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.filter.performance-parser-test
   (:require
-    [clojure.test :refer :all]
     [clojure.string :as str]
+    [clojure.test :refer :all]
     [com.sixsq.slipstream.db.filter.parser :as parser]))
 
 (defn cimi-filter

@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.util.es-mapping-test
   (:require
-    [clojure.test :refer [deftest testing is are]]
-    [com.sixsq.slipstream.ssclj.resources.spec.common :as common]
-    [com.sixsq.slipstream.db.es.common.es-mapping :as t]))
+    [clojure.test :refer [are deftest is testing]]
+    [com.sixsq.slipstream.db.es.common.es-mapping :as t]
+    [com.sixsq.slipstream.ssclj.resources.spec.common :as common]))
 
 
 (deftest common-schema

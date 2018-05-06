@@ -1,12 +1,12 @@
 (ns com.sixsq.slipstream.ssclj.resources.callback
   (:require
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.callback.utils :as utils]
-    [com.sixsq.slipstream.ssclj.resources.spec.callback]
     [com.sixsq.slipstream.auth.acl :as a]
+    [com.sixsq.slipstream.ssclj.resources.callback.utils :as utils]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.spec.callback]
     [com.sixsq.slipstream.ssclj.util.log :as log-util]
     [com.sixsq.slipstream.util.response :as r])
   (:import (clojure.lang ExceptionInfo)))

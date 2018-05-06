@@ -1,10 +1,10 @@
 (ns com.sixsq.slipstream.ssclj.resources.user.utils
   (:require
-    [com.sixsq.slipstream.util.response :as r]
     [com.sixsq.slipstream.ssclj.resources.callback :as callback]
     [com.sixsq.slipstream.ssclj.resources.callback-user-email-validation :as user-email-callback]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.util.response :as r]))
 
 
 (def ^:const admin-opts {:user-name "INTERNAL", :user-roles ["ADMIN"]})

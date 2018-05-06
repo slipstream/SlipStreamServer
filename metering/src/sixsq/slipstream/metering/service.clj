@@ -1,7 +1,7 @@
 (ns sixsq.slipstream.metering.service
   (:require
-    [clojure.tools.logging :as log]
     [clojure.core.async :as async]
+    [clojure.tools.logging :as log]
     [environ.core :as env]
     [sixsq.slipstream.metering.metering :as metering]
     [sixsq.slipstream.metering.scheduler :as scheduler]

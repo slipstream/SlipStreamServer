@@ -1,11 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.virtual-machine-test
   (:require
-    [clojure.test :refer :all]
     [clojure.spec.alpha :as s]
+    [clojure.test :refer :all]
 
     [com.sixsq.slipstream.ssclj.resources.spec.virtual-machine :as t]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]
-    [com.sixsq.slipstream.ssclj.resources.virtual-machine :as vm]))
+    [com.sixsq.slipstream.ssclj.resources.virtual-machine :as vm]
+    [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 (def valid-acl {:owner {:principal "ADMIN",
                         :type      "ROLE"},

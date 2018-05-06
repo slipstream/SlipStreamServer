@@ -1,10 +1,10 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.metering-test
   (:require
-    [clojure.test :refer :all]
     [clojure.spec.alpha :as s]
+    [clojure.test :refer :all]
+    [com.sixsq.slipstream.ssclj.resources.metering :as m]
     [com.sixsq.slipstream.ssclj.resources.spec.metering :as t]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]
-    [com.sixsq.slipstream.ssclj.resources.metering :as m]))
+    [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 (def valid-acl {:owner {:principal "ADMIN",
                         :type      "ROLE"},

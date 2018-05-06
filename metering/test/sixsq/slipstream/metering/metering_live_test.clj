@@ -1,11 +1,11 @@
 (ns sixsq.slipstream.metering.metering-live-test
   (:require
-    [clojure.test :refer [deftest is are]]
     [clojure.core.async :refer [<!!]]
+    [clojure.test :refer [are deftest is]]
+    [com.sixsq.slipstream.dbtest.es.spandex-utils :as spu]
     [qbits.spandex :as spandex]
     [sixsq.slipstream.metering.metering :as t]
-    [sixsq.slipstream.metering.utils :as utils]
-    [com.sixsq.slipstream.dbtest.es.spandex-utils :as spu]))
+    [sixsq.slipstream.metering.utils :as utils]))
 
 (defn random-doc
   [resource-type]

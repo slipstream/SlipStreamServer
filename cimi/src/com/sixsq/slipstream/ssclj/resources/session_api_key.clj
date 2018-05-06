@@ -1,18 +1,18 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-api-key
   (:require
+    [clojure.string :as str]
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.cookies :as cookies]
     [com.sixsq.slipstream.auth.utils.timestamp :as ts]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.credential-template-api-key :as api-key-tpl]
     [com.sixsq.slipstream.ssclj.resources.credential.key-utils :as key-utils]
     [com.sixsq.slipstream.ssclj.resources.session :as p]
     [com.sixsq.slipstream.ssclj.resources.session-template-api-key :as tpl]
     [com.sixsq.slipstream.ssclj.resources.session.utils :as sutils]
-    [com.sixsq.slipstream.util.response :as r]
-    [clojure.string :as str]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]))
+    [com.sixsq.slipstream.util.response :as r]))
 
 (def ^:const authn-method "api-key")
 

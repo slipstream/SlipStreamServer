@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.service-attribute-test
   (:require
     [clojure.test :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.service-attribute :refer :all]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.service-attribute :refer :all]))
 
 
 (deftest check-uri->id

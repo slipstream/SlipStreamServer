@@ -1,12 +1,12 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential-api-key
   (:require
     [com.sixsq.slipstream.auth.acl :as acl]
-    [com.sixsq.slipstream.ssclj.resources.spec.credential-api-key]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.credential :as p]
     [com.sixsq.slipstream.ssclj.resources.credential-template-api-key :as tpl]
     [com.sixsq.slipstream.ssclj.resources.credential.key-utils :as key-utils]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]))
+    [com.sixsq.slipstream.ssclj.resources.spec.credential-api-key]))
 
 (defn strip-session-role
   [roles]

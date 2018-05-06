@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.credential-template-cloud
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
-    [com.sixsq.slipstream.ssclj.resources.spec.common :as cimi-common]))
+    [com.sixsq.slipstream.ssclj.resources.spec.common :as cimi-common]
+    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]))
 
 ; FIXME: see https://github.com/slipstream/SlipStreamServer/issues/1309
 (s/def :cimi.credential-template.cloud/key string?)

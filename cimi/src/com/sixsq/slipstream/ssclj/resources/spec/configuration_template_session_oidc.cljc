@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-oidc
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template :as ps]
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
-    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template :as ps]))
+    [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 (s/def :cimi.configuration-template.session-oidc/clientID ::cimi-core/token)
 (s/def :cimi.configuration-template.session-oidc/baseURL ::cimi-core/token)

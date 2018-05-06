@@ -1,19 +1,19 @@
 (ns com.sixsq.slipstream.ssclj.app.routes
   (:require
-    [ring.middleware.head :refer [wrap-head]]
-    [compojure.core :refer [defroutes let-routes routes POST GET PUT DELETE ANY]]
-    [compojure.route :as route]
+    [com.sixsq.slipstream.auth.auth :as auth]
+    [com.sixsq.slipstream.auth.cyclone :as cy]
+    [com.sixsq.slipstream.auth.github :as gh]
 
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.util.config :as cf]
 
-    [com.sixsq.slipstream.auth.auth :as auth]
-    [com.sixsq.slipstream.auth.github :as gh]
-    [com.sixsq.slipstream.auth.cyclone :as cy]
-    [com.sixsq.slipstream.util.response :as r]))
+    [com.sixsq.slipstream.util.response :as r]
+    [compojure.core :refer [ANY defroutes DELETE GET let-routes POST PUT routes]]
+    [compojure.route :as route]
+    [ring.middleware.head :refer [wrap-head]]))
 
 (def collection-routes
   (let-routes [uri (str p/service-context ":resource-name")]

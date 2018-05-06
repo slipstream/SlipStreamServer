@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.utils-test
   (:require
-    [clojure.test :refer [deftest are is]]
+    [clj-time.core :as time]
+    [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as t]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [clj-time.core :as time]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 (deftest check-expired?-and-not-expired?
   (let [past-time (-> 10 time/minutes time/ago u/unparse-timestamp-datetime)

@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.util.convert-test
   (:require
-    [clojure.test :refer [deftest are is]]
+    [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.util.convert :as c])
   (:import
     [java.util ArrayList HashMap]))

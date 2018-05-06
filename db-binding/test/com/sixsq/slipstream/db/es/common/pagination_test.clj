@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.db.es.common.pagination-test
   (:require
-    [clojure.test :refer [deftest is are]]
+    [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.db.es.common.pagination :as t]))
 
 (deftest check-es-paging-params

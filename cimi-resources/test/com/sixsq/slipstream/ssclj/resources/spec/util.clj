@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.util
   (:require
-    [clojure.test :refer :all]
     [clojure.spec.alpha :as s]
+    [clojure.test :refer :all]
     [expound.alpha :refer [expound-str]]))
 
 (defmacro spec-valid?

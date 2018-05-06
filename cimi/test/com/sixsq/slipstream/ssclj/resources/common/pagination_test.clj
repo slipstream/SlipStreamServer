@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.pagination-test
   (:require
-    [com.sixsq.slipstream.ssclj.resources.common.pagination :refer :all]
-    [clojure.test :refer :all]))
+    [clojure.test :refer :all]
+    [com.sixsq.slipstream.ssclj.resources.common.pagination :refer :all]))
 
 (def one-to-ten
   (range 1 11))

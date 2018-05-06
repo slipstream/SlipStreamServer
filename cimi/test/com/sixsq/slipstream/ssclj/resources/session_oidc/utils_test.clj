@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-oidc.utils-test
   (:require
-    [clojure.test :refer [deftest are is]]
+    [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as t]))
 
 (deftest check-prefix

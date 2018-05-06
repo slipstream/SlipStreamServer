@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.user-template-self-registration-test
   (:require
-    [clojure.test :refer [deftest is]]
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.resources.user-template :as st]
-    [com.sixsq.slipstream.ssclj.resources.spec.user-template-self-registration]))
+    [clojure.test :refer [deftest is]]
+    [com.sixsq.slipstream.ssclj.resources.spec.user-template-self-registration]
+    [com.sixsq.slipstream.ssclj.resources.user-template :as st]))
 
 (def valid-acl {:owner {:principal "ADMIN"
                         :type      "ROLE"}

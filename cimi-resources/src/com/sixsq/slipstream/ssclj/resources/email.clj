@@ -8,13 +8,13 @@
    email address. When the callback is triggered, the validated? flag is set to
    true."
   (:require
-    [com.sixsq.slipstream.ssclj.resources.spec.email]
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.email.utils :as email-utils]
+    [com.sixsq.slipstream.ssclj.resources.spec.email]
     [com.sixsq.slipstream.util.response :as r]
     [superstring.core :as str]))
 

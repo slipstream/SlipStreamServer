@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.service-catalog.utils
   (:require
     [clojure.string :as str]
-    [ring.util.response :as r]
-    [com.sixsq.slipstream.util.response :as sr]))
+    [com.sixsq.slipstream.util.response :as sr]
+    [ring.util.response :as r]))
 
 
 (defn valid-attribute-name?

@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.common-test
   (:require
-    [clojure.test :refer [deftest are is]]
     [clojure.spec.alpha :as s]
+    [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.ssclj.resources.spec.acl :as cimi-acl]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as cimi-common]
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]

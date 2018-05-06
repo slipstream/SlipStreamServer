@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.db.es.common.es-mapping
   "Utility for converting clojure.spec definitions to Elasticsearch mappings."
   (:require
-    [spec-tools.visitor :as visitor]
+    [spec-tools.impl :as impl]
     [spec-tools.parse :as parse]
-    [spec-tools.impl :as impl]))
+    [spec-tools.visitor :as visitor]))
 
 ;;Code borrowed from https://github.com/metosin/spec-tools/blob/master/src/spec_tools/json_schema.cljc
 

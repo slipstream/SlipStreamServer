@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.db.es.aggregation
   (:require [clojure.string :as str])
   (:import
-    (org.elasticsearch.search.aggregations AggregationBuilder)
-    (org.elasticsearch.action.search SearchRequestBuilder)))
+    (org.elasticsearch.action.search SearchRequestBuilder)
+    (org.elasticsearch.search.aggregations AggregationBuilder)))
 
 (defmacro aggregator-constructor-fn
   "This takes a form that must evaluate to a string at compile time. The

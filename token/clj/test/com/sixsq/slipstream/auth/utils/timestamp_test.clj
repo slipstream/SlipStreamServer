@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.auth.utils.timestamp-test
   (:refer-clojure :exclude [update])
   (:require
-    [clojure.test :refer :all]
     [clojure.string :as str]
+    [clojure.test :refer :all]
     [com.sixsq.slipstream.auth.utils.timestamp :as t]))
 
 

@@ -4,7 +4,7 @@
   (:import [com.sixsq.slipstream.persistence Run])
   (:import [com.sixsq.slipstream.persistence User])
   (:import [com.sixsq.slipstream.util Logger])
-  (:require [clojure.core.async :as async :refer [go timeout thread chan <! >! <!! alts!]])
+  (:require [clojure.core.async :as async :refer [<! <!! >! alts! chan go thread timeout]])
   (:gen-class
     :name slipstream.async.Launcher
     :methods [#^{:static true

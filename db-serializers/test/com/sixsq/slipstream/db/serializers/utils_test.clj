@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.db.serializers.utils-test
   (:require
     [clojure.test :refer :all]
-    [com.sixsq.slipstream.dbtest.es.utils-esdb :as ud]
-    [com.sixsq.slipstream.db.serializers.utils :as u]))
+    [com.sixsq.slipstream.db.serializers.utils :as u]
+    [com.sixsq.slipstream.dbtest.es.utils-esdb :as ud]))
 
 (deftest test-as-boolean
   (is (= true (u/as-boolean true)))

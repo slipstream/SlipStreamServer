@@ -1,15 +1,15 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.utils
   "General utilities for dealing with resources."
   (:require
-    [superstring.core :as str]
+    [clj-time.coerce :as c]
     [clj-time.core :as time]
     [clj-time.format :as time-fmt]
     [clojure.spec.alpha :as s]
-    [clj-time.coerce :as c]
+    [com.sixsq.slipstream.ssclj.util.log :as logu]
     [expound.alpha :as expound]
-    [com.sixsq.slipstream.ssclj.util.log :as logu])
+    [superstring.core :as str])
   (:import
-    (java.util UUID Date)
+    (java.util Date UUID)
     (org.joda.time DateTime)))
 
 ;; NOTE: this cannot be replaced with s/lisp-case because it

@@ -2,9 +2,9 @@
   "This CredentialTemplate allows creating a Credential containing an existing
    SSH public key, either in RSA or DSA format."
   (:require
-    [com.sixsq.slipstream.ssclj.resources.spec.credential-template-ssh-public-key]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.credential-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.spec.credential-template-ssh-public-key]))
 
 (def ^:const credential-type "ssh-public-key")
 (def ^:const method "import-ssh-public-key")

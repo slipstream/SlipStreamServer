@@ -2,8 +2,8 @@
   "Access Control Lists (an extension to the CIMI standard)."
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]
-    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]))
+    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
+    [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 
 (s/def ::principal ::cimi-core/nonblank-string)

@@ -1,16 +1,16 @@
 (ns com.sixsq.slipstream.ssclj.resources.external-object
   (:require
-    [clojure.tools.logging :as log]
-    [buddy.core.hash :as ha]
     [buddy.core.codecs :as co]
+    [buddy.core.hash :as ha]
+    [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.external-object.utils :as s3]
     [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
+    [com.sixsq.slipstream.ssclj.resources.external-object.utils :as s3]
     [com.sixsq.slipstream.ssclj.util.log :as logu]
     [com.sixsq.slipstream.util.response :as r])
   (:import (clojure.lang ExceptionInfo)))

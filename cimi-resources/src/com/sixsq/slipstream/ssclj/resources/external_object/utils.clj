@@ -4,12 +4,12 @@
     [clj-time.core :as t]
     [clojure.tools.logging :as log])
   (:import
-    (com.amazonaws.auth BasicAWSCredentials AWSStaticCredentialsProvider)
-    (com.amazonaws.services.s3 AmazonS3ClientBuilder)
-    (com.amazonaws.services.s3.model GeneratePresignedUrlRequest DeleteObjectRequest
-                                     ResponseHeaderOverrides CreateBucketRequest)
+    (com.amazonaws HttpMethod)
+    (com.amazonaws.auth AWSStaticCredentialsProvider BasicAWSCredentials)
     (com.amazonaws.client.builder AwsClientBuilder$EndpointConfiguration)
-    (com.amazonaws HttpMethod)))
+    (com.amazonaws.services.s3 AmazonS3ClientBuilder)
+    (com.amazonaws.services.s3.model CreateBucketRequest DeleteObjectRequest
+                                     GeneratePresignedUrlRequest ResponseHeaderOverrides)))
 
 
 (def ^:const default-ttl 15)

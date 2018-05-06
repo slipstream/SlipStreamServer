@@ -1,13 +1,13 @@
 (ns com.sixsq.slipstream.ssclj.resources.user
   (:require
     [clj-time.core :as t]
-    [com.sixsq.slipstream.ssclj.resources.user-template-direct :as tpl]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.user-template-direct :as tpl]
     [com.sixsq.slipstream.ssclj.util.log :as logu])
   (:import
     (clojure.lang ExceptionInfo)))

@@ -1,6 +1,6 @@
 (ns sixsq.slipstream.metering.utils-test
   (:require
-    [clojure.test :refer [deftest is are]]
+    [clojure.test :refer [are deftest is]]
     [sixsq.slipstream.metering.utils :as t]))
 
 (deftest check-str->int

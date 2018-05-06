@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.middleware.logger-test
   (:require
-    [clojure.test :refer :all]
     [clojure.string :as str]
+    [clojure.test :refer :all]
     [com.sixsq.slipstream.ssclj.middleware.logger :refer :all]))
 
 (def start 1450701200947)

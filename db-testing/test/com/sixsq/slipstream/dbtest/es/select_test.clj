@@ -1,13 +1,13 @@
 (ns com.sixsq.slipstream.dbtest.es.select-test
   (:refer-clojure :exclude [read update])
   (:require
-    [clojure.test :refer [deftest is are]]
+    [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.db.es.select :as t]
-    [com.sixsq.slipstream.dbtest.es.utils :as eut]
-    [com.sixsq.slipstream.db.es.utils :as eu])
-  (:import (org.elasticsearch.search.sort SortOrder)
-           (org.elasticsearch.action.search SearchRequestBuilder)
-           (org.elasticsearch.search.aggregations AggregationBuilder)))
+    [com.sixsq.slipstream.db.es.utils :as eu]
+    [com.sixsq.slipstream.dbtest.es.utils :as eut])
+  (:import (org.elasticsearch.action.search SearchRequestBuilder)
+           (org.elasticsearch.search.aggregations AggregationBuilder)
+           (org.elasticsearch.search.sort SortOrder)))
 
 (deftest check-select-keys
   (eut/with-es-test-client

@@ -1,12 +1,12 @@
 (ns com.sixsq.slipstream.ssclj.resources.callback-email-validation
   (:require
-    [com.sixsq.slipstream.ssclj.resources.callback :as callback]
-    [com.sixsq.slipstream.ssclj.util.log :as log-util]
     [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.util.response :as r]
+    [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.resources.callback :as callback]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.db.impl :as db])
+    [com.sixsq.slipstream.ssclj.util.log :as log-util]
+    [com.sixsq.slipstream.util.response :as r])
   (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const action-name "email-validation")

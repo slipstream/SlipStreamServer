@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.middleware.exception-handler
   (:require
-    [clojure.tools.logging :as log]
     [clj-stacktrace.repl :as st]
+    [clojure.tools.logging :as log]
     [ring.util.response :as r]))
 
 (defn treat-unexpected-exception

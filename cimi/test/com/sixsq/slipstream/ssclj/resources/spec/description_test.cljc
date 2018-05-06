@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.description-test
   (:require
-    [clojure.test :refer [deftest are is]]
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.resources.spec.description :as t]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as desc]))
+    [clojure.test :refer [are deftest is]]
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as desc]
+    [com.sixsq.slipstream.ssclj.resources.spec.description :as t]))
 
 (deftest check-parameter-type
   (are [expect-fn arg] (expect-fn (s/valid? :cimi.desc/type arg))

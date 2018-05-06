@@ -1,11 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.app.graphite
   (:require
     [clojure.tools.logging :as log]
-    [metrics.reporters.graphite :as graphite]
-    [environ.core :refer [env]])
+    [environ.core :refer [env]]
+    [metrics.reporters.graphite :as graphite])
   (:import
-    [java.util.concurrent TimeUnit]
-    [com.codahale.metrics MetricFilter]))
+    [com.codahale.metrics MetricFilter]
+    [java.util.concurrent TimeUnit]))
 
 
 (def ^:dynamic *reporter* nil)

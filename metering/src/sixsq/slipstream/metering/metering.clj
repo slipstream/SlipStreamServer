@@ -2,10 +2,10 @@
   "Core functions that copy a set of resource documents into 'metering'
    documents."
   (:require
-    [clojure.tools.logging :as log]
-    [clojure.string :as str]
-    [clojure.core.async :as async]
     [clj-time.core :as time]
+    [clojure.core.async :as async]
+    [clojure.string :as str]
+    [clojure.tools.logging :as log]
     [qbits.spandex :as spandex]
     [sixsq.slipstream.metering.utils :as utils]))
 

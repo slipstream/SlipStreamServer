@@ -1,14 +1,14 @@
 (ns com.sixsq.slipstream.ssclj.resources.job
   (:require
-    [superstring.core :as str]
     [com.sixsq.slipstream.auth.acl :as a]
-    [com.sixsq.slipstream.ssclj.resources.spec.job]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.resources.job.utils :as ju])
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.job.utils :as ju]
+    [com.sixsq.slipstream.ssclj.resources.spec.job]
+    [superstring.core :as str])
   (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-name "Job")

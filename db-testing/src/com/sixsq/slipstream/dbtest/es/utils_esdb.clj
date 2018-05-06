@@ -2,8 +2,8 @@
   (:require
     [com.sixsq.slipstream.db.es.binding :as esb]
     [com.sixsq.slipstream.db.es.utils :as esu]
-    [com.sixsq.slipstream.dbtest.es.utils :as esut]
-    [com.sixsq.slipstream.db.impl :as db]))
+    [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.dbtest.es.utils :as esut]))
 
 ;;
 ;; DB related.

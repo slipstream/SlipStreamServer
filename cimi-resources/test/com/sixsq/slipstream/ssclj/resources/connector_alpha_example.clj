@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.connector-alpha-example
   (:require
     [clojure.spec.alpha :as s]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.connector :as p]
-    [com.sixsq.slipstream.ssclj.resources.connector-template-alpha-example :as tpl]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.connector-template-alpha-example :as tpl]))
 
 (def ^:const cloud-service-type "alpha")
 

@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.tools.cli.utils
   (:require
-    [clojure.string :as s]
-    [clojure.edn :as edn]
     [clj-http.client :as http]
+    [clojure.edn :as edn]
+    [clojure.string :as s]
     [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]
     [com.sixsq.slipstream.db.serializers.service-config-util :as scu])
   (:import

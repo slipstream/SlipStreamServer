@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.session-template-cyclone-test
   (:require
-    [clojure.test :refer [deftest is]]
     [clojure.spec.alpha :as s]
+    [clojure.test :refer [deftest is]]
     [com.sixsq.slipstream.ssclj.resources.session-template :as st]
     [com.sixsq.slipstream.ssclj.resources.spec.session-template-cyclone]))
 

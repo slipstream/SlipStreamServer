@@ -1,18 +1,18 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential-ssh-public-key-lifecycle-test
   (:require
-    [clojure.test :refer :all]
     [clojure.data.json :as json]
-    [peridot.core :refer :all]
+    [clojure.spec.alpha :as s]
+    [clojure.test :refer :all]
+    [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.credential :as credential]
     [com.sixsq.slipstream.ssclj.resources.credential-template :as ct]
+    [com.sixsq.slipstream.ssclj.resources.credential-template-ssh-key-pair :as skp]
     [com.sixsq.slipstream.ssclj.resources.credential-template-ssh-public-key :as spk]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-    [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.credential.ssh-utils :as ssh-utils]
-    [com.sixsq.slipstream.ssclj.resources.credential-template-ssh-key-pair :as skp]))
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [peridot.core :refer :all]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 

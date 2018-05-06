@@ -1,10 +1,10 @@
 (ns com.sixsq.slipstream.ssclj.resources.email.utils
-  (:require [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+  (:require [com.sixsq.slipstream.ssclj.resources.callback :as callback]
             [com.sixsq.slipstream.ssclj.resources.callback-email-validation :as email-callback]
-            [com.sixsq.slipstream.util.response :as r]
+            [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
             [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-            [postal.core :as postal]
-            [com.sixsq.slipstream.ssclj.resources.callback :as callback])
+            [com.sixsq.slipstream.util.response :as r]
+            [postal.core :as postal])
   (:import (java.security MessageDigest)))
 
 

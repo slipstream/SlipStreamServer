@@ -1,15 +1,15 @@
 (ns com.sixsq.slipstream.dbtest.es.aggregate-test
   (:refer-clojure :exclude [read update])
   (:require
-    [clojure.test :refer [deftest is are]]
+    [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.db.es.aggregation :as t]
     [com.sixsq.slipstream.db.es.utils :as eu]
     [com.sixsq.slipstream.dbtest.es.utils :as eut]
 
     )
-  (:import (org.elasticsearch.search.sort SortOrder)
-           (org.elasticsearch.action.search SearchRequestBuilder)
-           (org.elasticsearch.search.aggregations AggregationBuilder)))
+  (:import (org.elasticsearch.action.search SearchRequestBuilder)
+           (org.elasticsearch.search.aggregations AggregationBuilder)
+           (org.elasticsearch.search.sort SortOrder)))
 
 (deftest check-aggregator-constructors
   (doseq [algo (keys t/aggregator-constructors)]

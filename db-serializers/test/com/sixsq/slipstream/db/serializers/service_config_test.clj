@@ -3,8 +3,8 @@
     [clojure.test :refer :all]
 
     [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]
-    [com.sixsq.slipstream.ssclj.resources.spec.description]
-    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-slipstream :as crtpls]))
+    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-slipstream :as crtpls]
+    [com.sixsq.slipstream.ssclj.resources.spec.description]))
 
 ;; Tests
 

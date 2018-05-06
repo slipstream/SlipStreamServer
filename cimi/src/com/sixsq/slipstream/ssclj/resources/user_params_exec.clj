@@ -1,10 +1,10 @@
 (ns com.sixsq.slipstream.ssclj.resources.user-params-exec
   (:require
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.user-params-template-exec]
     [com.sixsq.slipstream.ssclj.resources.user-params :as p]
-    [com.sixsq.slipstream.ssclj.resources.user-params-template-exec :as tpl]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]))
+    [com.sixsq.slipstream.ssclj.resources.user-params-template-exec :as tpl]))
 
 ;;
 ;; multimethods for validation

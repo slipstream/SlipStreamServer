@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.db.es-rest.acl
   (:require
-    [com.sixsq.slipstream.db.utils.acl :as acl-utils]
-    [com.sixsq.slipstream.db.es-rest.query :as ef]))
+    [com.sixsq.slipstream.db.es-rest.query :as ef]
+    [com.sixsq.slipstream.db.utils.acl :as acl-utils]))
 
 (defn and-acl
   "Enriches query-builder by adding a clause on ACL (extracted from options)"

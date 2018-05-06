@@ -3,8 +3,8 @@
    either via the static 'main' function (e.g. for running as a daemon) or via
    the 'start' function (e.g. for testing from the REPL)."
   (:require
-    [clojure.tools.logging :as log]
-    [clojure.string :as str])
+    [clojure.string :as str]
+    [clojure.tools.logging :as log])
   (:import
     [java.io Closeable]
     [java.net InetSocketAddress])

@@ -9,13 +9,13 @@
     * for each connector the component is priced on the smallest service offer
   "
   (:require
-    [clojure.tools.logging :as log]
-    [clojure.string :as str]
     [clojure.core.async :as async]
-    [sixsq.slipstream.pricing.lib.pricing :as pr]
+    [clojure.string :as str]
+    [clojure.tools.logging :as log]
+    [environ.core :as e]
     [sixsq.slipstream.client.api.cimi :as cimi]
     [sixsq.slipstream.client.sync :as sync]
-    [environ.core :as e]))
+    [sixsq.slipstream.pricing.lib.pricing :as pr]))
 
 (def no-price -1)
 

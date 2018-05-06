@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.dbtest.es.utils-test
   (:require
-    [clojure.test :refer [deftest is are]]
+    [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.dbtest.es.utils :as eu])
   (:import (org.elasticsearch.action.admin.indices.create CreateIndexResponse)))
 

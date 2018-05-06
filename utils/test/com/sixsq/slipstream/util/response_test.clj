@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.util.response-test
   (:require
-    [clojure.test :refer [deftest are is]]
-    [com.sixsq.slipstream.util.response :as r]
-    [clojure.string :as str])
+    [clojure.string :as str]
+    [clojure.test :refer [are deftest is]]
+    [com.sixsq.slipstream.util.response :as r])
   (:import
     (clojure.lang ExceptionInfo)))
 

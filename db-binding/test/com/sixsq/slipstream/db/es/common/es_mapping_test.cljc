@@ -1,12 +1,12 @@
 (ns com.sixsq.slipstream.db.es.common.es-mapping-test
   (:require
-    [clojure.test :refer [deftest testing is are]]
     [clojure.spec.alpha :as s]
+    [clojure.test :refer [are deftest is testing]]
+    [com.sixsq.slipstream.db.es.common.es-mapping :as t]
+    #_[com.sixsq.slipstream.ssclj.resources.spec.common :as common]
     [spec-tools.core :as st]
     [spec-tools.data-spec :as ds]
-    [spec-tools.spec :as spec]
-    #_[com.sixsq.slipstream.ssclj.resources.spec.common :as common]
-    [com.sixsq.slipstream.db.es.common.es-mapping :as t]))
+    [spec-tools.spec :as spec]))
 
 ;;Borrowed from https://github.com/metosin/spec-tools/blob/master/test/cljc/spec_tools/json_schema_test.cljc
 

@@ -3,16 +3,16 @@
 ;;
 (ns com.sixsq.slipstream.db.es.binding
   (:require
-    [com.sixsq.slipstream.db.utils.common :as cu]
+    [com.sixsq.slipstream.db.binding :refer [Binding]]
     [com.sixsq.slipstream.db.es.common.utils :as escu]
-    [com.sixsq.slipstream.util.response :as response]
     [com.sixsq.slipstream.db.es.utils :as esu]
     [com.sixsq.slipstream.db.utils.acl :as acl-utils]
-    [com.sixsq.slipstream.db.binding :refer [Binding]])
+    [com.sixsq.slipstream.db.utils.common :as cu]
+    [com.sixsq.slipstream.util.response :as response])
   (:import
+    (java.io Closeable)
     (org.elasticsearch.client Client)
-    (org.elasticsearch.index.engine VersionConflictEngineException)
-    (java.io Closeable)))
+    (org.elasticsearch.index.engine VersionConflictEngineException)))
 
 
 (defn wait-client-create-index

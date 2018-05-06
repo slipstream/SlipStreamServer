@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.db.binding-lifecycle
   (:require
-    [clojure.test :refer [deftest is are]]
     [clojure.spec.alpha :as s]
+    [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.db.binding :as db]))
 
 (s/def ::id string?)

@@ -1,11 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.credential-cloud-dummy
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.resources.spec.credential-template-cloud-dummy]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]
     [com.sixsq.slipstream.ssclj.resources.spec.credential :as cred]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template :as ps]
-    [com.sixsq.slipstream.ssclj.resources.spec.credential-template-cloud :as ctc]))
+    [com.sixsq.slipstream.ssclj.resources.spec.credential-template-cloud :as ctc]
+    [com.sixsq.slipstream.ssclj.resources.spec.credential-template-cloud-dummy]
+    [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 (s/def :cimi.credential.cloud-dummy/domain-name string?)
 

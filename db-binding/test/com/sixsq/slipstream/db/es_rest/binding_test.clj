@@ -1,10 +1,10 @@
 (ns com.sixsq.slipstream.db.es-rest.binding-test
   (:require
-    [clojure.test :refer [deftest is are]]
+    [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.db.binding-lifecycle :as lifecycle]
     [com.sixsq.slipstream.db.binding-queries :as queries]
-    [com.sixsq.slipstream.db.es.es-node :as es-node]
-    [com.sixsq.slipstream.db.es-rest.binding :as t]))
+    [com.sixsq.slipstream.db.es-rest.binding :as t]
+    [com.sixsq.slipstream.db.es.es-node :as es-node]))
 
 
 (deftest check-es-rest-protocol

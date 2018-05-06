@@ -4,8 +4,8 @@
     [clojure.spec.alpha :as s]
     [clojure.spec.gen.alpha :as gen]
     [clojure.string :as str]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
+    [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 ;;
 ;; basic types

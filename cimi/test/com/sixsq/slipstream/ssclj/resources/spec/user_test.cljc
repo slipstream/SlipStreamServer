@@ -2,8 +2,8 @@
   (:require
     [clojure.spec.alpha :as s]
     [clojure.test :refer [deftest is]]
-    [com.sixsq.slipstream.ssclj.resources.user :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.spec.user]))
+    [com.sixsq.slipstream.ssclj.resources.spec.user]
+    [com.sixsq.slipstream.ssclj.resources.user :refer :all]))
 
 (def valid-acl {:owner {:principal "ADMIN"
                         :type      "ROLE"}

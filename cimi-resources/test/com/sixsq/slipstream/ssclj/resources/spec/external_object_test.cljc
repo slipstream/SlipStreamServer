@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.external-object-test
   (:require
-    [clojure.test :refer [deftest]]
     [clojure.spec.alpha :as s]
+    [clojure.test :refer [deftest]]
     [com.sixsq.slipstream.ssclj.resources.spec.external-object :as eos]
     [com.sixsq.slipstream.ssclj.resources.spec.util :as sut]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))

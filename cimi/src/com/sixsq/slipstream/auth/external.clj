@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.auth.external
   (:require
-    [clojure.tools.logging :as log]
     [clojure.string :as str]
-    [com.sixsq.slipstream.auth.utils.db :as db]
+    [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.cookies :as cookies]
+    [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.auth.utils.http :as uh]))
 
 (defn- mapped-user

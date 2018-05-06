@@ -4,13 +4,13 @@
   "
   {:doc/format :markdown}
   (:require
-    [clojure.tools.logging :as log]
-    [clojure.walk :as walk]
     [clojure.data.json :as json]
-    [clojure.string :as str])
-  (:import [java.util Map List Set]
-           [com.sixsq.slipstream.persistence Module ImageModule ModuleCategory ModuleCategory]
-           [com.sixsq.slipstream.configuration Configuration]
+    [clojure.string :as str]
+    [clojure.tools.logging :as log]
+    [clojure.walk :as walk])
+  (:import [com.sixsq.slipstream.configuration Configuration]
+           [com.sixsq.slipstream.persistence ImageModule Module ModuleCategory ModuleCategory]
+           [java.util List Map Set]
            )
   (:gen-class
     :name sixsq.slipstream.prs.core.JavaWrapper

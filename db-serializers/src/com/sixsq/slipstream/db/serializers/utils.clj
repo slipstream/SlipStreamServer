@@ -1,13 +1,13 @@
 (ns com.sixsq.slipstream.db.serializers.utils
   (:require
     [clojure.tools.logging :as log]
-    [superstring.core :as s]
     [com.sixsq.slipstream.db.es.binding :as esb]
     [com.sixsq.slipstream.db.es.common.utils :as escu]
     [com.sixsq.slipstream.db.es.utils :as esu]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :as aih]
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]))
+    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
+    [superstring.core :as s]))
 
 (defn throw-on-resp-error
   [resp]

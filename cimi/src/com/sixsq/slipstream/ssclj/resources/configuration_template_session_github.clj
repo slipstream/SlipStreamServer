@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.configuration-template-session-github
   (:require
-    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-github]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-github]))
 
 (def ^:const service "session-github")
 

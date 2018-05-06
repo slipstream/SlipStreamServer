@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.user.utils-test
   (:require
-    [clojure.test :refer [deftest is are]]
+    [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.ssclj.resources.user.utils :as t])
   (:import
     (clojure.lang ExceptionInfo)))

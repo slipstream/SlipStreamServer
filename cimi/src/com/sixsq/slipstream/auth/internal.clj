@@ -1,14 +1,14 @@
 (ns com.sixsq.slipstream.auth.internal
   (:refer-clojure :exclude [update])
   (:require
-    [clojure.tools.logging :as log]
+    [buddy.core.codecs :as co]
 
+    [buddy.core.hash :as ha]
+    [clojure.string :as str]
+    [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.cookies :as cookies]
     [com.sixsq.slipstream.auth.utils.db :as db]
-    [com.sixsq.slipstream.auth.utils.http :as uh]
-    [buddy.core.codecs :as co]
-    [clojure.string :as str]
-    [buddy.core.hash :as ha]))
+    [com.sixsq.slipstream.auth.utils.http :as uh]))
 
 (defn- extract-credentials
   [request]

@@ -1,10 +1,10 @@
 (ns com.sixsq.slipstream.ssclj.resources.configuration-session-github
   (:require
-    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-github]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration :as p]
     [com.sixsq.slipstream.ssclj.resources.configuration-template-session-github :as tpl]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]))
+    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-github]))
 
 (def ^:const service "session-github")
 

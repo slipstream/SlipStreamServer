@@ -1,14 +1,14 @@
 (ns com.sixsq.slipstream.ssclj.resources.user-params
   (:require
-    [com.sixsq.slipstream.ssclj.resources.spec.user-params-exec]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [clojure.string :as s]
     [com.sixsq.slipstream.auth.acl :as a]
-    [com.sixsq.slipstream.ssclj.util.log :as logu]
     [com.sixsq.slipstream.ssclj.middleware.cimi-params.impl :as cpi]
-    [clojure.string :as s]))
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.spec.user-params-exec]
+    [com.sixsq.slipstream.ssclj.util.log :as logu]))
 
 (def ^:const resource-tag :userParam)
 

@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.db.atom.binding-test
   (:require
-    [clojure.test :refer [deftest is are]]
-    [duratom.core :as duratom]
+    [clojure.test :refer [are deftest is]]
+    [com.sixsq.slipstream.db.atom.binding :as t]
     [com.sixsq.slipstream.db.binding-lifecycle :as lifecycle]
-    [com.sixsq.slipstream.db.atom.binding :as t]))
+    [duratom.core :as duratom]))
 
 (deftest check-standard-atom
   (lifecycle/check-binding-lifecycle (t/->AtomBinding (atom {}))))

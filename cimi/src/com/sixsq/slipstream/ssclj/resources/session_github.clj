@@ -1,9 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-github
   (:require
     [clojure.tools.logging :as log]
-    [environ.core :as environ]
-
     [com.sixsq.slipstream.auth.cookies :as cookies]
+
     [com.sixsq.slipstream.auth.external :as ex]
     [com.sixsq.slipstream.auth.github :as auth-github]
     [com.sixsq.slipstream.auth.internal :as auth-internal]
@@ -14,12 +13,13 @@
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.session :as p]
-    [com.sixsq.slipstream.ssclj.resources.session.utils :as sutils]
     [com.sixsq.slipstream.ssclj.resources.session-template-github :as tpl]
+    [com.sixsq.slipstream.ssclj.resources.session.utils :as sutils]
     [com.sixsq.slipstream.ssclj.resources.spec.session]
     [com.sixsq.slipstream.ssclj.resources.spec.session-template-github]
     [com.sixsq.slipstream.ssclj.util.log :as logu]
-    [com.sixsq.slipstream.util.response :as r]))
+    [com.sixsq.slipstream.util.response :as r]
+    [environ.core :as environ]))
 
 (def ^:const authn-method "github")
 

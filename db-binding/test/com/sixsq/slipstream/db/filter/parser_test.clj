@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.db.filter.parser-test
   (:require
-    [clojure.test :refer [deftest is are]]
+    [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.db.filter.parser :refer :all]
     [instaparse.core :as insta]))
 

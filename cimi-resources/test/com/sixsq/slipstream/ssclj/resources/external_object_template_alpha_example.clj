@@ -1,12 +1,12 @@
 (ns com.sixsq.slipstream.ssclj.resources.external-object-template-alpha-example
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
     [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
+    [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
+    [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
     [com.sixsq.slipstream.ssclj.resources.spec.external-object :as eos]
-    [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]))
+    [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 (def ^:const objectType "alpha")
 

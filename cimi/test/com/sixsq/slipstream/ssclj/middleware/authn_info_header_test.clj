@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.middleware.authn-info-header-test
   (:require
     [clojure.test :refer :all]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer :all]
     [com.sixsq.slipstream.auth.cookies :as cookies]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer :all]
     [ring.util.codec :as codec]))
 
 (defn serialize-cookie-value

@@ -2,11 +2,11 @@
 ;; TODO: factorize common libraries to auth and ssclj project
 ;;
 (ns com.sixsq.slipstream.ssclj.util.config
-  (:require [environ.core :as environ]
-            [me.raynes.fs :as fs]
-            [clojure.edn :as edn]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.tools.logging :as log]
-            [clojure.java.io :as io]))
+            [environ.core :as environ]
+            [me.raynes.fs :as fs]))
 
 (defn- find-resource
   [resource-path]

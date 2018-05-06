@@ -4,9 +4,9 @@
     [clojure.string :as s]
     [clojure.tools.cli :refer [parse-opts]]
 
-    [com.sixsq.slipstream.tools.cli.utils :refer :all]
     [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]
-    [com.sixsq.slipstream.db.serializers.service-config-util :as scu])
+    [com.sixsq.slipstream.db.serializers.service-config-util :as scu]
+    [com.sixsq.slipstream.tools.cli.utils :refer :all])
   (:gen-class))
 
 ;;

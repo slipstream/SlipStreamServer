@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.db.utils.common
   "General utilities for dealing with resources."
   (:require
+    [clojure.string :as str]
     [clojure.tools.logging :as log]
-    [superstring.core :as s]
-    [clojure.string :as str]))
+    [superstring.core :as s]))
 
 ;; NOTE: this cannot be replaced with s/lisp-case because it
 ;; will treat a '/' in a resource name as a word separator.

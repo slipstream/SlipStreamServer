@@ -1,13 +1,13 @@
 (ns com.sixsq.slipstream.ssclj.resources.service-benchmark
   (:require
-    [com.sixsq.slipstream.ssclj.resources.spec.service-benchmark]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.service-catalog.utils :as sc]
     [com.sixsq.slipstream.auth.acl :as a]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.service-attribute-namespace :as sn]
+    [com.sixsq.slipstream.ssclj.resources.service-catalog.utils :as sc]
+    [com.sixsq.slipstream.ssclj.resources.spec.service-benchmark]
     [superstring.core :as str]))
 
 

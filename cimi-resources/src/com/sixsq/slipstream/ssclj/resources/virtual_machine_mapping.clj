@@ -1,12 +1,12 @@
 (ns com.sixsq.slipstream.ssclj.resources.virtual-machine-mapping
   (:require
-    [com.sixsq.slipstream.ssclj.resources.spec.virtual-machine-mapping]
+    [com.sixsq.slipstream.auth.acl :as a]
 
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.auth.acl :as a]))
+    [com.sixsq.slipstream.ssclj.resources.spec.virtual-machine-mapping]))
 
 (def ^:const resource-tag :virtualMachineMappings)
 

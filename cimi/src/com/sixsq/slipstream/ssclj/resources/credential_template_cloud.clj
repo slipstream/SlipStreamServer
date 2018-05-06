@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential-template-cloud
   (:require
     [com.sixsq.slipstream.ssclj.resources.credential-template :as ct]
-    [com.sixsq.slipstream.ssclj.util.userparamsdesc :refer [slurp-cloud-cred-desc]]
-    [com.sixsq.slipstream.ssclj.resources.credential-template :as p]))
+    [com.sixsq.slipstream.ssclj.resources.credential-template :as p]
+    [com.sixsq.slipstream.ssclj.util.userparamsdesc :refer [slurp-cloud-cred-desc]]))
 
 (def ^:const resource-acl-default {:owner {:principal "ADMIN"
                                            :type      "ROLE"}

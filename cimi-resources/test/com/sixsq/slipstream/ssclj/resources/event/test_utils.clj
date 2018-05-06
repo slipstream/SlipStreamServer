@@ -1,14 +1,14 @@
 (ns com.sixsq.slipstream.ssclj.resources.event.test-utils
   (:require
-    [clojure.test :refer [is]]
-    [peridot.core :refer :all]
-    [clojure.data.json :as json]
-    [clojure.string :as str]
-    [ring.util.codec :as rc]
     [clj-time.core :as time]
     [clj-time.format :as time-fmt]
+    [clojure.data.json :as json]
+    [clojure.string :as str]
+    [clojure.test :refer [is]]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]))
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [peridot.core :refer :all]
+    [ring.util.codec :as rc]))
 
 
 (defn to-time

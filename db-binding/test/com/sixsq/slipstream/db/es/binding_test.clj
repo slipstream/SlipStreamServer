@@ -1,10 +1,10 @@
 (ns com.sixsq.slipstream.db.es.binding-test
   (:require
     [clojure.test :refer [deftest is]]
-    [com.sixsq.slipstream.db.es.binding :as t]
-    [com.sixsq.slipstream.db.es.es-node :as es-node]
     [com.sixsq.slipstream.db.binding-lifecycle :as lifecycle]
-    [com.sixsq.slipstream.db.binding-queries :as queries])
+    [com.sixsq.slipstream.db.binding-queries :as queries]
+    [com.sixsq.slipstream.db.es.binding :as t]
+    [com.sixsq.slipstream.db.es.es-node :as es-node])
   (:import
     (clojure.lang Var$Unbound)
     (java.io StringWriter)))

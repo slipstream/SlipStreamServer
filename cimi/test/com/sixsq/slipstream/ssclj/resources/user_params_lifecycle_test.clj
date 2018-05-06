@@ -1,10 +1,10 @@
 (ns com.sixsq.slipstream.ssclj.resources.user-params-lifecycle-test
   (:require
     [clojure.test :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.user-params :as up]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [com.sixsq.slipstream.ssclj.resources.user-params :as up]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 

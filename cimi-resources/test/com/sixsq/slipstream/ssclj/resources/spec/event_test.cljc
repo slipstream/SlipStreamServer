@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.event-test
   (:require
-    [clojure.test :refer [deftest are is]]
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.resources.event :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]))
+    [clojure.test :refer [are deftest is]]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.event :refer :all]))
 
 (def event-timestamp "2015-01-16T08:05:00.0Z")
 

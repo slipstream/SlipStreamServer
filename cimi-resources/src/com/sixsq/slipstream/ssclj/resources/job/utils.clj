@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.job.utils
   (:require
-    [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
     [clj-time.core :as time]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u])
+    [clojure.tools.logging :as log]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk])
   (:import (org.apache.commons.io.filefilter FalseFileFilter)))
 
 (def state-running "RUNNING")

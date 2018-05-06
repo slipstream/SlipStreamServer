@@ -1,15 +1,15 @@
 (ns com.sixsq.slipstream.ssclj.resources.external-object-report-lifecycle-test
   (:require
     [clojure.data.json :as json]
-    [clojure.test :refer [deftest use-fixtures join-fixtures]]
-    [peridot.core :refer [request]]
+    [clojure.test :refer [deftest join-fixtures use-fixtures]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
     [com.sixsq.slipstream.ssclj.resources.external-object-lifecycle-test-utils :as eoltu]
     [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
     [com.sixsq.slipstream.ssclj.resources.external-object-template-report :as report]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]))
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [peridot.core :refer [request]]))
 
 
 (defn update-server-conf-fixture!

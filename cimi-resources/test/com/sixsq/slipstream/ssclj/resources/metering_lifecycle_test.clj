@@ -1,15 +1,15 @@
 (ns com.sixsq.slipstream.ssclj.resources.metering-lifecycle-test
   (:require
-    [clojure.test :refer :all]
-    [clojure.data.json :as json]
-    [peridot.core :refer :all]
     [cemerick.url :as url]
-    [com.sixsq.slipstream.ssclj.resources.metering :as m]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
+    [clj-time.core :as time]
+    [clojure.data.json :as json]
+    [clojure.test :refer :all]
     [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [clj-time.core :as time]))
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [com.sixsq.slipstream.ssclj.resources.metering :as m]
+    [peridot.core :refer :all]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 

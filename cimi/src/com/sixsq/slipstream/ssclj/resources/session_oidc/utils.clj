@@ -2,15 +2,15 @@
   (:require
     [clojure.string :as str]
     [clojure.tools.logging :as log]
-    [ring.util.codec :as codec]
-    [environ.core :as environ]
-    [com.sixsq.slipstream.ssclj.resources.session :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.auth.utils.http :as uh]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.session :as p]
+    [com.sixsq.slipstream.ssclj.util.log :as logu]
     [com.sixsq.slipstream.util.response :as r]
-    [com.sixsq.slipstream.ssclj.util.log :as logu]))
+    [environ.core :as environ]
+    [ring.util.codec :as codec]))
 
 (defn prefix
   [realm attr]

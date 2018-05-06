@@ -1,24 +1,24 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-github-lifecycle-test
   (:require
-    [clojure.test :refer :all]
     [clojure.data.json :as json]
-    [peridot.core :refer :all]
-    [ring.util.codec :as codec]
+    [clojure.test :refer :all]
+    [com.sixsq.slipstream.auth.external :as ex]
+    [com.sixsq.slipstream.auth.github :as auth-github]
 
     [com.sixsq.slipstream.auth.utils.db :as db]
+    [com.sixsq.slipstream.auth.utils.sign :as sign]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.configuration :as configuration]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.session :as session]
     [com.sixsq.slipstream.ssclj.resources.session-template :as ct]
-    [com.sixsq.slipstream.ssclj.resources.session-template-github :as github]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-    [com.sixsq.slipstream.auth.github :as auth-github]
-    [com.sixsq.slipstream.auth.utils.sign :as sign]
-    [com.sixsq.slipstream.auth.external :as ex]
     [com.sixsq.slipstream.ssclj.resources.session-template :as st]
-    [com.sixsq.slipstream.ssclj.resources.configuration :as configuration]))
+    [com.sixsq.slipstream.ssclj.resources.session-template-github :as github]
+    [peridot.core :refer :all]
+    [ring.util.codec :as codec]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 

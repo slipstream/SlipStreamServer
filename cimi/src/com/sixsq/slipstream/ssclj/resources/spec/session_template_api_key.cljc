@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.session-template-api-key
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template :as ps]))
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template :as ps]
+    [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 (s/def :cimi.session-template.api-key/key ::cimi-core/nonblank-string)
 (s/def :cimi.session-template.api-key/secret ::cimi-core/nonblank-string)

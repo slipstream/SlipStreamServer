@@ -1,16 +1,16 @@
 (ns com.sixsq.slipstream.ssclj.resources.configuration-slipstream-lifecycle-test
   (:require
-    [clojure.test :refer [deftest use-fixtures is]]
     [clojure.data.json :as json]
-    [peridot.core :refer :all]
+    [clojure.test :refer [deftest is use-fixtures]]
+    [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration :refer :all]
+    [com.sixsq.slipstream.ssclj.resources.configuration-lifecycle-test-utils :as test-utils]
+    [com.sixsq.slipstream.ssclj.resources.configuration-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream :as slipstream]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.resources.configuration-lifecycle-test-utils :as test-utils]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-    [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.configuration-template :as ct]))
+    [peridot.core :refer :all]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 

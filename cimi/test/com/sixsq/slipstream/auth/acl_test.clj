@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.auth.acl-test
   (:require
-    [clojure.test :refer [deftest are is]]
+    [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.auth.acl :as acl]))
 
 (deftest check-current-authentication

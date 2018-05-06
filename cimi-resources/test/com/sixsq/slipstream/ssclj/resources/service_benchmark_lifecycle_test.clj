@@ -1,16 +1,16 @@
 (ns com.sixsq.slipstream.ssclj.resources.service-benchmark-lifecycle-test
   (:require
-    [clojure.test :refer :all]
     [clojure.data.json :as json]
-    [peridot.core :refer :all]
-    [ring.util.codec :as rc]
-    [com.sixsq.slipstream.ssclj.resources.service-attribute-namespace :as sn]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
-    [com.sixsq.slipstream.ssclj.resources.service-benchmark :refer :all]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
+    [clojure.test :refer :all]
     [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]))
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [com.sixsq.slipstream.ssclj.resources.service-attribute-namespace :as sn]
+    [com.sixsq.slipstream.ssclj.resources.service-benchmark :refer :all]
+    [peridot.core :refer :all]
+    [ring.util.codec :as rc]))
 
 (use-fixtures :each t/with-test-server-fixture)
 

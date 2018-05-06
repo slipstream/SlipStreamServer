@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.external-object.utils-test
   (:require
-    [clojure.test :refer :all]
     [clojure.string :as s]
+    [clojure.test :refer :all]
     [com.sixsq.slipstream.ssclj.resources.external-object.utils :as u]))
 
 

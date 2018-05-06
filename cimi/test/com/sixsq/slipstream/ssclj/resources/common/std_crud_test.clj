@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.std-crud-test
   (:require
     [clojure.test :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as t]
     [com.sixsq.slipstream.auth.acl :as a]
-    [com.sixsq.slipstream.db.impl :as db-impl])
+    [com.sixsq.slipstream.db.impl :as db-impl]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as t])
   (:import (clojure.lang ExceptionInfo)))
 
 (deftest resolve-href-keep-with-nil-href

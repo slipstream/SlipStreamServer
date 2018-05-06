@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.connector-template-test
   (:require
-    [clojure.test :refer :all]
     [clojure.spec.alpha :as s]
+    [clojure.test :refer :all]
 
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.connector-template :as ct]

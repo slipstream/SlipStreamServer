@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.db.es.acl
   (:require
-    [com.sixsq.slipstream.db.utils.acl :as acl-utils]
-    [com.sixsq.slipstream.db.es.filter :as ef]))
+    [com.sixsq.slipstream.db.es.filter :as ef]
+    [com.sixsq.slipstream.db.utils.acl :as acl-utils]))
 
 (def ^:private query-no-result (ef/term-query "id" ""))
 

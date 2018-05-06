@@ -3,12 +3,12 @@
     [clojure.data.json :as json]
     [clojure.tools.logging :as log]
     [clojure.walk :refer [keywordize-keys]]
+    [com.sixsq.slipstream.auth.cookies :as cookies]
     [compojure.core :refer [defroutes PUT]]
     [compojure.route :as route]
-    [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
+    [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
     [ring.middleware.json :refer [wrap-json-params]]
-    [sixsq.slipstream.placement.core :as pc]
-    [com.sixsq.slipstream.auth.cookies :as cookies]))
+    [sixsq.slipstream.placement.core :as pc]))
 
 (defn- authenticated?
   [ss-token]

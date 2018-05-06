@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.external-object-test
   (:require
-    [clojure.test :refer :all]
     [clojure.string :as s]
+    [clojure.test :refer :all]
     [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
     [com.sixsq.slipstream.ssclj.resources.external-object.utils :as s3])
   (:import (clojure.lang ExceptionInfo)))

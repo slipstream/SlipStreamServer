@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.cloud-entry-point-test
   (:require
-    [clojure.test :refer [deftest are is]]
-    [com.sixsq.slipstream.ssclj.resources.cloud-entry-point :refer :all]
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.app.params :as p]))
+    [clojure.test :refer [are deftest is]]
+    [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.resources.cloud-entry-point :refer :all]))
 
 (defn valid? [cep] (s/valid? :cimi/cloud-entry-point cep))
 (def invalid? (complement valid?))

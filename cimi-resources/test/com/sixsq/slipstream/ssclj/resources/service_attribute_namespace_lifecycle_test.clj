@@ -1,14 +1,14 @@
 (ns com.sixsq.slipstream.ssclj.resources.service-attribute-namespace-lifecycle-test
   (:require
-    [com.sixsq.slipstream.ssclj.resources.service-attribute-namespace :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-    [clojure.test :refer :all]
     [clojure.data.json :as json]
-    [peridot.core :refer :all]
+    [clojure.test :refer :all]
     [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]))
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [com.sixsq.slipstream.ssclj.resources.service-attribute-namespace :refer :all]
+    [peridot.core :refer :all]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 

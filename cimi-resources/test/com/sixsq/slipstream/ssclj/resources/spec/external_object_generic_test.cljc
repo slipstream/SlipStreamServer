@@ -1,11 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.external-object-generic-test
   (:require
     [clojure.test :refer [deftest is]]
-    [com.sixsq.slipstream.ssclj.resources.spec.util :as u]
     [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
-    [com.sixsq.slipstream.ssclj.resources.spec.external-object-generic]
+    [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
     [com.sixsq.slipstream.ssclj.resources.external-object-template-generic :as tpl]
-    [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]))
+    [com.sixsq.slipstream.ssclj.resources.spec.external-object-generic]
+    [com.sixsq.slipstream.ssclj.resources.spec.util :as u]))
 
 
 (def valid-acl {:owner {:principal "ADMIN"

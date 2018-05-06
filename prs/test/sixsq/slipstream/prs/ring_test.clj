@@ -1,8 +1,8 @@
 (ns sixsq.slipstream.prs.ring-test
   (:require
     [clojure.test :refer :all]
-    [sixsq.slipstream.prs.ring]
-    [com.sixsq.slipstream.auth.cookies]))
+    [com.sixsq.slipstream.auth.cookies]
+    [sixsq.slipstream.prs.ring]))
 
 (deftest test-authenticated?
   (with-redefs [com.sixsq.slipstream.auth.cookies/extract-cookie-info (fn [_] nil)]

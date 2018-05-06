@@ -1,20 +1,20 @@
 (ns com.sixsq.slipstream.db.serializers.service-config-impl
   (:require
+    [camel-snake-kebab.core :refer [->camelCase]]
     [clojure.edn :as edn]
     [clojure.set :as set]
-    [clojure.tools.logging :as log]
 
-    [camel-snake-kebab.core :refer [->camelCase]]
-    [superstring.core :as s]
+    [clojure.tools.logging :as log]
+    [com.sixsq.slipstream.db.serializers.service-config-util :as scu]
 
     [com.sixsq.slipstream.db.serializers.utils :as u]
-    [com.sixsq.slipstream.db.serializers.service-config-util :as scu]
     [com.sixsq.slipstream.ssclj.resources.configuration :as cr]
     [com.sixsq.slipstream.ssclj.resources.configuration-slipstream :as crs]
-    [com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream :as cts]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as crtpl]
+    [com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream :as cts]
     [com.sixsq.slipstream.ssclj.resources.connector :as con]
-    [com.sixsq.slipstream.ssclj.resources.connector-template :as cont]))
+    [com.sixsq.slipstream.ssclj.resources.connector-template :as cont]
+    [superstring.core :as s]))
 
 
 (def connector-ref-attrs-defaults (merge cont/connector-mandatory-reference-attrs-defaults

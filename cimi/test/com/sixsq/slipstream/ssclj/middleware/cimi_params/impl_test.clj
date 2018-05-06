@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.middleware.cimi-params.impl-test
   (:require
-    [clojure.test :refer [deftest is are]]
+    [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.db.filter.parser :as parser]
     [com.sixsq.slipstream.ssclj.middleware.cimi-params.impl :as t]))
 

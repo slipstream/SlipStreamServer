@@ -1,11 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.resources.user-direct
   (:require
     [com.sixsq.slipstream.auth.internal :as ia]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.user]
     [com.sixsq.slipstream.ssclj.resources.spec.user-template-direct]
     [com.sixsq.slipstream.ssclj.resources.user :as p]
-    [com.sixsq.slipstream.ssclj.resources.user-template-direct :as tpl]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.user-template-direct :as tpl]))
 
 ;;
 ;; validate the create resource

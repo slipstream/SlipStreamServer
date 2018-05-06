@@ -1,17 +1,17 @@
 (ns com.sixsq.slipstream.ssclj.resources.quota.utils-test
   (:require
-    [clojure.test :refer :all]
-    [peridot.core :refer :all]
     [clojure.data.json :as json]
-    [com.sixsq.slipstream.ssclj.resources.quota.utils :as t]
-    [com.sixsq.slipstream.ssclj.resources.quota :as quota]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
+    [clojure.test :refer :all]
+    [com.sixsq.slipstream.db.filter.parser :as parser]
     [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.virtual-machine :as vm]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
-    [com.sixsq.slipstream.db.filter.parser :as parser]))
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [com.sixsq.slipstream.ssclj.resources.quota :as quota]
+    [com.sixsq.slipstream.ssclj.resources.quota.utils :as t]
+    [com.sixsq.slipstream.ssclj.resources.virtual-machine :as vm]
+    [peridot.core :refer :all]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 

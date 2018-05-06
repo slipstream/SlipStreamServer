@@ -9,8 +9,8 @@
     [com.sixsq.slipstream.ssclj.resources.configuration-slipstream :as cfg-s]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as cfgt]
     [com.sixsq.slipstream.ssclj.resources.connector :as conn]
-    [com.sixsq.slipstream.ssclj.resources.connector-template :as cont]
     [com.sixsq.slipstream.ssclj.resources.connector :as con]
+    [com.sixsq.slipstream.ssclj.resources.connector-template :as cont]
     [com.sixsq.slipstream.tools.cli.utils :refer :all])
   (:gen-class))
 

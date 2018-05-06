@@ -1,17 +1,17 @@
 (ns com.sixsq.slipstream.ssclj.resources.connector-test-utils
   (:require
-    [clojure.test :refer :all]
     [clojure.data.json :as json]
-    [peridot.core :refer :all]
-
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [clojure.test :refer :all]
     [com.sixsq.slipstream.ssclj.app.params :as p]
+
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.connector :as con]
-    [com.sixsq.slipstream.ssclj.resources.connector-template :as ct])
+    [com.sixsq.slipstream.ssclj.resources.connector-template :as ct]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [peridot.core :refer :all])
   (:import (clojure.lang ExceptionInfo)))
 
 (def base-uri (str p/service-context (u/de-camelcase con/resource-name)))

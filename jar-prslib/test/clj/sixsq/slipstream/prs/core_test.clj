@@ -1,7 +1,7 @@
 (ns sixsq.slipstream.prs.core-test
-  (:require [clojure.test :refer :all]
-            [sixsq.slipstream.prs.core :refer :all]
-            [clojure.data.json :as json]))
+  (:require [clojure.data.json :as json]
+            [clojure.test :refer :all]
+            [sixsq.slipstream.prs.core :refer :all]))
 
 (deftest test-place-and-rank
   (is (= (json/write-str {}) (place-and-rank {}))))

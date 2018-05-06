@@ -1,21 +1,21 @@
 (ns com.sixsq.slipstream.ssclj.resources.external-object-lifecycle-test-utils
   (:require
-    [clojure.test :refer [is]]
     [clojure.data.json :as json]
-    [peridot.core :refer :all]
+    [clojure.test :refer [is]]
+    [clojure.tools.logging :as log]
+    [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.connector :as c]
     [com.sixsq.slipstream.ssclj.resources.connector-template :as cont]
     [com.sixsq.slipstream.ssclj.resources.connector-template-alpha-example :as con-alpha]
     [com.sixsq.slipstream.ssclj.resources.credential :as cred]
     [com.sixsq.slipstream.ssclj.resources.credential-template :as credt]
     [com.sixsq.slipstream.ssclj.resources.credential-template-cloud-alpha :as cred-alpha]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
     [com.sixsq.slipstream.ssclj.resources.external-object.utils :as s3]
-    [clojure.tools.logging :as log]))
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [peridot.core :refer :all]))
 
 
 (def ^:const user-info-header "jane USER")

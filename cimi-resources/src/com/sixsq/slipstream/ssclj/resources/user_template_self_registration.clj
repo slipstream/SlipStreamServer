@@ -2,9 +2,9 @@
   "This template allows someone to create a new account (user) from the
    minimal information: username, password, and email address."
   (:require
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.user-template-self-registration]
-    [com.sixsq.slipstream.ssclj.resources.user-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.user-template :as p]))
 
 (def ^:const registration-method "self-registration")
 

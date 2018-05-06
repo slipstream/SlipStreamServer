@@ -2,29 +2,29 @@
   (:require
     [clojure.tools.logging :as log]
 
-    [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
-    [ring.middleware.params :refer [wrap-params]]
-    [ring.middleware.keyword-params :refer [wrap-keyword-params]]
-    [ring.middleware.nested-params :refer [wrap-nested-params]]
-    [ring.middleware.cookies :refer [wrap-cookies]]
+    [com.sixsq.slipstream.db.es.binding :as esb]
+    [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.app.graphite :as graphite]
+    [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.app.routes :as routes]
 
-    [metrics.core :refer [default-registry remove-all-metrics]]
-    [metrics.ring.instrument :refer [instrument]]
-    [metrics.ring.expose :refer [expose-metrics-as-json]]
-    [metrics.jvm.core :refer [instrument-jvm]]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [wrap-authn-info-header]]
+    [com.sixsq.slipstream.ssclj.middleware.base-uri :refer [wrap-base-uri]]
+    [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer [wrap-cimi-params]]
+    [com.sixsq.slipstream.ssclj.middleware.exception-handler :refer [wrap-exceptions]]
 
     [com.sixsq.slipstream.ssclj.middleware.logger :refer [wrap-logger]]
-    [com.sixsq.slipstream.ssclj.middleware.base-uri :refer [wrap-base-uri]]
-    [com.sixsq.slipstream.ssclj.middleware.exception-handler :refer [wrap-exceptions]]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [wrap-authn-info-header]]
-    [com.sixsq.slipstream.ssclj.middleware.cimi-params :refer [wrap-cimi-params]]
-    [com.sixsq.slipstream.ssclj.app.routes :as routes]
-    [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.app.graphite :as graphite]
-    [com.sixsq.slipstream.db.impl :as db]
-    [com.sixsq.slipstream.db.es.binding :as esb]
+    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as resources]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as zku]
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as resources]))
+    [metrics.core :refer [default-registry remove-all-metrics]]
+    [metrics.jvm.core :refer [instrument-jvm]]
+    [metrics.ring.expose :refer [expose-metrics-as-json]]
+    [metrics.ring.instrument :refer [instrument]]
+    [ring.middleware.cookies :refer [wrap-cookies]]
+    [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
+    [ring.middleware.keyword-params :refer [wrap-keyword-params]]
+    [ring.middleware.nested-params :refer [wrap-nested-params]]
+    [ring.middleware.params :refer [wrap-params]]))
 
 
 (defn- set-persistence-impl

@@ -1,13 +1,13 @@
 (ns sixsq.slipstream.prs.javawrapper-test
   (:require
     [clojure.test :refer :all]
-    [sixsq.slipstream.prs.javawrapper :refer :all]
+    [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]
     [com.sixsq.slipstream.db.serializers.utils :as su]
     [com.sixsq.slipstream.dbtest.es.utils-esdb :as sud]
-    [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]
+    [sixsq.slipstream.prs.javawrapper :refer :all]
     )
-  (:import [java.util HashMap ArrayList HashSet]
-           [com.sixsq.slipstream.persistence ImageModule DeploymentModule Node ModuleParameter ParameterCategory]))
+  (:import [com.sixsq.slipstream.persistence DeploymentModule ImageModule ModuleParameter Node ParameterCategory]
+           [java.util ArrayList HashMap HashSet]))
 
 ;; Fixtures
 (use-fixtures :once sud/test-fixture-es-client-and-db-impl)

@@ -18,10 +18,10 @@
      The collection IDs are keywords, the document identifiers (uuids) are
      strings, and the document is standard EDN data."
   (:require
-    [com.sixsq.slipstream.db.utils.common :as cu]
-    [com.sixsq.slipstream.util.response :as response]
     [com.sixsq.slipstream.db.binding :refer [Binding]]
-    [com.sixsq.slipstream.db.utils.acl :as acl-utils])
+    [com.sixsq.slipstream.db.utils.acl :as acl-utils]
+    [com.sixsq.slipstream.db.utils.common :as cu]
+    [com.sixsq.slipstream.util.response :as response])
   (:import
     (java.io Closeable)))
 

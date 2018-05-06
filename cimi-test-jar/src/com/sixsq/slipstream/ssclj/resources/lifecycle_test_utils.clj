@@ -20,7 +20,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
     [compojure.core :as cc]
-    [peridot.core :refer [session request]]
+    [peridot.core :refer [request session]]
     [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
     [ring.middleware.keyword-params :refer [wrap-keyword-params]]
     [ring.middleware.nested-params :refer [wrap-nested-params]]

@@ -1,11 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.configuration-test
   (:require
+    [clojure.spec.alpha :as s]
     [clojure.test :refer :all]
+    [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.configuration :refer :all]
     [com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream :as tpl]
     [com.sixsq.slipstream.ssclj.resources.spec.configuration-template :as cts]
-    [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 (s/def :cimi.test/configuration (su/only-keys-maps cts/resource-keys-spec))

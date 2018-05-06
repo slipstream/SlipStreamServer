@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-template-oidc
   (:require
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-oidc]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.session-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-oidc]))
 
 (def ^:const authn-method "oidc")
 

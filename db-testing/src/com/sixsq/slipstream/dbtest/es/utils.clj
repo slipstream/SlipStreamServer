@@ -1,18 +1,18 @@
 (ns com.sixsq.slipstream.dbtest.es.utils
   (:refer-clojure :exclude [read update])
   (:require
-    [clojure.java.io :as io]
     [clojure.data.json :as json]
+    [clojure.java.io :as io]
     [clojure.tools.logging :as log]
-    [environ.core :as env]
-    [me.raynes.fs :as fs]
-    [com.sixsq.slipstream.db.utils.common :as cu]
-    [com.sixsq.slipstream.db.es.pagination :as pg]
     [com.sixsq.slipstream.db.es.acl :as acl]
-    [com.sixsq.slipstream.db.es.order :as order]
     [com.sixsq.slipstream.db.es.aggregation :as agg]
     [com.sixsq.slipstream.db.es.filter :as ef]
-    [com.sixsq.slipstream.db.es.select :as select])
+    [com.sixsq.slipstream.db.es.order :as order]
+    [com.sixsq.slipstream.db.es.pagination :as pg]
+    [com.sixsq.slipstream.db.es.select :as select]
+    [com.sixsq.slipstream.db.utils.common :as cu]
+    [environ.core :as env]
+    [me.raynes.fs :as fs])
   (:import
     (java.net InetAddress)
     (java.util UUID)
@@ -21,20 +21,20 @@
     (org.elasticsearch.action.admin.indices.exists.indices IndicesExistsRequest)
     (org.elasticsearch.action.admin.indices.get GetIndexRequest)
     (org.elasticsearch.action.bulk BulkRequestBuilder BulkResponse)
-    (org.elasticsearch.action.search SearchType SearchPhaseExecutionException SearchResponse SearchRequestBuilder)
+    (org.elasticsearch.action.search SearchPhaseExecutionException SearchRequestBuilder SearchResponse SearchType)
     (org.elasticsearch.action.support WriteRequest$RefreshPolicy)
-    (org.elasticsearch.common.settings Settings)
-    (org.elasticsearch.common.transport TransportAddress)
-    (org.elasticsearch.common.xcontent XContentType)
-    (org.elasticsearch.common.unit TimeValue)
     (org.elasticsearch.client Client)
     (org.elasticsearch.cluster.health ClusterHealthStatus)
+    (org.elasticsearch.common.logging LogConfigurator)
+    (org.elasticsearch.common.settings Settings)
+    (org.elasticsearch.common.transport TransportAddress)
+    (org.elasticsearch.common.unit TimeValue)
+    (org.elasticsearch.common.xcontent XContentType)
     (org.elasticsearch.index IndexNotFoundException)
     (org.elasticsearch.index.query QueryBuilders)
-    (org.elasticsearch.node Node MockNode)
+    (org.elasticsearch.node MockNode Node)
     (org.elasticsearch.transport Netty4Plugin)
-    (org.elasticsearch.transport.client PreBuiltTransportClient)
-    (org.elasticsearch.common.logging LogConfigurator)))
+    (org.elasticsearch.transport.client PreBuiltTransportClient)))
 
 (def ^:const max-result-window 200000)
 

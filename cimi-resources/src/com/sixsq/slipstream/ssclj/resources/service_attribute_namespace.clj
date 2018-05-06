@@ -1,14 +1,14 @@
 (ns com.sixsq.slipstream.ssclj.resources.service-attribute-namespace
   (:require
-    [superstring.core :as str]
     [com.sixsq.slipstream.db.es.binding :as esb]
-    [com.sixsq.slipstream.ssclj.resources.spec.service-attribute-namespace]
+    [com.sixsq.slipstream.db.filter.parser :as parser]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.spec.service-attribute-namespace]
     [com.sixsq.slipstream.util.response :as response]
-    [com.sixsq.slipstream.db.filter.parser :as parser]))
+    [superstring.core :as str]))
 
 (def ^:const resource-name "ServiceAttributeNamespace")
 

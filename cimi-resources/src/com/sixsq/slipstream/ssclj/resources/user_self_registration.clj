@@ -1,13 +1,13 @@
 (ns com.sixsq.slipstream.ssclj.resources.user-self-registration
   (:require
     [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.ssclj.resources.user :as p]
-    [com.sixsq.slipstream.ssclj.resources.user.utils :as user-utils]
-    [com.sixsq.slipstream.ssclj.resources.spec.user]
-    [com.sixsq.slipstream.ssclj.resources.user-template-self-registration :as tpl]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.auth.internal :as internal]
-    [com.sixsq.slipstream.ssclj.resources.email.utils :as email-utils]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.email.utils :as email-utils]
+    [com.sixsq.slipstream.ssclj.resources.spec.user]
+    [com.sixsq.slipstream.ssclj.resources.user :as p]
+    [com.sixsq.slipstream.ssclj.resources.user-template-self-registration :as tpl]
+    [com.sixsq.slipstream.ssclj.resources.user.utils :as user-utils]))
 
 ;;
 ;; multimethods for validation

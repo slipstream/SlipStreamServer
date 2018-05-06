@@ -2,9 +2,9 @@
   (:refer-clojure :exclude [update])
   (:require
     [clojure.test :refer :all]
-    [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.auth.internal :as ia]
     [com.sixsq.slipstream.auth.test-helper :as th]
+    [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]))
 
 (use-fixtures :each ltu/with-test-server-fixture)

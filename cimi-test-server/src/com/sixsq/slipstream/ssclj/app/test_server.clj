@@ -2,8 +2,8 @@
   (:require
     [com.sixsq.slipstream.db.es.binding :as esb]
     [com.sixsq.slipstream.db.es.utils :as esu]
-    [com.sixsq.slipstream.dbtest.es.utils :as esut]
     [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.dbtest.es.utils :as esut]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as zku]
     [metrics.core :refer [remove-all-metrics]]
     [sixsq.slipstream.server.ring-container :as rc]

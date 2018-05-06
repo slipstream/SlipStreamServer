@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.util.zookeeper
   (:require
-    [environ.core :as env]
     [clojure.tools.logging :as log]
+    [environ.core :as env]
     [zookeeper :as zk])
   (:import (org.apache.zookeeper KeeperException$SessionExpiredException)))
 

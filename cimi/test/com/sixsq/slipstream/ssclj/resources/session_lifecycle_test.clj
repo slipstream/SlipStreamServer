@@ -1,11 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-lifecycle-test
   (:require
-    [clojure.test :refer [use-fixtures deftest]]
-    [peridot.core :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.session :as session]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [clojure.test :refer [deftest use-fixtures]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [com.sixsq.slipstream.ssclj.resources.session :as session]
+    [peridot.core :refer :all]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 

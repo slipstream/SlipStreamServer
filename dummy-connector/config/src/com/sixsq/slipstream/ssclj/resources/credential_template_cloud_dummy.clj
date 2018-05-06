@@ -4,10 +4,10 @@
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.connector.dummy-template :as ct]
-    [com.sixsq.slipstream.ssclj.resources.spec.credential-template-cloud-dummy]
-    [com.sixsq.slipstream.ssclj.resources.credential-template :as p]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.credential-template :as p]
+    [com.sixsq.slipstream.ssclj.resources.spec.credential-template-cloud-dummy]
     [com.sixsq.slipstream.ssclj.util.userparamsdesc :refer [slurp-cloud-cred-desc]]))
 
 (def ^:const credential-type (str "cloud-cred-" ct/cloud-service-type))

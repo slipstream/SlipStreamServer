@@ -1,10 +1,10 @@
 (ns com.sixsq.slipstream.db.serializers.service-config-util
   (:require
+    [clojure.data.xml :as xml]
     [clojure.pprint :refer [pprint]]
     [clojure.test :refer :all]
-    [clojure.data.xml :as xml]
-    [me.raynes.fs :as fs]
-    [com.sixsq.slipstream.db.serializers.utils :as u]))
+    [com.sixsq.slipstream.db.serializers.utils :as u]
+    [me.raynes.fs :as fs]))
 
 (defn- xml-params
   [xml]

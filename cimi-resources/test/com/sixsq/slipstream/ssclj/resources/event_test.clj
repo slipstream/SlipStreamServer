@@ -1,16 +1,16 @@
 (ns com.sixsq.slipstream.ssclj.resources.event-test
   (:require
-    [clojure.test :refer :all]
-    [peridot.core :refer :all]
     [clojure.data.json :as json]
-    [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
-    [ring.middleware.params :refer [wrap-params]]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-    [com.sixsq.slipstream.ssclj.resources.event :refer :all]
+    [clojure.test :refer :all]
     [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.event :refer :all]
+    [com.sixsq.slipstream.ssclj.resources.event.test-utils :as tu :refer [exec-request is-count urlencode-params]]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.resources.event.test-utils :as tu :refer [urlencode-params is-count exec-request]]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [peridot.core :refer :all]
+    [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
+    [ring.middleware.params :refer [wrap-params]]))
 
 (def base-uri (str p/service-context (u/de-camelcase resource-name)))
 

@@ -1,17 +1,17 @@
 (ns com.sixsq.slipstream.ssclj.resources.external-object-template-lifecycle-test
   (:require
-    [clojure.test :refer [deftest is are use-fixtures]]
-    [peridot.core :refer [session header request content-type]]
+    [clojure.test :refer [are deftest is use-fixtures]]
+    [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
     [com.sixsq.slipstream.ssclj.resources.external-object-template-alpha-example :as eotae]
     [com.sixsq.slipstream.ssclj.resources.external-object-template-generic :as eotg]
     [com.sixsq.slipstream.ssclj.resources.external-object-template-report :as eotr]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-    [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]))
+    [peridot.core :refer [content-type header request session]]))
 
 
 (use-fixtures :each ltu/with-test-server-fixture)

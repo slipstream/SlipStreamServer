@@ -6,9 +6,9 @@
     [qbits.spandex :as spandex])
   (:import
     (org.apache.http HttpHost)
-    (org.elasticsearch.client.node NodeClient)
-    (org.elasticsearch.client RestClient)
     (org.elasticsearch.action.admin.cluster.node.info NodeInfo NodesInfoResponse)
+    (org.elasticsearch.client RestClient)
+    (org.elasticsearch.client.node NodeClient)
     (org.elasticsearch.common.transport TransportAddress)))
 
 

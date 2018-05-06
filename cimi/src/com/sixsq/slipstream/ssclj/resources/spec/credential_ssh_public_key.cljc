@@ -1,10 +1,10 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.credential-ssh-public-key
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]
     [com.sixsq.slipstream.ssclj.resources.spec.credential :as cred]
+    [com.sixsq.slipstream.ssclj.resources.spec.credential-template-ssh-key-pair]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template-ssh-public-key]
-    [com.sixsq.slipstream.ssclj.resources.spec.credential-template-ssh-key-pair]))
+    [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 (s/def :cimi.credential.ssh-public-key/algorithm #{"rsa" "dsa"})
 

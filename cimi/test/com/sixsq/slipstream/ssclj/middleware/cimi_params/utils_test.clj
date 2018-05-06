@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.middleware.cimi-params.utils-test
   (:require
-    [clojure.test :refer [deftest is are]]
+    [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.ssclj.middleware.cimi-params.utils :as t]))
 
 (deftest check-as-vector

@@ -1,12 +1,12 @@
 (ns com.sixsq.slipstream.auth.utils.db
   (:require
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.db.filter.parser :as parser]
+    [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.user-params-template-exec :as up-tmpl-exec])
   (:import
-    (java.util UUID)
-    (clojure.lang ExceptionInfo)))
+    (clojure.lang ExceptionInfo)
+    (java.util UUID)))
 
 ;; Only ACTIVE users can log in.  All other states (NEW, SUSPENDED, and DELETED) are disallowed
 (def ^:private active-user-filter "(state='ACTIVE')")

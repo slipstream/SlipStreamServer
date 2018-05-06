@@ -1,11 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.user-params-template-exec-test
   (:require
-    [clojure.test :refer :all]
     [clojure.spec.alpha :as s]
+    [clojure.test :refer :all]
 
+    [com.sixsq.slipstream.ssclj.resources.spec.user-params-template-exec]
     [com.sixsq.slipstream.ssclj.resources.user-params-template :as upt]
-    [com.sixsq.slipstream.ssclj.resources.user-params-template-exec :as upte]
-    [com.sixsq.slipstream.ssclj.resources.spec.user-params-template-exec]))
+    [com.sixsq.slipstream.ssclj.resources.user-params-template-exec :as upte]))
 
 (def valid-acl {:owner {:principal "USER"
                         :type      "ROLE"}

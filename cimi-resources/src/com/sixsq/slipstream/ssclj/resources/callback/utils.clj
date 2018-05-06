@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.callback.utils
   (:require
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.db.impl :as db])
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u])
   (:import (clojure.lang ExceptionInfo)))
 
 

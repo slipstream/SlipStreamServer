@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential.key-utils
   (:require
-    [clojure.string :as str]
-    [buddy.hashers :as hashers]))
+    [buddy.hashers :as hashers]
+    [clojure.string :as str]))
 
 ;;
 ;; Use only easily distinguished ASCII letters and numbers for the

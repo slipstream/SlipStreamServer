@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.callback-example
   (:require
+    [clojure.tools.logging :as log]
     [com.sixsq.slipstream.ssclj.resources.callback :as callback]
     [com.sixsq.slipstream.ssclj.resources.callback.utils :as utils]
     [com.sixsq.slipstream.ssclj.util.log :as log-util]
-    [clojure.tools.logging :as log]
     [com.sixsq.slipstream.util.response :as r]))
 
 (def ^:const action-name "example")

@@ -2,13 +2,13 @@
   "Verifies that the email address for a user is valid. On validation, the
    user state is changed from NEW to ACTIVE."
   (:require
-    [com.sixsq.slipstream.ssclj.resources.callback :as callback]
-    [com.sixsq.slipstream.ssclj.util.log :as log-util]
     [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.util.response :as r]
+    [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.resources.callback :as callback]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.db.impl :as db])
+    [com.sixsq.slipstream.ssclj.util.log :as log-util]
+    [com.sixsq.slipstream.util.response :as r])
   (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const action-name "user-email-validation")

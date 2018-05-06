@@ -4,10 +4,10 @@
    provide a concrete resource for testing."
   (:require
     [clojure.spec.alpha :as s]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.connector-template :as p]
     [com.sixsq.slipstream.ssclj.resources.spec.connector-template]
     [com.sixsq.slipstream.ssclj.resources.spec.connector-template :as ps]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 (def ^:const cloud-service-type "alpha")

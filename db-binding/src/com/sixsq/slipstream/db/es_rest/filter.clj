@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.db.es-rest.filter
   (:refer-clojure :exclude [filter])
   (:require
-    [clojure.walk :as w]
     [clojure.string :as str]
+    [clojure.walk :as w]
     [com.sixsq.slipstream.db.es-rest.query :as query]
     [com.sixsq.slipstream.db.utils.time-utils :as time]))
 

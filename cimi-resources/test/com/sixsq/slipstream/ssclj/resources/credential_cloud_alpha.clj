@@ -1,13 +1,13 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential-cloud-alpha
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]
-    [com.sixsq.slipstream.ssclj.resources.spec.credential :as cred]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.credential :as p]
+    [com.sixsq.slipstream.ssclj.resources.credential-template-cloud-alpha :as tpl]
+    [com.sixsq.slipstream.ssclj.resources.spec.credential :as cred]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template :as ps]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template-cloud :as ctc]
-    [com.sixsq.slipstream.ssclj.resources.credential-template-cloud-alpha :as tpl]))
+    [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 (s/def :cimi/credential.cloud-alpha
   (su/only-keys-maps cred/credential-keys-spec

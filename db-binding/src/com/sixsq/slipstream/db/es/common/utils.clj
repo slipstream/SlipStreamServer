@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.db.es.common.utils
   (:require
-    [com.sixsq.slipstream.db.utils.common :as cu]
-    [camel-snake-kebab.core :refer [->kebab-case]]))
+    [camel-snake-kebab.core :refer [->kebab-case]]
+    [com.sixsq.slipstream.db.utils.common :as cu]))
 
 
 (def default-index-prefix "slipstream-")

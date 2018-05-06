@@ -2,8 +2,8 @@
   "Utilities for dynamic loading of namespaces and vars."
   (:refer-clojure :exclude [resolve])
   (:require
-    [clojure.tools.logging :as log]
     [clojure.java.classpath :as cp]
+    [clojure.tools.logging :as log]
     [clojure.tools.namespace.find :as nsf]))
 
 (defn filter-namespaces

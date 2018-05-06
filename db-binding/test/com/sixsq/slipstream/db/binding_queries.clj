@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.db.binding-queries
   (:require
-    [clojure.test :refer [deftest is are]]
     [clojure.spec.alpha :as s]
+    [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.db.binding :as db]
     [com.sixsq.slipstream.db.filter.parser :as parser]))
 

@@ -1,12 +1,12 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential-ssh-public-key
   (:require
-    [com.sixsq.slipstream.ssclj.resources.spec.credential-ssh-public-key]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.credential :as p]
     [com.sixsq.slipstream.ssclj.resources.credential-template-ssh-public-key :as tpl]
     [com.sixsq.slipstream.ssclj.resources.credential.ssh-utils :as ssh-utils]
-    [com.sixsq.slipstream.ssclj.util.log :as logu]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]))
+    [com.sixsq.slipstream.ssclj.resources.spec.credential-ssh-public-key]
+    [com.sixsq.slipstream.ssclj.util.log :as logu]))
 
 (defn import-key [common-info publicKey]
   [nil (-> (ssh-utils/load publicKey)

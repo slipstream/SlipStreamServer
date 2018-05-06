@@ -1,11 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.credential-api-key
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.resources.spec.credential :as cred]
+    [com.sixsq.slipstream.ssclj.resources.spec.credential-template :as ps]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template-api-key]
-    [com.sixsq.slipstream.ssclj.resources.spec.credential-template :as ps]))
+    [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 (s/def :cimi.credential.api-key/expiry ::cimi-core/timestamp)
 

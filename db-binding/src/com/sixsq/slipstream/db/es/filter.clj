@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.db.es.filter
   (:require
-    [clojure.walk :as w]
     [clojure.string :as s]
+    [clojure.walk :as w]
     [com.sixsq.slipstream.db.utils.time-utils :as uu])
   (:import
     [org.elasticsearch.index.query QueryBuilders]))

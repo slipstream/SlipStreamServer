@@ -1,10 +1,10 @@
 (ns com.sixsq.slipstream.auth.token-checker-test
   (:require
-    [clojure.test :refer :all]
     [clojure.string :as str]
-    [environ.core :as environ]
+    [clojure.test :refer :all]
+    [com.sixsq.slipstream.auth.env-fixture :as env-fixture]
     [com.sixsq.slipstream.auth.token-checker :as t]
-    [com.sixsq.slipstream.auth.env-fixture :as env-fixture])
+    [environ.core :as environ])
   (:import (java.util Properties)))
 
 (deftest check-create-token

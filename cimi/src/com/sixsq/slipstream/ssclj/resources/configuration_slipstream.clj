@@ -3,13 +3,13 @@
     [clojure.tools.logging :as log]
 
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :as aih]
-    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-slipstream]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration :as p]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream :as tpl]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]))
+    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-slipstream]))
 
 (def ^:const service "slipstream")
 

@@ -1,14 +1,14 @@
 (ns com.sixsq.slipstream.dbtest.es.order-test
   (:refer-clojure :exclude [read update])
   (:require
-    [clojure.test :refer [deftest is are]]
+    [clojure.data.json :as json]
+    [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.db.es.order :as t]
     [com.sixsq.slipstream.db.es.utils :as eu]
-    [com.sixsq.slipstream.dbtest.es.utils :as eut]
-    [clojure.data.json :as json])
-  (:import (org.elasticsearch.search.sort SortOrder)
-           (org.elasticsearch.action.search SearchRequestBuilder)
-           (org.elasticsearch.search SearchHits SearchHit)))
+    [com.sixsq.slipstream.dbtest.es.utils :as eut])
+  (:import (org.elasticsearch.action.search SearchRequestBuilder)
+           (org.elasticsearch.search SearchHit SearchHits)
+           (org.elasticsearch.search.sort SortOrder)))
 
 (deftest check-direction->sort-order
   (is (= SortOrder/ASC (t/direction->sort-order :asc)))

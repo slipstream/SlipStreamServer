@@ -7,13 +7,13 @@
   - system environment variable `AUTHN_PUBLIC_KEY_CYCLONE`
   - system property `authn-public-key-cyclone`.
   "
-  (:require [clojure.tools.logging :as log]
+  (:require [clj-http.client :as http]
             [clojure.data.json :as json]
-            [clj-http.client :as http]
+            [clojure.tools.logging :as log]
+            [com.sixsq.slipstream.auth.external :as ex]
             [com.sixsq.slipstream.auth.utils.config :as cf]
             [com.sixsq.slipstream.auth.utils.http :as uh]
-            [com.sixsq.slipstream.auth.utils.sign :as sign]
-            [com.sixsq.slipstream.auth.external :as ex]))
+            [com.sixsq.slipstream.auth.utils.sign :as sign]))
 
 (def ^:private cyclone-base-url
   "https://federation.cyclone-project.eu/auth/realms/master/protocol/openid-connect")

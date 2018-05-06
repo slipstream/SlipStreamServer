@@ -1,21 +1,21 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-internal-lifecycle-test
   (:require
-    [clojure.test :refer :all]
     [clojure.data.json :as json]
     [clojure.string :as str]
-    [peridot.core :refer :all]
+    [clojure.test :refer :all]
+    [com.sixsq.slipstream.auth.internal :as auth-internal]
+    [com.sixsq.slipstream.auth.utils.db :as db]
+    [com.sixsq.slipstream.auth.utils.sign :as sign]
+    [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.session :as session]
     [com.sixsq.slipstream.ssclj.resources.session-internal :as si]
     [com.sixsq.slipstream.ssclj.resources.session-template :as ct]
+    [com.sixsq.slipstream.ssclj.resources.session-template :as st]
     [com.sixsq.slipstream.ssclj.resources.session-template-internal :as internal]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-    [com.sixsq.slipstream.auth.internal :as auth-internal]
-    [com.sixsq.slipstream.auth.utils.db :as db]
-    [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.auth.utils.sign :as sign]
-    [com.sixsq.slipstream.ssclj.resources.session-template :as st]))
+    [peridot.core :refer :all]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 

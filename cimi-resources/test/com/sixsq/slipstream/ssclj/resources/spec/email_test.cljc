@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.email-test
   (:require
-    [clojure.test :refer [deftest are is]]
     [clojure.spec.alpha :as s]
+    [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.ssclj.resources.email :as t]))
 
 (def valid-acl {:owner {:principal "ADMIN"

@@ -2,8 +2,8 @@
   "Utilities for creating ring responses and exceptions with embedded ring
    responses."
   (:require
-    [ring.util.response :as r]
-    [ring.util.codec :as codec]))
+    [ring.util.codec :as codec]
+    [ring.util.response :as r]))
 
 
 (defn response-created

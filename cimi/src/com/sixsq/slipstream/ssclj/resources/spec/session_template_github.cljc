@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.session-template-github
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template :as ps]))
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template :as ps]
+    [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 ;; Parameters for the GitHub configuration parameters are picked
 ;; up from the environment.

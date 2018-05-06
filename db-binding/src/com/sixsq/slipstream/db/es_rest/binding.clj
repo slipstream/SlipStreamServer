@@ -2,19 +2,19 @@
   "Binding protocol implemented for an Elasticsearch database that makes use
    of the Elasticsearch REST API."
   (:require
-    [qbits.spandex :as spandex]
+    [clojure.tools.logging :as log]
     [com.sixsq.slipstream.db.binding :refer [Binding]]
-    [com.sixsq.slipstream.db.es.common.utils :as escu]
     [com.sixsq.slipstream.db.es-rest.acl :as acl]
     [com.sixsq.slipstream.db.es-rest.filter :as filter]
     [com.sixsq.slipstream.db.es-rest.order :as order]
     [com.sixsq.slipstream.db.es-rest.pagination :as paging]
     [com.sixsq.slipstream.db.es-rest.select :as select]
-    [com.sixsq.slipstream.db.utils.common :as cu]
-    [com.sixsq.slipstream.db.utils.acl :as acl-utils]
-    [com.sixsq.slipstream.util.response :as response]
     [com.sixsq.slipstream.db.es.common.es-mapping :as mapping]
-    [clojure.tools.logging :as log])
+    [com.sixsq.slipstream.db.es.common.utils :as escu]
+    [com.sixsq.slipstream.db.utils.acl :as acl-utils]
+    [com.sixsq.slipstream.db.utils.common :as cu]
+    [com.sixsq.slipstream.util.response :as response]
+    [qbits.spandex :as spandex])
   (:import
     (java.io Closeable)))
 

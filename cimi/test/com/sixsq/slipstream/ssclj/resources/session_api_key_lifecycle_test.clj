@@ -1,22 +1,22 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-api-key-lifecycle-test
   (:require
-    [clojure.test :refer :all]
+    [clj-time.core :as time]
     [clojure.data.json :as json]
     [clojure.string :as str]
-    [peridot.core :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.session-api-key :as t]
-    [com.sixsq.slipstream.ssclj.resources.session :as session]
-    [com.sixsq.slipstream.ssclj.resources.session-template :as ct]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-    [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [clojure.test :refer :all]
     [com.sixsq.slipstream.auth.utils.sign :as sign]
+    [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.credential-template-api-key :as api-key-tpl]
+    [com.sixsq.slipstream.ssclj.resources.credential.key-utils :as key-utils]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [com.sixsq.slipstream.ssclj.resources.session :as session]
+    [com.sixsq.slipstream.ssclj.resources.session-api-key :as t]
+    [com.sixsq.slipstream.ssclj.resources.session-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.session-template :as st]
     [com.sixsq.slipstream.ssclj.resources.session-template-api-key :as api-key]
-    [com.sixsq.slipstream.ssclj.resources.credential-template-api-key :as api-key-tpl]
-    [clj-time.core :as time]
-    [com.sixsq.slipstream.ssclj.resources.credential.key-utils :as key-utils]))
+    [peridot.core :refer :all]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 

@@ -1,11 +1,11 @@
 (ns sixsq.slipstream.metering.metering-test
   (:require
-    [clojure.test :refer [deftest is are]]
-    [sixsq.slipstream.metering.metering :as t]
     [clojure.data.json :as json]
     [clojure.java.io :as io]
-    [sixsq.slipstream.metering.utils :as utils]
-    [clojure.string :as str]))
+    [clojure.string :as str]
+    [clojure.test :refer [are deftest is]]
+    [sixsq.slipstream.metering.metering :as t]
+    [sixsq.slipstream.metering.utils :as utils]))
 
 
 (deftest check-es-hosts

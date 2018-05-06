@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.auth.github
   (:require
-    [clojure.data.json :as json]
     [clj-http.client :as http]
+    [clojure.data.json :as json]
     [com.sixsq.slipstream.auth.external :as ex]))
 
 

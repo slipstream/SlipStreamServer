@@ -1,11 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.virtual-machine-mapping-test
   (:require
-    [clojure.test :refer :all]
     [clojure.spec.alpha :as s]
+    [clojure.test :refer :all]
 
     [com.sixsq.slipstream.ssclj.resources.spec.virtual-machine-mapping :as t]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]
     [com.sixsq.slipstream.ssclj.resources.virtual-machine-mapping :as vmm]
+    [com.sixsq.slipstream.ssclj.util.spec :as su]
     [expound.alpha :as expound]))
 
 (def valid-acl {:owner {:principal "ADMIN"

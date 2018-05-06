@@ -8,8 +8,8 @@
     (java.util UUID)
     (org.elasticsearch.common.logging LogConfigurator)
     (org.elasticsearch.common.settings Settings)
-    (org.elasticsearch.transport Netty4Plugin)
-    (org.elasticsearch.node MockNode)))
+    (org.elasticsearch.node MockNode)
+    (org.elasticsearch.transport Netty4Plugin)))
 
 
 (defn create-test-node

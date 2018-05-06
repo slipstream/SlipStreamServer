@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.credential-template-ssh-key-pair
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]
-    [com.sixsq.slipstream.ssclj.resources.spec.credential-template :as ps]))
+    [com.sixsq.slipstream.ssclj.resources.spec.credential-template :as ps]
+    [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 (s/def :cimi.credential-template.ssh-key-pair/size pos-int?)
 

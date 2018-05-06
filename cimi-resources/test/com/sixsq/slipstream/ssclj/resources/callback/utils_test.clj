@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.callback.utils-test
   (:require
-    [clojure.test :refer [deftest is are]]
+    [clj-time.core :refer [ago from-now weeks]]
+    [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.ssclj.resources.callback.utils :as t]
-    [clj-time.core :refer [weeks ago from-now]]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 

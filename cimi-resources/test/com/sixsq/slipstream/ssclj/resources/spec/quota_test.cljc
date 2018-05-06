@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.quota-test
   (:require
-    [clojure.test :refer [deftest are is]]
     [clojure.spec.alpha :as s]
+    [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.ssclj.resources.quota :as sq]))
 
 (def valid? (partial s/valid? :cimi/quota))

@@ -1,11 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.resources.user-lifecycle-test
   (:require
     [clojure.test :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.user :as user]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [com.sixsq.slipstream.ssclj.resources.user :as user]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 

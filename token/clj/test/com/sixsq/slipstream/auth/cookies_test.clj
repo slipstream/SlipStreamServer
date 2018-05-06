@@ -1,13 +1,13 @@
 (ns com.sixsq.slipstream.auth.cookies-test
   (:refer-clojure :exclude [update])
   (:require
-    [clojure.test :refer :all]
     [clj-time.coerce :as c]
-    [com.sixsq.slipstream.auth.env-fixture :as env-fixture]
-    [com.sixsq.slipstream.auth.cookies :as t]
-    [com.sixsq.slipstream.auth.utils.sign :as s]
-    [clojure.string :as str]
     [clojure.java.io :as io]
+    [clojure.string :as str]
+    [clojure.test :refer :all]
+    [com.sixsq.slipstream.auth.cookies :as t]
+    [com.sixsq.slipstream.auth.env-fixture :as env-fixture]
+    [com.sixsq.slipstream.auth.utils.sign :as s]
     [environ.core :as environ]
     [ring.util.codec :as codec]))
 

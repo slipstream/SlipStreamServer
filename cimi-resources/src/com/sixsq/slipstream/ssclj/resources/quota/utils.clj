@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.quota.utils
   (:require
+    [com.sixsq.slipstream.db.filter.parser :as parser]
     [com.sixsq.slipstream.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.middleware.cimi-params.utils :as cimi-params-utils]
-    [com.sixsq.slipstream.db.filter.parser :as parser]))
+    [com.sixsq.slipstream.ssclj.middleware.cimi-params.utils :as cimi-params-utils]))
 
 
 (defn extract-aggregation

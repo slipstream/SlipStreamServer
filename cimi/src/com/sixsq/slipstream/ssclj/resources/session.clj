@@ -1,16 +1,16 @@
 (ns com.sixsq.slipstream.ssclj.resources.session
   (:require
     [clojure.string :as str]
-    [com.sixsq.slipstream.auth.cookies :as cookies]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [clojure.walk :as walk]
     [com.sixsq.slipstream.auth.acl :as a]
-    [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.auth.cookies :as cookies]
     [com.sixsq.slipstream.db.filter.parser :as parser]
-    [com.sixsq.slipstream.ssclj.util.log :as log-util]
-    [clojure.walk :as walk])
+    [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.util.log :as log-util])
   (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const form-urlencoded "application/x-www-form-urlencoded")

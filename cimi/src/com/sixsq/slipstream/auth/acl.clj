@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.auth.acl
   (:require
-    [ring.util.response :as r]
-    [com.sixsq.slipstream.util.response :as ru]
+    [clojure.string :as str]
     [com.sixsq.slipstream.util.convert :as cu]
-    [clojure.string :as str]))
+    [com.sixsq.slipstream.util.response :as ru]
+    [ring.util.response :as r]))
 
 (def rights-hierarchy (-> (make-hierarchy)
                           (derive ::all ::manage)

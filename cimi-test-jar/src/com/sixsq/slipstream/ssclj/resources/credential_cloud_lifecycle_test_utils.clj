@@ -1,20 +1,20 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential-cloud-lifecycle-test-utils
   (:require
-    [clojure.test :refer [deftest is are use-fixtures]]
-    [peridot.core :refer :all]
+    [cemerick.url :as url]
     [clojure.data.json :as json]
     [clojure.string :as str]
-    [cemerick.url :as url]
+    [clojure.test :refer [are deftest is use-fixtures]]
+    [com.sixsq.slipstream.ssclj.app.params :as p]
+    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
+    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.connector :as con]
+    [com.sixsq.slipstream.ssclj.resources.connector-template :as cont]
     [com.sixsq.slipstream.ssclj.resources.credential :as credential]
     [com.sixsq.slipstream.ssclj.resources.credential-template :as ct]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
-    [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
-    [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.credential.key-utils :as key-utils]
-    [com.sixsq.slipstream.ssclj.resources.connector :as con]
-    [com.sixsq.slipstream.ssclj.resources.connector-template :as cont]))
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [peridot.core :refer :all]))
 
 (def base-uri (str p/service-context (u/de-camelcase credential/resource-url)))
 

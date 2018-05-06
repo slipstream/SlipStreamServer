@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential.key-utils-test
   (:require
-    [clojure.test :refer [is are deftest]]
     [clojure.string :as str]
+    [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.ssclj.resources.credential.key-utils :as t]))
 
 (deftest check-chars
