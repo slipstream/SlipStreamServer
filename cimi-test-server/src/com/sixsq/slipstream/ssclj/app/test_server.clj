@@ -2,8 +2,8 @@
   (:require
     [com.sixsq.slipstream.db.es.binding :as esb]
     [com.sixsq.slipstream.db.es.utils :as esu]
-    [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.dbtest.es.utils :as esut]
+    [com.sixsq.slipstream.ssclj.app.server :as cimi-server]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as zku]
     [metrics.core :refer [remove-all-metrics]]
     [sixsq.slipstream.server.ring-container :as rc]
@@ -48,7 +48,8 @@
      :es-port             es-port
      :es-node             es-node
      :es-client           es-client
-     :es-db-binding       es-db-binding}))
+     :es-db-binding       es-db-binding
+     :es-db-binding-fn    (constantly es-db-binding)}))
 
 
 (defn start-clients []
@@ -78,10 +79,10 @@
   (println "DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG : STARTING SERVER")
   (start-clients)
   (let [ssclj-port 12003
-        {:keys [zk-create-client-fn es-db-binding]} *service-clients*]
-    (with-redefs [zku/create-client zk-create-client-fn]
+        {:keys [zk-create-client-fn es-db-binding-fn]} *service-clients*]
+    (with-redefs [cimi-server/load-db-binding es-db-binding-fn
+                  zku/create-client zk-create-client-fn]
       (set-stop-server-fn (rc/start "com.sixsq.slipstream.ssclj.app.server/init" ssclj-port)))
-    (db/set-impl! es-db-binding)
     (System/setProperty "ssclj.endpoint" (str "http://localhost:" ssclj-port))))
 
 
@@ -91,9 +92,9 @@
     (set-stop-server-fn nil)
     (try
       (stop-fn)
-      (catch Exception _))
+      (catch Exception e
+        (println "ERROR STOPPING SERVER: " (.getMessage e))))
     (stop-clients)
-    (db/unset-impl!)
     (System/clearProperty "ssclj.endpoint")
     (remove-all-metrics)))
 

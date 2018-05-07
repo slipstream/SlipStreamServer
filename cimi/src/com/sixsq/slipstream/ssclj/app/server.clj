@@ -31,7 +31,7 @@
 (defn load-db-binding
   [db-binding-ns]
   (try
-    (require db-binding-ns)
+    (-> db-binding-ns symbol require)
     (catch Exception e
       (log/errorf "cannot require namespace %s: %s" db-binding-ns (.getMessage e))
       (throw e)))
