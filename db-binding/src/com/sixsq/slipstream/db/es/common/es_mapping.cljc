@@ -269,5 +269,6 @@
 
 (defn mapping
   [spec]
+  (log/info "Mapping for spec :" spec)
   (cond-> {:dynamic_templates dynamic-templates}
           spec (merge (dissoc (transform spec) :type))))
