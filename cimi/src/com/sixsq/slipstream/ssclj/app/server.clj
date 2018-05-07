@@ -33,7 +33,7 @@
   (try
     (require db-binding-ns)
     (catch Exception e
-      (log/errorf "cannot require namespace %f: %s" db-binding-ns (.getMessage e))
+      (log/errorf "cannot require namespace %s: %s" db-binding-ns (.getMessage e))
       (throw e)))
   (try
     (let [load (-> db-binding-ns symbol find-ns (ns-resolve 'load))]
