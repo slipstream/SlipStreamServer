@@ -163,7 +163,7 @@
 
 (defn create-index
   ^CreateIndexResponse [^Client client index-name spec]
-  (log/info "creating index:" index-name)
+  (log/info "creating index:" index-name " with spec : " spec)
   (let [edn-mapping (mapping/mapping spec)
         json-mapping (edn->json edn-mapping)
         settings (.. (Settings/builder)
