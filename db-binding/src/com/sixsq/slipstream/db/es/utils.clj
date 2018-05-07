@@ -171,6 +171,7 @@
                      (put "index.number_of_shards" 3)
                      (put "index.number_of_replicas" 0)
                      (build))]
+    (log/info "json mapping is " json-mapping " for index " index-name)
     (try
       (.. client
           (admin)

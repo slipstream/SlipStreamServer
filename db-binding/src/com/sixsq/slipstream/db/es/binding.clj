@@ -8,6 +8,7 @@
     [com.sixsq.slipstream.db.es.utils :as esu]
     [com.sixsq.slipstream.db.utils.acl :as acl-utils]
     [com.sixsq.slipstream.db.utils.common :as cu]
+    [clojure.tools.logging :as log]
     [com.sixsq.slipstream.util.response :as response])
   (:import
     (java.io Closeable)
@@ -159,8 +160,10 @@
   Binding
 
   (initialize [_ collection-id {:keys [spec] :as options}]
+    (log/info "Binding " collection-id " and spec is " spec)
     (let [index (escu/collection-id->index collection-id)]
       (when-not (esu/index-exists? client index)
+        (log/info "Will create index" index " using spec " spec)
         (esu/create-index client index spec)
         (esu/wait-for-index client index))))
 

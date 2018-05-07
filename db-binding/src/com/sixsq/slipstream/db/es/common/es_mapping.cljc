@@ -3,6 +3,7 @@
   (:require
     [spec-tools.impl :as impl]
     [spec-tools.parse :as parse]
+    [clojure.tools.logging :as log]
     [spec-tools.visitor :as visitor]))
 
 ;;Code borrowed from https://github.com/metosin/spec-tools/blob/master/src/spec_tools/json_schema.cljc
@@ -38,6 +39,7 @@
   ([spec]
    (transform spec nil))
   ([spec options]
+   (log/info "Transforming spec " spec)
    (visitor/visit spec accept-spec options)))
 
 
