@@ -34,7 +34,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.restlet.data.Protocol;
 import org.restlet.data.Reference;
-import slipstream.ui.views.Representation;
 
 import javax.persistence.NoResultException;
 import java.io.File;
@@ -219,10 +218,6 @@ public class Configuration implements Runnable {
 	}
 
 	private void postProcessParameters() throws ConfigurationException, ValidationException {
-		// Extract the SlipStream version number from the tag. Add this as a
-		// property in the configuration. Do this at the end so that a user
-		// cannot override the value.
-		extractAndSetVersion();
 
 		// Validate the base URL (and associated Reference) and cache the
 		// results.
@@ -245,20 +240,6 @@ public class Configuration implements Runnable {
 		baseUrl = initializeBaseUrl(baseRef);
 
 		setMandatoryToAllParameters();
-	}
-
-	private void extractAndSetVersion() throws ValidationException {
-		String versionRequiredParameter = RequiredParameters.SLIPSTREAM_VERSION.getName();
-
-		ServiceConfigurationParameter versionParameter = getParameters().getParameter(
-				versionRequiredParameter);
-		if (versionParameter == null) {
-			throw (new ConfigurationException("Missing mandatory configuration parameter "
-					+ versionRequiredParameter));
-		}
-		version = versionParameter.getValue();
-		versionParameter.setReadonly(true);
-		Representation.setReleaseVersion(version);
 	}
 
 	private void setMandatoryToAllParameters() {
