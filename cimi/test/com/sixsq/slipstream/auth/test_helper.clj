@@ -20,14 +20,13 @@
 
 
 (def req-template {:userTemplate
-                   {:href (str ct/resource-url "/" direct/registration-method)
+                   {:href   (str ct/resource-url "/" direct/registration-method)
                     :method "direct"}})
 
 
-(def request-base {:identity     {:current req-u-name
-                                  :authentications
-                                           {req-u-name {:roles    #{req-u-role}
-                                                        :identity req-u-name}}}
+(def request-base {:identity     {:current         req-u-name
+                                  :authentications {req-u-name {:roles    #{req-u-role}
+                                                                :identity req-u-name}}}
                    :sixsq.slipstream.authn/claims
                                  {:username req-u-name
                                   :roles    #{req-u-role}}
@@ -47,11 +46,3 @@
 (defn add-user-for-test!
   [user]
   (crud/add (user-request user)))
-
-
-#_(defn es-db-dump
-  [type]
-  (println "ES DUMP. Doc type:" type)
-  (clojure.pprint/pprint
-    (esu/dump esb/*client* esb/index-name type))
-  (println (apply str (repeat 20 "-"))))

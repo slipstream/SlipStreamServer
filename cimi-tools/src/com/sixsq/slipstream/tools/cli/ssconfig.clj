@@ -5,6 +5,7 @@
 
     [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]
     [com.sixsq.slipstream.db.serializers.utils :as u]
+    [com.sixsq.slipstream.db.loader :as db-loader]
     [com.sixsq.slipstream.ssclj.resources.configuration :as cfg]
     [com.sixsq.slipstream.ssclj.resources.configuration-slipstream :as cfg-s]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as cfgt]
@@ -13,6 +14,11 @@
     [com.sixsq.slipstream.ssclj.resources.connector-template :as cont]
     [com.sixsq.slipstream.tools.cli.utils :refer :all])
   (:gen-class))
+
+
+;; FIXME: This should become a parameter that can be set from the command line.
+(def default-db-binding-ns "com.sixsq.slipstream.db.es.loader")
+
 
 (def connector-resource conn/resource-url)
 (def configuration-resource cfg/resource-url)
@@ -32,18 +38,22 @@
 ;; Helper functions.
 ;;
 
+
 (defn exit-err
   [& msg]
   (println (apply str "ERROR: " msg))
   (System/exit 1))
 
+
 (defn resp-success?
   [resp]
   (< (:status resp) 400))
 
+
 (defn resp-error?
   [resp]
   (not (resp-success? resp)))
+
 
 (defn exit-on-resp-error
   [resp]
@@ -52,15 +62,18 @@
       (exit-err "Failed with: " msg ".")))
   resp)
 
+
 (defn init-db-client
   []
-  (u/db-client-and-crud-impl))
+  (db-loader/load-and-set-persistent-db-binding default-db-binding-ns))
+
 
 (defn init-namespaces
   []
   (u/initialize)
   (alter-var-root #'*templates* (constantly {:connector     @cont/templates
                                              :configuration @cfgt/templates})))
+
 
 (defn init
   []
@@ -77,6 +90,7 @@
     (first (s/split rstr #"-template/"))
     (first (s/split rstr #"/"))))
 
+
 (defn resource-type
   "Given string, resource or request, returns resource type or throws."
   [c]
@@ -87,15 +101,18 @@
                 (-> c :body (get :id ""))))]
     (resource-type-from-str res)))
 
+
 (defn connector?
   "c - str or map."
   [c]
   (= (resource-type c) conn/resource-url))
 
+
 (defn configuration?
   "c - str or map."
   [c]
   (= (resource-type c) cfg/resource-url))
+
 
 (defn check-mandatory-attrs
   [m]
@@ -103,11 +120,13 @@
     (exit-err "Each resource must contain following manatory attributes: " (s/join ", " mandatory-attrs))
     m))
 
+
 (defn validate-resource-type
   [m]
   (if-not (contains? resource-types (resource-type m))
     (exit-err "Resource type must be one of: " (s/join ", " resource-types))
     m))
+
 
 (defn resource->template-name
   [c]
@@ -117,8 +136,8 @@
                        (s/split #"/")
                        first
                        (str "-template/")
-                       (str (:cloudServiceType c)))
-    ))
+                       (str (:cloudServiceType c)))))
+
 
 (defn get-templates
   [c]
@@ -126,6 +145,7 @@
     (configuration? c) (:configuration *templates*)
     (connector? c) (:connector *templates*)
     :else {}))
+
 
 (defn halt-no-template
   [c]
@@ -135,6 +155,7 @@
       (exit-err "No template available for " tname))
     c))
 
+
 (defn check-required-attrs
   [c]
   (let [rtype (resource-type c)
@@ -142,6 +163,7 @@
     (if-not (every? #(contains? c %) attrs)
       (exit-err "Resource '" rtype "' must contain following attributes: " (s/join ", " attrs))
       c)))
+
 
 (defn validate
   [c]
@@ -161,9 +183,11 @@
     (assoc m :service cfg-s/service)
     m))
 
+
 (defn cfg-tpl-slipstream
   []
   (get (:configuration *templates*) (str cfgt/resource-url "/" cfg-s/service)))
+
 
 (defn complete-config
   "Add missing keys to satisfy schema."
@@ -171,6 +195,7 @@
   (->> cfg
        cfg-add-service-attr
        (merge (cfg-tpl-slipstream))))
+
 
 (defn cfg-edit-or-add
   "Returns response of edit or add operation. Tries to add if edit fails with 404."
@@ -184,6 +209,7 @@
             (assoc :body (complete-config (:body config-req)))
             cfg/add-impl))
       edit-resp)))
+
 
 (defn store-cfg
   [config]
@@ -200,6 +226,7 @@
   [conn]
   (second (s/split (:id conn) #"/")))
 
+
 (defn complete-connector
   "Add missing keys to satisfy schema."
   [conn]
@@ -208,13 +235,16 @@
         (merge conn)
         (assoc :instanceName (conn-inst-name conn)))))
 
+
 (defn get-ccc
   []
   (:cloudConnectorClass (sci/load-cfg)))
 
+
 (defn merge-ccc-and-new-conn
   [ccc new-conn]
   (s/replace (s/join "," [ccc new-conn]) #"(^[ \t]*,*|,*[ \t]*$)" ""))
+
 
 (defn update-ccc
   [ccc cin cn]
@@ -222,6 +252,7 @@
     (println "Updating :cloudConnectorClass parameter with -" new-conn)
     (store-cfg {:id                  (str cfg/resource-url "/" cfg-s/service)
                 :cloudConnectorClass (merge-ccc-and-new-conn ccc new-conn)})))
+
 
 (defn add-conn-to-ccc
   "Adds connector to :cloudConnectorClass attribute."
@@ -232,6 +263,7 @@
       (update-ccc ccc cin cn)
       {:status  200
        :message "Connector was already in :cloudConnectorClass."})))
+
 
 (defn conn-add
   "Connector `conn` as request. The resource is in :body."
@@ -245,6 +277,7 @@
       (add-conn-to-ccc cin cn)
       add-resp)))
 
+
 (defn conn-edit-or-add
   "Retruns response of edit or add operation. Tries to add if edit fails with 404."
   [conn]
@@ -256,12 +289,14 @@
         (conn-add conn))
       edit-resp)))
 
+
 (defn store-connector
   [conn]
   (->> conn
        (sci/connector-as-request (conn-inst-name conn))
        conn-edit-or-add
        exit-on-resp-error))
+
 
 ;;
 ;; Generic functions.
@@ -273,17 +308,20 @@
     (configuration? resource) (store-cfg resource)
     (connector? resource) (store-connector resource)))
 
+
 (defn slurp-and-store
   [f]
   (-> (slurp-edn f)
       validate
       store))
 
+
 (defn store-to-db
   [files]
   (init-db-client)
   (doseq [f files]
     (slurp-and-store f)))
+
 
 (defn list-tempates
   []
@@ -292,6 +330,7 @@
     (println (format "- templates for '%s'" (name ttn)))
     (doseq [k (keys ts)]
       (println k))))
+
 
 (defn print-template
   [tname]
@@ -304,17 +343,21 @@
         (println "WARNING: Template" tname "not found.")
         (list-tempates)))))
 
+
 (defn resource-uuid
   [rname]
   (-> rname (s/split #"/") second))
+
 
 (defn get-configuration-resource
   [rname]
   (sci/get-configuration (resource-uuid rname)))
 
+
 (defn get-connector-resource
   [rname]
   (sci/get-connector (resource-uuid rname)))
+
 
 (defn get-resource
   [rname]
@@ -323,10 +366,12 @@
     (connector? rname) (get-connector-resource rname)
     :else (println "WARNING: Don't know how to get resource:" rname)))
 
+
 (defn print-resource
   [r]
   (let [unwanted (into #{} (remove #{:id :cloudServiceType :description} sci/unwanted-attrs))]
     (clojure.pprint/pprint (sci/strip-unwanted-attrs r unwanted))))
+
 
 (defn print-resources
   []
@@ -339,12 +384,14 @@
         (do
           (println "WARNING: Resource" rname "not found."))))))
 
+
 (defn get-connector-resources
   []
   (let [cs (-> (con/query-impl (sci/connector-as-request configuration-resource))
                :body
                :connectors)]
     (map #(:id %) cs)))
+
 
 (defn get-configuration-resources
   []
@@ -353,6 +400,7 @@
                :configurations)]
     (map #(:id %) cs)))
 
+
 (defn get-persisted-resources
   [name]
   (cond
@@ -360,10 +408,12 @@
     (= name connector-resource) (get-connector-resources)
     :else (do (println "WARNING: Don't know how to get resources for" name))))
 
+
 (defn list-persisted-resources
   [name]
   (doseq [r (get-persisted-resources name)]
     (println r)))
+
 
 (defn list-resources
   []
@@ -373,6 +423,7 @@
     (println (format "- resources for '%s'" r))
     (list-persisted-resources r)))
 
+
 (defn edit-file
   [f kvs]
   (let [kvm (into {}
@@ -380,6 +431,7 @@
                     #(vec [(keyword (first %)) (second %)])
                     (map #(s/split % #"=") kvs)))]
     (spit-edn (merge (slurp-edn f) kvm) f)))
+
 
 (defn delete-resource
   [r]
@@ -389,6 +441,7 @@
     :else {:status 400
            :body   {:status  400
                     :message (str "Don't know how to delete resource: " r)}}))
+
 
 (defn delete-resources
   []
@@ -425,6 +478,7 @@
     :assoc-fn cli-parse-sets]
    ["-h" "--help"]])
 
+
 (def prog-help
   "
   Ensure :id key with a corresponding resource name is present in each configuration.
@@ -433,6 +487,7 @@
 
   ES_HOST and ES_PORT should be exported in the environment for the utility
   to be able to connect to Elasticsearch.")
+
 
 (defn usage
   [options-summary]

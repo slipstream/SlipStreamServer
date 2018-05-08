@@ -26,7 +26,8 @@
     [ring.middleware.nested-params :refer [wrap-nested-params]]
     [ring.middleware.params :refer [wrap-params]]
     [ring.util.codec :as codec]
-    [zookeeper :as zk])
+    [zookeeper :as zk]
+    [qbits.spandex :as spandex])
   (:import [org.apache.curator.test TestingServer]))
 
 
@@ -200,8 +201,6 @@
   (apply cc/routes rs))
 
 
-
-
 (defn dump
   [response]
   (pprint response)
@@ -216,12 +215,6 @@
   response)
 
 
-#_(defn dump-es
-  [type]
-  (pprint
-    (esu/dump esb/*client* esb/index-name type)))
-
-
 (defn dump-message
   [request]
   (println (get-in request [:response :body :message]))
@@ -230,7 +223,9 @@
 
 (defn refresh-es-indices
   []
-  (esu/refresh-all-indices esb/*client*))
+  (let [client (spandex/client {:hosts ["localhost:9200"]})]
+    (spandex/request client {:url [:_refresh], :method :post})
+    (spandex/close! client)))
 
 
 (defn strip-unwanted-attrs
@@ -299,7 +294,7 @@
   (let [node (esut/create-test-node)
         client (-> node
                    esu/node-client
-                   esb/wait-client-create-index)]
+                   esu/wait-for-cluster)]
     [node client]))
 
 
@@ -342,10 +337,9 @@
    allocated resources by closing both the client and the node."
   [& body]
   `(let [client# (second (set-es-node-client-cache))]
-     (binding [esb/*client* client#]
-       (db/set-impl! (esb/get-instance))
-       (esu/reset-index esb/*client* (str escu/default-index-prefix "*"))
-       ~@body)))
+     (db/set-impl! (esb/->ESBindingLocal client#))
+     (esu/reset-index client# (str escu/default-index-prefix "*"))
+     ~@body))
 
 
 ;;
@@ -354,7 +348,6 @@
 
 (defn make-ring-app [resource-routes]
   (log/info "creating ring application")
-  (db/set-impl! (esb/get-instance))
   (-> resource-routes
       wrap-cimi-params
       wrap-keyword-params

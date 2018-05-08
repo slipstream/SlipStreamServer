@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.db.impl
+(ns com.sixsq.slipstream.db.ephemeral-impl
   (:require
     [com.sixsq.slipstream.db.binding :as p])
   (:import

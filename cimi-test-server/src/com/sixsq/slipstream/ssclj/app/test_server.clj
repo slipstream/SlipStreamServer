@@ -2,13 +2,14 @@
   (:require
     [com.sixsq.slipstream.db.es.binding :as esb]
     [com.sixsq.slipstream.db.es.utils :as esu]
-    [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.db.loader :as db-loader]
     [com.sixsq.slipstream.dbtest.es.utils :as esut]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as zku]
     [metrics.core :refer [remove-all-metrics]]
     [sixsq.slipstream.server.ring-container :as rc]
     [zookeeper :as zk])
-  (:import (org.apache.curator.test TestingServer)))
+  (:import
+    (org.apache.curator.test TestingServer)))
 
 
 (def ^:dynamic *service-clients* nil)
@@ -35,8 +36,8 @@
         es-node (esut/create-test-node)
         es-client (-> es-node
                       esu/node-client
-                      esb/wait-client-create-index)
-        es-create-client-fn (constantly es-client)]
+                      esu/wait-for-cluster)
+        es-db-binding (esb/->ESBindingLocal es-client)]
     {:zk-port             zk-port
      :zk-server           zk-server
      :zk-client           zk-client
@@ -45,7 +46,8 @@
      :es-port             es-port
      :es-node             es-node
      :es-client           es-client
-     :es-create-client-fn es-create-client-fn}))
+     :es-db-binding       es-db-binding
+     :es-db-binding-fn    (constantly es-db-binding)}))
 
 
 (defn start-clients []
@@ -53,7 +55,7 @@
 
 
 (defn stop-clients []
-  (let [{:keys [zk-server zk-client es-node es-client]} *service-clients*]
+  (let [{:keys [zk-server es-node es-db-binding]} *service-clients*]
     (set-service-clients nil)
     (try
       (try
@@ -63,7 +65,7 @@
             (.close zk-server)
             (finally
               (try
-                (.close es-client)
+                (.close es-db-binding)
                 (finally
                   (.close es-node)))))))
       (catch Exception e
@@ -74,12 +76,10 @@
 (defn start []
   (start-clients)
   (let [ssclj-port 12003
-        {:keys [zk-create-client-fn es-create-client-fn es-client]} *service-clients*]
-    (with-redefs [esb/create-client es-create-client-fn
+        {:keys [zk-create-client-fn es-db-binding-fn]} *service-clients*]
+    (with-redefs [db-loader/load-db-binding es-db-binding-fn
                   zku/create-client zk-create-client-fn]
       (set-stop-server-fn (rc/start "com.sixsq.slipstream.ssclj.app.server/init" ssclj-port)))
-    (esb/set-client! es-client)
-    (db/set-impl! (esb/get-instance))
     (System/setProperty "ssclj.endpoint" (str "http://localhost:" ssclj-port))))
 
 
@@ -88,10 +88,9 @@
     (set-stop-server-fn nil)
     (try
       (stop-fn)
-      (catch Exception _))
+      (catch Exception e
+        (println "ERROR STOPPING SERVER: " (.getMessage e))))
     (stop-clients)
-    (esb/unset-client!)
-    (db/unset-impl!)
     (System/clearProperty "ssclj.endpoint")
     (remove-all-metrics)))
 

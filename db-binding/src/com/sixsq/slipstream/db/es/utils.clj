@@ -222,18 +222,24 @@
                                                  (read-string es-port)))))))
 
 (defn wait-for-cluster
+  "Waits for the cluster to reach a healthy state. Throws if the cluster does
+   not reach a healthy state before the timeout. Returns the client on success."
   [^Client client]
   (let [status (.. (cluster-health client [])
                    (getStatus))]
-    (throw-if-cluster-not-healthy status)))
+    (throw-if-cluster-not-healthy status)
+    client))
 
 (defn wait-for-index
+  "Waits for an index to reach a healthy state. Throws if the cluster does not
+   reach a healthy state before the timeout. Returns the client on success."
   [^Client client index]
   (let [status (.. (cluster-health client [index])
                    (getIndices)
                    (get index)
                    (getStatus))]
-    (throw-if-cluster-not-healthy status)))
+    (throw-if-cluster-not-healthy status)
+    client))
 
 (defn reset-index
   [^Client client index-name]

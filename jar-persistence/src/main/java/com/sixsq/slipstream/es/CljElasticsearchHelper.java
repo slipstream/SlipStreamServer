@@ -44,7 +44,8 @@ public class CljElasticsearchHelper {
     public static void init() {
         logger.info("Creating DB client and setting ES DB CRUD implementation.");
         requireNs(NS_SERIALIZERS_UTILS);
-        Clojure.var(NS_SERIALIZERS_UTILS, "db-client-and-crud-impl").invoke();
+        // FIXME: The server has normally been setup, why reset the client and binding?
+        //Clojure.var(NS_SERIALIZERS_UTILS, "db-client-and-crud-impl").invoke();
         initializeResourceTemplates();
     }
 
@@ -61,8 +62,9 @@ public class CljElasticsearchHelper {
     }
 
     private static void setDbCrudImpl() {
-        requireNs(NS_SERIALIZERS_UTILS);
-        Clojure.var(NS_SERIALIZERS_UTILS, "set-db-crud-impl").invoke();
+        // FIXME: The server has normally been setup, why reset the client and binding?
+        //requireNs(NS_SERIALIZERS_UTILS);
+        //Clojure.var(NS_SERIALIZERS_UTILS, "set-db-crud-impl").invoke();
     }
 
     private static void addDefaultServiceConfigToDb() {
@@ -133,11 +135,6 @@ public class CljElasticsearchHelper {
             logger.warning("Loaded 0 connector parameters for connector '" + connectorName + "'");
         }
         return scps;
-    }
-
-    public static void dumpEsDb(String resource) {
-        requireNs("com.sixsq.slipstream.db.serializers.utils");
-        Clojure.var("com.sixsq.slipstream.db.serializers.utils", "dump").invoke(resource);
     }
 
 }
