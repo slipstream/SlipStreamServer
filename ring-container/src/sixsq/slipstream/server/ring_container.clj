@@ -63,7 +63,7 @@
     (try
       (require ns)
       (catch Exception e
-        (log-and-throw (str "error requiring namespace: " ns))))
+        (log-and-throw (str "error requiring namespace (" ns "): " (.getMessage e)))))
 
     (if-let [result (resolve-var ns f)]
       result
