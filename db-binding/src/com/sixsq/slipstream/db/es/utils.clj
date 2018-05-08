@@ -190,12 +190,14 @@
   (let [edn-mapping (dissoc (mapping/transform spec) :type)
         json-mapping (edn->json edn-mapping)]
     (when (index-exists? client index-name)
+      (log/debug "json mapping for update is " json-mapping " on index " index-name)
       (try
         (.. client
             (admin)
             (indices)
             (preparePutMapping index-name)
             (setSource json-mapping XContentType/JSON)
+            (setType "_doc")
             (get))
         (catch Exception e
           (log/errorf "exception when updating mapping for index (%s) with spec (%s): "
