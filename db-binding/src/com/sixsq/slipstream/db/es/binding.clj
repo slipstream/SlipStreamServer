@@ -103,9 +103,16 @@
   (initialize [_ collection-id {:keys [spec] :as options}]
     (log/debug "Initializing collection" collection-id " with spec " spec)
     (let [index (escu/collection-id->index collection-id)]
-      (when-not (esu/index-exists? *client* index)
+      (if (esu/index-exists? *client* index)
+        ;;Index exists, update its mapping
+        (do
+          (esu/update-mapping *client* index spec)
+          (esu/wait-for-index *client* index)
+          )
+        ;;Index is new, create it
+        (do
         (esu/create-index *client* index spec)
-        (esu/wait-for-index *client* index))))
+        (esu/wait-for-index *client* index)))))
 
 
   (add [_ data options]

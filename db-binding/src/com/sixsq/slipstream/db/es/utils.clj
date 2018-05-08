@@ -185,6 +185,25 @@
                     index-name spec (.getMessage e))
         (throw e)))))
 
+
+(defn update-mapping [^Client client index-name spec]
+  (let [edn-mapping (dissoc (mapping/transform spec) :type)
+        json-mapping (edn->json edn-mapping)]
+    (when (index-exists? client index-name)
+      (try
+        (.. client
+            (admin)
+            (indices)
+            (preparePutMapping index-name)
+            (setSource json-mapping XContentType/JSON)
+            (get))
+        (catch Exception e
+          (log/errorf "exception when updating mapping for index (%s) with spec (%s): "
+                      index-name spec (.getMessage e))
+          ))))
+
+  )
+
 (def ^:private ok-health-statuses #{ClusterHealthStatus/GREEN ClusterHealthStatus/YELLOW})
 
 (defn- throw-if-cluster-not-healthy
