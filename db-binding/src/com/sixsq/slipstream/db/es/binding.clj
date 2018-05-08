@@ -101,7 +101,7 @@
   Binding
 
   (initialize [_ collection-id {:keys [spec] :as options}]
-    (log/debug "Initializing collection" colllection-id " with spec " spec)
+    (log/debug "Initializing collection" collection-id " with spec " spec)
     (let [index (escu/collection-id->index collection-id)]
       (when-not (esu/index-exists? *client* index)
         (esu/create-index *client* index spec)
