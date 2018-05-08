@@ -16,8 +16,6 @@
 
 
 (defn set-service-clients [m]
-  (println "DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG : SETTING SERVICE CLIENTS")
-  (println (with-out-str (clojure.pprint/pprint m)))
   (alter-var-root #'*service-clients* (constantly m)))
 
 
@@ -76,7 +74,6 @@
 
 
 (defn start []
-  (println "DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG : STARTING SERVER")
   (start-clients)
   (let [ssclj-port 12003
         {:keys [zk-create-client-fn es-db-binding-fn]} *service-clients*]
@@ -87,7 +84,6 @@
 
 
 (defn stop []
-  (println "DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG : STOPPING SERVER")
   (when-let [stop-fn *stop-server-fn*]
     (set-stop-server-fn nil)
     (try
