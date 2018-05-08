@@ -2,8 +2,8 @@
   (:require
     [com.sixsq.slipstream.db.es.binding :as esb]
     [com.sixsq.slipstream.db.es.utils :as esu]
+    [com.sixsq.slipstream.db.loader :as db-loader]
     [com.sixsq.slipstream.dbtest.es.utils :as esut]
-    [com.sixsq.slipstream.ssclj.app.server :as cimi-server]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as zku]
     [metrics.core :refer [remove-all-metrics]]
     [sixsq.slipstream.server.ring-container :as rc]
@@ -80,7 +80,7 @@
   (start-clients)
   (let [ssclj-port 12003
         {:keys [zk-create-client-fn es-db-binding-fn]} *service-clients*]
-    (with-redefs [cimi-server/load-db-binding es-db-binding-fn
+    (with-redefs [db-loader/load-db-binding es-db-binding-fn
                   zku/create-client zk-create-client-fn]
       (set-stop-server-fn (rc/start "com.sixsq.slipstream.ssclj.app.server/init" ssclj-port)))
     (System/setProperty "ssclj.endpoint" (str "http://localhost:" ssclj-port))))
