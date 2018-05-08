@@ -1,13 +1,9 @@
 (ns com.sixsq.slipstream.db.serializers.utils
   (:require
+    [clojure.string :as str]
     [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.db.es.binding :as esb]
-    [com.sixsq.slipstream.db.es.common.utils :as escu]
-    [com.sixsq.slipstream.db.es.utils :as esu]
-    [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :as aih]
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
-    [superstring.core :as s]))
+    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]))
 
 (defn throw-on-resp-error
   [resp]
@@ -31,7 +27,7 @@
       (catch NumberFormatException _
         s)
       (catch RuntimeException ex
-        (if-not (s/starts-with? (.getMessage ex) "Invalid token")
+        (if-not (str/starts-with? (.getMessage ex) "Invalid token")
           (throw ex)
           s)))
     s))
@@ -53,12 +49,6 @@
 ;;
 ;; DB related.
 ;;
-
-#_(defn dump
-  [resource & [msg]]
-  (println "DB DUMP: " (or msg ""))
-  (let [index-name (escu/id->index resource)]
-    (clojure.pprint/pprint (esu/dump esb/*client* index-name resource))))
 
 (defn as-boolean
   [maybe-boolean]
@@ -88,7 +78,7 @@
 
 (defn param-get-cat-and-name
   [p]
-  (s/split (.getName p) #"\." 2))
+  (str/split (.getName p) #"\." 2))
 
 (defn param-get-pname
   "Get unqualified parameter name by removing its category."
@@ -96,11 +86,9 @@
   (second (param-get-cat-and-name p)))
 
 (defn qualified-pname
-  [desc category]
-  (let [n (get desc :name (:displayName desc))]
-    (if (not (nil? category))
-      (str category "." n)
-      n)))
+  [{:keys [name displayName] :as desc} category]
+  (cond->> (or name displayName)
+           category (str category ".")))
 
 (defn build-sc-param
   [^Object serviceConf value desc & [category]]
@@ -112,7 +100,7 @@
         (when-not (nil? (:mandatory desc))
           (.setMandatory scp (as-boolean (:mandatory desc))))
         (when (:type desc)
-          (.setType scp (s/capitalize (:type desc))))
+          (.setType scp (str/capitalize (:type desc))))
         (when-not (nil? (:readOnly desc))
           (.setReadonly scp (as-boolean (get desc :readOnly (:readOnly desc)))))
         (when (:order desc)
@@ -126,7 +114,7 @@
 (defn desc-from-param
   [p]
   (let [pd {:displayName (param-get-pname p)
-            :type        (s/lower-case (.getType p))
+            :type        (str/lower-case (.getType p))
             :category    (.getCategory p)
             :description (.getDescription p)
             :mandatory   (.isMandatory p)

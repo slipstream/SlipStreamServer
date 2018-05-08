@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.db.es.loader
   (:refer-clojure :exclude [load])
   (:require
-    [com.sixsq.slipstream.db.es.utils :as esu]
-    [com.sixsq.slipstream.db.es.binding :as esb]))
+    [com.sixsq.slipstream.db.es.binding :as esb]
+    [com.sixsq.slipstream.db.es.utils :as esu]))
 
 
 (defn load

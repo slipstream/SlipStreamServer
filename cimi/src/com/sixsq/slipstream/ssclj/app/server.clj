@@ -1,8 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.app.server
   (:require
     [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.db.ephemeral-impl :as edb]
+    [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.db.loader :as db-loader]
     [com.sixsq.slipstream.ssclj.app.graphite :as graphite]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.app.routes :as routes]
@@ -26,37 +27,6 @@
 
 
 (def default-db-binding-ns "com.sixsq.slipstream.db.es.loader")
-
-
-(defn load-db-binding
-  [db-binding-ns]
-  (try
-    (-> db-binding-ns symbol require)
-    (catch Exception e
-      (log/errorf "cannot require namespace %s: %s" db-binding-ns (.getMessage e))
-      (throw e)))
-  (try
-    (let [load (-> db-binding-ns symbol find-ns (ns-resolve 'load))]
-      (let [binding-impl (load)]
-        (log/infof "created binding implementation from %s" db-binding-ns)
-        binding-impl))
-    (catch Exception e
-      (log/errorf "error executing load function from %s: %s" db-binding-ns (.getMessage e))
-      (throw e))))
-
-
-(defn load-persistent-db-binding
-  []
-  (-> (env/env :persistent-db-binding-ns default-db-binding-ns)
-      load-db-binding
-      db/set-impl!))
-
-
-(defn load-ephemeral-db-binding
-  []
-  (some-> (env/env :ephemeral-db-binding-ns)
-          load-db-binding
-          edb/set-impl!))
 
 
 (defn- create-ring-handler
@@ -117,9 +87,11 @@
     (catch Exception e
       (log/warn "error registering instrumentation metrics:" (str e))))
 
-  (load-persistent-db-binding)
+  (db-loader/load-and-set-persistent-db-binding
+    (env/env :persistent-db-binding-ns default-db-binding-ns))
 
-  (load-ephemeral-db-binding)
+  (db-loader/load-and-set-ephemeral-db-binding
+    (env/env :ephemeral-db-binding-ns))
 
   (try
     (zku/set-client! (zku/create-client))

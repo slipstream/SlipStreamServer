@@ -17,7 +17,7 @@
 
 (defn set-service-clients [m]
   (println "DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG : SETTING SERVICE CLIENTS")
-  (println m)
+  (println (with-out-str (clojure.pprint/pprint m)))
   (alter-var-root #'*service-clients* (constantly m)))
 
 
