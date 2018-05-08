@@ -163,7 +163,7 @@
 
 (defn create-index
   ^CreateIndexResponse [^Client client index-name spec]
-  (log/info "creating index:" index-name " with spec : " spec)
+  (log/debug "creating index:" index-name " with spec : " spec)
   (let [edn-mapping (mapping/mapping spec)
         json-mapping (edn->json edn-mapping)
         settings (.. (Settings/builder)
@@ -171,7 +171,7 @@
                      (put "index.number_of_shards" 3)
                      (put "index.number_of_replicas" 0)
                      (build))]
-    (log/info "json mapping is " json-mapping " for index " index-name)
+    (log/debug "json mapping is " json-mapping " for index " index-name)
     (try
       (.. client
           (admin)

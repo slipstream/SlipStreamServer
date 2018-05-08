@@ -8,7 +8,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.callback]
     [com.sixsq.slipstream.ssclj.util.log :as log-util]
-    [com.sixsq.slipstream.util.response :as r])
+    [com.sixsq.slipstream.util.response :as r]
+    [clojure.tools.logging :as log])
   (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-tag :callbacks)
@@ -135,4 +136,5 @@
 ;;
 (defn initialize
   []
+  (log/debug "Before  std-crud/initialize " resource-url " with  :cimi/callback")
   (std-crud/initialize resource-url :cimi/callback))

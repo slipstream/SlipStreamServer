@@ -409,4 +409,5 @@
 ;;
 (defn initialize
   []
+  (log/debug "Before  std-crud/initialize " resource-url " with  explicit nil")
   (std-crud/initialize resource-url nil))

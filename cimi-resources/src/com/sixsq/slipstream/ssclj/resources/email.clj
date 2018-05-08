@@ -16,7 +16,8 @@
     [com.sixsq.slipstream.ssclj.resources.email.utils :as email-utils]
     [com.sixsq.slipstream.ssclj.resources.spec.email]
     [com.sixsq.slipstream.util.response :as r]
-    [superstring.core :as str]))
+    [superstring.core :as str]
+    [clojure.tools.logging :as log]))
 
 (def ^:const resource-name "Email")
 
@@ -131,4 +132,5 @@
 ;;
 (defn initialize
   []
+  (log/debug "Before  std-crud/initialize " resource-url " with  :cimi/email")
   (std-crud/initialize resource-url :cimi/email))

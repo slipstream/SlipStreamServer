@@ -7,7 +7,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.connector-template :as connector-tmpl]
     [com.sixsq.slipstream.ssclj.resources.spec.connector]
-    [com.sixsq.slipstream.util.response :as r])
+    [com.sixsq.slipstream.util.response :as r]
+    [clojure.tools.logging :as log])
   (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-tag :connectors)
@@ -242,4 +243,5 @@
 ;;
 (defn initialize
   []
+  (log/debug "Before  std-crud/initialize " resource-url " with  explicit nil")
   (std-crud/initialize resource-url nil))

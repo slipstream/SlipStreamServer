@@ -1,5 +1,6 @@
 (ns com.sixsq.slipstream.db.impl
   (:require
+    [clojure.tools.logging :as log]
     [com.sixsq.slipstream.db.binding :as p]))
 
 (def ^:dynamic *impl*)
@@ -13,6 +14,7 @@
   (.unbindRoot #'*impl*))
 
 (defn initialize [collection-id options]
+  (log/debug "DB impl initialize" collection-id " with options " options)
   (p/initialize *impl* collection-id options))
 
 (defn add [collection-id data options]

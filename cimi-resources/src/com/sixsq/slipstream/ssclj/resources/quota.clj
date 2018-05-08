@@ -8,7 +8,8 @@
     [com.sixsq.slipstream.ssclj.resources.quota.utils :as quota-utils]
     [com.sixsq.slipstream.ssclj.resources.spec.quota]
     [com.sixsq.slipstream.util.response :as sr]
-    [superstring.core :as str])
+    [superstring.core :as str]
+    [clojure.tools.logging :as log])
   (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-name "Quota")
@@ -118,4 +119,5 @@
 ;;
 (defn initialize
   []
+  (log/debug "Before  std-crud/initialize " resource-url " with  :cimi/quota")
   (std-crud/initialize resource-url :cimi/quota))

@@ -6,7 +6,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.spec.event]))
+    [com.sixsq.slipstream.ssclj.resources.spec.event]
+    [clojure.tools.logging :as log]))
 
 (def ^:const resource-tag :events)
 (def ^:const resource-name "Event")
@@ -80,4 +81,5 @@
 ;;
 (defn initialize
   []
+  (log/debug "Before  std-crud/initialize " resource-url " with  :cimi/event")
   (std-crud/initialize resource-url :cimi/event))

@@ -135,6 +135,7 @@
    exception is thrown, it will be logged but then ignored."
   [resource-url spec]
   (try
+    (log/debug "Initializing resource " resource-url " with spec " spec)
     (db/initialize resource-url {:spec spec})
     (catch Exception e
       (log/errorf "exception when initializing database for %s: %s"

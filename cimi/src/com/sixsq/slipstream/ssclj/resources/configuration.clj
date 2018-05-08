@@ -6,7 +6,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as conf-tmpl]
-    [com.sixsq.slipstream.util.response :as r])
+    [com.sixsq.slipstream.util.response :as r]
+    [clojure.tools.logging :as log])
   (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-tag :configurations)
@@ -168,4 +169,5 @@
 ;;
 (defn initialize
   []
+  (log/debug "Calling  std-crud/initialize " resource-url " with explicit nil")
   (std-crud/initialize resource-url nil))

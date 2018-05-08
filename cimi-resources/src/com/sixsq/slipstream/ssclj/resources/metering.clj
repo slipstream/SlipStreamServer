@@ -7,7 +7,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.metering]
-    [superstring.core :as str]))
+    [superstring.core :as str]
+    [clojure.tools.logging :as log]))
 
 (def ^:const resource-name "Metering")
 
@@ -99,4 +100,5 @@
 ;;
 (defn initialize
   []
+  (log/debug "Before  std-crud/initialize " resource-url " with  :cimi/metering")
   (std-crud/initialize resource-url :cimi/metering))

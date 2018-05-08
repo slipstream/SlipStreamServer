@@ -109,6 +109,7 @@
 ;;
 (defn initialize
   []
+  (log/debug "Calling  std-crud/initialize " resource-url " with :cimi/cloud-entry-point")
   (std-crud/initialize resource-url :cimi/cloud-entry-point)
 
   (try

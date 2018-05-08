@@ -10,7 +10,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.util.log :as log-util])
+    [com.sixsq.slipstream.ssclj.util.log :as log-util]
+    [clojure.tools.logging :as log])
   (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const form-urlencoded "application/x-www-form-urlencoded")
@@ -290,4 +291,5 @@
 ;;
 (defn initialize
   []
+  (log/debug "Calling  std-crud/initialize " resource-url " with explicit nil")
   (std-crud/initialize resource-url nil))

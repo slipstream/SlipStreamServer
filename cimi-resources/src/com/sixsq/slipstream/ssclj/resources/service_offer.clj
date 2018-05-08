@@ -9,7 +9,8 @@
     [com.sixsq.slipstream.ssclj.resources.spec.service-offer]
     [com.sixsq.slipstream.util.response :as sr]
     [ring.util.response :as r]
-    [superstring.core :as str]))
+    [superstring.core :as str]
+    [clojure.tools.logging :as log]))
 
 (def ^:const resource-name "ServiceOffer")
 
@@ -115,4 +116,5 @@
 ;;
 (defn initialize
   []
+  (log/debug "Before  std-crud/initialize " resource-url " with  :cimi/service-offer")
   (std-crud/initialize resource-url :cimi/service-offer))

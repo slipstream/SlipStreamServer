@@ -8,7 +8,8 @@
     [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
     [com.sixsq.slipstream.ssclj.resources.external-object-template-report :as eot]
     [com.sixsq.slipstream.ssclj.resources.spec.external-object-report]
-    [com.sixsq.slipstream.ssclj.resources.spec.external-object-template-report]))
+    [com.sixsq.slipstream.ssclj.resources.spec.external-object-template-report]
+    [clojure.tools.logging :as log]))
 
 
 (def ExternalObjectReportDescription
@@ -70,4 +71,5 @@
 ;;
 (defn initialize
   []
+  (log/debug "Before  std-crud/initialize " eo/resource-url " with  :cimi/external-object.report")
   (std-crud/initialize eo/resource-url :cimi/external-object.report))

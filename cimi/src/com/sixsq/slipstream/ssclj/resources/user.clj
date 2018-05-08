@@ -8,7 +8,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.user-template-direct :as tpl]
-    [com.sixsq.slipstream.ssclj.util.log :as logu])
+    [com.sixsq.slipstream.ssclj.util.log :as logu]
+    [clojure.tools.logging :as log])
   (:import
     (clojure.lang ExceptionInfo)))
 
@@ -233,4 +234,5 @@
 ;;
 (defn initialize
   []
+  (log/debug "Calling  std-crud/initialize " resource-url " with explicit :cimi/user")
   (std-crud/initialize resource-url :cimi/user))

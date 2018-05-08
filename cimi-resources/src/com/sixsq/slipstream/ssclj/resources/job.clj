@@ -8,7 +8,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.job.utils :as ju]
     [com.sixsq.slipstream.ssclj.resources.spec.job]
-    [superstring.core :as str])
+    [superstring.core :as str]
+    [clojure.tools.logging :as log])
   (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-name "Job")
@@ -34,6 +35,7 @@
 ;;
 (defn initialize
   []
+  (log/debug "Before  std-crud/initialize " resource-url " with  :cimi/job")
   (std-crud/initialize resource-url :cimi/job)
   (ju/create-job-queue))
 
