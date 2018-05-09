@@ -16,7 +16,8 @@
 (def base-uri (str p/service-context (u/de-camelcase st/resource-name)))
 
 
-(def valid-template {:method      internal/authn-method
+(def valid-template {:method
+                                  internal/authn-method
                      :instance    internal/authn-method
                      :name        "Internal"
                      :description "Internal Authentication via Username/Password"

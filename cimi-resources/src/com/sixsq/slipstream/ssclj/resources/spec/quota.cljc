@@ -16,7 +16,7 @@
 
 
 (s/def :cimi.quota/resource ::cimi-core/nonblank-string)
-(s/def :cimi.quota/selection valid-cimi-filter?)
+(s/def :cimi.quota/selection (s/and string? valid-cimi-filter?))
 (s/def :cimi.quota/aggregation ::cimi-core/nonblank-string)
 (s/def :cimi.quota/limit pos-int?)
 
