@@ -2,7 +2,6 @@
   "Utilities for loading information from CIMI resources dynamically."
   (:require
     [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.util.namespace-utils :as dyn]))
 
 (defn resource?
