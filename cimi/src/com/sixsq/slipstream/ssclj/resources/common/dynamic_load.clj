@@ -62,5 +62,5 @@
 (defn initialize
   "Runs the initialize function for all resources that define it."
   []
-  (doseq [resource-namespace resource-namespaces]
+  (doseq [resource-namespace (resource-namespaces)]
     (initialize-resource resource-namespace)))
