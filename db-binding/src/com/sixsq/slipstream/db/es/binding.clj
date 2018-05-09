@@ -8,7 +8,8 @@
     [com.sixsq.slipstream.db.es.utils :as esu]
     [com.sixsq.slipstream.db.utils.acl :as acl-utils]
     [com.sixsq.slipstream.db.utils.common :as cu]
-    [com.sixsq.slipstream.util.response :as response])
+    [com.sixsq.slipstream.util.response :as response]
+    [clojure.tools.logging :as log])
   (:import
     (java.io Closeable)
     (org.elasticsearch.client Client)
@@ -71,57 +72,64 @@
 
   (initialize [_ collection-id {:keys [spec] :as options}]
     (let [index (escu/collection-id->index collection-id)]
-      (when-not (esu/index-exists? client index)
-        (esu/create-index client index spec)
-        (esu/wait-for-index client index))))
+      (when-not spec
+        (log/info "Initializing will null spec")
+        (if (= "cloud-entry-point" collection-id)
+        (try
+          (throw (Exception. "DEBUGGING nil spec"))
+            (catch Exception e (str "caught exception: " (.printStackTrace e))))))
+
+        (when-not (esu/index-exists? client index)
+          (esu/create-index client index spec)
+          (esu/wait-for-index client index))))
 
 
-  (add [_ data options]
-    (add-data client data))
+    (add [_ data options]
+         (add-data client data))
 
 
-  (add [_ collection-id data options]
-    (add-data client data))
+    (add [_ collection-id data options]
+         (add-data client data))
 
 
-  (retrieve [_ id options]
-    (find-data client (escu/id->index id) id options))
+    (retrieve [_ id options]
+              (find-data client (escu/id->index id) id options))
 
 
-  (delete [_ {:keys [id]} options]
-    (find-data client (escu/id->index id) id options)
-    (let [[type docid] (cu/split-id id)]
-      (.status (esu/delete client (escu/id->index id) type docid)))
-    (response/response-deleted id))
+    (delete [_ {:keys [id]} options]
+            (find-data client (escu/id->index id) id options)
+            (let [[type docid] (cu/split-id id)]
+              (.status (esu/delete client (escu/id->index id) type docid)))
+            (response/response-deleted id))
 
 
-  (edit [_ {:keys [id] :as data} options]
-    (let [[type docid] (cu/split-id id)
-          updated-doc (prepare-data data)]
-      (if (esu/update client (escu/id->index id) type docid updated-doc)
-        (response/json-response data)
-        (response/response-conflict id))))
+    (edit [_ {:keys [id] :as data} options]
+          (let [[type docid] (cu/split-id id)
+                updated-doc (prepare-data data)]
+            (if (esu/update client (escu/id->index id) type docid updated-doc)
+              (response/json-response data)
+              (response/response-conflict id))))
 
 
-  (query [_ collection-id options]
-    (let [result (esu/search client (escu/collection-id->index collection-id) collection-id options)
-          count-before-pagination (-> result :hits :total)
-          aggregations (:aggregations result)
-          meta (cond-> {:count count-before-pagination}
-                       aggregations (assoc :aggregations aggregations))
-          hits (->> result
-                    :hits
-                    :hits
-                    (map :_source)
-                    (map acl-utils/normalize-acl))]
-      [meta hits]))
+    (query [_ collection-id options]
+           (let [result (esu/search client (escu/collection-id->index collection-id) collection-id options)
+                 count-before-pagination (-> result :hits :total)
+                 aggregations (:aggregations result)
+                 meta (cond-> {:count count-before-pagination}
+                              aggregations (assoc :aggregations aggregations))
+                 hits (->> result
+                           :hits
+                           :hits
+                           (map :_source)
+                           (map acl-utils/normalize-acl))]
+             [meta hits]))
 
-  Closeable
-  (close [_]
-    (try
-      (.close client)
-      (catch Exception _ nil)
-      (finally nil))))
+    Closeable
+    (close [_]
+           (try
+             (.close client)
+             (catch Exception _ nil)
+             (finally nil))))
 
 
 
