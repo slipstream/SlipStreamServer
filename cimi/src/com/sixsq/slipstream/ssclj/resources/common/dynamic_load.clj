@@ -3,7 +3,6 @@
   (:require
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.db.impl :as db]
-    [com.sixsq.slipstream.ssclj.resources.common.debug-utils :as du]
     [com.sixsq.slipstream.ssclj.util.namespace-utils :as dyn]))
 
 (defn resource?
@@ -44,17 +43,6 @@
       (catch Exception e
         (log/error "initializing" (ns-name resource-ns) "failed:" (.getMessage e))))))
 
-(defn- initialize-db-for-resource
-  "Run a resource's initialization function on db if it exists."
-  [resource-ns]
-  (if-let [fvar (dyn/resolve "resource-url" resource-ns)]
-    (try
-      (let [index-name (deref fvar)]
-        (db/initialize index-name nil))
-      (log/info "initialized db for resource" (ns-name resource-ns))
-      (catch Exception e
-        (log/error "initializing" (ns-name resource-ns) "for db failed:" (.getMessage e))))))
-
 (defn resource-routes
   "Returns a lazy sequence of all of the routes for resources
    discovered on the classpath."
@@ -75,6 +63,5 @@
 (defn initialize
   "Runs the initialize function for all resources that define it."
   []
-  (doall
-    (map
-      (juxt initialize-db-for-resource initialize-resource) (resource-namespaces))))
+  (doseq [resource-namespace resource-namespaces]
+    (initialize-resource resource-namespace)))
