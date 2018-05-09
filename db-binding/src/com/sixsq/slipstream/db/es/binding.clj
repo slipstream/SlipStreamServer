@@ -11,7 +11,7 @@
     [com.sixsq.slipstream.util.response :as response]
     [clojure.tools.logging :as log])
   (:import
-    (java.io Closeable)
+    (java.io Closeable StringWriter PrintWriter)
     (org.elasticsearch.client Client)
     (org.elasticsearch.index.engine VersionConflictEngineException)))
 
@@ -67,18 +67,28 @@
         (response/response-conflict id)))))
 
 
+(defn stackTraceAsString [ex]
+  (let [sw (StringWriter.)
+        pw (PrintWriter. sw)]
+  (.printStackTrace ex pw)
+  (.toString sw)))
+
+
 (deftype ESBindingLocal [^Client client]
   Binding
 
   (initialize [_ collection-id {:keys [spec] :as options}]
     (let [index (escu/collection-id->index collection-id)]
       (when-not spec
-        (log/info "Initializing " collection-id " will null spec")
+        (log/info "Initializing " collection-id " when spec is nil" )
         (try
           (log/info "Must throw exception")
           (throw (Exception. "DEBUGGING nil spec"))
             (catch Exception e
-              (log/error (str "showing stacktrace for initialize : " (.printStackTrace e))))))
+              (log/error (str "showing stacktrace for initialize : " (stackTraceAsString e)))))
+
+
+        )
 
         (when-not (esu/index-exists? client index)
           (esu/create-index client index spec)
