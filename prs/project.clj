@@ -12,7 +12,7 @@
 
   :plugins [[lein-parent "0.3.2"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "5.3.3"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.3.5"]
                    :inherit [:plugins
                              :min-lein-version
                              :managed-dependencies
@@ -31,6 +31,7 @@
    [cheshire] ;; newer version needed
    [com.sixsq.slipstream/SlipStreamPlacementLib-jar ~+version+]
    [com.sixsq.slipstream/token ~+version+]
+   [commons-io "2.5"]
    [compojure]
    [ring/ring-json]
    [ring/ring-defaults]]
