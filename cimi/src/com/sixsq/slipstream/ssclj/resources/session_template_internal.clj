@@ -5,7 +5,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.session-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-internal]))
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-internal]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]))
 
 (def ^:const authn-method "internal")
 
@@ -45,6 +46,7 @@
   []
   (p/register authn-method desc)
   (try
+    (std-crud/initialize p/resource-url :cimi/session-template.internal)
     (let [request {:params   {:resource-name p/resource-url}
                    :identity {:current         "INTERNAL"
                               :authentications {"INTERNAL" {:identity "INTERNAL", :roles ["ADMIN" "USER" "ANON"]}}}
