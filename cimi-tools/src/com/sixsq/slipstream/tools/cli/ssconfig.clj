@@ -323,7 +323,7 @@
     (slurp-and-store f)))
 
 
-(defn list-tempates
+(defn list-templates
   []
   (println "List of accessible templates.")
   (doseq [[ttn ts] *templates*]
@@ -341,7 +341,7 @@
         (clojure.pprint/pprint (sci/strip-unwanted-attrs t unwanted)))
       (do
         (println "WARNING: Template" tname "not found.")
-        (list-tempates)))))
+        (list-templates)))))
 
 
 (defn resource-uuid
@@ -468,7 +468,7 @@
     :default #{}
     :assoc-fn cli-parse-sets]
    ["-e" "--edit-kv KEY=VALUE" (str "Updates or adds key=value in first file from "
-                                    "<list-of-files> (other files are ingnored).")
+                                    "<list-of-files> (other files are ignored).")
     :id :edit-kv
     :default #{}
     :assoc-fn cli-parse-sets]
@@ -512,11 +512,16 @@
     (cond
       (:help options) (exit 0 (usage summary))
       errors (exit 1 (error-msg errors)))
-    (when (not (empty? arguments))
-      (cond
-        (seq (:edit-kv options)) (edit-file (first arguments) (:edit-kv options))
-        :else (do (init-namespaces)
-                  (store-to-db arguments)))
+    (when (and (not (empty? arguments)) (seq (:edit-kv options)))
+      (edit-file (first arguments) (:edit-kv options))
+      (System/exit 0))
+
+    ;; for all actions below
+    (init-db-client)
+
+    (when (and (not (empty? arguments)) (empty? (:edit-kv options)))
+      (do (init-namespaces)
+          (store-to-db arguments))
       (System/exit 0))
     (when (seq (:delete-resources options))
       (alter-var-root #'*delete-resources* (fn [_] (:delete-resources options)))
@@ -528,7 +533,7 @@
       (System/exit 0))
     (when (:list options)
       (init-namespaces)
-      (list-tempates)
+      (list-templates)
       (System/exit 0))
     (when (not (s/blank? (:template options)))
       (init-namespaces)

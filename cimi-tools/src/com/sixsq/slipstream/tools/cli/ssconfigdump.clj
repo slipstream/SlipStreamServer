@@ -68,7 +68,7 @@
     :assoc-fn cli-parse-connectors]
    ["-x" "--configxml CONFIGXML" "Path to file or URL starting with https (requries -s parameter). Mandatory."]
    ["-s" "--credentials CREDENTIALS" "Credentials as user:pass for -x when URL is provided."]
-   ["-m" "--modify old=new" "Modify in all values. '=' is a separator. Usefull for updating hostname/ip of SlipStream."
+   ["-m" "--modify old=new" "Modify in all values. '=' is a separator. Useful for updating hostname/ip of SlipStream."
     :id :modifiers
     :default #{}
     :assoc-fn cli-parse-modifiers]
@@ -79,7 +79,7 @@
   "
   Given SlipStream URL or path to file with configuration XML, extracts
   and stores global service configuration and per connector parameters,
-  with their description, into connfiguration-slipstream.edn,
+  with their description, into configuration-slipstream.edn,
   connector-<instance-name>.edn and connector-<instance-name>-desc.edn
   respectively.")
 
