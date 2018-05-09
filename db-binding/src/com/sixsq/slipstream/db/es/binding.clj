@@ -73,11 +73,12 @@
   (initialize [_ collection-id {:keys [spec] :as options}]
     (let [index (escu/collection-id->index collection-id)]
       (when-not spec
-        (log/info "Initializing will null spec")
-        (if (= "cloud-entry-point" collection-id)
+        (log/info "Initializing " collection-id " will null spec")
         (try
+          (log/info "Must throw exception")
           (throw (Exception. "DEBUGGING nil spec"))
-            (catch Exception e (str "caught exception: " (.printStackTrace e))))))
+            (catch Exception e
+              (log/error (str "showing stacktrace for initialize : " (.printStackTrace e))))))
 
         (when-not (esu/index-exists? client index)
           (esu/create-index client index spec)
