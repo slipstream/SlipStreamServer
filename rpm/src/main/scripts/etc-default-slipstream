@@ -1,3 +1,4 @@
+export PERSISTENT_DB_BINDING_NS=com.sixsq.slipstream.db.es.loader
 export ES_HOST=localhost
 export ES_PORT=9300
 export JETTY_HOME=/opt/slipstream/server

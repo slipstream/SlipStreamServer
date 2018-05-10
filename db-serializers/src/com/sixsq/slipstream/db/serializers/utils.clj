@@ -3,7 +3,11 @@
     [clojure.string :as str]
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :as aih]
-    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]))
+    [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
+    [com.sixsq.slipstream.db.loader :as db-loader]
+    [environ.core :as env]))
+
+(def default-db-binding-ns "com.sixsq.slipstream.db.es.loader")
 
 (defn throw-on-resp-error
   [resp]
@@ -130,10 +134,24 @@
 ;; Initializer
 ;;
 
-(def dyn-init
-  (delay
-    (dyn/initialize)))
+(def dyn-init (delay (dyn/initialize)))
 
 (defn initialize
   []
   @dyn-init)
+
+
+;;
+;; database binding initialization
+;;
+
+(defn init-db-binding
+  "Load the binding for the persistent database implementation. Uses the
+   environmental variables PERSISTENT_DB_BINDING_NS to load the binding. The
+   chosen binding may also read configuration parameters from the environment.
+   For example, the Elasticsearch bindings will use ES_HOST and ES_PORT."
+  []
+  (db-loader/load-and-set-persistent-db-binding
+    (env/env :persistent-db-binding-ns default-db-binding-ns)))
+
+
