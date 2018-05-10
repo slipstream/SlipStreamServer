@@ -1,16 +1,15 @@
 (ns com.sixsq.slipstream.tools.cli.ssconfig
   (:require
-    [clojure.string :as s]
-    [clojure.tools.cli :refer [parse-opts]]
+    [clojure.string :as str]
+    [clojure.tools.cli :as cli]
 
+    [com.sixsq.slipstream.db.loader :as db-loader]
     [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]
     [com.sixsq.slipstream.db.serializers.utils :as u]
-    [com.sixsq.slipstream.db.loader :as db-loader]
     [com.sixsq.slipstream.ssclj.resources.configuration :as cfg]
     [com.sixsq.slipstream.ssclj.resources.configuration-slipstream :as cfg-s]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as cfgt]
     [com.sixsq.slipstream.ssclj.resources.connector :as conn]
-    [com.sixsq.slipstream.ssclj.resources.connector :as con]
     [com.sixsq.slipstream.ssclj.resources.connector-template :as cont]
     [com.sixsq.slipstream.tools.cli.utils :refer :all])
   (:gen-class))
@@ -87,8 +86,8 @@
 (defn resource-type-from-str
   [rstr]
   (if (re-find #"-template/" rstr)
-    (first (s/split rstr #"-template/"))
-    (first (s/split rstr #"/"))))
+    (first (str/split rstr #"-template/"))
+    (first (str/split rstr #"/"))))
 
 
 (defn resource-type
@@ -117,23 +116,23 @@
 (defn check-mandatory-attrs
   [m]
   (if-not (every? #(contains? m %) mandatory-attrs)
-    (exit-err "Each resource must contain following manatory attributes: " (s/join ", " mandatory-attrs))
+    (exit-err "Each resource must contain following mandatory attributes: " (str/join ", " mandatory-attrs))
     m))
 
 
 (defn validate-resource-type
   [m]
   (if-not (contains? resource-types (resource-type m))
-    (exit-err "Resource type must be one of: " (s/join ", " resource-types))
+    (exit-err "Resource type must be one of: " (str/join ", " resource-types))
     m))
 
 
 (defn resource->template-name
   [c]
   (cond
-    (configuration? c) (s/replace-first (:id c) #"/" "-template/")
+    (configuration? c) (str/replace-first (:id c) #"/" "-template/")
     (connector? c) (-> (:id c)
-                       (s/split #"/")
+                       (str/split #"/")
                        first
                        (str "-template/")
                        (str (:cloudServiceType c)))))
@@ -149,7 +148,7 @@
 
 (defn halt-no-template
   [c]
-  (let [tname     (resource->template-name c)
+  (let [tname (resource->template-name c)
         templates (get-templates c)]
     (when-not (contains? templates tname)
       (exit-err "No template available for " tname))
@@ -161,7 +160,7 @@
   (let [rtype (resource-type c)
         attrs (get required-attrs rtype)]
     (if-not (every? #(contains? c %) attrs)
-      (exit-err "Resource '" rtype "' must contain following attributes: " (s/join ", " attrs))
+      (exit-err "Resource '" rtype "' must contain the following attributes: " (str/join ", " attrs))
       c)))
 
 
@@ -178,10 +177,9 @@
 ;;
 
 (defn cfg-add-service-attr
-  [m]
-  (if-not (contains? m :service)
-    (assoc m :service cfg-s/service)
-    m))
+  [{:keys [service] :as m}]
+  (cond-> m
+          (nil? service) (assoc :service cfg-s/service)))
 
 
 (defn cfg-tpl-slipstream
@@ -224,7 +222,7 @@
 
 (defn conn-inst-name
   [conn]
-  (second (s/split (:id conn) #"/")))
+  (second (str/split (:id conn) #"/")))
 
 
 (defn complete-connector
@@ -243,12 +241,12 @@
 
 (defn merge-ccc-and-new-conn
   [ccc new-conn]
-  (s/replace (s/join "," [ccc new-conn]) #"(^[ \t]*,*|,*[ \t]*$)" ""))
+  (str/replace (str/join "," [ccc new-conn]) #"(^[ \t]*,*|,*[ \t]*$)" ""))
 
 
 (defn update-ccc
   [ccc cin cn]
-  (let [new-conn (s/join ":" [cin cn])]
+  (let [new-conn (str/join ":" [cin cn])]
     (println "Updating :cloudConnectorClass parameter with -" new-conn)
     (store-cfg {:id                  (str cfg/resource-url "/" cfg-s/service)
                 :cloudConnectorClass (merge-ccc-and-new-conn ccc new-conn)})))
@@ -257,7 +255,7 @@
 (defn add-conn-to-ccc
   "Adds connector to :cloudConnectorClass attribute."
   [cin cn]
-  (let [ccc     (get-ccc)
+  (let [ccc (get-ccc)
         cin->cn (sci/connector-names-map ccc)]
     (if-not (and (contains? cin->cn cin) (= (get cin->cn cin) cn))
       (update-ccc ccc cin cn)
@@ -268,8 +266,8 @@
 (defn conn-add
   "Connector `conn` as request. The resource is in :body."
   [conn]
-  (let [cin      (conn-inst-name (:body conn))
-        cn       (-> conn :body :cloudServiceType)
+  (let [cin (conn-inst-name (:body conn))
+        cn (-> conn :body :cloudServiceType)
         add-resp (-> conn
                      (assoc :body (complete-connector (:body conn)))
                      conn/add-impl)]
@@ -279,7 +277,7 @@
 
 
 (defn conn-edit-or-add
-  "Retruns response of edit or add operation. Tries to add if edit fails with 404."
+  "Returns response of edit or add operation. Tries to add if edit fails with 404."
   [conn]
   (let [edit-resp (conn/edit-impl conn)]
     ;; adding may fail because template hasn't been registered yet.
@@ -335,7 +333,7 @@
 (defn print-template
   [tname]
   (let [ts (apply merge (vals *templates*))
-        t  (get ts tname)]
+        t (get ts tname)]
     (if (seq t)
       (let [unwanted (into #{} (remove #{:id :cloudServiceType} sci/unwanted-attrs))]
         (clojure.pprint/pprint (sci/strip-unwanted-attrs t unwanted)))
@@ -346,7 +344,7 @@
 
 (defn resource-uuid
   [rname]
-  (-> rname (s/split #"/") second))
+  (-> rname (str/split #"/") second))
 
 
 (defn get-configuration-resource
@@ -387,10 +385,10 @@
 
 (defn get-connector-resources
   []
-  (let [cs (-> (con/query-impl (sci/connector-as-request configuration-resource))
+  (let [cs (-> (conn/query-impl (sci/connector-as-request configuration-resource))
                :body
                :connectors)]
-    (map #(:id %) cs)))
+    (map :id cs)))
 
 
 (defn get-configuration-resources
@@ -398,7 +396,7 @@
   (let [cs (-> (cfg/query-impl (sci/configuration-as-request connector-resource))
                :body
                :configurations)]
-    (map #(:id %) cs)))
+    (map :id cs)))
 
 
 (defn get-persisted-resources
@@ -429,7 +427,7 @@
   (let [kvm (into {}
                   (map
                     #(vec [(keyword (first %)) (second %)])
-                    (map #(s/split % #"=") kvs)))]
+                    (map #(str/split % #"=") kvs)))]
     (spit-edn (merge (slurp-edn f) kvm) f)))
 
 
@@ -446,7 +444,7 @@
 (defn delete-resources
   []
   (init-db-client)
-  (println "Deleting resources from DB:" (s/join ", " *delete-resources*))
+  (println "Deleting resources from DB:" (str/join ", " *delete-resources*))
   (doseq [r *delete-resources*]
     (let [res (delete-resource r)]
       (if (= 200 (:status res))
@@ -472,7 +470,7 @@
     :id :edit-kv
     :default #{}
     :assoc-fn cli-parse-sets]
-   ["-d" "--delete RESOURCE" "Deteles resource by name."
+   ["-d" "--delete RESOURCE" "Deletes resource by name."
     :id :delete-resources
     :default #{}
     :assoc-fn cli-parse-sets]
@@ -503,12 +501,12 @@
         "  <list-of-files>    list of edn files with configurations."
         ""
         prog-help]
-       (s/join \newline)))
+       (str/join \newline)))
 
 
 (defn -main
   [& args]
-  (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)]
+  (let [{:keys [options arguments errors summary]} (cli/parse-opts args cli-options)]
     (cond
       (:help options) (exit 0 (usage summary))
       errors (exit 1 (error-msg errors)))
@@ -535,7 +533,7 @@
       (init-namespaces)
       (list-templates)
       (System/exit 0))
-    (when (not (s/blank? (:template options)))
+    (when (not (str/blank? (:template options)))
       (init-namespaces)
       (print-template (:template options)))
     (when (:persisted options)

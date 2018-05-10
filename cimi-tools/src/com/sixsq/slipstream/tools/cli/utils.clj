@@ -2,7 +2,7 @@
   (:require
     [clj-http.client :as http]
     [clojure.edn :as edn]
-    [clojure.string :as s]
+    [clojure.string :as str]
     [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]
     [com.sixsq.slipstream.db.serializers.service-config-util :as scu])
   (:import
@@ -11,7 +11,7 @@
 (defn- update-val
   [v modifiers]
   (let [nvs (for [[m r] modifiers :when (and (string? v) (re-find m v))]
-              (s/replace v m r))]
+              (str/replace v m r))]
     (if (seq nvs)
       (last nvs)
       v)))
@@ -23,9 +23,9 @@
     (into {} res)))
 
 (def con-attrs-to-remove
-  {"ec2"      [:securityGroup]
-   "nuvlabox" [:orchestratorInstanceType :pdiskEndpoint]
-   "stratuslab" [:messagingQueue :messagingType :messagingEndpoint]
+  {"ec2"            [:securityGroup]
+   "nuvlabox"       [:orchestratorInstanceType :pdiskEndpoint]
+   "stratuslab"     [:messagingQueue :messagingType :messagingEndpoint]
    "stratuslabiter" [:messagingQueue :messagingType :messagingEndpoint]})
 
 (defn remove-attrs
@@ -69,7 +69,7 @@
 
 (defn conf-xml
   [path-url creds]
-  (if (s/starts-with? path-url "https")
+  (if (str/starts-with? path-url "https")
     (-> path-url
         ->config-resource
         (http/get {:follow-redirects false
@@ -103,7 +103,7 @@
 (defn error-msg
   [& errors]
   (str "The following errors occurred while parsing your command:\n\n"
-       (s/join \newline errors)))
+       (str/join \newline errors)))
 
 (defn cli-parse-sets
   ([m k v]
@@ -119,7 +119,7 @@
 (defn ->re-match-replace
   "'m=r' -> [#'m' 'r']"
   [mr]
-  (let [m-r (s/split mr #"=")]
+  (let [m-r (str/split mr #"=")]
     [(re-pattern (first m-r)) (second m-r)]))
 
 (defn cli-parse-modifiers
