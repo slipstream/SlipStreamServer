@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.tools.cli.ssconfigdump
   (:require
     [clojure.set :refer [difference]]
-    [clojure.string :as s]
+    [clojure.string :as str]
     [clojure.tools.cli :refer [parse-opts]]
 
     [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]
@@ -28,11 +28,11 @@
 (defn dump-connector!
   [cn vals desc]
   (println "Saving connector:" cn)
-  (let [vals-clean   (-> vals
-                         remove-attrs
-                         change-connector-vals-types)
+  (let [vals-clean (-> vals
+                       remove-attrs
+                       change-connector-vals-types)
         removed-keys (difference (set (keys vals)) (set (keys vals-clean)))
-        desc-clean   (apply dissoc desc removed-keys)]
+        desc-clean (apply dissoc desc removed-keys)]
     (scu/spit-pprint vals-clean (format "connector-%s.edn" cn))
     (scu/spit-pprint desc-clean (format "connector-%s-desc.edn" cn))))
 
@@ -94,7 +94,7 @@
         "Options:"
         options-summary
         prog-help]
-       (s/join \newline)))
+       (str/join \newline)))
 
 (defn -main
   [& args]
@@ -102,12 +102,12 @@
     (cond
       (:help options) (exit 0 (usage summary))
       errors (exit 1 (error-msg errors)))
-    (let [configxml   (:configxml options)
+    (let [configxml (:configxml options)
           credentials (:credentials options)]
       (if (empty? configxml)
         (exit 1 (error-msg "-x parameter must be provided."))
         (alter-var-root #'*cfg-path-url* (fn [_] configxml)))
-      (if (and (s/starts-with? configxml "https") (empty? credentials))
+      (if (and (str/starts-with? configxml "https") (empty? credentials))
         (exit 1 (error-msg "-s must be provided when -x is URL."))
         (alter-var-root #'*creds* (fn [_] credentials)))
       (alter-var-root #'*c-names* (fn [_] (:connectors options)))

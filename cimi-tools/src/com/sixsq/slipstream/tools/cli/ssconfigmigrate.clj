@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.tools.cli.ssconfigmigrate
   (:require
-    [clojure.string :as s]
+    [clojure.string :as str]
     [clojure.tools.cli :refer [parse-opts]]
 
     [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]
@@ -33,11 +33,11 @@
 
 (defn con-name-known?
   [con]
-  (not (s/blank? (:cloudServiceType con))))
+  (not (str/blank? (:cloudServiceType con))))
 
 (defn persist-config!
   [sc]
-  (println "Peristing global configuration.")
+  (println "Persisting global configuration.")
   (-> sc
       sci/sc->cfg
       ssconfig/validate
@@ -103,7 +103,7 @@
         "Options:"
         options-summary
         prog-help]
-       (s/join \newline)))
+       (str/join \newline)))
 
 (defn -main
   [& args]
@@ -111,14 +111,14 @@
     (cond
       (:help options) (exit 0 (usage summary))
       errors (exit 1 (error-msg errors)))
-    (let [configxml   (:configxml options)
+    (let [configxml (:configxml options)
           credentials (:credentials options)
-          connectors  (:connectors options)
-          modifiers   (:modifiers options)]
+          connectors (:connectors options)
+          modifiers (:modifiers options)]
       (if (empty? configxml)
         (exit 1 (error-msg "-x parameter must be provided."))
         (alter-var-root #'*cfg-path-url* (fn [_] configxml)))
-      (if (and (s/starts-with? configxml "https") (empty? credentials))
+      (if (and (str/starts-with? configxml "https") (empty? credentials))
         (exit 1 (error-msg "-s must be provided when -x is URL."))
         (alter-var-root #'*creds* (fn [_] credentials)))
       (alter-var-root #'*c-names* (fn [_] connectors))
