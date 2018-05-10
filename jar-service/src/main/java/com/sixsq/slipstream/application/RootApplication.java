@@ -122,6 +122,7 @@ public class RootApplication extends Application {
 		try {
 			createShutdownHook();
 
+			CljElasticsearchHelper.setDbCrudImpl();
 			CljElasticsearchHelper.init();
 
 			createStartupMetadata();

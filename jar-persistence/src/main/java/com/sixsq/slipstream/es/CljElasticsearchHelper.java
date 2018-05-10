@@ -38,14 +38,18 @@ public class CljElasticsearchHelper {
     public static final String NS_SERIALIZERS_SERVICE_CONFIG = "com.sixsq.slipstream.db.serializers.service-config";
     public static final String NS_SERIALIZERS_SERVICE_CONFIG_IMPL = "com.sixsq.slipstream.db.serializers.service-config-impl";
 
+    public static void setDbCrudImpl() {
+        requireNs(NS_SERIALIZERS_UTILS);
+        Clojure.var(NS_SERIALIZERS_UTILS, "init-db-binding").invoke();
+    }
+
     /**
      * Connection to a external Elasticsearch defined by ES_HOST and ES_PORT env vars.
      */
     public static void init() {
         logger.info("Creating DB client and setting ES DB CRUD implementation.");
-        requireNs(NS_SERIALIZERS_UTILS);
-        // FIXME: The server has normally been setup, why reset the client and binding?
-        //Clojure.var(NS_SERIALIZERS_UTILS, "db-client-and-crud-impl").invoke();
+        // initialized in test server
+        //setDbCrudImpl();
         initializeResourceTemplates();
     }
 
@@ -61,15 +65,10 @@ public class CljElasticsearchHelper {
         Clojure.var(NS_SERIALIZERS_UTILS, "initialize").invoke();
     }
 
-    private static void setDbCrudImpl() {
-        // FIXME: The server has normally been setup, why reset the client and binding?
-        //requireNs(NS_SERIALIZERS_UTILS);
-        //Clojure.var(NS_SERIALIZERS_UTILS, "set-db-crud-impl").invoke();
-    }
-
     private static void addDefaultServiceConfigToDb() {
         logger.info("Adding default service configuration to ES DB.");
-        setDbCrudImpl();
+        // initialized in test server
+        //setDbCrudImpl();
         requireNs(NS_SERIALIZERS_SERVICE_CONFIG_IMPL);
 		Clojure.var(NS_SERIALIZERS_SERVICE_CONFIG_IMPL, "db-add-default-config").invoke();
     }
