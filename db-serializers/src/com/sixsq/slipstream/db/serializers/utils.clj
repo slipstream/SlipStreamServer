@@ -2,9 +2,9 @@
   (:require
     [clojure.string :as str]
     [clojure.tools.logging :as log]
+    [com.sixsq.slipstream.db.loader :as db-loader]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :as aih]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
-    [com.sixsq.slipstream.db.loader :as db-loader]
     [environ.core :as env]))
 
 (def default-db-binding-ns "com.sixsq.slipstream.db.es.loader")
