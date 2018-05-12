@@ -3,30 +3,90 @@
     [clj-http.client :as http]
     [clojure.edn :as edn]
     [clojure.string :as str]
-    [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]
-    [com.sixsq.slipstream.db.serializers.service-config-util :as scu])
-  (:import
-    (com.sixsq.slipstream.persistence ServiceConfiguration)))
+    [com.sixsq.slipstream.db.serializers.service-config-util :as scu]
+    [sixsq.slipstream.client.api.authn :as authn]
+    [sixsq.slipstream.client.api.cimi :as cimi]
+    [sixsq.slipstream.client.sync :as cimi-sync]
+    [taoensso.timbre :as log]))
 
-(defn- update-val
-  [v modifiers]
-  (let [nvs (for [[m r] modifiers :when (and (string? v) (re-find m v))]
-              (str/replace v m r))]
-    (if (seq nvs)
-      (last nvs)
-      v)))
+
+(def ^:dynamic *cimi-client* nil)
+
+
+(defn cep-url
+  [endpoint]
+  (str endpoint "/api/cloud-entry-point"))
+
+
+(defn create-cimi-client
+  [cep-url]
+  (alter-var-root #'*cimi-client* (constantly (cimi-sync/instance cep-url))))
+
+
+(defn login
+  [username password]
+  (when *cimi-client*
+    (let [creds {:href     "session-template/internal"
+                 :username username
+                 :password password}
+          {:keys [status message] :as response} (authn/login *cimi-client* creds)]
+      (when (not= 201 status)
+        (let [msg (cond-> (str "login failed with status (" status ")")
+                          message (str ": " message))]
+          (log/error msg)
+          (throw (ex-info msg response)))))))
+
+
+(defn ss-cfg
+  []
+  (when *cimi-client*
+    (cimi/get *cimi-client* "configuration/slipstream")))
+
+
+(defn ss-connectors
+  []
+  (when *cimi-client*
+    (:connectors (cimi/search *cimi-client* "connectors" {:$last 500}))))
+
+
+(defn split-creds
+  "Splits a credentials string formatted as 'username:password' into a tuple
+   [username password]."
+  [creds]
+  (if (string? creds)
+    (let [[username password] (str/split creds #":")]
+      [username password])
+    [nil nil]))
+
+
+(defn replace-value
+  [value [pattern replacement]]
+  (if (string? value)
+    (str/replace value pattern replacement)
+    value))
+
+
+(defn update-val
+  [modifiers [_ v]]
+  (reduce replace-value v modifiers))
+
 
 (defn modify-vals
-  [con modifiers]
-  (let [res (for [[k v] con]
-              [k (update-val v modifiers)])]
-    (into {} res)))
+  "Uses the list of modifiers to replace string values in the values at the
+   first level of the resource map."
+  [resource modifiers]
+  (let [convert-fn (partial update-val modifiers)]
+    (->> resource
+         (map (juxt first convert-fn))
+         (into {}))))
+
 
 (def con-attrs-to-remove
   {"ec2"            [:securityGroup]
    "nuvlabox"       [:orchestratorInstanceType :pdiskEndpoint]
    "stratuslab"     [:messagingQueue :messagingType :messagingEndpoint]
    "stratuslabiter" [:messagingQueue :messagingType :messagingEndpoint]})
+
 
 (defn remove-attrs
   "Cleanup of old attributes."
@@ -35,94 +95,121 @@
     (apply dissoc con attrs)
     con))
 
-(defn can-validate-attr-type?
-  [k]
-  (contains? sci/connector-ref-attrs-defaults k))
 
-(defn- types-differ?
-  "Contains in the attributes list and types differ."
-  [k v]
-  (not= (type v) (type (k sci/connector-ref-attrs-defaults))))
-
-(defn change-connector-val-type
-  [k v]
-  (if (can-validate-attr-type? k)
-    (if (types-differ? k v)
-      (let [attr-type (type (k sci/connector-ref-attrs-defaults))]
-        (cond
-          (= java.lang.String attr-type) [k (str v)]
-          (= java.lang.Long attr-type) [k (read-string v)]
-          (= java.lang.Boolean attr-type) [k (read-string v)]
-          :else [k v]))
-      [k v])
-    (if (= java.lang.Boolean (type v))
-      [k v]
-      [k (str v)])))
-
-(defn change-connector-vals-types
-  [con]
-  (into {} (map #(apply change-connector-val-type %) con)))
-
-(defn ->config-resource
+(defn ss-cfg-url
   [url]
-  (str url "/configuration"))
+  (str url "/api/configuration/slipstream"))
 
-(defn conf-xml
-  [path-url creds]
-  (if (str/starts-with? path-url "https")
-    (-> path-url
-        ->config-resource
-        (http/get {:follow-redirects false
-                   :accept           :xml
-                   :basic-auth       creds})
-        :body)
-    (slurp path-url)))
+
+(defn cfg-json
+  [endpoint-url]
+  (-> endpoint-url
+      ss-cfg-url
+      (http/get {:follow-redirects false
+                 :accept           :json})
+      :body))
+
 
 (defn cfg-path-url->sc
-  [cfg-path-url creds]
-  (-> cfg-path-url
-      (conf-xml creds)
-      (scu/conf-xml->sc (ServiceConfiguration.))))
+  [endpoint-url]
+  (cfg-json endpoint-url))
+
+;;
+;; file read/write utilities
+;;
 
 (defn slurp-edn
   [f]
   (edn/read-string (slurp f)))
 
+
 (defn spit-edn
   [obj f]
   (scu/spit-pprint obj f))
+
+
 ;;
-;; Command line options processing.
+;; resource type utilities
+;;
+
+(defn resource-type-from-str
+  "Returns the base resource type from the string or nil if the type cannot be
+   determined."
+  [type-string]
+  (let [type (some-> type-string
+                     (str/split #"(-template)?/")
+                     first)]
+    (when-not (str/blank? type)
+      type)))
+
+
+(defn resource-type
+  "Extracts the resource type from a string, resource, or request. Returns nil
+   if the resource type cannot be obtained."
+  [v]
+  (resource-type-from-str
+    (cond
+      (string? v) v
+      (:id v) (:id v)
+      :else (-> v :body :id))))
+
+;;
+;; utilities for dealing with command line args and shell
 ;;
 
 (defn exit
-  [status msg]
-  (println msg)
-  (System/exit status))
+  ([]
+   (exit 0 nil))
+  ([status]
+   (exit status nil))
+  ([status msg]
+   (when msg
+     (if-not (zero? status)
+       (log/error msg)
+       (log/info msg)))
+   (System/exit status)))
+
+
+(defn success
+  ([]
+   (exit))
+  ([msg]
+   (exit 0 msg)))
+
+
+(defn failure
+  [& msg]
+  (exit 1 (str/join msg)))
+
 
 (defn error-msg
-  [& errors]
+  [errors]
   (str "The following errors occurred while parsing your command:\n\n"
        (str/join \newline errors)))
+
 
 (defn cli-parse-sets
   ([m k v]
    (cli-parse-sets m k v identity))
-  ([m k v fun] (assoc m k (if-let [oldval (get m k)]
-                            (merge oldval (fun v))
-                            (hash-set (fun v))))))
+  ([m k v f] (assoc m k (if-let [oldval (get m k)]
+                          (merge oldval (f v))
+                          (hash-set (f v))))))
+
 
 (defn cli-parse-connectors
   [m k v]
   (cli-parse-sets m k v))
 
-(defn ->re-match-replace
-  "'m=r' -> [#'m' 'r']"
-  [mr]
-  (let [m-r (str/split mr #"=")]
-    [(re-pattern (first m-r)) (second m-r)]))
+
+(defn parse-replacement
+  "Parses replacement specifications of the form 'm=r' as the two-element
+   tuple [#'m' 'r']."
+  [replacement]
+  (let [[m r] (str/split replacement #"=")]
+    [(re-pattern m) r]))
+
 
 (defn cli-parse-modifiers
   [m k v]
-  (cli-parse-sets m k v ->re-match-replace))
+  (cli-parse-sets m k v parse-replacement))
 

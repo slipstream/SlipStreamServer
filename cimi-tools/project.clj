@@ -20,6 +20,8 @@
 
   :source-paths ["src"]
 
+  :resource-paths ["resources"]
+
   :test-paths ["test"]
 
   :pom-location "target/"
@@ -34,6 +36,7 @@
    [org.clojure/tools.cli]
 
    [com.sixsq.slipstream/SlipStreamPersistence ~+version+ :scope "compile"]
+   [com.sixsq.slipstream/SlipStreamClojureAPI-cimi ~+version+ :scope "compile"]
    [com.sixsq.slipstream/SlipStreamCljResources-jar ~+version+ :scope "compile"]
    [com.sixsq.slipstream/SlipStreamDbBinding-jar ~+version+ :scope "compile"]
 
