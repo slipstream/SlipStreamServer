@@ -12,10 +12,19 @@
 (def ^:dynamic *options* nil)
 
 
+(defn remove-nuvlabox-connectors
+  [{:keys [cloudConnectorClass] :as configuration}]
+  (let [connector-classes (->> (str/split cloudConnectorClass #"\s*,\s*")
+                               (remove #(re-matches #".*nuvlabox$" %))
+                               (str/join ",\r\n"))]
+    (assoc configuration :cloudConnectorClass connector-classes)))
+
+
 (defn dump-configuration!
   [ss-cfg]
   (log/info "saving SlipStream configuration")
   (-> ss-cfg
+      remove-nuvlabox-connectors
       (u/modify-vals (:modifiers *options*))
       (u/spit-edn "configuration-slipstream.edn")))
 
@@ -32,8 +41,11 @@
 (defn dump-connectors!
   [connectors]
   (doseq [{:keys [id cloudServiceType] :as connector} connectors]
-    (let [connector-name (second (db-utils/split-id id))]
-      (dump-connector! connector-name (u/modify-vals connector (:modifiers *options*))))))
+    (let [connector-name (second (db-utils/split-id id))
+          updated-connector (-> connector
+                                (u/modify-vals (:modifiers *options*)))]
+      (when-not (= "nuvlabox" cloudServiceType)
+        (dump-connector! connector-name updated-connector)))))
 
 
 (defn run

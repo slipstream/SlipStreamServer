@@ -356,18 +356,18 @@
 
 (defn get-connector-resources
   []
-  (let [cs (-> (conn/query-impl (sci/connector-as-request configuration-resource))
-               :body
-               :connectors)]
-    (map :id cs)))
+  (-> (conn/query-impl (sci/connector-as-request configuration-resource))
+      :body
+      :connectors
+      :id))
 
 
 (defn get-configuration-resources
   []
-  (let [cs (-> (cfg/query-impl (sci/configuration-as-request connector-resource))
-               :body
-               :configurations)]
-    (map :id cs)))
+  (-> (cfg/query-impl (sci/configuration-as-request connector-resource))
+      :body
+      :configurations
+      :id))
 
 
 (defn get-persisted-resources
