@@ -26,7 +26,7 @@
   (-> ss-cfg
       remove-nuvlabox-connectors
       (u/modify-vals (:modifiers *options*))
-      (assoc :reportsObjectStoreBucketName "slipstream-reports-test")
+      (assoc :reportsObjectStoreBucketName "<REPORTS_BUCKET>")
       (assoc :reportsObjectStoreCreds "<CREDENTIAL_ID>")
       (u/spit-edn "configuration-slipstream.edn")))
 
