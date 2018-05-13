@@ -2,6 +2,7 @@
   (:require
     [buddy.core.codecs :as co]
     [buddy.core.hash :as ha]
+    [clojure.string :as str]
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.db.impl :as db]
@@ -12,8 +13,7 @@
     [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
     [com.sixsq.slipstream.ssclj.resources.external-object.utils :as s3]
     [com.sixsq.slipstream.ssclj.util.log :as logu]
-    [com.sixsq.slipstream.util.response :as r]
-    [clojure.string :as str])
+    [com.sixsq.slipstream.util.response :as r])
   (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-tag :externalObjects)
