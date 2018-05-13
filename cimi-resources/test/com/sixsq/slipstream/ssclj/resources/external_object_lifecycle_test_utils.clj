@@ -358,7 +358,8 @@
               (ltu/body->edn)
               (ltu/is-status 200)))
 
-      ;; after getting upload URL the state is set to 'uploading' and only 'ready' action is present
+      ;; after getting upload URL the state is set to 'uploading' and only 'ready' and
+      ;; 'upload' actions are present
       (-> session-admin
           (request abs-uri)
           (ltu/body->edn)
@@ -369,12 +370,12 @@
           (ltu/is-operation-absent "download")
           (ltu/is-status 200))
 
-      ;; doing it again should fail because the object is in 'uploading' state
+      ;; doing it again should succeed, a new upload URL can be obtained in 'uploading' state
       (-> session-admin
           (request abs-upload-uri
                    :request-method :post)
           (ltu/body->edn)
-          (ltu/is-status 400))
+          (ltu/is-status 200))
 
       (let [uploading-eo (-> session-admin
                              (request abs-uri)
@@ -415,7 +416,8 @@
               (ltu/body->edn)
               (ltu/is-status 200)))
 
-      ;; after getting upload URL the state is set to 'uploading' and only 'ready' action is present
+      ;; after getting upload URL the state is set to 'uploading' and only 'ready' and
+      ;; 'upload' actions are present
       (-> session-user
           (request abs-uri-user)
           (ltu/body->edn)
@@ -426,12 +428,13 @@
           (ltu/is-operation-absent "download")
           (ltu/is-status 200))
 
-      ;; doing it again should fail because the object is in 'uploading' state
+      ;; doing it again should succeed, a new upload URL can be obtained in 'uploading' state
       (-> session-user
           (request abs-upload-uri-user
                    :request-method :post)
           (ltu/body->edn)
-          (ltu/is-status 400))
+          (ltu/is-status 200))
+
       (let [uploading-eo (-> session-user
                              (request abs-uri-user)
                              (ltu/body->edn)

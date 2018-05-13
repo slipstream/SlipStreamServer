@@ -9,8 +9,8 @@
 (def s3-host "s3.cloud.com")
 (def s3-endpoint (str "https://" s3-host))
 
-(def my-cloud-creds {"credential/my-cred" {:key    "key"
-                                           :secret "secret"
+(def my-cloud-creds {"credential/my-cred" {:key       "key"
+                                           :secret    "secret"
                                            :connector {:objectStoreEndpoint s3-endpoint}}})
 
 (def bucketname "bucket-name")
@@ -22,8 +22,9 @@
   (with-redefs [s3/create-bucket! (fn [_ _] nil)
                 eo/expand-cred (fn [cred-href _ _] (get my-cloud-creds (:href cred-href)))]
 
-    (is (thrown-with-msg? ExceptionInfo (re-pattern (eo/error-msg-bad-state "upload" eo/state-new eo/state-ready))
-                          (eo/upload-fn {:state eo/state-ready} {})))
+    (let [expected-msg (eo/error-msg-bad-state "upload" #{eo/state-new eo/state-uploading} eo/state-ready)]
+      (is (thrown-with-msg? ExceptionInfo (re-pattern expected-msg)
+                            (eo/upload-fn {:state eo/state-ready} {}))))
 
     ;; generic external object
     (is (s/starts-with? (eo/upload-fn {:state           eo/state-new
@@ -47,8 +48,9 @@
 (deftest test-download-fn
   (with-redefs [eo/expand-cred (fn [cred-href _ _] (get my-cloud-creds (:href cred-href)))]
 
-    (is (thrown-with-msg? ExceptionInfo (re-pattern eo/ex-msg-download-bad-state)
-                          (eo/download-fn {:state eo/state-new} {})))
+    (let [expected-msg (eo/error-msg-bad-state "download" #{eo/state-ready} eo/state-new)]
+      (is (thrown-with-msg? ExceptionInfo (re-pattern expected-msg)
+                            (eo/download-fn {:state eo/state-new} {}))))
 
     (is (s/starts-with? (eo/download-fn {:state           eo/state-ready
                                          :bucketName      bucketname
