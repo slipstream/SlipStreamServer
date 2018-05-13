@@ -12,7 +12,8 @@
     [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
     [com.sixsq.slipstream.ssclj.resources.external-object.utils :as s3]
     [com.sixsq.slipstream.ssclj.util.log :as logu]
-    [com.sixsq.slipstream.util.response :as r])
+    [com.sixsq.slipstream.util.response :as r]
+    [clojure.string :as str])
   (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-tag :externalObjects)
@@ -287,14 +288,21 @@
 
 ;;; Upload URL operation
 
+(defn format-states
+  [states]
+  (->> states
+      (map #(format "'%s'" %))
+      (str/join ", ")))
+
 (defn error-msg-bad-state
-  [action sreq scurr]
-  (format "For '%s' action, external object should be in '%s' state! Current state: '%s'." action sreq scurr))
+  [action required-states current-state]
+  (format "Invalid state '%s' for '%s' action. Valid states: %s."
+          current-state action (format-states required-states)))
 
 (defn upload-fn
   "Provided 'resource' and 'request', returns object storage upload URL."
   [{:keys [objectType state contentType bucketName objectName objectStoreCred runUUID filename]} {{ttl :ttl} :body :as request}]
-  (if (= state state-new)
+  (if (#{state-new state-uploading} state)
     (let [object-name (if (not-empty objectName)
                         objectName
                         (format "%s/%s" runUUID filename))
@@ -303,7 +311,7 @@
       (s3/create-bucket! obj-store-conf bucketName)
       (s3/generate-url obj-store-conf bucketName object-name :put
                        {:ttl (or ttl s3/default-ttl) :content-type contentType :filename filename}))
-    (logu/log-and-throw-400 (error-msg-bad-state "upload" state-new state))))
+    (logu/log-and-throw-400 (error-msg-bad-state "upload" #{state-new state-uploading} state))))
 
 (defmulti upload-subtype
           (fn [resource _] (:objectType resource)))
@@ -339,14 +347,11 @@
         (-> resource
             (assoc :state state-ready)
             (db/edit request))
-        (logu/log-and-throw-400 (error-msg-bad-state "ready" state-uploading state))))
+        (logu/log-and-throw-400 (error-msg-bad-state "ready" #{state-uploading} state))))
     (catch ExceptionInfo ei
       (ex-data ei))))
 
 ;;; Download URL operation
-
-(def ex-msg-download-bad-state (format "External object is not in '%s' state to be downloaded!"
-                                       state-ready))
 
 (defn download-fn
   "Provided 'resource' and 'request', returns object storage download URL."
@@ -357,7 +362,7 @@
       (s3/generate-url (expand-obj-store-creds objectStoreCred request objectType)
                        bucketName objectName :get
                        {:ttl (or ttl s3/default-ttl)}))
-    (logu/log-and-throw-400 ex-msg-download-bad-state)))
+    (logu/log-and-throw-400 (error-msg-bad-state "download" #{state-ready} state))))
 
 (defmulti download-subtype
           (fn [resource _] (:objectType resource)))
