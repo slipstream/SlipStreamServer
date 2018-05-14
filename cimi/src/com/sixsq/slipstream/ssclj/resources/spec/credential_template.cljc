@@ -14,6 +14,8 @@
 ;; credential templates must provide a method name.
 (s/def :cimi.credential-template/method ::cimi-core/identifier)
 
+(s/def :cimi.credential-template/enabled boolean?)
+
 (def credential-template-regex #"^credential-template/[a-zA-Z0-9]([a-zA-Z0-9_-]*[a-zA-Z0-9])?$")
 (s/def :cimi.credential-template/href (s/and string? #(re-matches credential-template-regex %)))
 
@@ -24,10 +26,8 @@
 ;;
 
 (def credential-template-keys-spec {:req-un [:cimi.credential-template/type
-                                             :cimi.credential-template/method]})
-
-(def credential-template-keys-spec-opt {:opt-un [:cimi.credential-template/type
-                                                 :cimi.credential-template/method]})
+                                             :cimi.credential-template/method]
+                                    :opt-un [:cimi.credential-template/enabled]})
 
 (def resource-keys-spec
   (su/merge-keys-specs [c/common-attrs
@@ -39,5 +39,5 @@
 ;; subclasses MUST provide the href to the template to use
 (def template-keys-spec
   (su/merge-keys-specs [c/template-attrs
-                        credential-template-keys-spec-opt]))
+                        credential-template-keys-spec]))
 
