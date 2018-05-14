@@ -1,5 +1,6 @@
 (ns com.sixsq.slipstream.tools.cli.ssconfig
   (:require
+    [clojure.set :as set]
     [clojure.string :as str]
     [clojure.tools.cli :as cli]
     [com.sixsq.slipstream.db.loader :as db-loader]
@@ -11,8 +12,7 @@
     [com.sixsq.slipstream.ssclj.resources.connector :as conn]
     [com.sixsq.slipstream.ssclj.resources.connector-template :as cont]
     [com.sixsq.slipstream.tools.cli.utils :as u :refer :all]
-    [taoensso.timbre :as log]
-    [clojure.set :as set])
+    [taoensso.timbre :as log])
   (:gen-class))
 
 

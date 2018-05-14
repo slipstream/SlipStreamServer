@@ -42,8 +42,6 @@
 
    [com.sixsq.slipstream/SlipStreamDbSerializers-jar ~+version+ :scope "compile"]
 
-   [superstring]
-   [me.raynes/fs]
    [clj-http]]
 
   :profiles {:test {:dependencies [[com.sixsq.slipstream/SlipStreamDbTesting-jar ~+version+]]
