@@ -32,22 +32,19 @@
 
     (is (= 4 (count options)))
     (is (= ["http://127.0.0.1:9200"] hosts))
-    (is (= "resources-index/virtual-machine/_search" resource-search-url))
-    (is (= "resources-index" (-> metering-action :index :_index)))
-    (is (= "metering" (-> metering-action :index :_type)))
+    (is (= "slipstream-virtual-machine/_doc/_search" resource-search-url))
+    (is (= "slipstream-metering" (-> metering-action :index :_index)))
+    (is (= t/doc-type (-> metering-action :index :_type)))
     (is (= 1 metering-period-minutes)))
 
   (is (= ["http://elasticsearch:1234"] (:hosts (t/process-options {:es-host "elasticsearch"
                                                                    :es-port 1234}))))
   (is (= 2 (:metering-period-minutes (t/process-options {:metering-period-minutes 2}))))
-  (is (= "alpha/vms/_search" (:resource-search-url (t/process-options {:resources-index "alpha"
-                                                                       :resources-type  "vms"}))))
+  (is (= "alpha/_doc/_search" (:resource-search-url (t/process-options {:vm-index "alpha"}))))
 
   (let [{:keys [metering-action]}
-        (t/process-options {:metering-index "metering"
-                            :metering-type  "vms"})]
-    (is (= "metering" (-> metering-action :index :_index)))
-    (is (= "vms" (-> metering-action :index :_type)))))
+        (t/process-options {:metering-index "gamma"})]
+    (is (= "gamma" (-> metering-action :index :_index)))))
 
 
 (deftest check-assoc-snapshot-time
