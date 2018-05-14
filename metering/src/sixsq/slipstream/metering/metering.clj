@@ -15,6 +15,8 @@
 ;; per Year = ANN, per Month = MON, per Week = WEE, per Day = DAY, per Hour = HUR, per Minute = MIN, per Second = SEC.
 (def ^:const price-divisor {"SEC" (/ 1. 60), "MIN" 1, "HUR" 60, "DAY" (* 60 24), "WEE" (* 60 24 7)})
 
+(def ^:const doc-type "_doc")
+
 (defn es-hosts
   [host port]
   [(format "http://%s:%s" host port)])
@@ -30,19 +32,17 @@
 
 (defn process-options
   [{:keys [es-host es-port
-           resources-index resources-type
-           metering-index metering-type
+           vm-index
+           metering-index
            metering-period-minutes]
     :or   {es-host                 "127.0.0.1"
            es-port                 9200
-           resources-index         "resources-index"
-           resources-type          "virtual-machine"
-           metering-index          "resources-index"
-           metering-type           "metering"
+           vm-index                "slipstream-virtual-machine"
+           metering-index          "slipstream-metering"
            metering-period-minutes 1}}]
   {:hosts                   (es-hosts es-host es-port)
-   :resource-search-url     (search-url resources-index resources-type)
-   :metering-action         (index-action metering-index metering-type)
+   :resource-search-url     (search-url vm-index doc-type)
+   :metering-action         (index-action metering-index doc-type)
    :metering-period-minutes metering-period-minutes})
 
 
