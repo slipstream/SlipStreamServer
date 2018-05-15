@@ -25,7 +25,9 @@
    :description "public key of a generated SSH key pair"
    :size        1024
    :algorithm   "rsa"
-   :acl         resource-acl})
+   :acl         resource-acl
+   :enabled     true
+   })
 
 ;;
 ;; description

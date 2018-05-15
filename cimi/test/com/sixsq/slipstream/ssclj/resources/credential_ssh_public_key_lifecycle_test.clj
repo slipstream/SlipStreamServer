@@ -96,6 +96,7 @@
                             :request-method :post
                             :body (json/write-str create-import-href))
                    (ltu/body->edn)
+
                    (ltu/is-status 201))
           id (get-in resp [:response :body :resource-id])
           uri (-> resp
@@ -122,6 +123,7 @@
                          :response
                          :body)]
         (is (= "rsa" (:algorithm resource)))
+        (is (:enabled resource))
         (is (= (:fingerprint resource) (:fingerprint imported-ssh-key-info)))
         (is (= (:publicKey resource) (:publicKey imported-ssh-key-info))))
 
@@ -133,14 +135,7 @@
           (ltu/is-status 200)))))
 
 (deftest lifecycle-generate
-  (let [session (-> (ltu/ring-app)
-                    session
-                    (content-type "application/json"))
-        session-admin (header session authn-info-header "root ADMIN USER ANON")
-        session-user (header session authn-info-header "jane USER ANON")
-        session-anon (header session authn-info-header "unknown ANON")
-
-        href (str ct/resource-url "/" skp/method)
+  (let [href (str ct/resource-url "/" skp/method)
         template-url (str p/service-context ct/resource-url "/" skp/method)
 
         template (-> session-admin

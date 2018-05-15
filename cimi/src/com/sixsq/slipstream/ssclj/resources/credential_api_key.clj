@@ -38,6 +38,7 @@
                           :type        type
                           :method      method
                           :digest      digest
+                          :enabled     true
                           :claims      (extract-claims request)}
                          (valid-ttl? ttl) (assoc :expiry (u/ttl->timestamp ttl)))]
     [{:secretKey secret-key} resource]))
@@ -89,7 +90,7 @@
 
 ;; Set operation
 (def set-subtype-ops-fn
-  (fn [{:keys [id ] :as resource} request]
+  (fn [{:keys [id] :as resource} request]
     (let [
           href-disable (str id "/disable")
           disable-op {:rel (:disable c/action-uri) :href href-disable}]

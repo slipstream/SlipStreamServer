@@ -102,6 +102,13 @@
                    :type        "string"
                    :mandatory   true
                    :readOnly    true
+                   :order       11}
+          :enabled {:displayName "Credential availability flag"
+                   :category    "general"
+                   :description "true if credential can be used"
+                   :type        "boolean"
+                   :mandatory   false
+                   :readOnly    false
                    :order       11}}))
 ;;
 ;; multimethods for validation

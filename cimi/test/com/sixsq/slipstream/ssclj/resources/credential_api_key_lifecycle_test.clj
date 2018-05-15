@@ -174,16 +174,17 @@
             (ltu/is-operation-present "edit")))
 
       ;; ensure credential contains correct information
-      (let [{:keys [digest expiry claims]} (-> session-user
-                                               (request abs-uri)
-                                               (ltu/body->edn)
-                                               (ltu/is-status 200)
-                                               :response
-                                               :body)]
+      (let [{:keys [digest expiry claims enabled]} (-> session-user
+                                                       (request abs-uri)
+                                                       (ltu/body->edn)
+                                                       (ltu/is-status 200)
+                                                       :response
+                                                       :body)]
         (is digest)
         (is (key-utils/valid? secret-key digest))
         (is (nil? expiry))
-        (is claims))
+        (is claims)
+        (is enabled))
 
       ;; delete the credential
       (-> session-user

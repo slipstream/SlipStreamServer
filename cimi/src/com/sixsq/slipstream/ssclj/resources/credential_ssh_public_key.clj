@@ -29,7 +29,8 @@
   [{:keys [type method publicKey algorithm size]} request]
   (let [common-info {:resourceURI p/resource-uri
                      :type        type
-                     :method      method}]
+                     :method      method
+                     :enabled     true}]
     (try
       (if publicKey
         (import-key common-info publicKey)
@@ -84,7 +85,7 @@
 
 ;; Set operation
 (def set-subtype-ops-fn
-  (fn [{:keys [id ] :as resource} request]
+  (fn [{:keys [id] :as resource} request]
     (let [
           href-disable (str id "/disable")
           disable-op {:rel (:disable c/action-uri) :href href-disable}]
