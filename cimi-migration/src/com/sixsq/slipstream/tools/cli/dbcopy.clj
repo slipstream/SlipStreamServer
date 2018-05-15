@@ -98,7 +98,8 @@
                 dest (db-client dest-host dest-port)]
 
       (let [src-url [src-index src-type :_search]
-            query-all {:query {:match_all {}}}
+            query-all {:size  1000
+                       :query {:match_all {}}}
             ch (sdx/scroll-chan src {:url src-url, :body query-all})]
 
         (log/info "starting copy of resources from " src-url)
