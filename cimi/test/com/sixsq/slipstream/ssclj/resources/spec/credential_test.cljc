@@ -25,8 +25,7 @@
               :acl         valid-acl
               :type        "type"
               :method      "method"
-              :enabled true
-              }]
+              :enabled true}]
     (is (s/valid? :cimi.test/credential cred))
     (doseq [k (into #{} (keys (dissoc cred :enabled)))]
       (is (not (s/valid? :cimi.test/credential (dissoc cred k)))))))

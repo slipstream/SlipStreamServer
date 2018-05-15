@@ -5,7 +5,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.util.log :as logu]))
+    [com.sixsq.slipstream.ssclj.util.log :as logu])
+  (:import (clojure.lang ExceptionInfo)))
 
 (def ^:const resource-tag :credentials)
 
@@ -102,24 +103,6 @@
 
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
-;;
-;; available operations
-;;
-
-;; Use standard method for setting operations.
-#_(defmethod crud/set-operations resource-uri
-  [resource request]
-  (try
-    (a/can-modify? resource request)
-    (let [href (:id resource)
-          ^String resourceURI (:resourceURI resource)
-          ops (if (.endsWith resourceURI "Collection")
-                [{:rel (:add c/action-uri) :href href}]
-                [{:rel (:delete c/action-uri) :href href}])]
-      (assoc resource :operations ops))
-    (catch Exception e
-      (dissoc resource :operations))))
-
 (defn check-connector-exists
   "Use ADMIN role as we only want to check if href points to an existing
   resource."
@@ -188,3 +171,41 @@
 (defn initialize
   []
   (std-crud/initialize resource-url nil))
+
+;;; Disable operation
+
+(defmulti disable-subtype
+          (fn [resource _] (:type resource)))
+
+(defmethod disable-subtype :default
+  [resource _]
+  (let [err-msg (str "unknown Credential type: " (:type resource))]
+    (throw (ex-info err-msg {:status  400
+                             :message err-msg
+                             :body    resource}))))
+
+(defmethod crud/do-action [resource-url "disable"]
+  [{{uuid :uuid} :params :as request}]
+  (try
+    (let [id (str resource-url "/" uuid)]
+      (-> (crud/retrieve-by-id id {:user-name  "INTERNAL"
+                                   :user-roles ["ADMIN"]})
+          (disable-subtype request)))
+    (catch ExceptionInfo ei
+      (ex-data ei))))
+
+;;; set subtype operations
+
+(defmulti set-subtype-ops
+          (fn [resource _] (:type resource)))
+
+(defmethod set-subtype-ops :default
+  [resource request]
+  (crud/set-standard-operations resource request))
+
+(defmethod crud/set-operations resource-uri
+  [{:keys [id credentialTemplate] :as resource} request]
+  (let [disable-href (str id "/disable")
+        disable-op {:rel (:disable c/action-uri) :href disable-href}]
+    (cond-> (set-subtype-ops resource request)
+            (:href credentialTemplate) (update-in [:operations] conj disable-op))))

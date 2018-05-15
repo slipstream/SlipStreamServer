@@ -6,7 +6,14 @@
     [com.sixsq.slipstream.ssclj.resources.credential :as p]
     [com.sixsq.slipstream.ssclj.resources.credential-template-api-key :as tpl]
     [com.sixsq.slipstream.ssclj.resources.credential.key-utils :as key-utils]
-    [com.sixsq.slipstream.ssclj.resources.spec.credential-api-key]))
+    [com.sixsq.slipstream.ssclj.resources.spec.credential-api-key]
+    [clojure.tools.logging :as log]
+    [com.sixsq.slipstream.ssclj.util.log :as logu]
+    [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.auth.acl :as a]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c])
+  (:import (clojure.lang ExceptionInfo)))
 
 (defn strip-session-role
   [roles]
@@ -56,3 +63,39 @@
 (defn initialize
   []
   (std-crud/initialize p/resource-url :cimi/credential.api-key))
+
+;;
+;; Disable operation
+;;
+(defn disable-fn [{enabled :enabled id :id :as credential}]
+  (if (or enabled (nil? enabled))
+    (do
+      (log/warn "Disabling credential : " id)
+      (assoc credential :enabled false))
+    (logu/log-and-throw-400 (str "Bad enabled field value " enabled))))
+
+
+(defmethod p/disable-subtype tpl/credential-type
+  [_ {{uuid :uuid} :params :as request}]
+  (try
+    (let [id (str (u/de-camelcase p/resource-name) "/" uuid)]
+      (-> (db/retrieve id request)
+          (a/can-modify? request)
+          (disable-fn)
+          (db/edit request)))
+    (catch ExceptionInfo ei
+      (ex-data ei))))
+
+
+;; Set operation
+(def set-subtype-ops-fn
+  (fn [{:keys [id ] :as resource} request]
+    (let [
+          href-disable (str id "/disable")
+          disable-op {:rel (:disable c/action-uri) :href href-disable}]
+      (-> (crud/set-standard-operations resource request)
+          (update-in [:operations] conj disable-op)))))
+
+(defmethod p/set-subtype-ops tpl/credential-type
+  [resource request]
+  (set-subtype-ops-fn resource request))
