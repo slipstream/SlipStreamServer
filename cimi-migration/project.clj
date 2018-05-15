@@ -31,26 +31,25 @@
 
   :profiles
   {
-   :dbinit {:main "com.sixsq.slipstream.tools.cli.dbinit"
-            :dependencies
-                  [[com.sixsq.slipstream/SlipStreamDbBinding-jar ~+version+]
-                   [com.sixsq.slipstream/SlipStreamDbSerializers-jar ~+version+]
+   :dbinit     {:main "com.sixsq.slipstream.tools.cli.dbinit"
+                :dependencies
+                      [[com.sixsq.slipstream/SlipStreamDbBinding-jar ~+version+]
+                       [com.sixsq.slipstream/SlipStreamDbSerializers-jar ~+version+]
+                       [com.sixsq.slipstream/SlipStreamCljResources-jar ~+version+]
+                       [com.sixsq.slipstream/SlipStreamServer-cimi-resources ~+version+]]}
 
-                   ;; community
-                   [com.sixsq.slipstream/SlipStreamCljResources-jar ~+version+]
-                   [com.sixsq.slipstream/SlipStreamServer-cimi-resources ~+version+]
-                   [com.sixsq.slipstream/SlipStreamConnector-OpenStack-conf ~+version+]
-                   [com.sixsq.slipstream/SlipStreamConnector-CloudStack-conf ~+version+]
-                   [com.sixsq.slipstream/SlipStreamConnector-OpenNebula-conf ~+version+]
+   :community {:dependencies
+               [[com.sixsq.slipstream/SlipStreamConnector-OpenStack-conf ~+version+]
+                [com.sixsq.slipstream/SlipStreamConnector-CloudStack-conf ~+version+]
+                [com.sixsq.slipstream/SlipStreamConnector-OpenNebula-conf ~+version+]]}
 
-                   ;; enterprise
-                   [com.sixsq.slipstream/SlipStreamConnector-Exoscale-conf ~+version+]
-                   [com.sixsq.slipstream/SlipStreamConnector-NuvlaBox-conf ~+version+]
-                   [com.sixsq.slipstream/SlipStreamConnector-OTC-conf ~+version+]
-                   [com.sixsq.slipstream/SlipStreamConnector-EC2-conf ~+version+]
-                   ]}
+   :enterprise {:dependencies
+                [[com.sixsq.slipstream/SlipStreamConnector-Exoscale-conf ~+version+]
+                 [com.sixsq.slipstream/SlipStreamConnector-NuvlaBox-conf ~+version+]
+                 [com.sixsq.slipstream/SlipStreamConnector-OTC-conf ~+version+]
+                 [com.sixsq.slipstream/SlipStreamConnector-EC2-conf ~+version+]]}
 
-   :dbcopy {:main "com.sixsq.slipstream.tools.cli.dbcopy"
-            :dependencies
-                  [[cc.qbits/spandex]]}
+   :dbcopy     {:main "com.sixsq.slipstream.tools.cli.dbcopy"
+                :dependencies
+                      [[cc.qbits/spandex]]}
    })
