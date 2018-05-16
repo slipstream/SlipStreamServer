@@ -31,6 +31,7 @@
     <module>cimi-tools</module>
     <module>cimi-test-jar</module>
     <module>cimi-test-server</module>
+    <module>cimi-migration</module>
     <module>db-binding</module>
     <module>db-testing</module>
     <module>db-serializers</module>
