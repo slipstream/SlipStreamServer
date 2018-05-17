@@ -155,7 +155,6 @@
           <defaultUsername>slipstream</defaultUsername>
 
           <mappings>
-
             <mapping>
               <directory>${cimi.installation.dir}/lib</directory>
               <directoryIncluded>false</directoryIncluded>
@@ -165,28 +164,6 @@
                 </source>
               </sources>
             </mapping>
-
-            <mapping>
-              <directory>${slipstream.user.home}/.credentials</directory>
-              <directoryIncluded>true</directoryIncluded>
-              <filemode>700</filemode>
-              <username>slipstream</username>
-              <groupname>slipstream</groupname>
-            </mapping>
-
-            <mapping>
-              <directory>${slipstream.user.home}/.credentials</directory>
-              <directoryIncluded>false</directoryIncluded>
-              <filemode>644</filemode>
-              <username>slipstream</username>
-              <groupname>slipstream</groupname>
-              <sources>
-                <source>
-                  <location>src/object-store-conf.edn.tmpl</location>
-                </source>
-              </sources>
-            </mapping>
-
           </mappings>
 
         </configuration>

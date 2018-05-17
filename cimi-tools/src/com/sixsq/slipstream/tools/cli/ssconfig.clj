@@ -1,28 +1,27 @@
 (ns com.sixsq.slipstream.tools.cli.ssconfig
   (:require
+    [clojure.set :as set]
     [clojure.string :as str]
     [clojure.tools.cli :as cli]
-
     [com.sixsq.slipstream.db.loader :as db-loader]
     [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]
-    [com.sixsq.slipstream.db.serializers.utils :as u]
+    [com.sixsq.slipstream.db.serializers.utils :as su]
     [com.sixsq.slipstream.ssclj.resources.configuration :as cfg]
     [com.sixsq.slipstream.ssclj.resources.configuration-slipstream :as cfg-s]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as cfgt]
     [com.sixsq.slipstream.ssclj.resources.connector :as conn]
     [com.sixsq.slipstream.ssclj.resources.connector-template :as cont]
-    [com.sixsq.slipstream.tools.cli.utils :refer :all])
+    [com.sixsq.slipstream.tools.cli.utils :as u :refer :all]
+    [taoensso.timbre :as log])
   (:gen-class))
 
 
-;; FIXME: This should become a parameter that can be set from the command line.
 (def default-db-binding-ns "com.sixsq.slipstream.db.es.loader")
 
 
 (def connector-resource conn/resource-url)
 (def configuration-resource cfg/resource-url)
-(def resource-types #{connector-resource
-                      configuration-resource})
+(def resource-types #{connector-resource configuration-resource})
 
 (def mandatory-attrs #{:id})
 
@@ -37,101 +36,75 @@
 ;; Helper functions.
 ;;
 
-
-(defn exit-err
-  [& msg]
-  (println (apply str "ERROR: " msg))
-  (System/exit 1))
-
-
 (defn resp-success?
   [resp]
   (< (:status resp) 400))
 
 
-(defn resp-error?
-  [resp]
-  (not (resp-success? resp)))
+(def resp-error? (complement resp-success?))
 
 
 (defn exit-on-resp-error
   [resp]
   (if (resp-error? resp)
     (let [msg (or (-> resp :body :message) (:message resp))]
-      (exit-err "Failed with: " msg ".")))
+      (u/failure "Failed with: " msg ".")))
   resp)
 
 
 (defn init-db-client
-  []
-  (db-loader/load-and-set-persistent-db-binding default-db-binding-ns))
+  [binding-ns]
+  (db-loader/load-and-set-persistent-db-binding binding-ns))
 
 
 (defn init-namespaces
   []
-  (u/initialize)
+  (su/initialize)
   (alter-var-root #'*templates* (constantly {:connector     @cont/templates
                                              :configuration @cfgt/templates})))
 
 
 (defn init
-  []
-  (init-db-client)
+  [binding-ns]
+  (init-db-client binding-ns)
   (init-namespaces))
+
 
 ;;
 ;; Common functions.
 ;;
 
-(defn resource-type-from-str
-  [rstr]
-  (if (re-find #"-template/" rstr)
-    (first (str/split rstr #"-template/"))
-    (first (str/split rstr #"/"))))
-
-
-(defn resource-type
-  "Given string, resource or request, returns resource type or throws."
-  [c]
-  (let [res (if (string? c)
-              c
-              (if (contains? c :id)
-                (:id c)
-                (-> c :body (get :id ""))))]
-    (resource-type-from-str res)))
-
-
 (defn connector?
   "c - str or map."
   [c]
-  (= (resource-type c) conn/resource-url))
+  (= (u/resource-type c) conn/resource-url))
 
 
 (defn configuration?
   "c - str or map."
   [c]
-  (= (resource-type c) cfg/resource-url))
+  (= (u/resource-type c) cfg/resource-url))
 
 
 (defn check-mandatory-attrs
   [m]
-  (if-not (every? #(contains? m %) mandatory-attrs)
-    (exit-err "Each resource must contain following mandatory attributes: " (str/join ", " mandatory-attrs))
+  (if-not (set/subset? mandatory-attrs (keys m))
+    (u/failure "Each resource must contain the mandatory attributes: " (str/join ", " mandatory-attrs))
     m))
 
 
 (defn validate-resource-type
   [m]
-  (if-not (contains? resource-types (resource-type m))
-    (exit-err "Resource type must be one of: " (str/join ", " resource-types))
+  (if-not (-> m u/resource-type resource-types)
+    (u/failure "Resource type must be one of: " (str/join ", " resource-types))
     m))
 
 
 (defn resource->template-name
-  [c]
+  [{:keys [id] :as c}]
   (cond
-    (configuration? c) (str/replace-first (:id c) #"/" "-template/")
-    (connector? c) (-> (:id c)
+    (configuration? c) (str/replace-first id #"/" "-template/")
+    (connector? c) (-> id
                        (str/split #"/")
                        first
                        (str "-template/")
@@ -151,16 +124,16 @@
   (let [tname (resource->template-name c)
         templates (get-templates c)]
     (when-not (contains? templates tname)
-      (exit-err "No template available for " tname))
+      (u/failure "No template available for " tname))
     c))
 
 
 (defn check-required-attrs
   [c]
-  (let [rtype (resource-type c)
+  (let [rtype (u/resource-type c)
         attrs (get required-attrs rtype)]
     (if-not (every? #(contains? c %) attrs)
-      (exit-err "Resource '" rtype "' must contain the following attributes: " (str/join ", " attrs))
+      (u/failure "Resource '" rtype "' must contain the following attributes: " (str/join ", " attrs))
       c)))
 
 
@@ -171,6 +144,7 @@
       validate-resource-type
       check-required-attrs
       halt-no-template))
+
 
 ;;
 ;; Service configuration.
@@ -202,7 +176,7 @@
     ;; adding may fail because template hasn't been registered yet.
     (if (= 404 (:status edit-resp))
       (do
-        (println "Adding configuration for the first time.")
+        (log/info "Adding configuration for the first time.")
         (-> config-req
             (assoc :body (complete-config (:body config-req)))
             cfg/add-impl))
@@ -247,7 +221,7 @@
 (defn update-ccc
   [ccc cin cn]
   (let [new-conn (str/join ":" [cin cn])]
-    (println "Updating :cloudConnectorClass parameter with -" new-conn)
+    (log/info "Updating :cloudConnectorClass parameter with -" new-conn)
     (store-cfg {:id                  (str cfg/resource-url "/" cfg-s/service)
                 :cloudConnectorClass (merge-ccc-and-new-conn ccc new-conn)})))
 
@@ -283,7 +257,7 @@
     ;; adding may fail because template hasn't been registered yet.
     (if (= 404 (:status edit-resp))
       (do
-        (println "Adding connector" (-> conn :body :id) "for the first time.")
+        (log/info "Adding connector" (-> conn :body :id) "for the first time.")
         (conn-add conn))
       edit-resp)))
 
@@ -316,18 +290,17 @@
 
 (defn store-to-db
   [files]
-  (init-db-client)
   (doseq [f files]
     (slurp-and-store f)))
 
 
 (defn list-templates
   []
-  (println "List of accessible templates.")
+  (log/info "List of accessible templates.")
   (doseq [[ttn ts] *templates*]
-    (println (format "- templates for '%s'" (name ttn)))
+    (log/info (format "- templates for '%s'" (name ttn)))
     (doseq [k (keys ts)]
-      (println k))))
+      (log/info k))))
 
 
 (defn print-template
@@ -336,9 +309,9 @@
         t (get ts tname)]
     (if (seq t)
       (let [unwanted (into #{} (remove #{:id :cloudServiceType} sci/unwanted-attrs))]
-        (clojure.pprint/pprint (sci/strip-unwanted-attrs t unwanted)))
+        (log/info (with-out-str (clojure.pprint/pprint (sci/strip-unwanted-attrs t unwanted)))))
       (do
-        (println "WARNING: Template" tname "not found.")
+        (log/warn "template" tname "not found.")
         (list-templates)))))
 
 
@@ -362,41 +335,39 @@
   (cond
     (configuration? rname) (get-configuration-resource rname)
     (connector? rname) (get-connector-resource rname)
-    :else (println "WARNING: Don't know how to get resource:" rname)))
+    :else (log/warn "don't know how to get resource:" rname)))
 
 
 (defn print-resource
   [r]
   (let [unwanted (into #{} (remove #{:id :cloudServiceType :description} sci/unwanted-attrs))]
-    (clojure.pprint/pprint (sci/strip-unwanted-attrs r unwanted))))
+    (log/info (with-out-str (clojure.pprint/pprint (sci/strip-unwanted-attrs r unwanted))))))
 
 
 (defn print-resources
   []
-  (init-db-client)
   (doseq [rname *resources*]
-    (println ";;; Resource:" rname)
+    (log/info ";;; Resource:" rname)
     (let [r (get-resource rname)]
       (if (seq r)
         (print-resource r)
-        (do
-          (println "WARNING: Resource" rname "not found."))))))
+        (log/warn "resource" rname "not found.")))))
 
 
 (defn get-connector-resources
   []
-  (let [cs (-> (conn/query-impl (sci/connector-as-request configuration-resource))
-               :body
-               :connectors)]
-    (map :id cs)))
+  (-> (conn/query-impl (sci/connector-as-request configuration-resource))
+      :body
+      :connectors
+      :id))
 
 
 (defn get-configuration-resources
   []
-  (let [cs (-> (cfg/query-impl (sci/configuration-as-request connector-resource))
-               :body
-               :configurations)]
-    (map :id cs)))
+  (-> (cfg/query-impl (sci/configuration-as-request connector-resource))
+      :body
+      :configurations
+      :id))
 
 
 (defn get-persisted-resources
@@ -404,21 +375,20 @@
   (cond
     (= name configuration-resource) (get-configuration-resources)
     (= name connector-resource) (get-connector-resources)
-    :else (do (println "WARNING: Don't know how to get resources for" name))))
+    :else (log/warn "don't know how to get resources for" name)))
 
 
 (defn list-persisted-resources
   [name]
   (doseq [r (get-persisted-resources name)]
-    (println r)))
+    (log/info r)))
 
 
 (defn list-resources
   []
-  (init-db-client)
-  (println "List of persisted resources.")
+  (log/info "List of persisted resources.")
   (doseq [r resource-types]
-    (println (format "- resources for '%s'" r))
+    (log/infof "- resources for '%s'" r)
     (list-persisted-resources r)))
 
 
@@ -443,38 +413,42 @@
 
 (defn delete-resources
   []
-  (init-db-client)
-  (println "Deleting resources from DB:" (str/join ", " *delete-resources*))
+  (log/info "Deleting resources from DB:" (str/join ", " *delete-resources*))
   (doseq [r *delete-resources*]
     (let [res (delete-resource r)]
       (if (= 200 (:status res))
-        (println (format "- %s: Deleted." r))
-        (println (format "- %s: Failed deleting: %s" r (-> res
-                                                           :body
-                                                           :message)))))))
+        (log/info (format "- %s: Deleted." r))
+        (log/warn (format "- %s: Failed deleting: %s" r (-> res :body :message)))))))
 
 ;;
 ;; Command line options processing.
 ;;
 
 (def cli-options
-  [["-t" "--template TEMPLATE" "Prints out registered template by name."]
+  [["-b" "--binding BINDING_NS" "Database binding namespace."
+    :id :binding-ns
+    :default default-db-binding-ns]
+   ["-t" "--template TEMPLATE" "Prints out registered template by name."]
    ["-l" "--list" "Lists available templates."]
    ["-p" "--persisted" "Lists resources persisted in DB."]
    ["-r" "--resource RESOURCE" "Prints out persisted resource document(s) by name."
     :id :resources
     :default #{}
-    :assoc-fn cli-parse-sets]
+    :assoc-fn u/cli-parse-sets]
    ["-e" "--edit-kv KEY=VALUE" (str "Updates or adds key=value in first file from "
                                     "<list-of-files> (other files are ignored).")
     :id :edit-kv
     :default #{}
-    :assoc-fn cli-parse-sets]
+    :assoc-fn u/cli-parse-sets]
    ["-d" "--delete RESOURCE" "Deletes resource by name."
     :id :delete-resources
     :default #{}
-    :assoc-fn cli-parse-sets]
-   ["-h" "--help"]])
+    :assoc-fn u/cli-parse-sets]
+   ["-h" "--help"]
+   ["-l" "--logging LEVEL" "Logging level: trace, debug, info, warn, error, fatal, or report."
+    :id :level
+    :default :info
+    :parse-fn #(-> % str/lower-case keyword)]])
 
 
 (def prog-help
@@ -489,50 +463,56 @@
 
 (defn usage
   [options-summary]
-  (->> [""
-        "Adds or updates different parts of the SlipStream service configuration in DB."
-        ""
-        "Usage: [options] <list-of-files>"
-        ""
-        "Options:"
-        options-summary
-        ""
-        "Arguments:"
-        "  <list-of-files>    list of edn files with configurations."
-        ""
-        prog-help]
-       (str/join \newline)))
+  (str/join \newline
+            [""
+             "Adds or updates different parts of the SlipStream service configuration in DB."
+             ""
+             "Usage: [options] <list-of-files>"
+             ""
+             "Options:"
+             options-summary
+             ""
+             "Arguments:"
+             "  <list-of-files>    list of edn files with configurations."
+             ""
+             prog-help]))
 
 
 (defn -main
   [& args]
   (let [{:keys [options arguments errors summary]} (cli/parse-opts args cli-options)]
+
+    (log/set-level! (:level options :info))
+
     (cond
-      (:help options) (exit 0 (usage summary))
-      errors (exit 1 (error-msg errors)))
+      (:help options) (u/success (usage summary))
+      errors (u/failure (u/error-msg errors)))
+
     (when (and (not (empty? arguments)) (seq (:edit-kv options)))
       (edit-file (first arguments) (:edit-kv options))
-      (System/exit 0))
+      (u/success))
 
     ;; for all actions below
-    (init-db-client)
+    (if-let [binding-ns (:binding-ns options)]
+      (init-db-client binding-ns)
+      (u/failure "database binding namespace must be specified (-b, --binding)"))
 
     (when (and (not (empty? arguments)) (empty? (:edit-kv options)))
       (do (init-namespaces)
           (store-to-db arguments))
-      (System/exit 0))
+      (u/success))
     (when (seq (:delete-resources options))
-      (alter-var-root #'*delete-resources* (fn [_] (:delete-resources options)))
+      (alter-var-root #'*delete-resources* (constantly (:delete-resources options)))
       (delete-resources)
-      (System/exit 0))
+      (u/success))
     (when (seq (:resources options))
-      (alter-var-root #'*resources* (fn [_] (:resources options)))
+      (alter-var-root #'*resources* (constantly (:resources options)))
       (print-resources)
-      (System/exit 0))
+      (u/success))
     (when (:list options)
       (init-namespaces)
       (list-templates)
-      (System/exit 0))
+      (u/success))
     (when (not (str/blank? (:template options)))
       (init-namespaces)
       (print-template (:template options)))

@@ -1,61 +1,64 @@
 (ns com.sixsq.slipstream.tools.cli.ssconfigdump
   (:require
-    [clojure.set :refer [difference]]
+    [clojure.pprint :refer [pprint]]
     [clojure.string :as str]
-    [clojure.tools.cli :refer [parse-opts]]
-
-    [com.sixsq.slipstream.db.serializers.service-config-impl :as sci]
-    [com.sixsq.slipstream.db.serializers.service-config-util :as scu]
-    [com.sixsq.slipstream.tools.cli.utils :refer :all])
+    [clojure.tools.cli :as cli]
+    [com.sixsq.slipstream.db.utils.common :as db-utils]
+    [com.sixsq.slipstream.tools.cli.utils :as u]
+    [taoensso.timbre :as log])
   (:gen-class))
 
-;;
-;; Dynamic vars.
-(def ^:dynamic *c-names* #{})
-(def ^:dynamic *cfg-path-url* nil)
-(def ^:dynamic *creds* nil)
-(def ^:dynamic *modifiers* #{})
-(def ^:dynamic *skip-no-connector-name* false)
+
+(def ^:dynamic *options* nil)
+
+
+(defn remove-nuvlabox-connectors
+  [{:keys [cloudConnectorClass] :as configuration}]
+  (let [connector-classes (->> (str/split cloudConnectorClass #"\s*,\s*")
+                               (remove #(re-matches #".*nuvlabox$" %))
+                               (str/join ",\r\n"))]
+    (assoc configuration :cloudConnectorClass connector-classes)))
+
 
 (defn dump-configuration!
-  [sc]
-  (println "Saving configuration:" "slipstream")
-  (-> sc
-      sci/sc->cfg
-      (modify-vals *modifiers*)
-      (scu/spit-pprint (format "configuration-%s.edn" "slipstream"))))
+  [ss-cfg]
+  (log/info "saving SlipStream configuration")
+  (-> ss-cfg
+      remove-nuvlabox-connectors
+      (u/modify-vals (:modifiers *options*))
+      (assoc :reportsObjectStoreBucketName "<REPORTS_BUCKET>")
+      (assoc :reportsObjectStoreCreds "<CREDENTIAL_ID>")
+      (u/spit-edn "configuration-slipstream.edn")))
+
 
 (defn dump-connector!
-  [cn vals desc]
-  (println "Saving connector:" cn)
-  (let [vals-clean (-> vals
-                       remove-attrs
-                       change-connector-vals-types)
-        removed-keys (difference (set (keys vals)) (set (keys vals-clean)))
-        desc-clean (apply dissoc desc removed-keys)]
-    (scu/spit-pprint vals-clean (format "connector-%s.edn" cn))
-    (scu/spit-pprint desc-clean (format "connector-%s-desc.edn" cn))))
+  [connector-name connector]
+  (log/info "saving connector:" connector-name)
+  (let [filename (format "connector-%s.edn" connector-name)]
+    (-> connector
+        u/remove-attrs
+        (u/spit-edn filename))))
 
-(defn blank-category
-  [desc]
-  (into {}
-        (for [[k m] desc]
-          [k (assoc m :category "")])))
 
 (defn dump-connectors!
-  [sc]
-  (doseq [[cnkey [vals desc]] (sci/sc->connectors sc *c-names*)]
-    (if (and (seq desc) (seq (dissoc vals :id :cloudServiceType)))
-      (if (and (not (:cloudServiceType vals)) *skip-no-connector-name*)
-        (println "WARNING: :cloudServiceType is not defined. Not dumping" (:id vals))
-        (dump-connector! (name cnkey) (modify-vals vals *modifiers*) (blank-category desc)))
-      (println "WARNING: No data obtained for connector:" (name cnkey)))))
+  [connectors]
+  (doseq [{:keys [id cloudServiceType] :as connector} connectors]
+    (let [connector-name (second (db-utils/split-id id))
+          updated-connector (-> connector
+                                (u/modify-vals (:modifiers *options*)))]
+      (when-not (= "nuvlabox" cloudServiceType)
+        (dump-connector! connector-name updated-connector)))))
+
 
 (defn run
   []
-  (let [sc (cfg-path-url->sc *cfg-path-url* *creds*)]
-    (dump-configuration! sc)
-    (dump-connectors! sc)))
+  (-> *options* :endpoint u/cep-url u/create-cimi-client)
+  (let [[username password] (-> *options* :credentials u/split-creds)]
+    (u/login username password))
+  (let [ss-cfg (u/ss-cfg)]
+    (dump-configuration! ss-cfg))
+  (let [ss-connectors (u/ss-connectors)]
+    (dump-connectors! ss-connectors)))
 
 ;;
 ;; Command line options processing.
@@ -65,54 +68,67 @@
   [["-c" "--connector CONNECTOR" "Connector instance names (category). If not provided all connectors will be stored."
     :id :connectors
     :default #{}
-    :assoc-fn cli-parse-connectors]
-   ["-x" "--configxml CONFIGXML" "Path to file or URL starting with https (requries -s parameter). Mandatory."]
-   ["-s" "--credentials CREDENTIALS" "Credentials as user:pass for -x when URL is provided."]
+    :assoc-fn u/cli-parse-connectors]
+   ["-e" "--endpoint ENDPOINT_URL" "Server endpoint URL. Mandatory."]
+   ["-s" "--credentials CREDENTIALS" "Credentials as username:password. Mandatory."]
    ["-m" "--modify old=new" "Modify in all values. '=' is a separator. Useful for updating hostname/ip of SlipStream."
     :id :modifiers
     :default #{}
-    :assoc-fn cli-parse-modifiers]
+    :assoc-fn u/cli-parse-modifiers]
    [nil "--skip-no-connector-name" "Don't dump invalid configurations."]
-   ["-h" "--help"]])
+   ["-h" "--help"]
+   ["-l" "--logging LEVEL" "Logging level: trace, debug, info, warn, error, fatal, or report."
+    :id :level
+    :default :info
+    :parse-fn #(-> % str/lower-case keyword)]])
+
 
 (def prog-help
   "
-  Given SlipStream URL or path to file with configuration XML, extracts
-  and stores global service configuration and per connector parameters,
-  with their description, into configuration-slipstream.edn,
-  connector-<instance-name>.edn and connector-<instance-name>-desc.edn
-  respectively.")
+  Given SlipStream URL or path to file with configuration XML, extracts and
+  stores global service configuration and per connector parameters, with their
+  description, into configuration-slipstream.edn, connector-<instance-name>.edn
+  and connector-<instance-name>-desc.edn respectively.")
+
 
 (defn usage
   [options-summary]
-  (->> [""
-        "Extracts and stores service configuration, connector parameters
-        and their description."
-        ""
-        "Usage: -x <path or URL> [-s <user:pass>] [-c <connector name>]"
-        ""
-        "Options:"
-        options-summary
-        prog-help]
-       (str/join \newline)))
+  (str/join \newline
+            [""
+             "Extracts and stores service configuration, connector parameters
+             and their description."
+             ""
+             "Usage: -e <URL> -s <user:pass> [-c <connector name>]"
+             ""
+             "Options:"
+             options-summary
+             prog-help]))
+
+
+(defn options-errors
+  [{:keys [endpoint credentials] :as options}]
+  (cond-> []
+          (nil? endpoint) (conj "-e (--endpoint) parameter must be provided")
+          (nil? credentials) (conj "-s (--credentials) parameter must be provided")
+          true seq))
+
 
 (defn -main
   [& args]
-  (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)]
+  (let [{:keys [options errors summary]} (cli/parse-opts args cli-options)]
+
+    (log/set-level! (:level options :info))
+    (log/debug "parsed options:\n" (with-out-str (pprint options)))
+
     (cond
-      (:help options) (exit 0 (usage summary))
-      errors (exit 1 (error-msg errors)))
-    (let [configxml (:configxml options)
-          credentials (:credentials options)]
-      (if (empty? configxml)
-        (exit 1 (error-msg "-x parameter must be provided."))
-        (alter-var-root #'*cfg-path-url* (fn [_] configxml)))
-      (if (and (str/starts-with? configxml "https") (empty? credentials))
-        (exit 1 (error-msg "-s must be provided when -x is URL."))
-        (alter-var-root #'*creds* (fn [_] credentials)))
-      (alter-var-root #'*c-names* (fn [_] (:connectors options)))
-      (alter-var-root #'*modifiers* (fn [_] (:modifiers options)))
-      (alter-var-root #'*skip-no-connector-name* (fn [_] (:skip-no-connector-name options)))))
+      (:help options) (u/success (usage summary))
+      errors (u/failure (u/error-msg errors)))
+
+    (when-let [errors (options-errors options)]
+      (u/failure (u/error-msg errors)))
+
+    (alter-var-root #'*options* (constantly options)))
+
   (run)
-  (System/exit 0))
+  (u/success))
 
