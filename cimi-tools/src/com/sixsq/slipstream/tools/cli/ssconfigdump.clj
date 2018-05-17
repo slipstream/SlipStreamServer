@@ -77,7 +77,7 @@
     :assoc-fn u/cli-parse-modifiers]
    [nil "--skip-no-connector-name" "Don't dump invalid configurations."]
    ["-h" "--help"]
-   ["-l" "--logging LEVEL" "Logging level: trace, debug, info, warn, error, fatal, or report."
+   [nil "--logging LEVEL" "Logging level: trace, debug, info, warn, error, fatal, or report."
     :id :level
     :default :info
     :parse-fn #(-> % str/lower-case keyword)]])

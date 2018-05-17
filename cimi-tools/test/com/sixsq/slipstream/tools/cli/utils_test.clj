@@ -1,6 +1,8 @@
 (ns com.sixsq.slipstream.tools.cli.utils-test
   (:require
     [clojure.test :refer [are deftest is]]
+    [clojure.tools.cli :as cli]
+    [com.sixsq.slipstream.tools.cli.ssconfig :as ss]
     [com.sixsq.slipstream.tools.cli.utils :as u])
   (:import
     (java.util.regex Pattern)))
@@ -16,16 +18,16 @@
 
 
 (deftest test-modify-vals
-  (let [resource {:ip  "1.2.3.4"
-                  :url "http://1.2.3.4/uri"
-                  :dns "https://example.com"
+  (let [resource {:ip    "1.2.3.4"
+                  :url   "http://1.2.3.4/uri"
+                  :dns   "https://example.com"
                   :multi {:level {:map "https://1.2.3.4/untouched"}}}
         modifiers [[#"1.2.3.4" "4.3.2.1"]
                    [#"example.com" "nuv.la"]]
         m (u/modify-vals resource modifiers)]
-    (is (= m {:ip  "4.3.2.1"
-              :url "http://4.3.2.1/uri"
-              :dns "https://nuv.la"
+    (is (= m {:ip    "4.3.2.1"
+              :url   "http://4.3.2.1/uri"
+              :dns   "https://nuv.la"
               :multi {:level {:map "https://1.2.3.4/untouched"}}}))))
 
 
@@ -65,3 +67,14 @@
     (is (= Pattern (type pattern)))
     (is (= "a" (str pattern)))
     (is (= "b" replacement))))
+
+
+(deftest check-valid-options
+  (let [args ["-e" "id=configuration/slipstream" "-e" "clientURL=https://159.100.242.202/downloads/slipstreamclient.tgz" "/etc/slipstream/slipstream.edn"]]
+    (let [{:keys [:errors]} (cli/parse-opts args ss/cli-options)]
+      (is (nil? errors)))))
+
+
+(deftest check-parse-test
+  (let [kvs [[:k :a] [:k :b] [:k :c] [:other :d]]]
+    (is (= {:k #{:a :b :c} :other #{:d}} (reduce (fn [m [k v]] (u/cli-parse-sets m k v)) {} kvs)))))
