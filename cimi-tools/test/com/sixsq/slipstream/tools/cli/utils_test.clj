@@ -1,5 +1,6 @@
 (ns com.sixsq.slipstream.tools.cli.utils-test
   (:require
+    [clojure.set :as set]
     [clojure.test :refer [are deftest is]]
     [clojure.tools.cli :as cli]
     [com.sixsq.slipstream.tools.cli.ssconfig :as ss]
@@ -78,3 +79,10 @@
 (deftest check-parse-test
   (let [kvs [[:k :a] [:k :b] [:k :c] [:other :d]]]
     (is (= {:k #{:a :b :c} :other #{:d}} (reduce (fn [m [k v]] (u/cli-parse-sets m k v)) {} kvs)))))
+
+
+(deftest check-mandatory-attrs
+  ;;can only positive test cases where the provided map contains every mandatory keys
+  ;; otherwise we would exit
+  (is (= {:id "id"} (ss/check-mandatory-attrs {:id "id"})))
+  (is (= {:id "id" :k "value"} (ss/check-mandatory-attrs {:id "id" :k "value"}))))

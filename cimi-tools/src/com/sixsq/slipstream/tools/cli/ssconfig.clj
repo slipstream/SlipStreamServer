@@ -88,7 +88,9 @@
 
 (defn check-mandatory-attrs
   [m]
-  (if-not (set/subset? mandatory-attrs (keys m))
+  (if-not (set/subset? mandatory-attrs (-> m
+                                           keys
+                                           set))
     (u/failure "Each resource must contain the mandatory attributes: " (str/join ", " mandatory-attrs))
     m))
 
