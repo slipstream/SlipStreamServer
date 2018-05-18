@@ -12,33 +12,13 @@
   (is (= [] (db/get-all-users)))
   (match-external-user! :github "st" "st@sixsq.com")
   (let [created-user (first (db/get-active-users))]
-    (is (= "st" (:githublogin created-user)))
-    (is (nil? (:cyclonelogin created-user)))
-    (is (= "st@sixsq.com" (:emailAddress created-user)))
-    (is (not (:deleted created-user)))
-    (is (not (:isSuperUser created-user)))
-    (is (= "" (:roles created-user)))
-    (is (= "" (:organization created-user)))
-    (is (= "st" (:username created-user)))
-    (is (= "user/st" (:id created-user)))
-    (is (= "ACTIVE" (:state created-user)))
-    (is (= "direct" (:method created-user)))))
+    (is (nil? created-user))))
 
 (deftest match-new-cyclone-user-github
   (is (= [] (db/get-all-users)))
   (match-external-user! :cyclone "st" "st@sixsq.com")
   (let [created-user (first (db/get-all-users))]
-    (is (not (:deleted created-user)))
-    (is (= "st@sixsq.com" (:emailAddress created-user)))
-    (is (= "st" (:cyclonelogin created-user)))
-    (is (nil? (:githublogin created-user)))
-    (is (not (:isSuperUser created-user)))
-    (is (= "" (:roles created-user)))
-    (is (= "" (:organization created-user)))
-    (is (= "st" (:username created-user)))
-    (is (= "user/st" (:id created-user)))
-    (is (= "ACTIVE" (:state created-user)))
-    (is (= "direct" (:method created-user)))))
+    (is (nil? created-user))))
 
 (deftest match-existing-user
   (th/add-user-for-test! {:username     "joe"

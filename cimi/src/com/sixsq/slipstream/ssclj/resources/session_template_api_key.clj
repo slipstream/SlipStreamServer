@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-template-api-key
   (:require
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.session-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-api-key]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]))
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-api-key]))
 
 (def ^:const authn-method "api-key")
 

@@ -92,11 +92,7 @@
                               (oidc-utils/extract-entitlements claims))]
             (log/debug "oidc access token claims for" instance ":" (pr-str claims))
             (if sub
-              (if-let [matched-user (ex/create-user-when-missing! {:authn-login  sub
-                                                                   :email        email
-                                                                   :firstname    given_name
-                                                                   :lastname     family_name
-                                                                   :organization realm})]
+              (if-let [matched-user (ex/match-external-user! authn-method sub email)]
                 (let [claims (cond-> (auth-internal/create-claims matched-user)
                                      session-id (assoc :session session-id)
                                      session-id (update :roles #(str session-id " " %))

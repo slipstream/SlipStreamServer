@@ -36,9 +36,7 @@
   (if-let [username-mapped (db/find-username-by-authn authn-method external-login)]
     [(mapped-user authn-method username-mapped) "/dashboard"]
     (let [usernames-same-email (db/find-usernames-by-email external-email)]
-      (if (empty? usernames-same-email)
-        (let [name-new-user (create-slipstream-user! authn-method external-login external-email)]
-          [name-new-user (format "/user/%s?edit=true" name-new-user)])
+      (when-not (empty? usernames-same-email)
         [(map-slipstream-user! authn-method (first usernames-same-email) external-login) "/dashboard"]))))
 
 (defn sanitize-login-name
