@@ -371,51 +371,31 @@
                                   (request (str validate-url "?code=GOOD")
                                            :request-method :get)
                                   (ltu/body->edn)
-                                  (ltu/is-status 201)
-                                  (ltu/is-set-cookie))
-                    location (ltu/location ring-info)
-                    token (get-in ring-info [:response :cookies "com.sixsq.slipstream.cookie" :value :token])
-                    claims (if token (sign/unsign-claims token) {})]
-                (is (= location id))
-                (is (= "OIDC_USER" (:username claims)))
-                (let [claim-roles (set (str/split (or (:roles claims) "") #"\s+"))]
-                  (is (= claim-roles #{id "USER" "ANON" "alpha"
-                                       "my-realm:/organization" "my-realm:/organization/group-1"
-                                       "my-realm:alpha-entitlement"}))))
+                                  (ltu/is-status 400))])    ;; inactive account
 
               (let [ring-info (-> session-anon
                                   (request (str validate-url2 "?code=GOOD")
                                            :request-method :get)
                                   (ltu/body->edn)
-                                  (ltu/is-status 303)
-                                  (ltu/is-set-cookie))
+                                  (ltu/is-status 303))
                     location (ltu/location ring-info)
                     token (get-in ring-info [:response :cookies "com.sixsq.slipstream.cookie" :value :token])
                     claims (if token (sign/unsign-claims token) {})]
-                (is (= location redirect-uri))
-                (is (= "OIDC_USER" (:username claims)))
-                (let [claim-roles (set (str/split (or (:roles claims) "") #"\s+"))]
-                  (is (= claim-roles #{id2 "USER" "ANON" "alpha"
-                                       "my-realm:/organization" "my-realm:/organization/group-1"
-                                       "my-realm:alpha-entitlement"}))))
+                (is (clojure.string/starts-with? location redirect-uri))
+                (is (empty? claims)))
 
               (let [ring-info (-> session-anon
                                   (request (str validate-url3 "?code=GOOD")
                                            :request-method :get)
                                   (ltu/body->edn)
-                                  (ltu/is-status 303)
-                                  (ltu/is-set-cookie))
+                                  (ltu/is-status 303))
                     location (ltu/location ring-info)
                     token (get-in ring-info [:response :cookies "com.sixsq.slipstream.cookie" :value :token])
                     claims (if token (sign/unsign-claims token) {})]
-                (is (= location redirect-uri))
-                (is (= "OIDC_USER" (:username claims)))
-                (let [claim-roles (set (str/split (or (:roles claims) "") #"\s+"))]
-                  (is (= claim-roles #{id3 "USER" "ANON" "alpha"
-                                       "my-realm:/organization" "my-realm:/organization/group-1"
-                                       "my-realm:alpha-entitlement"}))))))
+                (is (clojure.string/starts-with? location redirect-uri))
+                (is (empty? claims)))))
 
-          ;; check that the session has been updated
+
           (let [ring-info (-> session-user
                               (header authn-info-header (str "user USER ANON " id))
                               (request abs-uri)
@@ -423,11 +403,11 @@
                               (ltu/is-status 200)
                               (ltu/is-id id)
                               (ltu/is-operation-present "delete")
-                              (ltu/is-operation-absent (:validate c/action-uri))
+                              (ltu/is-operation-present (:validate c/action-uri))
                               (ltu/is-operation-absent "edit"))
                 session (get-in ring-info [:response :body])]
-            (is (= "OIDC_USER" (:username session)))
-            (is (not= (:created session) (:updated session))))
+            (is (nil? (:username session)))
+            (is (= (:created session) (:updated session))))
 
           (let [ring-info (-> session-user
                               (header authn-info-header (str "user USER ANON " id2))
@@ -436,11 +416,11 @@
                               (ltu/is-status 200)
                               (ltu/is-id id2)
                               (ltu/is-operation-present "delete")
-                              (ltu/is-operation-absent (:validate c/action-uri))
+                              (ltu/is-operation-present (:validate c/action-uri))
                               (ltu/is-operation-absent "edit"))
                 session (get-in ring-info [:response :body])]
-            (is (= "OIDC_USER" (:username session)))
-            (is (not= (:created session) (:updated session))))
+            (is (nil? (:username session)))
+            (is (= (:created session) (:updated session))))
 
           (let [ring-info (-> session-user
                               (header authn-info-header (str "user USER ANON " id3))
@@ -449,11 +429,11 @@
                               (ltu/is-status 200)
                               (ltu/is-id id3)
                               (ltu/is-operation-present "delete")
-                              (ltu/is-operation-absent (:validate c/action-uri))
+                              (ltu/is-operation-present (:validate c/action-uri))
                               (ltu/is-operation-absent "edit"))
                 session (get-in ring-info [:response :body])]
-            (is (= "OIDC_USER" (:username session)))
-            (is (not= (:created session) (:updated session))))
+            (is (nil? (:username session)))
+            (is (= (:created session) (:updated session))))
 
           ;; user with session role can delete resource
           (-> session-user

@@ -31,6 +31,7 @@
        (db/create-user-params! user-name))
      user-name)))
 
+
 (defn match-external-user!
   [authn-method external-login external-email]
   (if-let [username-mapped (db/find-username-by-authn authn-method external-login)]
@@ -40,6 +41,13 @@
         (let [name-new-user (create-slipstream-user! authn-method external-login external-email)]
           [name-new-user (format "/user/%s?edit=true" name-new-user)])
         [(map-slipstream-user! authn-method (first usernames-same-email) external-login) "/dashboard"]))))
+
+
+(defn match-existing-external-user
+  [authn-method external-login external-email]
+  (when-let [username-mapped (db/find-username-by-authn authn-method external-login)]
+    [(mapped-user authn-method username-mapped) "/dashboard"]))
+
 
 (defn sanitize-login-name
   "Replace characters not satisfying [a-zA-Z0-9_] with underscore"
@@ -57,7 +65,7 @@
 (defn redirect-with-matched-user
   [authn-method external-login external-email redirect-server]
   (if (and (not-empty external-login) (not-empty external-email))
-    (let [[matched-user redirect-url] (match-external-user! authn-method (sanitize-login-name external-login) external-email)
+    (let [[matched-user redirect-url] (match-existing-external-user authn-method (sanitize-login-name external-login) external-email)
           claims {:username matched-user
                   :roles    (db/find-roles-for-username matched-user)}]
       (assoc
