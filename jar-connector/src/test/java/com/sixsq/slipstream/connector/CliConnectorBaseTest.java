@@ -138,8 +138,7 @@ public class CliConnectorBaseTest {
         assertTrue(!keySecretPair.get("secret").isEmpty());
     }
 
-    @Test
-    public void runApiKeyLifecycleTest() throws SlipStreamException {
+    public void runApiKeyLifecycle(boolean abortRun) throws SlipStreamException {
 
         Map<String, String> environment = new HashMap();
         String userName = "user";
@@ -176,10 +175,23 @@ public class CliConnectorBaseTest {
         assertTrue(roles.contains(role1));
         assertTrue(roles.contains(role2));
 
+        // Abort this run to ensure that cleanup still works.
+        if (abortRun) {
+            Run.abort("forced abort of run", run.getUuid());
+            run = Run.loadRunWithRuntimeParameters(run.getUuid());
+            assertTrue(run.isAbort());
+        }
+
         // Delete API key/secret resource.
         CliConnectorBase.deleteApiKeySecret(run, new User(userName), Logger.getLogger("test"));
         resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + key, userName + " USER");
         assertTrue(resp.getStatus().isError());
+    }
+
+    @Test
+    public void runApiKeyLifecycleTest() throws SlipStreamException {
+        runApiKeyLifecycle(false);
+        runApiKeyLifecycle(true);
     }
 
     private Run createAndStoreRun(String userName) throws SlipStreamClientException {
