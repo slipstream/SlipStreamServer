@@ -1,426 +1,638 @@
 {
   "body": {
-    "took": 1,
+    "took": 0,
     "timed_out": false,
     "_shards": {
       "total": 3,
       "successful": 3,
+      "skipped": 0,
       "failed": 0
     },
     "hits": {
-      "total": 35,
+      "total": 344,
       "max_score": 1.0,
       "hits": [
         {
-          "_index": "resources-index",
-          "_type": "virtual-machine",
-          "_id": "32733e0b-38c5-4cb5-be27-f71063ee01f5",
+          "_index": "slipstream-virtual-machine",
+          "_type": "_doc",
+          "_id": "a93a9c38-e670-3540-bc17-f1d3dcd1114f",
           "_score": 1.0,
           "_source": {
-            "updated": "2017-08-30T13:23:04.245Z",
-            "credential": {
-              "href": "connector/0123-4567-8912"
+            "connector": {
+              "href": "connector/ifb-genouest-genostack"
             },
-            "_acl-users": [
-              "ADMIN"
+            "ip": "192.168.100.241",
+            "credentials": [
+              {
+                "href": "credential/3c30fbbc-2291-4499-b6ed-4e2f3f578f50"
+              }
             ],
-            "created": "2017-08-30T13:23:04.245Z",
+            "updated": "2018-05-22T07:01:31.913Z",
+            "_acl-users": [
+              "mboudet"
+            ],
+            "created": "2018-05-21T20:36:59.214Z",
             "state": "Running",
-            "instanceID": "13381868-2fe3-4a36-ac32-4366dcdcc648",
-            "id": "virtual-machine/32733e0b-38c5-4cb5-be27-f71063ee01f5",
+            "instanceID": "a2aafc9b-d49f-4bce-9733-bac92cf12222",
+            "id": "virtual-machine/a93a9c38-e670-3540-bc17-f1d3dcd1114f",
             "_acl-roles": [
               "ADMIN"
             ],
             "acl": {
               "owner": {
-                "type": "USER",
+                "type": "ROLE",
                 "principal": "ADMIN"
               },
               "rules": [
                 {
-                  "right": "ALL",
-                  "type": "USER",
-                  "principal": "ADMIN"
-                },
-                {
-                  "type": "ROLE",
-                  "principal": "ADMIN",
-                  "right": "ALL"
-                }
-              ]
-            },
-            "resourceURI": "http://sixsq.com/slipstream/1/VirtualMachine"
-          }
-        },
-        {
-          "_index": "resources-index",
-          "_type": "virtual-machine",
-          "_id": "509ce6ea-85b8-4ad4-9b0a-64524419d932",
-          "_score": 1.0,
-          "_source": {
-            "updated": "2017-08-30T11:42:19.189Z",
-            "credential": {
-              "href": "connector/0123-4567-8912"
-            },
-            "_acl-users": [
-              "ADMIN"
-            ],
-            "created": "2017-08-30T11:42:19.189Z",
-            "state": "Running",
-            "instanceID": "e995433f-8eb8-4787-8742-b25beae64f5e",
-            "id": "virtual-machine/509ce6ea-85b8-4ad4-9b0a-64524419d932",
-            "_acl-roles": [
-              "ADMIN"
-            ],
-            "acl": {
-              "owner": {
-                "type": "USER",
-                "principal": "ADMIN"
-              },
-              "rules": [
-                {
-                  "right": "ALL",
-                  "type": "USER",
-                  "principal": "ADMIN"
-                },
-                {
-                  "type": "ROLE",
-                  "principal": "ADMIN",
-                  "right": "ALL"
-                }
-              ]
-            },
-            "resourceURI": "http://sixsq.com/slipstream/1/VirtualMachine"
-          }
-        },
-        {
-          "_index": "resources-index",
-          "_type": "virtual-machine",
-          "_id": "d7631526-1bec-4068-b83d-f9ff3ed572ab",
-          "_score": 1.0,
-          "_source": {
-            "updated": "2017-08-30T11:40:10.826Z",
-            "credential": {
-              "href": "connector/0123-4567-8912"
-            },
-            "_acl-users": [
-              "ADMIN"
-            ],
-            "created": "2017-08-30T11:40:10.826Z",
-            "state": "Running",
-            "instanceID": "36c1d679-d1f2-4fbd-b25f-ee61c088c0dd",
-            "id": "virtual-machine/d7631526-1bec-4068-b83d-f9ff3ed572ab",
-            "_acl-roles": [
-              "ADMIN"
-            ],
-            "acl": {
-              "owner": {
-                "type": "USER",
-                "principal": "ADMIN"
-              },
-              "rules": [
-                {
-                  "right": "ALL",
-                  "type": "USER",
-                  "principal": "ADMIN"
-                },
-                {
-                  "type": "ROLE",
-                  "principal": "ADMIN",
-                  "right": "ALL"
-                }
-              ]
-            },
-            "resourceURI": "http://sixsq.com/slipstream/1/VirtualMachine"
-          }
-        },
-        {
-          "_index": "resources-index",
-          "_type": "virtual-machine",
-          "_id": "95f3ca24-3a73-4d3a-946f-8c5c3422baf0",
-          "_score": 1.0,
-          "_source": {
-            "updated": "2017-08-30T11:42:38.675Z",
-            "credential": {
-              "href": "connector/0123-4567-8912"
-            },
-            "_acl-users": [
-              "ADMIN"
-            ],
-            "created": "2017-08-30T11:42:38.675Z",
-            "state": "Running",
-            "instanceID": "2d224570-48dd-4897-9c57-e1a71841e098",
-            "id": "virtual-machine/95f3ca24-3a73-4d3a-946f-8c5c3422baf0",
-            "_acl-roles": [
-              "ADMIN"
-            ],
-            "acl": {
-              "owner": {
-                "type": "USER",
-                "principal": "ADMIN"
-              },
-              "rules": [
-                {
-                  "right": "ALL",
-                  "type": "USER",
-                  "principal": "ADMIN"
-                },
-                {
-                  "type": "ROLE",
-                  "principal": "ADMIN",
-                  "right": "ALL"
-                }
-              ]
-            },
-            "resourceURI": "http://sixsq.com/slipstream/1/VirtualMachine"
-          }
-        },
-        {
-          "_index": "resources-index",
-          "_type": "virtual-machine",
-          "_id": "5ad282bb-d247-4751-a609-a29570eade43",
-          "_score": 1.0,
-          "_source": {
-            "updated": "2017-08-30T12:05:27.508Z",
-            "credential": {
-              "href": "connector/0123-4567-8912"
-            },
-            "_acl-users": [
-              "ADMIN"
-            ],
-            "created": "2017-08-30T12:05:27.508Z",
-            "state": "Running",
-            "instanceID": "eb463365-acf9-4ca6-aada-26cac9ec2dfb",
-            "id": "virtual-machine/5ad282bb-d247-4751-a609-a29570eade43",
-            "_acl-roles": [
-              "ADMIN"
-            ],
-            "acl": {
-              "owner": {
-                "type": "USER",
-                "principal": "ADMIN"
-              },
-              "rules": [
-                {
-                  "right": "ALL",
-                  "type": "USER",
-                  "principal": "ADMIN"
-                },
-                {
-                  "type": "ROLE",
-                  "principal": "ADMIN",
-                  "right": "ALL"
-                }
-              ]
-            },
-            "resourceURI": "http://sixsq.com/slipstream/1/VirtualMachine"
-          }
-        },
-        {
-          "_index": "resources-index",
-          "_type": "virtual-machine",
-          "_id": "e09ba0e1-d5c8-4425-88ec-a74f1f03b254",
-          "_score": 1.0,
-          "_source": {
-            "updated": "2017-08-30T12:43:58.977Z",
-            "credential": {
-              "href": "connector/0123-4567-8912"
-            },
-            "_acl-users": [
-              "ADMIN"
-            ],
-            "created": "2017-08-30T12:43:58.977Z",
-            "state": "Running",
-            "instanceID": "ecc31361-bb10-419e-badf-e9bb27905651",
-            "id": "virtual-machine/e09ba0e1-d5c8-4425-88ec-a74f1f03b254",
-            "_acl-roles": [
-              "ADMIN"
-            ],
-            "acl": {
-              "owner": {
-                "type": "USER",
-                "principal": "ADMIN"
-              },
-              "rules": [
-                {
-                  "right": "ALL",
-                  "type": "USER",
-                  "principal": "ADMIN"
-                },
-                {
-                  "type": "ROLE",
-                  "principal": "ADMIN",
-                  "right": "ALL"
-                }
-              ]
-            },
-            "resourceURI": "http://sixsq.com/slipstream/1/VirtualMachine"
-          }
-        },
-        {
-          "_index": "resources-index",
-          "_type": "virtual-machine",
-          "_id": "4d2da4f1-4846-4897-84f8-acec9531f70b",
-          "_score": 1.0,
-          "_source": {
-            "updated": "2017-08-30T12:47:14.414Z",
-            "credential": {
-              "href": "connector/0123-4567-8912"
-            },
-            "_acl-users": [
-              "ADMIN"
-            ],
-            "created": "2017-08-30T12:47:14.414Z",
-            "state": "Running",
-            "instanceID": "aaa-bbb-bb",
-            "id": "virtual-machine/4d2da4f1-4846-4897-84f8-acec9531f70b",
-            "_acl-roles": [
-              "ADMIN"
-            ],
-            "acl": {
-              "owner": {
-                "type": "USER",
-                "principal": "ADMIN"
-              },
-              "rules": [
-                {
-                  "right": "ALL",
-                  "type": "USER",
-                  "principal": "ADMIN"
-                },
-                {
-                  "type": "ROLE",
-                  "principal": "ADMIN",
-                  "right": "ALL"
-                }
-              ]
-            },
-            "resourceURI": "http://sixsq.com/slipstream/1/VirtualMachine"
-          }
-        },
-        {
-          "_index": "resources-index",
-          "_type": "virtual-machine",
-          "_id": "0e0f7131-7398-48b2-8854-faf38bcabd6d",
-          "_score": 1.0,
-          "_source": {
-            "updated": "2017-09-04T14:43:24.776Z",
-            "credential": {
-              "href": "connector/myCloudName"
-            },
-            "_acl-users": [
-              "ADMIN"
-            ],
-            "created": "2017-09-04T14:43:24.761Z",
-            "state": "Running",
-            "instanceID": "e0122e26-e188-4eab-bdac-536358f9eca5",
-            "id": "virtual-machine/0e0f7131-7398-48b2-8854-faf38bcabd6d",
-            "_acl-roles": [
-              "ADMIN"
-            ],
-            "acl": {
-              "owner": {
-                "type": "USER",
-                "principal": "ADMIN"
-              },
-              "rules": [
-                {
-                  "principal": "ADMIN",
-                  "right": "ALL",
+                  "principal": "mboudet",
+                  "right": "VIEW",
                   "type": "USER"
+                },
+                {
+                  "principal": "ADMIN",
+                  "right": "ALL",
+                  "type": "ROLE"
                 }
               ]
             },
             "resourceURI": "http://sixsq.com/slipstream/1/VirtualMachine",
-            "run": {
-              "href": "run/48f87eff-8f8b-4b56-b166-aac7d62c3bf2",
-              "user": {
-                "href": "user/runOwner"
-              }
+            "serviceOffer": {
+              "resource:vcpu": 4,
+              "price:unitCost": null,
+              "price:billingPeriodCode": "MON",
+              "price:freeUnits": 0,
+              "price:unitCode": "HUR",
+              "resource:instanceType": "m1.large",
+              "resource:ram": 8192,
+              "resource:disk": 20,
+              "href": "service-offer/a509a07c-8ec1-405e-a41b-00fb93cfb9bc"
             }
           }
         },
         {
-          "_index": "resources-index",
-          "_type": "virtual-machine",
-          "_id": "7b6462cb-13d0-4fe5-ad8b-b66b70c288df",
+          "_index": "slipstream-virtual-machine",
+          "_type": "_doc",
+          "_id": "cda85349-e187-3d29-8a7d-5f3ea4404920",
           "_score": 1.0,
           "_source": {
-            "updated": "2017-09-04T14:44:30.363Z",
-            "credential": {
-              "href": "connector/myCloudName"
+            "connector": {
+              "href": "connector/exoscale-de-fra"
             },
-            "_acl-users": [
-              "ADMIN"
+            "ip": "89.145.160.251",
+            "credentials": [
+              {
+                "href": "credential/f6e4104f-972a-464c-b12f-343fe1f761db"
+              }
             ],
-            "created": "2017-09-04T14:44:30.354Z",
+            "updated": "2018-05-22T07:10:05.435Z",
+            "_acl-users": [],
+            "created": "2018-05-21T20:33:25.246Z",
             "state": "Running",
-            "instanceID": "fa16ca74-04bf-4605-a657-4c788873d698",
-            "id": "virtual-machine/7b6462cb-13d0-4fe5-ad8b-b66b70c288df",
+            "instanceID": "d5f9a768-ef1c-4956-aff0-b7b2be6ce8fe",
+            "id": "virtual-machine/cda85349-e187-3d29-8a7d-5f3ea4404920",
             "_acl-roles": [
+              "ADMIN",
               "ADMIN"
             ],
             "acl": {
               "owner": {
-                "type": "USER",
+                "type": "ROLE",
                 "principal": "ADMIN"
               },
               "rules": [
                 {
                   "principal": "ADMIN",
                   "right": "ALL",
-                  "type": "USER"
+                  "type": "ROLE"
+                },
+                {
+                  "principal": "ADMIN",
+                  "right": "VIEW",
+                  "type": "ROLE"
                 }
               ]
             },
             "resourceURI": "http://sixsq.com/slipstream/1/VirtualMachine",
-            "run": {
-              "href": "run/da72b9df-b6a0-44cb-a7fe-2843638097d4",
-              "user": {
-                "href": "user/runOwner"
-              }
+            "serviceOffer": {
+              "resource:vcpu": 2,
+              "price:unitCost": 0.041677728,
+              "price:billingPeriodCode": "MON",
+              "price:freeUnits": 0,
+              "price:unitCode": "HUR",
+              "resource:instanceType": "Medium",
+              "resource:ram": 4096,
+              "resource:disk": 0,
+              "href": "service-offer/fb29e5cd-eba8-484d-b656-7067fddbd735"
             }
           }
         },
         {
-          "_index": "resources-index",
-          "_type": "virtual-machine",
-          "_id": "41ec1d4b-8310-4cce-a9b1-2a1122d27612",
+          "_index": "slipstream-virtual-machine",
+          "_type": "_doc",
+          "_id": "091f3310-7ec5-30d4-be2d-dc7570b7f5cd",
           "_score": 1.0,
           "_source": {
-            "updated": "2017-09-04T09:39:35.679Z",
-            "credential": {
-              "href": "connector/aCloudName"
+            "connector": {
+              "href": "connector/exoscale-de-fra"
             },
-            "_acl-users": [
-              "ADMIN"
+            "ip": "89.145.162.238",
+            "credentials": [
+              {
+                "href": "credential/f6e4104f-972a-464c-b12f-343fe1f761db"
+              }
             ],
-            "created": "2017-09-04T09:39:35.651Z",
+            "updated": "2018-05-22T07:10:05.165Z",
+            "_acl-users": [],
+            "created": "2018-05-21T20:33:25.053Z",
             "state": "Running",
-            "instanceID": "7ca12660-6443-405a-8d35-b2ecac2a39c3",
-            "id": "virtual-machine/41ec1d4b-8310-4cce-a9b1-2a1122d27612",
+            "instanceID": "2a02ffcb-6b35-4592-a176-0ae4e577ac59",
+            "id": "virtual-machine/091f3310-7ec5-30d4-be2d-dc7570b7f5cd",
             "_acl-roles": [
+              "ADMIN",
               "ADMIN"
             ],
             "acl": {
               "owner": {
-                "type": "USER",
+                "type": "ROLE",
                 "principal": "ADMIN"
               },
               "rules": [
                 {
                   "principal": "ADMIN",
                   "right": "ALL",
-                  "type": "USER"
+                  "type": "ROLE"
+                },
+                {
+                  "principal": "ADMIN",
+                  "right": "VIEW",
+                  "type": "ROLE"
                 }
               ]
             },
             "resourceURI": "http://sixsq.com/slipstream/1/VirtualMachine",
-            "run": {
-              "href": "run/4824efe2-59e9-4db6-be6b-fc1c8b3edf40",
-              "user": {
-                "href": "user/runOwner"
+            "serviceOffer": {
+              "resource:vcpu": 2,
+              "price:unitCost": 0.041677728,
+              "price:billingPeriodCode": "MON",
+              "price:freeUnits": 0,
+              "price:unitCode": "HUR",
+              "resource:instanceType": "Medium",
+              "resource:ram": 4096,
+              "resource:disk": 0,
+              "href": "service-offer/fb29e5cd-eba8-484d-b656-7067fddbd735"
+            }
+          }
+        },
+        {
+          "_index": "slipstream-virtual-machine",
+          "_type": "_doc",
+          "_id": "fb95d6bd-0d5a-3a54-be71-e22637fcac91",
+          "_score": 1.0,
+          "_source": {
+            "connector": {
+              "href": "connector/cyclone-fr2"
+            },
+            "ip": "134.158.74.134",
+            "credentials": [
+              {
+                "href": "credential/5be7e0e2-f88c-477e-b696-65058bfabbc0"
               }
+            ],
+            "updated": "2018-05-22T07:13:34.980Z",
+            "_acl-users": [
+              "marchal"
+            ],
+            "created": "2018-05-21T20:37:21.063Z",
+            "state": "Running",
+            "instanceID": "6cdc9e23-7e2c-463a-9eeb-c2534333db03",
+            "id": "virtual-machine/fb95d6bd-0d5a-3a54-be71-e22637fcac91",
+            "_acl-roles": [
+              "ADMIN"
+            ],
+            "acl": {
+              "owner": {
+                "type": "ROLE",
+                "principal": "ADMIN"
+              },
+              "rules": [
+                {
+                  "principal": "marchal",
+                  "right": "VIEW",
+                  "type": "USER"
+                },
+                {
+                  "principal": "ADMIN",
+                  "right": "ALL",
+                  "type": "ROLE"
+                }
+              ]
+            },
+            "resourceURI": "http://sixsq.com/slipstream/1/VirtualMachine",
+            "serviceOffer": {
+              "resource:vcpu": 4,
+              "price:unitCost": null,
+              "price:billingPeriodCode": "MON",
+              "price:freeUnits": 0,
+              "price:unitCode": "HUR",
+              "resource:instanceType": "os.4",
+              "resource:ram": 8192,
+              "resource:disk": 20,
+              "href": "service-offer/ad1d512a-b8db-4ed9-91ab-d2bcc4341518"
+            }
+          }
+        },
+        {
+          "_index": "slipstream-virtual-machine",
+          "_type": "_doc",
+          "_id": "023a3e9e-d105-3725-9d22-d755b48cd15e",
+          "_score": 1.0,
+          "_source": {
+            "connector": {
+              "href": "connector/exoscale-ch-gva"
+            },
+            "ip": "159.100.244.132",
+            "credentials": [
+              {
+                "href": "credential/ca9d5a7c-f30a-4adf-8092-710539b593c0"
+              }
+            ],
+            "updated": "2018-05-22T07:17:40.075Z",
+            "_acl-users": [],
+            "created": "2018-05-21T20:30:30.984Z",
+            "state": "Running",
+            "instanceID": "63493cba-5dfc-4b6c-b4a0-d05fb6ffbfc2",
+            "id": "virtual-machine/023a3e9e-d105-3725-9d22-d755b48cd15e",
+            "_acl-roles": [
+              "ADMIN",
+              "ADMIN"
+            ],
+            "acl": {
+              "owner": {
+                "type": "ROLE",
+                "principal": "ADMIN"
+              },
+              "rules": [
+                {
+                  "principal": "ADMIN",
+                  "right": "ALL",
+                  "type": "ROLE"
+                },
+                {
+                  "principal": "ADMIN",
+                  "right": "VIEW",
+                  "type": "ROLE"
+                }
+              ]
+            },
+            "resourceURI": "http://sixsq.com/slipstream/1/VirtualMachine",
+            "serviceOffer": {
+              "resource:vcpu": 4,
+              "price:unitCost": 0.08209166799999999,
+              "price:billingPeriodCode": "MON",
+              "price:freeUnits": 0,
+              "price:unitCode": "HUR",
+              "resource:instanceType": "Large",
+              "resource:ram": 8192,
+              "resource:disk": 0,
+              "href": "service-offer/9f8e1172-7464-4c1f-92dc-7ad0878d7dfa"
+            }
+          }
+        },
+        {
+          "_index": "slipstream-virtual-machine",
+          "_type": "_doc",
+          "_id": "79fd33a2-0be5-3ea3-a0e4-30a5182626cb",
+          "_score": 1.0,
+          "_source": {
+            "connector": {
+              "href": "connector/exoscale-ch-gva"
+            },
+            "ip": "159.100.244.120",
+            "credentials": [
+              {
+                "href": "credential/ca9d5a7c-f30a-4adf-8092-710539b593c0"
+              }
+            ],
+            "updated": "2018-05-22T07:17:40.216Z",
+            "_acl-users": [],
+            "created": "2018-05-21T20:30:31.109Z",
+            "state": "Running",
+            "instanceID": "2e96b87b-dfb2-4652-810e-fd67f5dd54f2",
+            "id": "virtual-machine/79fd33a2-0be5-3ea3-a0e4-30a5182626cb",
+            "_acl-roles": [
+              "ADMIN",
+              "ADMIN"
+            ],
+            "acl": {
+              "owner": {
+                "type": "ROLE",
+                "principal": "ADMIN"
+              },
+              "rules": [
+                {
+                  "principal": "ADMIN",
+                  "right": "ALL",
+                  "type": "ROLE"
+                },
+                {
+                  "principal": "ADMIN",
+                  "right": "VIEW",
+                  "type": "ROLE"
+                }
+              ]
+            },
+            "resourceURI": "http://sixsq.com/slipstream/1/VirtualMachine",
+            "serviceOffer": {
+              "resource:vcpu": 4,
+              "price:unitCost": 0.08209166799999999,
+              "price:billingPeriodCode": "MON",
+              "price:freeUnits": 0,
+              "price:unitCode": "HUR",
+              "resource:instanceType": "Large",
+              "resource:ram": 8192,
+              "resource:disk": 0,
+              "href": "service-offer/9f8e1172-7464-4c1f-92dc-7ad0878d7dfa"
+            }
+          }
+        },
+        {
+          "_index": "slipstream-virtual-machine",
+          "_type": "_doc",
+          "_id": "d26ad88c-3b80-3b0d-9554-7efe149feaeb",
+          "_score": 1.0,
+          "_source": {
+            "connector": {
+              "href": "connector/exoscale-de-fra"
+            },
+            "ip": "89.145.162.198",
+            "credentials": [
+              {
+                "href": "credential/08fc386c-e6cb-4877-9f29-67553cdfb7d5"
+              }
+            ],
+            "updated": "2018-05-22T07:17:42.034Z",
+            "_acl-users": [
+              "emmanouil_vamvakopoulos_cnrs_frhttps___janus_cnrs_fr_idp_https___fed-id_nuv_la_samlbridge_module_php_saml_sp_metadata_php_sixsq-saml-bridge_pyxmsatmd8z8xebykfpur_t9tgm_"
+            ],
+            "created": "2018-05-21T20:30:31.763Z",
+            "state": "Running",
+            "instanceID": "fbb0f0d7-aa78-4bb9-94d2-b91621392153",
+            "id": "virtual-machine/d26ad88c-3b80-3b0d-9554-7efe149feaeb",
+            "_acl-roles": [
+              "ADMIN",
+              "ADMIN"
+            ],
+            "deployment": {
+              "href": "run/6bda227a-5871-45ca-b295-59d4730e0ea8",
+              "user": {
+                "href": "user/emmanouil_vamvakopoulos_cnrs_frhttps___janus_cnrs_fr_idp_https___fed-id_nuv_la_samlbridge_module_php_saml_sp_metadata_php_sixsq-saml-bridge_pyxmsatmd8z8xebykfpur_t9tgm_"
+              }
+            },
+            "acl": {
+              "owner": {
+                "type": "ROLE",
+                "principal": "ADMIN"
+              },
+              "rules": [
+                {
+                  "principal": "emmanouil_vamvakopoulos_cnrs_frhttps___janus_cnrs_fr_idp_https___fed-id_nuv_la_samlbridge_module_php_saml_sp_metadata_php_sixsq-saml-bridge_pyxmsatmd8z8xebykfpur_t9tgm_",
+                  "right": "VIEW",
+                  "type": "USER"
+                },
+                {
+                  "principal": "ADMIN",
+                  "right": "ALL",
+                  "type": "ROLE"
+                },
+                {
+                  "principal": "ADMIN",
+                  "right": "VIEW",
+                  "type": "ROLE"
+                }
+              ]
+            },
+            "resourceURI": "http://sixsq.com/slipstream/1/VirtualMachine",
+            "serviceOffer": {
+              "resource:vcpu": 8,
+              "price:unitCost": 0.34873275200000003,
+              "price:billingPeriodCode": "MON",
+              "price:freeUnits": 0,
+              "price:unitCode": "HUR",
+              "resource:instanceType": "Huge",
+              "resource:ram": 32768,
+              "resource:disk": 0,
+              "href": "service-offer/c34014cf-e6cd-45fe-8656-201641d13805"
+            }
+          }
+        },
+        {
+          "_index": "slipstream-virtual-machine",
+          "_type": "_doc",
+          "_id": "033f8beb-ce5e-3fee-bc6b-92f4bb482c74",
+          "_score": 1.0,
+          "_source": {
+            "connector": {
+              "href": "connector/exoscale-de-fra"
+            },
+            "ip": "89.145.162.82",
+            "credentials": [
+              {
+                "href": "credential/08fc386c-e6cb-4877-9f29-67553cdfb7d5"
+              }
+            ],
+            "updated": "2018-05-22T07:17:42.861Z",
+            "_acl-users": [
+              "emmanouil_vamvakopoulos_cnrs_frhttps___janus_cnrs_fr_idp_https___fed-id_nuv_la_samlbridge_module_php_saml_sp_metadata_php_sixsq-saml-bridge_pyxmsatmd8z8xebykfpur_t9tgm_"
+            ],
+            "created": "2018-05-21T20:30:32.895Z",
+            "state": "Running",
+            "instanceID": "3b54bff3-6e4f-45c0-94e1-4d373e898cd7",
+            "id": "virtual-machine/033f8beb-ce5e-3fee-bc6b-92f4bb482c74",
+            "_acl-roles": [
+              "ADMIN",
+              "ADMIN"
+            ],
+            "deployment": {
+              "href": "run/8aeeaa89-5809-4e6d-ba5e-1f69b41838c2",
+              "user": {
+                "href": "user/emmanouil_vamvakopoulos_cnrs_frhttps___janus_cnrs_fr_idp_https___fed-id_nuv_la_samlbridge_module_php_saml_sp_metadata_php_sixsq-saml-bridge_pyxmsatmd8z8xebykfpur_t9tgm_"
+              }
+            },
+            "acl": {
+              "owner": {
+                "type": "ROLE",
+                "principal": "ADMIN"
+              },
+              "rules": [
+                {
+                  "principal": "emmanouil_vamvakopoulos_cnrs_frhttps___janus_cnrs_fr_idp_https___fed-id_nuv_la_samlbridge_module_php_saml_sp_metadata_php_sixsq-saml-bridge_pyxmsatmd8z8xebykfpur_t9tgm_",
+                  "right": "VIEW",
+                  "type": "USER"
+                },
+                {
+                  "principal": "ADMIN",
+                  "right": "ALL",
+                  "type": "ROLE"
+                },
+                {
+                  "principal": "ADMIN",
+                  "right": "VIEW",
+                  "type": "ROLE"
+                }
+              ]
+            },
+            "resourceURI": "http://sixsq.com/slipstream/1/VirtualMachine",
+            "serviceOffer": {
+              "resource:vcpu": 2,
+              "price:unitCost": 0.091320048,
+              "price:billingPeriodCode": "MON",
+              "price:freeUnits": 0,
+              "price:unitCode": "HUR",
+              "resource:instanceType": "Medium",
+              "resource:ram": 4096,
+              "resource:disk": 0,
+              "href": "service-offer/696de313-17b5-44c8-bf26-2f2ed4fbc6df"
+            }
+          }
+        },
+        {
+          "_index": "slipstream-virtual-machine",
+          "_type": "_doc",
+          "_id": "3925ddd1-7396-38f1-a5c2-642d05ef03b1",
+          "_score": 1.0,
+          "_source": {
+            "connector": {
+              "href": "connector/exoscale-de-fra"
+            },
+            "ip": "89.145.161.10",
+            "credentials": [
+              {
+                "href": "credential/08fc386c-e6cb-4877-9f29-67553cdfb7d5"
+              }
+            ],
+            "updated": "2018-05-22T07:17:43.129Z",
+            "_acl-users": [
+              "emmanouil_vamvakopoulos_cnrs_frhttps___janus_cnrs_fr_idp_https___fed-id_nuv_la_samlbridge_module_php_saml_sp_metadata_php_sixsq-saml-bridge_pyxmsatmd8z8xebykfpur_t9tgm_"
+            ],
+            "created": "2018-05-21T20:30:33.277Z",
+            "state": "Running",
+            "instanceID": "e069c2bb-0c19-45e9-93a7-b197dc60ffc2",
+            "id": "virtual-machine/3925ddd1-7396-38f1-a5c2-642d05ef03b1",
+            "_acl-roles": [
+              "ADMIN",
+              "ADMIN"
+            ],
+            "deployment": {
+              "href": "run/6bda227a-5871-45ca-b295-59d4730e0ea8",
+              "user": {
+                "href": "user/emmanouil_vamvakopoulos_cnrs_frhttps___janus_cnrs_fr_idp_https___fed-id_nuv_la_samlbridge_module_php_saml_sp_metadata_php_sixsq-saml-bridge_pyxmsatmd8z8xebykfpur_t9tgm_"
+              }
+            },
+            "acl": {
+              "owner": {
+                "type": "ROLE",
+                "principal": "ADMIN"
+              },
+              "rules": [
+                {
+                  "principal": "emmanouil_vamvakopoulos_cnrs_frhttps___janus_cnrs_fr_idp_https___fed-id_nuv_la_samlbridge_module_php_saml_sp_metadata_php_sixsq-saml-bridge_pyxmsatmd8z8xebykfpur_t9tgm_",
+                  "right": "VIEW",
+                  "type": "USER"
+                },
+                {
+                  "principal": "ADMIN",
+                  "right": "ALL",
+                  "type": "ROLE"
+                },
+                {
+                  "principal": "ADMIN",
+                  "right": "VIEW",
+                  "type": "ROLE"
+                }
+              ]
+            },
+            "resourceURI": "http://sixsq.com/slipstream/1/VirtualMachine",
+            "serviceOffer": {
+              "resource:vcpu": 8,
+              "price:unitCost": 0.34873275200000003,
+              "price:billingPeriodCode": "MON",
+              "price:freeUnits": 0,
+              "price:unitCode": "HUR",
+              "resource:instanceType": "Huge",
+              "resource:ram": 32768,
+              "resource:disk": 0,
+              "href": "service-offer/c34014cf-e6cd-45fe-8656-201641d13805"
+            }
+          }
+        },
+        {
+          "_index": "slipstream-virtual-machine",
+          "_type": "_doc",
+          "_id": "0528219c-efd2-313d-abe7-bd9a213e0e66",
+          "_score": 1.0,
+          "_source": {
+            "connector": {
+              "href": "connector/exoscale-de-fra"
+            },
+            "ip": "89.145.160.249",
+            "credentials": [
+              {
+                "href": "credential/11c25b0a-5051-4720-9814-4686619f229c"
+              }
+            ],
+            "updated": "2018-05-22T07:17:40.755Z",
+            "_acl-users": [
+              "jcasals_pic_es"
+            ],
+            "created": "2018-05-21T20:30:30.661Z",
+            "state": "Running",
+            "instanceID": "306a35ab-f78e-44ed-b7f0-fd92a2d4ff2d",
+            "id": "virtual-machine/0528219c-efd2-313d-abe7-bd9a213e0e66",
+            "_acl-roles": [
+              "ADMIN",
+              "ADMIN"
+            ],
+            "deployment": {
+              "href": "run/48c1ba34-7e4a-4b52-8d75-302fe423122f",
+              "user": {
+                "href": "user/jcasals_pic_es"
+              }
+            },
+            "acl": {
+              "owner": {
+                "type": "ROLE",
+                "principal": "ADMIN"
+              },
+              "rules": [
+                {
+                  "principal": "jcasals_pic_es",
+                  "right": "VIEW",
+                  "type": "USER"
+                },
+                {
+                  "principal": "ADMIN",
+                  "right": "ALL",
+                  "type": "ROLE"
+                },
+                {
+                  "principal": "ADMIN",
+                  "right": "VIEW",
+                  "type": "ROLE"
+                }
+              ]
+            },
+            "resourceURI": "http://sixsq.com/slipstream/1/VirtualMachine",
+            "serviceOffer": {
+              "resource:vcpu": 1,
+              "price:unitCost": 0.007582728,
+              "price:billingPeriodCode": "MON",
+              "price:freeUnits": 0,
+              "price:unitCode": "HUR",
+              "resource:instanceType": "Micro",
+              "resource:ram": 512,
+              "resource:disk": 0,
+              "href": "service-offer/4f60dce1-8c24-4a82-9fe4-78680b74ebd7"
             }
           }
         }

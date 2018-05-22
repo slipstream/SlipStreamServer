@@ -165,10 +165,6 @@
           action (t/index-action "index" "type")
           actions (t/create-actions "timestamp" action search-result-doc)]
       (is (pos? (count actions)))
-      #_(is (->> actions
-               (map first)
-
-               (every? #(= "action" %))))
       (is (->> actions
                (map second)
                (map :snapshot-time)
