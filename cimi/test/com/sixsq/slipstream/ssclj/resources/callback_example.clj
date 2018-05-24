@@ -9,7 +9,7 @@
 (def ^:const action-name "example")
 
 (defmethod callback/execute action-name
-  [{{:keys [ok?]} :data id :id :as resource}]
+  [{{:keys [ok?]} :data id :id :as resource} request]
   (if ok?
     (do
       (utils/callback-succeeded! id)

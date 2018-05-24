@@ -106,16 +106,18 @@
 ;; actions
 ;;
 
-(def dispatch-on-action :action)
+(defn dispatch-on-action
+  [callback-resource request]
+  (:action callback-resource))
 
 
 (defmulti execute dispatch-on-action)
 
 
 (defmethod execute :default
-  [{:keys [id] :as resource}]
+  [{:keys [id] :as callback-resource} request]
   (utils/callback-failed! id)
-  (log-util/log-and-throw 400 (str "error executing callback: '" (dispatch-on-action resource) "'")))
+  (log-util/log-and-throw 400 (str "error executing callback: '" (dispatch-on-action callback-resource) "'")))
 
 
 (defmethod crud/do-action [resource-url "execute"]
@@ -124,7 +126,7 @@
     (let [id (str resource-url "/" uuid)]
       (when-let [callback (crud/retrieve-by-id id {:user-name "INTERNAL", :user-roles ["ADMIN"]})]
         (if (utils/executable? callback)
-          (execute callback)
+          (execute callback request)
           (r/map-response "cannot re-execute callback" 409 id))))
     (catch ExceptionInfo ei
       (ex-data ei))))

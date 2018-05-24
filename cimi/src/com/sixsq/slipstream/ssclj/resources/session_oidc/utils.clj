@@ -75,6 +75,9 @@
 (defn throw-inactive-user [username redirectURI]
   (logu/log-error-and-throw-with-redirect 400 (str "account is inactive (" username ")") redirectURI))
 
+(defn throw-cannot-create-user [username redirectURI]
+  (logu/log-error-and-throw-with-redirect 400 (str "account cannot be created (" username ")") redirectURI))
+
 ;; retrieval of configuration parameters
 
 (defn config-params

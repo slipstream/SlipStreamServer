@@ -83,11 +83,7 @@
   "Verifies that a user with the given username exists in the database no
    matter what the user state is."
   [username]
-  (-> username
-      get-user
-      :state
-      nil?
-      not))
+  (-> username get-user :state nil? not))
 
 (defn- to-resource-id
   [n]
