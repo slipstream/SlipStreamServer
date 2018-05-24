@@ -5,7 +5,7 @@
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.resources.callback :as callback]
-    [com.sixsq.slipstream.ssclj.resources.callback-user-creation :as user]
+    [com.sixsq.slipstream.ssclj.resources.callback-create-oidc-user :as user]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [peridot.core :refer :all]

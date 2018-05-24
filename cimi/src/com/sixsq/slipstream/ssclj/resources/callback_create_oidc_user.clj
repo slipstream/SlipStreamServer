@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.callback-user-creation
+(ns com.sixsq.slipstream.ssclj.resources.callback-create-oidc-user
   "Creates a new user resource presumably after some external authentication
    method has succeeded."
   (:require
@@ -18,13 +18,15 @@
 (def ^:const action-name "user-creation")
 
 
+;; FIXME: get the proper name of the instance to identify the correct configuration resource
+;; FIXME: check why there is no oidc authentication method in the user
 (defn create-user
   [request]
-  (let [redirectURI "some-fake-uri"
-        instance "oidc"
+  (let [instance "oidc"
         [client-id base-url public-key] (oidc-utils/config-params nil instance)]
     (if-let [code (uh/param-value request :code)]
-      (if-let [access-token (auth-oidc/get-oidc-access-token client-id base-url code "same-fake-uri-2")]
+      ;; FIXME: redirectURI in token function can be nil?  What is it used for?
+      (if-let [access-token (auth-oidc/get-oidc-access-token client-id base-url code nil)]
         (try
           (let [{:keys [sub email] :as claims} (sign/unsign-claims access-token public-key)
                 user-info {:authn-login       sub
@@ -37,12 +39,12 @@
                 (let [created-user (external/create-user-when-missing! user-info)]
                   (some->> created-user (str "user/")))
                 (catch Exception e
-                  (oidc-utils/throw-cannot-create-user sub redirectURI)))
-              (oidc-utils/throw-no-subject redirectURI)))
+                  (oidc-utils/throw-cannot-create-user sub nil)))
+              (oidc-utils/throw-no-subject nil)))
           (catch Exception e
-            (oidc-utils/throw-invalid-access-code (str e) redirectURI)))
-        (oidc-utils/throw-no-access-token redirectURI))
-      (oidc-utils/throw-missing-oidc-code redirectURI))))
+            (oidc-utils/throw-invalid-access-code (str e) nil)))
+        (oidc-utils/throw-no-access-token nil))
+      (oidc-utils/throw-missing-oidc-code nil))))
 
 
 (defmethod callback/execute action-name
