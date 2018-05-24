@@ -17,7 +17,7 @@
                  "' to existing SlipStream user '" slipstream-username "'"))
   (db/update-user-authn-info authn-method slipstream-username external-login))
 
-(defn- create-slipstream-user!
+(defn create-slipstream-user!
   ([authn-method external-login external-email]
    (log/info (str "Creating new SlipStream user with external (" authn-method ") user '" external-login "'"))
    (let [user-name (db/create-user! authn-method external-login external-email)]
