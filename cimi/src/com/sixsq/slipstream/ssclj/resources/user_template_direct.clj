@@ -1,5 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.user-template-direct
   (:require
+    [clojure.stacktrace :as st]
+    [clojure.tools.logging :as log]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.user-template-direct]
     [com.sixsq.slipstream.ssclj.resources.user-template :as p]))
@@ -70,11 +74,13 @@
                          :order       24}}))
 
 ;;
-;; initialization: register this User template
+;; initialization: register the description and ensure template exists in database
 ;;
 (defn initialize
   []
-  (p/register resource desc))
+  (p/register "user-template/direct" desc)
+  (std-crud/initialize p/resource-url :cimi/session-template.internal)
+  (std-crud/add-if-absent "user-template/direct" p/resource-url resource))
 
 ;;
 ;; multimethods for validation

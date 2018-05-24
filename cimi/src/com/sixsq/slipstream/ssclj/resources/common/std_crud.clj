@@ -8,7 +8,8 @@
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.util.response :as r])
+    [com.sixsq.slipstream.util.response :as r]
+    [clojure.stacktrace :as st])
   (:import (clojure.lang ExceptionInfo)))
 
 (defn add-fn
@@ -139,3 +140,26 @@
     (catch Exception e
       (log/errorf "exception when initializing database for %s: %s"
                   resource-url (.getMessage e)))))
+
+
+(def internal-authn {:current         "INTERNAL"
+                     :authentications {"INTERNAL" {:identity "INTERNAL"
+                                                   :roles    ["ADMIN" "USER" "ANON"]}}})
+
+(defn add-if-absent
+  "Ensures that the given resource is available in the database. Used
+   primarily to ensure that critical resources exist."
+  [id resource-name resource]
+  (try
+    (let [request {:params   {:resource-name resource-name}
+                   :identity internal-authn
+                   :body     resource}
+          {:keys [body status] :as resp} (crud/add request)]
+      (println "DEBUG DEBUG DEBUG DEBUG: " (:resource-id body) " " status " " resp)
+      (case status
+        201 (log/infof "created %s resource" id)
+        409 (log/infof "%s resource already exists; new resource not created." id)
+        (log/info "unexpected status code (%d) when creating %s resource:" status id)))
+    (catch Exception e
+      (log/warnf "error when creating %s resource: %s\n%s"
+                 id (str e) (with-out-str (st/print-cause-trace e))))))
