@@ -30,7 +30,8 @@
     (is (s/valid? :cimi/callback (assoc callback :state "SUCCEEDED")))
     (is (s/valid? :cimi/callback (assoc callback :state "FAILED")))
     (is (not (s/valid? :cimi/callback (assoc callback :state "UNKNOWN"))))
-    (doseq [attr #{:id :resourceURI :created :updated :acl :action}]
+    (doseq [attr #{:id :resourceURI :created :updated :acl :action :state}]
       (is (not (s/valid? :cimi/callback (dissoc callback attr)))))
-    (doseq [attr #{:expires :data}]
+    (doseq [attr #{:targetResource
+                   :expires :data}]
       (is (s/valid? :cimi/callback (dissoc callback attr))))))

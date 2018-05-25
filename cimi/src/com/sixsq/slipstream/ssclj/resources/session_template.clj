@@ -7,8 +7,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.session-template]
-    [com.sixsq.slipstream.util.response :as r])
-  (:import (clojure.lang ExceptionInfo)))
+    [com.sixsq.slipstream.util.response :as r]))
 
 (def ^:const resource-tag :sessionTemplates)
 
@@ -194,7 +193,7 @@
             (r/json-response desc)
             (r/ex-not-found id)))
         (r/ex-not-found id)))
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 

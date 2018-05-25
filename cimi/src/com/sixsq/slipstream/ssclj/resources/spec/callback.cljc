@@ -15,7 +15,7 @@
 (s/def :cimi/callback
   (su/only-keys-maps cimi-common/common-attrs
                      {:req-un [:cimi.callback/action
-                               :cimi.callback/state
-                               :cimi.callback/targetResource]
-                      :opt-un [:cimi.callback/data
+                               :cimi.callback/state]
+                      :opt-un [:cimi.callback/targetResource
+                               :cimi.callback/data
                                :cimi.callback/expires]}))

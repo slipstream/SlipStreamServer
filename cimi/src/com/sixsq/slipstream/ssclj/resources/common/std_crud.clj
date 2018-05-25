@@ -9,8 +9,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.util.response :as r]
-    [clojure.stacktrace :as st])
-  (:import (clojure.lang ExceptionInfo)))
+    [clojure.stacktrace :as st]))
 
 (defn add-fn
   [resource-name collection-acl resource-uri]
@@ -36,8 +35,8 @@
           (a/can-view? request)
           (crud/set-operations request)
           (r/json-response))
-      (catch ExceptionInfo ei
-        (ex-data ei)))))
+      (catch Exception e
+        (or (ex-data e) (throw e))))))
 
 (defn edit-fn
   [resource-name]
@@ -51,8 +50,8 @@
             (u/update-timestamps)
             (crud/validate)
             (db/edit request)))
-      (catch ExceptionInfo ei
-        (ex-data ei)))))
+      (catch Exception e
+        (or (ex-data e) (throw e))))))
 
 (defn delete-fn
   [resource-name]
@@ -62,8 +61,8 @@
           (db/retrieve request)
           (a/can-modify? request)
           (db/delete request))
-      (catch ExceptionInfo ei
-        (ex-data ei)))))
+      (catch Exception e
+        (or (ex-data e) (throw e))))))
 
 (defn collection-wrapper-fn
   [resource-name collection-acl collection-uri collection-key]

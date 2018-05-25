@@ -8,8 +8,7 @@
     [com.sixsq.slipstream.ssclj.resources.quota.utils :as quota-utils]
     [com.sixsq.slipstream.ssclj.resources.spec.quota]
     [com.sixsq.slipstream.util.response :as sr]
-    [superstring.core :as str])
-  (:import (clojure.lang ExceptionInfo)))
+    [superstring.core :as str]))
 
 (def ^:const resource-name "Quota")
 
@@ -109,8 +108,8 @@
                                    :user-roles ["ADMIN"]})
           (quota-utils/collect request)
           sr/json-response))
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 
 ;;
