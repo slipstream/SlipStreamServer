@@ -4,11 +4,9 @@
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as p]
     [com.sixsq.slipstream.ssclj.util.config :as uc]))
 
+
 (def ^:const service "slipstream")
 
-(def slipstream-version (-> "com/sixsq/slipstream/version.txt"
-                            uc/find-file
-                            slurp))
 
 ;;
 ;; resource
@@ -43,7 +41,7 @@
 
    :serviceCatalogEnable         false
 
-   :slipstreamVersion            slipstream-version
+   :slipstreamVersion            "UNKNOWN"
 
    :cloudConnectorClass          ""
 
@@ -61,12 +59,14 @@
   (merge p/ConfigurationTemplateDescription
          (uc/read-config "com/sixsq/slipstream/ssclj/resources/configuration-slipstream-desc.edn")))
 
+
 ;;
 ;; initialization: register this Configuration template
 ;;
 (defn initialize
   []
   (p/register resource desc))
+
 
 ;;
 ;; multimethods for validation
