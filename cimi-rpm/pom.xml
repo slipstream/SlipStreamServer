@@ -87,7 +87,7 @@
                     </assembly>
                     <runCmds>
                       <runCmd>apk update</runCmd>
-                      <runCmd>apk add openssl openssh shadow postfix msmtp</runCmd>
+                      <runCmd>apk add openssl openssh shadow postfix msmtp openjdk8</runCmd>
                       <runCmd>/usr/sbin/groupadd -r slipstream</runCmd>
                       <runCmd>/usr/sbin/useradd -r -d ${installation.dir} -g slipstream slipstream</runCmd>
                       <runCmd>mkdir -p /opt/slipstream/server/.ssh</runCmd>
@@ -106,6 +106,8 @@
                       <SSCLJ_GRAPHITE_HOST>127.0.0.1</SSCLJ_GRAPHITE_HOST>
                       <ES_HOST>elasticsearch</ES_HOST>
                       <ES_PORT>9300</ES_PORT>
+                      <PERSISTENT_DB_BINDING_NS>com.sixsq.slipstream.db.dataclay.loader</PERSISTENT_DB_BINDING_NS>
+                      <EPHEMERAL_DB_BINDING_NS>com.sixsq.slipstream.db.dataclay.loader</EPHEMERAL_DB_BINDING_NS>
                       <AUTH_PRIVATE_KEY>/etc/slipstream/auth/auth_privkey.pem</AUTH_PRIVATE_KEY>
                       <AUTH_PUBLIC_KEY>/etc/slipstream/auth/auth_pubkey.pem</AUTH_PUBLIC_KEY>
                       <AUTH_PUBLIC_KEY_CYCLONE>/etc/slipstream/auth/cyclone_pubkey.pem</AUTH_PUBLIC_KEY_CYCLONE>
@@ -148,6 +150,8 @@
                       <SSCLJ_GRAPHITE_HOST>127.0.0.1</SSCLJ_GRAPHITE_HOST>
                       <ES_HOST>elasticsearch</ES_HOST>
                       <ES_PORT>9300</ES_PORT>
+                      <PERSISTENT_DB_BINDING_NS>com.sixsq.slipstream.db.dataclay.loader</PERSISTENT_DB_BINDING_NS>
+                      <EPHEMERAL_DB_BINDING_NS>com.sixsq.slipstream.db.dataclay.loader</EPHEMERAL_DB_BINDING_NS>
                       <AUTH_PRIVATE_KEY>/etc/slipstream/auth/auth_privkey.pem</AUTH_PRIVATE_KEY>
                       <AUTH_PUBLIC_KEY>/etc/slipstream/auth/auth_pubkey.pem</AUTH_PUBLIC_KEY>
                       <AUTH_PUBLIC_KEY_CYCLONE>/etc/slipstream/auth/cyclone_pubkey.pem</AUTH_PUBLIC_KEY_CYCLONE>
