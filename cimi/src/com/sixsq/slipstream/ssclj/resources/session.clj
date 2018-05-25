@@ -10,8 +10,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.util.log :as log-util])
-  (:import (clojure.lang ExceptionInfo)))
+    [com.sixsq.slipstream.ssclj.util.log :as log-util]))
 
 (def ^:const form-urlencoded "application/x-www-form-urlencoded")
 
@@ -281,8 +280,8 @@
       (validate-callback (crud/retrieve-by-id id {:user-name  "INTERNAL"
                                                   :user-roles [id]}) ;; Essentially turn off authz by spoofing owner of resource.
                          request))
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 
 ;;

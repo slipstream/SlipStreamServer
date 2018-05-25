@@ -6,8 +6,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.util.log :as log-util]
-    [com.sixsq.slipstream.util.response :as r])
-  (:import (clojure.lang ExceptionInfo)))
+    [com.sixsq.slipstream.util.response :as r]))
 
 (def ^:const action-name "email-validation")
 
@@ -22,12 +21,12 @@
         (u/update-timestamps)
         (assoc :validated? true)
         (db/edit admin-opts))
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 
 (defmethod callback/execute action-name
-  [{{:keys [href]} :targetResource :as resource}]
+  [{{:keys [href]} :targetResource :as callback-resource} request]
   (let [{:keys [id validated?] :as email} (crud/retrieve-by-id href admin-opts)]
     (if-not validated?
       (let [msg (str id " successfully validated")]

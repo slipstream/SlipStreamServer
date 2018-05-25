@@ -6,8 +6,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.user-template]
-    [com.sixsq.slipstream.util.response :as r])
-  (:import (clojure.lang ExceptionInfo)))
+    [com.sixsq.slipstream.util.response :as r]))
 
 (def ^:const resource-tag :userTemplates)
 
@@ -129,8 +128,8 @@
       (-> (get @templates id)
           (a/can-view? request)
           (r/json-response)))
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 ;; must override the default implementation so that the
 ;; data can be pulled from the atom rather than the database
@@ -138,8 +137,8 @@
   [id]
   (try
     (get @templates id)
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 (defmethod crud/edit resource-name
   [request]
@@ -177,7 +176,7 @@
       (-> (get @descriptions id)
           (a/can-view? request)
           (r/json-response)))
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 

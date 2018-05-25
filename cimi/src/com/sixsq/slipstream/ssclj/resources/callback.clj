@@ -8,8 +8,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.callback]
     [com.sixsq.slipstream.ssclj.util.log :as log-util]
-    [com.sixsq.slipstream.util.response :as r])
-  (:import (clojure.lang ExceptionInfo)))
+    [com.sixsq.slipstream.util.response :as r]))
 
 (def ^:const resource-tag :callbacks)
 
@@ -106,28 +105,31 @@
 ;; actions
 ;;
 
-(def dispatch-on-action :action)
+(defn action-dispatch
+  [callback-resource request]
+  (:action callback-resource))
 
 
-(defmulti execute dispatch-on-action)
+(defmulti execute action-dispatch)
 
 
 (defmethod execute :default
-  [{:keys [id] :as resource}]
+  [{:keys [id] :as callback-resource} request]
   (utils/callback-failed! id)
-  (log-util/log-and-throw 400 (str "error executing callback: '" (dispatch-on-action resource) "'")))
+  (let [msg (format "error executing callback: '%s' of type '%s'" id (action-dispatch callback-resource request))]
+    (log-util/log-and-throw 400 msg)))
 
 
 (defmethod crud/do-action [resource-url "execute"]
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
-      (when-let [callback (crud/retrieve-by-id id {:user-name "INTERNAL", :user-roles ["ADMIN"]})]
-        (if (utils/executable? callback)
-          (execute callback)
+      (when-let [callback-resource (crud/retrieve-by-id id {:user-name "INTERNAL", :user-roles ["ADMIN"]})]
+        (if (utils/executable? callback-resource)
+          (execute callback-resource request)
           (r/map-response "cannot re-execute callback" 409 id))))
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 
 ;;

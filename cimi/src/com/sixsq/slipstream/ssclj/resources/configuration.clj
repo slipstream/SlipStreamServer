@@ -6,8 +6,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as conf-tmpl]
-    [com.sixsq.slipstream.util.response :as r])
-  (:import (clojure.lang ExceptionInfo)))
+    [com.sixsq.slipstream.util.response :as r]))
 
 (def ^:const resource-tag :configurations)
 
@@ -149,8 +148,8 @@
       (-> (get @conf-tmpl/descriptions template-id)
           (a/can-view? request)
           (r/json-response)))
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 ;;
 ;; use service as the identifier

@@ -8,9 +8,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.user-template-direct :as tpl]
-    [com.sixsq.slipstream.ssclj.util.log :as logu])
-  (:import
-    (clojure.lang ExceptionInfo)))
+    [com.sixsq.slipstream.ssclj.util.log :as logu]))
 
 (def ^:const resource-tag :users)
 
@@ -221,8 +219,8 @@
           (u/update-timestamps)
           (crud/validate)
           (db/edit request)))
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 (defmethod crud/edit resource-name
   [request]
   (edit-impl request))

@@ -5,8 +5,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.util.response :as r])
-  (:import (clojure.lang ExceptionInfo)))
+    [com.sixsq.slipstream.util.response :as r]))
 
 (def ^:const resource-tag :userParamTemplates)
 
@@ -117,15 +116,15 @@
       (-> (get @templates id)
           (a/can-view? request)
           (r/json-response)))
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 (defmethod crud/retrieve-by-id resource-url
   [id]
   (try
     (get @templates id)
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 (defmethod crud/add resource-name
   [request]
@@ -167,5 +166,5 @@
       (-> (get @descriptions id)
           (a/can-view? request)
           (r/json-response)))
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))

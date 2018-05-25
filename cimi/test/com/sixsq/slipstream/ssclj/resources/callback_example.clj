@@ -6,10 +6,12 @@
     [com.sixsq.slipstream.ssclj.util.log :as log-util]
     [com.sixsq.slipstream.util.response :as r]))
 
+
 (def ^:const action-name "example")
 
+
 (defmethod callback/execute action-name
-  [{{:keys [ok?]} :data id :id :as resource}]
+  [{{:keys [ok?]} :data id :id :as callback-resource} request]
   (if ok?
     (do
       (utils/callback-succeeded! id)
