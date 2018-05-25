@@ -8,8 +8,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.job.utils :as ju]
     [com.sixsq.slipstream.ssclj.resources.spec.job]
-    [superstring.core :as str])
-  (:import (clojure.lang ExceptionInfo)))
+    [superstring.core :as str]))
 
 (def ^:const resource-name "Job")
 
@@ -96,8 +95,8 @@
           ju/job-cond->edition
           crud/validate
           (db/edit request)))
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 
 (defmethod crud/edit resource-name
@@ -111,8 +110,8 @@
         (a/can-modify? request)
         (ju/stop)
         (db/delete request))
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 
 (defmethod crud/delete resource-name
@@ -146,5 +145,5 @@
         (a/can-modify? request)
         (ju/stop)
         (db/edit request))
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))

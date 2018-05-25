@@ -7,8 +7,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.connector-template :as connector-tmpl]
     [com.sixsq.slipstream.ssclj.resources.spec.connector]
-    [com.sixsq.slipstream.util.response :as r])
-  (:import (clojure.lang ExceptionInfo)))
+    [com.sixsq.slipstream.util.response :as r]))
 
 (def ^:const resource-tag :connectors)
 
@@ -179,8 +178,8 @@
       (-> (crud/retrieve-by-id id {:user-name  "INTERNAL"
                                    :user-roles ["ADMIN"]})
           (activate-subtype request)))
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 
 ;;; Quarantine operation
@@ -202,8 +201,8 @@
       (-> (crud/retrieve-by-id id {:user-name  "INTERNAL"
                                    :user-roles ["ADMIN"]})
           (quarantine-subtype request)))
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 
 ;;; Describe operation
@@ -217,8 +216,8 @@
       (-> (get @connector-tmpl/descriptions template-id)
           (a/can-view? request)
           (r/json-response)))
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 ;;; set subtype operations
 

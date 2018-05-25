@@ -13,8 +13,7 @@
     [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
     [com.sixsq.slipstream.ssclj.resources.external-object.utils :as s3]
     [com.sixsq.slipstream.ssclj.util.log :as logu]
-    [com.sixsq.slipstream.util.response :as r])
-  (:import (clojure.lang ExceptionInfo)))
+    [com.sixsq.slipstream.util.response :as r]))
 
 (def ^:const resource-tag :externalObjects)
 
@@ -323,8 +322,8 @@
     (let [upload-uri (upload-fn resource request)]
       (db/edit (assoc resource :state state-uploading) request)
       (r/json-response {:uri upload-uri}))
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 (defmethod crud/do-action [resource-url "upload"]
   [{{uuid :uuid} :params :as request}]
@@ -333,8 +332,8 @@
       (-> (crud/retrieve-by-id id {:user-name  "INTERNAL"
                                    :user-roles ["ADMIN"]})
           (upload-subtype request)))
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 (defmethod crud/do-action [resource-url "ready"]
   [{{uuid :uuid} :params :as request}]
@@ -348,8 +347,8 @@
             (assoc :state state-ready)
             (db/edit request))
         (logu/log-and-throw-400 (error-msg-bad-state "ready" #{state-uploading} state))))
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 ;;; Download URL operation
 
@@ -372,8 +371,8 @@
   (try
     (a/can-modify? resource request)
     (r/json-response {:uri (download-fn resource request)})
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 (defmethod crud/do-action [resource-url "download"]
   [{{uuid :uuid} :params :as request}]
@@ -382,8 +381,8 @@
       (-> (crud/retrieve-by-id id {:user-name  "INTERNAL"
                                    :user-roles ["ADMIN"]})
           (download-subtype request)))
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 ;;; Delete resource.
 
@@ -405,8 +404,8 @@
       (-> (crud/retrieve-by-id id {:user-name  "INTERNAL"
                                    :user-roles ["ADMIN"]})
           (delete-subtype request)))
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 
 ;;

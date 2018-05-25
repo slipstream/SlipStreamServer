@@ -2,8 +2,7 @@
   (:require
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u])
-  (:import (clojure.lang ExceptionInfo)))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 
 (defn executable?
@@ -20,8 +19,8 @@
           (u/update-timestamps)
           (assoc :state state)
           (db/edit admin-opts)))
-    (catch ExceptionInfo ei
-      (ex-data ei))))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 
 (def callback-succeeded! (partial update-callback-state! "SUCCEEDED"))

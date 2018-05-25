@@ -5,7 +5,6 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.user-params-template-exec :as up-tmpl-exec])
   (:import
-    (clojure.lang ExceptionInfo)
     (java.util UUID)))
 
 ;; Only ACTIVE users can log in.  All other states (NEW, SUSPENDED, and DELETED) are disallowed
@@ -21,13 +20,13 @@
   []
   (try
     (second (db/query resource-name {:user-roles ["ADMIN"]}))
-    (catch ExceptionInfo _ [])))
+    (catch Exception _ [])))
 
 (defn get-all-user-params
   []
   (try
     (second (db/query "user-param" {:user-roles ["ADMIN"]}))
-    (catch ExceptionInfo _ [])))
+    (catch Exception _ [])))
 
 (defn get-active-users
   []
@@ -35,13 +34,13 @@
     (try
       (second (db/query resource-name {:cimi-params filter
                                        :user-roles  ["ADMIN"]}))
-      (catch ExceptionInfo _ []))))
+      (catch Exception _ []))))
 
 (defn get-user
   [username]
   (try
     (db/retrieve (resource-uri username) {})
-    (catch ExceptionInfo _ {})))
+    (catch Exception _ {})))
 
 (defn find-usernames-by-email
   [email]
@@ -50,7 +49,7 @@
           filter {:filter (parser/parse-cimi-filter filter-str)}
           matched-users (try (second (db/query resource-name {:cimi-params filter
                                                               :user-roles  ["ADMIN"]}))
-                             (catch ExceptionInfo e []))]
+                             (catch Exception _ []))]
       (set (map :username matched-users)))))
 
 (defn find-username-by-authn
@@ -61,8 +60,7 @@
           matched-users (try
                           (second (db/query resource-name {:cimi-params filter
                                                            :user-roles  ["ADMIN"]}))
-                          (catch ExceptionInfo _
-                            []))]
+                          (catch Exception _ []))]
       (if (> (count matched-users) 1)
         (throw (Exception. (str "There should be only one result for "
                                 authn-id ". Was " matched-users)))
@@ -77,7 +75,7 @@
                                  :user-roles  ["ADMIN"]})
                second
                first)
-           (catch ExceptionInfo _ {})))))
+           (catch Exception _ {})))))
 
 (defn user-exists?
   "Verifies that a user with the given username exists in the database no
