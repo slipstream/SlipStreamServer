@@ -1,14 +1,13 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-template-internal
   (:require
-    [clojure.stacktrace :as st]
-    [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.session-template :as p]
     [com.sixsq.slipstream.ssclj.resources.spec.session-template-internal]))
 
+
 (def ^:const authn-method "internal")
+
 
 (def default-template {:method      authn-method
                        :instance    authn-method
@@ -18,6 +17,7 @@
                        :username    "username"
                        :password    "password"
                        :acl         p/resource-acl})
+
 
 ;;
 ;; description
@@ -39,26 +39,16 @@
                      :readOnly    false
                      :order       21}}))
 
+
 ;;
 ;; initialization: register this Session template and create internal authentication template
 ;;
 (defn initialize
   []
   (p/register authn-method desc)
-  (try
-    (std-crud/initialize p/resource-url :cimi/session-template.internal)
-    (let [request {:params   {:resource-name p/resource-url}
-                   :identity {:current         "INTERNAL"
-                              :authentications {"INTERNAL" {:identity "INTERNAL", :roles ["ADMIN" "USER" "ANON"]}}}
-                   :body     default-template}
-          {:keys [status]} (crud/add request)]
-      (case status
-        201 (log/info "created session-template/internal resource")
-        409 (log/info "session-template/internal resource already exists; new resource not created.")
-        (log/info "unexpected status code when creating session-template/internal resource:" status)))
-    (catch Exception e
-      (log/warn "error when creating session-template/internal resource: " (str e) "\n"
-                (with-out-str (st/print-cause-trace e))))))
+  (std-crud/initialize p/resource-url :cimi/session-template.internal)
+  (std-crud/add-if-absent "session-template/internal" p/resource-url default-template))
+
 
 ;;
 ;; multimethods for validation

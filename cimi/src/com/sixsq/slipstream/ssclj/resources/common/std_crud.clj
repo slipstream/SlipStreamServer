@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.std-crud
   "Standard CRUD functions for resources."
   (:require
+    [clojure.stacktrace :as st]
     [clojure.string :as str]
     [clojure.tools.logging :as log]
     [clojure.walk :as w]
@@ -9,6 +10,14 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.util.response :as r]))
+
+
+(def ^{:doc "Internal administrator identity for database queries."}
+internal-identity
+  {:current         "INTERNAL"
+   :authentications {"INTERNAL" {:identity "INTERNAL"
+                                 :roles    ["ADMIN" "USER" "ANON"]}}})
+
 
 (defn add-fn
   [resource-name collection-acl resource-uri]
@@ -25,6 +34,7 @@
           crud/validate)
       {})))
 
+
 (defn retrieve-fn
   [resource-name]
   (fn [{{uuid :uuid} :params :as request}]
@@ -36,6 +46,7 @@
           (r/json-response))
       (catch Exception e
         (or (ex-data e) (throw e))))))
+
 
 (defn edit-fn
   [resource-name]
@@ -52,6 +63,7 @@
       (catch Exception e
         (or (ex-data e) (throw e))))))
 
+
 (defn delete-fn
   [resource-name]
   (fn [{{uuid :uuid} :params :as request}]
@@ -62,6 +74,7 @@
           (db/delete request))
       (catch Exception e
         (or (ex-data e) (throw e))))))
+
 
 (defn collection-wrapper-fn
   [resource-name collection-acl collection-uri collection-key]
@@ -74,6 +87,7 @@
           (crud/set-operations request)
           (assoc collection-key entries-with-operations)))))
 
+
 (defn query-fn
   [resource-name collection-acl collection-uri collection-key]
   (fn [request]
@@ -84,9 +98,12 @@
           entries-and-count (merge metadata (wrapper-fn request entries))]
       (r/json-response entries-and-count))))
 
+
 (def ^:const href-not-found-msg "requested href not found")
 
+
 (def ^:const href-not-accessible-msg "requested href cannot be accessed")
+
 
 (defn resolve-href-keep
   "Pulls in the resource identified by the value of the :href key and merges
@@ -111,6 +128,7 @@
       (throw (r/ex-bad-request (format "%s: %s" href-not-found-msg href))))
     resource))
 
+
 (defn resolve-href
   "Like resolve-href-keep, except that the :href attributes are removed."
   [{:keys [href] :as resource} idmap]
@@ -119,6 +137,7 @@
         (resolve-href-keep idmap)
         (dissoc :href))
     resource))
+
 
 (defn resolve-hrefs
   "Does a prewalk of the given argument, replacing any map with an :href
@@ -138,3 +157,21 @@
     (catch Exception e
       (log/errorf "exception when initializing database for %s: %s"
                   resource-url (.getMessage e)))))
+
+
+(defn add-if-absent
+  [resource-id resource-url resource]
+  (try
+    (let [request {:params   {:resource-name resource-url}
+                   :identity internal-identity
+                   :body     resource}
+          {:keys [status]} (crud/add request)]
+      (case status
+        201 (log/infof "created %s resource" resource-id)
+        409 (log/infof "%s resource already exists; new resource not created." resource-id)
+        (log/errorf "unexpected status code (%s) when creating %s resource:" (str status) resource-id)))
+    (catch Exception e
+      (log/errorf "error when creating %s resource: %s\n%s"
+                  resource-id
+                  (str e)
+                  (with-out-str (st/print-cause-trace e))))))

@@ -35,7 +35,16 @@
                  (ltu/body->edn)
                  (ltu/is-status 200))
         template (get-in resp [:response :body])
-        valid-create {:configurationTemplate (ltu/strip-unwanted-attrs (assoc template attr-kw attr-value))}]
+        valid-create {:configurationTemplate (ltu/strip-unwanted-attrs (assoc template attr-kw attr-value))}
+
+        uri (str (u/de-camelcase resource-name) "/" service)
+        abs-uri (str p/service-context uri)]
+
+    ;; verify that the auto-generated configuration is present
+    (-> session-admin
+        (request abs-uri)
+        (ltu/body->edn)
+        (ltu/is-status 200))
 
     ;; admin create with valid template should fail
     ;; slipstream configuration initialization will have already created a resource
@@ -46,22 +55,18 @@
         (ltu/body->edn)
         (ltu/is-status 409))
 
-    ;; delete the existing entry, to allow for standard tests afterwards
-    (let [uri (str (u/de-camelcase resource-name) "/" service)
-          abs-uri (str p/service-context uri)]
+    ;; admin delete succeeds
+    (-> session-admin
+        (request abs-uri
+                 :request-method :delete)
+        (ltu/body->edn)
+        (ltu/is-status 200))
 
-      ;; admin delete succeeds
-      (-> session-admin
-          (request abs-uri
-                   :request-method :delete)
-          (ltu/body->edn)
-          (ltu/is-status 200))
-
-      ;; ensure entry is really gone
-      (-> session-admin
-          (request abs-uri)
-          (ltu/body->edn)
-          (ltu/is-status 404)))))
+    ;; ensure entry is really gone
+    (-> session-admin
+        (request abs-uri)
+        (ltu/body->edn)
+        (ltu/is-status 404))))
 
 
 (deftest lifecycle-slipstream
