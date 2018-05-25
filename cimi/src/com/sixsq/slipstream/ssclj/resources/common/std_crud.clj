@@ -2,6 +2,7 @@
   "Standard CRUD functions for resources."
   (:require
     [clojure.stacktrace :as st]
+    [clojure.stacktrace :as st]
     [clojure.string :as str]
     [clojure.tools.logging :as log]
     [clojure.walk :as w]
@@ -9,8 +10,7 @@
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.util.response :as r]
-    [clojure.stacktrace :as st]))
+    [com.sixsq.slipstream.util.response :as r]))
 
 
 (def ^{:doc "Internal administrator identity for database queries."}
