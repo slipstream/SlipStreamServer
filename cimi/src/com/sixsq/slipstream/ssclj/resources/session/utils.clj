@@ -1,12 +1,16 @@
 (ns com.sixsq.slipstream.ssclj.resources.session.utils
   (:require [clojure.tools.logging :as log]
             [com.sixsq.slipstream.auth.utils.http :as uh]
+            [com.sixsq.slipstream.ssclj.resources.callback :as callback]
             [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
             [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
             [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
             [com.sixsq.slipstream.ssclj.resources.session :as p]
+            [com.sixsq.slipstream.ssclj.util.log :as logu]
             [com.sixsq.slipstream.util.response :as r]
             [ring.util.codec :as codec]))
+
+(def ^:const admin-opts {:user-name "INTERNAL", :user-roles ["ADMIN"]})
 
 (defn cookie-name
   "Provides the name of the cookie based on the resource ID in the
@@ -76,3 +80,53 @@
                                                              :roles    [session-id]}}}
                   :params     {:uuid (extract-session-uuid session-id)}
                   :body       updated-session}))
+
+
+(defn throw-bad-client-config [cfg-id redirectURI]
+  (logu/log-error-and-throw-with-redirect 500 (str "missing or incorrect configuration (" cfg-id ") for GitHub authentication") redirectURI))
+
+
+(defn throw-missing-oauth-code [redirectURI]
+  (logu/log-error-and-throw-with-redirect 400 "GitHub authentication callback request does not contain required code" redirectURI))
+
+(defn throw-no-access-token [redirectURI]
+  (logu/log-error-and-throw-with-redirect 400 "unable to retrieve GitHub access code" redirectURI))
+
+(defn throw-no-user-info [redirectURI]
+  (logu/log-error-and-throw-with-redirect 400 "unable to retrieve GitHub user information" redirectURI))
+
+(defn throw-no-matched-user [redirectURI]
+  (logu/log-error-and-throw-with-redirect 403 "no matching account for GitHub user" redirectURI))
+
+
+(defn config-github-params
+  [redirectURI instance]
+  (let [cfg-id (str "configuration/session-github-" instance)
+        opts {:user-name "INTERNAL" :user-roles ["ADMIN"]}] ;; FIXME: works around authn at DB interface level
+    (try
+      (let [{:keys [clientID clientSecret]} (crud/retrieve-by-id cfg-id opts)]
+        (if (and clientID clientSecret)
+          [clientID clientSecret]
+          (throw-bad-client-config cfg-id redirectURI)))
+      (catch Exception _
+        (throw-bad-client-config cfg-id redirectURI)))))
+
+;; FIXME: Fix ugliness around needing to create ring requests with authentication!
+(defn create-callback [baseURI session-id action]
+  (let [callback-request {:params   {:resource-name callback/resource-url}
+                          :body     {:action         action
+                                     :targetResource {:href session-id}}
+                          :identity {:current         "INTERNAL"
+                                     :authentications {"INTERNAL" {:identity "INTERNAL"
+                                                                   :roles    ["ADMIN"]}}}}
+        {{:keys [resource-id]} :body status :status} (crud/add callback-request)]
+    (if (= 201 status)
+      (if-let [callback-resource (crud/set-operations (crud/retrieve-by-id resource-id admin-opts) {})]
+        (if-let [validate-op (u/get-op callback-resource "execute")]
+          (str baseURI validate-op)
+          (let [msg "callback does not have execute operation"]
+            (throw (ex-info msg (r/map-response msg 500 resource-id)))))
+        (let [msg "cannot retrieve  session callback"]
+          (throw (ex-info msg (r/map-response msg 500 resource-id)))))
+      (let [msg "cannot create  session callback"]
+        (throw (ex-info msg (r/map-response msg 500 session-id)))))))
