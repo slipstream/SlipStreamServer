@@ -106,8 +106,8 @@
                       <SSCLJ_GRAPHITE_HOST>127.0.0.1</SSCLJ_GRAPHITE_HOST>
                       <ES_HOST>elasticsearch</ES_HOST>
                       <ES_PORT>9300</ES_PORT>
-                      <PERSISTENT_DB_BINDING_NS>com.sixsq.slipstream.db.dataclay.loader</PERSISTENT_DB_BINDING_NS>
-                      <EPHEMERAL_DB_BINDING_NS>com.sixsq.slipstream.db.dataclay.loader</EPHEMERAL_DB_BINDING_NS>
+                      <PERSISTENT_DB_BINDING_NS>com.sixsq.slipstream.db.es.loader</PERSISTENT_DB_BINDING_NS>
+                      <EPHEMERAL_DB_BINDING_NS>com.sixsq.slipstream.db.es.loader</EPHEMERAL_DB_BINDING_NS>
                       <AUTH_PRIVATE_KEY>/etc/slipstream/auth/auth_privkey.pem</AUTH_PRIVATE_KEY>
                       <AUTH_PUBLIC_KEY>/etc/slipstream/auth/auth_pubkey.pem</AUTH_PUBLIC_KEY>
                       <AUTH_PUBLIC_KEY_CYCLONE>/etc/slipstream/auth/cyclone_pubkey.pem</AUTH_PUBLIC_KEY_CYCLONE>

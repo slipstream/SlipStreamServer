@@ -13,6 +13,7 @@
 
 (def ^:const validation-email-body
   (str "To validate your email address, please visit the address:\n\n-->>    %s\n\n"
+       "By validating your email you are accepting SixSq's Terms and Conditions, available at %s \n\n"
        "If you did not initiate this request, do NOT click on the\n"
        "link and report this to the service administrator."))
 
@@ -48,19 +49,20 @@
   "Extracts the SMTP configuration from the server's configuration resource.
    Note that this assumes a standard URL for the configuration resource."
   []
-  (when-let [{:keys [mailHost mailPort mailSSL mailUsername mailPassword]} (crud/retrieve-by-id "configuration/slipstream" admin-opts)]
+  (when-let [{:keys [mailHost mailPort mailSSL mailUsername mailPassword termsAndConditions]} (crud/retrieve-by-id "configuration/slipstream" admin-opts)]
     {:host mailHost
      :port mailPort
      :ssl  mailSSL
      :user mailUsername
-     :pass mailPassword}))
+     :pass mailPassword
+     :terms-and-conditions termsAndConditions}))
 
 
 (defn send-validation-email [callback-url address]
   (try
     (let [smtp (smtp-cfg)]
       (let [sender (or (:user smtp) "administrator")
-            body (format validation-email-body callback-url)
+            body (format validation-email-body callback-url (:terms-and-conditions smtp))
             msg {:from    sender
                  :to      [address]
                  :subject "email validation"

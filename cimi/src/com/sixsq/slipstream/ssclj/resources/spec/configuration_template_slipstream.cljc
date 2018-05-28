@@ -21,6 +21,7 @@
 (s/def :cimi.configuration-template.slipstream/mailPort ::cimi-core/port)
 (s/def :cimi.configuration-template.slipstream/mailSSL boolean?)
 (s/def :cimi.configuration-template.slipstream/mailDebug boolean?)
+(s/def :cimi.configuration-template.slipstream/termsAndConditions ::cimi-core/nonblank-string)
 
 (s/def :cimi.configuration-template.slipstream/quotaEnable boolean?)
 
@@ -72,10 +73,11 @@
 
             :cimi.configuration-template.slipstream/metricsLoggerEnable
             :cimi.configuration-template.slipstream/metricsGraphiteEnable
-
+            :cimi.configuration-template.slipstream/termsAndConditions
             :cimi.configuration-template.slipstream/reportsObjectStoreBucketName
             :cimi.configuration-template.slipstream/reportsObjectStoreCreds]
-   :opt-un [:cimi.configuration-template.slipstream/reportsLocation]}) ; reportsLocation is deprecated
+   :opt-un [:cimi.configuration-template.slipstream/reportsLocation ; reportsLocation is deprecated
+            ]}) 
 
 ;; FIXME: Treats all parameters as optional.  Instead those without reasonable defaults should be required.
 (def configuration-template-keys-spec-opt

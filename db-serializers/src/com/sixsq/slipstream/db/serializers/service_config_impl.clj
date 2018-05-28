@@ -45,6 +45,8 @@
    :mailSSL                      "slipstream.mail.ssl"
    :mailDebug                    "slipstream.mail.debug"
 
+   :termsAndConditions           "slipstream.mail.termsandconditions"   
+
    :quotaEnable                  "slipstream.quota.enable"
 
    :registrationEnable           "slipstream.registration.enable"

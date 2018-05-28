@@ -31,6 +31,8 @@
    :mailSSL                      true
    :mailDebug                    true
 
+   :termsAndConditions           "https://sixsq.com/terms/general-terms-and-conditions"
+
    :quotaEnable                  true
 
    :registrationEnable           true

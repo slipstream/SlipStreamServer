@@ -248,4 +248,12 @@
   :order 45}
 }
 
+ :termsAndConditions
+ {:displayName "slipstream.mail.termsandconditions"
+  :type "string"
+  :category "SlipStream_Support"
+  :description "Terms and Conditions link to be included in the user validation email."
+  :mandatory false
+  :readOnly false
+  :order 46}
 
