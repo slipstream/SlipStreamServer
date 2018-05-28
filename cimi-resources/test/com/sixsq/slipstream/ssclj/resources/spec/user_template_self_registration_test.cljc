@@ -2,7 +2,7 @@
   (:require
     [clojure.spec.alpha :as s]
     [clojure.test :refer [deftest is]]
-    [com.sixsq.slipstream.ssclj.resources.spec.user-template-self-registration]
+    [com.sixsq.slipstream.ssclj.resources.spec.user-template-self-registration :as user-template]
     [com.sixsq.slipstream.ssclj.resources.user-template :as st]))
 
 (def valid-acl {:owner {:principal "ADMIN"
@@ -23,6 +23,7 @@
              :acl            valid-acl
 
              :method         "self-registration"
+             :instance       "self-registration"
 
              :username       "user"
              :password       "plaintext-password"
@@ -36,19 +37,19 @@
                     :userTemplate (dissoc tpl :id)}]
 
     ;; check the registration schema (without href)
-    (is (s/valid? :cimi/user-template.self-registration tpl))
+    (is (s/valid? ::user-template/self-registration tpl))
     (doseq [attr #{:id :resourceURI :created :updated :acl
                    :method :username :password :passwordRepeat :emailAddress}]
-      (is (not (s/valid? :cimi/user-template.self-registration (dissoc tpl attr)))))
+      (is (not (s/valid? ::user-template/self-registration (dissoc tpl attr)))))
     (doseq [attr #{:name :description :properties}]
-      (is (s/valid? :cimi/user-template.self-registration (dissoc tpl attr))))
+      (is (s/valid? ::user-template/self-registration (dissoc tpl attr))))
 
     ;; check the create template schema (with href)
-    (is (s/valid? :cimi/user-template.self-registration-create create-tpl))
-    (is (s/valid? :cimi/user-template.self-registration-create (assoc-in create-tpl [:userTemplate :href] "user-template/abc")))
-    (is (not (s/valid? :cimi/user-template.self-registration-create (assoc-in create-tpl [:userTemplate :href] "bad-reference/abc"))))
+    (is (s/valid? ::user-template/self-registration-create create-tpl))
+    (is (s/valid? ::user-template/self-registration-create (assoc-in create-tpl [:userTemplate :href] "user-template/abc")))
+    (is (not (s/valid? ::user-template/self-registration-create (assoc-in create-tpl [:userTemplate :href] "bad-reference/abc"))))
 
     (doseq [attr #{:resourceURI :userTemplate}]
-      (is (not (s/valid? :cimi/user-template.self-registration-create (dissoc create-tpl attr)))))
+      (is (not (s/valid? ::user-template/self-registration-create (dissoc create-tpl attr)))))
     (doseq [attr #{:name :description :properties}]
-      (is (s/valid? :cimi/user-template.self-registration-create (dissoc create-tpl attr))))))
+      (is (s/valid? ::user-template/self-registration-create (dissoc create-tpl attr))))))

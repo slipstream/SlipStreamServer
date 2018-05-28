@@ -3,7 +3,7 @@
    minimal information: username, password, and email address."
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.spec.user-template-self-registration]
+    [com.sixsq.slipstream.ssclj.resources.spec.user-template-self-registration :as user-template]
     [com.sixsq.slipstream.ssclj.resources.user-template :as p]))
 
 (def ^:const registration-method "self-registration")
@@ -19,6 +19,7 @@
 ;;
 (def ^:const resource
   {:method         registration-method
+   :instance       registration-method
    :name           "Self Registration"
    :description    "Creates a new user through self-registration"
    :username       "username"
@@ -72,7 +73,7 @@
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi/user-template.self-registration))
+(def validate-fn (u/create-spec-validation-fn ::user-template/self-registration))
 (defmethod p/validate-subtype registration-method
   [resource]
   (validate-fn resource))
