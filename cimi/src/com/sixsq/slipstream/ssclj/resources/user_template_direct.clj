@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.user-template-direct
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.spec.user-template-direct]
+    [com.sixsq.slipstream.ssclj.resources.spec.user-template-direct :as user-template]
     [com.sixsq.slipstream.ssclj.resources.user-template :as p]))
 
 (def ^:const registration-method "direct")
@@ -17,6 +17,7 @@
 ;;
 (def ^:const resource
   {:method       registration-method
+   :instance     registration-method
    :name         "Direct"
    :description  "Direct creation of user by the administrator"
    :username     "username"
@@ -80,7 +81,7 @@
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi/user-template.direct))
+(def validate-fn (u/create-spec-validation-fn ::user-template/direct))
 (defmethod p/validate-subtype registration-method
   [resource]
   (validate-fn resource))

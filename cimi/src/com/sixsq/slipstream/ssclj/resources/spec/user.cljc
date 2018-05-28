@@ -5,31 +5,39 @@
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
-(s/def :cimi.user/username ::cimi-core/nonblank-string)
-(s/def :cimi.user/emailAddress ::cimi-core/nonblank-string)
-(s/def :cimi.user/firstName ::cimi-core/nonblank-string)
-(s/def :cimi.user/lastName ::cimi-core/nonblank-string)
-(s/def :cimi.user/organization string?)
 
-(s/def :cimi.user/id (s/and string? #(re-matches #"^user/.*" %)))
+;; Less restrictive than standard ::cimi-common/id to accommodate OIDC, etc.
+(s/def ::id (s/and string? #(re-matches #"^user/.*" %)))
 
-(s/def :cimi.user/method ::cimi-core/identifier)
-(s/def :cimi.user/href string?)
-(s/def :cimi.user/password ::cimi-core/nonblank-string)
-(s/def :cimi.user/roles string?)
-(s/def :cimi.user/state #{"NEW" "ACTIVE" "DELETED" "SUSPENDED"})
-(s/def :cimi.user/creation ::cimi-core/timestamp)
-(s/def :cimi.user/lastOnline ::cimi-core/timestamp)
-(s/def :cimi.user/lastExecute ::cimi-core/timestamp)
-(s/def :cimi.user/activeSince ::cimi-core/timestamp)
-(s/def :cimi.user/isSuperUser boolean?)
-(s/def :cimi.user/deleted boolean?)
-(s/def :cimi.user/githublogin string?)
-(s/def :cimi.user/cyclonelogin string?)
+(s/def ::username ::cimi-core/nonblank-string)
+(s/def ::emailAddress ::cimi-core/nonblank-string)
 
+(s/def ::firstName ::cimi-core/nonblank-string)
+(s/def ::lastName ::cimi-core/nonblank-string)
+(s/def ::organization string?)
+
+(s/def ::method ::cimi-core/identifier)
+(s/def ::href string?)
+(s/def ::password ::cimi-core/nonblank-string)
+(s/def ::roles string?)
+(s/def ::state #{"NEW" "ACTIVE" "DELETED" "SUSPENDED"})
+(s/def ::creation ::cimi-core/timestamp)
+(s/def ::lastOnline ::cimi-core/timestamp)
+(s/def ::lastExecute ::cimi-core/timestamp)
+(s/def ::activeSince ::cimi-core/timestamp)
+(s/def ::isSuperUser boolean?)
+(s/def ::deleted boolean?)
+(s/def ::githublogin string?)
+(s/def ::cyclonelogin string?)
+
+
+;;
+;; redefined common attributes to allow for less restrictive
+;; resource identifier (::id) for user resources
+;;
 
 (def ^:const user-common-attrs
-  {:req-un [:cimi.user/id              ;; less restrictive than ::cimi-common/id
+  {:req-un [::id
             ::cimi-common/resourceURI
             ::cimi-common/created
             ::cimi-common/updated
@@ -41,25 +49,25 @@
 
 
 (def user-keys-spec
-  {:req-un [:cimi.user/username
-            :cimi.user/emailAddress]
-   :opt-un [:cimi.user/firstName
-            :cimi.user/lastName
-            :cimi.user/organization
+  {:req-un [::username
+            ::emailAddress]
+   :opt-un [::firstName
+            ::lastName
+            ::organization
 
-            :cimi.user/method
-            :cimi.user/href
-            :cimi.user/password
-            :cimi.user/roles
-            :cimi.user/isSuperUser
-            :cimi.user/state
-            :cimi.user/deleted
-            :cimi.user/creation
-            :cimi.user/lastOnline
-            :cimi.user/lastExecute
-            :cimi.user/activeSince
-            :cimi.user/githublogin
-            :cimi.user/cyclonelogin]})
+            ::method
+            ::href
+            ::password
+            ::roles
+            ::isSuperUser
+            ::state
+            ::deleted
+            ::creation
+            ::lastOnline
+            ::lastExecute
+            ::activeSince
+            ::githublogin
+            ::cyclonelogin]})
 
 
 (s/def :cimi/user
