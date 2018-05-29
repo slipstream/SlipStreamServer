@@ -9,6 +9,7 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.user-template :refer :all]
     [com.sixsq.slipstream.ssclj.resources.user-template-direct :as direct]
+    [com.sixsq.slipstream.ssclj.resources.user-template-self-registration :as self]
     [peridot.core :refer :all]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
@@ -40,9 +41,11 @@
                     (ltu/entries resource-tag))
         ids (set (map :id entries))
         types (set (map :method entries))]
-    (is (= #{(str resource-url "/" direct/registration-method)}
+    (is (= #{(str resource-url "/" direct/registration-method)
+             (str resource-url "/" self/registration-method)}
            ids))
-    (is (= #{direct/registration-method}
+    (is (= #{direct/registration-method
+             self/registration-method}
            types))
 
     (doseq [entry entries]
