@@ -6,10 +6,10 @@
     [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-slipstream :as crtpls]
     [com.sixsq.slipstream.ssclj.resources.spec.description]))
 
-;; Tests
 
 (deftest test-attrs-map-valid
-  (let [config-attrs (set (map (comp keyword name) (:req-un crtpls/configuration-template-keys-spec-req)))]
-    (is (= (set (keys sci/rname->param))
-           config-attrs))))
-
+  (is (= (set (keys sci/rname->param))
+         (->> (vals crtpls/configuration-template-keys-spec-req)
+              (apply concat)
+              (map (comp keyword name))
+              set))))

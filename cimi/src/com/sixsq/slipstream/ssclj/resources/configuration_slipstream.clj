@@ -4,7 +4,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration :as p]
     [com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream :as tpl]
-    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-slipstream]))
+    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-slipstream :as configuration-template]))
 
 
 (def ^:const service "slipstream")
@@ -26,13 +26,13 @@
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi/configuration-template.slipstream))
+(def validate-fn (u/create-spec-validation-fn ::configuration-template/slipstream))
 (defmethod p/validate-subtype service
   [resource]
   (validate-fn resource))
 
 
-(def create-validate-fn (u/create-spec-validation-fn :cimi/configuration-template.slipstream-create))
+(def create-validate-fn (u/create-spec-validation-fn ::configuration-template/slipstream-create))
 (defmethod p/create-validate-subtype service
   [resource]
   (create-validate-fn resource))
@@ -51,5 +51,5 @@
   ;; FIXME: this is a nasty hack to ensure configuration template is available
   (tpl/initialize)
 
-  (std-crud/initialize p/resource-url :cimi/configuration-template.slipstream)
+  (std-crud/initialize p/resource-url ::configuration-template/slipstream)
   (std-crud/add-if-absent "configuration/slipstream" p/resource-url create-template))

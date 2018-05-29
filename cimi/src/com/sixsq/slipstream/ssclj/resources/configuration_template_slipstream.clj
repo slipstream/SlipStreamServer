@@ -2,6 +2,7 @@
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as p]
+    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-slipstream :as configuration-template]
     [com.sixsq.slipstream.ssclj.util.config :as uc]))
 
 
@@ -31,10 +32,13 @@
    :mailSSL                      true
    :mailDebug                    true
 
+   ;; Optional, without a good default.
+   ;;:termsAndConditions           "https://example.com/terms/update-or-remove"
+
    :quotaEnable                  true
 
    :registrationEnable           true
-   :registrationEmail            "register@sixsq.com"
+   :registrationEmail            "register@example.com"
 
    :meteringEnable               false
    :meteringEndpoint             "http://localhost:2005"
@@ -72,7 +76,7 @@
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi/configuration-template.slipstream))
+(def validate-fn (u/create-spec-validation-fn ::configuration-template/slipstream))
 (defmethod p/validate-subtype service
   [resource]
   (validate-fn resource))

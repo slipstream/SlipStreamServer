@@ -1,20 +1,34 @@
 (ns com.sixsq.slipstream.ssclj.resources.email.utils
-  (:require [com.sixsq.slipstream.ssclj.resources.callback :as callback]
-            [com.sixsq.slipstream.ssclj.resources.callback-email-validation :as email-callback]
-            [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-            [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-            [com.sixsq.slipstream.util.response :as r]
-            [postal.core :as postal])
-  (:import (java.security MessageDigest)))
+  (:require
+    [clojure.string :as str]
+    [com.sixsq.slipstream.ssclj.resources.callback :as callback]
+    [com.sixsq.slipstream.ssclj.resources.callback-email-validation :as email-callback]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.util.response :as r]
+    [postal.core :as postal])
+  (:import
+    (java.security MessageDigest)))
 
 
 (def ^:const admin-opts {:user-name "INTERNAL", :user-roles ["ADMIN"]})
 
 
-(def ^:const validation-email-body
-  (str "To validate your email address, please visit the address:\n\n-->>    %s\n\n"
-       "If you did not initiate this request, do NOT click on the\n"
-       "link and report this to the service administrator."))
+(def validation-email-body
+  (partial format
+           (str/join "\n"
+                     ["To validate your email address, visit:"
+                      "\n    %s\n"
+                      "If you did not initiate this request, do NOT click on the link and report"
+                      "this to the service administrator."])))
+
+
+(def t-and-c-acceptance
+  (partial format
+           (str/join "\n"
+                     ["By clicking the link and validating your email address you accept the Terms"
+                      "and Conditions:"
+                      "\n    %s\n"])))
 
 
 (defn md5 [^String s]
@@ -48,19 +62,24 @@
   "Extracts the SMTP configuration from the server's configuration resource.
    Note that this assumes a standard URL for the configuration resource."
   []
-  (when-let [{:keys [mailHost mailPort mailSSL mailUsername mailPassword]} (crud/retrieve-by-id "configuration/slipstream" admin-opts)]
-    {:host mailHost
-     :port mailPort
-     :ssl  mailSSL
-     :user mailUsername
-     :pass mailPassword}))
+  (when-let [{:keys [mailHost mailPort
+                     mailSSL
+                     mailUsername mailPassword
+                     termsAndConditions]} (crud/retrieve-by-id "configuration/slipstream" admin-opts)]
+    {:host        mailHost
+     :port        mailPort
+     :ssl         mailSSL
+     :user        mailUsername
+     :pass        mailPassword
+     :t-and-c-url termsAndConditions}))
 
 
 (defn send-validation-email [callback-url address]
   (try
-    (let [smtp (smtp-cfg)]
-      (let [sender (or (:user smtp) "administrator")
-            body (format validation-email-body callback-url)
+    (let [{:keys [user t-and-c-url] :as smtp} (smtp-cfg)]
+      (let [sender (or user "administrator")
+            body (cond-> (validation-email-body callback-url)
+                         t-and-c-url (str (t-and-c-acceptance t-and-c-url)))
             msg {:from    sender
                  :to      [address]
                  :subject "email validation"

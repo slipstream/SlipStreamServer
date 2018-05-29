@@ -132,8 +132,10 @@
                                                 :ssl  true
                                                 :user "admin"
                                                 :pass "password"})
+
+                        ;; WARNING: This is a fragile!  Regex matching to recover callback URL.
                         postal/send-message (fn [_ {:keys [body] :as message}]
-                                              (let [url (second (re-matches #"(?s).*-->>\s+(.*?)\n.*" body))]
+                                              (let [url (second (re-matches #"(?s).*visit:\n\n\s+(.*?)\n.*" body))]
                                                 (reset! validation-link url))
                                               {:code 0, :error :SUCCESS, :message "OK"})]
 
@@ -143,13 +145,14 @@
                 (ltu/is-status 202))
 
             (let [abs-validation-link (str p/service-context @validation-link)]
-              (is (re-matches #"^email/.* successfully validated$" (-> session-anon
-                            (request abs-validation-link)
-                            (ltu/body->edn)
-                            (ltu/is-status 200)
-                            :response
-                            :body
-                            :message)))
+              (is (re-matches #"^email/.* successfully validated$"
+                              (-> session-anon
+                                  (request abs-validation-link)
+                                  (ltu/body->edn)
+                                  (ltu/is-status 200)
+                                  :response
+                                  :body
+                                  :message)))
 
               (is (true? (-> session-admin
                              (request admin-abs-uri)
