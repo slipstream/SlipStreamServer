@@ -25,8 +25,10 @@
                                           :ssl  true
                                           :user "admin"
                                           :pass "password"})
+
+                  ;; WARNING: This is a fragile!  Regex matching to recover callback URL.
                   postal/send-message (fn [_ {:keys [body] :as message}]
-                                        (let [url (second (re-matches #"(?s).*-->>\s+http[s]?://.*?(/.*?)\n.*" body))]
+                                        (let [url (second (re-matches #"(?s).*visit:\n\n\s+(.*?)\n.*" body))]
                                           (reset! validation-link url))
                                         {:code 0, :error :SUCCESS, :message "OK"})]
 
