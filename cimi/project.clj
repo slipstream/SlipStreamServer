@@ -65,11 +65,7 @@
    [com.sixsq.slipstream/utils ~+version+]
    [com.sixsq.slipstream/SlipStreamDbBinding-jar ~+version+]
    [com.sixsq.slipstream/SlipStreamClojureAPI-cimi ~+version+]
-   [com.sixsq.slipstream/SlipStreamCljResourcesTests-jar ~+version+]
-   [com.sixsq.slipstream/token ~+version+]
-
-   [org.clojure/test.check] ; FIXME: Needed for spec.gen.alpha. Fix "Could not locate clojure/test/check/generators__init.class"
-   ]
+   [com.sixsq.slipstream/token ~+version+]]
 
   :aot [com.sixsq.slipstream.ssclj.app.main
         com.sixsq.slipstream.ssclj.util.userparamsdesc]
@@ -82,7 +78,8 @@
                                [org.slf4j/slf4j-log4j12]
                                [com.cemerick/url]
                                [org.apache.curator/curator-test]
-                               [com.sixsq.slipstream/SlipStreamDbTesting-jar ~+version+]]
+                               [com.sixsq.slipstream/SlipStreamDbTesting-jar ~+version+]
+                               [com.sixsq.slipstream/SlipStreamCljResourcesTests-jar ~+version+]]
               :resource-paths ["test-resources"]
               :env            {:config-name      "config-params.edn"
                                :auth-private-key "test-resources/auth_privkey.pem"

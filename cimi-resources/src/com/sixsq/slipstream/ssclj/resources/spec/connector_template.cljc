@@ -7,8 +7,7 @@
 
 ;; Generic type definitions.
 
-(s/def :cimi.connector-template.core/identifier
-  (su/regex-string #"[a-z0-9-]" #"^[a-z0-9]+(-[a-z0-9]+)*$"))
+(s/def :cimi.connector-template.core/identifier (s/and string? #(re-matches #"^[a-z0-9]+(-[a-z0-9]+)*$" %)))
 
 ;; Required parameters for all connectors.
 (s/def :cimi.connector-template/cloudServiceType :cimi.connector-template.core/identifier)

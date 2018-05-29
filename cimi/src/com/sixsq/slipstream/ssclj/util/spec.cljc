@@ -3,9 +3,7 @@
    supported directly by the core spec functions and macros."
   (:require
     [clojure.set :as set]
-    [clojure.spec.alpha :as s]
-    [clojure.spec.gen.alpha :as gen]
-    [clojure.string :as str]))
+    [clojure.spec.alpha :as s]))
 
 (def ^:private all-ascii-chars (map str (map char (range 0 256))))
 
@@ -42,15 +40,6 @@
                (unnamespaced-kws req-un)
                opt
                (unnamespaced-kws opt-un))))
-
-(defmacro regex-string
-  "Creates a string spec that matches the given regex with a generator
-   that randomly selects from the ASCII characters identified by the
-   char-pattern."
-  [char-pattern regex]
-  (let [allowed-chars (regex-chars char-pattern)]
-    `(s/with-gen (s/and string? #(re-matches ~regex %))
-                 (constantly (gen/fmap str/join (gen/vector (s/gen ~allowed-chars)))))))
 
 (defmacro only-keys
   "Creates a closed map definition where only the defined keys are
