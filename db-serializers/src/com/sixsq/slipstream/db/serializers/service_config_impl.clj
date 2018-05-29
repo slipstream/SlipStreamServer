@@ -3,18 +3,16 @@
     [camel-snake-kebab.core :refer [->camelCase]]
     [clojure.edn :as edn]
     [clojure.set :as set]
-
+    [clojure.string :as str]
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.db.serializers.service-config-util :as scu]
-
     [com.sixsq.slipstream.db.serializers.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration :as cr]
     [com.sixsq.slipstream.ssclj.resources.configuration-slipstream :as crs]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as crtpl]
     [com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream :as cts]
     [com.sixsq.slipstream.ssclj.resources.connector :as con]
-    [com.sixsq.slipstream.ssclj.resources.connector-template :as cont]
-    [superstring.core :as s]))
+    [com.sixsq.slipstream.ssclj.resources.connector-template :as cont]))
 
 
 (def connector-ref-attrs-defaults (merge cont/connector-mandatory-reference-attrs-defaults
@@ -26,7 +24,7 @@
 
 (def user-roles-str "me ADMIN")
 
-(def user-roles ((juxt first rest) (s/split user-roles-str #"\s+")))
+(def user-roles ((juxt first rest) (str/split user-roles-str #"\s+")))
 
 
 (def rname->param
@@ -45,7 +43,7 @@
    :mailSSL                      "slipstream.mail.ssl"
    :mailDebug                    "slipstream.mail.debug"
 
-   :termsAndConditions           "slipstream.mail.termsandconditions"   
+   :termsAndConditions           "slipstream.mail.termsandconditions"
 
    :quotaEnable                  "slipstream.quota.enable"
 
@@ -64,6 +62,7 @@
    :metricsLoggerEnable          "slipstream.metrics.logger.enable"
    :metricsGraphiteEnable        "slipstream.metrics.graphite.enable"
 
+   :reportsLocation              "slipstream.reports.location"
    :reportsObjectStoreCreds      "slipstream.reports.objectstore.creds"
    :reportsObjectStoreBucketName "slipstream.reports.objectstore.bucket.name"})
 
@@ -111,7 +110,7 @@
   [p cin->cn]
   (let [[cin pname] (u/param-get-cat-and-name p)
         cn (get cin->cn cin)]
-    (if (s/blank? pname)
+    (if (str/blank? pname)
       (log/warn "Parameter name is blank when mapping connector parameter for:" cin)
       (->> pname
            (conn-pname-to-kwname cn)
@@ -129,7 +128,7 @@
   [p]
   (let [v (.getValue p)]
     (cond
-      (= "boolean" (s/lower-case (.getType p))) (process-param-value v)
+      (= "boolean" (str/lower-case (.getType p))) (process-param-value v)
       (integer? (process-param-value v)) (read-string v)
       :else v)))
 
@@ -204,10 +203,10 @@
   [cnames]
   (into {}
         (if (seq cnames)
-          (->> (s/split cnames #",")
-               (map #(s/trim %))
+          (->> (str/split cnames #",")
+               (map #(str/trim %))
                (filter #(seq %))
-               (map #(s/split % #":"))
+               (map #(str/split % #":"))
                (map grow-coll-1->2)))))
 
 (defn sc-connector-names-map
@@ -220,7 +219,7 @@
   "Given parameter and connector instance name to name mapping,
   return the parameter's connetor name."
   [p cin->cn]
-  (let [cin (first (s/split (.getName p) #"\."))]
+  (let [cin (first (str/split (.getName p) #"\."))]
     (get cin->cn cin)))
 
 (defn assoc-conn-identity
