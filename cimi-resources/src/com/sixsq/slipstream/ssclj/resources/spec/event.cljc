@@ -10,8 +10,7 @@
 
 ;; Events may need to reference resources that do not follow the CIMI.
 ;; conventions.  Allow for a more flexible schema to be used here.
-(s/def :cimi.event.link/href
-  (su/regex-string #"[a-zA-Z0-9_./-]" #"^[a-zA-Z0-9]+[a-zA-Z0-9_./-]*$"))
+(s/def :cimi.event.link/href (s/and string? #(re-matches #"^[a-zA-Z0-9]+[a-zA-Z0-9_./-]*$" %)))
 (s/def :cimi.event/resource-link (s/keys :req-un [:cimi.event.link/href]))
 
 (s/def :cimi.event/state string?)

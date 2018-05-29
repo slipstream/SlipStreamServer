@@ -2,7 +2,6 @@
   "Spec definitions for basic types used in CIMI resources."
   (:require
     [clojure.spec.alpha :as s]
-    [clojure.spec.gen.alpha :as gen]
     [clojure.string :as str]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
@@ -21,8 +20,7 @@
 (s/def ::port (s/int-in 1 65536))
 
 ;; FIXME: Provide an implementation that works with ClojureScript.
-(s/def ::timestamp cu/as-datetime #_(s/with-gen cu/as-datetime
-                               (constantly (gen/fmap cu/unparse-timestamp-date (gen/gen-for-pred inst?)))))
+(s/def ::timestamp cu/as-datetime)
 
 ;; FIXME: Remove this definition when resources treat the timestamp as optional rather than allowing an empty value.
 (s/def ::optional-timestamp (s/or :empty #{""} :not-empty ::timestamp))
@@ -31,21 +29,17 @@
 (s/def ::uri ::nonblank-string)
 
 ;; A username can only consist of letters, digits and underscores.
-(s/def ::username
-  (su/regex-string #"[a-zA-Z0-9_]" #"^[a-zA-Z0-9_]+$"))
+(s/def ::username (s/and string? #(re-matches #"^[a-zA-Z0-9_]+$" %)))
 
 ;; A kebab identifier consists of lowercased words separated by dashes.
-(s/def ::kebab-identifier
-  (su/regex-string #"[a-z-]" #"^[a-z]+(-[a-z]+)*$"))
+(s/def ::kebab-identifier (s/and string? #(re-matches #"^[a-z]+(-[a-z]+)*$" %)))
 
 ;; A resource identifier consists of words of letters and digits separated
 ;; by underscores or dashes.
-(s/def ::resource-identifier
-  (su/regex-string #"[a-zA-Z0-9_-]" #"^[a-zA-Z0-9]+([_-][a-zA-Z0-9]+)*$"))
+(s/def ::resource-identifier (s/and string? #(re-matches #"^[a-zA-Z0-9]+([_-][a-zA-Z0-9]+)*$" %)))
 
 ;; Words consisting of lowercase letters and digits, separated by dashes.
-(s/def ::identifier
-  (su/regex-string #"[a-z0-9-]" #"^[a-z0-9]+(-[a-z0-9]+)*$"))
+(s/def ::identifier (s/and string? #(re-matches #"^[a-z0-9]+(-[a-z0-9]+)*$" %)))
 
 (s/def ::resource-type ::kebab-identifier)
 
@@ -59,18 +53,7 @@
 ;; A resource href is the concatenation of a resource type and resource identifier separated
 ;; with a slash.  The later part is optional for singleton resources like the cloud-entry-point.
 ;;
-(defn- join-href-parts
-  [[resource-type resource-identifier]]
-  (if resource-identifier
-    (str resource-type "/" resource-identifier)
-    resource-type))
 
 (def resource-href-regex #"^[a-z]([a-z-]*[a-z])?(/[a-zA-Z0-9]([a-zA-Z0-9_-]*[a-zA-Z0-9])?)?$")
-(s/def ::resource-href
-  (s/with-gen (s/and string? #(re-matches resource-href-regex %))
-              (constantly (gen/fmap join-href-parts
-                                    (gen/tuple
-                                      (s/gen ::kebab-identifier)
-                                      (gen/frequency [[95 (s/gen ::resource-identifier)]
-                                                      [5 (s/gen #{nil})]]))))))
+(s/def ::resource-href (s/and string? #(re-matches resource-href-regex %)))
 
