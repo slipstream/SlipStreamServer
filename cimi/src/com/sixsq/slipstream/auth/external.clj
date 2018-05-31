@@ -45,6 +45,7 @@
 
 (defn match-existing-external-user
   [authn-method external-login external-email]
+  (log/debug (str "Matching external user with method " authn-method " external-login = " external-login " and external-email = " external-email))
   (when-let [username-mapped (db/find-username-by-authn authn-method external-login)]
     [(mapped-user authn-method username-mapped) "/dashboard"]))
 
