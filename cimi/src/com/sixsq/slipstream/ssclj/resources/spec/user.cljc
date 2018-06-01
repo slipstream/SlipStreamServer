@@ -28,6 +28,7 @@
 (s/def ::isSuperUser boolean?)
 (s/def ::deleted boolean?)
 (s/def ::githublogin string?)
+(s/def ::oidclogin string?)
 (s/def ::cyclonelogin string?)
 
 
@@ -67,6 +68,7 @@
             ::lastExecute
             ::activeSince
             ::githublogin
+            ::oidclogin
             ::cyclonelogin]})
 
 

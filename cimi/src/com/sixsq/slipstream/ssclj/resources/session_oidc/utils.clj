@@ -1,8 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-oidc.utils
   (:require
     [clojure.string :as str]
+    [com.sixsq.slipstream.ssclj.resources.callback :as callback]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.util.log :as logu]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.util.log :as logu]
+    [com.sixsq.slipstream.util.response :as r]))
 
 (defn prefix
   [realm attr]
@@ -46,7 +49,9 @@
          vec)
     []))
 
-;; exceptions specific to cyclone
+(def ^:const admin-opts {:user-name "INTERNAL", :user-roles ["ADMIN"]})
+
+;; exceptions
 
 (defn throw-no-username-or-email [username email redirectURI]
   (logu/log-error-and-throw-with-redirect 400 (str "OIDC token is missing name/preferred_name (" username ") or email (" email ")") redirectURI))
@@ -88,3 +93,23 @@
           (throw-bad-client-config cfg-id redirectURI)))
       (catch Exception _
         (throw-bad-client-config cfg-id redirectURI)))))
+
+;; FIXME: Fix ugliness around needing to create ring requests with authentication!
+(defn create-callback [baseURI session-id action]
+  (let [callback-request {:params   {:resource-name callback/resource-url}
+                          :body     {:action         action
+                                     :targetResource {:href session-id}}
+                          :identity {:current         "INTERNAL"
+                                     :authentications {"INTERNAL" {:identity "INTERNAL"
+                                                                   :roles    ["ADMIN"]}}}}
+        {{:keys [resource-id]} :body status :status} (crud/add callback-request)]
+    (if (= 201 status)
+      (if-let [callback-resource (crud/set-operations (crud/retrieve-by-id resource-id admin-opts) {})]
+        (if-let [validate-op (u/get-op callback-resource "execute")]
+          (str baseURI validate-op)
+          (let [msg "callback does not have execute operation"]
+            (throw (ex-info msg (r/map-response msg 500 resource-id)))))
+        (let [msg "cannot retrieve  session callback"]
+          (throw (ex-info msg (r/map-response msg 500 resource-id)))))
+      (let [msg "cannot create  session callback"]
+        (throw (ex-info msg (r/map-response msg 500 session-id)))))))
