@@ -68,7 +68,6 @@
             ::lastExecute
             ::activeSince
             ::githublogin
-            ::oidclogin
             ::cyclonelogin]})
 
 

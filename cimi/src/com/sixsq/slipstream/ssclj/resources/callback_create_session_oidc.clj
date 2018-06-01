@@ -33,13 +33,13 @@
     (if-let [code (uh/param-value request :code)]
       (if-let [access-token (auth-oidc/get-oidc-access-token client-id base-url code (str base-uri (or callback-id "unknown-id") "/execute"))]
         (try
-          (let [{:keys [sub email] :as claims} (sign/unsign-claims access-token public-key)
+          (let [{:keys [sub] :as claims} (sign/unsign-claims access-token public-key)
                 roles (concat (oidc-utils/extract-roles claims)
                               (oidc-utils/extract-groups claims)
                               (oidc-utils/extract-entitlements claims))]
             (log/debug "OIDC access token claims for" instance ":" (pr-str claims))
             (if sub
-              (if-let [[matched-user _] (ex/match-existing-external-user :oidclogin sub email)]
+              (if-let [matched-user  (ex/match-oidc-username sub)]
                 (let [claims (cond-> (auth-internal/create-claims matched-user)
                                      session-id (assoc :session session-id)
                                      session-id (update :roles #(str session-id " " %))

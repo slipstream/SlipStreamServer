@@ -40,7 +40,6 @@
              :lastExecute  timestamp
              :activeSince  timestamp
              :githublogin  "github-login"
-             :oidclogin    "oidc-login"
              :cyclonelogin "cyclone-login"}]
 
     (is (s/valid? :cimi/user cfg))
@@ -49,5 +48,5 @@
       (is (not (s/valid? :cimi/user (dissoc cfg attr)))))
     (doseq [attr #{:firstName :lastName :organization :method :href :password
                    :roles :isSuperUser :state :deleted :creation :lastOnline
-                   :lastExecute :activeSince :githublogin :oidclogin :cyclonelogin}]
+                   :lastExecute :activeSince :githublogin  :cyclonelogin}]
       (is (s/valid? :cimi/user (dissoc cfg attr))))))

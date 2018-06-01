@@ -49,6 +49,12 @@
   (when-let [username-mapped (db/find-username-by-authn authn-method external-login)]
     [(mapped-user authn-method username-mapped) "/dashboard"]))
 
+(defn match-oidc-username
+  [external-login]
+  (log/debug (str "Matching via username  " external-login))
+  (when-let [username-mapped (db/get-active-user-by-name external-login)]
+    (:username (mapped-user :oidc username-mapped) )))
+
 
 (defn sanitize-login-name
   "Replace characters not satisfying [a-zA-Z0-9_] with underscore"
