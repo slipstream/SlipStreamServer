@@ -11,7 +11,7 @@
                          :principal "ADMIN",
                          :right     "ALL"}]})
 
-(deftest check-session-template-cyclone-schema
+(deftest check-session-template-internal-schema
   (let [timestamp "1964-08-25T10:00:00.0Z"
         cfg {:id          (str st/resource-url "/internal")
              :resourceURI st/resource-uri
@@ -21,7 +21,7 @@
 
              :method      "internal"
              :instance    "internal"
-             :group       "CYCLONE Federated Identity"
+             :group       "Federated Identity"
              :redirectURI "https://nuv.la/webui/profile"
 
              :username    "user"

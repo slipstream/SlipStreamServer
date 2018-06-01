@@ -1,15 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.app.routes
   (:require
     [com.sixsq.slipstream.auth.auth :as auth]
-    [com.sixsq.slipstream.auth.cyclone :as cy]
-    [com.sixsq.slipstream.auth.github :as gh]
-
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.dynamic-load :as dyn]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.util.config :as cf]
-
     [com.sixsq.slipstream.util.response :as r]
     [compojure.core :refer [ANY defroutes DELETE GET let-routes POST PUT routes]]
     [compojure.route :as route]
@@ -51,14 +47,10 @@
 
 (def auth-routes
   (let-routes [uri-login (str p/auth-context "login")
-               uri-logout (str p/auth-context "logout")
-
-               uri-cyclone (str p/auth-context "callback-cyclone")]
+               uri-logout (str p/auth-context "logout")]
 
     (POST uri-login request (auth/login request))
-    (POST uri-logout request (auth/logout request))
-
-    (GET uri-cyclone request (cy/callback-cyclone request (cf/property-value :main-server)))))
+    (POST uri-logout request (auth/logout request))))
 
 (def user-routes
   (let-routes [uri (str p/service-context ":resource-name{user}/:uuid{.*}")]
