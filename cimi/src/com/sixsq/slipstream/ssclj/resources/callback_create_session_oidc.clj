@@ -5,7 +5,7 @@
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.cookies :as cookies]
     [com.sixsq.slipstream.auth.cookies :as cookies]
-    [com.sixsq.slipstream.auth.cyclone :as auth-oidc]
+    [com.sixsq.slipstream.auth.oidc :as auth-oidc]
     [com.sixsq.slipstream.auth.external :as ex]
     [com.sixsq.slipstream.auth.external :as ex]
     [com.sixsq.slipstream.auth.internal :as auth-internal]
