@@ -48,5 +48,5 @@
       (is (not (s/valid? :cimi/user (dissoc cfg attr)))))
     (doseq [attr #{:firstName :lastName :organization :method :href :password
                    :roles :isSuperUser :state :deleted :creation :lastOnline
-                   :lastExecute :activeSince :githublogin  :cyclonelogin}]
+                   :lastExecute :activeSince :githublogin :cyclonelogin}]
       (is (s/valid? :cimi/user (dissoc cfg attr))))))
