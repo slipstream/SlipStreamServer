@@ -10,26 +10,6 @@
 (use-fixtures :each ltu/with-test-server-fixture)
 
 
-(deftest match-new-cyclone-user-github
-  (is (= [] (db/get-all-users)))
-  (match-external-user! :cyclone "st" "st@sixsq.com")
-  (let [{:keys [deleted emailAddress cyclonelogin githublogin
-                isSuperUser roles organization username
-                id state method]
-         :as   created-user} (first (db/get-all-users))]
-    (is (not deleted))
-    (is (= "st@sixsq.com" emailAddress))
-    (is (= "st" cyclonelogin))
-    (is (nil? githublogin))
-    (is (not isSuperUser))
-    (is (= "" roles))
-    (is (= "" organization))
-    (is (= "st" username))
-    (is (= "user/st" id))
-    (is (= "ACTIVE" state))
-    (is (= "direct" method))))
-
-
 (deftest match-already-mapped
   (let [get-db-user #(-> (db/get-all-users) first (dissoc :updated))
         user-info {:username     "joe"
@@ -41,19 +21,13 @@
         user (get-db-user)]
 
     (match-external-user! :github "st" "st@sixsq.com")
-    (is (= user (get-db-user)))
-
-    (match-external-user! :cyclone "st" "st@sixsq.com")
-    (is (= (assoc user :cyclonelogin "st") (get-db-user)))))
+    (is (= user (get-db-user)))))
 
 
 (deftest match-existing-external-user-does-not-create
   (is (= [] (db/get-all-users)))
 
   (match-existing-external-user :github "st" "st@sixsq.com")
-  (is (empty? (db/get-all-users)))
-
-  (match-existing-external-user :cyclone "st" "st@sixsq.com")
   (is (empty? (db/get-all-users))))
 
 
@@ -85,31 +59,7 @@
 
     ;; explicitly mapped; should be OK
     (match-existing-external-user :github "st" "st@sixsq.com")
-    (is (= user (get-db-user)))
-
-    ;; no implicit mapping between authn methods by email
-    (match-existing-external-user :cyclone "st" "st@sixsq.com")
     (is (= user (get-db-user)))))
-
-;;
-;; ignore this test because it fails intermittently
-;; probably an explicit refresh of the ES index is required
-;;
-#_(deftest match-existing-deleted-user
-    (th/add-user-for-test! {:username     "st"
-                            :password     "secret"
-                            :emailAddress "st@sixsq.com"
-                            :state        "DELETED"})
-    (let [users-before-match (db/get-all-users)]
-      (is (= 1 (count users-before-match))))
-    (match-existing-external-user :github "st" "st@sixsq.com")
-    (let [users-after-match (db/get-all-users)
-          new-user (second users-after-match)
-          _ (with-out-str (clojure.pprint/pprint new-user))]
-      (is (= 2 (count users-after-match)))
-      (is (= "st" (:githublogin new-user)))
-      (is (= "st_1" (:username new-user)))))
-
 
 (deftest oidc-user-names
   (let [users (db/get-active-users)]

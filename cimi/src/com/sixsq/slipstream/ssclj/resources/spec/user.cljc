@@ -28,7 +28,7 @@
 (s/def ::isSuperUser boolean?)
 (s/def ::deleted boolean?)
 (s/def ::githublogin string?)
-(s/def ::cyclonelogin string?)
+(s/def ::cyclonelogin string?)                              ;; Deprecated and unused.  Kept for backward compatibility.
 
 
 ;;

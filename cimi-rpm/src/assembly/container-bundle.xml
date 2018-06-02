@@ -24,10 +24,6 @@
       <outputDirectory>${installation.dir}/tools/resources</outputDirectory>
     </file>
     <file>
-      <source>src/main/resources/cyclone_pubkey.pem</source>
-      <outputDirectory>/etc/slipstream/auth</outputDirectory>
-    </file>
-    <file>
       <source>src/main/tools/scripts/ss-config.sh</source>
       <outputDirectory>/usr/bin</outputDirectory>
       <destName>ss-config</destName>

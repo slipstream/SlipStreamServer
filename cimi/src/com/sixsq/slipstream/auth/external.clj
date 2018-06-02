@@ -2,30 +2,33 @@
   (:require
     [clojure.string :as str]
     [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.auth.cookies :as cookies]
-    [com.sixsq.slipstream.auth.utils.db :as db]
-    [com.sixsq.slipstream.auth.utils.http :as uh]))
+    [com.sixsq.slipstream.auth.utils.db :as db]))
+
 
 (defn- mapped-user
   [authn-method username]
-  (log/info (str "External (" authn-method ") user '" username "' already mapped => login ok."))
+  (log/infof "External (%s) user '%s' already mapped => login ok." authn-method username)
   username)
+
 
 (defn- map-slipstream-user!
   [authn-method slipstream-username external-login]
-  (log/info (str "Mapping external (" authn-method ") user '" external-login
-                 "' to existing SlipStream user '" slipstream-username "'"))
+  (log/infof "Mapping external (%s) user '%s' to existing SlipStream user '%s'"
+             authn-method external-login slipstream-username)
   (db/update-user-authn-info authn-method slipstream-username external-login))
+
 
 (defn- create-slipstream-user!
   ([authn-method external-login external-email]
-   (log/info (str "Creating new SlipStream user with external (" authn-method ") user '" external-login "'"))
+   (log/infof "Creating new SlipStream user with external (%s) user '%s'"
+              authn-method external-login)
    (let [user-name (db/create-user! authn-method external-login external-email)]
      (when user-name
        (db/create-user-params! user-name))
      user-name))
+
   ([{:keys [authn-login] :as user-record}]
-   (log/info (str "Creating new SlipStream user '" authn-login "'"))
+   (log/infof "Creating new SlipStream user '%'" authn-login)
    (let [user-name (db/create-user! user-record)]
      (when user-name
        (db/create-user-params! user-name))
@@ -54,22 +57,11 @@
   [s]
   (when s (str/replace s #"[^a-zA-Z0-9_-]" "_")))
 
+
 (defn create-user-when-missing!
   [{:keys [authn-login fail-on-existing?] :as user-record}]
   (let [username (sanitize-login-name authn-login)]
     (if-not (db/user-exists? username)
-     (create-slipstream-user! (assoc user-record :authn-login username))
-     (when-not fail-on-existing?
-       username))))
-
-(defn redirect-with-matched-user
-  [authn-method external-login external-email redirect-server]
-  (if (and (not-empty external-login) (not-empty external-email))
-    (let [[matched-user redirect-url] (match-existing-external-user authn-method (sanitize-login-name external-login) external-email)
-          claims {:username matched-user
-                  :roles    (db/find-roles-for-username matched-user)}]
-      (assoc
-        (uh/response-redirect (str redirect-server redirect-url))
-        :cookies (cookies/claims-cookie claims "com.sixsq.slipstream.cookie")))
-    (uh/response-redirect (str redirect-server "/login?flash-now-warning=auth-failed"))))
-
+      (create-slipstream-user! (assoc user-record :authn-login username))
+      (when-not fail-on-existing?
+        username))))

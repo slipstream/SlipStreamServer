@@ -46,15 +46,6 @@
          vec)
     []))
 
-;; exceptions specific to cyclone
-
-(defn throw-no-username-or-email [username email redirectURI]
-  (logu/log-error-and-throw-with-redirect 400 (str "OIDC token is missing name/preferred_name (" username ") or email (" email ")") redirectURI))
-
-(defn throw-no-matched-user [username email redirectURI]
-  (logu/log-error-and-throw-with-redirect 400 (str "Unable to match account to name/preferred_name (" username ") or email (" email ")") redirectURI))
-
-
 ;; general exceptions
 
 (defn throw-bad-client-config [cfg-id redirectURI]
