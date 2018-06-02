@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-github-lifecycle-test
   (:require
     [clojure.data.json :as json]
-    [clojure.test :refer :all]
+    [clojure.test :refer [deftest is use-fixtures]]
     [com.sixsq.slipstream.auth.external :as ex]
     [com.sixsq.slipstream.auth.github :as auth-github]
     [com.sixsq.slipstream.auth.utils.db :as db]
@@ -44,10 +44,9 @@
                                                            :clientID     "FAKE_CLIENT_ID"
                                                            :clientSecret "ABCDEF..."}})
 
-;;callbacks states reset between tests
+;; callback state reset between tests
 (defn reset-callback! [callback-id]
-  (cbu/update-callback-state! "WAITING" callback-id)
-  )
+  (cbu/update-callback-state! "WAITING" callback-id))
 
 (deftest lifecycle
 
@@ -338,7 +337,7 @@
               (ltu/body->edn)
               (ltu/is-status 201))
 
-          ;;reset callbacks state , otherwise we'll get error 409
+          ;; reset callback states, otherwise we'll get error 409
           (reset-callback! callback-id)
           (reset-callback! callback-id2)
           (reset-callback! callback-id3)
@@ -420,7 +419,6 @@
                                 (request (str validate-url2 "?code=GOOD")
                                          :request-method :get)
                                 (ltu/body->edn)
-                                (ltu/dump)
                                 (ltu/is-status 303)
                                 (ltu/is-set-cookie))
                   location (ltu/location ring-info)

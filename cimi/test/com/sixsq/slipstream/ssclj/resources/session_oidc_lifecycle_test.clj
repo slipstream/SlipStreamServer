@@ -1,7 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-oidc-lifecycle-test
   (:require
     [clojure.data.json :as json]
-    [clojure.string :as str]
     [clojure.test :refer :all]
     [com.sixsq.slipstream.auth.oidc :as auth-oidc]
     [com.sixsq.slipstream.auth.utils.db :as db]
@@ -9,7 +8,6 @@
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.resources.callback.utils :as cbu]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration :as configuration]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
@@ -36,12 +34,10 @@
                             :acl         st/resource-acl})
 
 (def ^:const callback-pattern #".*/api/callback/.*/execute")
-(def ^:const callback-err-msg-pattern #".*error executing validation callback.*")
 
-;;callbacks states reset between tests
+;; callback state reset between tests
 (defn reset-callback! [callback-id]
-  (cbu/update-callback-state! "WAITING" callback-id)
-  )
+  (cbu/update-callback-state! "WAITING" callback-id))
 
 (def auth-pubkey
   (str
@@ -501,6 +497,7 @@
                        :body (json/write-str invalid-create))
               (ltu/body->edn)
               (ltu/is-status 400)))))))
+
 
 (deftest bad-methods
   (let [resource-uri (str p/service-context (u/new-resource-id session/resource-name))]
