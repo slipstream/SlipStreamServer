@@ -48,8 +48,16 @@
 
 (defn match-existing-external-user
   [authn-method external-login external-email]
+  (log/debugf "Matching external user with method '%s', external-login '%s', and external-email '%s'"
+              authn-method external-login external-email)
   (when-let [username-mapped (db/find-username-by-authn authn-method external-login)]
     [(mapped-user authn-method username-mapped) "/dashboard"]))
+
+(defn match-oidc-username
+  [external-login]
+  (log/debug "Matching via username" external-login)
+  (when-let [username-mapped (db/get-active-user-by-name external-login)]
+    (:username (mapped-user :oidc username-mapped))))
 
 
 (defn sanitize-login-name
