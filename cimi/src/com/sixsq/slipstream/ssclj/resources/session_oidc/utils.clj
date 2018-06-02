@@ -49,6 +49,7 @@
          vec)
     []))
 
+
 (def ^:const admin-opts {:user-name "INTERNAL", :user-roles ["ADMIN"]})
 
 ;; exceptions
@@ -58,7 +59,6 @@
 
 (defn throw-no-matched-user [username email redirectURI]
   (logu/log-error-and-throw-with-redirect 400 (str "Unable to match account to name/preferred_name (" username ") or email (" email ")") redirectURI))
-
 
 ;; general exceptions
 
