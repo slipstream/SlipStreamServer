@@ -1,6 +1,6 @@
-(def +version+ "3.52")
+(def +version+ "3.53-SNAPSHOT")
 
-(defproject com.sixsq.slipstream/SlipStreamPlacementLib-jar "3.52"
+(defproject com.sixsq.slipstream/SlipStreamPlacementLib-jar "3.53-SNAPSHOT"
 
   :description "placement library"
 
