@@ -19,7 +19,7 @@
 
 (def ^:const login-request-timeout (* 3 60))
 
-(def ^:const oidc-relative-url "/auth?response_type=code&client_id=%s&redirect_uri=%s")
+
 
 ;;
 ;; schemas
@@ -59,8 +59,7 @@
             session (sutils/create-session session-init headers authn-method)
             session (assoc session :expiry (ts/rfc822->iso8601 (ts/expiry-later-rfc822 login-request-timeout)))
             callback-url (oidc-utils/create-callback base-uri (:id session) cb/action-name)
-            ;;redirect-url (str base-url (format oidc-relative-url client-id (sutils/validate-action-url base-uri (:id session))))
-            redirect-url (str base-url (format oidc-relative-url client-id callback-url))]
+            redirect-url (str base-url (format oidc-utils/oidc-relative-url client-id callback-url))]
         [{:status 303, :headers {"Location" redirect-url}} session])
       (oidc-utils/throw-bad-client-config authn-method redirectURI))))
 

@@ -31,7 +31,8 @@
 
 
 (defmethod p/tpl->user user-template/registration-method
-  [{:keys [password] :as resource} request]
+  [resource _]
+  ;;FIXME
   (-> resource
       (merge user-defaults)
       (dissoc :instance)))

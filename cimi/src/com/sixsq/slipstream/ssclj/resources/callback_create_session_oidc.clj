@@ -27,6 +27,7 @@
 
 (defn validate-session
   [{{session-id :href} :targetResource callback-id :id :as callback-resource} {:keys [headers base-uri uri] :as request}]
+
   (let [{:keys [server clientIP redirectURI] {:keys [href]} :sessionTemplate :as current-session} (sutils/retrieve-session-by-id session-id)
         instance (u/document-id href)
         [client-id base-url public-key] (oidc-utils/config-params redirectURI instance)]
@@ -39,7 +40,7 @@
                               (oidc-utils/extract-entitlements claims))]
             (log/debug "OIDC access token claims for" instance ":" (pr-str claims))
             (if sub
-              (if-let [matched-user  (ex/match-oidc-username sub)]
+              (if-let [matched-user (ex/match-oidc-username sub)]
                 (let [claims (cond-> (auth-internal/create-claims matched-user)
                                      session-id (assoc :session session-id)
                                      session-id (update :roles #(str session-id " " %))

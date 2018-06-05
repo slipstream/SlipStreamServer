@@ -59,7 +59,7 @@
             href-create {:name         name-attr
                          :description  description-attr
                          :properties   properties-attr
-                         :resourceURI  "http://sixsq.com/slipstream/1/UserTemplateCreate" ;; FIXME: Why is this needed?
+                         ;;:resourceURI  "http://sixsq.com/slipstream/1/UserTemplateCreate" ;; FIXME: Why is this needed?
                          :userTemplate {:href           href
                                         :username       uname
                                         ;;:password       plaintext-password
@@ -231,7 +231,6 @@
           (let [{:keys [state] :as user} (-> session-admin
                                              (request abs-uri)
                                              (ltu/body->edn)
-                                             (ltu/dump)
                                              :response
                                              :body)]
             (is (= "ACTIVE" state)))

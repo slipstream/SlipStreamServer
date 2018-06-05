@@ -7,6 +7,8 @@
     [com.sixsq.slipstream.ssclj.util.log :as logu]
     [com.sixsq.slipstream.util.response :as r]))
 
+(def ^:const oidc-relative-url "/auth?response_type=code&client_id=%s&redirect_uri=%s")
+
 (defn prefix
   [realm attr]
   (when (and realm attr)
