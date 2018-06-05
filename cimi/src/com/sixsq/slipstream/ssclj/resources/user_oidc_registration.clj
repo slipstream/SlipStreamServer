@@ -33,9 +33,9 @@
 (defmethod p/tpl->user user-template/registration-method
   [resource _]
   ;;FIXME
-  (-> resource
+  [nil (-> resource
       (merge user-defaults)
-      (dissoc :instance)))
+      (dissoc :instance))])
 
 
 ;;

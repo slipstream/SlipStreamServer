@@ -110,12 +110,23 @@
   (:method resource))
 
 ;; transforms the user template into a user resource
+;;
+;; The concrete implementation of this method MUST return a two-element
+;; tuple containing a response fragment and the created user resource.
+;; The response fragment will be merged with the 'add-impl' function
+;; response and should be used to override the return status (e.g. to
+;; instead provide a redirect) and to set a cookie header.
+;;
 (defmulti tpl->user dispatch-conversion)
 
-;; default implementation throws if the registration method is unknown
+; All concrete session types MUST provide an implementation of this
+;; multimethod. The default implementation will throw an 'internal
+;;; server error' exception.
+;;
 (defmethod tpl->user :default
   [resource request]
-  (logu/log-and-throw-400 "missing or invalid UserTemplate reference"))
+  [{:status 400, :message "missing or invalid UserTemplate reference"} nil])
+
 
 ;; handles any actions that must be taken after the user is added
 (defmulti post-user-add dispatch-conversion)
@@ -151,16 +162,16 @@
   [{:keys [body] :as request}]
   (let [idmap {:identity (:identity request)}
         desc-attrs (u/select-desc-keys body)
-        {:keys [id] :as body} (-> body
-                                  (assoc :resourceURI create-uri)
-                                  (update-in [:userTemplate] dissoc :method :id) ;; forces use of template reference
-                                  (std-crud/resolve-hrefs idmap)
-                                  (update-in [:userTemplate] merge desc-attrs) ;; validate desc attrs
-                                  (crud/validate)
-                                  (:userTemplate)
-                                  (merge-with-defaults)
-                                  (tpl->user request)
-                                  (merge desc-attrs))]      ;; ensure desc attrs are added
+        [cookie-header {:keys [id] :as body}] (-> body
+                                                  (assoc :resourceURI create-uri)
+                                                  (update-in [:userTemplate] dissoc :method :id) ;; forces use of template reference
+                                                  (std-crud/resolve-hrefs idmap)
+                                                  (update-in [:userTemplate] merge desc-attrs) ;; validate desc attrs
+                                                  (crud/validate)
+                                                  (:userTemplate)
+                                                  (merge-with-defaults)
+                                                  (tpl->user request)
+                                                  (merge desc-attrs))] ;; ensure desc attrs are added
     (let [{{:keys [status resource-id]} :body :as result} (add-impl (assoc request :id id :body body))]
       (when (and resource-id (= 201 status))
         (post-user-add (assoc body :id resource-id) request))

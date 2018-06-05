@@ -33,10 +33,10 @@
 
 (defmethod p/tpl->user user-template/registration-method
   [{:keys [password] :as resource} request]
-  (-> resource
-      (merge user-defaults)
-      (dissoc :passwordRepeat :instance)
-      (assoc :password (internal/hash-password password))))
+  [nil (-> resource
+           (merge user-defaults)
+           (dissoc :passwordRepeat :instance)
+           (assoc :password (internal/hash-password password)))])
 
 
 ;;
