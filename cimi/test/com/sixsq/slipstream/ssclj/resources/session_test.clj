@@ -22,4 +22,4 @@
 
 (deftest check-convert-form
   (is (= {:sessionTemplate {:alpha "alpha", :beta "beta"}}
-         (u/convert-form {:alpha "alpha", "beta" "beta"}))))
+         (u/convert-form :sessionTemplate {:alpha "alpha", "beta" "beta"}))))
