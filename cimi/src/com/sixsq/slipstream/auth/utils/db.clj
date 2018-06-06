@@ -142,7 +142,7 @@
   (str (UUID/randomUUID)))
 
 (defn user-create-request
-  [{:keys [authn-login email authn-method firstname lastname roles organization state password]}]
+  [{:keys [authn-login email authn-method firstname lastname roles organization state password name]}]
   (let [slipstream-username (name-no-collision authn-login (existing-user-names))
         user-resource (cond-> {:href         "user-template/direct"
                                :username     slipstream-username
@@ -155,7 +155,8 @@
                               firstname (assoc :firstName firstname)
                               lastname (assoc :lastName lastname)
                               roles (assoc :roles roles)
-                              organization (assoc :organization organization))]
+                              organization (assoc :organization organization)
+                              name (assoc :name name))]
     {:identity     {:current "internal"
                     :authentications
                              {"internal" {:roles #{"ADMIN"}, :identity "internal"}}}
