@@ -142,13 +142,12 @@
   (str (UUID/randomUUID)))
 
 (defn user-create-request
-  [{:keys [authn-login email authn-method firstname lastname roles organization
-           state]}]
+  [{:keys [authn-login email authn-method firstname lastname roles organization state password]}]
   (let [slipstream-username (name-no-collision authn-login (existing-user-names))
         user-resource (cond-> {:href         "user-template/direct"
                                :username     slipstream-username
                                :emailAddress email
-                               :password     (random-password)
+                               :password     (if password password (random-password))
                                :deleted      false
                                :isSuperUser  false
                                :state        (or state "ACTIVE")}
