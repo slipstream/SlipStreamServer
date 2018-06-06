@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.user.utils
   (:require
     [com.sixsq.slipstream.ssclj.resources.callback :as callback]
-    [com.sixsq.slipstream.ssclj.resources.callback-user-email-validation :as user-email-callback]
     [com.sixsq.slipstream.ssclj.resources.callback-create-user-oidc :as user-oidc-callback]
+    [com.sixsq.slipstream.ssclj.resources.callback-user-email-validation :as user-email-callback]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.util.response :as r]))
@@ -46,10 +46,10 @@
         (throw (ex-info msg (r/map-response msg 500 user-id)))))))
 
 
-(defn create-user-oidc-callback [{user-id :id :as user} baseURI]
+(defn create-user-oidc-callback [baseURI href]
   (let [callback-request {:params   {:resource-name callback/resource-url}
                           :body     {:action         user-oidc-callback/action-name
-                                     :targetResource {:href user-id}}
+                                     :targetResource {:href href}}
                           :identity {:current         "INTERNAL"
                                      :authentications {"INTERNAL" {:identity "INTERNAL"
                                                                    :roles    ["ADMIN"]}}}}
@@ -64,4 +64,4 @@
         (let [msg "cannot retrieve email validation callback"]
           (throw (ex-info msg (r/map-response msg 500 resource-id)))))
       (let [msg "cannot create email validation callback"]
-        (throw (ex-info msg (r/map-response msg 500 user-id)))))))
+        (throw (ex-info msg (r/map-response msg 500 "")))))))

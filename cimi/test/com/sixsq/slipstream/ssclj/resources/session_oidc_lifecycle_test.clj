@@ -64,7 +64,7 @@
         session-admin (header session-anon authn-info-header "admin ADMIN USER ANON")
         session-user (header session-anon authn-info-header "user USER ANON")
         session-anon-form (-> session-anon
-                              (content-type session/form-urlencoded))
+                              (content-type u/form-urlencoded))
 
         redirect-uri "https://example.com/webui"]
 

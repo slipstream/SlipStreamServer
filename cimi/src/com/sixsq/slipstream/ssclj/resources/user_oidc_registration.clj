@@ -2,8 +2,10 @@
   (:require
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.internal :as internal]
+    [com.sixsq.slipstream.ssclj.resources.callback-create-user-oidc :as cb]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.email.utils :as email-utils]
+    [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as oidc-utils]
     [com.sixsq.slipstream.ssclj.resources.spec.user]
     [com.sixsq.slipstream.ssclj.resources.spec.user-template-oidc-registration :as user-template-spec]
     [com.sixsq.slipstream.ssclj.resources.user :as p]
@@ -31,11 +33,14 @@
 
 
 (defmethod p/tpl->user user-template/registration-method
-  [resource _]
-  ;;FIXME
-  [nil (-> resource
-      (merge user-defaults)
-      (dissoc :instance))])
+  [{:keys [href redirectURI] :as resource} {:keys [headers base-uri] :as request}]
+  (let [[client-id base-url public-key] (oidc-utils/config-params redirectURI (u/document-id href))]
+    (if (and base-url client-id public-key)
+      (let [callback-url (user-utils/create-user-oidc-callback base-uri href)
+            redirect-url (str base-url (format oidc-utils/oidc-relative-url client-id callback-url))]
+        [{:status 303, :headers {"Location" redirect-url}} nil])
+      (oidc-utils/throw-bad-client-config user-template/registration-method redirectURI))))
+
 
 
 ;;

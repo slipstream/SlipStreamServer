@@ -7,6 +7,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.user-template-direct :as tpl]
     [com.sixsq.slipstream.ssclj.util.log :as logu]))
 
@@ -23,6 +24,8 @@
 (def ^:const collection-uri (str c/slipstream-schema-uri collection-name))
 
 (def ^:const create-uri (str c/slipstream-schema-uri resource-name "Create"))
+
+(def ^:const form-urlencoded "application/x-www-form-urlencoded")
 
 ;; creating a new user is a registration request, so anonymous users must
 ;; be able to view the collection and post requests to it (if a template is
@@ -157,25 +160,42 @@
   (merge user-attrs-defaults resource))
 
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
+
+(defn- use-fragment
+  [request id body desc-attrs fragment]
+  ;;FIXME : id is always nil
+  (-> request
+      (assoc :id id :body (merge body desc-attrs))
+      (merge fragment)))
+
+
 ;; requires a UserTemplate to create new User
 (defmethod crud/add resource-name
-  [{:keys [body] :as request}]
+  [{:keys [body form-params headers] :as request}]
+
   (let [idmap {:identity (:identity request)}
+        body (if (u/is-form? headers) (u/convert-form :userTemplate form-params) body)
         desc-attrs (u/select-desc-keys body)
-        [cookie-header {:keys [id] :as body}] (-> body
+        [resp-fragment {:keys [id] :as body}] (-> body
                                                   (assoc :resourceURI create-uri)
                                                   (update-in [:userTemplate] dissoc :method :id) ;; forces use of template reference
-                                                  (std-crud/resolve-hrefs idmap)
+                                                  (std-crud/resolve-hrefs idmap true)
                                                   (update-in [:userTemplate] merge desc-attrs) ;; validate desc attrs
                                                   (crud/validate)
                                                   (:userTemplate)
                                                   (merge-with-defaults)
                                                   (tpl->user request)
-                                                  (merge desc-attrs))] ;; ensure desc attrs are added
-    (let [{{:keys [status resource-id]} :body :as result} (add-impl (assoc request :id id :body body))]
-      (when (and resource-id (= 201 status))
-        (post-user-add (assoc body :id resource-id) request))
-      result)))
+                                                  (merge desc-attrs))]
+
+    (if resp-fragment
+      ;;possibly a redirect
+      (use-fragment request id body desc-attrs resp-fragment)
+
+      ;; ensure desc attrs are added
+      (let [{{:keys [status resource-id]} :body :as result} (add-impl (assoc request :id id :body body))]
+        (when (and resource-id (= 201 status))
+          (post-user-add (assoc body :id resource-id) request))
+        result))))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 (defmethod crud/retrieve resource-name

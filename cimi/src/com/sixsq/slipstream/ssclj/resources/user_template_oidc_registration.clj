@@ -6,7 +6,7 @@
     [com.sixsq.slipstream.ssclj.resources.spec.user-template-oidc-registration :as oidc]
     [com.sixsq.slipstream.ssclj.resources.user-template :as p]))
 
-(def ^:const registration-method "oidc-registration")
+(def ^:const registration-method "oidc")
 
 (def resource-acl {:owner {:principal "ADMIN"
                            :type      "ROLE"}
@@ -22,8 +22,6 @@
    :instance       registration-method
    :name           "OIDC Registration"
    :description    "Creates a new user through oidc-registration"
-   :username       "username"
-   :emailAddress   "user@example.com"
    :acl            resource-acl})
 
 ;;
