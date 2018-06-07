@@ -329,7 +329,8 @@
                                       :body
                                       :state)))
 
-                  (is (true? (db/user-exists? username))))))))))))
+
+                  )))))))))
 
 
 (deftest bad-methods

@@ -1,15 +1,13 @@
 (ns com.sixsq.slipstream.ssclj.resources.user-github-registration-lifecycle-test
   (:require
     [clojure.data.json :as json]
-    [clojure.test :refer :all]
+    [clojure.test :refer [are deftest is use-fixtures]]
     [com.sixsq.slipstream.auth.external :as ex]
     [com.sixsq.slipstream.auth.github :as auth-github]
     [com.sixsq.slipstream.auth.utils.db :as db]
-    [com.sixsq.slipstream.auth.utils.sign :as sign]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.resources.callback.utils :as cbu]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration :as configuration]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
@@ -42,10 +40,7 @@
 
 (deftest lifecycle
 
-  (let [
-
-        href (str ut/resource-url "/" utg/registration-method)
-        template-url (str p/service-context ut/resource-url "/" utg/registration-method)
+  (let [href (str ut/resource-url "/" utg/registration-method)
 
         session-anon (-> (ltu/ring-app)
                          session
@@ -59,13 +54,7 @@
         redirect-uri-example "https://example.com/webui"]
 
     ;; get user template so that user resources can be tested
-    (let [template (-> session-admin
-                       (request template-url)
-                       (ltu/body->edn)
-                       (ltu/is-status 200)
-                       (get-in [:response :body]))
-
-          name-attr "name"
+    (let [name-attr "name"
           description-attr "description"
           properties-attr {:a "one", :b "two"}
 
@@ -78,12 +67,13 @@
                                                :redirectURI redirect-uri-example}}
           invalid-create (assoc-in href-create [:userTemplate :invalid] "BAD")]
 
-      ;; anonymous query should succeed but have no entries
-      (-> session-anon
-          (request base-uri)
-          (ltu/body->edn)
-          (ltu/is-status 200)
-          (ltu/is-count zero?))
+      ;; queries by anyone should succeed but have no entries
+      (doseq [session [session-anon session-user session-admin]]
+        (-> session
+            (request base-uri)
+            (ltu/body->edn)
+            (ltu/is-status 200)
+            (ltu/is-count zero?)))
 
       ;; configuration must have GitHub client ID or secret, if not should get 500
       (-> session-anon
@@ -94,314 +84,176 @@
           (ltu/message-matches #".*missing or incorrect configuration.*")
           (ltu/is-status 500))
 
-
-
-      (let [
-            ;;
-            ;; create the session-github configuration to use for these tests
-            ;;
-            cfg-href (-> session-admin
+      ;; create the session-github configuration to use for these tests
+      (let [cfg-href (-> session-admin
                          (request configuration-base-uri
                                   :request-method :post
                                   :body (json/write-str configuration-user-github))
                          (ltu/body->edn)
                          (ltu/is-status 201)
-                         (ltu/location))
+                         (ltu/location))]
 
-            _ (is (= cfg-href (str "configuration/session-github-" utg/registration-method)))
+        (is (= cfg-href (str "configuration/session-github-" utg/registration-method)))
 
-            resp (-> session-anon
-                     (request base-uri
-                              :request-method :post
-                              :body (json/write-str href-create))
-                     (ltu/body->edn)
-                     (ltu/is-status 303))
+        (let [resp (-> session-anon
+                       (request base-uri
+                                :request-method :post
+                                :body (json/write-str href-create))
+                       (ltu/body->edn)
+                       (ltu/is-status 303))
 
-            redirect-uri (-> session-anon
-                             (request base-uri
-                                      :request-method :post
-                                      :body (json/write-str href-create))
-                             (ltu/body->edn)
-                             (ltu/location))
+              redirect-uri (-> session-anon
+                               (request base-uri
+                                        :request-method :post
+                                        :body (json/write-str href-create))
+                               (ltu/body->edn)
+                               (ltu/location))
+              uri (-> resp ltu/location)
 
-            id (get-in resp [:response :body :resource-id])
-            uri (-> resp
-                    (ltu/location))
-            abs-uri (str p/service-context id)
+              resp (-> session-anon
+                       (request base-uri
+                                :request-method :post
+                                :body (json/write-str href-create-redirect))
+                       (ltu/body->edn)
+                       (ltu/is-status 303))
+              uri2 (-> resp ltu/location)
 
-            resp (-> session-anon
-                     (request base-uri
-                              :request-method :post
-                              :body (json/write-str href-create-redirect))
-                     (ltu/body->edn)
-                     (ltu/is-status 303))
-            id2 (get-in resp [:response :body :resource-id])
-            uri2 (-> resp
-                     (ltu/location))
-            abs-uri2 (str p/service-context id2)
+              resp (-> session-anon-form
+                       (request base-uri
+                                :request-method :post
+                                :body (codec/form-encode {:href        href
+                                                          :redirectURI redirect-uri}))
+                       (ltu/body->edn)
+                       (ltu/is-status 303))
+              uri3 (-> resp ltu/location)
 
-            resp (-> session-anon-form
-                     (request base-uri
-                              :request-method :post
-                              :body (codec/form-encode {:href        href
-                                                        :redirectURI redirect-uri}))
-                     (ltu/body->edn)
-                     (ltu/is-status 303))
-            id3 (get-in resp [:response :body :resource-id])
-            uri3 (-> resp
-                     (ltu/location))
-            abs-uri3 (str p/service-context id3)]
+              uris [uri uri2 uri3]]
 
+          ;; redirect URLs in location header should contain the client ID and resource id
+          (doseq [u uris]
+            (is (re-matches #".*FAKE_CLIENT_ID.*" (or u "")))
+            (is (re-matches callback-pattern (or u ""))))
 
-        ;; redirect URLs in location header should contain the client ID and resource id
-        (doseq [u [uri uri2 uri3]]
-          (is (re-matches #".*FAKE_CLIENT_ID.*" (or u "")))
-          (is (re-matches callback-pattern (or u ""))))
-
-        ;; anonymous, user and admin query should succeed but have no users
-        (doseq [session [session-anon session-user session-admin]]
-          (-> session
-              (request base-uri)
-              (ltu/body->edn)
-              (ltu/is-status 200)
-              (ltu/is-count zero?)))
+          ;; anonymous, user and admin query should succeed but have no users
+          (doseq [session [session-anon session-user session-admin]]
+            (-> session
+                (request base-uri)
+                (ltu/body->edn)
+                (ltu/is-status 200)
+                (ltu/is-count zero?)))
 
 
-        ;;
-        ;; test validation callback
-        ;;
-        (let [get-redirect-uri #(->> % (re-matches #".*redirect_uri=(.*)$") second)
-              get-callback-id #(->> % (re-matches #".*(callback.*)/execute$") second)
+          ;;
+          ;; test validation callback
+          ;;
+          (let [get-redirect-uri #(->> % (re-matches #".*redirect_uri=(.*)$") second)
+                get-callback-id #(->> % (re-matches #".*(callback.*)/execute$") second)
 
-              validate-url (get-redirect-uri uri)
-              validate-url2 (get-redirect-uri uri2)
-              validate-url3 (get-redirect-uri uri3)
-
-              callback-id (get-callback-id validate-url)
-              callback-id2 (get-callback-id validate-url2)
-              callback-id3 (get-callback-id validate-url3)]
+                validate-urls (map get-redirect-uri uris)
+                callbacks (map get-callback-id validate-urls)]
 
 
-          ;; all callbacks must exist
-          (doseq [cb-id [callback-id callback-id2 callback-id3]]
+            ;; all callbacks must exist
+            (doseq [callback callbacks]
+              (-> session-admin
+                  (request (str p/service-context callback))
+                  (ltu/body->edn)
+                  (ltu/is-status 200)))
+
+
+            ;; remove the authentication configuration
             (-> session-admin
-                (request (str p/service-context cb-id))
+                (request (str p/service-context cfg-href)
+                         :request-method :delete)
                 (ltu/body->edn)
-                (ltu/is-status 200)))
+                (ltu/is-status 200))
 
+            ;; try hitting the callback with an invalid server configuration
+            ;; when a redirectURI is present, the return is 303 even on errors
+            (doseq [[url status] (map vector validate-urls [500 303 303])]
+              (-> session-anon
+                  (request url
+                           :request-method :get)
+                  (ltu/body->edn)
+                  (ltu/message-matches #".*missing or incorrect configuration.*")
+                  (ltu/is-status status)))
 
-          ;; remove the authentication configuration
-          (-> session-admin
-              (request (str p/service-context cfg-href)
-                       :request-method :delete)
-              (ltu/body->edn)
-              (ltu/is-status 200))
+            ;; add the configuration back again
+            (-> session-admin
+                (request configuration-base-uri
+                         :request-method :post
+                         :body (json/write-str configuration-user-github))
+                (ltu/body->edn)
+                (ltu/is-status 201))
 
-          ;; try hitting the callback with an invalid server configuration
+            ;; try hitting the callback without the OAuth code parameter
+            ;; when a redirectURI is present, the return is 303 even on errors
+            (doseq [[callback url status] (map vector callbacks validate-urls [400 303 303])]
+              (reset-callback! callback)
+              (-> session-anon
+                  (request url
+                           :request-method :get)
+                  (ltu/body->edn)
+                  (ltu/message-matches #".*not contain required code.*")
+                  (ltu/is-status status)))
 
+            ;; try hitting the callback with mocked codes
+            (doseq [[callback url status n] (map vector callbacks validate-urls [400 303 303] (range))]
+              (reset-callback! callback)
+
+              (let [username (str "GITHUB_USER_" n)
+                    email (format "user-%s@example.com" n)]
+
+                (with-redefs [auth-github/get-github-access-token (fn [client-id client-secret oauth-code]
+                                                                    (case oauth-code
+                                                                      "GOOD" "GOOD_ACCESS_CODE"
+                                                                      "BAD" "BAD_ACCESS_CODE"
+                                                                      nil))
+                              auth-github/get-github-user-info (fn [access-code]
+                                                                 (when (= access-code "GOOD_ACCESS_CODE")
+                                                                   {:login username, :email email}))
+
+                              ex/match-existing-external-user (fn [authn-method external-login external-email]
+                                                                ["MATCHED_USER" "/dashboard"])
+
+                              #_db/find-roles-for-username #_(fn [username]
+                                                           "USER ANON alpha")]
+
+                  (-> session-anon
+                      (request (str url "?code=NONE")
+                               :request-method :get)
+                      (ltu/body->edn)
+                      (ltu/message-matches #".*unable to retrieve GitHub access code.*")
+                      (ltu/is-status status))
+
+                  (is (false? (db/user-exists? username)))
+
+                  (reset-callback! callback)
+                  (-> session-anon
+                      (request (str url "?code=BAD")
+                               :request-method :get)
+                      (ltu/body->edn)
+                      (ltu/message-matches #".*unable to retrieve GitHub user information.*")
+                      (ltu/is-status status))
+
+                  (is (false? (db/user-exists? username)))
+
+                  (reset-callback! callback)
+                  (-> session-anon
+                      (request (str url "?code=GOOD")
+                               :request-method :get)
+                      (ltu/body->edn)
+                      (ltu/is-status 201))
+
+                  (is (true? (db/user-exists? username)))))))
+
+          ;; create with invalid template fails
           (-> session-anon
-              (request validate-url
-                       :request-method :get)
-              (ltu/body->edn)
-              (ltu/message-matches #".*missing or incorrect configuration.*")
-              (ltu/is-status 500))
-
-          (-> session-anon
-              (request validate-url2
-                       :request-method :get)
-              (ltu/body->edn)
-              (ltu/message-matches #".*missing or incorrect configuration.*")
-              (ltu/is-status 303))                          ;; always expect redirect when redirectURI is provided
-
-          (-> session-anon
-              (request validate-url3
-                       :request-method :get)
-              (ltu/body->edn)
-              (ltu/message-matches #".*missing or incorrect configuration.*")
-              (ltu/is-status 303))                          ;; always expect redirect when redirectURI is provided
-
-          ;; add the configuration back again
-          (-> session-admin
-              (request configuration-base-uri
+              (request base-uri
                        :request-method :post
-                       :body (json/write-str configuration-user-github))
+                       :body (json/write-str invalid-create))
               (ltu/body->edn)
-              (ltu/is-status 201))
-
-
-          ;; try hitting the callback without the OAuth code parameter
-          (reset-callback! callback-id)
-          (-> session-anon
-              (request validate-url
-                       :request-method :get)
-              (ltu/body->edn)
-              (ltu/message-matches #".*not contain required code.*")
-              (ltu/is-status 400))
-
-          (reset-callback! callback-id2)
-          (-> session-anon
-              (request validate-url2
-                       :request-method :get)
-              (ltu/body->edn)
-              (ltu/message-matches #".*not contain required code.*")
-              (ltu/is-status 303))
-
-          (reset-callback! callback-id3)
-          (-> session-anon
-              (request validate-url3
-                       :request-method :get)
-              (ltu/body->edn)
-              (ltu/message-matches #".*not contain required code.*")
-              (ltu/is-status 303))
-
-
-          ;; try now with a fake code
-          (reset-callback! callback-id)
-
-          (with-redefs [auth-github/get-github-access-token (fn [client-id client-secret oauth-code]
-                                                              (case oauth-code
-                                                                "GOOD" "GOOD_ACCESS_CODE"
-                                                                "BAD" "BAD_ACCESS_CODE"
-                                                                nil))
-                        auth-github/get-github-user-info (fn [access-code]
-                                                           (when (= access-code "GOOD_ACCESS_CODE")
-                                                             {:login "GITHUB_USER"
-                                                              :email "user@example.com"}))
-
-                        ex/match-existing-external-user (fn [authn-method external-login external-email]
-                                                          ["MATCHED_USER" "/dashboard"])
-
-                        db/find-roles-for-username (fn [username]
-                                                     "USER ANON alpha")]
-
-            (-> session-anon
-                (request (str validate-url "?code=NONE")
-                         :request-method :get)
-                (ltu/body->edn)
-                (ltu/message-matches #".*unable to retrieve GitHub access code.*")
-                (ltu/is-status 400))
-
-            (reset-callback! callback-id)
-            (-> session-anon
-                (request (str validate-url "?code=BAD")
-                         :request-method :get)
-                (ltu/body->edn)
-                (ltu/message-matches #".*unable to retrieve GitHub user information.*")
-                (ltu/is-status 400))
-
-
-            (let [_ (reset-callback! callback-id)
-                  ring-info (-> session-anon
-                                (request (str validate-url "?code=GOOD")
-                                         :request-method :get)
-                                (ltu/body->edn)
-                                (ltu/is-status 201)
-                                (ltu/is-set-cookie))
-                  location (ltu/location ring-info)
-                  token (get-in ring-info [:response :cookies "com.sixsq.slipstream.cookie" :value :token])
-                  claims (if token (sign/unsign-claims token) {})]
-              (is (= location id))
-              (is (= "MATCHED_USER" (:username claims)))
-              (is (re-matches (re-pattern (str ".*" id ".*")) (or (:roles claims) ""))))
-
-            (let [_ (reset-callback! callback-id2)
-                  ring-info (-> session-anon
-                                (request (str validate-url2 "?code=GOOD")
-                                         :request-method :get)
-                                (ltu/body->edn)
-                                (ltu/is-status 303)
-                                (ltu/is-set-cookie))
-                  location (ltu/location ring-info)
-                  token (get-in ring-info [:response :cookies "com.sixsq.slipstream.cookie" :value :token])
-                  claims (if token (sign/unsign-claims token) {})]
-              (is (= location redirect-uri-example))
-              (is (= "MATCHED_USER" (:username claims)))
-              (is (re-matches (re-pattern (str ".*" id2 ".*")) (or (:roles claims) ""))))
-
-            (let [_ (reset-callback! callback-id3)
-                  ring-info (-> session-anon
-                                (request (str validate-url3 "?code=GOOD")
-                                         :request-method :get)
-                                (ltu/body->edn)
-                                (ltu/is-status 303)
-                                (ltu/is-set-cookie))
-                  location (ltu/location ring-info)
-                  token (get-in ring-info [:response :cookies "com.sixsq.slipstream.cookie" :value :token])
-                  claims (if token (sign/unsign-claims token) {})]
-              (is (= location redirect-uri))
-              (is (= "MATCHED_USER" (:username claims)))
-              (is (re-matches (re-pattern (str ".*" id3 ".*")) (or (:roles claims) ""))))))
-
-        ;; check that the session has been updated
-        (let [ring-info (-> session-user
-                            (header authn-info-header (str "user USER ANON " id))
-                            (request abs-uri)
-                            (ltu/body->edn)
-                            (ltu/is-status 200)
-                            (ltu/is-id id)
-                            (ltu/is-operation-present "delete")
-                            (ltu/is-operation-absent (:validate c/action-uri))
-                            (ltu/is-operation-absent "edit"))
-              session (get-in ring-info [:response :body])]
-          (is (= "MATCHED_USER" (:username session)))
-          (is (not= (:created session) (:updated session))))
-
-        (let [ring-info (-> session-user
-                            (header authn-info-header (str "user USER ANON " id2))
-                            (request abs-uri2)
-                            (ltu/body->edn)
-                            (ltu/is-status 200)
-                            (ltu/is-id id2)
-                            (ltu/is-operation-present "delete")
-                            (ltu/is-operation-absent (:validate c/action-uri))
-                            (ltu/is-operation-absent "edit"))
-              session (get-in ring-info [:response :body])]
-          (is (= "MATCHED_USER" (:username session)))
-          (is (not= (:created session) (:updated session))))
-
-        (let [ring-info (-> session-user
-                            (header authn-info-header (str "user USER ANON " id3))
-                            (request abs-uri3)
-                            (ltu/body->edn)
-                            (ltu/is-status 200)
-                            (ltu/is-id id3)
-                            (ltu/is-operation-present "delete")
-                            (ltu/is-operation-absent (:validate c/action-uri))
-                            (ltu/is-operation-absent "edit"))
-              session (get-in ring-info [:response :body])]
-          (is (= "MATCHED_USER" (:username session)))
-          (is (not= (:created session) (:updated session))))
-
-        ;; user with session role can delete resource
-        (-> session-user
-            (header authn-info-header (str "user USER ANON " id))
-            (request abs-uri
-                     :request-method :delete)
-            (ltu/is-unset-cookie)
-            (ltu/body->edn)
-            (ltu/is-status 200))
-        (-> session-user
-            (header authn-info-header (str "user USER ANON " id2))
-            (request abs-uri2
-                     :request-method :delete)
-            (ltu/is-unset-cookie)
-            (ltu/body->edn)
-            (ltu/is-status 200))
-        (-> session-user
-            (header authn-info-header (str "user USER ANON " id3))
-            (request abs-uri3
-                     :request-method :delete)
-            (ltu/is-unset-cookie)
-            (ltu/body->edn)
-            (ltu/is-status 200))
-
-        ;; create with invalid template fails
-        (-> session-anon
-            (request base-uri
-                     :request-method :post
-                     :body (json/write-str invalid-create))
-            (ltu/body->edn)
-            (ltu/is-status 400))))))
+              (ltu/is-status 400)))))))
 
 
 (deftest bad-methods
