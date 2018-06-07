@@ -12,8 +12,6 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.util.log :as log-util]))
 
-(def ^:const form-urlencoded "application/x-www-form-urlencoded")
-
 (def ^:const resource-tag :sessions)
 
 (def ^:const resource-name "Session")
@@ -168,38 +166,12 @@
         crud/validate)
     {}))
 
-(defn convert-form
-  "Allow form encoded data to be supplied for a session. This is required to
-   support external authentication methods triggered via a 'submit' button in
-   an HTML form. This takes the flat list of form parameters, keywordizes the
-   keys, and adds the parent :sessionTemplate key."
-  [form-data]
-  {:sessionTemplate (walk/keywordize-keys form-data)})
-
-(defn is-content-type?
-  "Checks if the given header name is 'content-type' in various forms."
-  [k]
-  (try
-    (= :content-type (-> k name str/lower-case keyword))
-    (catch Exception _
-      false)))
-
-(defn is-form?
-  "Checks the headers to see if the content type is
-   application/x-www-form-urlencoded. Converts the header names to lowercase
-   and keywordizes the result to collect the various header name variants."
-  [headers]
-  (->> headers
-       (filter #(is-content-type? (first %)))
-       first
-       second
-       (= form-urlencoded)))
-
 ;; requires a SessionTemplate to create new Session
 (defmethod crud/add resource-name
   [{:keys [body form-params headers] :as request}]
+
   (let [idmap {:identity (:identity request)}
-        body (if (is-form? headers) (convert-form form-params) body)
+        body (if (u/is-form? headers) (u/convert-form :sessionTemplate form-params) body)
         desc-attrs (u/select-desc-keys body)
         [cookie-header {:keys [id] :as body}] (-> body
                                                   (assoc :resourceURI create-uri)

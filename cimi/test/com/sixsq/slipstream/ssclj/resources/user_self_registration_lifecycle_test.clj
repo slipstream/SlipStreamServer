@@ -8,7 +8,7 @@
     [com.sixsq.slipstream.ssclj.resources.email.utils :as email-utils]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.user :as user]
-    [com.sixsq.slipstream.ssclj.resources.user-template :as ct]
+    [com.sixsq.slipstream.ssclj.resources.user-template :as ut]
     [com.sixsq.slipstream.ssclj.resources.user-template-self-registration :as self]
     [peridot.core :refer :all]
     [postal.core :as postal]))
@@ -33,8 +33,8 @@
                                         {:code 0, :error :SUCCESS, :message "OK"})]
 
       (let [uname "120720737412_eduid_chhttps___eduid_ch"
-            href (str ct/resource-url "/" self/registration-method)
-            template-url (str p/service-context ct/resource-url "/" self/registration-method)
+            href (str ut/resource-url "/" self/registration-method)
+            template-url (str p/service-context ut/resource-url "/" self/registration-method)
 
             session (-> (ltu/ring-app)
                         session

@@ -22,6 +22,6 @@
 ;;
 (defmethod p/tpl->user tpl/registration-method
   [{:keys [isSuperUser] :as resource} request]
-  (cond-> (assoc resource :resourceURI p/resource-uri)
+  [nil (cond-> (assoc resource :resourceURI p/resource-uri)
           true (dissoc :instance)                           ;; FIXME: Should this instead be added to user?
-          (nil? isSuperUser) (assoc :isSuperUser false)))
+          (nil? isSuperUser) (assoc :isSuperUser false))])

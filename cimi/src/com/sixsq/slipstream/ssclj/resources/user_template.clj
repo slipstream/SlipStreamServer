@@ -33,6 +33,19 @@
                               :type      "ROLE"
                               :right     "VIEW"}]})
 
+(def resource-acl {:owner {:principal "ADMIN"
+                           :type      "ROLE"}
+                   :rules [{:principal "ADMIN"
+                            :type      "ROLE"
+                            :right     "ALL"}
+                           {:principal "ANON"
+                            :type      "ROLE"
+                            :right     "VIEW"}
+                           {:principal "USER"
+                            :type      "ROLE"
+                            :right     "VIEW"}]})
+
+
 ;;
 ;; atom to keep track of the loaded UserTemplate resources
 ;;
