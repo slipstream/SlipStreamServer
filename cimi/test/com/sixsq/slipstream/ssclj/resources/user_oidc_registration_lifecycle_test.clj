@@ -319,9 +319,7 @@
               (-> session-anon
                   (request (str validate-url "?code=GOOD")
                            :request-method :get)
-                  (ltu/body->edn)
-                  ltu/dump
-                  (ltu/is-status 400))                      ;; inactive account
+                  (ltu/is-status 200))
 
               #_(reset-callback! callback-id2)
               #_(let [ring-info (-> session-anon
