@@ -291,6 +291,14 @@
                   (ltu/message-matches #".*unable to retrieve OIDC access token.*")
                   (ltu/is-status 400))
 
+              (is (= "FAILED" (-> session-admin
+                                  (request (str p/service-context callback-id))
+                                  (ltu/body->edn)
+                                  (ltu/is-status 200)
+                                  :response
+                                  :body
+                                  :state)))
+
               (reset-callback! callback-id)
               (-> session-anon
                   (request (str validate-url "?code=BAD")
@@ -299,8 +307,16 @@
                   (ltu/message-matches #".*OIDC token is missing subject.*")
                   (ltu/is-status 400))
 
-              #_(reset-callback! callback-id)
-              #_(-> session-anon
+              (is (= "FAILED" (-> session-admin
+                                  (request (str p/service-context callback-id))
+                                  (ltu/body->edn)
+                                  (ltu/is-status 200)
+                                  :response
+                                  :body
+                                  :state)))
+
+              (reset-callback! callback-id)
+              (-> session-anon
                   (request (str validate-url "?code=GOOD")
                            :request-method :get)
                   (ltu/body->edn)
@@ -309,27 +325,27 @@
 
               #_(reset-callback! callback-id2)
               #_(let [ring-info (-> session-anon
-                                  (request (str validate-url2 "?code=GOOD")
-                                           :request-method :get)
-                                  (ltu/body->edn)
-                                  (ltu/is-status 303))
-                    location (ltu/location ring-info)
-                    token (get-in ring-info [:response :cookies "com.sixsq.slipstream.cookie" :value :token])
-                    claims (if token (sign/unsign-claims token) {})]
-                #_(is (clojure.string/starts-with? location redirect-uri))
-                (is (empty? claims)))
+                                    (request (str validate-url2 "?code=GOOD")
+                                             :request-method :get)
+                                    (ltu/body->edn)
+                                    (ltu/is-status 303))
+                      location (ltu/location ring-info)
+                      token (get-in ring-info [:response :cookies "com.sixsq.slipstream.cookie" :value :token])
+                      claims (if token (sign/unsign-claims token) {})]
+                  #_(is (clojure.string/starts-with? location redirect-uri))
+                  (is (empty? claims)))
 
               #_(reset-callback! callback-id3)
               #_(let [ring-info (-> session-anon
-                                  (request (str validate-url3 "?code=GOOD")
-                                           :request-method :get)
-                                  (ltu/body->edn)
-                                  (ltu/is-status 303))
-                    location (ltu/location ring-info)
-                    token (get-in ring-info [:response :cookies "com.sixsq.slipstream.cookie" :value :token])
-                    claims (if token (sign/unsign-claims token) {})]
-                #_(is (clojure.string/starts-with? location redirect-uri))
-                (is (empty? claims)))))
+                                    (request (str validate-url3 "?code=GOOD")
+                                             :request-method :get)
+                                    (ltu/body->edn)
+                                    (ltu/is-status 303))
+                      location (ltu/location ring-info)
+                      token (get-in ring-info [:response :cookies "com.sixsq.slipstream.cookie" :value :token])
+                      claims (if token (sign/unsign-claims token) {})]
+                  #_(is (clojure.string/starts-with? location redirect-uri))
+                  (is (empty? claims)))))
 
 
           #_(let [ring-info (-> session-user
@@ -401,11 +417,11 @@
 
 
 (deftest bad-methods
-    (let [resource-uri (str p/service-context (u/new-resource-id user/resource-name))]
-      (ltu/verify-405-status [[base-uri :options]
-                              [base-uri :delete]
-                              [resource-uri :options]
-                              [resource-uri :put]
-                              [resource-uri :post]])))
+  (let [resource-uri (str p/service-context (u/new-resource-id user/resource-name))]
+    (ltu/verify-405-status [[base-uri :options]
+                            [base-uri :delete]
+                            [resource-uri :options]
+                            [resource-uri :put]
+                            [resource-uri :post]])))
 
 
