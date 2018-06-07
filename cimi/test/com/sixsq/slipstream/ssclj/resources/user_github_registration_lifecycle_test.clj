@@ -1,7 +1,7 @@
-(ns com.sixsq.slipstream.ssclj.resources.session-github-lifecycle-test
+(ns com.sixsq.slipstream.ssclj.resources.user-github-registration-lifecycle-test
   (:require
     [clojure.data.json :as json]
-    [clojure.test :refer [deftest is use-fixtures]]
+    [clojure.test :refer :all]
     [com.sixsq.slipstream.auth.external :as ex]
     [com.sixsq.slipstream.auth.github :as auth-github]
     [com.sixsq.slipstream.auth.utils.db :as db]
@@ -13,86 +13,70 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration :as configuration]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.resources.session :as session]
-    [com.sixsq.slipstream.ssclj.resources.session-template :as ct]
-    [com.sixsq.slipstream.ssclj.resources.session-template :as st]
-    [com.sixsq.slipstream.ssclj.resources.session-template-github :as github]
+    [com.sixsq.slipstream.ssclj.resources.user :as user]
+    [com.sixsq.slipstream.ssclj.resources.user-template :as ut]
+    [com.sixsq.slipstream.ssclj.resources.user-template-github-registration :as utg]
     [peridot.core :refer :all]
     [ring.util.codec :as codec]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 
-(def base-uri (str p/service-context (u/de-camelcase session/resource-name)))
+(def base-uri (str p/service-context (u/de-camelcase user/resource-name)))
 
 (def configuration-base-uri (str p/service-context (u/de-camelcase configuration/resource-name)))
 
-(def session-template-base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
+(def user-template-base-uri (str p/service-context (u/de-camelcase ut/resource-name)))
 
 (def ^:const callback-pattern #".*/api/callback/.*/execute")
-
-
-
-(def instance "test-github")
-(def session-template-github {:method      github/authn-method
-                              :instance    instance
-                              :name        "GitHub"
-                              :description "External Authentication with GitHub Credentials"
-                              :acl         st/resource-acl})
-
-(def configuration-session-github {:configurationTemplate {:service      "session-github"
-                                                           :instance     instance
-                                                           :clientID     "FAKE_CLIENT_ID"
-                                                           :clientSecret "ABCDEF..."}})
 
 ;; callback state reset between tests
 (defn reset-callback! [callback-id]
   (cbu/update-callback-state! "WAITING" callback-id))
 
+
+(def configuration-user-github {:configurationTemplate {:service      "session-github" ;;reusing configuration from session GitHub
+                                                        :instance     utg/registration-method
+
+                                                        :clientID     "FAKE_CLIENT_ID"
+                                                        :clientSecret "ABCDEF..."}})
+
 (deftest lifecycle
 
-  (let [app (ltu/ring-app)
-        session (-> (session app)
-                    (content-type "application/json"))
-        session-admin (header session authn-info-header "admin ADMIN USER ANON")
-        session-user (header session authn-info-header "user USER ANON")
-        session-anon (header session authn-info-header "unknown ANON")
+  (let [
+
+        href (str ut/resource-url "/" utg/registration-method)
+        template-url (str p/service-context ut/resource-url "/" utg/registration-method)
+
+        session-anon (-> (ltu/ring-app)
+                         session
+                         (content-type "application/json")
+                         (header authn-info-header "unknown ANON"))
+        session-admin (header session-anon authn-info-header "admin ADMIN USER ANON")
+        session-user (header session-anon authn-info-header "user USER ANON")
         session-anon-form (-> session-anon
-                              (content-type u/form-urlencoded))
+                              (content-type user/form-urlencoded))
 
         redirect-uri-example "https://example.com/webui"]
 
-    ;; get session template so that session resources can be tested
-    (let [
-          ;;
-          ;; create the session template to use for these tests
-          ;;
-          href (-> session-admin
-                   (request session-template-base-uri
-                            :request-method :post
-                            :body (json/write-str session-template-github))
-                   (ltu/body->edn)
-                   (ltu/is-status 201)
-                   (ltu/location))
-
-          template-url (str p/service-context href)
-
-          resp (-> session-anon
-                   (request template-url)
-                   (ltu/body->edn)
-                   (ltu/is-status 200))
-          template (get-in resp [:response :body])
+    ;; get user template so that user resources can be tested
+    (let [template (-> session-admin
+                       (request template-url)
+                       (ltu/body->edn)
+                       (ltu/is-status 200)
+                       (get-in [:response :body]))
 
           name-attr "name"
           description-attr "description"
           properties-attr {:a "one", :b "two"}
 
-          href-create {:name            name-attr
-                       :description     description-attr
-                       :properties      properties-attr
-                       :sessionTemplate {:href href}}
-          href-create-redirect {:sessionTemplate {:href        href
-                                                  :redirectURI redirect-uri-example}}
-          invalid-create (assoc-in href-create-redirect [:sessionTemplate :invalid] "BAD")]
+          href-create {:name         name-attr
+                       :description  description-attr
+                       :properties   properties-attr
+                       :userTemplate {:href href}}
+
+          href-create-redirect {:userTemplate {:href        href
+                                               :redirectURI redirect-uri-example}}
+          invalid-create (assoc-in href-create [:userTemplate :invalid] "BAD")]
 
       ;; anonymous query should succeed but have no entries
       (-> session-anon
@@ -110,7 +94,8 @@
           (ltu/message-matches #".*missing or incorrect configuration.*")
           (ltu/is-status 500))
 
-      ;; anonymous create must succeed (normal create and href create)
+
+
       (let [
             ;;
             ;; create the session-github configuration to use for these tests
@@ -118,12 +103,12 @@
             cfg-href (-> session-admin
                          (request configuration-base-uri
                                   :request-method :post
-                                  :body (json/write-str configuration-session-github))
+                                  :body (json/write-str configuration-user-github))
                          (ltu/body->edn)
                          (ltu/is-status 201)
                          (ltu/location))
 
-            _ (is (= cfg-href (str "configuration/session-github-" instance)))
+            _ (is (= cfg-href (str "configuration/session-github-" utg/registration-method)))
 
             resp (-> session-anon
                      (request base-uri
@@ -168,136 +153,42 @@
             abs-uri3 (str p/service-context id3)]
 
 
-        ;; redirect URLs in location header should contain a link to the callback execute url
-        (is (re-matches #".*FAKE_CLIENT_ID.*" (or uri "")))
-        (is (re-matches callback-pattern (or uri "")))
-        (is (re-matches #".*FAKE_CLIENT_ID.*" (or uri2 "")))
-        (is (re-matches callback-pattern (or uri2 "")))
-        (is (re-matches #".*FAKE_CLIENT_ID.*" (or uri3 "")))
-        (is (re-matches callback-pattern (or uri3 "")))
+        ;; redirect URLs in location header should contain the client ID and resource id
+        (doseq [u [uri uri2 uri3]]
+          (is (re-matches #".*FAKE_CLIENT_ID.*" (or u "")))
+          (is (re-matches callback-pattern (or u ""))))
 
-        ;; user should not be able to see session without session role
-        (-> session-user
-            (request abs-uri)
-            (ltu/body->edn)
-            (ltu/is-status 403))
-        (-> session-user
-            (request abs-uri2)
-            (ltu/body->edn)
-            (ltu/is-status 403))
-        (-> session-user
-            (request abs-uri3)
-            (ltu/body->edn)
-            (ltu/is-status 403))
+        ;; anonymous, user and admin query should succeed but have no users
+        (doseq [session [session-anon session-user session-admin]]
+          (-> session
+              (request base-uri)
+              (ltu/body->edn)
+              (ltu/is-status 200)
+              (ltu/is-count zero?)))
 
-        ;; anonymous query should succeed but still have no entries
-        (-> session-anon
-            (request base-uri)
-            (ltu/body->edn)
-            (ltu/is-status 200)
-            (ltu/is-count zero?))
-
-        ;; user query should succeed but have no entries because of missing session role
-        (-> session-user
-            (request base-uri)
-            (ltu/body->edn)
-            (ltu/is-status 200)
-            (ltu/is-count zero?))
-
-        ;; admin query should succeed, but see no sessions without the correct session role
-        (-> session-admin
-            (request base-uri)
-            (ltu/body->edn)
-            (ltu/is-status 200)
-            (ltu/is-count 0))
-
-        ;; user should be able to see session with session role
-        (-> session-user
-            (header authn-info-header (str "user USER ANON " id))
-            (request abs-uri)
-            (ltu/body->edn)
-            (ltu/is-status 200)
-            (ltu/is-id id)
-            (ltu/is-operation-present "delete")
-            (ltu/is-operation-absent "edit"))
-        (-> session-user
-            (header authn-info-header (str "user USER ANON " id2))
-            (request abs-uri2)
-            (ltu/body->edn)
-            (ltu/is-status 200)
-            (ltu/is-id id2)
-            (ltu/is-operation-present "delete")
-            (ltu/is-operation-absent "edit"))
-        (-> session-user
-            (header authn-info-header (str "user USER ANON " id3))
-            (request abs-uri3)
-            (ltu/body->edn)
-            (ltu/is-status 200)
-            (ltu/is-id id3)
-            (ltu/is-operation-present "delete")
-            (ltu/is-operation-absent "edit"))
-
-        ;; check contents of session
-        (let [{:keys [name description properties] :as body} (-> session-user
-                                                                 (header authn-info-header (str "user USER ANON " id))
-                                                                 (request abs-uri)
-                                                                 (ltu/body->edn)
-                                                                 :response
-                                                                 :body)]
-          (is (= name name-attr))
-          (is (= description description-attr))
-          (is (= properties properties-attr)))
-
-        ;; user query with session role should succeed but and have one entry
-        (-> session-user
-            (header authn-info-header (str "user USER ANON " id))
-            (request base-uri)
-            (ltu/body->edn)
-            (ltu/is-status 200)
-            (ltu/is-count 1))
-        (-> session-user
-            (header authn-info-header (str "user USER ANON " id2))
-            (request base-uri)
-            (ltu/body->edn)
-            (ltu/is-status 200)
-            (ltu/is-count 1))
-        (-> session-user
-            (header authn-info-header (str "user USER ANON " id3))
-            (request base-uri)
-            (ltu/body->edn)
-            (ltu/is-status 200)
-            (ltu/is-count 1))
 
         ;;
         ;; test validation callback
         ;;
-        (let [get-redirect-uri (fn [u]
-                                 (let [r #".*redirect_uri=(.*)$"]
-                                   (second (re-matches r u))))
-              get-callback-id (fn [u]
-                                (let [r #".*(callback.*)/execute$"]
-                                  (second (re-matches r u))))
+        (let [get-redirect-uri #(->> % (re-matches #".*redirect_uri=(.*)$") second)
+              get-callback-id #(->> % (re-matches #".*(callback.*)/execute$") second)
+
               validate-url (get-redirect-uri uri)
               validate-url2 (get-redirect-uri uri2)
               validate-url3 (get-redirect-uri uri3)
+
               callback-id (get-callback-id validate-url)
               callback-id2 (get-callback-id validate-url2)
               callback-id3 (get-callback-id validate-url3)]
 
-          (-> session-admin
-              (request (str p/service-context callback-id))
-              (ltu/body->edn)
-              (ltu/is-status 200))
 
-          (-> session-admin
-              (request (str p/service-context callback-id2))
-              (ltu/body->edn)
-              (ltu/is-status 200))
+          ;; all callbacks must exist
+          (doseq [cb-id [callback-id callback-id2 callback-id3]]
+            (-> session-admin
+                (request (str p/service-context cb-id))
+                (ltu/body->edn)
+                (ltu/is-status 200)))
 
-          (-> session-admin
-              (request (str p/service-context callback-id3))
-              (ltu/body->edn)
-              (ltu/is-status 200))
 
           ;; remove the authentication configuration
           (-> session-admin
@@ -333,16 +224,13 @@
           (-> session-admin
               (request configuration-base-uri
                        :request-method :post
-                       :body (json/write-str configuration-session-github))
+                       :body (json/write-str configuration-user-github))
               (ltu/body->edn)
               (ltu/is-status 201))
 
-          ;; reset callback states, otherwise we'll get error 409
-          (reset-callback! callback-id)
-          (reset-callback! callback-id2)
-          (reset-callback! callback-id3)
 
           ;; try hitting the callback without the OAuth code parameter
+          (reset-callback! callback-id)
           (-> session-anon
               (request validate-url
                        :request-method :get)
@@ -350,6 +238,7 @@
               (ltu/message-matches #".*not contain required code.*")
               (ltu/is-status 400))
 
+          (reset-callback! callback-id2)
           (-> session-anon
               (request validate-url2
                        :request-method :get)
@@ -357,6 +246,7 @@
               (ltu/message-matches #".*not contain required code.*")
               (ltu/is-status 303))
 
+          (reset-callback! callback-id3)
           (-> session-anon
               (request validate-url3
                        :request-method :get)
@@ -511,5 +401,15 @@
                      :request-method :post
                      :body (json/write-str invalid-create))
             (ltu/body->edn)
-            (ltu/is-status 400)))
-      )))
+            (ltu/is-status 400))))))
+
+
+(deftest bad-methods
+  (let [resource-uri (str p/service-context (u/new-resource-id user/resource-name))]
+    (ltu/verify-405-status [[base-uri :options]
+                            [base-uri :delete]
+                            [resource-uri :options]
+                            [resource-uri :put]
+                            [resource-uri :post]])))
+
+
