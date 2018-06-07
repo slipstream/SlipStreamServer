@@ -7,7 +7,6 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.user-template-direct :as tpl]
     [com.sixsq.slipstream.ssclj.util.log :as logu]))
 
@@ -161,13 +160,6 @@
 
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
-(defn- use-fragment
-  [request id body desc-attrs fragment]
-  ;;FIXME : id is always nil
-  (-> request
-      (assoc :id id :body (merge body desc-attrs))
-      (merge fragment)))
-
 
 ;; requires a UserTemplate to create new User
 (defmethod crud/add resource-name
@@ -189,7 +181,7 @@
 
     (if resp-fragment
       ;;possibly a redirect
-      (use-fragment request id body desc-attrs resp-fragment)
+      resp-fragment
 
       ;; ensure desc attrs are added
       (let [{{:keys [status resource-id]} :body :as result} (add-impl (assoc request :id id :body body))]

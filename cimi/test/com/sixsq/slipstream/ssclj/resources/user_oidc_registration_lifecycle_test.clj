@@ -111,19 +111,7 @@
                                   :body (json/write-str configuration-user-oidc))
                          (ltu/body->edn)
                          (ltu/is-status 201)
-                         (ltu/location))
-
-            public-key (:auth-public-key environ.core/env)
-            good-claims {:sub         "OIDC_USER"
-                         :email       "user@oidc.example.com"
-                         :given_name  "John"
-                         :family_name "Smith"
-                         :entitlement ["alpha-entitlement"]
-                         :groups      ["/organization/group-1"]
-                         :realm       "my-realm"}
-            good-token (sign/sign-claims good-claims)
-            bad-claims {}
-            bad-token (sign/sign-claims bad-claims)]
+                         (ltu/location))]
 
         (is (= cfg-href (str "configuration/session-oidc-" oidc/registration-method)))
 
@@ -153,33 +141,17 @@
                        ltu/location)]
 
           ;; redirect URLs in location header should contain the client ID and resource id
-          (is (re-matches #".*FAKE_CLIENT_ID.*" (or uri "")))
-          (is (re-matches callback-pattern (or uri "")))
-          (is (re-matches #".*FAKE_CLIENT_ID.*" (or uri2 "")))
-          (is (re-matches callback-pattern (or uri2 "")))
-          (is (re-matches #".*FAKE_CLIENT_ID.*" (or uri3 "")))
-          (is (re-matches callback-pattern (or uri3 "")))
+          (doseq [u [uri uri2 uri3]]
+            (is (re-matches #".*FAKE_CLIENT_ID.*" (or u "")))
+            (is (re-matches callback-pattern (or u ""))))
 
-          ;; anonymous query should succeed but still have no users
-          (-> session-anon
-              (request base-uri)
-              (ltu/body->edn)
-              (ltu/is-status 200)
-              (ltu/is-count zero?))
-
-          ;; user query should succeed but have no users
-          (-> session-user
-              (request base-uri)
-              (ltu/body->edn)
-              (ltu/is-status 200)
-              (ltu/is-count zero?))
-
-          ;; admin query should succeed, but see no users
-          (-> session-admin
-              (request base-uri)
-              (ltu/body->edn)
-              (ltu/is-status 200)
-              (ltu/is-count 0))
+          ;; anonymous, user and admin query should succeed but have no users
+          (doseq [session [session-anon session-user session-admin]]
+            (-> session
+                (request base-uri)
+                (ltu/body->edn)
+                (ltu/is-status 200)
+                (ltu/is-count zero?)))
 
           ;; validate callbacks
           (let [get-redirect-uri #(->> % (re-matches #".*redirect_uri=(.*)$") second)
@@ -194,21 +166,11 @@
                 callback-id3 (get-callback-id validate-url3)]
 
             ;; all callbacks must exist
-            (-> session-admin
-                (request (str p/service-context callback-id))
-                (ltu/body->edn)
-                (ltu/is-status 200))
-
-            (-> session-admin
-                (request (str p/service-context callback-id2))
-                (ltu/body->edn)
-                (ltu/is-status 200))
-
-            (-> session-admin
-                (request (str p/service-context callback-id3))
-                (ltu/body->edn)
-                (ltu/is-status 200))
-
+            (doseq [cb-id [callback-id callback-id2 callback-id3]]
+              (-> session-admin
+                  (request (str p/service-context cb-id))
+                  (ltu/body->edn)
+                  (ltu/is-status 200)))
 
             ;; remove the authentication configuration
             (-> session-admin
@@ -230,14 +192,14 @@
                          :request-method :get)
                 (ltu/body->edn)
                 (ltu/message-matches #".*missing or incorrect configuration.*")
-                (ltu/is-status 500))                        ;; FIXME: always expect redirect 303 when redirectURI is provided
+                (ltu/is-status 303))
 
             (-> session-anon
                 (request validate-url3
                          :request-method :get)
                 (ltu/body->edn)
                 (ltu/message-matches #".*missing or incorrect configuration.*")
-                (ltu/is-status 500))                        ;; FIXME: always expect redirect 303 when redirectURI is provided
+                (ltu/is-status 303))
 
             ;; add the configuration back again
             (-> session-admin
@@ -262,7 +224,7 @@
                          :request-method :get)
                 (ltu/body->edn)
                 (ltu/message-matches #".*not contain required code.*")
-                (ltu/is-status 400))                        ;; FIXME: always expect redirect 303 when redirectURI is provided
+                (ltu/is-status 303))
 
             (reset-callback! callback-id3)
             (-> session-anon
@@ -270,148 +232,104 @@
                          :request-method :get)
                 (ltu/body->edn)
                 (ltu/message-matches #".*not contain required code.*")
-                (ltu/is-status 400))                        ;; FIXME: always expect redirect 303 when redirectURI is provided
+                (ltu/is-status 303))
 
             ;; try now with a fake code
-            (with-redefs [auth-oidc/get-oidc-access-token (fn [client-id client-secret oauth-code redirect-url]
-                                                            (case oauth-code
-                                                              "GOOD" good-token
-                                                              "BAD" bad-token
-                                                              nil))
-                          db/find-roles-for-username (fn [username]
-                                                       "USER ANON alpha")
-                          db/user-exists? (constantly true)]
 
+            (doseq [[user-number return-code cb-id val-url] (map (fn [n rc cb vu] [n rc cb vu])
+                                                                 (range)
+                                                                 [400 303 303] ;; Expect 303 even on errors when redirectURI is provided
+                                                                 [callback-id callback-id2 callback-id3]
+                                                                 [validate-url validate-url2 validate-url3])]
 
-              (reset-callback! callback-id)
-              (-> session-anon
-                  (request (str validate-url "?code=NONE")
-                           :request-method :get)
-                  (ltu/body->edn)
-                  (ltu/message-matches #".*unable to retrieve OIDC access token.*")
-                  (ltu/is-status 400))
+              (let [username (str "OIDC_USER_" user-number)
+                    good-claims {:sub         username
+                                 :email       "user@oidc.example.com"
+                                 :given_name  "John"
+                                 :family_name "Smith"
+                                 :entitlement ["alpha-entitlement"]
+                                 :groups      ["/organization/group-1"]
+                                 :realm       "my-realm"}
+                    good-token (sign/sign-claims good-claims)
+                    bad-claims {}
+                    bad-token (sign/sign-claims bad-claims)]
 
-              (is (= "FAILED" (-> session-admin
-                                  (request (str p/service-context callback-id))
-                                  (ltu/body->edn)
-                                  (ltu/is-status 200)
-                                  :response
-                                  :body
-                                  :state)))
+                (with-redefs [auth-oidc/get-oidc-access-token (fn [client-id client-secret oauth-code redirect-url]
+                                                                (case oauth-code
+                                                                  "GOOD" good-token
+                                                                  "BAD" bad-token
+                                                                  nil))
+                              db/find-roles-for-username (fn [username]
+                                                           "USER ANON alpha")]
 
-              (reset-callback! callback-id)
-              (-> session-anon
-                  (request (str validate-url "?code=BAD")
-                           :request-method :get)
-                  (ltu/body->edn)
-                  (ltu/message-matches #".*OIDC token is missing subject.*")
-                  (ltu/is-status 400))
+                  (reset-callback! cb-id)
+                  (-> session-anon
+                      (request (str val-url "?code=NONE")
+                               :request-method :get)
+                      (ltu/body->edn)
+                      (ltu/message-matches #".*unable to retrieve OIDC access token.*")
+                      (ltu/is-status return-code))
 
-              (is (= "FAILED" (-> session-admin
-                                  (request (str p/service-context callback-id))
-                                  (ltu/body->edn)
-                                  (ltu/is-status 200)
-                                  :response
-                                  :body
-                                  :state)))
+                  (is (= "FAILED" (-> session-admin
+                                      (request (str p/service-context cb-id))
+                                      (ltu/body->edn)
+                                      (ltu/is-status 200)
+                                      :response
+                                      :body
+                                      :state)))
 
-              (reset-callback! callback-id)
-              (-> session-anon
-                  (request (str validate-url "?code=GOOD")
-                           :request-method :get)
-                  (ltu/is-status 200))
+                  (reset-callback! cb-id)
+                  (-> session-anon
+                      (request (str val-url "?code=BAD")
+                               :request-method :get)
+                      (ltu/body->edn)
+                      (ltu/message-matches #".*OIDC token is missing subject.*")
+                      (ltu/is-status return-code))
 
-              #_(reset-callback! callback-id2)
-              #_(let [ring-info (-> session-anon
-                                    (request (str validate-url2 "?code=GOOD")
-                                             :request-method :get)
-                                    (ltu/body->edn)
-                                    (ltu/is-status 303))
-                      location (ltu/location ring-info)
-                      token (get-in ring-info [:response :cookies "com.sixsq.slipstream.cookie" :value :token])
-                      claims (if token (sign/unsign-claims token) {})]
-                  #_(is (clojure.string/starts-with? location redirect-uri))
-                  (is (empty? claims)))
+                  (is (= "FAILED" (-> session-admin
+                                      (request (str p/service-context cb-id))
+                                      (ltu/body->edn)
+                                      (ltu/is-status 200)
+                                      :response
+                                      :body
+                                      :state)))
 
-              #_(reset-callback! callback-id3)
-              #_(let [ring-info (-> session-anon
-                                    (request (str validate-url3 "?code=GOOD")
-                                             :request-method :get)
-                                    (ltu/body->edn)
-                                    (ltu/is-status 303))
-                      location (ltu/location ring-info)
-                      token (get-in ring-info [:response :cookies "com.sixsq.slipstream.cookie" :value :token])
-                      claims (if token (sign/unsign-claims token) {})]
-                  #_(is (clojure.string/starts-with? location redirect-uri))
-                  (is (empty? claims)))))
+                  ;; try creating the user via callback, should succeed
+                  (reset-callback! cb-id)
+                  (is (false? (db/user-exists? username)))
+                  (-> session-anon
+                      (request (str val-url "?code=GOOD")
+                               :request-method :get)
+                      (ltu/is-status 201))
 
+                  (is (= "SUCCEEDED" (-> session-admin
+                                         (request (str p/service-context cb-id))
+                                         (ltu/body->edn)
+                                         (ltu/is-status 200)
+                                         :response
+                                         :body
+                                         :state)))
 
-          #_(let [ring-info (-> session-user
-                                (header authn-info-header (str "user USER ANON " id))
-                                (request abs-uri)
-                                (ltu/body->edn)
-                                (ltu/is-status 200)
-                                (ltu/is-id id)
-                                (ltu/is-operation-present "delete")
-                                (ltu/is-operation-absent "edit"))
-                  session (get-in ring-info [:response :body])]
-              (is (nil? (:username session)))
-              (is (= (:created session) (:updated session))))
+                  (is (true? (db/user-exists? username)))
 
-          #_(let [ring-info (-> session-user
-                                (header authn-info-header (str "user USER ANON " id2))
-                                (request abs-uri2)
-                                (ltu/body->edn)
-                                (ltu/is-status 200)
-                                (ltu/is-id id2)
-                                (ltu/is-operation-present "delete")
-                                (ltu/is-operation-absent "edit"))
-                  session (get-in ring-info [:response :body])]
-              (is (nil? (:username session)))
-              (is (= (:created session) (:updated session))))
+                  ;; try creating the same user again, should fail
+                  (reset-callback! cb-id)
+                  (-> session-anon
+                      (request (str val-url "?code=GOOD")
+                               :request-method :get)
+                      (ltu/body->edn)
+                      (ltu/message-matches #".*account already exists.*")
+                      (ltu/is-status return-code))
 
-          #_(let [ring-info (-> session-user
-                                (header authn-info-header (str "user USER ANON " id3))
-                                (request abs-uri3)
-                                (ltu/body->edn)
-                                (ltu/is-status 200)
-                                (ltu/is-id id3)
-                                (ltu/is-operation-present "delete")
-                                (ltu/is-operation-absent "edit"))
-                  session (get-in ring-info [:response :body])]
-              (is (nil? (:username session)))
-              (is (= (:created session) (:updated session))))
+                  (is (= "FAILED" (-> session-admin
+                                      (request (str p/service-context cb-id))
+                                      (ltu/body->edn)
+                                      (ltu/is-status 200)
+                                      :response
+                                      :body
+                                      :state)))
 
-          ;; user with session role can delete resource
-          #_(-> session-user
-                (header authn-info-header (str "user USER ANON " id))
-                (request abs-uri
-                         :request-method :delete)
-                (ltu/is-unset-cookie)
-                (ltu/body->edn)
-                (ltu/is-status 200))
-          #_(-> session-user
-                (header authn-info-header (str "user USER ANON " id2))
-                (request abs-uri2
-                         :request-method :delete)
-                (ltu/is-unset-cookie)
-                (ltu/body->edn)
-                (ltu/is-status 200))
-          #_(-> session-user
-                (header authn-info-header (str "user USER ANON " id3))
-                (request abs-uri3
-                         :request-method :delete)
-                (ltu/is-unset-cookie)
-                (ltu/body->edn)
-                (ltu/is-status 200))
-
-          ;; create with invalid template fails
-          #_(-> session-anon
-                (request base-uri
-                         :request-method :post
-                         :body (json/write-str invalid-create))
-                (ltu/body->edn)
-                (ltu/is-status 400)))))))
+                  (is (true? (db/user-exists? username))))))))))))
 
 
 (deftest bad-methods

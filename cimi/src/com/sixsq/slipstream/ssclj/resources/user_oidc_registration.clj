@@ -1,8 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.user-oidc-registration
   (:require
     [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.auth.internal :as internal]
-    [com.sixsq.slipstream.ssclj.resources.callback-create-user-oidc :as cb]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.email.utils :as email-utils]
     [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as oidc-utils]
@@ -21,6 +19,7 @@
   [{resource :userTemplate :as create-document}]
   (create-validate-fn create-document))
 
+
 ;;
 ;; transform template into user resource
 ;; strips method attribute and updates the resource URI
@@ -36,7 +35,8 @@
   [{:keys [href redirectURI] :as resource} {:keys [headers base-uri] :as request}]
   (let [[client-id base-url public-key] (oidc-utils/config-params redirectURI (u/document-id href))]
     (if (and base-url client-id public-key)
-      (let [callback-url (user-utils/create-user-oidc-callback base-uri href)
+      (let [data (when redirectURI {:redirectURI redirectURI})
+            callback-url (user-utils/create-user-oidc-callback base-uri href data)
             redirect-url (str base-url (format oidc-utils/oidc-relative-url client-id callback-url))]
         [{:status 303, :headers {"Location" redirect-url}} nil])
       (oidc-utils/throw-bad-client-config user-template/registration-method redirectURI))))

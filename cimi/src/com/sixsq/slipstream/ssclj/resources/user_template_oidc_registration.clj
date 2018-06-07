@@ -27,23 +27,7 @@
 ;;
 ;; description
 ;;
-(def ^:const desc
-  (merge p/UserTemplateDescription
-         {:username       {:displayName "Username"
-                           :category    "summary"
-                           :description "username"
-                           :type        "string"
-                           :mandatory   true
-                           :readOnly    false
-                           :order       20}
-
-          :emailAddress   {:displayName "Email Address"
-                           :category    "general"
-                           :description "email address"
-                           :type        "string"
-                           :mandatory   true
-                           :readOnly    false
-                           :order       23}}))
+(def ^:const desc p/UserTemplateDescription)
 
 ;;
 ;; initialization: register this User template

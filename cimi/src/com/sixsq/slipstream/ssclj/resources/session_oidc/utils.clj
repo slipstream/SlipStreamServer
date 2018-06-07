@@ -82,6 +82,9 @@
 (defn throw-inactive-user [username redirectURI]
   (logu/log-error-and-throw-with-redirect 400 (str "account is inactive (" username ")") redirectURI))
 
+(defn throw-user-exists [username redirectURI]
+  (logu/log-error-and-throw-with-redirect 400 (str "account already exists (" username ")") redirectURI))
+
 ;; retrieval of configuration parameters
 
 (defn config-params
