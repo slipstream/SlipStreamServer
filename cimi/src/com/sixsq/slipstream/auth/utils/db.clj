@@ -55,16 +55,28 @@
 (defn find-username-by-authn
   [authn-method authn-id]
   (when (and authn-method authn-id)
-    (let [filter-str (format "%s='%s' and %s" (name authn-method) authn-id active-user-filter)
+    (let [filter-str (format "externalIdentity='%s:%s' and %s" (name authn-method) authn-id active-user-filter)
           filter {:filter (parser/parse-cimi-filter filter-str)}
           matched-users (try
                           (second (db/query resource-name {:cimi-params filter
                                                            :user-roles  ["ADMIN"]}))
-                          (catch Exception _ []))]
-      (if (> (count matched-users) 1)
-        (throw (Exception. (str "There should be only one result for "
-                                authn-id ". Was " matched-users)))
-        (:username (first matched-users))))))
+                          (catch Exception _ []))
+          filter-str-fallback (format "%s='%s' and %s" (name authn-method) authn-id active-user-filter)
+          filter-fallback {:filter (parser/parse-cimi-filter filter-str-fallback)}
+          matched-users-fallback (try
+                                   (second (db/query resource-name {:cimi-params filter-fallback
+                                                                    :user-roles  ["ADMIN"]}))
+                                   (catch Exception _ []))
+
+          get-user (fn [users] (:username (first users)))
+          throw-ex (fn [users]  (throw (Exception. (str "There should be only one result for "
+                                                       authn-id ". Was " users))) )]
+
+      (cond
+        (= (count matched-users) 1) (get-user matched-users)
+        (> (count matched-users) 1) (throw-ex matched-users)
+        (= (count matched-users-fallback) 1) (get-user matched-users-fallback)
+        (> (count matched-users-fallback) 1) (throw-ex matched-users-fallback)))))
 
 (defn get-active-user-by-name
   [username]

@@ -46,7 +46,19 @@
       (is (= "last" (:lastName user)))
       (is (:password user))
       (is (:created user))
-      (is (= "USER ANON" (db/find-roles-for-username "st"))))))
+      (is (= "USER ANON" (db/find-roles-for-username "st")))))
+
+
+  (is (= "st" (db/create-user! {:authn-method "github"
+                                :authn-login  "st"
+                                :email        "st@s.com"
+                                :roles        "alpha-role, beta-role"
+                                :firstname    "first"
+                                :lastname     "last"
+                                :organization "myorg"})))
+
+
+  )
 
 
 (deftest test-user-creation-avoids-user-same-name

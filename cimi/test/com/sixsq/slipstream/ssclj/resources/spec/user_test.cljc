@@ -40,13 +40,17 @@
              :lastExecute  timestamp
              :activeSince  timestamp
              :githublogin  "github-login"
-             :cyclonelogin "cyclone-login"}]
+             :cyclonelogin "cyclone-login"
+             :externalIdentity ["github:aGithubLogin"]
+             }]
 
     (is (s/valid? :cimi/user cfg))
+    (is (s/valid? :cimi/user (assoc cfg :externalIdentity nil)))
+    (is (s/valid? :cimi/user (update cfg :externalIdentity conj "oidc:aOidcLogin")))
     (is (not (s/valid? :cimi/user (assoc cfg :unknown "value"))))
     (doseq [attr #{:id :resourceURI :created :updated :acl :username :emailAddress}]
       (is (not (s/valid? :cimi/user (dissoc cfg attr)))))
     (doseq [attr #{:firstName :lastName :organization :method :href :password
                    :roles :isSuperUser :state :deleted :creation :lastOnline
-                   :lastExecute :activeSince :githublogin :cyclonelogin}]
+                   :lastExecute :activeSince :githublogin :cyclonelogin :externalIdentity}]
       (is (s/valid? :cimi/user (dissoc cfg attr))))))
