@@ -38,7 +38,7 @@
       (is (= false (:deleted user)))
       (is (= "st@s.com" (:emailAddress user)))
       (is (= false (:isSuperUser user)))
-      (is (= uuid (:username user)))
+      (is (= "st" (:username user)))
       (is (= "ACTIVE" (:state user)))
       (is (= "first" (:firstName user)))
       (is (= "last" (:lastName user)))
