@@ -24,10 +24,15 @@
         (if-let [user-info (auth-github/get-github-user-info access-token)]
           (do
             (log/debugf "github user info for %s: %s" instance (str user-info))
-            (let [external-login (auth-github/sanitized-login user-info)
-                  external-email (auth-github/retrieve-email user-info access-token)
-                  [matched-user _] (ex/match-external-user! :github external-login external-email)]
-              (or matched-user (gu/throw-no-matched-user redirectURI))))
+            (let [github-login (auth-github/sanitized-login user-info)
+                  github-email (auth-github/retrieve-email user-info access-token)]
+              (if github-login
+                (if-let [matched-user (ex/create-github-user-when-missing! {:github-login      github-login
+                                                                            :github-email      github-email
+                                                                            :fail-on-existing? true})]
+                  matched-user
+                  (gu/throw-user-exists github-login redirectURI))
+                (gu/throw-no-matched-user redirectURI))))
           (gu/throw-no-user-info redirectURI))
         (gu/throw-no-access-token redirectURI))
       (gu/throw-missing-oauth-code redirectURI))))

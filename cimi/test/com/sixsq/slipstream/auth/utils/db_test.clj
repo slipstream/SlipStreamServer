@@ -5,6 +5,7 @@
     [com.sixsq.slipstream.auth.internal :as ia]
     [com.sixsq.slipstream.auth.test-helper :as th]
     [com.sixsq.slipstream.auth.utils.db :as db]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
@@ -17,9 +18,23 @@
                                 :firstname    "first"
                                 :lastname     "last"
                                 :organization "myorg"})))
+
+
+
+  (let [uuid (u/random-uuid)]
+    (is (= uuid (db/create-user! {:authn-method   "github"
+                                  :authn-login    uuid
+                                  :external-login "st"
+                                  :email          "st@s.com"
+                                  :roles          "alpha-role, beta-role"
+                                  :firstname      "first"
+                                  :lastname       "last"
+                                  :organization   "myorg"}))))
+
+
   (let [user-names (db/existing-user-names)
         user (db/get-user (first user-names))]
-    (is (= 1 (count user-names)))
+    (is (= 2 (count user-names)))
     (is (= "alpha-role, beta-role" (:roles user)))
     (is (= false (:deleted user)))
     (is (= "st@s.com" (:emailAddress user)))

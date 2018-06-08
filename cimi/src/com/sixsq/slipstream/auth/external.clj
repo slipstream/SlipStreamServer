@@ -2,7 +2,8 @@
   (:require
     [clojure.string :as str]
     [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.auth.utils.db :as db]))
+    [com.sixsq.slipstream.auth.utils.db :as db]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 
 (defn- mapped-user
@@ -38,12 +39,12 @@
 (defn match-external-user!
   [authn-method external-login external-email]
   (if-let [username-mapped (db/find-username-by-authn authn-method external-login)]
-    [(mapped-user authn-method username-mapped) "/dashboard"]
+    (mapped-user authn-method username-mapped)
     (let [usernames-same-email (db/find-usernames-by-email external-email)]
       (if (empty? usernames-same-email)
         (let [name-new-user (create-slipstream-user! authn-method external-login external-email)]
           [name-new-user (format "/user/%s?edit=true" name-new-user)])
-        [(map-slipstream-user! authn-method (first usernames-same-email) external-login) "/dashboard"]))))
+        (map-slipstream-user! authn-method (first usernames-same-email) external-login) ))))
 
 
 (defn match-existing-external-user
@@ -73,3 +74,13 @@
       (create-slipstream-user! (assoc user-record :authn-login username))
       (when-not fail-on-existing?
         username))))
+
+
+(defn create-github-user-when-missing!
+  [{:keys [github-login github-email fail-on-existing?] :as github-record}]
+  (let [username (db/find-username-by-authn :githublogin github-login)]
+    (when-not username (create-user-when-missing! {:authn-login (u/random-uuid)
+                                                   :email github-email
+                                                   :external-login github-login
+                                                   :authn-method "github"
+                                                   :fail-on-existing? fail-on-existing?}))))

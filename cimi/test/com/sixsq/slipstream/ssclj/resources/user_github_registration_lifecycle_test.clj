@@ -201,7 +201,7 @@
             (doseq [[callback url status n] (map vector callbacks validate-urls [400 303 303] (range))]
               (reset-callback! callback)
 
-              (let [username (str "GITHUB_USER_" n)
+              (let [github-login (str "GITHUB_USER_" n)
                     email (format "user-%s@example.com" n)]
 
                 (with-redefs [auth-github/get-github-access-token (fn [client-id client-secret oauth-code]
@@ -211,13 +211,10 @@
                                                                       nil))
                               auth-github/get-github-user-info (fn [access-code]
                                                                  (when (= access-code "GOOD_ACCESS_CODE")
-                                                                   {:login username, :email email}))
+                                                                   {:login github-login, :email email}))
 
                               ex/match-existing-external-user (fn [authn-method external-login external-email]
-                                                                ["MATCHED_USER" "/dashboard"])
-
-                              #_db/find-roles-for-username #_(fn [username]
-                                                           "USER ANON alpha")]
+                                                                ["MATCHED_USER" "/dashboard"])]
 
                   (-> session-anon
                       (request (str url "?code=NONE")
@@ -226,7 +223,7 @@
                       (ltu/message-matches #".*unable to retrieve GitHub access code.*")
                       (ltu/is-status status))
 
-                  (is (false? (db/user-exists? username)))
+                  (is (false? (db/user-exists? github-login)))
 
                   (reset-callback! callback)
                   (-> session-anon
@@ -236,7 +233,7 @@
                       (ltu/message-matches #".*unable to retrieve GitHub user information.*")
                       (ltu/is-status status))
 
-                  (is (false? (db/user-exists? username)))
+                  (is (nil? (db/find-username-by-authn :githublogin github-login)))
 
                   (reset-callback! callback)
                   (-> session-anon
@@ -245,7 +242,18 @@
                       (ltu/body->edn)
                       (ltu/is-status 201))
 
-                  (is (true? (db/user-exists? username)))))))
+                  (is (not(nil? (db/find-username-by-authn :githublogin github-login))))
+
+                  ;; try creating the same user again, should fail
+                  (reset-callback! callback)
+                  (-> session-anon
+                      (request (str url "?code=GOOD")
+                               :request-method :get)
+                      (ltu/body->edn)
+                      (ltu/message-matches #".*account already exists.*")
+                      (ltu/is-status status))))))
+
+
 
           ;; create with invalid template fails
           (-> session-anon

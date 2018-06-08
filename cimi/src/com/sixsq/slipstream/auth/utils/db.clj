@@ -143,7 +143,7 @@
 
 (defn user-create-request
   [{:keys [authn-login email authn-method firstname lastname roles organization
-           state]}]
+           state external-login]}]
   (let [slipstream-username (name-no-collision authn-login (existing-user-names))
         user-resource (cond-> {:href         "user-template/direct"
                                :username     slipstream-username
@@ -152,7 +152,7 @@
                                :deleted      false
                                :isSuperUser  false
                                :state        (or state "ACTIVE")}
-                              authn-method (assoc (to-am-kw authn-method) authn-login)
+                              authn-method (assoc (to-am-kw authn-method) (or external-login authn-login))
                               firstname (assoc :firstName firstname)
                               lastname (assoc :lastName lastname)
                               roles (assoc :roles roles)
@@ -193,10 +193,16 @@
      (when (or (not fail-on-existing?) (= authn-login slipstream-username))
        (crud/add (user-create-request user-record))
        slipstream-username)))
+  ([authn-method authn-login email external-login]
+   (create-user! {:authn-login    authn-login               ;; possibly a UUID
+                  :authn-method   authn-method
+                  :email          email
+                  :external-login external-login}))
   ([authn-method authn-login email]
-   (create-user! {:authn-login  authn-login
-                  :authn-method authn-method
-                  :email        email}))
+   (create-user! {:authn-login    authn-login
+                  :authn-method   authn-method
+                  :email          email
+                  :external-login authn-login}))            ;;legacy behaviour where external-login=authn-login
   ([authn-login email]
    (create-user! {:authn-login authn-login
                   :email       email})))

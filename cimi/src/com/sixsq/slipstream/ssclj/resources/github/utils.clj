@@ -20,6 +20,9 @@
 (defn throw-no-matched-user [redirectURI]
   (logu/log-error-and-throw-with-redirect 403 "no matching account for GitHub user" redirectURI))
 
+(defn throw-user-exists [username redirectURI]
+  (logu/log-error-and-throw-with-redirect 400 (str "account already exists (" username ")") redirectURI))
+
 (defn config-github-params
   [redirectURI instance]
 
