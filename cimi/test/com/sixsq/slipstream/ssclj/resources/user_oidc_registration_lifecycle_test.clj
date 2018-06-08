@@ -327,10 +327,7 @@
                                       (ltu/is-status 200)
                                       :response
                                       :body
-                                      :state)))
-
-
-                  )))))))))
+                                      :state))))))))))))
 
 
 (deftest bad-methods
