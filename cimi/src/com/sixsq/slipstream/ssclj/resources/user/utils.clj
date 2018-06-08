@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.user.utils
   (:require
     [com.sixsq.slipstream.ssclj.resources.callback :as callback]
+    [com.sixsq.slipstream.ssclj.resources.callback-create-user-github :as user-github-callback]
     [com.sixsq.slipstream.ssclj.resources.callback-create-user-oidc :as user-oidc-callback]
     [com.sixsq.slipstream.ssclj.resources.callback-user-email-validation :as user-email-callback]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
@@ -48,7 +49,7 @@
 
 (defn create-user-oidc-callback
   ([baseURI href]
-    (create-user-oidc-callback baseURI href nil))
+   (create-user-oidc-callback baseURI href nil))
   ([baseURI href data]
    (let [callback-request {:params   {:resource-name callback/resource-url}
                            :body     (cond-> {:action         user-oidc-callback/action-name
@@ -64,7 +65,30 @@
            (str baseURI validate-op)
            (let [msg "callback does not have execute operation"]
              (throw (ex-info msg (r/map-response msg 500 resource-id)))))
-         (let [msg "cannot retrieve email validation callback"]
+         (let [msg "cannot retrieve user create callback"]
            (throw (ex-info msg (r/map-response msg 500 resource-id)))))
-       (let [msg "cannot create email validation callback"]
+       (let [msg "cannot create user create callback"]
+         (throw (ex-info msg (r/map-response msg 500 ""))))))))
+
+(defn create-user-github-callback
+  ([baseURI href]
+   (create-user-github-callback baseURI href nil))
+  ([baseURI href data]
+   (let [callback-request {:params   {:resource-name callback/resource-url}
+                           :body     (cond-> {:action         user-github-callback/action-name
+                                              :targetResource {:href href}}
+                                             data (assoc :data data))
+                           :identity {:current         "INTERNAL"
+                                      :authentications {"INTERNAL" {:identity "INTERNAL"
+                                                                    :roles    ["ADMIN"]}}}}
+         {{:keys [resource-id]} :body status :status} (crud/add callback-request)]
+     (if (= 201 status)
+       (if-let [callback-resource (crud/set-operations (crud/retrieve-by-id resource-id admin-opts) {})]
+         (if-let [validate-op (u/get-op callback-resource "execute")]
+           (str baseURI validate-op)
+           (let [msg "callback does not have execute operation"]
+             (throw (ex-info msg (r/map-response msg 500 resource-id)))))
+         (let [msg "cannot retrieve user create callback"]
+           (throw (ex-info msg (r/map-response msg 500 resource-id)))))
+       (let [msg "cannot create user callback"]
          (throw (ex-info msg (r/map-response msg 500 ""))))))))

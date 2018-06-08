@@ -11,6 +11,7 @@
     [com.sixsq.slipstream.ssclj.resources.callback :as callback]
     [com.sixsq.slipstream.ssclj.resources.callback.utils :as utils]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.github.utils :as gu]
     [com.sixsq.slipstream.ssclj.resources.session.utils :as sutils]
     [com.sixsq.slipstream.util.response :as r]))
 
@@ -22,7 +23,7 @@
   [{:keys [headers uri redirectURI] :as request} session-id]
   (let [{:keys [server clientIP redirectURI] {:keys [href]} :sessionTemplate :as current-session} (sutils/retrieve-session-by-id session-id)
         instance (u/document-id href)
-        [client-id client-secret] (sutils/config-github-params redirectURI instance)]
+        [client-id client-secret] (gu/config-github-params redirectURI instance)]
     (if-let [code (uh/param-value request :code)]
       (if-let [access-token (auth-github/get-github-access-token client-id client-secret code)]
         (if-let [{:keys [user email] :as user-info} (auth-github/get-github-user-info access-token)]
@@ -50,10 +51,10 @@
                       (if redirectURI
                         (r/response-final-redirect redirectURI cookie-tuple)
                         (r/response-created session-id cookie-tuple)))))
-                (sutils/throw-no-matched-user redirectURI))))
-          (sutils/throw-no-user-info redirectURI))
-        (sutils/throw-no-access-token redirectURI))
-      (sutils/throw-missing-oauth-code redirectURI))))
+                (gu/throw-no-matched-user redirectURI))))
+          (gu/throw-no-user-info redirectURI))
+        (gu/throw-no-access-token redirectURI))
+      (gu/throw-missing-oauth-code redirectURI))))
 
 (defmethod callback/execute action-name
   [{callback-id :id {session-id :href} :targetResource :as callback-resource} request]

@@ -5,6 +5,7 @@
     [com.sixsq.slipstream.auth.internal :as ia]
     [com.sixsq.slipstream.auth.test-helper :as th]
     [com.sixsq.slipstream.auth.utils.db :as db]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
@@ -17,20 +18,33 @@
                                 :firstname    "first"
                                 :lastname     "last"
                                 :organization "myorg"})))
-  (let [user-names (db/existing-user-names)
-        user (db/get-user (first user-names))]
-    (is (= 1 (count user-names)))
-    (is (= "alpha-role, beta-role" (:roles user)))
-    (is (= false (:deleted user)))
-    (is (= "st@s.com" (:emailAddress user)))
-    (is (= false (:isSuperUser user)))
-    (is (= "st" (:username user)))
-    (is (= "ACTIVE" (:state user)))
-    (is (= "first" (:firstName user)))
-    (is (= "last" (:lastName user)))
-    (is (:password user))
-    (is (:created user))
-    (is (= "USER ANON" (db/find-roles-for-username "st")))))
+
+
+
+  (let [uuid (u/random-uuid)]
+    (is (= uuid (db/create-user! {:authn-method   "github"
+                                  :authn-login    uuid
+                                  :external-login "st"
+                                  :email          "st@s.com"
+                                  :roles          "alpha-role, beta-role"
+                                  :firstname      "first"
+                                  :lastname       "last"
+                                  :organization   "myorg"})))
+
+    (let [user-names (db/existing-user-names)
+          user (db/get-user (first user-names))]
+      (is (= 2 (count user-names)))
+      (is (= "alpha-role, beta-role" (:roles user)))
+      (is (= false (:deleted user)))
+      (is (= "st@s.com" (:emailAddress user)))
+      (is (= false (:isSuperUser user)))
+      (is (= uuid (:username user)))
+      (is (= "ACTIVE" (:state user)))
+      (is (= "first" (:firstName user)))
+      (is (= "last" (:lastName user)))
+      (is (:password user))
+      (is (:created user))
+      (is (= "USER ANON" (db/find-roles-for-username "st"))))))
 
 (deftest test-user-creation-avoids-user-same-name
   (th/add-user-for-test! {:username     "stef"

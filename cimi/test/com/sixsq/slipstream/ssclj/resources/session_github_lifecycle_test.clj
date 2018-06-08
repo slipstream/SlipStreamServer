@@ -29,7 +29,7 @@
 (def session-template-base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
 
 (def ^:const callback-pattern #".*/api/callback/.*/execute")
-(def ^:const callback-err-msg-pattern #".*error executing validation callback.*")
+
 
 
 (def instance "test-github")

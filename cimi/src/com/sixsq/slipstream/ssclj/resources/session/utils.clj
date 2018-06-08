@@ -82,34 +82,9 @@
                   :body       updated-session}))
 
 
-(defn throw-bad-client-config [cfg-id redirectURI]
-  (logu/log-error-and-throw-with-redirect 500 (str "missing or incorrect configuration (" cfg-id ") for GitHub authentication") redirectURI))
 
 
-(defn throw-missing-oauth-code [redirectURI]
-  (logu/log-error-and-throw-with-redirect 400 "GitHub authentication callback request does not contain required code" redirectURI))
 
-(defn throw-no-access-token [redirectURI]
-  (logu/log-error-and-throw-with-redirect 400 "unable to retrieve GitHub access code" redirectURI))
-
-(defn throw-no-user-info [redirectURI]
-  (logu/log-error-and-throw-with-redirect 400 "unable to retrieve GitHub user information" redirectURI))
-
-(defn throw-no-matched-user [redirectURI]
-  (logu/log-error-and-throw-with-redirect 403 "no matching account for GitHub user" redirectURI))
-
-
-(defn config-github-params
-  [redirectURI instance]
-  (let [cfg-id (str "configuration/session-github-" instance)
-        opts {:user-name "INTERNAL" :user-roles ["ADMIN"]}] ;; FIXME: works around authn at DB interface level
-    (try
-      (let [{:keys [clientID clientSecret]} (crud/retrieve-by-id cfg-id opts)]
-        (if (and clientID clientSecret)
-          [clientID clientSecret]
-          (throw-bad-client-config cfg-id redirectURI)))
-      (catch Exception _
-        (throw-bad-client-config cfg-id redirectURI)))))
 
 ;; FIXME: Fix ugliness around needing to create ring requests with authentication!
 (defn create-callback [baseURI session-id action]

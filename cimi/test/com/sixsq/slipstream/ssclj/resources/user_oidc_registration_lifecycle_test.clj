@@ -327,9 +327,7 @@
                                       (ltu/is-status 200)
                                       :response
                                       :body
-                                      :state)))
-
-                  (is (true? (db/user-exists? username))))))))))))
+                                      :state))))))))))))
 
 
 (deftest bad-methods
