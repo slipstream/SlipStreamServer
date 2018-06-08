@@ -242,7 +242,15 @@
                       (ltu/body->edn)
                       (ltu/is-status 201))
 
-                  (is (not(nil? (db/find-username-by-authn :githublogin github-login))))
+
+
+                  (let [ss-username (db/find-username-by-authn :githublogin github-login)]
+                    (is (not (nil? ss-username)))
+
+                    (is (= email (->> github-login
+                                     (db/find-username-by-authn :githublogin)
+                                     (db/get-user)
+                                     :emailAddress))))
 
                   ;; try creating the same user again, should fail
                   (reset-callback! callback)
