@@ -511,5 +511,4 @@
                      :request-method :post
                      :body (json/write-str invalid-create))
             (ltu/body->edn)
-            (ltu/is-status 400)))
-      )))
+            (ltu/is-status 400))))))
