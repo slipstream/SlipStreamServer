@@ -2,7 +2,8 @@
   (:require
     [clojure.spec.alpha :as s]
     [clojure.test :refer [are deftest is]]
-    [com.sixsq.slipstream.ssclj.resources.email :as t]))
+    [com.sixsq.slipstream.ssclj.resources.email :as t]
+    [com.sixsq.slipstream.ssclj.resources.spec.email :as email]))
 
 (def valid-acl {:owner {:principal "ADMIN"
                         :type      "ROLE"}
@@ -20,7 +21,7 @@
                :address     "user@example.com"
                :validated?  false}]
 
-    (is (s/valid? :cimi/email email))
-    (is (not (s/valid? :cimi/email (assoc email :bad "value"))))
+    (is (s/valid? ::email/email email))
+    (is (not (s/valid? ::email/email (assoc email :bad "value"))))
     (doseq [attr #{:id :resourceURI :created :updated :acl :address :validated?}]
-      (is (not (s/valid? :cimi/email (dissoc email attr)))))))
+      (is (not (s/valid? ::email/email (dissoc email attr)))))))
