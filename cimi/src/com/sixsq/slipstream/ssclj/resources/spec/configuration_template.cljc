@@ -7,14 +7,14 @@
 
 ;; Parameter definitions.
 
-(s/def :cimi.configuration-template/service  ::cimi-core/identifier)
-(s/def :cimi.configuration-template/instance ::cimi-core/identifier)
+(s/def ::service ::cimi-core/identifier)
+(s/def ::instance ::cimi-core/identifier)
 
 (def configuration-template-regex #"^configuration-template/[a-z0-9]+(-[a-z0-9]+)*$")
-(s/def :cimi.configuration-template/href (s/and string? #(re-matches configuration-template-regex %)))
+(s/def ::href (s/and string? #(re-matches configuration-template-regex %)))
 
-(s/def :cimi.configuration-template/configurationTemplate (su/only-keys-maps
-                                                            {:req-un [:cimi.configuration-template/href]}))
+(s/def ::configurationTemplate (su/only-keys-maps
+                                 {:req-un [::href]}))
 
 ;;
 ;; Keys specifications for configuration-template resources.
@@ -22,9 +22,8 @@
 ;; is no sense in defining map resources for the resource itself.
 ;;
 
-(def configuration-template-keys-spec {:req-un [:cimi.configuration-template/service]
-                                       :opt-un [:cimi.configuration-template/instance
-                                                :cimi.configuration-template/configurationTemplate]})
+(def configuration-template-keys-spec {:req-un [::service]
+                                       :opt-un [::instance ::configurationTemplate]})
 
 (def resource-keys-spec
   (su/merge-keys-specs [c/common-attrs configuration-template-keys-spec]))
@@ -35,5 +34,5 @@
 (def template-keys-spec
   (su/merge-keys-specs [c/template-attrs
                         configuration-template-keys-spec
-                        {:opt-un [:cimi.configuration-template/href]}]))
+                        {:opt-un [::href]}]))
 
