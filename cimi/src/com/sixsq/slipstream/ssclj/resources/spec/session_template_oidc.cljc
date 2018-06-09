@@ -13,9 +13,9 @@
 
 ;; Defines the contents of the oidc template used in a create resource.
 ;; NOTE: The name must match the key defined by the resource, :sessionTemplate here.
-(s/def :cimi.session-template.oidc/sessionTemplate
+(s/def ::sessionTemplate
   (su/only-keys-maps ps/template-keys-spec))
 
 (s/def :cimi/session-template.oidc-create
   (su/only-keys-maps ps/create-keys-spec
-                     {:req-un [:cimi.session-template.oidc/sessionTemplate]}))
+                     {:req-un [::sessionTemplate]}))

@@ -6,23 +6,23 @@
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 ;; All session resources must have a 'method' attribute.
-(s/def :cimi.session-template/method ::cimi-core/identifier)
+(s/def ::method ::cimi-core/identifier)
 
 ;; All session resources must have a 'instance' attribute that is used in
 ;; the template identifier.
-(s/def :cimi.session-template/instance ::cimi-core/identifier)
+(s/def ::instance ::cimi-core/identifier)
 
 ;; Session template resources may have a 'group' attribute that is used to group
 ;; authentication methods together.  Primarily geared towards visualization of
 ;; the authentication methods.
-(s/def :cimi.session-template/group ::cimi-core/nonblank-string)
+(s/def ::group ::cimi-core/nonblank-string)
 
 ;; Sessions may provide a redirect URI to be used on successful authentication.
-(s/def :cimi.session-template/redirectURI ::cimi-core/nonblank-string)
+(s/def ::redirectURI ::cimi-core/nonblank-string)
 
 ;; Restrict the href used to create sessions.
 (def session-template-regex #"^session-template/[a-z]+(-[a-z]+)*$")
-(s/def :cimi.session-template/href (s/and string? #(re-matches session-template-regex %)))
+(s/def ::href (s/and string? #(re-matches session-template-regex %)))
 
 ;;
 ;; Keys specifications for SessionTemplate resources.
@@ -30,10 +30,8 @@
 ;; is no sense in defining map resources for the resource itself.
 ;;
 
-(def session-template-keys-spec {:req-un [:cimi.session-template/method
-                                          :cimi.session-template/instance]
-                                 :opt-un [:cimi.session-template/group
-                                          :cimi.session-template/redirectURI]})
+(def session-template-keys-spec {:req-un [::method ::instance]
+                                 :opt-un [::group ::redirectURI]})
 
 (def resource-keys-spec
   (su/merge-keys-specs [c/common-attrs
@@ -45,5 +43,5 @@
 (def template-keys-spec
   (su/merge-keys-specs [c/template-attrs
                         session-template-keys-spec
-                        {:req-un [:cimi.session-template/href]}]))
+                        {:req-un [::href]}]))
 
