@@ -30,7 +30,7 @@
 ;; specifically allows use of form submit buttons
 (s/def ::redirectURI ::cimi-core/nonblank-string)
 
-(s/def :cimi/session
+(s/def ::session
   (su/only-keys-maps c/common-attrs
                      {:req-un [::method ::sessionTemplate ::expiry]
                       :opt-un [::username ::roles ::server ::clientIP ::redirectURI]}))

@@ -13,7 +13,7 @@
   {:req-un [::username ::password]})
 
 ;; Defines the contents of the internal SessionTemplate resource itself.
-(s/def :cimi/session-template.internal
+(s/def ::internal
   (su/only-keys-maps ps/resource-keys-spec
                      session-template-keys-spec-req))
 
@@ -23,6 +23,6 @@
   (su/only-keys-maps ps/template-keys-spec
                      session-template-keys-spec-req))
 
-(s/def :cimi/session-template.internal-create
+(s/def ::internal-create
   (su/only-keys-maps ps/create-keys-spec
                      {:req-un [::sessionTemplate]}))
