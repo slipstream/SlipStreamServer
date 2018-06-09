@@ -8,8 +8,8 @@
     [com.sixsq.slipstream.ssclj.resources.session :as p]
     [com.sixsq.slipstream.ssclj.resources.session-template-github :as tpl]
     [com.sixsq.slipstream.ssclj.resources.session.utils :as sutils]
-    [com.sixsq.slipstream.ssclj.resources.spec.session]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-github]))
+    [com.sixsq.slipstream.ssclj.resources.spec.session :as session]
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-github :as session-tpl]))
 
 (def ^:const authn-method "github")
 
@@ -32,13 +32,13 @@
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi/session))
+(def validate-fn (u/create-spec-validation-fn ::session/session))
 (defmethod p/validate-subtype authn-method
   [resource]
   (validate-fn resource))
 
 
-(def create-validate-fn (u/create-spec-validation-fn :cimi/session-template.github-create))
+(def create-validate-fn (u/create-spec-validation-fn ::session-tpl/github-create))
 (defmethod p/create-validate-subtype authn-method
   [resource]
   (create-validate-fn resource))
@@ -66,4 +66,4 @@
 ;;
 (defn initialize
   []
-  (std-crud/initialize p/resource-url :cimi/session))
+  (std-crud/initialize p/resource-url ::session/session))

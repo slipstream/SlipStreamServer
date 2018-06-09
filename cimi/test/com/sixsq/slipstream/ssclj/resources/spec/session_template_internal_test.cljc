@@ -3,7 +3,7 @@
     [clojure.spec.alpha :as s]
     [clojure.test :refer [deftest is]]
     [com.sixsq.slipstream.ssclj.resources.session-template :as st]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-internal]))
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-internal :as session-tpl]))
 
 (def valid-acl {:owner {:principal "ADMIN"
                         :type      "ROLE"}
@@ -27,8 +27,8 @@
              :username    "user"
              :password    "pass"}]
 
-    (is (s/valid? :cimi/session-template.internal cfg))
+    (is (s/valid? ::session-tpl/internal cfg))
     (doseq [attr #{:id :resourceURI :created :updated :acl :method :instance :username :password}]
-      (is (not (s/valid? :cimi/session-template.internal (dissoc cfg attr)))))
+      (is (not (s/valid? ::session-tpl/internal (dissoc cfg attr)))))
     (doseq [attr #{:group :redirectURI}]
-      (is (s/valid? :cimi/session-template.internal (dissoc cfg attr))))))
+      (is (s/valid? ::session-tpl/internal (dissoc cfg attr))))))

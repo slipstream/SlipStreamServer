@@ -3,7 +3,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.session-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-internal]))
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-internal :as session-tpl]))
 
 
 (def ^:const authn-method "internal")
@@ -46,7 +46,7 @@
 (defn initialize
   []
   (p/register authn-method desc)
-  (std-crud/initialize p/resource-url :cimi/session-template.internal)
+  (std-crud/initialize p/resource-url ::session-tpl/internal)
   (std-crud/add-if-absent "session-template/internal" p/resource-url default-template))
 
 
@@ -54,7 +54,7 @@
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi/session-template.internal))
+(def validate-fn (u/create-spec-validation-fn ::session-tpl/internal))
 (defmethod p/validate-subtype authn-method
   [resource]
   (validate-fn resource))
