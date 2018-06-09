@@ -11,7 +11,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.spec.cloud-entry-point]
+    [com.sixsq.slipstream.ssclj.resources.spec.cloud-entry-point :as cep]
     [com.sixsq.slipstream.util.response :as sr]
     [compojure.core :refer [ANY defroutes DELETE GET POST PUT]]
     [ring.util.response :as r]))
@@ -43,7 +43,7 @@
 ;; define validation function and add to standard multi-method
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi/cloud-entry-point))
+(def validate-fn (u/create-spec-validation-fn ::cep/cloud-entry-point))
 (defmethod crud/validate resource-uri
   [resource]
   (validate-fn resource))
@@ -109,7 +109,7 @@
 ;;
 (defn initialize
   []
-  (std-crud/initialize resource-url :cimi/cloud-entry-point)
+  (std-crud/initialize resource-url ::cep/cloud-entry-point)
 
   (try
     (add)

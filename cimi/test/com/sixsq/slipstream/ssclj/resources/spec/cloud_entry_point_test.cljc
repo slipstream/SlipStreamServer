@@ -3,9 +3,10 @@
     [clojure.spec.alpha :as s]
     [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
-    [com.sixsq.slipstream.ssclj.resources.cloud-entry-point :refer :all]))
+    [com.sixsq.slipstream.ssclj.resources.cloud-entry-point :refer :all]
+    [com.sixsq.slipstream.ssclj.resources.spec.cloud-entry-point :as cep]))
 
-(defn valid? [cep] (s/valid? :cimi/cloud-entry-point cep))
+(defn valid? [cep] (s/valid? ::cep/cloud-entry-point cep))
 (def invalid? (complement valid?))
 
 (deftest check-root-schema

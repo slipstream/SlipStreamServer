@@ -6,7 +6,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.spec.callback]
+    [com.sixsq.slipstream.ssclj.resources.spec.callback :as callback]
     [com.sixsq.slipstream.ssclj.util.log :as log-util]
     [com.sixsq.slipstream.util.response :as r]))
 
@@ -32,7 +32,7 @@
 ;; validate subclasses of callbacks
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi/callback))
+(def validate-fn (u/create-spec-validation-fn ::callback/callback))
 (defmethod crud/validate
   resource-uri
   [resource]
@@ -137,4 +137,4 @@
 ;;
 (defn initialize
   []
-  (std-crud/initialize resource-url :cimi/callback))
+  (std-crud/initialize resource-url ::callback/callback))

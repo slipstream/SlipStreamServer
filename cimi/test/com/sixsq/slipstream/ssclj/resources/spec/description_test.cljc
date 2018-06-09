@@ -3,10 +3,10 @@
     [clojure.spec.alpha :as s]
     [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as desc]
-    [com.sixsq.slipstream.ssclj.resources.spec.description :as t]))
+    [com.sixsq.slipstream.ssclj.resources.spec.description :as desc-spec]))
 
 (deftest check-parameter-type
-  (are [expect-fn arg] (expect-fn (s/valid? :cimi.desc/type arg))
+  (are [expect-fn arg] (expect-fn (s/valid? ::desc-spec/type arg))
                        true? "string"
                        true? "boolean"
                        true? "int"
@@ -31,7 +31,7 @@
                        :other      valid-desc
                        :acl        valid-acl}]
 
-    (are [expect-fn arg] (expect-fn (s/valid? :cimi.desc/parameter-description arg))
+    (are [expect-fn arg] (expect-fn (s/valid? ::desc-spec/parameter-description arg))
                          true? valid-desc
                          true? (dissoc valid-desc :category)
                          true? (dissoc valid-desc :description)
@@ -49,7 +49,7 @@
                          false? (assoc valid-desc :enum "1")
                          false? (assoc valid-desc :enum ["a" 1]))
 
-    (are [expect-fn arg] (expect-fn (s/valid? :cimi.desc/resource-description arg))
+    (are [expect-fn arg] (expect-fn (s/valid? ::desc-spec/resource-description arg))
                          true? resource-desc
                          false? (assoc resource-desc :another 1)
                          true? (assoc desc/CommonParameterDescription :acl valid-acl))))

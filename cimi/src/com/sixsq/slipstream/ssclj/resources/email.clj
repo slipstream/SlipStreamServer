@@ -14,7 +14,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.email.utils :as email-utils]
-    [com.sixsq.slipstream.ssclj.resources.spec.email]
+    [com.sixsq.slipstream.ssclj.resources.spec.email :as email]
     [com.sixsq.slipstream.util.response :as r]
     [superstring.core :as str]))
 
@@ -56,7 +56,7 @@
     (assoc resource :id (str (u/de-camelcase resource-name) "/" new-id))))
 
 
-(def validate-fn (u/create-spec-validation-fn :cimi/email))
+(def validate-fn (u/create-spec-validation-fn ::email/email))
 (defmethod crud/validate
   resource-uri
   [resource]
@@ -131,4 +131,4 @@
 ;;
 (defn initialize
   []
-  (std-crud/initialize resource-url :cimi/email))
+  (std-crud/initialize resource-url ::email/email))

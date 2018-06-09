@@ -6,16 +6,16 @@
     [com.sixsq.slipstream.ssclj.resources.spec.session-template]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
-(s/def :cimi.callback/action ::cimi-core/nonblank-string)
-(s/def :cimi.callback/state #{"WAITING" "FAILED" "SUCCEEDED"})
-(s/def :cimi.callback/targetResource ::cimi-common/resource-link)
-(s/def :cimi.callback/data (su/constrained-map keyword? any?))
-(s/def :cimi.callback/expires ::cimi-core/timestamp)
+(s/def ::action ::cimi-core/nonblank-string)
+(s/def ::state #{"WAITING" "FAILED" "SUCCEEDED"})
+(s/def ::targetResource ::cimi-common/resource-link)
+(s/def ::data (su/constrained-map keyword? any?))
+(s/def ::expires ::cimi-core/timestamp)
 
-(s/def :cimi/callback
+(s/def ::callback
   (su/only-keys-maps cimi-common/common-attrs
-                     {:req-un [:cimi.callback/action
-                               :cimi.callback/state]
-                      :opt-un [:cimi.callback/targetResource
-                               :cimi.callback/data
-                               :cimi.callback/expires]}))
+                     {:req-un [::action
+                               ::state]
+                      :opt-un [::targetResource
+                               ::data
+                               ::expires]}))
