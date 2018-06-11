@@ -142,7 +142,6 @@
                 (ltu/is-status 200)
                 (ltu/is-count zero?)))
 
-
           ;;
           ;; test validation callback
           ;;
@@ -233,7 +232,7 @@
                       (ltu/message-matches #".*unable to retrieve GitHub user information.*")
                       (ltu/is-status status))
 
-                  (is (nil? (db/find-username-by-authn :githublogin github-login)))
+                  (is (nil? (db/find-username-by-authn :github github-login)))
 
                   (reset-callback! callback)
                   (-> session-anon
@@ -244,13 +243,13 @@
 
 
 
-                  (let [ss-username (db/find-username-by-authn :githublogin github-login)]
+                  (let [ss-username (db/find-username-by-authn :github github-login)]
                     (is (not (nil? ss-username)))
 
                     (is (= email (->> github-login
-                                     (db/find-username-by-authn :githublogin)
-                                     (db/get-user)
-                                     :emailAddress))))
+                                      (db/find-username-by-authn :github)
+                                      (db/get-user)
+                                      :name))))
 
                   ;; try creating the same user again, should fail
                   (reset-callback! callback)
@@ -260,7 +259,6 @@
                       (ltu/body->edn)
                       (ltu/message-matches #".*account already exists.*")
                       (ltu/is-status status))))))
-
 
 
           ;; create with invalid template fails

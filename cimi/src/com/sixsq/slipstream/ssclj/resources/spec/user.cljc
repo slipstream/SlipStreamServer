@@ -29,6 +29,10 @@
 (s/def ::deleted boolean?)
 (s/def ::githublogin string?)
 (s/def ::cyclonelogin string?)                              ;; Deprecated and unused.  Kept for backward compatibility.
+(s/def ::identityAttribute (s/and string? #(re-matches #"^[a-z]+(:[a-zA-Z0-9_+-]+)*$" %)))
+(s/def ::externalIdentity (s/nilable (s/coll-of ::identityAttribute :min-count 1)))
+(s/def ::name ::cimi-core/nonblank-string)
+
 
 
 ;;
@@ -54,7 +58,6 @@
    :opt-un [::firstName
             ::lastName
             ::organization
-
             ::method
             ::href
             ::password
@@ -67,7 +70,10 @@
             ::lastExecute
             ::activeSince
             ::githublogin
-            ::cyclonelogin]})
+            ::cyclonelogin
+            ::externalIdentity
+            ::name
+            ]})
 
 
 (s/def :cimi/user

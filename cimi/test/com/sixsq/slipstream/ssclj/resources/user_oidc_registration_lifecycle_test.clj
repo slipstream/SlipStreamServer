@@ -49,9 +49,7 @@
 
 (deftest lifecycle
 
-  (let [
-
-        href (str ut/resource-url "/" oidc/registration-method)
+  (let [href (str ut/resource-url "/" oidc/registration-method)
         template-url (str p/service-context ut/resource-url "/" oidc/registration-method)
 
         session-anon (-> (ltu/ring-app)
@@ -101,8 +99,7 @@
           (ltu/is-status 500))
 
       ;; anonymous create must succeed (normal create and href create)
-      (let [
-            ;;
+      (let [;;
             ;; create the session-oidc configuration to use for these tests
             ;;
             cfg-href (-> session-admin
@@ -243,8 +240,9 @@
                                                                  [validate-url validate-url2 validate-url3])]
 
               (let [username (str "OIDC_USER_" user-number)
+                    email (format "user-%s@example.com" user-number)
                     good-claims {:sub         username
-                                 :email       "user@oidc.example.com"
+                                 :email       email
                                  :given_name  "John"
                                  :family_name "Smith"
                                  :entitlement ["alpha-entitlement"]
@@ -310,7 +308,13 @@
                                          :body
                                          :state)))
 
-                  (is (true? (db/user-exists? username)))
+
+                  (let [ss-username (db/find-username-by-authn :oidc username)]
+                    (is (not (nil? ss-username)))
+                    (is (= email (->> username
+                                      (db/find-username-by-authn :oidc)
+                                      (db/get-user)
+                                      :name))))
 
                   ;; try creating the same user again, should fail
                   (reset-callback! cb-id)

@@ -52,19 +52,35 @@
                              (catch Exception _ []))]
       (set (map :username matched-users)))))
 
+(defn- to-am-kw
+  [authn-method]
+  (keyword (str (name authn-method) "login")))
+
+
 (defn find-username-by-authn
   [authn-method authn-id]
+  ;;assume authn-method is :github or :oidc (i.e not :githublogin)
   (when (and authn-method authn-id)
-    (let [filter-str (format "%s='%s' and %s" (name authn-method) authn-id active-user-filter)
-          filter {:filter (parser/parse-cimi-filter filter-str)}
-          matched-users (try
-                          (second (db/query resource-name {:cimi-params filter
-                                                           :user-roles  ["ADMIN"]}))
-                          (catch Exception _ []))]
-      (if (> (count matched-users) 1)
-        (throw (Exception. (str "There should be only one result for "
-                                authn-id ". Was " matched-users)))
-        (:username (first matched-users))))))
+    (let [filter-str (format "externalIdentity='%s:%s' and %s" (name authn-method) authn-id active-user-filter)
+          filter-str-fallback (format "%s='%s' and %s" (name (to-am-kw authn-method)) authn-id active-user-filter)
+          create-filter (fn [filter-string] {:filter (parser/parse-cimi-filter filter-string)})
+          filter (create-filter filter-str)
+
+          filter-fallback (create-filter filter-str-fallback)
+          query-users (fn [f] (try
+                                (second (db/query resource-name {:cimi-params f
+                                                                 :user-roles  ["ADMIN"]}))
+                                (catch Exception _ [])))
+          matched-users (query-users filter)
+          matched-users-fallback (query-users filter-fallback)
+          get-user (fn [users] (:username (first users)))
+          throw-ex (fn [users] (throw (Exception. (str "There should be only one result for "
+                                                       authn-id ". Was " users))))]
+      (cond
+        (= (count matched-users) 1) (get-user matched-users)
+        (> (count matched-users) 1) (throw-ex matched-users)
+        (= (count matched-users-fallback) 1) (get-user matched-users-fallback)
+        (> (count matched-users-fallback) 1) (throw-ex matched-users-fallback)))))
 
 (defn get-active-user-by-name
   [username]
@@ -81,19 +97,25 @@
   "Verifies that a user with the given username exists in the database no
    matter what the user state is."
   [username]
-  (-> username
-      get-user
-      :state
-      nil?
-      not))
+  (-> username get-user :state nil? not))
+
+(defn external-identity-exists?
+  "Verifies that a user with the given username exists in the database
+  as an external Identity , no matter what the user state is."
+  [authn-method username]
+  (let [filter-str (format "externalIdentity='%s:%s' " (name authn-method) username)
+        create-filter (fn [filter-string] {:filter (parser/parse-cimi-filter filter-string)})
+        filter (create-filter filter-str)
+        query-users (fn [f] (try
+                              (second (db/query resource-name {:cimi-params f
+                                                               :user-roles  ["ADMIN"]}))
+                              (catch Exception _ [])))
+        matched-users (query-users filter)]
+    (pos? (count matched-users))))
 
 (defn- to-resource-id
   [n]
   (format "%s/%s" resource-name n))
-
-(defn- to-am-kw
-  [authn-method]
-  (keyword (str (name authn-method) "login")))
 
 (defn update-user-authn-info
   [authn-method slipstream-username authn-id]
@@ -152,7 +174,8 @@
                                :deleted      false
                                :isSuperUser  false
                                :state        (or state "ACTIVE")}
-                              authn-method (assoc (to-am-kw authn-method) (or external-login authn-login))
+                              authn-method (assoc :externalIdentity [(str authn-method ":" (or external-login authn-login))]
+                                                  :name email)
                               firstname (assoc :firstName firstname)
                               lastname (assoc :lastName lastname)
                               roles (assoc :roles roles)

@@ -27,12 +27,12 @@
             (log/debug "oidc access token claims for" instance ":" (pr-str claims))
 
             (if sub
-              (if-let [matched-user (ex/create-user-when-missing! {:authn-login       sub
-                                                                   :email             email
-                                                                   :firstname         given_name
-                                                                   :lastname          family_name
-                                                                   :organization      realm
-                                                                   :fail-on-existing? true})]
+              (if-let [matched-user (ex/create-user-when-missing! :oidc {:external-login    sub
+                                                                         :external-email    email
+                                                                         :firstname         given_name
+                                                                         :lastname          family_name
+                                                                         :organization      realm
+                                                                         :fail-on-existing? true})]
                 matched-user
                 (oidc-utils/throw-user-exists sub redirectURI))
               (oidc-utils/throw-no-subject redirectURI)))
