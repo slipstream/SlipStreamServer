@@ -44,7 +44,7 @@
       (if (empty? usernames-same-email)
         (let [name-new-user (create-slipstream-user! authn-method external-login external-email)]
           [name-new-user (format "/user/%s?edit=true" name-new-user)])
-        (map-slipstream-user! authn-method (first usernames-same-email) external-login) ))))
+        (map-slipstream-user! authn-method (first usernames-same-email) external-login)))))
 
 
 (defn match-existing-external-user
@@ -54,11 +54,6 @@
   (when-let [username-mapped (db/find-username-by-authn authn-method external-login)]
     [(mapped-user authn-method username-mapped) "/dashboard"]))
 
-(defn match-oidc-username
-  [external-login]
-  (log/debug "Matching via username" external-login)
-  (when-let [username-mapped (db/get-active-user-by-name external-login)]
-    (:username (mapped-user :oidc username-mapped))))
 
 
 (defn sanitize-login-name
@@ -66,21 +61,28 @@
   [s]
   (when s (str/replace s #"[^a-zA-Z0-9_-]" "_")))
 
+(defn match-oidc-username
+  [external-login]
+  (log/debug "Matching via OIDC username" external-login)
+  (let [username-by-authn (db/find-username-by-authn :oidc (sanitize-login-name external-login))
+        username-by-name (db/get-active-user-by-name external-login)
+        username-fallback (when username-by-name (:username (mapped-user :oidc username-by-name)))
+        ]
+    (or username-by-authn username-fallback)))
 
 (defn create-user-when-missing!
-  [{:keys [authn-login fail-on-existing?] :as user-record}]
+  [{:keys [authn-login external-login fail-on-existing?] :as user-record}]
   (let [username (sanitize-login-name authn-login)]
-    (if-not (db/user-exists? username)
+    (if-not (db/user-exists? (or external-login username)) ;; the `or` is mainly for legacy oidc users
       (create-slipstream-user! (assoc user-record :authn-login username))
       (when-not fail-on-existing?
         username))))
 
-
-(defn create-github-user-when-missing!
-  [{:keys [github-login github-email fail-on-existing?] :as github-record}]
-  (let [username (db/find-username-by-authn :github github-login)]
-    (when-not username (create-user-when-missing! {:authn-login (u/random-uuid)
-                                                   :email github-email
-                                                   :external-login github-login
-                                                   :authn-method "github"
+(defn create-external-user-when-missing!
+  [authn-method {:keys [external-login external-email fail-on-existing?] :as external-record}]
+  (let [username (db/find-username-by-authn authn-method external-login)]
+    (when-not username (create-user-when-missing! {:authn-login       (u/random-uuid)
+                                                   :email             external-email
+                                                   :external-login    external-login
+                                                   :authn-method      (name authn-method)
                                                    :fail-on-existing? fail-on-existing?}))))

@@ -201,7 +201,7 @@
             (doseq [[callback url status n] (map vector callbacks validate-urls [400 303 303] (range))]
               (reset-callback! callback)
 
-              (let [github-login (str "GITHUBUSER" n)
+              (let [github-login (str "GITHUB_USER_" n)
                     email (format "user-%s@example.com" n)]
 
                 (with-redefs [auth-github/get-github-access-token (fn [client-id client-secret oauth-code]
