@@ -78,7 +78,7 @@
 
 (defn create-github-user-when-missing!
   [{:keys [github-login github-email fail-on-existing?] :as github-record}]
-  (let [username (db/find-username-by-authn :githublogin github-login)]
+  (let [username (db/find-username-by-authn :github github-login)]
     (when-not username (create-user-when-missing! {:authn-login (u/random-uuid)
                                                    :email github-email
                                                    :external-login github-login

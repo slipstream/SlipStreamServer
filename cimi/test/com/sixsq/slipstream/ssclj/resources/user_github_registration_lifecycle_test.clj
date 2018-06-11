@@ -201,7 +201,7 @@
             (doseq [[callback url status n] (map vector callbacks validate-urls [400 303 303] (range))]
               (reset-callback! callback)
 
-              (let [github-login (str "GITHUB_USER_" n)
+              (let [github-login (str "GITHUBUSER" n)
                     email (format "user-%s@example.com" n)]
 
                 (with-redefs [auth-github/get-github-access-token (fn [client-id client-secret oauth-code]
@@ -233,7 +233,7 @@
                       (ltu/message-matches #".*unable to retrieve GitHub user information.*")
                       (ltu/is-status status))
 
-                  (is (nil? (db/find-username-by-authn :githublogin github-login)))
+                  (is (nil? (db/find-username-by-authn :github github-login)))
 
                   (reset-callback! callback)
                   (-> session-anon
@@ -244,11 +244,11 @@
 
 
 
-                  (let [ss-username (db/find-username-by-authn :githublogin github-login)]
+                  (let [ss-username (db/find-username-by-authn :github github-login)]
                     (is (not (nil? ss-username)))
 
                     (is (= email (->> github-login
-                                     (db/find-username-by-authn :githublogin)
+                                     (db/find-username-by-authn :github)
                                      (db/get-user)
                                      :emailAddress))))
 

@@ -10,11 +10,24 @@
 (use-fixtures :each ltu/with-test-server-fixture)
 
 
-(deftest match-already-mapped
+(deftest match-already-mapped-legacy
   (let [get-db-user #(-> (db/get-all-users) first (dissoc :updated))
         user-info {:username     "joe"
                    :password     "secret"
                    :githublogin  "st"
+                   :emailAddress "st@sixsq.com"
+                   :state        "ACTIVE"}
+        _ (th/add-user-for-test! user-info)
+        user (get-db-user)]
+
+    (match-external-user! :github "st" "st@sixsq.com")
+    (is (= user (get-db-user)))))
+
+(deftest match-already-mapped
+  (let [get-db-user #(-> (db/get-all-users) first (dissoc :updated))
+        user-info {:username     "joe"
+                   :password     "secret"
+                   :externalIdentity  ["github:st"]
                    :emailAddress "st@sixsq.com"
                    :state        "ACTIVE"}
         _ (th/add-user-for-test! user-info)
