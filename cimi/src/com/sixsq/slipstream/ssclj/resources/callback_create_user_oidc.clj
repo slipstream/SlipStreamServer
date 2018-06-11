@@ -27,7 +27,7 @@
             (log/debug "oidc access token claims for" instance ":" (pr-str claims))
 
             (if sub
-              (if-let [matched-user (ex/create-external-user-when-missing! :oidc {:external-login    sub
+              (if-let [matched-user (ex/create-user-when-missing! :oidc {:external-login             sub
                                                                                   :external-email    email
                                                                                   :firstname         given_name
                                                                                   :lastname          family_name

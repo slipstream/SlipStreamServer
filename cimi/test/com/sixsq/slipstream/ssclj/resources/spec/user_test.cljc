@@ -42,6 +42,7 @@
              :githublogin  "github-login"
              :cyclonelogin "cyclone-login"
              :externalIdentity ["github:aGithubLogin"]
+             :name "me@example.com"
              }]
 
     (is (s/valid? :cimi/user cfg))
@@ -52,5 +53,5 @@
       (is (not (s/valid? :cimi/user (dissoc cfg attr)))))
     (doseq [attr #{:firstName :lastName :organization :method :href :password
                    :roles :isSuperUser :state :deleted :creation :lastOnline
-                   :lastExecute :activeSince :githublogin :cyclonelogin :externalIdentity}]
+                   :lastExecute :activeSince :githublogin :cyclonelogin :externalIdentity :name}]
       (is (s/valid? :cimi/user (dissoc cfg attr))))))

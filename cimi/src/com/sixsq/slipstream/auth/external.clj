@@ -71,18 +71,20 @@
     (or username-by-authn username-fallback)))
 
 (defn create-user-when-missing!
-  [{:keys [authn-login external-login fail-on-existing?] :as user-record}]
-  (let [username (sanitize-login-name authn-login)]
-    (if-not (db/user-exists? (or external-login username)) ;; the `or` is mainly for legacy oidc users
-      (create-slipstream-user! (assoc user-record :authn-login username))
-      (when-not fail-on-existing?
-        username))))
-
-(defn create-external-user-when-missing!
   [authn-method {:keys [external-login external-email fail-on-existing?] :as external-record}]
-  (let [username (db/find-username-by-authn authn-method external-login)]
-    (when-not username (create-user-when-missing! {:authn-login       (u/random-uuid)
-                                                   :email             external-email
-                                                   :external-login    external-login
-                                                   :authn-method      (name authn-method)
-                                                   :fail-on-existing? fail-on-existing?}))))
+  (let [username-by-authn (db/find-username-by-authn authn-method (sanitize-login-name external-login))
+        username (u/random-uuid)]
+    (if (and username-by-authn (not fail-on-existing?))
+      username-by-authn
+      (when-not username-by-authn (if-not
+                                    (or (db/user-exists? (or (sanitize-login-name external-login) username))
+                                        (db/external-identity-exists? authn-method (or (sanitize-login-name external-login) username))
+                                        )
+                                    (create-slipstream-user! (assoc external-record
+                                                               :authn-login username
+                                                               :external-login (sanitize-login-name external-login)
+                                                               :email external-email
+                                                               :authn-method (name authn-method)))
+
+                                    (when-not fail-on-existing?
+                                      (or (sanitize-login-name external-login) username)))))))

@@ -318,7 +318,7 @@
                     (is (= email (->> username
                                       (db/find-username-by-authn :oidc)
                                       (db/get-user)
-                                      :emailAddress))))
+                                      :name))))
 
                   ;; try creating the same user again, should fail
                   (reset-callback! cb-id)

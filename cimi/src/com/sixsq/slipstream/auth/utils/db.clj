@@ -65,6 +65,7 @@
           filter-str-fallback (format "%s='%s' and %s" (name (to-am-kw authn-method)) authn-id active-user-filter)
           create-filter (fn [filter-string] {:filter (parser/parse-cimi-filter filter-string)})
           filter (create-filter filter-str)
+
           filter-fallback (create-filter filter-str-fallback)
           query-users (fn [f] (try
                                 (second (db/query resource-name {:cimi-params f
@@ -73,8 +74,8 @@
           matched-users (query-users filter)
           matched-users-fallback (query-users filter-fallback)
           get-user (fn [users] (:username (first users)))
-          throw-ex (fn [users]  (throw (Exception. (str "There should be only one result for "
-                                                       authn-id ". Was " users))) )]
+          throw-ex (fn [users] (throw (Exception. (str "There should be only one result for "
+                                                       authn-id ". Was " users))))]
       (cond
         (= (count matched-users) 1) (get-user matched-users)
         (> (count matched-users) 1) (throw-ex matched-users)
@@ -101,6 +102,20 @@
       :state
       nil?
       not))
+
+(defn external-identity-exists?
+  "Verifies that a user with the given username exists in the database
+  as an external Identity , no matter what the user state is."
+  [authn-method username]
+  (let [filter-str (format "externalIdentity='%s:%s' " (name authn-method) username )
+        create-filter (fn [filter-string] {:filter (parser/parse-cimi-filter filter-string)})
+        filter (create-filter filter-str)
+        query-users (fn [f] (try
+                              (second (db/query resource-name {:cimi-params f
+                                                               :user-roles  ["ADMIN"]}))
+                              (catch Exception _ [])))
+        matched-users (query-users filter)]
+    (> (count matched-users) 0)))
 
 (defn- to-resource-id
   [n]
@@ -163,7 +178,9 @@
                                :deleted      false
                                :isSuperUser  false
                                :state        (or state "ACTIVE")}
-                              authn-method (assoc :externalIdentity [ (str authn-method ":" (or external-login authn-login))])
+                              authn-method (assoc :externalIdentity [(str authn-method ":" (or external-login authn-login))]
+                                                  :name email
+                                                  )
                               firstname (assoc :firstName firstname)
                               lastname (assoc :lastName lastname)
                               roles (assoc :roles roles)

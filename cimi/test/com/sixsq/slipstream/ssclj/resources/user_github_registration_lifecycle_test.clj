@@ -250,7 +250,7 @@
                     (is (= email (->> github-login
                                      (db/find-username-by-authn :github)
                                      (db/get-user)
-                                     :emailAddress))))
+                                     :name))))
 
                   ;; try creating the same user again, should fail
                   (reset-callback! callback)

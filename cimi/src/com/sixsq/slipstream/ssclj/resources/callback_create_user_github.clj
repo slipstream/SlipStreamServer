@@ -27,8 +27,8 @@
             (let [github-login (auth-github/sanitized-login user-info)
                   github-email (auth-github/retrieve-email user-info access-token)]
               (if github-login
-                (if-let [matched-user (ex/create-external-user-when-missing! :github {:external-login    github-login
-                                                                                      :external-email     github-email
+                (if-let [matched-user (ex/create-user-when-missing! :github {:external-login             github-login
+                                                                                      :external-email    github-email
                                                                                       :fail-on-existing? true})]
                   matched-user
                   (gu/throw-user-exists github-login redirectURI))
