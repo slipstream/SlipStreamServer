@@ -142,7 +142,6 @@
                 (ltu/is-status 200)
                 (ltu/is-count zero?)))
 
-
           ;;
           ;; test validation callback
           ;;
@@ -248,9 +247,9 @@
                     (is (not (nil? ss-username)))
 
                     (is (= email (->> github-login
-                                     (db/find-username-by-authn :github)
-                                     (db/get-user)
-                                     :name))))
+                                      (db/find-username-by-authn :github)
+                                      (db/get-user)
+                                      :name))))
 
                   ;; try creating the same user again, should fail
                   (reset-callback! callback)
@@ -260,7 +259,6 @@
                       (ltu/body->edn)
                       (ltu/message-matches #".*account already exists.*")
                       (ltu/is-status status))))))
-
 
 
           ;; create with invalid template fails

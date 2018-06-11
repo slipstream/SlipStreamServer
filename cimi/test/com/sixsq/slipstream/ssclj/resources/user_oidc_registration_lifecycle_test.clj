@@ -49,9 +49,7 @@
 
 (deftest lifecycle
 
-  (let [
-
-        href (str ut/resource-url "/" oidc/registration-method)
+  (let [href (str ut/resource-url "/" oidc/registration-method)
         template-url (str p/service-context ut/resource-url "/" oidc/registration-method)
 
         session-anon (-> (ltu/ring-app)
@@ -101,8 +99,7 @@
           (ltu/is-status 500))
 
       ;; anonymous create must succeed (normal create and href create)
-      (let [
-            ;;
+      (let [;;
             ;; create the session-oidc configuration to use for these tests
             ;;
             cfg-href (-> session-admin
@@ -310,7 +307,6 @@
                                          :response
                                          :body
                                          :state)))
-
 
 
                   (let [ss-username (db/find-username-by-authn :oidc username)]

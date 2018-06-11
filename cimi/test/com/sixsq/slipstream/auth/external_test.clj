@@ -24,6 +24,7 @@
     (match-external-user! :github "st" "st@sixsq.com")
     (is (= user (get-db-user)))))
 
+
 (deftest match-already-mapped
   (let [get-db-user #(-> (db/get-all-users) first (dissoc :updated))
         user-info {:username         "joe"
@@ -91,11 +92,10 @@
              :username))))
 
 
-
 (deftest oidc-user-names
   (let [users (db/get-active-users)
-        authn-methods #{:github :oidc :others}
-        ]
+        authn-methods #{:github :oidc :others}]
+
     (is (zero? (count users)))
 
     (doseq [authn-method authn-methods]
@@ -124,8 +124,8 @@
 
 (deftest check-create-user-when-missing!
   (let [users (db/get-active-users)
-        authn-methods #{:oidc :github :other}
-        ]
+        authn-methods #{:oidc :github :other}]
+
     (is (zero? (count users)))
     (th/add-user-for-test! {:username     "not-missing"
                             :password     "secret"
@@ -160,9 +160,6 @@
                                                                                  :state             "DELETED"
                                                                                  :fail-on-existing? false})))))
 
-
-
-
     (let [users (db/get-all-users)
           user-params (db/get-all-user-params)]
       (is (= (inc (* 2 (count authn-methods))) (count users)))
@@ -177,35 +174,25 @@
     (let [users (db/get-all-users)
           user-params (db/get-all-user-params)]
       (is (= (inc (* 2 (count authn-methods))) (count users)))
-      (is (= (* 2 (count authn-methods)) (count user-params))))
+      (is (= (* 2 (count authn-methods)) (count user-params))))))
 
-    ))
 
 (deftest test-new-user-with-params!
-  (let [users (db/get-active-users)
-        authn-methods #{:oidc :github :other}
-        ]
+  (let [users (db/get-active-users)]
     (is (zero? (count users)))
 
     (is (= (str (name :github) ":" "missing") (get-identity :github {:external-login "missing"
-                                                                               :external-email "ok@example.com"})))
+                                                                     :external-email "ok@example.com"})))
 
+    (let [user-params (db/get-all-user-params)]
+      (is (= (str (name :github) ":" "missing") (-> user-params
+                                                    first
+                                                    (get-in [:acl :owner :principal])
+                                                    (db/get-user)
+                                                    :externalIdentity
+                                                    first)))
 
-    (let [user-params (db/get-all-user-params)
-
-          ]
-        (is (= (str (name :github) ":" "missing") (-> user-params
-                                                           first
-                                                           (get-in [:acl :owner :principal])
-                                                           (db/get-user)
-                                                           :externalIdentity
-                                                           first
-                                                           )))
-
-
-
-    (is (= 1 (count user-params)))))
-  )
+      (is (= 1 (count user-params))))))
 
 
 (deftest test-sanitize-login-name

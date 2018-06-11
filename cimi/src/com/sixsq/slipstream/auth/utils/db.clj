@@ -97,17 +97,13 @@
   "Verifies that a user with the given username exists in the database no
    matter what the user state is."
   [username]
-  (-> username
-      get-user
-      :state
-      nil?
-      not))
+  (-> username get-user :state nil? not))
 
 (defn external-identity-exists?
   "Verifies that a user with the given username exists in the database
   as an external Identity , no matter what the user state is."
   [authn-method username]
-  (let [filter-str (format "externalIdentity='%s:%s' " (name authn-method) username )
+  (let [filter-str (format "externalIdentity='%s:%s' " (name authn-method) username)
         create-filter (fn [filter-string] {:filter (parser/parse-cimi-filter filter-string)})
         filter (create-filter filter-str)
         query-users (fn [f] (try
@@ -115,7 +111,7 @@
                                                                :user-roles  ["ADMIN"]}))
                               (catch Exception _ [])))
         matched-users (query-users filter)]
-    (> (count matched-users) 0)))
+    (pos? (count matched-users))))
 
 (defn- to-resource-id
   [n]

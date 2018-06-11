@@ -55,20 +55,20 @@
     [(mapped-user authn-method username-mapped) "/dashboard"]))
 
 
-
 (defn sanitize-login-name
   "Replace characters not satisfying [a-zA-Z0-9_] with underscore"
   [s]
   (when s (str/replace s #"[^a-zA-Z0-9_-]" "_")))
+
 
 (defn match-oidc-username
   [external-login]
   (log/debug "Matching via OIDC username" external-login)
   (let [username-by-authn (db/find-username-by-authn :oidc (sanitize-login-name external-login))
         username-by-name (db/get-active-user-by-name external-login)
-        username-fallback (when username-by-name (:username (mapped-user :oidc username-by-name)))
-        ]
+        username-fallback (when username-by-name (:username (mapped-user :oidc username-by-name)))]
     (or username-by-authn username-fallback)))
+
 
 (defn create-user-when-missing!
   [authn-method {:keys [external-login external-email fail-on-existing?] :as external-record}]
@@ -78,8 +78,7 @@
       username-by-authn
       (when-not username-by-authn (if-not
                                     (or (db/user-exists? (or (sanitize-login-name external-login) username))
-                                        (db/external-identity-exists? authn-method (or (sanitize-login-name external-login) username))
-                                        )
+                                        (db/external-identity-exists? authn-method (or (sanitize-login-name external-login) username)))
                                     (create-slipstream-user! (assoc external-record
                                                                :authn-login username
                                                                :external-login (sanitize-login-name external-login)

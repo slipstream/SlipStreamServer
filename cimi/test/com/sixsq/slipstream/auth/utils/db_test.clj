@@ -8,7 +8,9 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]))
 
+
 (use-fixtures :each ltu/with-test-server-fixture)
+
 
 (deftest test-user-creation-standard-username
   (let [identifier "st"]
@@ -55,9 +57,7 @@
                                 :roles        "alpha-role, beta-role"
                                 :firstname    "first"
                                 :lastname     "last"
-                                :organization "myorg"})))
-
-  )
+                                :organization "myorg"}))))
 
 
 (deftest test-user-creation-avoids-user-same-name
@@ -150,11 +150,11 @@
 
 
 (deftest test-users-by-authn-skips-deleted
-  (th/add-user-for-test! {:username     "joe-slipstream"
-                          :password     "123456"
-                          :emailAddress "joe@sixsq.com"
-                          :externalIdentity  ["github:joe"]
-                          :state        "DELETED"})
+  (th/add-user-for-test! {:username         "joe-slipstream"
+                          :password         "123456"
+                          :emailAddress     "joe@sixsq.com"
+                          :externalIdentity ["github:joe"]
+                          :state            "DELETED"})
   (is (nil? (db/find-username-by-authn :github "joe"))))
 
 
@@ -210,6 +210,7 @@
                           :githublogin  "joe"})
   (is (thrown-with-msg? Exception #"one result for joe"
                         (db/find-username-by-authn :github "joe"))))
+
 
 (deftest test-users-by-authn-detect-inconsistent-data
   (th/add-user-for-test! {:username         "joe1-slipstream"
