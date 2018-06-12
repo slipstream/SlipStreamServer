@@ -24,24 +24,36 @@
 ;;
 (def ^:const desc
   (merge p/ConfigurationTemplateDescription
-         {:clientID  {:displayName "Client ID"
-                      :type        "string"
-                      :description "client identifier assigned by the OIDC server"
-                      :mandatory   true
-                      :readOnly    false
-                      :order       20}
-          :baseURL   {:displayName "Base URL"
-                      :type        "string"
-                      :description "server's endpoint URL for the OIDC protocol"
-                      :mandatory   true
-                      :readOnly    false
-                      :order       21}
-          :publicKey {:displayName "Public Key"
-                      :type        "string"
-                      :description "public key to verify signed tokens from the OIDC server"
-                      :mandatory   true
-                      :readOnly    false
-                      :order       22}}))
+         {:clientID     {:displayName "Client ID"
+                         :type        "string"
+                         :description "client identifier assigned by the OIDC server"
+                         :mandatory   true
+                         :readOnly    false
+                         :order       20}
+          :baseURL      {:displayName "Base URL"
+                         :type        "string"
+                         :description "server's endpoint URL for the OIDC protocol"
+                         :mandatory   true
+                         :readOnly    false
+                         :order       21}
+          :publicKey    {:displayName "Public Key"
+                         :type        "string"
+                         :description "public key to verify signed tokens from the OIDC server"
+                         :mandatory   true
+                         :readOnly    false
+                         :order       22}
+          :authorizeURL {:displayName "Authorize URL"
+                         :type        "string"
+                         :description "server's endpoint authentication URL for the OIDC protocol"
+                         :mandatory   true
+                         :readOnly    false
+                         :order       23}
+          :tokenURL     {:displayName "Token URL"
+                         :type        "string"
+                         :description "server's endpoint token URL for the OIDC protocol"
+                         :mandatory   true
+                         :readOnly    false
+                         :order       24}}))
 
 ;;
 ;; initialization: register this Configuration template

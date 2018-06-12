@@ -5,8 +5,8 @@
 
 
 (defn get-oidc-access-token
-  [oidc-client-id oidc-base-url oidc-code redirect-uri]
-  (-> (http/post (str oidc-base-url "/token")
+  [oidc-client-id oidc-base-url oidc-token-url oidc-code redirect-uri]
+  (-> (http/post (or oidc-token-url (str oidc-base-url "/token"))
                  {:headers     {"Accept" "application/json"}
                   :form-params {:grant_type   "authorization_code"
                                 :code         oidc-code
