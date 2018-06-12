@@ -10,10 +10,10 @@
 
 ;; All user template resources must have a 'instance' attribute that is used as
 ;; the template identifier.
-(s/def :cimi.user-template/instance ::cimi-core/identifier)
+(s/def ::instance ::cimi-core/identifier)
 
 ;; Users may provide a redirect URI to be used on successful authentication.
-(s/def :cimi.user-template/redirectURI ::cimi-core/nonblank-string)
+(s/def ::redirectURI ::cimi-core/nonblank-string)
 
 (def user-template-regex #"^user-template/[a-zA-Z0-9]([a-zA-Z0-9_-]*[a-zA-Z0-9])?$")
 (s/def ::href (s/and string? #(re-matches user-template-regex %)))
