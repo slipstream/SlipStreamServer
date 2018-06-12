@@ -31,7 +31,7 @@
             (log/debug "github user info for" instance ":" user-info)
             (let [external-login (auth-github/sanitized-login user-info)
                   external-email (auth-github/retrieve-email user-info access-token)
-                  [matched-user _] (ex/match-existing-external-user :githublogin external-login external-email)]
+                  matched-user  (ex/match-existing-external-user :github external-login external-email)]
               (if matched-user
                 (let [claims (cond-> (auth-internal/create-claims matched-user)
                                      session-id (assoc :session session-id)

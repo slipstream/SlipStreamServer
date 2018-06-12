@@ -7,6 +7,8 @@
 
 (s/def ::clientID ::cimi-core/token)
 (s/def ::baseURL ::cimi-core/token)
+(s/def ::authorizeURL ::cimi-core/token)
+(s/def ::tokenURL ::cimi-core/token)
 (s/def ::publicKey ::cimi-core/token)
 
 (def configuration-template-keys-spec-req

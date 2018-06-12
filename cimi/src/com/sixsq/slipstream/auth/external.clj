@@ -52,7 +52,7 @@
   (log/debugf "Matching external user with method '%s', external-login '%s', and external-email '%s'"
               authn-method external-login external-email)
   (when-let [username-mapped (db/find-username-by-authn authn-method external-login)]
-    [(mapped-user authn-method username-mapped) "/dashboard"]))
+    (mapped-user authn-method username-mapped)))
 
 
 (defn sanitize-login-name
