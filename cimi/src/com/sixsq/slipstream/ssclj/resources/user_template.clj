@@ -4,6 +4,7 @@
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.user-template]
     [com.sixsq.slipstream.util.response :as r]))
@@ -20,19 +21,6 @@
 
 (def ^:const collection-uri (str c/slipstream-schema-uri collection-name))
 
-;; the templates are managed as in-memory resources, so modification
-;; of the collection is not permitted, but anonymous users must be
-;; able to list and view templates (if anonymous registration is
-;; permitted)
-(def collection-acl {:owner {:principal "ADMIN"
-                             :type      "ROLE"}
-                     :rules [{:principal "ANON"
-                              :type      "ROLE"
-                              :right     "VIEW"}
-                             {:principal "USER"
-                              :type      "ROLE"
-                              :right     "VIEW"}]})
-
 (def resource-acl {:owner {:principal "ADMIN"
                            :type      "ROLE"}
                    :rules [{:principal "ADMIN"
@@ -45,55 +33,39 @@
                             :type      "ROLE"
                             :right     "VIEW"}]})
 
+(def desc-acl {:owner {:principal "ADMIN"
+                       :type      "ROLE"}
+               :rules [{:principal "ANON"
+                        :type      "ROLE"
+                        :right     "VIEW"}]})
+
+(def collection-acl {:owner {:principal "ADMIN"
+                             :type      "ROLE"}
+                     :rules [{:principal "ANON"
+                              :type      "ROLE"
+                              :right     "VIEW"}
+                             {:principal "USER"
+                              :type      "ROLE"
+                              :right     "VIEW"}]})
+
 
 ;;
-;; atom to keep track of the loaded UserTemplate resources
+;; atom to keep track of the UserTemplate descriptions
 ;;
-(def templates (atom {}))
+
 (def descriptions (atom {}))
 
-(defn collection-wrapper-fn
-  "Specialized version of this function that removes the adding
-   of operations to the collection and entries.  These are already
-   part of the stored resources."
-  [resource-name collection-acl collection-uri collection-key]
-  (fn [request entries]
-    (let [skeleton {:acl         collection-acl
-                    :resourceURI collection-uri
-                    :id          (u/de-camelcase resource-name)}]
-      (-> skeleton
-          (crud/set-operations request)
-          (assoc collection-key entries)))))
-
-(defn complete-resource
-  "Completes the given document with server-managed information:
-   resourceURI, timestamps, and operations.  NOTE: The subtype
-   MUST provide an ACL for the template."
-  [{:keys [method] :as resource}]
-  (when method
-    (let [id (str resource-url "/" method)
-          href (str id "/describe")
-          ops [{:rel (:describe c/action-uri) :href href}]]
-      (-> resource
-          (merge {:id          id
-                  :resourceURI resource-uri
-                  :operations  ops})
-          u/update-timestamps))))
 
 (defn register
-  "Registers a given UserTemplate resource and its description
-   with the server.  The resource document (resource) and the description
-   (desc) must be valid.  The key will be used to create the id of
-   the resource as 'user-template/key'."
-  [resource desc]
-  (when-let [{:keys [id] :as full-resource} (complete-resource resource)]
-    (swap! templates assoc id full-resource)
-    (log/info "loaded UserTemplate" id)
-    (when desc
-      (let [acl (:acl full-resource)
-            full-desc (assoc desc :acl acl)]
-        (swap! descriptions assoc id full-desc))
-      (log/info "loaded UserTemplate description" id))))
+  "Registers a given UserTemplate description with the server. The description
+   (desc) must be valid. The method attribute is used as the key to look up the
+   correct description."
+  [method desc]
+  (when (and method desc)
+    (let [full-desc (assoc desc :acl desc-acl)]
+      (swap! descriptions assoc method full-desc)
+      (log/info "loaded UserTemplate description" method))))
+
 
 ;;
 ;; schemas
@@ -101,13 +73,21 @@
 
 (def UserTemplateDescription
   (merge c/CommonParameterDescription
-         {:method {:displayName "Registration Method"
-                   :category    "general"
-                   :description "method to be used to register user"
-                   :type        "string"
-                   :mandatory   true
-                   :readOnly    true
-                   :order       10}}))
+         {:method   {:displayName "Registration Method"
+                     :category    "general"
+                     :description "method to be used to register user"
+                     :type        "string"
+                     :mandatory   true
+                     :readOnly    true
+                     :order       10}
+          :instance {:displayName "Registration Instance"
+                     :category    "general"
+                     :description "registration instance identifier"
+                     :type        "string"
+                     :mandatory   true
+                     :readOnly    true
+                     :order       11}}))
+
 ;;
 ;; multimethods for validation
 ;;
@@ -117,9 +97,11 @@
            UserTemplate subtype schema."
           :method)
 
+
 (defmethod validate-subtype :default
   [resource]
   (throw (ex-info (str "unknown UserTemplate type: " (:method resource)) resource)))
+
 
 (defmethod crud/validate
   resource-uri
@@ -127,69 +109,95 @@
   (validate-subtype resource))
 
 ;;
+;; identifiers for these resources are the same as the :instance value
+;;
+
+(defmethod crud/new-identifier resource-name
+  [{:keys [instance] :as resource} resource-name]
+  (->> instance
+       (str resource-url "/")
+       (assoc resource :id)))
+
+;;
 ;; CRUD operations
 ;;
 
+(def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
+
 (defmethod crud/add resource-name
-  [request]
-  (throw (r/ex-bad-method request)))
+  [{{:keys [method]} :body :as request}]
+  (if (get @descriptions method)
+    (add-impl request)
+    (throw (r/ex-bad-request (str "invalid authentication method '" method "'")))))
+
+
+(def retrieve-impl (std-crud/retrieve-fn resource-name))
+
 
 (defmethod crud/retrieve resource-name
-  [{{uuid :uuid} :params :as request}]
-  (try
-    (let [id (str resource-url "/" uuid)]
-      (-> (get @templates id)
-          (a/can-view? request)
-          (r/json-response)))
-    (catch Exception e
-      (or (ex-data e) (throw e)))))
+  [request]
+  (retrieve-impl request))
 
-;; must override the default implementation so that the
-;; data can be pulled from the atom rather than the database
-(defmethod crud/retrieve-by-id resource-url
-  [id]
-  (try
-    (get @templates id)
-    (catch Exception e
-      (or (ex-data e) (throw e)))))
+
+(def edit-impl (std-crud/edit-fn resource-name))
+
 
 (defmethod crud/edit resource-name
   [request]
-  (throw (r/ex-bad-method request)))
+  (edit-impl request))
+
+
+(def delete-impl (std-crud/delete-fn resource-name))
+
 
 (defmethod crud/delete resource-name
   [request]
-  (throw (r/ex-bad-method request)))
+  (delete-impl request))
 
-(defn- viewable? [request {:keys [acl] :as entry}]
-  (try
-    (a/can-view? {:acl acl} request)
-    (catch Exception _
-      false)))
+
+(def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
+
 
 (defmethod crud/query resource-name
   [request]
-  (a/can-view? {:acl collection-acl} request)
-  (let [wrapper-fn (collection-wrapper-fn resource-name collection-acl collection-uri resource-tag)
-        entries (or (filter (partial viewable? request) (vals @templates)) [])
-        ;; FIXME: At least the paging options should be supported.
-        options (select-keys request [:identity :query-params :cimi-params :user-name :user-roles])
-        count-before-pagination (count entries)
-        wrapped-entries (wrapper-fn request entries)
-        entries-and-count (assoc wrapped-entries :count count-before-pagination)]
-    (r/json-response entries-and-count)))
+  (query-impl request))
+
+
+;;
+;; override the operations method to add describe action
+;;
+
+(defmethod crud/set-operations resource-uri
+  [{:keys [id resourceURI] :as resource} request]
+  (let [href (str id "/describe")]
+    (try
+      (a/can-modify? resource request)
+      (let [ops (if (.endsWith resourceURI "Collection")
+                  [{:rel (:add c/action-uri) :href id}]
+                  [{:rel (:edit c/action-uri) :href id}
+                   {:rel (:delete c/action-uri) :href id}
+
+                   {:rel (:describe c/action-uri) :href href}])]
+        (assoc resource :operations ops))
+      (catch Exception e
+        (if (.endsWith resourceURI "Collection")
+          (dissoc resource :operations)
+          (assoc resource :operations [{:rel (:describe c/action-uri) :href href}]))))))
+
 
 ;;
 ;; actions
 ;;
+
 (defmethod crud/do-action [resource-url "describe"]
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
-      (-> (get @descriptions id)
-          (a/can-view? request)
-          (r/json-response)))
+      (if-let [{:keys [method] :as resource} (crud/retrieve-by-id id {:user-name "INTERNAL" :user-roles ["ADMIN"]})]
+        (if (a/can-view? resource request)
+          (if-let [desc (get @descriptions method)]
+            (r/json-response desc)
+            (r/ex-not-found id)))
+        (r/ex-not-found id)))
     (catch Exception e
       (or (ex-data e) (throw e)))))
-
-

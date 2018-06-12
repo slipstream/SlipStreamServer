@@ -183,6 +183,7 @@
 ;;
 ;; actions
 ;;
+
 (defmethod crud/do-action [resource-url "describe"]
   [{{uuid :uuid} :params :as request}]
   (try
@@ -195,5 +196,3 @@
         (r/ex-not-found id)))
     (catch Exception e
       (or (ex-data e) (throw e)))))
-
-

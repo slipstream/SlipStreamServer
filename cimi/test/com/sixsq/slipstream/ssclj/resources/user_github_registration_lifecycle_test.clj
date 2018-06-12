@@ -15,7 +15,8 @@
     [com.sixsq.slipstream.ssclj.resources.user-template :as ut]
     [com.sixsq.slipstream.ssclj.resources.user-template-github-registration :as utg]
     [peridot.core :refer :all]
-    [ring.util.codec :as codec]))
+    [ring.util.codec :as codec]
+    [com.sixsq.slipstream.ssclj.resources.user-template-github-registration :as github]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 
@@ -52,6 +53,13 @@
                               (content-type user/form-urlencoded))
 
         redirect-uri-example "https://example.com/webui"]
+
+    ;; must create the github user template; this is not created automatically
+    (-> session-admin
+        (request user-template-base-uri
+                 :request-method :post
+                 :body (json/write-str github/resource))
+        (ltu/is-status 201))
 
     ;; get user template so that user resources can be tested
     (let [name-attr "name"

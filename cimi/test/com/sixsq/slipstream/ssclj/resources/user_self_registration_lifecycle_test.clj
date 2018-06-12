@@ -17,6 +17,8 @@
 
 (def base-uri (str p/service-context (u/de-camelcase user/resource-name)))
 
+(def user-template-base-uri (str p/service-context (u/de-camelcase ut/resource-name)))
+
 (deftest lifecycle
   (let [validation-link (atom nil)]
     (with-redefs [email-utils/smtp-cfg (fn []
@@ -43,16 +45,23 @@
             session-user (header session authn-info-header (format "%s USER ANON" uname))
             session-anon (header session authn-info-header "unknown ANON")
 
-            name-attr "name"
-            description-attr "description"
-            properties-attr {:a "one", :b "two"}
-            plaintext-password "plaintext-password"
+            ;; must create the self registration user template; this is not created automatically
+            _ (-> session-admin
+                  (request user-template-base-uri
+                           :request-method :post
+                           :body (json/write-str self/resource))
+                  (ltu/is-status 201))
 
             template (-> session-admin
                          (request template-url)
                          (ltu/body->edn)
                          (ltu/is-status 200)
                          (get-in [:response :body]))
+
+            name-attr "name"
+            description-attr "description"
+            properties-attr {:a "one", :b "two"}
+            plaintext-password "plaintext-password"
 
             no-href-create {:userTemplate (ltu/strip-unwanted-attrs (assoc template
                                                                       :username uname
@@ -114,7 +123,7 @@
                      :request-method :post
                      :body (json/write-str invalid-create))
             (ltu/body->edn)
-            (ltu/is-status 400))
+            (ltu/is-status 404))
 
         ;; create a user anonymously
         (let [resp (-> session-anon

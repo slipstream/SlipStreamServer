@@ -63,6 +63,13 @@
 
         redirect-uri "https://example.com/webui"]
 
+    ;; must create the oidc user template; this is not created automatically
+    (-> session-admin
+        (request user-template-base-uri
+                 :request-method :post
+                 :body (json/write-str oidc/resource))
+        (ltu/is-status 201))
+
     ;; get user template so that user resources can be tested
     (let [template (-> session-admin
                        (request template-url)
