@@ -80,50 +80,34 @@
             invalid-create (assoc-in href-create [:userTemplate :href] "user-template/unknown-template")]
 
 
-        ;; anonymous user collection query should succeed but be empty
-        ;; access needed to allow self-registration
-        (-> session-anon
-            (request base-uri)
-            (ltu/body->edn)
-            (ltu/is-status 200)
-            (ltu/is-count zero?)
-            (ltu/is-operation-present "add")
-            (ltu/is-operation-absent "delete")
-            (ltu/is-operation-absent "edit"))
+        ;; user collection query should succeed but be empty for all users
+        (doseq [session [session-anon session-user session-admin]]
+          (-> session
+              (request base-uri)
+              (ltu/body->edn)
+              (ltu/is-status 200)
+              (ltu/is-count zero?)
+              (ltu/is-operation-present "add")
+              (ltu/is-operation-absent "delete")
+              (ltu/is-operation-absent "edit")))
 
-        ;; admin user collection query should succeed but be empty (no users created yet)
-        (-> session-admin
-            (request base-uri)
-            (ltu/body->edn)
-            (ltu/is-status 200)
-            (ltu/is-count zero?)
-            (ltu/is-operation-present "add")
-            (ltu/is-operation-absent "delete")
-            (ltu/is-operation-absent "edit"))
+        ;; create a new user; fails without reference
+        (doseq [session [session-anon session-user session-admin]]
+          (-> session
+              (request base-uri
+                       :request-method :post
+                       :body (json/write-str no-href-create))
+              (ltu/body->edn)
+              (ltu/is-status 400)))
 
-        ;; create a new user as administrator; fail without reference
-        (-> session-admin
-            (request base-uri
-                     :request-method :post
-                     :body (json/write-str no-href-create))
-            (ltu/body->edn)
-            (ltu/is-status 400))
-
-        ;; anonymous create without template reference fails
-        (-> session-anon
-            (request base-uri
-                     :request-method :post
-                     :body (json/write-str no-href-create))
-            (ltu/body->edn)
-            (ltu/is-status 400))
-
-        ;; admin create with invalid template fails
-        (-> session-admin
-            (request base-uri
-                     :request-method :post
-                     :body (json/write-str invalid-create))
-            (ltu/body->edn)
-            (ltu/is-status 404))
+        ;; create with invalid template fails
+        (doseq [session [session-anon session-user session-admin]]
+          (-> session
+              (request base-uri
+                       :request-method :post
+                       :body (json/write-str invalid-create))
+              (ltu/body->edn)
+              (ltu/is-status 404)))
 
         ;; create a user anonymously
         (let [resp (-> session-anon
@@ -145,21 +129,14 @@
               (ltu/body->edn)
               (ltu/is-status 409))
 
-          ;; admin should be able to see, edit, and delete user
-          (-> session-admin
-              (request abs-uri)
-              (ltu/body->edn)
-              (ltu/is-status 200)
-              (ltu/is-operation-present "delete")
-              (ltu/is-operation-present "edit"))
-
-          ;; user should be able to see, edit, and delete user
-          (-> session-user
-              (request abs-uri)
-              (ltu/body->edn)
-              (ltu/is-status 200)
-              (ltu/is-operation-present "delete")
-              (ltu/is-operation-present "edit"))
+          ;; user and admin should be able to see, edit, and delete user
+          (doseq [session [session-user session-admin]]
+            (-> session
+                (request abs-uri)
+                (ltu/body->edn)
+                (ltu/is-status 200)
+                (ltu/is-operation-present "delete")
+                (ltu/is-operation-present "edit")))
 
           ;; check contents of resource
           (let [{:keys [name
