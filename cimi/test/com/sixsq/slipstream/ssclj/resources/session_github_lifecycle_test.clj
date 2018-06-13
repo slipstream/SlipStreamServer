@@ -29,7 +29,7 @@
 (def session-template-base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
 
 (def ^:const callback-pattern #".*/api/callback/.*/execute")
-(def ^:const callback-err-msg-pattern #".*error executing validation callback.*")
+
 
 
 (def instance "test-github")
@@ -57,7 +57,7 @@
         session-user (header session authn-info-header "user USER ANON")
         session-anon (header session authn-info-header "unknown ANON")
         session-anon-form (-> session-anon
-                              (content-type session/form-urlencoded))
+                              (content-type u/form-urlencoded))
 
         redirect-uri-example "https://example.com/webui"]
 

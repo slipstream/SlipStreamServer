@@ -2,7 +2,7 @@
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-oidc]))
+    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-oidc :as ct-oidc]))
 
 (def ^:const service "session-oidc")
 
@@ -54,7 +54,7 @@
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi/configuration-template.session-oidc))
+(def validate-fn (u/create-spec-validation-fn ::ct-oidc/session-oidc))
 (defmethod p/validate-subtype service
   [resource]
   (validate-fn resource))

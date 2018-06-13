@@ -5,9 +5,11 @@
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
-(s/def :cimi.cloud-entry-point/baseURI ::cimi-core/nonblank-string)
 
-(s/def :cimi/cloud-entry-point
+(s/def ::baseURI ::cimi-core/nonblank-string)
+
+
+(s/def ::cloud-entry-point
   (su/constrained-map keyword? ::cimi-common/resource-link
                       cimi-common/common-attrs
-                      {:req-un [:cimi.cloud-entry-point/baseURI]}))
+                      {:req-un [::baseURI]}))

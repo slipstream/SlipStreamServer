@@ -5,12 +5,16 @@
     [clj-time.core :as time]
     [clj-time.format :as time-fmt]
     [clojure.spec.alpha :as s]
+    [clojure.walk :as walk]
     [com.sixsq.slipstream.ssclj.util.log :as logu]
     [expound.alpha :as expound]
     [superstring.core :as str])
   (:import
     (java.util Date UUID)
     (org.joda.time DateTime)))
+
+
+(def ^:const form-urlencoded "application/x-www-form-urlencoded")
 
 ;; NOTE: this cannot be replaced with s/lisp-case because it
 ;; will treat a '/' in a resource name as a word separator.
@@ -197,3 +201,30 @@
   "Removes optional elements defined in `specs` set from `keys-spec` spec."
   [keys-spec specs]
   (remove-in keys-spec :opt-un specs))
+
+(defn convert-form
+  "Allow form encoded data to be supplied for a session. This is required to
+   support external authentication methods triggered via a 'submit' button in
+   an HTML form. This takes the flat list of form parameters, keywordizes the
+   keys, and adds the parent :sessionTemplate key."
+  [tpl form-data]
+  {tpl (walk/keywordize-keys form-data)})
+
+(defn is-content-type?
+  "Checks if the given header name is 'content-type' in various forms."
+  [k]
+  (try
+    (= :content-type (-> k name str/lower-case keyword))
+    (catch Exception _
+      false)))
+
+(defn is-form?
+  "Checks the headers to see if the content type is
+   application/x-www-form-urlencoded. Converts the header names to lowercase
+   and keywordizes the result to collect the various header name variants."
+  [headers]
+  (->> headers
+       (filter #(is-content-type? (first %)))
+       first
+       second
+       (= form-urlencoded)))

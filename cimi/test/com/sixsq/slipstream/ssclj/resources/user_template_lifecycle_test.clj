@@ -9,6 +9,8 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.user-template :refer :all]
     [com.sixsq.slipstream.ssclj.resources.user-template-direct :as direct]
+    [com.sixsq.slipstream.ssclj.resources.user-template-github-registration :as github]
+    [com.sixsq.slipstream.ssclj.resources.user-template-oidc-registration :as oidc]
     [com.sixsq.slipstream.ssclj.resources.user-template-self-registration :as self]
     [peridot.core :refer :all]))
 
@@ -42,10 +44,14 @@
         ids (set (map :id entries))
         types (set (map :method entries))]
     (is (= #{(str resource-url "/" direct/registration-method)
-             (str resource-url "/" self/registration-method)}
+             (str resource-url "/" self/registration-method)
+             (str resource-url "/" github/registration-method)
+             (str resource-url "/" oidc/registration-method)}
            ids))
     (is (= #{direct/registration-method
-             self/registration-method}
+             self/registration-method
+             github/registration-method
+             oidc/registration-method}
            types))
 
     (doseq [entry entries]

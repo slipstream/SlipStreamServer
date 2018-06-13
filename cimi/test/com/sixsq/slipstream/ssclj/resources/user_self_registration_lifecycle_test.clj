@@ -8,10 +8,11 @@
     [com.sixsq.slipstream.ssclj.resources.email.utils :as email-utils]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.user :as user]
-    [com.sixsq.slipstream.ssclj.resources.user-template :as ct]
+    [com.sixsq.slipstream.ssclj.resources.user-template :as ut]
     [com.sixsq.slipstream.ssclj.resources.user-template-self-registration :as self]
     [peridot.core :refer :all]
-    [postal.core :as postal]))
+    [postal.core :as postal]
+    [ring.util.codec :as codec]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 
@@ -33,8 +34,8 @@
                                         {:code 0, :error :SUCCESS, :message "OK"})]
 
       (let [uname "120720737412_eduid_chhttps___eduid_ch"
-            href (str ct/resource-url "/" self/registration-method)
-            template-url (str p/service-context ct/resource-url "/" self/registration-method)
+            href (str ut/resource-url "/" self/registration-method)
+            template-url (str p/service-context ut/resource-url "/" self/registration-method)
 
             session (-> (ltu/ring-app)
                         session
@@ -42,6 +43,8 @@
             session-admin (header session authn-info-header "root ADMIN")
             session-user (header session authn-info-header (format "%s USER ANON" uname))
             session-anon (header session authn-info-header "unknown ANON")
+            session-anon-form (-> session-anon
+                                  (content-type u/form-urlencoded))
 
             name-attr "name"
             description-attr "description"
@@ -232,6 +235,30 @@
                                              :response
                                              :body)]
             (is (= "ACTIVE" state)))
+
+          ;; admin can delete resource
+          (-> session-admin
+              (request abs-uri
+                       :request-method :delete)
+              (ltu/body->edn)
+              (ltu/is-status 200)))
+
+        ;; check that a form-encoded create request works
+        (let [resp (-> session-anon-form
+                       (request base-uri
+                                :request-method :post
+                                :body (codec/form-encode {:href href}))
+                       (ltu/body->edn)
+                       (ltu/is-status 201))
+
+              uri (-> resp ltu/location)
+              abs-uri (str p/service-context (u/de-camelcase uri))]
+
+          ;; check resource exists
+          (-> session-admin
+              (request abs-uri)
+              (ltu/body->edn)
+              (ltu/is-status 200))
 
           ;; admin can delete resource
           (-> session-admin

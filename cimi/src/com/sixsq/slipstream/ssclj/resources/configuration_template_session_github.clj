@@ -2,7 +2,7 @@
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-github]))
+    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-github :as ct-github]))
 
 (def ^:const service "session-github")
 
@@ -47,7 +47,7 @@
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi/configuration-template.session-github))
+(def validate-fn (u/create-spec-validation-fn ::ct-github/session-github))
 (defmethod p/validate-subtype service
   [resource]
   (validate-fn resource))

@@ -3,7 +3,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.session-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-api-key]))
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-api-key :as session-tpl]))
 
 (def ^:const authn-method "api-key")
 
@@ -41,13 +41,13 @@
 (defn initialize
   []
   (p/register authn-method desc)
-  (std-crud/initialize p/resource-url :cimi/session-template.api-key))
+  (std-crud/initialize p/resource-url ::session-tpl/api-key))
 
 ;;
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi/session-template.api-key))
+(def validate-fn (u/create-spec-validation-fn ::session-tpl/api-key))
 (defmethod p/validate-subtype authn-method
   [resource]
   (validate-fn resource))

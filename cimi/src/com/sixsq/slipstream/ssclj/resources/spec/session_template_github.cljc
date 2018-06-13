@@ -8,14 +8,14 @@
 ;; up from the environment.
 
 ;; Defines the contents of the github SessionTemplate resource itself.
-(s/def :cimi/session-template.github
+(s/def ::github
   (su/only-keys-maps ps/resource-keys-spec))
 
 ;; Defines the contents of the github template used in a create resource.
 ;; NOTE: The name must match the key defined by the resource, :sessionTemplate here.
-(s/def :cimi.session-template.github/sessionTemplate
+(s/def ::sessionTemplate
   (su/only-keys-maps ps/template-keys-spec))
 
-(s/def :cimi/session-template.github-create
+(s/def ::github-create
   (su/only-keys-maps ps/create-keys-spec
-                     {:req-un [:cimi.session-template.github/sessionTemplate]}))
+                     {:req-un [::sessionTemplate]}))

@@ -4,7 +4,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration :as p]
     [com.sixsq.slipstream.ssclj.resources.configuration-template-session-oidc :as tpl]
-    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-oidc]))
+    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-oidc :as ct-oidc]))
 
 (def ^:const service "session-oidc")
 
@@ -20,12 +20,12 @@
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi/configuration-template.session-oidc))
+(def validate-fn (u/create-spec-validation-fn ::ct-oidc/session-oidc))
 (defmethod p/validate-subtype service
   [resource]
   (validate-fn resource))
 
-(def create-validate-fn (u/create-spec-validation-fn :cimi/configuration-template.session-oidc-create))
+(def create-validate-fn (u/create-spec-validation-fn ::ct-oidc/session-oidc-create))
 (defmethod p/create-validate-subtype service
   [resource]
   (create-validate-fn resource))
@@ -36,4 +36,4 @@
 ;;
 (defn initialize
   []
-  (std-crud/initialize p/resource-url :cimi/configuration-template.session-oidc))
+  (std-crud/initialize p/resource-url ::ct-oidc/session-oidc))

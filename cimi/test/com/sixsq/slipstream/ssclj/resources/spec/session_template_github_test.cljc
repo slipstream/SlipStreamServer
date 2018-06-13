@@ -3,7 +3,7 @@
     [clojure.spec.alpha :as s]
     [clojure.test :refer [deftest is]]
     [com.sixsq.slipstream.ssclj.resources.session-template :as st]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-github]))
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-github :as session-tpl]))
 
 (def valid-acl {:owner {:principal "ADMIN"
                         :type      "ROLE"}
@@ -24,8 +24,8 @@
              :group       "GitHub Authentication"
              :redirectURI "https://nuv.la/webui/profile"}]
 
-    (is (s/valid? :cimi/session-template.github cfg))
+    (is (s/valid? ::session-tpl/github cfg))
     (doseq [attr #{:id :resourceURI :created :updated :acl :method :instance}]
-      (is (not (s/valid? :cimi/session-template.github (dissoc cfg attr)))))
+      (is (not (s/valid? ::session-tpl/github (dissoc cfg attr)))))
     (doseq [attr #{:group :redirectURI}]
-      (is (s/valid? :cimi/session-template.github (dissoc cfg attr))))))
+      (is (s/valid? ::session-tpl/github (dissoc cfg attr))))))

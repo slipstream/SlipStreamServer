@@ -1,7 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-oidc
   (:require
-    [clojure.string :as str]
-    [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.utils.timestamp :as ts]
     [com.sixsq.slipstream.ssclj.resources.callback-create-session-oidc :as cb]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
@@ -11,15 +9,14 @@
     [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as oidc-utils]
     [com.sixsq.slipstream.ssclj.resources.session-template-oidc :as tpl]
     [com.sixsq.slipstream.ssclj.resources.session.utils :as sutils]
-    [com.sixsq.slipstream.ssclj.resources.spec.session]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-oidc]
-    [com.sixsq.slipstream.util.response :as r]))
+    [com.sixsq.slipstream.ssclj.resources.spec.session :as session]
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-oidc :as session-tpl]))
 
 (def ^:const authn-method "oidc")
 
 (def ^:const login-request-timeout (* 3 60))
 
-(def ^:const oidc-relative-url "/auth?response_type=code&client_id=%s&redirect_uri=%s")
+
 
 ;;
 ;; schemas
@@ -37,12 +34,12 @@
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi/session))
+(def validate-fn (u/create-spec-validation-fn ::session/session))
 (defmethod p/validate-subtype authn-method
   [resource]
   (validate-fn resource))
 
-(def create-validate-fn (u/create-spec-validation-fn :cimi/session-template.oidc-create))
+(def create-validate-fn (u/create-spec-validation-fn ::session-tpl/oidc-create))
 (defmethod p/create-validate-subtype authn-method
   [resource]
   (create-validate-fn resource))
@@ -59,8 +56,7 @@
             session (sutils/create-session session-init headers authn-method)
             session (assoc session :expiry (ts/rfc822->iso8601 (ts/expiry-later-rfc822 login-request-timeout)))
             callback-url (oidc-utils/create-callback base-uri (:id session) cb/action-name)
-            ;;redirect-url (str base-url (format oidc-relative-url client-id (sutils/validate-action-url base-uri (:id session))))
-            redirect-url (str base-url (format oidc-relative-url client-id callback-url))]
+            redirect-url (str base-url (format oidc-utils/oidc-relative-url client-id callback-url))]
         [{:status 303, :headers {"Location" redirect-url}} session])
       (oidc-utils/throw-bad-client-config authn-method redirectURI))))
 
@@ -69,4 +65,4 @@
 ;;
 (defn initialize
   []
-  (std-crud/initialize p/resource-url :cimi/session))
+  (std-crud/initialize p/resource-url ::session/session))

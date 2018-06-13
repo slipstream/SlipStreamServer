@@ -24,6 +24,8 @@
 
 (def ^:const create-uri (str c/slipstream-schema-uri resource-name "Create"))
 
+(def ^:const form-urlencoded "application/x-www-form-urlencoded")
+
 ;; creating a new user is a registration request, so anonymous users must
 ;; be able to view the collection and post requests to it (if a template is
 ;; visible to ANON.)
@@ -110,12 +112,23 @@
   (:method resource))
 
 ;; transforms the user template into a user resource
+;;
+;; The concrete implementation of this method MUST return a two-element
+;; tuple containing a response fragment and the created user resource.
+;; The response fragment will be merged with the 'add-impl' function
+;; response and should be used to override the return status (e.g. to
+;; instead provide a redirect) and to set a cookie header.
+;;
 (defmulti tpl->user dispatch-conversion)
 
-;; default implementation throws if the registration method is unknown
+; All concrete session types MUST provide an implementation of this
+;; multimethod. The default implementation will throw an 'internal
+;;; server error' exception.
+;;
 (defmethod tpl->user :default
   [resource request]
-  (logu/log-and-throw-400 "missing or invalid UserTemplate reference"))
+  [{:status 400, :message "missing or invalid UserTemplate reference"} nil])
+
 
 ;; handles any actions that must be taken after the user is added
 (defmulti post-user-add dispatch-conversion)
@@ -146,25 +159,35 @@
   (merge user-attrs-defaults resource))
 
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
+
+
 ;; requires a UserTemplate to create new User
 (defmethod crud/add resource-name
-  [{:keys [body] :as request}]
+  [{:keys [body form-params headers] :as request}]
+
   (let [idmap {:identity (:identity request)}
+        body (if (u/is-form? headers) (u/convert-form :userTemplate form-params) body)
         desc-attrs (u/select-desc-keys body)
-        {:keys [id] :as body} (-> body
-                                  (assoc :resourceURI create-uri)
-                                  (update-in [:userTemplate] dissoc :method :id) ;; forces use of template reference
-                                  (std-crud/resolve-hrefs idmap)
-                                  (update-in [:userTemplate] merge desc-attrs) ;; validate desc attrs
-                                  (crud/validate)
-                                  (:userTemplate)
-                                  (merge-with-defaults)
-                                  (tpl->user request)
-                                  (merge desc-attrs))]      ;; ensure desc attrs are added
-    (let [{{:keys [status resource-id]} :body :as result} (add-impl (assoc request :id id :body body))]
-      (when (and resource-id (= 201 status))
-        (post-user-add (assoc body :id resource-id) request))
-      result)))
+        [resp-fragment {:keys [id] :as body}] (-> body
+                                                  (assoc :resourceURI create-uri)
+                                                  (update-in [:userTemplate] dissoc :method :id) ;; forces use of template reference
+                                                  (std-crud/resolve-hrefs idmap true)
+                                                  (update-in [:userTemplate] merge desc-attrs) ;; validate desc attrs
+                                                  (crud/validate)
+                                                  (:userTemplate)
+                                                  (merge-with-defaults)
+                                                  (tpl->user request)
+                                                  (merge desc-attrs))]
+
+    (if resp-fragment
+      ;;possibly a redirect
+      resp-fragment
+
+      ;; ensure desc attrs are added
+      (let [{{:keys [status resource-id]} :body :as result} (add-impl (assoc request :id id :body body))]
+        (when (and resource-id (= 201 status))
+          (post-user-add (assoc body :id resource-id) request))
+        result))))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 (defmethod crud/retrieve resource-name
