@@ -128,7 +128,7 @@
   [{{:keys [method]} :body :as request}]
   (if (get @descriptions method)
     (add-impl request)
-    (throw (r/ex-bad-request (str "invalid authentication method '" method "'")))))
+    (throw (r/ex-bad-request (str "invalid registration method '" method "'")))))
 
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
@@ -176,7 +176,6 @@
                   [{:rel (:add c/action-uri) :href id}]
                   [{:rel (:edit c/action-uri) :href id}
                    {:rel (:delete c/action-uri) :href id}
-
                    {:rel (:describe c/action-uri) :href href}])]
         (assoc resource :operations ops))
       (catch Exception e
