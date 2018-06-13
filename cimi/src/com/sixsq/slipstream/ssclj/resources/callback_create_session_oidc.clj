@@ -4,13 +4,9 @@
     [clojure.string :as str]
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.cookies :as cookies]
-    [com.sixsq.slipstream.auth.cookies :as cookies]
     [com.sixsq.slipstream.auth.external :as ex]
-    [com.sixsq.slipstream.auth.external :as ex]
-    [com.sixsq.slipstream.auth.internal :as auth-internal]
     [com.sixsq.slipstream.auth.internal :as auth-internal]
     [com.sixsq.slipstream.auth.oidc :as auth-oidc]
-    [com.sixsq.slipstream.auth.utils.http :as uh]
     [com.sixsq.slipstream.auth.utils.http :as uh]
     [com.sixsq.slipstream.auth.utils.sign :as sign]
     [com.sixsq.slipstream.auth.utils.timestamp :as ts]
@@ -30,9 +26,9 @@
 
   (let [{:keys [server clientIP redirectURI] {:keys [href]} :sessionTemplate :as current-session} (sutils/retrieve-session-by-id session-id)
         instance (u/document-id href)
-        [client-id base-url public-key] (oidc-utils/config-params redirectURI instance)]
+        [client-id base-url public-key authorizeURL tokenURL] (oidc-utils/config-params redirectURI instance)]
     (if-let [code (uh/param-value request :code)]
-      (if-let [access-token (auth-oidc/get-oidc-access-token client-id base-url code (str base-uri (or callback-id "unknown-id") "/execute"))]
+      (if-let [access-token (auth-oidc/get-oidc-access-token client-id base-url tokenURL code (str base-uri (or callback-id "unknown-id") "/execute"))]
         (try
           (let [{:keys [sub] :as claims} (sign/unsign-claims access-token public-key)
                 roles (concat (oidc-utils/extract-roles claims)

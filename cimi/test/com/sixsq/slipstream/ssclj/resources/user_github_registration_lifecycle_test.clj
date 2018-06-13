@@ -221,7 +221,7 @@
                                                                    {:login github-login, :email email}))
 
                               ex/match-existing-external-user (fn [authn-method external-login external-email]
-                                                                ["MATCHED_USER" "/dashboard"])]
+                                                                "MATCHED_USER")]
 
                   (-> session-anon
                       (request (str url "?code=NONE")

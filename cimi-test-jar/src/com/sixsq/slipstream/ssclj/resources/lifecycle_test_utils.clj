@@ -69,7 +69,7 @@
 (defmacro has-key
   [m k]
   `((fn [m# k#]
-      (is (get-in m# [:response :body k#]) (str "Map did not contain key " k#)))
+      (is (get-in m# [:response :body k#]) (str "Map did not contain key " k#)) m#)
      ~m ~k))
 
 

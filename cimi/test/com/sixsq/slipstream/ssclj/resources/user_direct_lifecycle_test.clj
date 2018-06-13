@@ -9,7 +9,8 @@
     [com.sixsq.slipstream.ssclj.resources.user :as user]
     [com.sixsq.slipstream.ssclj.resources.user-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.user-template-direct :as direct]
-    [peridot.core :refer :all]))
+    [peridot.core :refer :all]
+    [ring.util.codec :as codec]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 
@@ -26,6 +27,8 @@
         session-admin (header session authn-info-header "root ADMIN")
         session-user (header session authn-info-header (format "%s USER ANON" uname))
         session-anon (header session authn-info-header "unknown ANON")
+        session-admin-form (-> session-admin
+                               (content-type u/form-urlencoded))
 
         template (-> session-admin
                      (request template-url)
@@ -131,6 +134,33 @@
           (ltu/is-status 200)
           (ltu/is-operation-present "delete")
           (ltu/is-operation-present "edit"))
+
+      ;; admin can delete resource
+      (-> session-admin
+          (request abs-uri
+                   :request-method :delete)
+          (ltu/body->edn)
+          (ltu/is-status 200)))
+
+    ;; check that user can be created with form
+    ;; referenced template is only available to admin
+    (let [resp (-> session-admin-form
+                   (request base-uri
+                            :request-method :post
+                            :body (codec/form-encode {:href         href
+                                                      :username     uname
+                                                      :emailAddress "jane@example.org"}))
+                   (ltu/body->edn)
+                   (ltu/is-status 201))
+
+          uri (-> resp ltu/location)
+          abs-uri (str p/service-context (u/de-camelcase uri))]
+
+      ;; check resource exists
+      (-> session-admin
+          (request abs-uri)
+          (ltu/body->edn)
+          (ltu/is-status 200))
 
       ;; admin can delete resource
       (-> session-admin
