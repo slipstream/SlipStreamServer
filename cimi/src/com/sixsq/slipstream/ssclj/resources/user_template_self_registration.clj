@@ -17,6 +17,7 @@
 ;;
 ;; resource
 ;;
+
 (def ^:const resource
   {:method         registration-method
    :instance       registration-method
@@ -28,9 +29,11 @@
    :emailAddress   "user@example.com"
    :acl            resource-acl})
 
+
 ;;
 ;; description
 ;;
+
 (def ^:const desc
   (merge p/UserTemplateDescription
          {:username       {:displayName "Username"
@@ -62,12 +65,15 @@
                            :readOnly    false
                            :order       23}}))
 
+
 ;;
 ;; initialization: register this User template
 ;;
+
 (defn initialize
   []
-  (p/register resource desc))
+  (p/register registration-method desc))
+
 
 ;;
 ;; multimethods for validation

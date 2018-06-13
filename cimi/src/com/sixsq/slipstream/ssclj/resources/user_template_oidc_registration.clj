@@ -17,6 +17,7 @@
 ;;
 ;; resource
 ;;
+
 (def ^:const resource
   {:method         registration-method
    :instance       registration-method
@@ -24,17 +25,22 @@
    :description    "Creates a new user through oidc-registration"
    :acl            resource-acl})
 
+
 ;;
 ;; description
 ;;
+
 (def ^:const desc p/UserTemplateDescription)
+
 
 ;;
 ;; initialization: register this User template
 ;;
+
 (defn initialize
   []
-  (p/register resource desc))
+  (p/register registration-method desc))
+
 
 ;;
 ;; multimethods for validation
