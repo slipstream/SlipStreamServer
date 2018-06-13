@@ -29,7 +29,7 @@
      user-name))
 
   ([{:keys [authn-login] :as user-record}]
-   (log/infof "Creating new SlipStream user '%'" authn-login)
+   (log/infof "Creating new SlipStream user '%s'" authn-login)
    (let [user-name (db/create-user! user-record)]
      (when user-name
        (db/create-user-params! user-name))
