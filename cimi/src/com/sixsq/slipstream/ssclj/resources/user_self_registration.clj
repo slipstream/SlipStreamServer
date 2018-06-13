@@ -35,7 +35,7 @@
   [{:keys [password] :as resource} request]
   [nil (-> resource
            (merge user-defaults)
-           (dissoc :passwordRepeat :instance)
+           (dissoc :passwordRepeat :instance :redirectURI)
            (assoc :password (internal/hash-password password)))])
 
 
