@@ -39,19 +39,19 @@
           :publicKey    {:displayName "Public Key"
                          :type        "string"
                          :description "public key to verify signed tokens from the OIDC server"
-                         :mandatory   true
+                         :mandatory   false
                          :readOnly    false
                          :order       22}
           :authorizeURL {:displayName "Authorize URL"
                          :type        "string"
                          :description "server's endpoint authentication URL for the OIDC protocol"
-                         :mandatory   true
+                         :mandatory   false
                          :readOnly    false
                          :order       23}
           :tokenURL     {:displayName "Token URL"
                          :type        "string"
                          :description "server's endpoint token URL for the OIDC protocol"
-                         :mandatory   true
+                         :mandatory   false
                          :readOnly    false
                          :order       24}}))
 
