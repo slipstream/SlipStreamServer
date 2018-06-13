@@ -33,13 +33,13 @@
           :baseURL      {:displayName "Base URL"
                          :type        "string"
                          :description "server's endpoint URL for the OIDC protocol"
-                         :mandatory   true
+                         :mandatory   false
                          :readOnly    false
                          :order       21}
           :publicKey    {:displayName "Public Key"
                          :type        "string"
                          :description "public key to verify signed tokens from the OIDC server"
-                         :mandatory   false
+                         :mandatory   true
                          :readOnly    false
                          :order       22}
           :authorizeURL {:displayName "Authorize URL"
