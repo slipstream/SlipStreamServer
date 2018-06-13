@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.user-template-direct
   (:require
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.user-template-direct :as user-tpl]
-    [com.sixsq.slipstream.ssclj.resources.user-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]))
+    [com.sixsq.slipstream.ssclj.resources.user-template :as p]))
 
 (def ^:const registration-method "direct")
 

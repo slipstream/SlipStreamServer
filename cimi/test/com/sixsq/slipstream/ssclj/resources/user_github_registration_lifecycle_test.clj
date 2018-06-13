@@ -14,9 +14,9 @@
     [com.sixsq.slipstream.ssclj.resources.user :as user]
     [com.sixsq.slipstream.ssclj.resources.user-template :as ut]
     [com.sixsq.slipstream.ssclj.resources.user-template-github-registration :as utg]
+    [com.sixsq.slipstream.ssclj.resources.user-template-github-registration :as github]
     [peridot.core :refer :all]
-    [ring.util.codec :as codec]
-    [com.sixsq.slipstream.ssclj.resources.user-template-github-registration :as github]))
+    [ring.util.codec :as codec]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 
