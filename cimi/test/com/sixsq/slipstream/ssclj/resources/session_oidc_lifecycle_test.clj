@@ -26,12 +26,16 @@
 
 (def session-template-base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
 
+(def instance-legacy "legacy-test-oidc")
 (def instance "test-oidc")
-(def session-template-oidc {:method      oidc/authn-method
-                            :instance    instance
-                            :name        "OpenID Connect"
-                            :description "External Authentication via OpenID Connect Protocol"
-                            :acl         st/resource-acl})
+
+(def session-template-oidc-legacy {:method      oidc/authn-method
+                                   :instance    instance-legacy
+                                   :name        "OpenID Connect"
+                                   :description "External Authentication via OpenID Connect Protocol"
+                                   :acl         st/resource-acl})
+
+(def session-template-oidc (assoc session-template-oidc-legacy :instance instance))
 
 (def ^:const callback-pattern #".*/api/callback/.*/execute")
 
@@ -49,11 +53,17 @@
     "jVunw8YkO7dsBhVP/8bqLDLw/8NsSAKwlzsoNKbrjVQ/NmHMJ88QkiKwv+E6lidy"
     "3wIDAQAB"))
 
-(def configuration-session-oidc {:configurationTemplate {:service   "session-oidc"
-                                                         :instance  instance
-                                                         :clientID  "FAKE_CLIENT_ID"
-                                                         :baseURL   "https://oidc.example.com"
-                                                         :publicKey auth-pubkey}})
+(def configuration-session-oidc-legacy {:configurationTemplate {:service   "session-oidc"
+                                                                :instance  instance-legacy
+                                                                :clientID  "FAKE_CLIENT_ID"
+                                                                :baseURL   "https://oidc.example.com"
+                                                                :publicKey auth-pubkey}})
+
+(def configuration-session-oidc (-> configuration-session-oidc-legacy
+                                    (update-in [:configurationTemplate] dissoc :baseURL)
+                                    (assoc-in [:configurationTemplate :instance] instance)
+                                    (assoc-in [:configurationTemplate :authorizeURL] "https://authorize.oidc.com/authorize")
+                                    (assoc-in [:configurationTemplate :tokenURL] "https://token.oidc.com/token")))
 
 (deftest lifecycle
 
@@ -73,6 +83,13 @@
           ;;
           ;; create the session template to use for these tests
           ;;
+          href-legacy (-> session-admin
+                          (request session-template-base-uri
+                                   :request-method :post
+                                   :body (json/write-str session-template-oidc-legacy))
+                          (ltu/body->edn)
+                          (ltu/is-status 201)
+                          (ltu/location))
           href (-> session-admin
                    (request session-template-base-uri
                             :request-method :post
@@ -81,25 +98,38 @@
                    (ltu/is-status 201)
                    (ltu/location))
 
+          template-url-legacy (str p/service-context href-legacy)
           template-url (str p/service-context href)
 
+          resp-legacy (-> session-anon
+                          (request template-url-legacy)
+                          (ltu/body->edn)
+                          (ltu/is-status 200))
           resp (-> session-anon
                    (request template-url)
                    (ltu/body->edn)
                    (ltu/is-status 200))
-          template (get-in resp [:response :body])
+
 
           name-attr "name"
           description-attr "description"
           properties-attr {:a "one", :b "two"}
 
           ;;valid-create {:sessionTemplate (ltu/strip-unwanted-attrs template)}
+          href-create-legacy {:name            name-attr
+                              :description     description-attr
+                              :properties      properties-attr
+                              :sessionTemplate {:href href-legacy}}
           href-create {:name            name-attr
                        :description     description-attr
                        :properties      properties-attr
                        :sessionTemplate {:href href}}
+
+          href-create-redirect-legacy {:sessionTemplate {:href        href-legacy
+                                                         :redirectURI redirect-uri}}
           href-create-redirect {:sessionTemplate {:href        href
                                                   :redirectURI redirect-uri}}
+          invalid-create-legacy (assoc-in href-create-legacy [:sessionTemplate :invalid] "BAD")
           invalid-create (assoc-in href-create [:sessionTemplate :invalid] "BAD")]
 
       ;; anonymous query should succeed but have no entries
@@ -110,19 +140,28 @@
           (ltu/is-count zero?))
 
       ;; configuration must have OIDC client id and base URL, if not should get 500
+      (doseq [hcreate #{href-create href-create-legacy}]
       (-> session-anon
           (request base-uri
                    :request-method :post
-                   :body (json/write-str href-create))
+                   :body (json/write-str hcreate))
           (ltu/body->edn)
           (ltu/message-matches #".*missing or incorrect configuration.*")
-          (ltu/is-status 500))
+          (ltu/is-status 500)))
 
-      ;; anonymous create must succeed (normal create and href create)
+
+      ;; anonymous create must succeed (normal create and href-legacy create)
       (let [
             ;;
             ;; create the session-oidc configuration to use for these tests
             ;;
+            cfg-href-legacy (-> session-admin
+                                (request configuration-base-uri
+                                         :request-method :post
+                                         :body (json/write-str configuration-session-oidc-legacy))
+                                (ltu/body->edn)
+                                (ltu/is-status 201)
+                                (ltu/location))
             cfg-href (-> session-admin
                          (request configuration-base-uri
                                   :request-method :post
@@ -130,6 +169,7 @@
                          (ltu/body->edn)
                          (ltu/is-status 201)
                          (ltu/location))
+
 
             public-key (:auth-public-key environ.core/env)
             good-claims {:sub         "OIDC_USER"
@@ -141,12 +181,13 @@
             bad-claims {}
             bad-token (sign/sign-claims bad-claims)]
 
+        (is (= cfg-href-legacy (str "configuration/session-oidc-" instance-legacy)))
         (is (= cfg-href (str "configuration/session-oidc-" instance)))
 
         (let [resp (-> session-anon
                        (request base-uri
                                 :request-method :post
-                                :body (json/write-str href-create))
+                                :body (json/write-str href-create-legacy))
                        (ltu/body->edn)
                        (ltu/is-status 303))
               id (get-in resp [:response :body :resource-id])
@@ -157,7 +198,7 @@
               resp (-> session-anon
                        (request base-uri
                                 :request-method :post
-                                :body (json/write-str href-create-redirect))
+                                :body (json/write-str href-create-redirect-legacy))
                        (ltu/body->edn)
                        (ltu/is-status 303))
               id2 (get-in resp [:response :body :resource-id])
@@ -168,7 +209,7 @@
               resp (-> session-anon-form
                        (request base-uri
                                 :request-method :post
-                                :body (codec/form-encode {:href        href
+                                :body (codec/form-encode {:href        href-legacy
                                                           :redirectURI redirect-uri}))
                        (ltu/body->edn)
                        (ltu/is-status 303))
@@ -283,38 +324,41 @@
           (let [get-redirect-uri (fn [u]
                                    (let [r #".*redirect_uri=(.*)$"]
                                      (second (re-matches r u))))
-                 get-callback-id (fn [u]
-                                     (let [r #".*(callback.*)/execute$"]
-                                         (second (re-matches r u))))
-                 validate-url (get-redirect-uri uri)
-                 validate-url2 (get-redirect-uri uri2)
-                 validate-url3 (get-redirect-uri uri3)
-                 callback-id (get-callback-id validate-url)
-                 callback-id2 (get-callback-id validate-url2)
-                 callback-id3 (get-callback-id validate-url3)]
+                get-callback-id (fn [u]
+                                  (let [r #".*(callback.*)/execute$"]
+                                    (second (re-matches r u))))
+                validate-url (get-redirect-uri uri)
+                validate-url2 (get-redirect-uri uri2)
+                validate-url3 (get-redirect-uri uri3)
+                callback-id (get-callback-id validate-url)
+                callback-id2 (get-callback-id validate-url2)
+                callback-id3 (get-callback-id validate-url3)]
 
-             (-> session-admin
-                   (request (str p/service-context callback-id))
-                   (ltu/body->edn)
-                   (ltu/is-status 200))
-
-             (-> session-admin
-                   (request (str p/service-context callback-id2))
-                   (ltu/body->edn)
-                   (ltu/is-status 200))
-
-             (-> session-admin
-                   (request (str p/service-context callback-id3))
-                   (ltu/body->edn)
-                   (ltu/is-status 200))
-
-
-            ;; remove the authentication configuration
             (-> session-admin
-                (request (str p/service-context cfg-href)
-                         :request-method :delete)
+                (request (str p/service-context callback-id))
                 (ltu/body->edn)
                 (ltu/is-status 200))
+
+            (-> session-admin
+                (request (str p/service-context callback-id2))
+                (ltu/body->edn)
+                (ltu/is-status 200))
+
+            (-> session-admin
+                (request (str p/service-context callback-id3))
+                (ltu/body->edn)
+                (ltu/is-status 200))
+
+
+
+            ;; remove the authentication configurations
+            (doseq [conf #{cfg-href cfg-href-legacy}]
+              (-> session-admin
+                  (request (str p/service-context conf)
+                           :request-method :delete)
+                  (ltu/body->edn)
+                  (ltu/is-status 200)))
+
 
             ;; try hitting the callback with an invalid server configuration
 
@@ -339,16 +383,18 @@
                 (ltu/message-matches #".*missing or incorrect configuration.*")
                 (ltu/is-status 303))                        ;; always expect redirect when redirectURI is provided
 
-            ;; add the configuration back again
-            (-> session-admin
-                (request configuration-base-uri
-                         :request-method :post
-                         :body (json/write-str configuration-session-oidc))
-                (ltu/body->edn)
-                (ltu/is-status 201))
+            ;; add the configurations back again
+            (doseq [conf #{configuration-session-oidc configuration-session-oidc-legacy}]
+              (-> session-admin
+                  (request configuration-base-uri
+                           :request-method :post
+                           :body (json/write-str conf))
+                  (ltu/body->edn)
+                  (ltu/is-status 201)))
+
 
             ;; try hitting the callback without the OIDC code parameter
-             (reset-callback! callback-id)
+            (reset-callback! callback-id)
             (-> session-anon
                 (request validate-url
                          :request-method :get)
@@ -356,7 +402,7 @@
                 (ltu/message-matches #".*not contain required code.*")
                 (ltu/is-status 400))
 
-             (reset-callback! callback-id2)
+            (reset-callback! callback-id2)
             (-> session-anon
                 (request validate-url2
                          :request-method :get)
@@ -364,7 +410,7 @@
                 (ltu/message-matches #".*not contain required code.*")
                 (ltu/is-status 303))                        ;; always expect redirect when redirectURI is provided
 
-             (reset-callback! callback-id3)
+            (reset-callback! callback-id3)
             (-> session-anon
                 (request validate-url3
                          :request-method :get)
@@ -373,7 +419,7 @@
                 (ltu/is-status 303))                        ;; always expect redirect when redirectURI is provided
 
             ;; try now with a fake code
-            (with-redefs [auth-oidc/get-oidc-access-token (fn [client-id client-secret oauth-code redirect-url]
+            (with-redefs [auth-oidc/get-oidc-access-token (fn [client-id client-secret token-url oauth-code redirect-url]
                                                             (case oauth-code
                                                               "GOOD" good-token
                                                               "BAD" bad-token
@@ -491,12 +537,13 @@
               (ltu/is-status 200))
 
           ;; create with invalid template fails
+          (doseq [inv-create #{invalid-create invalid-create-legacy}]
           (-> session-anon
               (request base-uri
                        :request-method :post
-                       :body (json/write-str invalid-create))
+                       :body (json/write-str inv-create))
               (ltu/body->edn)
-              (ltu/is-status 400)))))))
+              (ltu/is-status 400))))))))
 
 
 (deftest bad-methods

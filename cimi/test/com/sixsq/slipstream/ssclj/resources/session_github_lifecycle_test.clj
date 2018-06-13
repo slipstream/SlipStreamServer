@@ -379,7 +379,7 @@
                                                               :email "user@example.com"}))
 
                         ex/match-existing-external-user (fn [authn-method external-login external-email]
-                                                          ["MATCHED_USER" "/dashboard"])
+                                                          "MATCHED_USER" )
 
                         db/find-roles-for-username (fn [username]
                                                      "USER ANON alpha")]

@@ -7,8 +7,6 @@
     [com.sixsq.slipstream.ssclj.util.log :as logu]
     [com.sixsq.slipstream.util.response :as r]))
 
-(def ^:const oidc-relative-url "/auth?response_type=code&client_id=%s&redirect_uri=%s")
-
 (defn prefix
   [realm attr]
   (when (and realm attr)
@@ -92,9 +90,9 @@
   (let [cfg-id (str "configuration/session-oidc-" instance)
         opts {:user-name "INTERNAL" :user-roles ["ADMIN"]}] ;; FIXME: works around authn at DB interface level
     (try
-      (let [{:keys [clientID baseURL publicKey]} (crud/retrieve-by-id cfg-id opts)]
-        (if (and clientID baseURL publicKey)
-          [clientID baseURL publicKey]
+      (let [{:keys [clientID baseURL publicKey authorizeURL tokenURL]} (crud/retrieve-by-id cfg-id opts)]
+        (if (or (and clientID baseURL publicKey) (and clientID authorizeURL tokenURL publicKey))
+          [clientID baseURL publicKey authorizeURL tokenURL]
           (throw-bad-client-config cfg-id redirectURI)))
       (catch Exception _
         (throw-bad-client-config cfg-id redirectURI)))))
@@ -118,3 +116,11 @@
           (throw (ex-info msg (r/map-response msg 500 resource-id)))))
       (let [msg "cannot create  session callback"]
         (throw (ex-info msg (r/map-response msg 500 session-id)))))))
+
+(defn create-redirect-url
+  "Generate a callback-url. By default, use authorizeURL if provided,
+  otherwise fallback to base-url/auth"
+  [base-url authorizeURL client-id callback-url]
+  (let [url-params-format "?response_type=code&client_id=%s&redirect_uri=%s"
+        base-redirect-url (or authorizeURL (str base-url "/auth"))]
+    (str base-redirect-url (format url-params-format client-id callback-url))))

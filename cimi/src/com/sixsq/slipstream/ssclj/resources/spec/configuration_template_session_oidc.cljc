@@ -7,13 +7,17 @@
 
 (s/def ::clientID ::cimi-core/token)
 (s/def ::baseURL ::cimi-core/token)
+(s/def ::authorizeURL ::cimi-core/token)
+(s/def ::tokenURL ::cimi-core/token)
 (s/def ::publicKey ::cimi-core/token)
 
 (def configuration-template-keys-spec-req
-  {:req-un [::ps/instance ::clientID ::baseURL ::publicKey]})
+  {:req-un [::ps/instance ::clientID  ::publicKey]
+   :opt-un [::baseURL ::authorizeURL ::tokenURL]})
 
 (def configuration-template-keys-spec-create
-  {:req-un [::ps/instance ::clientID ::baseURL ::publicKey]})
+  {:req-un [::ps/instance ::clientID ::publicKey]
+   :opt-un [::baseURL ::authorizeURL ::tokenURL]})
 
 ;; Defines the contents of the OIDC authentication ConfigurationTemplate resource itself.
 (s/def ::session-oidc

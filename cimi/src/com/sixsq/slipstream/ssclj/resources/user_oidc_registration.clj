@@ -33,11 +33,11 @@
 
 (defmethod p/tpl->user user-template/registration-method
   [{:keys [href redirectURI] :as resource} {:keys [headers base-uri] :as request}]
-  (let [[client-id base-url public-key] (oidc-utils/config-params redirectURI (u/document-id href))]
-    (if (and base-url client-id public-key)
+  (let [[client-id base-url public-key authorizeURL tokenURL] (oidc-utils/config-params redirectURI (u/document-id href))]
+    (if (or (and base-url client-id public-key) (and authorizeURL tokenURL client-id public-key))
       (let [data (when redirectURI {:redirectURI redirectURI})
             callback-url (user-utils/create-user-oidc-callback base-uri href data)
-            redirect-url (str base-url (format oidc-utils/oidc-relative-url client-id callback-url))]
+            redirect-url (oidc-utils/create-redirect-url base-url authorizeURL client-id callback-url)]
         [{:status 303, :headers {"Location" redirect-url}} nil])
       (oidc-utils/throw-bad-client-config user-template/registration-method redirectURI))))
 
