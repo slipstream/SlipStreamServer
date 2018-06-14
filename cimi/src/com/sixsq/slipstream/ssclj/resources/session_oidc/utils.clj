@@ -90,9 +90,9 @@
   (let [cfg-id (str "configuration/session-oidc-" instance)
         opts {:user-name "INTERNAL" :user-roles ["ADMIN"]}] ;; FIXME: works around authn at DB interface level
     (try
-      (let [{:keys [clientID baseURL publicKey authorizeURL tokenURL]} (crud/retrieve-by-id cfg-id opts)]
-        (if (or (and clientID baseURL publicKey) (and clientID authorizeURL tokenURL publicKey))
-          [clientID baseURL publicKey authorizeURL tokenURL]
+      (let [{:keys [clientID clientSecret baseURL publicKey authorizeURL tokenURL]} (crud/retrieve-by-id cfg-id opts)]
+        (if (or (and clientID baseURL publicKey) (and clientID clientSecret authorizeURL tokenURL publicKey))
+          [clientID clientSecret baseURL publicKey authorizeURL tokenURL]
           (throw-bad-client-config cfg-id redirectURI)))
       (catch Exception _
         (throw-bad-client-config cfg-id redirectURI)))))

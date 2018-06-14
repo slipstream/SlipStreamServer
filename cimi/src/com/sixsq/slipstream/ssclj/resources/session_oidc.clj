@@ -49,8 +49,8 @@
 ;;
 (defmethod p/tpl->session authn-method
   [{:keys [href redirectURI] :as resource} {:keys [headers base-uri] :as request}]
-  (let [[client-id base-url public-key authorizeURL tokenURL] (oidc-utils/config-params redirectURI (u/document-id href))]
-    (if (or (and base-url client-id public-key) (and authorizeURL tokenURL client-id public-key))
+  (let [[client-id client-secret base-url public-key authorizeURL tokenURL] (oidc-utils/config-params redirectURI (u/document-id href))]
+    (if (or (and base-url client-id public-key) (and authorizeURL tokenURL client-id client-secret public-key))
       (let [session-init (cond-> {:href href}
                                  redirectURI (assoc :redirectURI redirectURI))
             session (sutils/create-session session-init headers authn-method)
