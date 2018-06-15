@@ -13,16 +13,18 @@
 
 
 (deftest test-user-creation-standard-username
-  (let [identifier "st"]
-    (is (= identifier (db/create-user! {:authn-method "github"
-                                        :authn-login  identifier
-                                        :email        "st@s.com"
-                                        :roles        "alpha-role, beta-role"
-                                        :firstname    "first"
-                                        :lastname     "last"
-                                        :organization "myorg"})))))
+  (let [short-id "st"
+        long-id "485879@vho-switchaai.chhttps://aai-logon.vho-switchaai.ch/idp/shibboleth!https://fed-id.nuv.la/samlbridge/module.php/saml/sp/metadata.php/sixsq-saml-bridge!uays4u2/dk2qefyxzsv9uiicv+y="]
+    (doseq [id #{short-id long-id}]
+      (is (= id (db/create-user! {:authn-method "github"
+                                  :authn-login  id
+                                  :email        "st@s.com"
+                                  :roles        "alpha-role, beta-role"
+                                  :firstname    "first"
+                                  :lastname     "last"
+                                  :organization "myorg"}))))))
 
-(deftest test-user-creation-standard-username
+(deftest test-user-creation-standard-username-oidc
   (let [identifier "st"]
     (is (= identifier (db/create-user! {:authn-method "oidc"
                                         :instance     "instance"
