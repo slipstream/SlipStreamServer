@@ -21,15 +21,3 @@
       :access_token))
 
 
-
-
-(defn oidc-token->json
-  [token]
-  (let [ decode (fn [to-decode] (String. (.decode (Base64/getDecoder) to-decode)))]
-  (-> token
-      (str/split #"\." 3)
-      (second)
-      (decode)
-      (json/read-str :key-fn keyword))))
-
-
