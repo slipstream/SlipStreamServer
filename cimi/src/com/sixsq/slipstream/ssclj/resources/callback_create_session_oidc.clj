@@ -36,7 +36,7 @@
                               (oidc-utils/extract-entitlements claims))]
             (log/debug "OIDC access token claims for" instance ":" (pr-str claims))
             (if sub
-              (if-let [matched-user (ex/match-oidc-username sub)]
+              (if-let [matched-user (ex/match-oidc-username sub instance)]
                 (let [claims (cond-> (auth-internal/create-claims matched-user)
                                      session-id (assoc :session session-id)
                                      session-id (update :roles #(str session-id " " %))

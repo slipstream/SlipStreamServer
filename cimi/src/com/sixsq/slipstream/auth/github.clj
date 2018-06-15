@@ -1,8 +1,7 @@
 (ns com.sixsq.slipstream.auth.github
   (:require
     [clj-http.client :as http]
-    [clojure.data.json :as json]
-    [com.sixsq.slipstream.auth.external :as ex]))
+    [clojure.data.json :as json]))
 
 
 (defn parse-github-user
@@ -14,7 +13,8 @@
 
 
 (defn primary-or-verified
-  "Return primary verified email (if found) else fallbacks to any (non deterministic) verified email"
+  "Return primary verified email (if found) otherwise fallback to any (non
+   deterministic) verified email."
   [emails]
   (let [verified (filter :verified emails)]
     (if-let [primary (first (filter :primary verified))]
@@ -35,11 +35,6 @@
   (if-let [public-email (:email user-info)]
     public-email
     (retrieve-private-email access-token)))
-
-
-(defn sanitized-login
-  [user-info]
-  (-> user-info :login ex/sanitize-login-name))
 
 
 (defn get-github-access-token

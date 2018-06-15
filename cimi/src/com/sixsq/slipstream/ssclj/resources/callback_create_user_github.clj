@@ -24,7 +24,7 @@
         (if-let [user-info (auth-github/get-github-user-info access-token)]
           (do
             (log/debugf "github user info for %s: %s" instance (str user-info))
-            (let [github-login (auth-github/sanitized-login user-info)
+            (let [github-login (:login user-info)
                   github-email (auth-github/retrieve-email user-info access-token)]
               (if github-login
                 (if-let [matched-user (ex/create-user-when-missing! :github {:external-login    github-login
@@ -36,7 +36,6 @@
           (gu/throw-no-user-info redirectURI))
         (gu/throw-no-access-token redirectURI))
       (gu/throw-missing-oauth-code redirectURI))))
-
 
 
 (defmethod callback/execute action-name

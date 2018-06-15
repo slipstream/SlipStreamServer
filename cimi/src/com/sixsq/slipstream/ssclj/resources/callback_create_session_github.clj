@@ -29,7 +29,7 @@
         (if-let [{:keys [user email] :as user-info} (auth-github/get-github-user-info access-token)]
           (do
             (log/debug "github user info for" instance ":" user-info)
-            (let [external-login (auth-github/sanitized-login user-info)
+            (let [external-login (:login user-info)
                   external-email (auth-github/retrieve-email user-info access-token)
                   matched-user  (ex/match-existing-external-user :github external-login external-email)]
               (if matched-user
@@ -55,6 +55,7 @@
           (gu/throw-no-user-info redirectURI))
         (gu/throw-no-access-token redirectURI))
       (gu/throw-missing-oauth-code redirectURI))))
+
 
 (defmethod callback/execute action-name
   [{callback-id :id {session-id :href} :targetResource :as callback-resource} request]

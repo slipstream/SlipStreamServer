@@ -11,34 +11,6 @@
 (use-fixtures :each ltu/with-test-server-fixture)
 
 
-(deftest match-already-mapped-legacy
-  (let [get-db-user #(-> (db/get-all-users) first (dissoc :updated))
-        user-info {:username     "joe"
-                   :password     "secret"
-                   :githublogin  "st"
-                   :emailAddress "st@sixsq.com"
-                   :state        "ACTIVE"}
-        _ (th/add-user-for-test! user-info)
-        user (get-db-user)]
-
-    (match-external-user! :github "st" "st@sixsq.com")
-    (is (= user (get-db-user)))))
-
-
-(deftest match-already-mapped
-  (let [get-db-user #(-> (db/get-all-users) first (dissoc :updated))
-        user-info {:username         "joe"
-                   :password         "secret"
-                   :externalIdentity ["github:st"]
-                   :emailAddress     "st@sixsq.com"
-                   :state            "ACTIVE"}
-        _ (th/add-user-for-test! user-info)
-        user (get-db-user)]
-
-    (match-external-user! :github "st" "st@sixsq.com")
-    (is (= user (get-db-user)))))
-
-
 (deftest match-existing-external-user-does-not-create
   (is (= [] (db/get-all-users)))
 
@@ -78,48 +50,17 @@
 
 
 (defn get-identity
-  [authn-method external-record]
+  [authn-method {:keys [instance] :as external-record}]
   (let [externalIdentity (->> (create-user-when-missing! authn-method external-record)
                               (db/get-user)
                               :externalIdentity
-                              (filter #(str/starts-with? % (name authn-method)))
-                              first
-                              )]
+                              (filter #(str/starts-with? % (or instance (name authn-method))))
+                              first)]
     (or externalIdentity
         ;;use fallback
         (->> (create-user-when-missing! authn-method external-record)
              (db/get-user)
              :username))))
-
-
-(deftest oidc-user-names
-  (let [users (db/get-active-users)
-        authn-methods #{:github :oidc :others}]
-
-    (is (zero? (count users)))
-
-    (doseq [authn-method authn-methods]
-      (is (= (str (name authn-method) ":" "a_b_c_d_e") (get-identity authn-method {:external-login    "a/b!c@d#e"
-                                                                                   :external-email    "bad-address@example.com"
-                                                                                   :fail-on-existing? false}))))
-    (let [users (db/get-active-users)]
-      (is (= (count authn-methods) (count users))))
-
-
-    (doseq [authn-method authn-methods]
-      (is (= (str (name authn-method) ":" "a_b_c_d_e") (get-identity authn-method {:external-login    "a/b!c@d#e"
-                                                                                   :external-email    "bad-address@example.com"
-                                                                                   :fail-on-existing? false}))))
-    (let [users (db/get-active-users)]
-      (is (= (count authn-methods) (count users))))
-
-
-    (doseq [authn-method authn-methods]
-      (is (= (str (name authn-method) ":" "A_B_C_D_E") (get-identity authn-method {:external-login    "A/B!C@D#E"
-                                                                                   :external-email    "bad-address@example.com"
-                                                                                   :fail-on-existing? false}))))
-    (let [users (db/get-active-users)]
-      (is (= (* 2 (count authn-methods)) (count users))))))
 
 
 (deftest check-create-user-when-missing!
@@ -144,14 +85,22 @@
 
 
     (doseq [authn-method authn-methods]
-      (is (= (str (name authn-method) ":" "missing)" (get-identity authn-method {:external-login    "missing"
+      (is (= (str (name authn-method) ":" "missing") (get-identity authn-method {:external-login    "missing"
                                                                                  :external-email    "ok@example.com"
-                                                                                 :fail-on-existing? false})))))
+                                                                                 :fail-on-existing? false}))))
+
+    (doseq [authn-method authn-methods]
+      (is (= "instance:missing2" (get-identity authn-method {:external-login    "missing2"
+                                                             :external-email    "ok@example.com"
+                                                             :instance          "instance"
+                                                             :fail-on-existing? false}))))
+
+
 
     (let [users (db/get-all-users)
           user-params (db/get-all-user-params)]
-      (is (= (inc (count authn-methods)) (count users)))
-      (is (= (count authn-methods) (count user-params))))
+      (is (= (+ 2 (count authn-methods)) (count users)))
+      (is (= (+ 1 (count authn-methods)) (count user-params))))
 
 
     (doseq [authn-method authn-methods]
@@ -160,10 +109,11 @@
                                                                                  :state             "DELETED"
                                                                                  :fail-on-existing? false})))))
 
+
     (let [users (db/get-all-users)
           user-params (db/get-all-user-params)]
-      (is (= (inc (* 2 (count authn-methods))) (count users)))
-      (is (= (* 2 (count authn-methods)) (count user-params))))
+      (is (= (+ 2 (* 2 (count authn-methods))) (count users)))
+      (is (= (+ 1 (* 2 (count authn-methods))) (count user-params))))
 
 
     (doseq [authn-method authn-methods]
@@ -171,10 +121,12 @@
                                                                                  :external-email    "ok@example.com"
                                                                                  :state             "DELETED"
                                                                                  :fail-on-existing? true})))))
+
+
     (let [users (db/get-all-users)
           user-params (db/get-all-user-params)]
-      (is (= (inc (* 2 (count authn-methods))) (count users)))
-      (is (= (* 2 (count authn-methods)) (count user-params))))))
+      (is (= (+ 2 (* 2 (count authn-methods))) (count users)))
+      (is (= (+ 1 (* 2 (count authn-methods))) (count user-params))))))
 
 
 (deftest test-new-user-with-params!
@@ -195,8 +147,21 @@
       (is (= 1 (count user-params))))))
 
 
-(deftest test-sanitize-login-name
-  (is (= "st" (sanitize-login-name "st")))
-  (is (= "Paul_Newman" (sanitize-login-name "Paul Newman")))
-  (is (= "abc-def-123" (sanitize-login-name "abc-def-123")))
-  (is (= "a_b_c_d_e" (sanitize-login-name "a/b!c@d#e"))))
+(deftest test-new-user-with-instance-params!
+  (let [users (db/get-active-users)]
+    (is (zero? (count users)))
+
+    (is (= "instance:missing" (get-identity :oidc {:external-login "missing"
+                                                   :external-email "ok@example.com"
+                                                   :instance       "instance"
+                                                   })))
+
+    (let [user-params (db/get-all-user-params)]
+      (is (= "instance:missing" (-> user-params
+                                    first
+                                    (get-in [:acl :owner :principal])
+                                    (db/get-user)
+                                    :externalIdentity
+                                    first)))
+
+      (is (= 1 (count user-params))))))

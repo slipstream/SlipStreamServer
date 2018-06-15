@@ -7,14 +7,18 @@
   (:import
     (java.util UUID)))
 
+
 ;; Only ACTIVE users can log in.  All other states (NEW, SUSPENDED, and DELETED) are disallowed
 (def ^:private active-user-filter "(state='ACTIVE')")
 
+
 (def resource-name "user")
+
 
 (defn resource-uri
   [name]
   (str resource-name "/" name))
+
 
 (defn get-all-users
   []
@@ -22,11 +26,13 @@
     (second (db/query resource-name {:user-roles ["ADMIN"]}))
     (catch Exception _ [])))
 
+
 (defn get-all-user-params
   []
   (try
     (second (db/query "user-param" {:user-roles ["ADMIN"]}))
     (catch Exception _ [])))
+
 
 (defn get-active-users
   []
@@ -36,11 +42,13 @@
                                        :user-roles  ["ADMIN"]}))
       (catch Exception _ []))))
 
+
 (defn get-user
   [username]
   (try
     (db/retrieve (resource-uri username) {})
     (catch Exception _ {})))
+
 
 (defn find-usernames-by-email
   [email]
@@ -51,6 +59,7 @@
                                                               :user-roles  ["ADMIN"]}))
                              (catch Exception _ []))]
       (set (map :username matched-users)))))
+
 
 (defn- to-am-kw
   [authn-method]
@@ -82,6 +91,7 @@
         (= (count matched-users-fallback) 1) (get-user matched-users-fallback)
         (> (count matched-users-fallback) 1) (throw-ex matched-users-fallback)))))
 
+
 (defn get-active-user-by-name
   [username]
   (when username
@@ -93,11 +103,13 @@
                first)
            (catch Exception _ {})))))
 
+
 (defn user-exists?
   "Verifies that a user with the given username exists in the database no
    matter what the user state is."
   [username]
   (-> username get-user :state nil? not))
+
 
 (defn external-identity-exists?
   "Verifies that a user with the given username exists in the database
@@ -113,9 +125,11 @@
         matched-users (query-users filter)]
     (pos? (count matched-users))))
 
+
 (defn- to-resource-id
   [n]
   (format "%s/%s" resource-name n))
+
 
 (defn update-user-authn-info
   [authn-method slipstream-username authn-id]
@@ -136,45 +150,29 @@
     (crud/edit request))
   slipstream-username)
 
-(defn- inc-string
-  [s]
-  (if (empty? s)
-    1
-    (inc (read-string s))))
-
-(defn- append-number-or-inc
-  [name]
-  (if-let [tokens (re-find #"(\w*)(_)(\d*)" name)]
-    (str (nth tokens 1) "_" (inc-string (nth tokens 3)))
-    (str name "_1")))
-
-(defn name-no-collision
-  [name existing-names]
-  (if ((set existing-names) name)
-    (recur (append-number-or-inc name) existing-names)
-    name))
 
 (defn existing-user-names
   []
   (let [users (second (db/query "user" {:user-roles ["ADMIN"]}))]
-    (map :username users)))
+    (set (map :username users))))
+
 
 (defn random-password
   []
   (str (UUID/randomUUID)))
 
+
 (defn user-create-request
   [{:keys [authn-login email authn-method firstname lastname roles organization state external-login password instance] :as user-record}]
-  (let [slipstream-username (name-no-collision authn-login (existing-user-names))
-        user-resource (cond-> {:href         "user-template/direct" ;;FIXME : should reflect the actual user template
-                               :username     slipstream-username
+  (let [user-resource (cond-> {:href         "user-template/direct" ;; FIXME: should reflect the actual user template
+                               :username     authn-login
                                :emailAddress email
                                :password     (if password password (random-password))
                                :deleted      false
                                :isSuperUser  false
                                :state        (or state "ACTIVE")}
                               authn-method (assoc
-                                             :externalIdentity [(str authn-method ":" (or external-login authn-login))]
+                                             :externalIdentity [(str (or instance (name authn-method))":" (or external-login authn-login))]
                                              :name email)
                               firstname (assoc :firstName firstname)
                               lastname (assoc :lastName lastname)
@@ -190,6 +188,7 @@
      :user-roles   #{"ANON"}
      :body         {:userTemplate user-resource}}))
 
+
 (defn user-param-create-request
   [user-name]
   {:identity     {:current user-name
@@ -202,9 +201,11 @@
    :user-roles   #{"USER"}
    :body         {:userParamTemplate up-tmpl-exec/resource}})
 
+
 (defn create-user-params!
   [user-name]
   (crud/add (user-param-create-request user-name)))
+
 
 (defn create-user!
   "Create a new user in the database. Values for 'email' and 'authn-login'
@@ -212,27 +213,34 @@
    collisions with existing users. The value used to create the account is
    returned."
   ([{:keys [authn-login fail-on-existing?] :as user-record}]
-   (let [slipstream-username (name-no-collision authn-login (existing-user-names))]
-     (when (or (not fail-on-existing?) (= authn-login slipstream-username))
+   (if ((existing-user-names) authn-login)
+     (when (not fail-on-existing?)
+       authn-login)
+     (do
        (crud/add (user-create-request user-record))
-       slipstream-username)))
+       authn-login)))
+
   ([authn-method authn-login email external-login]
    (create-user! {:authn-login    authn-login               ;; possibly a UUID
                   :authn-method   authn-method
                   :email          email
                   :external-login external-login}))
+
   ([authn-method authn-login email]
    (create-user! {:authn-login    authn-login
                   :authn-method   authn-method
                   :email          email
-                  :external-login authn-login}))            ;;legacy behaviour where external-login=authn-login
+                  :external-login authn-login}))            ;; legacy behaviour where external-login=authn-login
+
   ([authn-login email]
    (create-user! {:authn-login authn-login
                   :email       email})))
 
+
 (defn find-password-for-username
   [username]
   (:password (get-active-user-by-name username)))
+
 
 (defn find-roles-for-username
   [username]
