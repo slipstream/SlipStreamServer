@@ -31,8 +31,9 @@
    treated as a raw public key string and will be used directly."
   ([token]
    (unsign-claims token :auth-public-key))
-  ([token env-var-pubkey-path]
-   (let [options (algorithm-option token)]
-     (if (keyword? env-var-pubkey-path)
-       (jwt/unsign token (certs/public-key env-var-pubkey-path) options)
-       (jwt/unsign token (certs/str->public-key env-var-pubkey-path) options)))))
+  ([token env-var-kw-or-cert-string]
+   (let [options (algorithm-option token)
+         public-key (if (keyword? env-var-kw-or-cert-string)
+                      (certs/public-key env-var-kw-or-cert-string)
+                      (certs/str->public-key env-var-kw-or-cert-string))]
+     (jwt/unsign token public-key options))))
