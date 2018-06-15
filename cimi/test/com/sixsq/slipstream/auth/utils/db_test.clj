@@ -60,25 +60,18 @@
                                 :organization "myorg"}))))
 
 
-(deftest test-user-creation-avoids-user-same-name
-  (th/add-user-for-test! {:username     "stef"
-                          :password     "secret"
-                          :emailAddress "st@s.com"})
-  (is (= "stef_1" (db/create-user! "github" "stef" "st@s.com")))
-  (let [users-created (db/get-active-users)]
-    (is (= 2 (count users-created))))
-  (is (nil? (db/create-user! {:authn-login       "stef"
-                              :password          "secret"
-                              :email             "st@s.com"
-                              :fail-on-existing? true})))
-  (let [users-created (db/get-active-users)]
-    (is (= 2 (count users-created))))
-  (is (= "stef_2" (db/create-user! {:authn-login       "stef"
-                                    :password          "secret"
-                                    :email             "st@s.com"
-                                    :fail-on-existing? false})))
-  (let [users-created (db/get-active-users)]
-    (is (= 3 (count users-created)))))
+(deftest test-no-creation-on-existing-user
+  (let [user-info {:authn-login    "stef"
+                   :authn-method   "github"
+                   :email          "st@s.com"
+                   :external-login "stef"}]
+
+    (th/add-user-for-test! {:username     "stef"
+                            :password     "secret"
+                            :emailAddress "st@s.com"})
+
+    (is (= "stef" (db/create-user! user-info)))
+    (is (nil? (db/create-user! (assoc user-info :fail-on-existing? true))))))
 
 
 (defn create-users
@@ -93,25 +86,10 @@
 
 
 (deftest test-existing-user-names
-  (is (= [] (db/existing-user-names)))
+  (is (empty? (db/existing-user-names)))
   (create-users 3)
   (is (= 3 (count (db/existing-user-names)))))
 
-
-(deftest test-name-no-collision
-  (is (= "_" (db/name-no-collision "_" [])))
-  (is (= "_1" (db/name-no-collision "_" ["_"])))
-  (is (= "" (db/name-no-collision "" [])))
-  (is (= "_1" (db/name-no-collision "" [""])))
-
-  (is (= ["joe", "joe_1", "joe_2"]
-         (reduce #(conj %1 (db/name-no-collision %2 %1)) [] (repeat 3 "joe"))))
-
-  (is (= "joe_" (db/name-no-collision "joe_" ["joe", "joe_1"])))
-  (is (= "joe_1" (db/name-no-collision "joe_" ["joe", "joe_"])))
-  (is (= "joe_2" (db/name-no-collision "joe_" ["joe", "joe_", "joe_1"])))
-  (is (= "joe_11" (db/name-no-collision "joe_10" ["joe_10"])))
-  (is (= "joe_1_2_4" (db/name-no-collision "joe_1_2_3" ["joe_1_2_3"]))))
 
 
 (deftest test-users-by-email-skips-deleted
@@ -269,12 +247,4 @@
               :password    "password"
               :isSuperUser false}]
     (th/add-user-for-test! user)
-    (is (= "USER ANON" (db/find-roles-for-username username))))
-
-  ; FIXME: requires direct user creation by super to be able to set isSuperUser to true
-  #_(let [username "super"
-          user {:username    username
-                :password    "password"
-                :isSuperUser true}]
-      (th/add-user-for-test! user)
-      (is (= "ADMIN USER ANON" (db/find-roles-for-username username)))))
+    (is (= "USER ANON" (db/find-roles-for-username username)))))
