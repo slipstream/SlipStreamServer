@@ -157,11 +157,11 @@
                                                    })))
 
     (let [user-params (db/get-all-user-params)]
-        (is (= "instance:missing" (-> user-params
-                                                      first
-                                                      (get-in [:acl :owner :principal])
-                                                      (db/get-user)
-                                                      :externalIdentity
-                                                      first)))
+      (is (= "instance:missing" (-> user-params
+                                    first
+                                    (get-in [:acl :owner :principal])
+                                    (db/get-user)
+                                    :externalIdentity
+                                    first)))
 
-        (is (= 1 (count user-params))))))
+      (is (= 1 (count user-params))))))

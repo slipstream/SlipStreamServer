@@ -38,7 +38,6 @@
       (gu/throw-missing-oauth-code redirectURI))))
 
 
-
 (defmethod callback/execute action-name
   [{callback-id :id :as callback-resource} request]
   (log/debug "Executing callback" callback-id)

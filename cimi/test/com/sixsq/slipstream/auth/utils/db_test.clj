@@ -24,6 +24,7 @@
                                   :lastname     "last"
                                   :organization "myorg"}))))))
 
+
 (deftest test-user-creation-standard-username-oidc
   (let [identifier "st"]
     (is (= identifier (db/create-user! {:authn-method "oidc"
@@ -34,7 +35,6 @@
                                         :firstname    "first"
                                         :lastname     "last"
                                         :organization "myorg"})))))
-
 
 
 (deftest test-user-creation-uuid
@@ -167,6 +167,7 @@
 
   (is (nil? (db/find-username-by-authn :github "unknownid")))
   (is (= "joe-slipstream" (db/find-username-by-authn :github "joe"))))
+
 
 (deftest test-users-by-authn
   (th/add-user-for-test! {:username         "joe-slipstream"

@@ -16,7 +16,6 @@
 (def ^:const action-name "user-oidc-creation")
 
 
-
 (defn register-user
   [{{href :href} :targetResource {:keys [redirectURI]} :data callback-id :id :as callback-resource} {:keys [headers base-uri uri] :as request}]
   (let [instance (u/document-id href)

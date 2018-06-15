@@ -56,6 +56,7 @@
         (gu/throw-no-access-token redirectURI))
       (gu/throw-missing-oauth-code redirectURI))))
 
+
 (defmethod callback/execute action-name
   [{callback-id :id {session-id :href} :targetResource :as callback-resource} request]
   (try
