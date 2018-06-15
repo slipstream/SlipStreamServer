@@ -16,6 +16,7 @@
 (def ^:const action-name "user-oidc-creation")
 
 
+
 (defn register-user
   [{{href :href} :targetResource {:keys [redirectURI]} :data callback-id :id :as callback-resource} {:keys [headers base-uri uri] :as request}]
   (let [instance (u/document-id href)
@@ -23,15 +24,16 @@
     (if-let [code (uh/param-value request :code)]
       (if-let [access-token (auth-oidc/get-oidc-access-token client-id client-secret base-url tokenURL code (str base-uri (or callback-id "unknown-id") "/execute"))]
         (try
-          (let [{:keys [sub email given_name family_name realm] :as claims} (sign/unsign-claims access-token public-key)]
+          (let [{:keys [sub email given_name family_name realm] :as claims} (auth-oidc/oidc-token->json access-token)]
             (log/debugf "oidc access token claims for %s: %s" instance (pr-str claims))
 
             (if sub
               (if-let [matched-user (ex/create-user-when-missing! :oidc {:external-login    sub
-                                                                         :external-email    email
+                                                                         :external-email    (or email (str sub "@fake-email.com" )) ;;some OIDC server do not return emails
                                                                          :firstname         given_name
                                                                          :lastname          family_name
                                                                          :organization      realm
+                                                                         :instance      instance
                                                                          :fail-on-existing? true})]
                 matched-user
                 (oidc-utils/throw-user-exists sub redirectURI))

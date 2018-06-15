@@ -1,7 +1,10 @@
 (ns com.sixsq.slipstream.auth.oidc
   (:require
     [clj-http.client :as http]
-    [clojure.data.json :as json]))
+    [clojure.data.json :as json]
+    [clojure.string :as str])
+  (:import java.util.Base64)
+  )
 
 
 (defn get-oidc-access-token
@@ -16,3 +19,17 @@
       :body
       (json/read-str :key-fn keyword)
       :access_token))
+
+
+
+
+(defn oidc-token->json
+  [token]
+  (let [ decode (fn [to-decode] (String. (.decode (Base64/getDecoder) to-decode)))]
+  (-> token
+      (str/split #"\." 3)
+      (second)
+      (decode)
+      (json/read-str :key-fn keyword))))
+
+

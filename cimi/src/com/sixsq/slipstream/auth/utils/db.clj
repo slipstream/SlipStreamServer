@@ -164,9 +164,9 @@
   (str (UUID/randomUUID)))
 
 (defn user-create-request
-  [{:keys [authn-login email authn-method firstname lastname roles organization state external-login password]}]
+  [{:keys [authn-login email authn-method firstname lastname roles organization state external-login password instance] :as user-record}]
   (let [slipstream-username (name-no-collision authn-login (existing-user-names))
-        user-resource (cond-> {:href         "user-template/direct"
+        user-resource (cond-> {:href         "user-template/direct" ;;FIXME : should reflect the actual user template
                                :username     slipstream-username
                                :emailAddress email
                                :password     (if password password (random-password))
