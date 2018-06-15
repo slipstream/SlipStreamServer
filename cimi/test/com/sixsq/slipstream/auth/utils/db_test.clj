@@ -22,6 +22,18 @@
                                         :lastname     "last"
                                         :organization "myorg"})))))
 
+(deftest test-user-creation-standard-username
+  (let [identifier "st"]
+    (is (= identifier (db/create-user! {:authn-method "oidc"
+                                        :instance     "instance"
+                                        :authn-login  identifier
+                                        :email        "st@s.com"
+                                        :roles        "alpha-role, beta-role"
+                                        :firstname    "first"
+                                        :lastname     "last"
+                                        :organization "myorg"})))))
+
+
 
 (deftest test-user-creation-uuid
   (let [uuid (u/random-uuid)]

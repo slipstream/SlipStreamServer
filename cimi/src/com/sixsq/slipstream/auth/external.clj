@@ -36,17 +36,6 @@
      user-name)))
 
 
-(defn match-external-user!
-  [authn-method external-login external-email]
-  (if-let [username-mapped (db/find-username-by-authn authn-method external-login)]
-    (mapped-user authn-method username-mapped)
-    (let [usernames-same-email (db/find-usernames-by-email external-email)]
-      (if (empty? usernames-same-email)
-        (let [name-new-user (create-slipstream-user! authn-method external-login external-email)]
-          [name-new-user (format "/user/%s?edit=true" name-new-user)])
-        (map-slipstream-user! authn-method (first usernames-same-email) external-login)))))
-
-
 (defn match-existing-external-user
   [authn-method external-login external-email]
   (log/debugf "Matching external user with method '%s', external-login '%s', and external-email '%s'"
@@ -56,17 +45,18 @@
 
 
 (defn match-oidc-username
-  [external-login]
+  [external-login instance]
   (log/debug "Matching via OIDC username" external-login)
-  (let [username-by-authn (db/find-username-by-authn :oidc external-login)
+  (let [username-by-authn (db/find-username-by-authn instance external-login)
         username-by-name (db/get-active-user-by-name external-login)
-        username-fallback (when username-by-name (:username (mapped-user :oidc username-by-name)))]
+        username-fallback (when username-by-name (:username (mapped-user instance username-by-name)))]
     (or username-by-authn username-fallback)))
 
 
 (defn create-user-when-missing!
   [authn-method {:keys [external-login external-email instance fail-on-existing?] :as external-record}]
-  (let [username-by-authn (db/find-username-by-authn authn-method external-login)
+
+  (let [username-by-authn (db/find-username-by-authn (or instance authn-method) external-login)
         username (u/random-uuid)]
     (if (and username-by-authn (not fail-on-existing?))
       username-by-authn
@@ -77,8 +67,7 @@
                                                                :authn-login username
                                                                :external-login external-login
                                                                :email external-email
-                                                               :instance instance
+                                                               :instance (or instance (name authn-method))
                                                                :authn-method (name authn-method)))
-
                                     (when-not fail-on-existing?
                                       (or external-login username)))))))
