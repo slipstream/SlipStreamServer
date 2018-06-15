@@ -15,7 +15,6 @@
    :description "OpenID Connect Authentication Configuration"
    :instance    "authn-name"
    :clientID    "server-assigned-client-id"
-   :baseURL     "https://keycloak.example.org/auth/realms/myorg/protocol/openid-connect"
    :publicKey   "ABCDEF..."})
 
 
@@ -30,30 +29,36 @@
                          :mandatory   true
                          :readOnly    false
                          :order       20}
+          :clientSecret {:displayName "Client Secret"
+                         :type        "password"
+                         :description "client secret assigned by the OIDC server"
+                         :mandatory   false
+                         :readOnly    false
+                         :order       21}
           :baseURL      {:displayName "Base URL"
                          :type        "string"
                          :description "server's endpoint URL for the OIDC protocol"
                          :mandatory   false
                          :readOnly    false
-                         :order       21}
+                         :order       22}
           :publicKey    {:displayName "Public Key"
                          :type        "string"
                          :description "public key to verify signed tokens from the OIDC server"
                          :mandatory   true
                          :readOnly    false
-                         :order       22}
+                         :order       23}
           :authorizeURL {:displayName "Authorize URL"
                          :type        "string"
                          :description "server's endpoint authentication URL for the OIDC protocol"
                          :mandatory   false
                          :readOnly    false
-                         :order       23}
+                         :order       24}
           :tokenURL     {:displayName "Token URL"
                          :type        "string"
                          :description "server's endpoint token URL for the OIDC protocol"
                          :mandatory   false
                          :readOnly    false
-                         :order       24}}))
+                         :order       25}}))
 
 ;;
 ;; initialization: register this Configuration template

@@ -25,6 +25,7 @@
 
   :dependencies
   [[org.clojure/clojure]
+   [org.clojure/data.json]
    [buddy/buddy-core]
    [buddy/buddy-hashers]
    [buddy/buddy-sign]

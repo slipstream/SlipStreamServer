@@ -20,10 +20,10 @@
 
 
 (defn- create-slipstream-user!
-  ([authn-method external-login external-email]
+  ([authn-method external-login external-email instance]
    (log/infof "Creating new SlipStream user with external (%s) user '%s'"
               authn-method external-login)
-   (let [user-name (db/create-user! authn-method external-login external-email)]
+   (let [user-name (db/create-user! authn-method external-login external-email instance)]
      (when user-name
        (db/create-user-params! user-name))
      user-name))
@@ -71,7 +71,7 @@
 
 
 (defn create-user-when-missing!
-  [authn-method {:keys [external-login external-email fail-on-existing?] :as external-record}]
+  [authn-method {:keys [external-login external-email instance fail-on-existing?] :as external-record}]
   (let [username-by-authn (db/find-username-by-authn authn-method (sanitize-login-name external-login))
         username (u/random-uuid)]
     (if (and username-by-authn (not fail-on-existing?))
@@ -83,6 +83,7 @@
                                                                :authn-login username
                                                                :external-login (sanitize-login-name external-login)
                                                                :email external-email
+                                                               :instance instance
                                                                :authn-method (name authn-method)))
 
                                     (when-not fail-on-existing?

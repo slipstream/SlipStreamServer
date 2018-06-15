@@ -15,7 +15,8 @@
 (s/def ::text cu/as-text)
 
 (defn token? [s] (re-matches #"^\S+$" s))
-(s/def ::token (s/and string? token?))
+(s/def
+  ::token (s/and string? token?))
 
 (s/def ::port (s/int-in 1 65536))
 

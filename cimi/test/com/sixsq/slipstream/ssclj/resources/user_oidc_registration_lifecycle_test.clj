@@ -49,6 +49,7 @@
 
 (def configuration-user-oidc (-> configuration-user-oidc-legacy
                                  (update-in [:configurationTemplate] dissoc :baseURL)
+                                 (assoc-in [:configurationTemplate :clientSecret] "MyOIDCClientSecret")
                                  (assoc-in [:configurationTemplate :authorizeURL] "https://authorize.oidc.com/authorize")
                                  (assoc-in [:configurationTemplate :tokenURL] "https://token.oidc.com/token")))
 
@@ -272,7 +273,7 @@
             bad-claims {}
             bad-token (sign/sign-claims bad-claims)]
 
-        (with-redefs [auth-oidc/get-oidc-access-token (fn [client-id client-secret tokenurl oauth-code redirect-url]
+        (with-redefs [auth-oidc/get-oidc-access-token (fn [client-id client-secret base-url tokenurl oauth-code redirect-uri]
                                                         (case oauth-code
                                                           "GOOD" good-token
                                                           "BAD" bad-token

@@ -62,6 +62,7 @@
 (def configuration-session-oidc (-> configuration-session-oidc-legacy
                                     (update-in [:configurationTemplate] dissoc :baseURL)
                                     (assoc-in [:configurationTemplate :instance] instance)
+                                    (assoc-in [:configurationTemplate :clientSecret] "MyOIDCClientSecret")
                                     (assoc-in [:configurationTemplate :authorizeURL] "https://authorize.oidc.com/authorize")
                                     (assoc-in [:configurationTemplate :tokenURL] "https://token.oidc.com/token")))
 
@@ -419,7 +420,7 @@
                 (ltu/is-status 303))                        ;; always expect redirect when redirectURI is provided
 
             ;; try now with a fake code
-            (with-redefs [auth-oidc/get-oidc-access-token (fn [client-id client-secret token-url oauth-code redirect-url]
+            (with-redefs [auth-oidc/get-oidc-access-token (fn [client-id client-secret base-url token-url oauth-code redirect-url]
                                                             (case oauth-code
                                                               "GOOD" good-token
                                                               "BAD" bad-token
