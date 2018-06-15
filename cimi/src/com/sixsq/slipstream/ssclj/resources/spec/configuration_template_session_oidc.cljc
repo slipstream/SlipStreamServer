@@ -10,7 +10,7 @@
 (s/def ::baseURL ::cimi-core/token)
 (s/def ::authorizeURL ::cimi-core/token)
 (s/def ::tokenURL ::cimi-core/token)
-(s/def ::publicKey ::cimi-core/token)
+(s/def ::publicKey ::cimi-core/nonblank-string)             ;; allows jwk JSON representation
 
 (def configuration-template-keys-spec-req
   {:req-un [::ps/instance ::clientID  ::publicKey]
