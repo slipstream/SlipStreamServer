@@ -37,11 +37,6 @@
     (retrieve-private-email access-token)))
 
 
-(defn sanitized-login
-  [user-info]
-  (-> user-info :login ex/sanitize-login-name))
-
-
 (defn get-github-access-token
   [client-id client-secret oauth-code]
   (-> (http/post "https://github.com/login/oauth/access_token"

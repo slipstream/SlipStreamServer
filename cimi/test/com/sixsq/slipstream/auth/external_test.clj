@@ -92,36 +92,6 @@
              :username))))
 
 
-(deftest oidc-user-names
-  (let [users (db/get-active-users)
-        authn-methods #{:github :oidc :others}]
-
-    (is (zero? (count users)))
-
-    (doseq [authn-method authn-methods]
-      (is (= (str (name authn-method) ":" "a_b_c_d_e") (get-identity authn-method {:external-login    "a/b!c@d#e"
-                                                                                   :external-email    "bad-address@example.com"
-                                                                                   :fail-on-existing? false}))))
-    (let [users (db/get-active-users)]
-      (is (= (count authn-methods) (count users))))
-
-
-    (doseq [authn-method authn-methods]
-      (is (= (str (name authn-method) ":" "a_b_c_d_e") (get-identity authn-method {:external-login    "a/b!c@d#e"
-                                                                                   :external-email    "bad-address@example.com"
-                                                                                   :fail-on-existing? false}))))
-    (let [users (db/get-active-users)]
-      (is (= (count authn-methods) (count users))))
-
-
-    (doseq [authn-method authn-methods]
-      (is (= (str (name authn-method) ":" "A_B_C_D_E") (get-identity authn-method {:external-login    "A/B!C@D#E"
-                                                                                   :external-email    "bad-address@example.com"
-                                                                                   :fail-on-existing? false}))))
-    (let [users (db/get-active-users)]
-      (is (= (* 2 (count authn-methods)) (count users))))))
-
-
 (deftest check-create-user-when-missing!
   (let [users (db/get-active-users)
         authn-methods #{:oidc :github :other}]
@@ -193,10 +163,3 @@
                                                     first)))
 
       (is (= 1 (count user-params))))))
-
-
-(deftest test-sanitize-login-name
-  (is (= "st" (sanitize-login-name "st")))
-  (is (= "Paul_Newman" (sanitize-login-name "Paul Newman")))
-  (is (= "abc-def-123" (sanitize-login-name "abc-def-123")))
-  (is (= "a_b_c_d_e" (sanitize-login-name "a/b!c@d#e"))))
