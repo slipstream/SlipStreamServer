@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.auth.utils.certs
   (:require
-    [buddy.core.keys :as ks]
+    [buddy.core.keys :as keys]
+    [clojure.data.json :as json]
     [clojure.tools.logging :as log]
     [environ.core :as environ]))
 
@@ -28,19 +29,34 @@
   (str "-----BEGIN PUBLIC KEY-----\n" public-key "\n-----END PUBLIC KEY-----\n"))
 
 
+(defn parse-jwk-string
+  [jwk-string]
+  (try
+    (keys/jwk->public-key (json/read-str jwk-string :key-fn keyword))
+    (catch Exception e
+      (log/debug "error converting jwk to public key: " (str e))
+      nil)))
+
+
 (defn parse-key-string
   [rsa-public-key]
   (try
-    (ks/str->public-key (wrap-public-key rsa-public-key))
+    (keys/str->public-key (wrap-public-key rsa-public-key))
     (catch Exception e
       (log/error "error reading key:" (str e))
       (throw e))))
 
 
-(def public-key (memoize (partial read-key ks/public-key default-public-key-path)))
+(defn parse-public-key
+  [key-string]
+  (or (parse-jwk-string key-string)
+      (parse-key-string key-string)))
 
 
-(def private-key (memoize (partial read-key ks/private-key default-private-key-path)))
+(def public-key (memoize (partial read-key keys/public-key default-public-key-path)))
 
 
-(def str->public-key (memoize parse-key-string))
+(def private-key (memoize (partial read-key keys/private-key default-private-key-path)))
+
+
+(def str->public-key (memoize parse-public-key))
