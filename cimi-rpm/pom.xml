@@ -115,7 +115,7 @@
                       <port>8201</port>
                     </ports>
                     <workdir>${installation.dir}</workdir>
-                    <cmd>postfix start &amp;&amp; sh ${installation.dir}/bin/generate-auth-keys.sh &amp;&amp; /usr/bin/java -Dconfig.name=db.spec -Dlogfile.path=production -cp "/opt/slipstream/ring-container/lib/*:resources:lib/*:extra-resources/*" sixsq.slipstream.server.ring_container</cmd>
+                    <cmd>postfix start &amp;&amp; sh ${installation.dir}/bin/generate-auth-keys.sh &amp;&amp; /usr/bin/java -cp "/opt/slipstream/ring-container/lib/*:resources:lib/*:extra-resources/*" sixsq.slipstream.server.ring_container</cmd>
                   </build>
                 </image>
                 <image>
@@ -158,7 +158,7 @@
                       <port>8201</port>
                     </ports>
                     <workdir>${installation.dir}</workdir>
-                    <cmd>sh ${installation.dir}/bin/generate-auth-keys.sh &amp;&amp; /usr/bin/java -Dconfig.name=db.spec -Dlogfile.path=production -cp "/opt/slipstream/ring-container/lib/*:resources:lib/*:extra-resources/*" sixsq.slipstream.server.ring_container</cmd>
+                    <cmd>sh ${installation.dir}/bin/generate-auth-keys.sh &amp;&amp; /usr/bin/java -cp "/opt/slipstream/ring-container/lib/*:resources:lib/*:extra-resources/*" sixsq.slipstream.server.ring_container</cmd>
                   </build>
                 </image>
               </images>
@@ -446,7 +446,6 @@ ${installation.dir}/bin/generate-auth-keys.sh
                   <location>src/main/resources</location>
                   <includes>
                     <include>log4j.properties</include>
-                    <include>db.spec</include>
                   </includes>
                 </source>
               </sources>
