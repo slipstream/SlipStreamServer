@@ -72,7 +72,7 @@
 
   :profiles
   {
-   :provided {:aot [com.sixsq.slipstream.ssclj.app.main]}
+   :provided {:dependencies [[com.sixsq.slipstream/slipstream-ring-container ~+version+]]}
    :test     {:dependencies   [[peridot]
                                [org.clojure/test.check]
                                [org.slf4j/slf4j-log4j12]
@@ -85,6 +85,5 @@
                                :auth-private-key "test-resources/auth_privkey.pem"
                                :auth-public-key  "test-resources/auth_pubkey.pem"}
               :aot            :all}
-   :dev      {:resource-paths ["test-resources"]
-              :dependencies [[com.sixsq.slipstream/slipstream-ring-container ~+version+]]}
+   :dev      {:resource-paths ["test-resources"]}
    })
