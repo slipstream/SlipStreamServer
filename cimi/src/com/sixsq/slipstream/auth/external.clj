@@ -52,6 +52,14 @@
         username-fallback (when username-by-name (:username (mapped-user instance username-by-name)))]
     (or username-by-authn username-fallback)))
 
+(defn match-mitreid-username
+  [external-login instance]
+  (log/debug "Matching via MITREid username" external-login)
+  (let [username-by-authn (db/find-username-by-authn instance external-login)
+        username-by-name (db/get-active-user-by-name external-login)
+        username-fallback (when username-by-name (:username (mapped-user instance username-by-name)))]
+    (or username-by-authn username-fallback)))
+
 
 (defn create-user-when-missing!
   [authn-method {:keys [external-login external-email instance fail-on-existing?] :as external-record}]
