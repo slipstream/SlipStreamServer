@@ -12,7 +12,7 @@
 
   :plugins [[lein-parent "0.3.2"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "5.3.7"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.3.8"]
                    :inherit [:plugins
                              :min-lein-version
                              :managed-dependencies
@@ -27,7 +27,7 @@
 
   :dependencies
   [[org.clojure/clojure]
-   [aleph]
+   [aleph "0.4.4"]
    [cheshire]                                               ;; newer version needed for ring-json
    [compojure]
    [com.jcraft/jsch]

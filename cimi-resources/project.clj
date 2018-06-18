@@ -12,7 +12,7 @@
 
   :plugins [[lein-parent "0.3.2"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "5.3.7"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.3.8"]
                    :inherit [:plugins
                              :min-lein-version
                              :managed-dependencies
@@ -36,7 +36,7 @@
                                          [org.apache.curator/curator-test]
                                          [com.sixsq.slipstream/SlipStreamDbTesting-jar ~+version+]
                                          [com.sixsq.slipstream/SlipStreamCljResourcesTests-jar ~+version+]
-                                         ]
+                                         [aleph "0.4.4"]]
                         :resource-paths ["test-resources"]
                         :env            {:config-name      "config-params.edn"
                                          :auth-private-key "test-resources/auth_privkey.pem"
