@@ -35,9 +35,9 @@
                          :mandatory   false
                          :readOnly    false
                          :order       21}
-          :baseURL      {:displayName "Base URL"
+          :userInfoURL  {:displayName "User information URL"
                          :type        "string"
-                         :description "server's endpoint URL for the MITREid protocol"
+                         :description "server's endpoint user info URL for the MITREid protocol"
                          :mandatory   false
                          :readOnly    false
                          :order       22}

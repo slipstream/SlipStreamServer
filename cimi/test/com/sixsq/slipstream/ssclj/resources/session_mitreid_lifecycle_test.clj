@@ -2,7 +2,7 @@
   (:require
     [clojure.data.json :as json]
     [clojure.test :refer :all]
-    [com.sixsq.slipstream.auth.mitreid :as auth-mitreid]
+    [com.sixsq.slipstream.auth.oidc :as auth-oidc]
     [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.auth.utils.sign :as sign]
     [com.sixsq.slipstream.ssclj.app.params :as p]
@@ -392,7 +392,7 @@
                 (ltu/is-status 303))                        ;; always expect redirect when redirectURI is provided
 
             ;; try now with a fake code
-            (with-redefs [auth-mitreid/get-mitreid-access-token (fn [client-id client-secret base-url token-url oauth-code redirect-url]
+            (with-redefs [auth-oidc/get-access-token (fn [client-id client-secret base-url token-url oauth-code redirect-url]
                                                                   (case oauth-code
                                                                     "GOOD" good-token
                                                                     "BAD" bad-token

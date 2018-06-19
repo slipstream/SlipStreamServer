@@ -3,7 +3,7 @@
   (:require
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.external :as ex]
-    [com.sixsq.slipstream.auth.mitreid :as auth-mitreid]
+    [com.sixsq.slipstream.auth.oidc :as auth-oidc]
     [com.sixsq.slipstream.auth.utils.http :as uh]
     [com.sixsq.slipstream.auth.utils.sign :as sign]
     [com.sixsq.slipstream.ssclj.resources.callback :as callback]
@@ -21,10 +21,10 @@
   (let [instance (u/document-id href)
         [client-id client-secret base-url public-key authorizeURL tokenURL userInfoURL] (mitreid-utils/config-params redirectURI instance)]
     (if-let [code (uh/param-value request :code)]
-      (if-let [access-token (auth-mitreid/get-mitreid-access-token client-id client-secret base-url tokenURL code (str base-uri (or callback-id "unknown-id") "/execute"))]
+      (if-let [access-token (auth-oidc/get-access-token client-id client-secret base-url tokenURL code (str base-uri (or callback-id "unknown-id") "/execute"))]
         (try
           (let [{:keys [sub] :as claims}  (sign/unsign-claims access-token public-key)
-                 {:keys [username givenName familyName emails] :as userinfo} (when sub (auth-mitreid/get-mitreid-userinfo userInfoURL access-token))
+                 {:keys [username givenName familyName emails] :as userinfo} (when sub (mitreid-utils/get-mitreid-userinfo userInfoURL access-token))
                  email (-> (filter :primary emails)
                            first
                            :value)]

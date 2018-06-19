@@ -273,7 +273,7 @@
             bad-claims {}
             bad-token (sign/sign-claims bad-claims)]
 
-        (with-redefs [auth-oidc/get-oidc-access-token (fn [client-id client-secret base-url tokenurl oauth-code redirect-uri]
+        (with-redefs [auth-oidc/get-access-token (fn [client-id client-secret base-url tokenurl oauth-code redirect-uri]
                                                         (case oauth-code
                                                           "GOOD" good-token
                                                           "BAD" bad-token

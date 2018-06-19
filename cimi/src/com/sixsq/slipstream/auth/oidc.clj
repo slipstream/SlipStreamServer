@@ -2,22 +2,18 @@
   (:require
     [clj-http.client :as http]
     [clojure.data.json :as json]
-    [clojure.string :as str])
-  (:import java.util.Base64)
-  )
+    [clojure.string :as str]))
 
 
-(defn get-oidc-access-token
-  [oidc-client-id oidc-client-secret oidc-base-url oidc-token-url oidc-code redirect-uri]
-  (-> (http/post (or oidc-token-url (str oidc-base-url "/token"))
+(defn get-access-token
+  [client-id client-secret base-url tokenURL oidc-code redirect-uri]
+  (-> (http/post (or tokenURL (str base-url "/token"))
                  {:headers     {"Accept" "application/json"}
                   :form-params {:grant_type    "authorization_code"
                                 :code          oidc-code
                                 :redirect_uri  redirect-uri
-                                :client_id     oidc-client-id
-                                :client_secret oidc-client-secret}})
+                                :client_id     client-id
+                                :client_secret client-secret}})
       :body
       (json/read-str :key-fn keyword)
       :access_token))
-
-

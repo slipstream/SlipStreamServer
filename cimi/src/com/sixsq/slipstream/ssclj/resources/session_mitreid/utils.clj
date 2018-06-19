@@ -1,5 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-mitreid.utils
   (:require
+    [clj-http.client :as http]
+    [clojure.data.json :as json]
     [clojure.string :as str]
     [com.sixsq.slipstream.ssclj.resources.callback :as callback]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
@@ -124,3 +126,12 @@
   (let [url-params-format "?response_type=code&client_id=%s&redirect_uri=%s"
         base-redirect-url (or authorizeURL (str base-url "/auth"))]
     (str base-redirect-url (format url-params-format client-id callback-url))))
+
+(defn get-mitreid-userinfo
+  [userInfoURL access_token]
+  (-> (http/post userInfoURL
+                 {:headers     {"Accept" "application/json"}
+                  :form-params {::access_token access_token}})
+      :body
+      (json/read-str :key-fn keyword)))
+
