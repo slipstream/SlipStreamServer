@@ -60,16 +60,18 @@
 
 (defn add-impl [{body :body :as request}]
   (a/can-modify? {:acl collection-acl} request)
-  (let [{:keys [id] :as new-job} (-> body
-                                     u/strip-service-attrs
-                                     (crud/new-identifier resource-name)
-                                     (assoc :resourceURI resource-uri)
-                                     (assoc :state ju/state-queued)
-                                     u/update-timestamps
-                                     ju/job-cond->addition
-                                     (crud/add-acl request)
-                                     crud/validate)]
-    (ju/add-job-to-queue id)
+  (let [id (u/new-resource-id (u/de-camelcase resource-name))
+        zookeeper-path (ju/add-job-to-queue id)
+        new-job (-> body
+                    u/strip-service-attrs
+                    (assoc :resourceURI resource-uri)
+                    (assoc :id id)
+                    (assoc :state ju/state-queued)
+                    u/update-timestamps
+                    ju/job-cond->addition
+                    (crud/add-acl request)
+                    (assoc :properties {:zookeeper-path zookeeper-path})
+                    (crud/validate))]
     (db/add resource-name new-job {})))
 
 (defmethod crud/add resource-name
@@ -98,7 +100,6 @@
     (catch Exception e
       (or (ex-data e) (throw e)))))
 
-
 (defmethod crud/edit resource-name
   [request]
   (edit-impl request))
@@ -124,7 +125,6 @@
 (defmethod crud/query resource-name
   [request]
   (query-impl request))
-
 
 ;;
 ;; provide an action that allows the job to be stoppable.
