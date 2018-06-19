@@ -10,15 +10,16 @@
 (s/def ::baseURL ::cimi-core/token)
 (s/def ::authorizeURL ::cimi-core/token)
 (s/def ::tokenURL ::cimi-core/token)
+(s/def ::userInfoURL ::cimi-core/token)
 (s/def ::publicKey ::cimi-core/nonblank-string)             ;; allows jwk JSON representation
 
 (def configuration-template-keys-spec-req
   {:req-un [::ps/instance ::clientID  ::publicKey]
-   :opt-un [::baseURL ::authorizeURL ::tokenURL ::clientSecret]})
+   :opt-un [::baseURL ::authorizeURL ::tokenURL ::userInfoURL ::clientSecret]})
 
 (def configuration-template-keys-spec-create
   {:req-un [::ps/instance ::clientID ::publicKey]
-   :opt-un [::baseURL ::authorizeURL ::tokenURL ::clientSecret]})
+   :opt-un [::baseURL ::authorizeURL ::tokenURL ::userInfoURL ::clientSecret]})
 
 ;; Defines the contents of the Mi authentication ConfigurationTemplate resource itself.
 (s/def ::session-mitreid

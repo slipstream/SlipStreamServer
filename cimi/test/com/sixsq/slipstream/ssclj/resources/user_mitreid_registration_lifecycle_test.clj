@@ -41,17 +41,14 @@
     "jVunw8YkO7dsBhVP/8bqLDLw/8NsSAKwlzsoNKbrjVQ/NmHMJ88QkiKwv+E6lidy"
     "3wIDAQAB"))
 
-(def configuration-user-mitreid-legacy {:configurationTemplate {:service "session-mitreid" ;;reusing configuration from session MITREid
-                                                             :instance   mitreid/registration-method
-                                                             :clientID   "FAKE_CLIENT_ID"
-                                                             :baseURL    "https://mitreid.example.com"
-                                                             :publicKey  auth-pubkey}})
-
-(def configuration-user-mitreid (-> configuration-user-mitreid-legacy
-                                    (update-in [:configurationTemplate] dissoc :baseURL)
-                                    (assoc-in [:configurationTemplate :clientSecret] "MyMITREidClientSecret")
-                                    (assoc-in [:configurationTemplate :authorizeURL] "https://authorize.mitreid.com/authorize")
-                                    (assoc-in [:configurationTemplate :tokenURL] "https://token.mitreid.com/token")))
+(def configuration-user-mitreid {:configurationTemplate {:service      "session-mitreid" ;;reusing configuration from session MITREid
+                                                         :instance     mitreid/registration-method
+                                                         :clientID     "FAKE_CLIENT_ID"
+                                                         :clientSecret "MyMITREidClientSecret"
+                                                         :authorizeURL "https://authorize.mitreid.com/authorize"
+                                                         :tokenURL     "https://token.mitreid.com/token"
+                                                         :userInfoURL  "https://userinfo.mitreid.com/api/user/me"
+                                                         :publicKey    auth-pubkey}})
 
 (deftest lifecycle
 
@@ -115,244 +112,251 @@
       (let [;;
             ;; create the session-mitreid configuration to use for these tests
             ;;
-            cfg-href-legacy (-> session-admin
-                                (request configuration-base-uri
-                                         :request-method :post
-                                         :body (json/write-str configuration-user-mitreid-legacy))
-                                (ltu/body->edn)
-                                (ltu/is-status 201)
-                                (ltu/location))
-            _ (-> session-admin
-                  (request configuration-base-uri
-                           :request-method :post
-                           :body (json/write-str configuration-user-mitreid))
+            cfg-href (-> session-admin
+                         (request configuration-base-uri
+                                  :request-method :post
+                                  :body (json/write-str configuration-user-mitreid))
+                         (ltu/body->edn)
+                         (ltu/is-status 201)
+                         (ltu/location))
+            ]
+
+
+
+        (is (= cfg-href (str "configuration/session-mitreid-" mitreid/registration-method)))
+
+        (let [uri (-> session-anon
+                      (request base-uri
+                               :request-method :post
+                               :body (json/write-str href-create))
+                      (ltu/body->edn)
+                      (ltu/is-status 303)
+                      ltu/location)
+
+              uri2 (-> session-anon
+                       (request base-uri
+                                :request-method :post
+                                :body (json/write-str href-create-redirect))
+                       (ltu/body->edn)
+                       (ltu/is-status 303)
+                       ltu/location)
+
+              uri3 (-> session-anon-form
+                       (request base-uri
+                                :request-method :post
+                                :body (codec/form-encode {:href        href
+                                                          :redirectURI redirect-uri}))
+                       (ltu/body->edn)
+                       (ltu/is-status 303)
+                       ltu/location)]
+
+          ;; redirect URLs in location header should contain the client ID and resource id
+          (doseq [u [uri uri2 uri3]]
+            (is (re-matches #".*FAKE_CLIENT_ID.*" (or u "")))
+            (is (re-matches callback-pattern (or u ""))))
+
+          ;; anonymous, user and admin query should succeed but have no users
+          (doseq [session [session-anon session-user session-admin]]
+            (-> session
+                (request base-uri)
+                (ltu/body->edn)
+                (ltu/is-status 200)
+                (ltu/is-count zero?)))
+
+          ;; validate callbacks
+          (let [get-redirect-uri #(->> % (re-matches #".*redirect_uri=(.*)$") second)
+                get-callback-id #(->> % (re-matches #".*(callback.*)/execute$") second)
+
+                validate-url (get-redirect-uri uri)
+                validate-url2 (get-redirect-uri uri2)
+                validate-url3 (get-redirect-uri uri3)
+
+                callback-id (get-callback-id validate-url)
+                callback-id2 (get-callback-id validate-url2)
+                callback-id3 (get-callback-id validate-url3)]
+
+            ;; all callbacks must exist
+            (doseq [cb-id [callback-id callback-id2 callback-id3]]
+              (-> session-admin
+                  (request (str p/service-context cb-id))
                   (ltu/body->edn)
-                  (ltu/is-status 409))]
+                  (ltu/is-status 200)))
+
+            ;; remove the authentication configuration
+            (-> session-admin
+                (request (str p/service-context cfg-href)
+                         :request-method :delete)
+                (ltu/body->edn)
+                (ltu/is-status 200))
+
+            ;; try hitting the callback with an invalid server configuration
+            (-> session-anon
+                (request validate-url
+                         :request-method :get)
+                (ltu/body->edn)
+                (ltu/message-matches #".*missing or incorrect configuration.*")
+                (ltu/is-status 500))
+
+            (-> session-anon
+                (request validate-url2
+                         :request-method :get)
+                (ltu/body->edn)
+                (ltu/message-matches #".*missing or incorrect configuration.*")
+                (ltu/is-status 303))
+
+            (-> session-anon
+                (request validate-url3
+                         :request-method :get)
+                (ltu/body->edn)
+                (ltu/message-matches #".*missing or incorrect configuration.*")
+                (ltu/is-status 303))
+
+            ;; add the configuration back again
+            (-> session-admin
+                (request configuration-base-uri
+                         :request-method :post
+                         :body (json/write-str configuration-user-mitreid))
+                (ltu/body->edn)
+                (ltu/is-status 201))
+
+            ;; try hitting the callback without the MITREid code parameter
+            (reset-callback! callback-id)
+            (-> session-anon
+                (request validate-url
+                         :request-method :get)
+                (ltu/body->edn)
+                (ltu/message-matches #".*not contain required code.*")
+                (ltu/is-status 400))
+
+            (reset-callback! callback-id2)
+            (-> session-anon
+                (request validate-url2
+                         :request-method :get)
+                (ltu/body->edn)
+                (ltu/message-matches #".*not contain required code.*")
+                (ltu/is-status 303))
+
+            (reset-callback! callback-id3)
+            (-> session-anon
+                (request validate-url3
+                         :request-method :get)
+                (ltu/body->edn)
+                (ltu/message-matches #".*not contain required code.*")
+                (ltu/is-status 303))
+
+            ;; try now with a fake code
+
+            (doseq [[user-number return-code cb-id val-url] (map (fn [n rc cb vu] [n rc cb vu])
+                                                                 (range)
+                                                                 [400 303 303] ;; Expect 303 even on errors when redirectURI is provided
+                                                                 [callback-id callback-id2 callback-id3]
+                                                                 [validate-url validate-url2 validate-url3])]
+
+              (let [username (str "MITREid_USER_" user-number)
+                    email (format "user-%s@example.com" user-number)
+                    good-claims {:sub         username
+                                 :email       email
+                                 :given_name  "John"
+                                 :family_name "Smith"
+                                 :entitlement ["alpha-entitlement"]
+                                 :groups      ["/organization/group-1"]
+                                 :realm       "my-realm"}
+                    good-token (sign/sign-claims good-claims)
+                    bad-claims {}
+                    bad-token (sign/sign-claims bad-claims)]
+
+                (with-redefs [auth-mitreid/get-mitreid-access-token (fn [client-id client-secret base-url tokenurl oauth-code redirect-uri]
+                                                                      (case oauth-code
+                                                                        "GOOD" good-token
+                                                                        "BAD" bad-token
+                                                                        nil))
+
+                              auth-mitreid/get-mitreid-userinfo (fn [userInfoURL access_token]
+                                                                  {:id          42
+                                                                   :updatedAt   "2018-06-13T11:48:48"
+                                                                   :username    username
+                                                                   :givenName   "John",
+                                                                   :familyName  "Doe",
+                                                                   :displayName "John Doe",
+                                                                   :emails      [{:value    email
+                                                                                  :primary  true
+                                                                                  :verified true}]})
+
+                              db/find-roles-for-username (fn [username]
+                                                           "USER ANON alpha")]
+
+                  (reset-callback! cb-id)
+                  (-> session-anon
+                      (request (str val-url "?code=NONE")
+                               :request-method :get)
+                      (ltu/body->edn)
+                      (ltu/message-matches #".*unable to retrieve MITREid access token.*")
+                      (ltu/is-status return-code))
+
+                  (is (= "FAILED" (-> session-admin
+                                      (request (str p/service-context cb-id))
+                                      (ltu/body->edn)
+                                      (ltu/is-status 200)
+                                      :response
+                                      :body
+                                      :state)))
+
+                  (reset-callback! cb-id)
+                  (-> session-anon
+                      (request (str val-url "?code=BAD")
+                               :request-method :get)
+                      (ltu/body->edn)
+                      (ltu/message-matches #".*MITREid token is missing subject.*")
+                      (ltu/is-status return-code))
+
+                  (is (= "FAILED" (-> session-admin
+                                      (request (str p/service-context cb-id))
+                                      (ltu/body->edn)
+                                      (ltu/is-status 200)
+                                      :response
+                                      :body
+                                      :state)))
+
+                  ;; try creating the user via callback, should succeed
+                  (reset-callback! cb-id)
+                  (is (false? (db/user-exists? username)))
+                  (-> session-anon
+                      (request (str val-url "?code=GOOD")
+                               :request-method :get)
+                      (ltu/is-status 201))
+
+                  (is (= "SUCCEEDED" (-> session-admin
+                                         (request (str p/service-context cb-id))
+                                         (ltu/body->edn)
+                                         (ltu/is-status 200)
+                                         :response
+                                         :body
+                                         :state)))
 
 
+                  (let [ss-username (db/find-username-by-authn :mitreid username)]
+                    (is (not (nil? ss-username)))
+                    (is (= email (->> username
+                                      (db/find-username-by-authn :mitreid)
+                                      (db/get-user)
+                                      :name))))
 
-(is (= cfg-href-legacy (str "configuration/session-mitreid-" mitreid/registration-method)))
+                  ;; try creating the same user again, should fail
+                  (reset-callback! cb-id)
+                  (-> session-anon
+                      (request (str val-url "?code=GOOD")
+                               :request-method :get)
+                      (ltu/body->edn)
+                      (ltu/message-matches #".*account already exists.*")
+                      (ltu/is-status return-code))
 
-(let [uri (-> session-anon
-              (request base-uri
-                       :request-method :post
-                       :body (json/write-str href-create))
-              (ltu/body->edn)
-              (ltu/is-status 303)
-              ltu/location)
-
-      uri2 (-> session-anon
-               (request base-uri
-                        :request-method :post
-                        :body (json/write-str href-create-redirect))
-               (ltu/body->edn)
-               (ltu/is-status 303)
-               ltu/location)
-
-      uri3 (-> session-anon-form
-               (request base-uri
-                        :request-method :post
-                        :body (codec/form-encode {:href        href
-                                                  :redirectURI redirect-uri}))
-               (ltu/body->edn)
-               (ltu/is-status 303)
-               ltu/location)]
-
-  ;; redirect URLs in location header should contain the client ID and resource id
-  (doseq [u [uri uri2 uri3]]
-    (is (re-matches #".*FAKE_CLIENT_ID.*" (or u "")))
-    (is (re-matches callback-pattern (or u ""))))
-
-  ;; anonymous, user and admin query should succeed but have no users
-  (doseq [session [session-anon session-user session-admin]]
-    (-> session
-        (request base-uri)
-        (ltu/body->edn)
-        (ltu/is-status 200)
-        (ltu/is-count zero?)))
-
-  ;; validate callbacks
-  (let [get-redirect-uri #(->> % (re-matches #".*redirect_uri=(.*)$") second)
-        get-callback-id #(->> % (re-matches #".*(callback.*)/execute$") second)
-
-        validate-url (get-redirect-uri uri)
-        validate-url2 (get-redirect-uri uri2)
-        validate-url3 (get-redirect-uri uri3)
-
-        callback-id (get-callback-id validate-url)
-        callback-id2 (get-callback-id validate-url2)
-        callback-id3 (get-callback-id validate-url3)]
-
-    ;; all callbacks must exist
-    (doseq [cb-id [callback-id callback-id2 callback-id3]]
-      (-> session-admin
-          (request (str p/service-context cb-id))
-          (ltu/body->edn)
-          (ltu/is-status 200)))
-
-    ;; remove the authentication configuration
-    (-> session-admin
-        (request (str p/service-context cfg-href-legacy)
-                 :request-method :delete)
-        (ltu/body->edn)
-        (ltu/is-status 200))
-
-    ;; try hitting the callback with an invalid server configuration
-    (-> session-anon
-        (request validate-url
-                 :request-method :get)
-        (ltu/body->edn)
-        (ltu/message-matches #".*missing or incorrect configuration.*")
-        (ltu/is-status 500))
-
-    (-> session-anon
-        (request validate-url2
-                 :request-method :get)
-        (ltu/body->edn)
-        (ltu/message-matches #".*missing or incorrect configuration.*")
-        (ltu/is-status 303))
-
-    (-> session-anon
-        (request validate-url3
-                 :request-method :get)
-        (ltu/body->edn)
-        (ltu/message-matches #".*missing or incorrect configuration.*")
-        (ltu/is-status 303))
-
-    ;; add the configuration back again
-    (-> session-admin
-        (request configuration-base-uri
-                 :request-method :post
-                 :body (json/write-str configuration-user-mitreid-legacy))
-        (ltu/body->edn)
-        (ltu/is-status 201))
-
-    ;; try hitting the callback without the MITREid code parameter
-    (reset-callback! callback-id)
-    (-> session-anon
-        (request validate-url
-                 :request-method :get)
-        (ltu/body->edn)
-        (ltu/message-matches #".*not contain required code.*")
-        (ltu/is-status 400))
-
-    (reset-callback! callback-id2)
-    (-> session-anon
-        (request validate-url2
-                 :request-method :get)
-        (ltu/body->edn)
-        (ltu/message-matches #".*not contain required code.*")
-        (ltu/is-status 303))
-
-    (reset-callback! callback-id3)
-    (-> session-anon
-        (request validate-url3
-                 :request-method :get)
-        (ltu/body->edn)
-        (ltu/message-matches #".*not contain required code.*")
-        (ltu/is-status 303))
-
-    ;; try now with a fake code
-
-    (doseq [[user-number return-code cb-id val-url] (map (fn [n rc cb vu] [n rc cb vu])
-                                                         (range)
-                                                         [400 303 303] ;; Expect 303 even on errors when redirectURI is provided
-                                                         [callback-id callback-id2 callback-id3]
-                                                         [validate-url validate-url2 validate-url3])]
-
-      (let [username (str "MITREid_USER_" user-number)
-            email (format "user-%s@example.com" user-number)
-            good-claims {:sub         username
-                         :email       email
-                         :given_name  "John"
-                         :family_name "Smith"
-                         :entitlement ["alpha-entitlement"]
-                         :groups      ["/organization/group-1"]
-                         :realm       "my-realm"}
-            good-token (sign/sign-claims good-claims)
-            bad-claims {}
-            bad-token (sign/sign-claims bad-claims)]
-
-        (with-redefs [auth-mitreid/get-mitreid-access-token (fn [client-id client-secret base-url tokenurl oauth-code redirect-uri]
-                                                        (case oauth-code
-                                                          "GOOD" good-token
-                                                          "BAD" bad-token
-                                                          nil))
-                      db/find-roles-for-username (fn [username]
-                                                   "USER ANON alpha")]
-
-          (reset-callback! cb-id)
-          (-> session-anon
-              (request (str val-url "?code=NONE")
-                       :request-method :get)
-              (ltu/body->edn)
-              (ltu/message-matches #".*unable to retrieve MITREid access token.*")
-              (ltu/is-status return-code))
-
-          (is (= "FAILED" (-> session-admin
-                              (request (str p/service-context cb-id))
-                              (ltu/body->edn)
-                              (ltu/is-status 200)
-                              :response
-                              :body
-                              :state)))
-
-          (reset-callback! cb-id)
-          (-> session-anon
-              (request (str val-url "?code=BAD")
-                       :request-method :get)
-              (ltu/body->edn)
-              (ltu/message-matches #".*MITREid token is missing subject.*")
-              (ltu/is-status return-code))
-
-          (is (= "FAILED" (-> session-admin
-                              (request (str p/service-context cb-id))
-                              (ltu/body->edn)
-                              (ltu/is-status 200)
-                              :response
-                              :body
-                              :state)))
-
-          ;; try creating the user via callback, should succeed
-          (reset-callback! cb-id)
-          (is (false? (db/user-exists? username)))
-          (-> session-anon
-              (request (str val-url "?code=GOOD")
-                       :request-method :get)
-              (ltu/is-status 201))
-
-          (is (= "SUCCEEDED" (-> session-admin
-                                 (request (str p/service-context cb-id))
-                                 (ltu/body->edn)
-                                 (ltu/is-status 200)
-                                 :response
-                                 :body
-                                 :state)))
-
-
-          (let [ss-username (db/find-username-by-authn :mitreid username)]
-            (is (not (nil? ss-username)))
-            (is (= email (->> username
-                              (db/find-username-by-authn :mitreid)
-                              (db/get-user)
-                              :name))))
-
-          ;; try creating the same user again, should fail
-          (reset-callback! cb-id)
-          (-> session-anon
-              (request (str val-url "?code=GOOD")
-                       :request-method :get)
-              (ltu/body->edn)
-              (ltu/message-matches #".*account already exists.*")
-              (ltu/is-status return-code))
-
-          (is (= "FAILED" (-> session-admin
-                              (request (str p/service-context cb-id))
-                              (ltu/body->edn)
-                              (ltu/is-status 200)
-                              :response
-                              :body
-                              :state)))))))) ) ) ) )
+                  (is (= "FAILED" (-> session-admin
+                                      (request (str p/service-context cb-id))
+                                      (ltu/body->edn)
+                                      (ltu/is-status 200)
+                                      :response
+                                      :body
+                                      :state))))))))))))
 
 
 (deftest bad-methods

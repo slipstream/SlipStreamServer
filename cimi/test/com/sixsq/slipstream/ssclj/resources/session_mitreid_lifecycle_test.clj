@@ -29,11 +29,11 @@
 (def instance-legacy "legacy-test-mitreid")
 (def instance "test-mitreid")
 
-(def session-template-mitreid-legacy {:method   mitreid/authn-method
-                                   :instance    instance-legacy
-                                   :name        "MITREid Connect"
-                                   :description "External Authentication via MITREid Connect Protocol"
-                                   :acl         st/resource-acl})
+(def session-template-mitreid-legacy {:method      mitreid/authn-method
+                                      :instance    instance-legacy
+                                      :name        "MITREid Connect"
+                                      :description "External Authentication via MITREid Connect Protocol"
+                                      :acl         st/resource-acl})
 
 (def session-template-mitreid (assoc session-template-mitreid-legacy :instance instance))
 
@@ -53,18 +53,21 @@
     "jVunw8YkO7dsBhVP/8bqLDLw/8NsSAKwlzsoNKbrjVQ/NmHMJ88QkiKwv+E6lidy"
     "3wIDAQAB"))
 
-(def configuration-session-mitreid-legacy {:configurationTemplate {:service "session-mitreid"
-                                                                :instance   instance-legacy
-                                                                :clientID   "FAKE_CLIENT_ID"
-                                                                :baseURL    "https://mitreid.example.com"
-                                                                :publicKey  auth-pubkey}})
+(def configuration-session-mitreid-legacy {:configurationTemplate {:service   "session-mitreid"
+                                                                   :instance  instance-legacy
+                                                                   :clientID  "FAKE_CLIENT_ID"
+                                                                   :baseURL   "https://mitreid.example.com"
+                                                                   :publicKey auth-pubkey}})
 
-(def configuration-session-mitreid (-> configuration-session-mitreid-legacy
-                                       (update-in [:configurationTemplate] dissoc :baseURL)
-                                       (assoc-in [:configurationTemplate :instance] instance)
-                                       (assoc-in [:configurationTemplate :clientSecret] "MyMITREidClientSecret")
-                                       (assoc-in [:configurationTemplate :authorizeURL] "https://authorize.mitreid.com/authorize")
-                                       (assoc-in [:configurationTemplate :tokenURL] "https://token.mitreid.com/token")))
+
+(def configuration-session-mitreid {:configurationTemplate {:service      "session-mitreid" ;;reusing configuration from session MITREid
+                                                            :instance     instance
+                                                            :clientID     "FAKE_CLIENT_ID"
+                                                            :clientSecret "MyMITREidClientSecret"
+                                                            :authorizeURL "https://authorize.mitreid.com/authorize"
+                                                            :tokenURL     "https://token.mitreid.com/token"
+                                                            :userInfoURL  "https://userinfo.mitreid.com/api/user/me"
+                                                            :publicKey    auth-pubkey}})
 
 (deftest lifecycle
 
@@ -84,13 +87,6 @@
           ;;
           ;; create the session template to use for these tests
           ;;
-          href-legacy (-> session-admin
-                          (request session-template-base-uri
-                                   :request-method :post
-                                   :body (json/write-str session-template-mitreid-legacy))
-                          (ltu/body->edn)
-                          (ltu/is-status 201)
-                          (ltu/location))
           href (-> session-admin
                    (request session-template-base-uri
                             :request-method :post
@@ -99,13 +95,9 @@
                    (ltu/is-status 201)
                    (ltu/location))
 
-          template-url-legacy (str p/service-context href-legacy)
+
           template-url (str p/service-context href)
 
-          resp-legacy (-> session-anon
-                          (request template-url-legacy)
-                          (ltu/body->edn)
-                          (ltu/is-status 200))
           resp (-> session-anon
                    (request template-url)
                    (ltu/body->edn)
@@ -117,20 +109,13 @@
           properties-attr {:a "one", :b "two"}
 
           ;;valid-create {:sessionTemplate (ltu/strip-unwanted-attrs template)}
-          href-create-legacy {:name            name-attr
-                              :description     description-attr
-                              :properties      properties-attr
-                              :sessionTemplate {:href href-legacy}}
+
           href-create {:name            name-attr
                        :description     description-attr
                        :properties      properties-attr
                        :sessionTemplate {:href href}}
-
-          href-create-redirect-legacy {:sessionTemplate {:href        href-legacy
-                                                         :redirectURI redirect-uri}}
           href-create-redirect {:sessionTemplate {:href        href
                                                   :redirectURI redirect-uri}}
-          invalid-create-legacy (assoc-in href-create-legacy [:sessionTemplate :invalid] "BAD")
           invalid-create (assoc-in href-create [:sessionTemplate :invalid] "BAD")]
 
       ;; anonymous query should succeed but have no entries
@@ -141,14 +126,14 @@
           (ltu/is-count zero?))
 
       ;; configuration must have MITREid client id and base URL, if not should get 500
-      (doseq [hcreate #{href-create href-create-legacy}]
+
       (-> session-anon
           (request base-uri
                    :request-method :post
-                   :body (json/write-str hcreate))
+                   :body (json/write-str href-create))
           (ltu/body->edn)
           (ltu/message-matches #".*missing or incorrect configuration.*")
-          (ltu/is-status 500)))
+          (ltu/is-status 500))
 
 
       ;; anonymous create must succeed (normal create and href-legacy create)
@@ -156,13 +141,6 @@
             ;;
             ;; create the session-mitreid configuration to use for these tests
             ;;
-            cfg-href-legacy (-> session-admin
-                                (request configuration-base-uri
-                                         :request-method :post
-                                         :body (json/write-str configuration-session-mitreid-legacy))
-                                (ltu/body->edn)
-                                (ltu/is-status 201)
-                                (ltu/location))
             cfg-href (-> session-admin
                          (request configuration-base-uri
                                   :request-method :post
@@ -173,22 +151,17 @@
 
 
             public-key (:auth-public-key environ.core/env)
-            good-claims {:sub         "MITREid_USER"
-                         :email       "user@mitreid.example.com"
-                         :entitlement ["alpha-entitlement"]
-                         :groups      ["/organization/group-1"]
-                         :realm       "my-realm"}
+            good-claims {:sub 42}
             good-token (sign/sign-claims good-claims)
             bad-claims {}
             bad-token (sign/sign-claims bad-claims)]
 
-        (is (= cfg-href-legacy (str "configuration/session-mitreid-" instance-legacy)))
         (is (= cfg-href (str "configuration/session-mitreid-" instance)))
 
         (let [resp (-> session-anon
                        (request base-uri
                                 :request-method :post
-                                :body (json/write-str href-create-legacy))
+                                :body (json/write-str href-create))
                        (ltu/body->edn)
                        (ltu/is-status 303))
               id (get-in resp [:response :body :resource-id])
@@ -199,7 +172,7 @@
               resp (-> session-anon
                        (request base-uri
                                 :request-method :post
-                                :body (json/write-str href-create-redirect-legacy))
+                                :body (json/write-str href-create-redirect))
                        (ltu/body->edn)
                        (ltu/is-status 303))
               id2 (get-in resp [:response :body :resource-id])
@@ -210,7 +183,7 @@
               resp (-> session-anon-form
                        (request base-uri
                                 :request-method :post
-                                :body (codec/form-encode {:href        href-legacy
+                                :body (codec/form-encode {:href        href
                                                           :redirectURI redirect-uri}))
                        (ltu/body->edn)
                        (ltu/is-status 303))
@@ -353,12 +326,11 @@
 
 
             ;; remove the authentication configurations
-            (doseq [conf #{cfg-href cfg-href-legacy}]
-              (-> session-admin
-                  (request (str p/service-context conf)
-                           :request-method :delete)
-                  (ltu/body->edn)
-                  (ltu/is-status 200)))
+            (-> session-admin
+                (request (str p/service-context cfg-href)
+                         :request-method :delete)
+                (ltu/body->edn)
+                (ltu/is-status 200))
 
 
             ;; try hitting the callback with an invalid server configuration
@@ -421,10 +393,10 @@
 
             ;; try now with a fake code
             (with-redefs [auth-mitreid/get-mitreid-access-token (fn [client-id client-secret base-url token-url oauth-code redirect-url]
-                                                            (case oauth-code
-                                                              "GOOD" good-token
-                                                              "BAD" bad-token
-                                                              nil))
+                                                                  (case oauth-code
+                                                                    "GOOD" good-token
+                                                                    "BAD" bad-token
+                                                                    nil))
                           db/find-roles-for-username (fn [username]
                                                        "USER ANON alpha")
                           db/user-exists? (constantly true)]
@@ -538,13 +510,12 @@
               (ltu/is-status 200))
 
           ;; create with invalid template fails
-          (doseq [inv-create #{invalid-create invalid-create-legacy}]
           (-> session-anon
               (request base-uri
                        :request-method :post
-                       :body (json/write-str inv-create))
+                       :body (json/write-str invalid-create))
               (ltu/body->edn)
-              (ltu/is-status 400))))))))
+              (ltu/is-status 400)))))))
 
 
 (deftest bad-methods

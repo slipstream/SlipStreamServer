@@ -19,3 +19,10 @@
       :access_token))
 
 
+(defn get-mitreid-userinfo
+  [userInfoURL access_token]
+  (-> (http/post userInfoURL
+                 {:headers     {"Accept" "application/json"}
+                  :form-params {::access_token access_token}})
+      :body
+      (json/read-str :key-fn keyword)))

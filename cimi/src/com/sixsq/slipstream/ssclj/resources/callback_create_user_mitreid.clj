@@ -19,20 +19,23 @@
 (defn register-user
   [{{href :href} :targetResource {:keys [redirectURI]} :data callback-id :id :as callback-resource} {:keys [headers base-uri uri] :as request}]
   (let [instance (u/document-id href)
-        [client-id client-secret base-url public-key authorizeURL tokenURL] (mitreid-utils/config-params redirectURI instance)]
+        [client-id client-secret base-url public-key authorizeURL tokenURL userInfoURL] (mitreid-utils/config-params redirectURI instance)]
     (if-let [code (uh/param-value request :code)]
       (if-let [access-token (auth-mitreid/get-mitreid-access-token client-id client-secret base-url tokenURL code (str base-uri (or callback-id "unknown-id") "/execute"))]
         (try
-          (let [{:keys [sub email given_name family_name realm] :as claims} (sign/unsign-claims access-token public-key)]
+          (let [{:keys [sub] :as claims}  (sign/unsign-claims access-token public-key)
+                 {:keys [username givenName familyName emails] :as userinfo} (when sub (auth-mitreid/get-mitreid-userinfo userInfoURL access-token))
+                 email (-> (filter :primary emails)
+                           first
+                           :value)]
             (log/debugf "MITREid access token claims for %s: %s" instance (pr-str claims))
             (if sub
-              (if-let [matched-user (ex/create-user-when-missing! :mitreid {:external-login    sub
-                                                                         :external-email    (or email (str sub "@fake-email.com")) ;;some MITREid server do not return emails
-                                                                         :firstname         given_name
-                                                                         :lastname          family_name
-                                                                         :organization      realm
-                                                                         :instance          instance
-                                                                         :fail-on-existing? true})]
+              (if-let [matched-user (ex/create-user-when-missing! :mitreid {:external-login    username
+                                                                            :external-email    (or email (str username "@fake-email.com"))
+                                                                            :firstname         givenName
+                                                                            :lastname          familyName
+                                                                            :instance          instance
+                                                                            :fail-on-existing? true})]
                 matched-user
                 (mitreid-utils/throw-user-exists sub redirectURI))
               (mitreid-utils/throw-no-subject redirectURI)))
