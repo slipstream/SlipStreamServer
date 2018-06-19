@@ -23,11 +23,11 @@
     (if-let [code (uh/param-value request :code)]
       (if-let [access-token (auth-oidc/get-access-token client-id client-secret base-url tokenURL code (str base-uri (or callback-id "unknown-id") "/execute"))]
         (try
-          (let [{:keys [sub] :as claims}  (sign/unsign-claims access-token public-key)
-                 {:keys [username givenName familyName emails] :as userinfo} (when sub (mitreid-utils/get-mitreid-userinfo userInfoURL access-token))
-                 email (-> (filter :primary emails)
-                           first
-                           :value)]
+          (let [{:keys [sub] :as claims} (sign/unsign-claims access-token public-key)
+                {:keys [username givenName familyName emails] :as userinfo} (when sub (mitreid-utils/get-mitreid-userinfo userInfoURL access-token))
+                email (-> (filter :primary emails)
+                          first
+                          :value)]
             (log/debugf "MITREid access token claims for %s: %s" instance (pr-str claims))
             (if sub
               (if-let [matched-user (ex/create-user-when-missing! :mitreid {:external-login    username

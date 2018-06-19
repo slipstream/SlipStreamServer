@@ -33,10 +33,12 @@
           (let [{:keys [sub] :as claims} (sign/unsign-claims access-token public-key)
                 roles (concat (mitreid-utils/extract-roles claims)
                               (mitreid-utils/extract-groups claims)
-                              (mitreid-utils/extract-entitlements claims))]
+                              (mitreid-utils/extract-entitlements claims))
+                {:keys [username] :as userinfo} (when sub (mitreid-utils/get-mitreid-userinfo userInfoURL access-token))
+                ]
             (log/debug "MITREid access token claims for" instance ":" (pr-str claims))
             (if sub
-              (if-let [matched-user (ex/match-mitreid-username sub instance)]
+              (if-let [matched-user (ex/match-mitreid-username username instance)]
                 (let [claims (cond-> (auth-internal/create-claims matched-user)
                                      session-id (assoc :session session-id)
                                      session-id (update :roles #(str session-id " " %))
