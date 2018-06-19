@@ -62,11 +62,12 @@
                   (ltu/body->edn)
                   (ltu/is-status 200)
                   (ltu/is-operation-present "stop")
-                  (get-in [:response :body]))]
+                  (get-in [:response :body]))
+          zookeeper-path (get-in job [:properties :zookeeper-path])]
 
       (is (= "QUEUED" (:state job)))
 
-      (is (= (uzk/get-data "/job/entries/entry-100-0000000000") uri))
+      (is (= (uzk/get-data zookeeper-path) uri))
 
       (-> session-user
           (request "/api/job")

@@ -3,8 +3,7 @@
     [clj-time.core :as time]
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk])
-  (:import (org.apache.commons.io.filefilter FalseFileFilter)))
+    [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]))
 
 (def state-running "RUNNING")
 (def state-failed "FAILED")
@@ -12,6 +11,7 @@
 (def state-stopped "STOPPED")
 (def state-success "SUCCESS")
 (def state-queued "QUEUED")
+
 
 (defn stop [{state :state id :id :as job}]
   (if (= state state-running)
