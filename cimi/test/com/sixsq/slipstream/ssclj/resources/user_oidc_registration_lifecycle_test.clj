@@ -273,7 +273,7 @@
             bad-claims {}
             bad-token (sign/sign-claims bad-claims)]
 
-        (with-redefs [auth-oidc/get-oidc-access-token (fn [client-id client-secret base-url tokenurl oauth-code redirect-uri]
+        (with-redefs [auth-oidc/get-access-token (fn [client-id client-secret base-url tokenurl oauth-code redirect-uri]
                                                         (case oauth-code
                                                           "GOOD" good-token
                                                           "BAD" bad-token
@@ -286,7 +286,7 @@
               (request (str val-url "?code=NONE")
                        :request-method :get)
               (ltu/body->edn)
-              (ltu/message-matches #".*unable to retrieve OIDC access token.*")
+              (ltu/message-matches #".*unable to retrieve OIDC/MITREid access token.*")
               (ltu/is-status return-code))
 
           (is (= "FAILED" (-> session-admin
@@ -302,7 +302,7 @@
               (request (str val-url "?code=BAD")
                        :request-method :get)
               (ltu/body->edn)
-              (ltu/message-matches #".*OIDC token is missing subject.*")
+              (ltu/message-matches #".*OIDC/MITREid token is missing subject.*")
               (ltu/is-status return-code))
 
           (is (= "FAILED" (-> session-admin
