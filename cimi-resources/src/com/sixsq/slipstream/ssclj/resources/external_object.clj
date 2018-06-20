@@ -329,8 +329,7 @@
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
-      (-> (crud/retrieve-by-id id {:user-name  "INTERNAL"
-                                   :user-roles ["ADMIN"]})
+      (-> (crud/retrieve-by-id-as-admin id)
           (upload-subtype request)))
     (catch Exception e
       (or (ex-data e) (throw e)))))
@@ -338,8 +337,7 @@
 (defmethod crud/do-action [resource-url "ready"]
   [{{uuid :uuid} :params :as request}]
   (try
-    (let [resource (crud/retrieve-by-id (str resource-url "/" uuid) {:user-name  "INTERNAL"
-                                                                     :user-roles ["ADMIN"]})
+    (let [resource (crud/retrieve-by-id-as-admin (str resource-url "/" uuid))
           state (:state resource)]
       (a/can-modify? resource request)
       (if (= state state-uploading)
@@ -378,8 +376,7 @@
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
-      (-> (crud/retrieve-by-id id {:user-name  "INTERNAL"
-                                   :user-roles ["ADMIN"]})
+      (-> (crud/retrieve-by-id-as-admin id)
           (download-subtype request)))
     (catch Exception e
       (or (ex-data e) (throw e)))))
@@ -401,8 +398,7 @@
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
-      (-> (crud/retrieve-by-id id {:user-name  "INTERNAL"
-                                   :user-roles ["ADMIN"]})
+      (-> (crud/retrieve-by-id-as-admin id)
           (delete-subtype request)))
     (catch Exception e
       (or (ex-data e) (throw e)))))
