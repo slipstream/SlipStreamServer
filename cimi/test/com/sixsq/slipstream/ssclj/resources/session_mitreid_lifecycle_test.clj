@@ -26,8 +26,7 @@
 
 (def session-template-base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
 
-
-(def instance "test-mitreid")
+(def instance "test-MITREid")
 
 (def session-template-mitreid {:method       mitreid/authn-method
                                :instance     instance
@@ -72,12 +71,10 @@
         session-user (header session-anon authn-info-header "user USER ANON")
         session-anon-form (-> session-anon
                               (content-type u/form-urlencoded))
-
         redirect-uri "https://example.com/webui"]
 
     ;; get session template so that session resources can be tested
-    (let [
-          ;;
+    (let [;;
           ;; create the session template to use for these tests
           ;;
           href (-> session-admin

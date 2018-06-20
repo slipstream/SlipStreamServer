@@ -115,7 +115,6 @@
           (ltu/is-count zero?))
 
       ;; configuration must have OIDC client id and base URL, if not should get 500
-
       (-> session-anon
           (request base-uri
                    :request-method :post
@@ -351,7 +350,6 @@
                 (ltu/is-status 303))                        ;; always expect redirect when redirectURI is provided
 
             ;; add the configurations back again
-
             (-> session-admin
                 (request configuration-base-uri
                          :request-method :post
