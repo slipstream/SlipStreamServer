@@ -115,7 +115,7 @@
 (defmethod crud/do-action [resource-url "validate"]
   [{{uuid :uuid} :params baseURI :baseURI}]
   (let [id (str resource-url "/" uuid)]
-    (when-let [{:keys [address validated?]} (crud/retrieve-by-id id {:user-name "INTERNAL", :user-roles ["ADMIN"]})]
+    (when-let [{:keys [address validated?]} (crud/retrieve-by-id-as-admin id)]
       (if-not validated?
         (try
           (-> (email-utils/create-callback id baseURI)

@@ -19,7 +19,7 @@
 (defn validated-email!
   [user-id]
   (try
-    (-> (crud/retrieve-by-id user-id admin-opts)
+    (-> (crud/retrieve-by-id-as-admin user-id)
         (u/update-timestamps)
         (assoc :state "ACTIVE")
         (db/edit admin-opts))
@@ -29,7 +29,7 @@
 
 (defmethod callback/execute action-name
   [{{:keys [href]} :targetResource :as callback-resource} request]
-  (let [{:keys [id state] :as user} (crud/retrieve-by-id href admin-opts)]
+  (let [{:keys [id state] :as user} (crud/retrieve-by-id-as-admin href)]
     (if (= "NEW" state)
       (let [msg (str "email for " id " successfully validated")]
         (validated-email! id)

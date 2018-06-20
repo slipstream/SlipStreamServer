@@ -52,8 +52,6 @@
     []))
 
 
-(def ^:const admin-opts {:user-name "INTERNAL", :user-roles ["ADMIN"]})
-
 ;; exceptions
 
 (defn throw-no-username-or-email [username email redirectURI]
@@ -119,7 +117,7 @@
                                                                    :roles    ["ADMIN"]}}}}
         {{:keys [resource-id]} :body status :status} (crud/add callback-request)]
     (if (= 201 status)
-      (if-let [callback-resource (crud/set-operations (crud/retrieve-by-id resource-id admin-opts) {})]
+      (if-let [callback-resource (crud/set-operations (crud/retrieve-by-id-as-admin resource-id) {})]
         (if-let [validate-op (u/get-op callback-resource "execute")]
           (str baseURI validate-op)
           (let [msg "callback does not have execute operation"]

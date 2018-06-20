@@ -104,8 +104,7 @@
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
-      (-> (crud/retrieve-by-id id {:user-name  "INTERNAL"
-                                   :user-roles ["ADMIN"]})
+      (-> (crud/retrieve-by-id-as-admin id)
           (quota-utils/collect request)
           sr/json-response))
     (catch Exception e
