@@ -21,16 +21,16 @@
               :updated     timestamp
               :acl         valid-acl
 
-              :nodes       [{:component    {:href "module/a-b"}
-                             :multiplicity 1}
-                            {:component               {:href "module/c-d"}
-                             :multiplicity            2
-                             :maxProvisioningFailures 1}
-                            {:component               {:href "module/e-f"}
-                             :multiplicity            20
-                             :maxProvisioningFailures 10
-                             :parameterMappings       {:param.1-2 {:mapped true, :value "param.2-3"}
-                                                       :param.3-4 {:mapped false, :value "default"}}}]}]
+              :nodes       {:node_alpha {:component    {:href "module/a-b"}
+                                         :multiplicity 1}
+                            :node_beta  {:component               {:href "module/c-d"}
+                                         :multiplicity            2
+                                         :maxProvisioningFailures 1}
+                            :node_gamma {:component               {:href "module/e-f"}
+                                         :multiplicity            20
+                                         :maxProvisioningFailures 10
+                                         :parameterMappings       {:param.1-2 {:mapped true, :value "param.2-3"}
+                                                                   :param.3-4 {:mapped false, :value "default"}}}}}]
 
     (is (s/valid? ::module-app/module-application root))
     (is (false? (s/valid? ::module-app/module-application (assoc root :badKey "badValue"))))

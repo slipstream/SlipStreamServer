@@ -15,39 +15,43 @@
 
 (deftest test-schema-check
   (let [timestamp "1964-08-25T10:00:00.0Z"
-        root {:id             (str t/resource-url "/connector-uuid")
-              :resourceURI    t/resource-uri
-              :created        timestamp
-              :updated        timestamp
-              :acl            valid-acl
+        root {:id               (str t/resource-url "/connector-uuid")
+              :resourceURI      t/resource-uri
+              :created          timestamp
+              :updated          timestamp
+              :acl              valid-acl
 
-              :cpu            2
-              :ram            2048
-              :disk           100
-              :volatileDisk   500
-              :networkType    "public"
+              :cpu              2
+              :ram              2048
+              :disk             100
+              :volatileDisk     500
+              :networkType      "public"
 
-              :parameters     {:param-1 {:category "Input" :description "desc2" :value "100"}
-                               :param-2 {:category "Output" :description "desc2"}
-                               :param-3 {:category "Output"}}
+              :inputParameters  {:iparam-1 {:description "desc2" :value "100"}
+                                 :iparam-2 {:description "desc2"}
+                                 :iparam-3 {}}
 
-              :targets        {:preinstall  "preinstall"
-                               :packages    ["emacs-nox" "vim"]
-                               :postinstall "postinstall"
-                               :deployment  "deployment"
-                               :reporting   "reporting"
-                               :onVmAdd     "onVmAdd"
-                               :onVmRemove  "onVmRemove"
-                               :prescale    "prescale"
-                               :postscale   "postscale"}}]
+              :outputParameters {:param-1 {:description "desc2" :value "100"}
+                                 :param-2 {:description "desc2"}
+                                 :param-3 {}}
+
+              :targets          {:preinstall  "preinstall"
+                                 :packages    ["emacs-nox" "vim"]
+                                 :postinstall "postinstall"
+                                 :deployment  "deployment"
+                                 :reporting   "reporting"
+                                 :onVmAdd     "onVmAdd"
+                                 :onVmRemove  "onVmRemove"
+                                 :prescale    "prescale"
+                                 :postscale   "postscale"}}]
 
     (is (s/valid? ::module-component/module-component root))
     (is (false? (s/valid? ::module-component/module-component (assoc root :badKey "badValue"))))
 
     ;; required attributes
-    (doseq [k #{:id :resourceURI :created :updated :acl :networkType :parameters}]
+    (doseq [k #{:id :resourceURI :created :updated :acl :networkType :outputParameters}]
       (is (false? (s/valid? ::module-component/module-component (dissoc root k)))))
 
     ;; optional attributes
-    (doseq [k #{:cpu :ram :disk :volatileDisk :targets}]
+    (doseq [k #{:cpu :ram :disk :volatileDisk :targets :inputParameters}]
       (is (true? (s/valid? ::module-component/module-component (dissoc root k)))))))
