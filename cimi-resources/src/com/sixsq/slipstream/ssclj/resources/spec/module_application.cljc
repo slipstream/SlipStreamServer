@@ -13,7 +13,8 @@
 (s/def ::maxProvisioningFailures nat-int?)
 
 (def module-href-regex #"^module/[a-z]+(-[a-z]+)*$")
-(s/def ::component (s/and string? #(re-matches module-href-regex %)))
+(s/def ::href (s/and string? #(re-matches module-href-regex %)))
+(s/def ::component (s/keys :req-un [::href]))
 
 (s/def ::parameter-name (s/and keyword? #(re-matches #"^[a-z0-9]+([\.-][a-z0-9]+)*$" (name %))))
 
