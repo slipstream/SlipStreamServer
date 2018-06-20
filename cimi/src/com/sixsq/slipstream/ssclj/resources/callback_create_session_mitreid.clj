@@ -13,7 +13,7 @@
     [com.sixsq.slipstream.ssclj.resources.callback :as callback]
     [com.sixsq.slipstream.ssclj.resources.callback.utils :as utils]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.session-mitreid.utils :as mitreid-utils]
+    [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as oidc-utils]
     [com.sixsq.slipstream.ssclj.resources.session.utils :as sutils]
     [com.sixsq.slipstream.util.response :as r]))
 
@@ -26,19 +26,18 @@
 
   (let [{:keys [server clientIP redirectURI] {:keys [href]} :sessionTemplate :as current-session} (sutils/retrieve-session-by-id session-id)
         instance (u/document-id href)
-        [client-id client-secret base-url public-key authorizeURL tokenURL userInfoURL] (mitreid-utils/config-params redirectURI instance)]
+        [client-id client-secret base-url public-key authorizeURL tokenURL userInfoURL] (oidc-utils/config-mitreid-params redirectURI instance)]
     (if-let [code (uh/param-value request :code)]
       (if-let [access-token (auth-oidc/get-access-token client-id client-secret base-url tokenURL code (str base-uri (or callback-id "unknown-id") "/execute"))]
         (try
           (let [{:keys [sub] :as claims} (sign/unsign-claims access-token public-key)
-                roles (concat (mitreid-utils/extract-roles claims)
-                              (mitreid-utils/extract-groups claims)
-                              (mitreid-utils/extract-entitlements claims))
-                {:keys [username] :as userinfo} (when sub (mitreid-utils/get-mitreid-userinfo userInfoURL access-token))
-                ]
+                roles (concat (oidc-utils/extract-roles claims)
+                              (oidc-utils/extract-groups claims)
+                              (oidc-utils/extract-entitlements claims))
+                {:keys [username] :as userinfo} (when sub (oidc-utils/get-mitreid-userinfo userInfoURL access-token))]
             (log/debug "MITREid access token claims for" instance ":" (pr-str claims))
             (if sub
-              (if-let [matched-user (ex/match-mitreid-username username instance)]
+              (if-let [matched-user (ex/match-oidc-username username instance)]
                 (let [claims (cond-> (auth-internal/create-claims matched-user)
                                      session-id (assoc :session session-id)
                                      session-id (update :roles #(str session-id " " %))
@@ -58,12 +57,12 @@
                       (if redirectURI
                         (r/response-final-redirect redirectURI cookie-tuple)
                         (r/response-created session-id cookie-tuple)))))
-                (mitreid-utils/throw-inactive-user sub redirectURI))
-              (mitreid-utils/throw-no-subject redirectURI)))
+                (oidc-utils/throw-inactive-user sub redirectURI))
+              (oidc-utils/throw-no-subject redirectURI)))
           (catch Exception e
-            (mitreid-utils/throw-invalid-access-code (str e) redirectURI)))
-        (mitreid-utils/throw-no-access-token redirectURI))
-      (mitreid-utils/throw-missing-mitreid-code redirectURI))))
+            (oidc-utils/throw-invalid-access-code (str e) redirectURI)))
+        (oidc-utils/throw-no-access-token redirectURI))
+      (oidc-utils/throw-missing-code redirectURI))))
 
 
 (defmethod callback/execute action-name

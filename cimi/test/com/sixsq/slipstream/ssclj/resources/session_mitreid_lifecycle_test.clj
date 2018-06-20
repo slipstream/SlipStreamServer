@@ -407,7 +407,7 @@
                   (request (str validate-url "?code=NONE")
                            :request-method :get)
                   (ltu/body->edn)
-                  (ltu/message-matches #".*unable to retrieve MITREid access token.*")
+                  (ltu/message-matches #".*unable to retrieve OIDC/MITREid access token.*")
                   (ltu/is-status 400))
 
               (reset-callback! callback-id)

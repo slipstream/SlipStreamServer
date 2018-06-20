@@ -435,7 +435,7 @@
                   (request (str validate-url "?code=NONE")
                            :request-method :get)
                   (ltu/body->edn)
-                  (ltu/message-matches #".*unable to retrieve OIDC access token.*")
+                  (ltu/message-matches #".*unable to retrieve OIDC/MITREid access token.*")
                   (ltu/is-status 400))
 
               (reset-callback! callback-id)
@@ -443,7 +443,7 @@
                   (request (str validate-url "?code=BAD")
                            :request-method :get)
                   (ltu/body->edn)
-                  (ltu/message-matches #".*OIDC token is missing subject.*")
+                  (ltu/message-matches #".*OIDC/MITREid token is missing subject.*")
                   (ltu/is-status 400))
 
               (let [_ (reset-callback! callback-id)

@@ -9,7 +9,7 @@
     [com.sixsq.slipstream.ssclj.resources.callback :as callback]
     [com.sixsq.slipstream.ssclj.resources.callback.utils :as utils]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.session-mitreid.utils :as mitreid-utils]
+    [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as oidc-utils]
     [com.sixsq.slipstream.util.response :as r]))
 
 
@@ -19,12 +19,12 @@
 (defn register-user
   [{{href :href} :targetResource {:keys [redirectURI]} :data callback-id :id :as callback-resource} {:keys [headers base-uri uri] :as request}]
   (let [instance (u/document-id href)
-        [client-id client-secret base-url public-key authorizeURL tokenURL userInfoURL] (mitreid-utils/config-params redirectURI instance)]
+        [client-id client-secret base-url public-key authorizeURL tokenURL userInfoURL] (oidc-utils/config-mitreid-params redirectURI instance)]
     (if-let [code (uh/param-value request :code)]
       (if-let [access-token (auth-oidc/get-access-token client-id client-secret base-url tokenURL code (str base-uri (or callback-id "unknown-id") "/execute"))]
         (try
           (let [{:keys [sub] :as claims} (sign/unsign-claims access-token public-key)
-                {:keys [username givenName familyName emails] :as userinfo} (when sub (mitreid-utils/get-mitreid-userinfo userInfoURL access-token))
+                {:keys [username givenName familyName emails] :as userinfo} (when sub (oidc-utils/get-mitreid-userinfo userInfoURL access-token))
                 email (-> (filter :primary emails)
                           first
                           :value)]
@@ -37,12 +37,12 @@
                                                                             :instance          instance
                                                                             :fail-on-existing? true})]
                 matched-user
-                (mitreid-utils/throw-user-exists sub redirectURI))
-              (mitreid-utils/throw-no-subject redirectURI)))
+                (oidc-utils/throw-user-exists sub redirectURI))
+              (oidc-utils/throw-no-subject redirectURI)))
           (catch Exception e
-            (mitreid-utils/throw-invalid-access-code (str e) redirectURI)))
-        (mitreid-utils/throw-no-access-token redirectURI))
-      (mitreid-utils/throw-missing-mitreid-code redirectURI))))
+            (oidc-utils/throw-invalid-access-code (str e) redirectURI)))
+        (oidc-utils/throw-no-access-token redirectURI))
+      (oidc-utils/throw-missing-code redirectURI))))
 
 
 (defmethod callback/execute action-name

@@ -26,7 +26,7 @@
 
   (let [{:keys [server clientIP redirectURI] {:keys [href]} :sessionTemplate :as current-session} (sutils/retrieve-session-by-id session-id)
         instance (u/document-id href)
-        [client-id client-secret base-url public-key authorizeURL tokenURL] (oidc-utils/config-params redirectURI instance)]
+        [client-id client-secret base-url public-key authorizeURL tokenURL] (oidc-utils/config-oidc-params redirectURI instance)]
     (if-let [code (uh/param-value request :code)]
       (if-let [access-token (auth-oidc/get-access-token client-id client-secret base-url tokenURL code (str base-uri (or callback-id "unknown-id") "/execute"))]
         (try
@@ -61,7 +61,7 @@
           (catch Exception e
             (oidc-utils/throw-invalid-access-code (str e) redirectURI)))
         (oidc-utils/throw-no-access-token redirectURI))
-      (oidc-utils/throw-missing-oidc-code redirectURI))))
+      (oidc-utils/throw-missing-code redirectURI))))
 
 
 (defmethod callback/execute action-name

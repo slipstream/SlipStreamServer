@@ -1,8 +1,7 @@
 (ns com.sixsq.slipstream.auth.oidc
   (:require
     [clj-http.client :as http]
-    [clojure.data.json :as json]
-    [clojure.string :as str]))
+    [clojure.data.json :as json]))
 
 
 (defn get-access-token

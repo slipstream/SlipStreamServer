@@ -11,7 +11,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration :as configuration]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.resources.session-mitreid.utils :as mitreid-utils]
+    [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as oidc-utils]
     [com.sixsq.slipstream.ssclj.resources.user :as user]
     [com.sixsq.slipstream.ssclj.resources.user-template :as ut]
     [com.sixsq.slipstream.ssclj.resources.user-template-mitreid-registration :as mitreid]
@@ -267,21 +267,21 @@
                     bad-token (sign/sign-claims bad-claims)]
 
                 (with-redefs [auth-oidc/get-access-token (fn [client-id client-secret base-url tokenurl oauth-code redirect-uri]
-                                                                      (case oauth-code
-                                                                        "GOOD" good-token
-                                                                        "BAD" bad-token
-                                                                        nil))
+                                                           (case oauth-code
+                                                             "GOOD" good-token
+                                                             "BAD" bad-token
+                                                             nil))
 
-                              mitreid-utils/get-mitreid-userinfo (fn [userInfoURL access_token]
-                                                                  {:id          42
-                                                                   :updatedAt   "2018-06-13T11:48:48"
-                                                                   :username    username
-                                                                   :givenName   "John",
-                                                                   :familyName  "Doe",
-                                                                   :displayName "John Doe",
-                                                                   :emails      [{:value    email
-                                                                                  :primary  true
-                                                                                  :verified true}]})
+                              oidc-utils/get-mitreid-userinfo (fn [userInfoURL access_token]
+                                                                {:id          42
+                                                                 :updatedAt   "2018-06-13T11:48:48"
+                                                                 :username    username
+                                                                 :givenName   "John",
+                                                                 :familyName  "Doe",
+                                                                 :displayName "John Doe",
+                                                                 :emails      [{:value    email
+                                                                                :primary  true
+                                                                                :verified true}]})
 
                               db/find-roles-for-username (fn [username]
                                                            "USER ANON alpha")]
@@ -291,7 +291,7 @@
                       (request (str val-url "?code=NONE")
                                :request-method :get)
                       (ltu/body->edn)
-                      (ltu/message-matches #".*unable to retrieve MITREid access token.*")
+                      (ltu/message-matches #".*unable to retrieve OIDC/MITREid access token.*")
                       (ltu/is-status return-code))
 
                   (is (= "FAILED" (-> session-admin

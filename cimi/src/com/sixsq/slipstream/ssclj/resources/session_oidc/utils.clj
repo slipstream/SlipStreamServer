@@ -1,5 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-oidc.utils
   (:require
+    [clj-http.client :as http]
+    [clojure.data.json :as json]
     [clojure.string :as str]
     [com.sixsq.slipstream.ssclj.resources.callback :as callback]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
@@ -55,7 +57,7 @@
 ;; exceptions
 
 (defn throw-no-username-or-email [username email redirectURI]
-  (logu/log-error-and-throw-with-redirect 400 (str "OIDC token is missing name/preferred_name (" username ") or email (" email ")") redirectURI))
+  (logu/log-error-and-throw-with-redirect 400 (str "OIDC/MITREid token is missing name/preferred_name (" username ") or email (" email ")") redirectURI))
 
 (defn throw-no-matched-user [username email redirectURI]
   (logu/log-error-and-throw-with-redirect 400 (str "Unable to match account to name/preferred_name (" username ") or email (" email ")") redirectURI))
@@ -63,19 +65,19 @@
 ;; general exceptions
 
 (defn throw-bad-client-config [cfg-id redirectURI]
-  (logu/log-error-and-throw-with-redirect 500 (str "missing or incorrect configuration (" cfg-id ") for OIDC authentication") redirectURI))
+  (logu/log-error-and-throw-with-redirect 500 (str "missing or incorrect configuration (" cfg-id ") for OIDC/MITREid authentication") redirectURI))
 
-(defn throw-missing-oidc-code [redirectURI]
-  (logu/log-error-and-throw-with-redirect 400 "OIDC authentication callback request does not contain required code" redirectURI))
+(defn throw-missing-code [redirectURI]
+  (logu/log-error-and-throw-with-redirect 400 "OIDC/MITREid authentication callback request does not contain required code" redirectURI))
 
 (defn throw-no-access-token [redirectURI]
-  (logu/log-error-and-throw-with-redirect 400 "unable to retrieve OIDC access token" redirectURI))
+  (logu/log-error-and-throw-with-redirect 400 "unable to retrieve OIDC/MITREid access token" redirectURI))
 
 (defn throw-no-subject [redirectURI]
-  (logu/log-error-and-throw-with-redirect 400 (str "OIDC token is missing subject (sub) attribute") redirectURI))
+  (logu/log-error-and-throw-with-redirect 400 (str "OIDC/MITREid token is missing subject (sub) attribute") redirectURI))
 
 (defn throw-invalid-access-code [msg redirectURI]
-  (logu/log-error-and-throw-with-redirect 400 (str "error when processing OIDC access token: " msg) redirectURI))
+  (logu/log-error-and-throw-with-redirect 400 (str "error when processing OIDC/MITREid access token: " msg) redirectURI))
 
 (defn throw-inactive-user [username redirectURI]
   (logu/log-error-and-throw-with-redirect 400 (str "account is inactive (" username ")") redirectURI))
@@ -85,14 +87,24 @@
 
 ;; retrieval of configuration parameters
 
-(defn config-params
+(defn config-oidc-params
   [redirectURI instance]
-  (let [cfg-id (str "configuration/session-oidc-" instance)
-        opts {:user-name "INTERNAL" :user-roles ["ADMIN"]}] ;; FIXME: works around authn at DB interface level
+  (let [cfg-id (str "configuration/session-oidc-" instance)]
     (try
-      (let [{:keys [clientID clientSecret baseURL publicKey authorizeURL tokenURL]} (crud/retrieve-by-id cfg-id opts)]
+      (let [{:keys [clientID clientSecret baseURL publicKey authorizeURL tokenURL]} (crud/retrieve-by-id-as-admin cfg-id)]
         (if (or (and clientID baseURL publicKey) (and clientID clientSecret authorizeURL tokenURL publicKey))
           [clientID clientSecret baseURL publicKey authorizeURL tokenURL]
+          (throw-bad-client-config cfg-id redirectURI)))
+      (catch Exception _
+        (throw-bad-client-config cfg-id redirectURI)))))
+
+(defn config-mitreid-params
+  [redirectURI instance]
+  (let [cfg-id (str "configuration/session-mitreid-" instance)]
+    (try
+      (let [{:keys [clientID clientSecret baseURL publicKey authorizeURL tokenURL userInfoURL]} (crud/retrieve-by-id-as-admin cfg-id)]
+        (if (and clientID clientSecret authorizeURL tokenURL userInfoURL publicKey)
+          [clientID clientSecret baseURL publicKey authorizeURL tokenURL userInfoURL]
           (throw-bad-client-config cfg-id redirectURI)))
       (catch Exception _
         (throw-bad-client-config cfg-id redirectURI)))))
@@ -124,3 +136,11 @@
   (let [url-params-format "?response_type=code&client_id=%s&redirect_uri=%s"
         base-redirect-url (or authorizeURL (str base-url "/auth"))]
     (str base-redirect-url (format url-params-format client-id callback-url))))
+
+(defn get-mitreid-userinfo
+  [userInfoURL access_token]
+  (-> (http/get userInfoURL
+                {:headers      {"Accept" "application/json"}
+                 :query-params {::access_token access_token}})
+      :body
+      (json/read-str :key-fn keyword)))

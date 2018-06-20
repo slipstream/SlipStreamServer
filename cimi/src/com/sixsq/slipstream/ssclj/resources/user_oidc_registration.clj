@@ -33,7 +33,7 @@
 
 (defmethod p/tpl->user user-template/registration-method
   [{:keys [href redirectURI] :as resource} {:keys [headers base-uri] :as request}]
-  (let [[client-id client-secret base-url public-key authorizeURL tokenURL] (oidc-utils/config-params redirectURI (u/document-id href))]
+  (let [[client-id client-secret base-url public-key authorizeURL tokenURL] (oidc-utils/config-oidc-params redirectURI (u/document-id href))]
     (if (or (and base-url client-id public-key) (and authorizeURL tokenURL client-id client-secret public-key))
       (let [data (when redirectURI {:redirectURI redirectURI})
             callback-url (user-utils/create-user-oidc-callback base-uri href data)
