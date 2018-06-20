@@ -13,6 +13,6 @@ email = "$youremail@yourdomain$"
 storage = "acme.json"
 entryPoint = "https"
 [acme.httpChallenge]
-   entryPoint = "http"
+  entryPoint = "http"
 [[acme.domains]]
    main = "$fqdn$"
