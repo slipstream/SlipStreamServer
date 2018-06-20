@@ -54,6 +54,14 @@
   [resource-id & [options]]
   (db/retrieve resource-id (or options {})))
 
+(defn retrieve-by-id-as-admin
+  "Calls the retrieve-by-id multimethod with options that set the user
+   identity to the administrator to allow access to any resource. Works around
+   the authentication enforcement at the database level."
+  [resource-id]
+  (let [opts {:user-name "INTERNAL" :user-roles ["ADMIN"]}]
+    (retrieve-by-id resource-id opts)))
+
 (defmulti edit resource-name-dispatch)
 
 (defmethod edit :default

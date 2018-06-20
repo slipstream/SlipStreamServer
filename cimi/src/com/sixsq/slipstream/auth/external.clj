@@ -46,7 +46,7 @@
 
 (defn match-oidc-username
   [external-login instance]
-  (log/debug "Matching via OIDC username" external-login)
+  (log/debug "Matching via OIDC/MITREid username" external-login)
   (let [username-by-authn (db/find-username-by-authn instance external-login)
         username-by-name (db/get-active-user-by-name external-login)
         username-fallback (when username-by-name (:username (mapped-user instance username-by-name)))]

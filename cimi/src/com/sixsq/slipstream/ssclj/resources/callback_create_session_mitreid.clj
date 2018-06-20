@@ -1,5 +1,5 @@
-(ns com.sixsq.slipstream.ssclj.resources.callback-create-session-oidc
-  "Creates a new OIDC session resource presumably after external authentication has succeeded."
+(ns com.sixsq.slipstream.ssclj.resources.callback-create-session-mitreid
+  "Creates a new MITREid session resource presumably after external authentication has succeeded."
   (:require
     [clojure.string :as str]
     [clojure.tools.logging :as log]
@@ -18,7 +18,7 @@
     [com.sixsq.slipstream.util.response :as r]))
 
 
-(def ^:const action-name "session-oidc-creation")
+(def ^:const action-name "session-mitreid-creation")
 
 
 (defn validate-session
@@ -26,17 +26,18 @@
 
   (let [{:keys [server clientIP redirectURI] {:keys [href]} :sessionTemplate :as current-session} (sutils/retrieve-session-by-id session-id)
         instance (u/document-id href)
-        [client-id client-secret base-url public-key authorizeURL tokenURL] (oidc-utils/config-oidc-params redirectURI instance)]
+        [client-id client-secret base-url public-key authorizeURL tokenURL userInfoURL] (oidc-utils/config-mitreid-params redirectURI instance)]
     (if-let [code (uh/param-value request :code)]
       (if-let [access-token (auth-oidc/get-access-token client-id client-secret base-url tokenURL code (str base-uri (or callback-id "unknown-id") "/execute"))]
         (try
           (let [{:keys [sub] :as claims} (sign/unsign-claims access-token public-key)
                 roles (concat (oidc-utils/extract-roles claims)
                               (oidc-utils/extract-groups claims)
-                              (oidc-utils/extract-entitlements claims))]
-            (log/debug "OIDC access token claims for" instance ":" (pr-str claims))
+                              (oidc-utils/extract-entitlements claims))
+                {:keys [username] :as userinfo} (when sub (oidc-utils/get-mitreid-userinfo userInfoURL access-token))]
+            (log/debug "MITREid access token claims for" instance ":" (pr-str claims))
             (if sub
-              (if-let [matched-user (ex/match-oidc-username sub instance)]
+              (if-let [matched-user (ex/match-oidc-username username instance)]
                 (let [claims (cond-> (auth-internal/create-claims matched-user)
                                      session-id (assoc :session session-id)
                                      session-id (update :roles #(str session-id " " %))
@@ -49,7 +50,7 @@
                       updated-session (cond-> (assoc current-session :username matched-user :expiry expires)
                                               claims-roles (assoc :roles claims-roles))
                       {:keys [status] :as resp} (sutils/update-session session-id updated-session)]
-                  (log/debug "OIDC cookie token claims for" instance ":" (pr-str claims))
+                  (log/debug "MITREid cookie token claims for" instance ":" (pr-str claims))
                   (if (not= status 200)
                     resp
                     (let [cookie-tuple [(sutils/cookie-name session-id) cookie]]
@@ -72,7 +73,7 @@
       resp
       (do
         (utils/callback-failed! callback-id)
-        (r/map-response "could not validate OIDC session" 400)))
+        (r/map-response "could not validate MITREid session" 400)))
     (catch Exception e
       (utils/callback-failed! callback-id)
       (or (ex-data e) (throw e)))))
