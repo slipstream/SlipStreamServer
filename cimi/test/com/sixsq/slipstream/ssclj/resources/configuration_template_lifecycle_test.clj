@@ -6,8 +6,8 @@
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.configuration-template-lifecycle-test-utils :as test-utils]
     [com.sixsq.slipstream.ssclj.resources.configuration-template-session-github :as github]
-    [com.sixsq.slipstream.ssclj.resources.configuration-template-session-oidc :as oidc]
     [com.sixsq.slipstream.ssclj.resources.configuration-template-session-mitreid :as mitreid]
+    [com.sixsq.slipstream.ssclj.resources.configuration-template-session-oidc :as oidc]
     [com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream :as slipstream]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [peridot.core :refer :all]))
