@@ -26,10 +26,9 @@
 (defn config-github-params
   [redirectURI instance]
 
-  (let [cfg-id (str "configuration/session-github-" instance)
-        opts {:user-name "INTERNAL" :user-roles ["ADMIN"]}] ;; FIXME: works around authn at DB interface level
+  (let [cfg-id (str "configuration/session-github-" instance)]
     (try
-      (let [{:keys [clientID clientSecret]} (crud/retrieve-by-id cfg-id opts)]
+      (let [{:keys [clientID clientSecret]} (crud/retrieve-by-id-as-admin cfg-id)]
         (if (and clientID clientSecret)
           [clientID clientSecret]
           (throw-bad-client-config cfg-id redirectURI)))

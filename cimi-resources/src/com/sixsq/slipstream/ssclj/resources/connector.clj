@@ -175,8 +175,7 @@
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
-      (-> (crud/retrieve-by-id id {:user-name  "INTERNAL"
-                                   :user-roles ["ADMIN"]})
+      (-> (crud/retrieve-by-id-as-admin id)
           (activate-subtype request)))
     (catch Exception e
       (or (ex-data e) (throw e)))))
@@ -198,8 +197,7 @@
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
-      (-> (crud/retrieve-by-id id {:user-name  "INTERNAL"
-                                   :user-roles ["ADMIN"]})
+      (-> (crud/retrieve-by-id-as-admin id)
           (quarantine-subtype request)))
     (catch Exception e
       (or (ex-data e) (throw e)))))

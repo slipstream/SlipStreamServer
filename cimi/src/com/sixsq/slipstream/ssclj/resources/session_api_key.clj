@@ -61,9 +61,8 @@
    error occurs, then nil is returned."
   [doc-id]
   (try
-    (crud/retrieve-by-id (uuid->id doc-id) {:user-name  "INTERNAL"
-                                            :user-roles ["ADMIN"]})
-    (catch Exception e
+    (crud/retrieve-by-id-as-admin (uuid->id doc-id))
+    (catch Exception _
       nil)))
 
 (defn valid-api-key?
