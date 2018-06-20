@@ -19,12 +19,12 @@
 (defn register-user
   [{{href :href} :targetResource {:keys [redirectURI]} :data callback-id :id :as callback-resource} {:keys [headers base-uri uri] :as request}]
   (let [instance (u/document-id href)
-        [client-id client-secret public-key authorizeURL tokenURL userInfoURL] (oidc-utils/config-mitreid-params redirectURI instance)]
+        [client-id client-secret public-key authorizeURL tokenURL userProfileURL] (oidc-utils/config-mitreid-params redirectURI instance)]
     (if-let [code (uh/param-value request :code)]
       (if-let [access-token (auth-oidc/get-access-token client-id client-secret tokenURL code (str base-uri (or callback-id "unknown-id") "/execute"))]
         (try
           (let [{:keys [sub] :as claims} (sign/unsign-claims access-token public-key)
-                {:keys [username givenName familyName emails] :as userinfo} (when sub (oidc-utils/get-mitreid-userinfo userInfoURL access-token))
+                {:keys [username givenName familyName emails] :as userinfo} (when sub (oidc-utils/get-mitreid-userinfo userProfileURL access-token))
                 email (-> (filter :primary emails)
                           first
                           :value)]

@@ -48,7 +48,7 @@
 ;;
 (defmethod p/tpl->session authn-method
   [{:keys [href redirectURI] :as resource} {:keys [headers base-uri] :as request}]
-  (let [[client-id client-secret public-key authorizeURL tokenURL userInfoURL] (oidc-utils/config-mitreid-params redirectURI (u/document-id href))
+  (let [[client-id client-secret public-key authorizeURL tokenURL userProfileURL] (oidc-utils/config-mitreid-params redirectURI (u/document-id href))
         session-init (cond-> {:href href}
                              redirectURI (assoc :redirectURI redirectURI))
         session (sutils/create-session session-init headers authn-method)

@@ -33,7 +33,7 @@
 
 (defmethod p/tpl->user user-template/registration-method
   [{:keys [href redirectURI] :as resource} {:keys [headers base-uri] :as request}]
-  (let [[client-id client-secret public-key authorizeURL tokenURL userInfoURL] (oidc-utils/config-mitreid-params redirectURI (u/document-id href))
+  (let [[client-id client-secret public-key authorizeURL tokenURL userProfileURL] (oidc-utils/config-mitreid-params redirectURI (u/document-id href))
         data (when redirectURI {:redirectURI redirectURI})
         callback-url (user-utils/create-user-mitreid-callback base-uri href data)
         redirect-url (oidc-utils/create-redirect-url authorizeURL client-id callback-url)]

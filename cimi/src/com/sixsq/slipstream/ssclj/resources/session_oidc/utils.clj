@@ -86,8 +86,8 @@
 
 
 (defn valid-mitreid-config?
-  [{:keys [clientID clientSecret publicKey authorizeURL tokenURL userInfoURL] :as config}]
-  (and clientID clientSecret authorizeURL tokenURL userInfoURL publicKey))
+  [{:keys [clientID clientSecret publicKey authorizeURL tokenURL userProfileURL] :as config}]
+  (and clientID clientSecret authorizeURL tokenURL userProfileURL publicKey))
 
 (defn valid-oidc-config?
   "An OIDC config without clientSecret is valid (e.g KeyCloak)"
@@ -113,9 +113,9 @@
   (let [cfg-id (str "configuration/session-mitreid-" instance)]
     (try
       (let [mitreid-config (crud/retrieve-by-id-as-admin cfg-id)
-            {:keys [clientID clientSecret publicKey authorizeURL tokenURL userInfoURL]} mitreid-config]
+            {:keys [clientID clientSecret publicKey authorizeURL tokenURL userProfileURL]} mitreid-config]
         (if (valid-mitreid-config? mitreid-config)
-          [clientID clientSecret publicKey authorizeURL tokenURL userInfoURL]
+          [clientID clientSecret publicKey authorizeURL tokenURL userProfileURL]
           (throw-bad-client-config cfg-id redirectURI)))
       (catch Exception _
         (throw-bad-client-config cfg-id redirectURI)))))
@@ -147,8 +147,8 @@
     (str authorizeURL (format url-params-format client-id callback-url))))
 
 (defn get-mitreid-userinfo
-  [userInfoURL access_token]
-  (-> (http/get userInfoURL
+  [userProfileURL access_token]
+  (-> (http/get userProfileURL
                 {:headers      {"Accept" "application/json"}
                  :query-params {::access_token access_token}})
       :body
