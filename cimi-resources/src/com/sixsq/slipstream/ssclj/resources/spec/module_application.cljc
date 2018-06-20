@@ -24,9 +24,9 @@
 
 (s/def ::parameterMappings (s/map-of ::parameter-name ::parameterMapping))
 
-(s/def ::node (su/only-keys {:req-un [::multiplicity ::component]
-                             :opt-un [::maxProvisioningFailures
-                                      ::parameterMappings]}))
+(s/def ::node (su/only-keys :req-un [::multiplicity ::component]
+                            :opt-un [::maxProvisioningFailures
+                                     ::parameterMappings]))
 
 (s/def ::nodes (s/coll-of ::node ::min-count 1 ::kind vector?))
 
