@@ -26,16 +26,15 @@
 
 (def session-template-base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
 
-(def instance-legacy "legacy-test-mitreid")
+
 (def instance "test-mitreid")
 
-(def session-template-mitreid-legacy {:method      mitreid/authn-method
-                                      :instance    instance-legacy
+(def session-template-mitreid {:method      mitreid/authn-method
+                                      :instance    instance
                                       :name        "MITREid Connect"
                                       :description "External Authentication via MITREid Connect Protocol"
                                       :acl         st/resource-acl})
 
-(def session-template-mitreid (assoc session-template-mitreid-legacy :instance instance))
 
 (def ^:const callback-pattern #".*/api/callback/.*/execute")
 
@@ -53,13 +52,6 @@
     "jVunw8YkO7dsBhVP/8bqLDLw/8NsSAKwlzsoNKbrjVQ/NmHMJ88QkiKwv+E6lidy"
     "3wIDAQAB"))
 
-(def configuration-session-mitreid-legacy {:configurationTemplate {:service   "session-mitreid"
-                                                                   :instance  instance-legacy
-                                                                   :clientID  "FAKE_CLIENT_ID"
-                                                                   :baseURL   "https://mitreid.example.com"
-                                                                   :publicKey auth-pubkey}})
-
-
 (def configuration-session-mitreid {:configurationTemplate {:service      "session-mitreid" ;;reusing configuration from session MITREid
                                                             :instance     instance
                                                             :clientID     "FAKE_CLIENT_ID"
@@ -68,6 +60,7 @@
                                                             :tokenURL     "https://token.mitreid.com/token"
                                                             :userInfoURL  "https://userinfo.mitreid.com/api/user/me"
                                                             :publicKey    auth-pubkey}})
+
 
 (deftest lifecycle
 
@@ -136,7 +129,7 @@
           (ltu/is-status 500))
 
 
-      ;; anonymous create must succeed (normal create and href-legacy create)
+      ;; anonymous create must succeed
       (let [
             ;;
             ;; create the session-mitreid configuration to use for these tests
@@ -357,13 +350,12 @@
                 (ltu/is-status 303))                        ;; always expect redirect when redirectURI is provided
 
             ;; add the configurations back again
-            (doseq [conf #{configuration-session-mitreid configuration-session-mitreid-legacy}]
               (-> session-admin
                   (request configuration-base-uri
                            :request-method :post
-                           :body (json/write-str conf))
+                           :body (json/write-str configuration-session-mitreid))
                   (ltu/body->edn)
-                  (ltu/is-status 201)))
+                  (ltu/is-status 201))
 
 
             ;; try hitting the callback without the MITREid code parameter
@@ -392,7 +384,7 @@
                 (ltu/is-status 303))                        ;; always expect redirect when redirectURI is provided
 
             ;; try now with a fake code
-            (with-redefs [auth-oidc/get-access-token (fn [client-id client-secret base-url token-url oauth-code redirect-url]
+            (with-redefs [auth-oidc/get-access-token (fn [client-id client-secret token-url oauth-code redirect-url]
                                                                   (case oauth-code
                                                                     "GOOD" good-token
                                                                     "BAD" bad-token

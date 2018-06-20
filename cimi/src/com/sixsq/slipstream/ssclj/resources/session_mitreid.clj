@@ -17,7 +17,6 @@
 (def ^:const login-request-timeout (* 3 60))
 
 
-
 ;;
 ;; schemas
 ;;
@@ -49,16 +48,15 @@
 ;;
 (defmethod p/tpl->session authn-method
   [{:keys [href redirectURI] :as resource} {:keys [headers base-uri] :as request}]
-  (let [[client-id client-secret base-url public-key authorizeURL tokenURL userInfoURL] (oidc-utils/config-mitreid-params redirectURI (u/document-id href))]
-    (if (or (and base-url client-id public-key) (and authorizeURL tokenURL client-id client-secret public-key))
-      (let [session-init (cond-> {:href href}
-                                 redirectURI (assoc :redirectURI redirectURI))
-            session (sutils/create-session session-init headers authn-method)
-            session (assoc session :expiry (ts/rfc822->iso8601 (ts/expiry-later-rfc822 login-request-timeout)))
-            callback-url (oidc-utils/create-callback base-uri (:id session) cb/action-name)
-            redirect-url (oidc-utils/create-redirect-url base-url authorizeURL client-id callback-url)]
-        [{:status 303, :headers {"Location" redirect-url}} session])
-      (oidc-utils/throw-bad-client-config authn-method redirectURI))))
+  (let [[client-id client-secret public-key authorizeURL tokenURL userInfoURL]
+        (oidc-utils/config-mitreid-params redirectURI (u/document-id href))
+        session-init (cond-> {:href href}
+                             redirectURI (assoc :redirectURI redirectURI))
+        session (sutils/create-session session-init headers authn-method)
+        session (assoc session :expiry (ts/rfc822->iso8601 (ts/expiry-later-rfc822 login-request-timeout)))
+        callback-url (oidc-utils/create-callback base-uri (:id session) cb/action-name)
+        redirect-url (oidc-utils/create-redirect-url authorizeURL client-id callback-url)]
+    [{:status 303, :headers {"Location" redirect-url}} session]))
 
 ;;
 ;; initialization: no schema for this parent resource
