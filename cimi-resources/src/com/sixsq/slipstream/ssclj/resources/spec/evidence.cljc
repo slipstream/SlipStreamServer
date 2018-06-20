@@ -12,6 +12,7 @@
 (s/def :cimi.evidence/startTime ::cimi-core/timestamp)
 (s/def :cimi.evidence/planID ::cimi-core/nonblank-string)
 (s/def :cimi.evidence/passed boolean?)
+(s/def :cimi.evidence/log (s/coll-of string?))
 
 (s/def :cimi/evidence
   (su/constrained-map keyword? any?
@@ -20,4 +21,5 @@
                                 :cimi.evidence/startTime
                                 :cimi.evidence/planID
                                 :cimi.evidence/passed
-                                :cimi.evidence/class]}))
+                                :cimi.evidence/class]
+                      :opt-un [:cimi.evidence/log]}))

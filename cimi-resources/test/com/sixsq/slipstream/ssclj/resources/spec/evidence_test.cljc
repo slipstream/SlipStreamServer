@@ -33,6 +33,8 @@
 
                   :className:random 3147.12
 
+                  :log            ["log1","log2"]
+
                   :other         "value"})
 
 
@@ -48,6 +50,7 @@
                        false? (dissoc evid :planID)
                        false? (dissoc evid :endTime)
                        false? (dissoc evid :startTime)
+                      ;  false? (dissoc evid :log)                      
                        false? (dissoc evid :class)
                        true? (dissoc evid :className:random)
                        true? (dissoc evid :other)))
