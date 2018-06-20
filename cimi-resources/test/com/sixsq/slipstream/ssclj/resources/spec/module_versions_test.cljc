@@ -26,13 +26,14 @@
                             {:href "module-image/abc"}]
               :logo        {:href "external-object/xyz"}}]
 
-    (is (s/valid? ::module-versions/module-versions root))
+    (is (true? (s/valid? ::module-versions/module-versions root)))
     (is (false? (s/valid? ::module-versions/module-versions (assoc root :badKey "badValue"))))
+    (is (false? (s/valid? ::module-versions/module-versions (assoc root :type "BAD_VALUE"))))
 
     ;; required attributes
     (doseq [k #{:id :resourceURI :created :updated :acl :path :type :versions}]
-      (is (not (s/valid? ::module-versions/module-versions (dissoc root k)))))
+      (is (false? (s/valid? ::module-versions/module-versions (dissoc root k)))))
 
     ;; optional attributes
     (doseq [k #{:logo}]
-      (is (s/valid? ::module-versions/module-versions (dissoc root k))))))
+      (is (true? (s/valid? ::module-versions/module-versions (dissoc root k)))))))
