@@ -124,7 +124,7 @@
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
-      (when-let [callback-resource (crud/retrieve-by-id id {:user-name "INTERNAL", :user-roles ["ADMIN"]})]
+      (when-let [callback-resource (crud/retrieve-by-id-as-admin id)]
         (if (utils/executable? callback-resource)
           (execute callback-resource request)
           (r/map-response "cannot re-execute callback" 409 id))))

@@ -5,6 +5,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 
+(def ^:const admin-opts {:user-name "INTERNAL", :user-roles ["ADMIN"]})
+
 (defn executable?
   [{:keys [state expires]}]
   (and (= state "WAITING")
@@ -14,11 +16,10 @@
 (defn update-callback-state!
   [state callback-id]
   (try
-    (let [admin-opts {:user-name "INTERNAL", :user-roles ["ADMIN"]}]
-      (-> (crud/retrieve-by-id callback-id admin-opts)
-          (u/update-timestamps)
-          (assoc :state state)
-          (db/edit admin-opts)))
+    (-> (crud/retrieve-by-id-as-admin callback-id)
+        (u/update-timestamps)
+        (assoc :state state)
+        (db/edit admin-opts))
     (catch Exception e
       (or (ex-data e) (throw e)))))
 

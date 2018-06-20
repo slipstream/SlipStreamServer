@@ -249,9 +249,7 @@
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
-      (validate-callback (crud/retrieve-by-id id {:user-name  "INTERNAL"
-                                                  :user-roles [id]}) ;; Essentially turn off authz by spoofing owner of resource.
-                         request))
+      (validate-callback (crud/retrieve-by-id-as-admin id) request))
     (catch Exception e
       (or (ex-data e) (throw e)))))
 

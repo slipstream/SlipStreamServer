@@ -2,6 +2,7 @@
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
+    [com.sixsq.slipstream.ssclj.resources.spec.common :as cimi-common]
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
@@ -10,9 +11,9 @@
 
 (s/def ::type #{"IMAGE" "COMPONENT" "APPLICATION"})
 
-(s/def ::versions (s/coll-of ::cimi-core/resource-href :min-count 1 :kind vector?))
+(s/def ::versions ::cimi-common/resource-links)
 
-(s/def ::logo ::cimi-core/nonblank-string)
+(s/def ::logo ::cimi-common/resource-link)
 
 
 (def module-keys-spec (su/merge-keys-specs [c/common-attrs

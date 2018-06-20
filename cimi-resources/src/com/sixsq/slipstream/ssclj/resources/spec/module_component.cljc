@@ -35,11 +35,11 @@
 (s/def ::prescale ::target)
 (s/def ::postscale ::target)
 
-(s/def ::targets (su/only-keys {:opt-un [::preinstall ::packages
-                                         ::postinstall ::deployment
-                                         ::reporting ::onVmAdd
-                                         ::onVmRemove ::prescale
-                                         ::postscale]}))
+(s/def ::targets (su/only-keys :opt-un [::preinstall ::packages
+                                        ::postinstall ::deployment
+                                        ::reporting ::onVmAdd
+                                        ::onVmRemove ::prescale
+                                        ::postscale]))
 
 
 (def module-component-keys-spec (su/merge-keys-specs [c/common-attrs
