@@ -29,11 +29,11 @@
 
 (def instance "test-mitreid")
 
-(def session-template-mitreid {:method      mitreid/authn-method
-                                      :instance    instance
-                                      :name        "MITREid Connect"
-                                      :description "External Authentication via MITREid Connect Protocol"
-                                      :acl         st/resource-acl})
+(def session-template-mitreid {:method       mitreid/authn-method
+                               :instance     instance
+                               :name         "MITREid Connect"
+                               :description  "External Authentication via MITREid Connect Protocol"
+                               :acl          st/resource-acl})
 
 
 (def ^:const callback-pattern #".*/api/callback/.*/execute")
@@ -350,12 +350,12 @@
                 (ltu/is-status 303))                        ;; always expect redirect when redirectURI is provided
 
             ;; add the configurations back again
-              (-> session-admin
-                  (request configuration-base-uri
-                           :request-method :post
-                           :body (json/write-str configuration-session-mitreid))
-                  (ltu/body->edn)
-                  (ltu/is-status 201))
+            (-> session-admin
+                (request configuration-base-uri
+                         :request-method :post
+                         :body (json/write-str configuration-session-mitreid))
+                (ltu/body->edn)
+                (ltu/is-status 201))
 
 
             ;; try hitting the callback without the MITREid code parameter
@@ -385,10 +385,10 @@
 
             ;; try now with a fake code
             (with-redefs [auth-oidc/get-access-token (fn [client-id client-secret token-url oauth-code redirect-url]
-                                                                  (case oauth-code
-                                                                    "GOOD" good-token
-                                                                    "BAD" bad-token
-                                                                    nil))
+                                                       (case oauth-code
+                                                         "GOOD" good-token
+                                                         "BAD" bad-token
+                                                         nil))
                           db/find-roles-for-username (fn [username]
                                                        "USER ANON alpha")
                           db/user-exists? (constantly true)]

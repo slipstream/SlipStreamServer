@@ -14,7 +14,11 @@
    :name        "MITREid Authentication Configuration"
    :description "MITREid OpenID Connect Authentication Configuration"
    :instance    "authn-name"
+   :authorizeURL "http://auth.example.com"
+   :tokenURL    "http://token.example.com"
+   :userInfoURL "http://userinfo.example.com"
    :clientID    "server-assigned-client-id"
+   :clientSecret "aaabbbcccdddd"
    :publicKey   "ABCDEF..."})
 
 
@@ -32,31 +36,31 @@
           :clientSecret {:displayName "Client Secret"
                          :type        "password"
                          :description "client secret assigned by the MITREid server"
-                         :mandatory   false
+                         :mandatory   true
                          :readOnly    false
                          :order       21}
-          :userInfoURL  {:displayName "User information URL"
-                         :type        "string"
-                         :description "server's endpoint user info URL for the MITREid protocol"
-                         :mandatory   false
-                         :readOnly    false
-                         :order       22}
           :publicKey    {:displayName "Public Key"
                          :type        "string"
                          :description "public key to verify signed tokens from the MITREid server"
                          :mandatory   true
                          :readOnly    false
-                         :order       23}
+                         :order       22}
           :authorizeURL {:displayName "Authorize URL"
                          :type        "string"
                          :description "server's endpoint authentication URL for the MITREid protocol"
-                         :mandatory   false
+                         :mandatory   true
                          :readOnly    false
-                         :order       24}
+                         :order       23}
           :tokenURL     {:displayName "Token URL"
                          :type        "string"
                          :description "server's endpoint token URL for the MITREid protocol"
-                         :mandatory   false
+                         :mandatory   true
+                         :readOnly    false
+                         :order       24}
+          :userInfoURL  {:displayName "User information URL"
+                         :type        "string"
+                         :description "server's endpoint user info URL for the MITREid protocol"
+                         :mandatory   true
                          :readOnly    false
                          :order       25}}))
 
