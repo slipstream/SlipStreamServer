@@ -42,14 +42,14 @@
     "jVunw8YkO7dsBhVP/8bqLDLw/8NsSAKwlzsoNKbrjVQ/NmHMJ88QkiKwv+E6lidy"
     "3wIDAQAB"))
 
-(def configuration-user-mitreid {:configurationTemplate {:service      "session-mitreid" ;;reusing configuration from session MITREid
-                                                         :instance     mitreid/registration-method
-                                                         :clientID     "FAKE_CLIENT_ID"
-                                                         :clientSecret "MyMITREidClientSecret"
-                                                         :authorizeURL "https://authorize.mitreid.com/authorize"
-                                                         :tokenURL     "https://token.mitreid.com/token"
-                                                         :userInfoURL  "https://userinfo.mitreid.com/api/user/me"
-                                                         :publicKey    auth-pubkey}})
+(def configuration-user-mitreid {:configurationTemplate {:service        "session-mitreid" ;;reusing configuration from session MITREid
+                                                         :instance       mitreid/registration-method
+                                                         :clientID       "FAKE_CLIENT_ID"
+                                                         :clientSecret   "MyMITREidClientSecret"
+                                                         :authorizeURL   "https://authorize.mitreid.com/authorize"
+                                                         :tokenURL       "https://token.mitreid.com/token"
+                                                         :userProfileURL "https://userinfo.mitreid.com/api/user/me"
+                                                         :publicKey      auth-pubkey}})
 
 (deftest lifecycle
 
@@ -266,7 +266,7 @@
                     bad-claims {}
                     bad-token (sign/sign-claims bad-claims)]
 
-                (with-redefs [auth-oidc/get-access-token (fn [client-id client-secret base-url tokenurl oauth-code redirect-uri]
+                (with-redefs [auth-oidc/get-access-token (fn [client-id client-secret tokenurl oauth-code redirect-uri]
                                                            (case oauth-code
                                                              "GOOD" good-token
                                                              "BAD" bad-token
