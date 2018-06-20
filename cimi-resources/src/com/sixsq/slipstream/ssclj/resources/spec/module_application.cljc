@@ -29,7 +29,7 @@
                             :opt-un [::maxProvisioningFailures
                                      ::parameterMappings]))
 
-(s/def ::nodes (s/coll-of ::node ::min-count 1 ::kind vector?))
+(s/def ::nodes (s/map-of  ::node-name ::node))
 
 (def module-application-keys-spec (su/merge-keys-specs [c/common-attrs
                                                         {:req-un [::nodes]}]))

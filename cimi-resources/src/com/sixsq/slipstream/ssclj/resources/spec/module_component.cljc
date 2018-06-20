@@ -13,14 +13,13 @@
 (s/def ::networkType #{"public" "private"})
 
 (s/def ::name (s/and keyword? #(re-matches #"^[a-z0-9]+([\.-][a-z0-9]+)*$" (name %))))
-(s/def ::category #{"Input" "Output"})
 (s/def ::description ::cimi-core/nonblank-string)
 (s/def ::value ::cimi-core/nonblank-string)
 
-(s/def ::parameterMap (su/only-keys :req-un [::category]
-                                    :opt-un [::description ::value]))
+(s/def ::parameterMap (su/only-keys :opt-un [::description ::value]))
 
-(s/def ::parameters (s/map-of ::name ::parameterMap))
+(s/def ::inputParameters (s/map-of ::name ::parameterMap))
+(s/def ::outputParameters (s/map-of ::name ::parameterMap))
 
 (s/def ::target ::cimi-core/nonblank-string)
 (s/def ::package-list (s/coll-of ::cimi-core/nonblank-string :min-count 1 :kind vector?))
@@ -43,7 +42,7 @@
 
 
 (def module-component-keys-spec (su/merge-keys-specs [c/common-attrs
-                                                      {:req-un [::networkType ::parameters]
-                                                       :opt-un [::cpu ::ram ::disk ::volatileDisk ::targets]}]))
+                                                      {:req-un [::networkType ::outputParameters]
+                                                       :opt-un [::inputParameters ::cpu ::ram ::disk ::volatileDisk ::targets]}]))
 
 (s/def ::module-component (su/only-keys-maps module-component-keys-spec))
