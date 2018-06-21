@@ -105,18 +105,57 @@
       {})))
 
 
-(def retrieve-impl (std-crud/retrieve-fn resource-name))
+(defn retrieve-edn
+  [{{uuid :uuid} :params :as request}]
+  (-> (str (u/de-camelcase resource-name) "/" uuid)
+      (db/retrieve request)
+      (a/can-view? request)))
+
 
 (defmethod crud/retrieve resource-name
   [request]
-  (retrieve-impl request))
+  (try
+    (let [{:keys [versions] :as module-meta} (retrieve-edn request)
+          module-content (crud/retrieve-by-id-as-admin (-> versions last :href))]
+      (-> (assoc module-meta :content module-content)
+          (crud/set-operations request)
+          (r/json-response)))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
+
 
 (def edit-impl (std-crud/edit-fn resource-name))
 
 
 (defmethod crud/edit resource-name
-  [request]
-  (edit-impl request))
+  [{:keys [body] :as request}]
+  (try
+    (let [id (str resource-url "/" (-> request :params :uuid))
+          [module-meta module-content] (-> body u/strip-service-attrs split-resource)
+          {:keys [type versions acl]} (crud/retrieve-by-id-as-admin id)
+
+          _ (a/can-modify? {:acl acl} request)
+
+          content-url (type->resource-name type)
+          content-uri (type->resource-uri type)
+
+          content-body (merge module-content {:resourceURI content-uri})
+          content-request {:params   {:resource-name content-url}
+                           :identity std-crud/internal-identity
+                           :body     content-body}
+
+          response (crud/add content-request)
+
+          content-id (-> response :body :resource-id)
+
+          versions (conj versions {:href content-id})
+          module-meta (assoc module-meta :versions versions
+                                         :type type)]
+
+      (edit-impl (assoc request :body module-meta)))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
+
 
 (def delete-impl (std-crud/delete-fn resource-name))
 

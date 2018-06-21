@@ -39,11 +39,7 @@
                                 {:href "module-image/abc"}]
                   :logo        {:href "external-object/xyz"}})
 
-(def valid-image {:id           (str module-image/resource-url "/connector-uuid")
-                  :resourceURI  module-image/resource-uri
-                  :created      timestamp
-                  :updated      timestamp
-                  :acl          valid-acl
+(def valid-image {:resourceURI  module-image/resource-uri
 
                   :os           "Ubuntu"
                   :loginUser    "ubuntu"
@@ -119,10 +115,34 @@
             (ltu/body->edn)
             (ltu/is-status 403)))
 
-      (-> session-admin
-          (request abs-uri)
-          (ltu/body->edn)
-          (ltu/is-status 200))
+      (let [content (-> session-admin
+                        (request abs-uri)
+                        (ltu/body->edn)
+                        (ltu/is-status 200)
+                        :response
+                        :body
+                        :content)]
+        (is (= valid-image (select-keys content (keys valid-image)))))
+
+      ;; edit: OK for admin; NOK for others
+      (doseq [session [session-anon session-user]]
+        (-> session
+            (request abs-uri
+                     :request-method :put
+                     :body (json/write-str (assoc valid-entry :content valid-image)))
+            (ltu/body->edn)
+            (ltu/is-status 403)))
+
+      (let [versions (-> session-admin
+                         (request abs-uri
+                                  :request-method :put
+                                  :body (json/write-str (assoc valid-entry :content valid-image)))
+                         (ltu/body->edn)
+                         (ltu/is-status 200)
+                         :response
+                         :body
+                         :versions)]
+        (is (= 2 (count versions))))
 
       ;; delete: OK for admin; NOK for others
       (doseq [session [session-anon session-user]]
