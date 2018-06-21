@@ -5,7 +5,13 @@
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.module :as module]
-    [superstring.core :as str]))
+    [com.sixsq.slipstream.ssclj.resources.module-image :as module-image]
+    [com.sixsq.slipstream.ssclj.resources.module-component :as module-component]
+    [com.sixsq.slipstream.ssclj.resources.module-application :as module-application]
+    [superstring.core :as str]
+    [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.auth.acl :as a]
+    [com.sixsq.slipstream.util.response :as r]))
 
 (def ^:const resource-name "Module")
 
@@ -25,8 +31,6 @@
                               :type      "ROLE"
                               :right     "ALL"}]})
 
-(def resource-acl collection-acl)
-
 ;;
 ;; multimethods for validation and operations
 ;;
@@ -42,17 +46,63 @@
 
 (defmethod crud/add-acl resource-uri
   [resource request]
-  (assoc resource :acl resource-acl))
+  (a/add-acl resource request))
 
 ;;
 ;; CRUD operations
 ;;
 
-(def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
+(defn split-resource
+  [{:keys [content] :as body}]
+  (let [module-meta (dissoc body :content)]
+    [module-meta content]))
+
+
+(defn type->resource-name
+  [type]
+  (case type
+    "IMAGE" module-image/resource-url
+    "COMPONENT" module-component/resource-url
+    "APPLICATION" module-application/resource-url
+    (throw (r/ex-bad-request (str "unknown module type: " type)))))
+
+
+(defn type->resource-uri
+  [type]
+  (case type
+    "IMAGE" module-image/resource-uri
+    "COMPONENT" module-component/resource-uri
+    "APPLICATION" module-application/resource-uri
+    (throw (r/ex-bad-request (str "unknown module type: " type)))))
+
 
 (defmethod crud/add resource-name
-  [request]
-  (add-impl request))
+  [{:keys [body] :as request}]
+  (a/can-modify? {:acl collection-acl} request)
+  (let [[{:keys [type] :as module-meta} module-content] (-> body u/strip-service-attrs split-resource)
+        content-url (type->resource-name type)
+        content-uri (type->resource-uri type)
+
+        content-body (merge module-content {:resourceURI content-uri})
+        content-request {:params   {:resource-name content-url}
+                         :identity std-crud/internal-identity
+                         :body     content-body}
+
+        response (crud/add content-request)
+
+        content-id (-> response :body :resource-id)
+        module-meta (assoc module-meta :versions [{:href content-id}])]
+
+    (db/add
+      resource-name
+      (-> module-meta
+          u/strip-service-attrs
+          (crud/new-identifier resource-name)
+          (assoc :resourceURI resource-uri)
+          u/update-timestamps
+          (crud/add-acl request)
+          crud/validate)
+      {})))
 
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))

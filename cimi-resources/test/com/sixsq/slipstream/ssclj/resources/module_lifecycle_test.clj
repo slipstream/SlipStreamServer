@@ -7,14 +7,15 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.resources.module :as module-list]
+    [com.sixsq.slipstream.ssclj.resources.module :as module]
+    [com.sixsq.slipstream.ssclj.resources.module-image :as module-image]
     [peridot.core :refer :all]))
 
 
 (use-fixtures :each ltu/with-test-server-fixture)
 
 
-(def base-uri (str p/service-context (u/de-camelcase module-list/resource-name)))
+(def base-uri (str p/service-context (u/de-camelcase module/resource-name)))
 
 
 (def valid-acl {:owner {:type      "ROLE"
@@ -27,8 +28,8 @@
 (def timestamp "1964-08-25T10:00:00.0Z")
 
 
-(def valid-entry {:id          (str module-list/resource-url "/connector-uuid")
-                  :resourceURI module-list/resource-uri
+(def valid-entry {:id          (str module/resource-url "/connector-uuid")
+                  :resourceURI module/resource-uri
                   :created     timestamp
                   :updated     timestamp
                   :acl         valid-acl
@@ -37,6 +38,27 @@
                   :versions    [{:href "module-image/xyz"}
                                 {:href "module-image/abc"}]
                   :logo        {:href "external-object/xyz"}})
+
+(def valid-image {:id           (str module-image/resource-url "/connector-uuid")
+                  :resourceURI  module-image/resource-uri
+                  :created      timestamp
+                  :updated      timestamp
+                  :acl          valid-acl
+
+                  :os           "Ubuntu"
+                  :loginUser    "ubuntu"
+                  :sudo         true
+
+                  :cpu          2
+                  :ram          2048
+                  :disk         100
+                  :volatileDisk 500
+                  :networkType  "public"
+
+                  :imageIDs     {:some-cloud       "my-great-image-1"
+                                 :some-other-cloud "great-stuff"}
+
+                  :relatedImage {:href "module/other"}})
 
 
 (deftest lifecycle
@@ -51,7 +73,7 @@
       (-> session
           (request base-uri
                    :request-method :post
-                   :body (json/write-str valid-entry))
+                   :body (json/write-str (assoc valid-entry :content valid-image)))
           (ltu/body->edn)
           (ltu/is-status 403)))
 
@@ -69,12 +91,21 @@
         (ltu/is-count zero?))
 
 
+    ;; invalid module type
+    (-> session-admin
+        (request base-uri
+                 :request-method :post
+                 :body (json/write-str (assoc valid-entry
+                                         :content valid-image
+                                         :type "bad-module-type")))
+        (ltu/body->edn)
+        (ltu/is-status 400))
 
     ;; adding, retrieving and  deleting entry as user should succeed
     (let [uri (-> session-admin
                   (request base-uri
                            :request-method :post
-                           :body (json/write-str valid-entry))
+                           :body (json/write-str (assoc valid-entry :content valid-image)))
                   (ltu/body->edn)
                   (ltu/is-status 201)
                   (ltu/location))
@@ -115,7 +146,7 @@
 
 
 (deftest bad-methods
-  (let [resource-uri (str p/service-context (u/new-resource-id module-list/resource-name))]
+  (let [resource-uri (str p/service-context (u/new-resource-id module/resource-name))]
     (ltu/verify-405-status [[base-uri :options]
                             [base-uri :delete]
                             [resource-uri :options]
