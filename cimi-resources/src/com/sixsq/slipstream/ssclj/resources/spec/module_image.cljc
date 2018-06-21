@@ -19,9 +19,9 @@
 (s/def ::loginUser ::cimi-core/nonblank-string)
 (s/def ::sudo boolean?)
 
-(s/def ::imageId ::cimi-core/nonblank-string)
+(s/def ::imageID ::cimi-core/nonblank-string)
 
-(s/def ::imageIds (s/map-of ::connector ::imageID))
+(s/def ::imageIDs (s/map-of ::connector ::imageID))
 
 (s/def ::connectors (s/nilable (s/coll-of ::connector :min-count 1 :kind vector?)))
 
@@ -33,7 +33,7 @@
 
 (def module-image-keys-spec (su/merge-keys-specs [c/common-attrs
                                                   {:req-un [::os ::loginUser ::networkType]
-                                                   :opt-un [::imageIds ::sudo ::relatedImage
+                                                   :opt-un [::imageIDs ::sudo ::relatedImage
                                                             ::cpu ::ram ::disk ::volatileDisk]}]))
 
 (s/def ::module-image (su/only-keys-maps module-image-keys-spec))

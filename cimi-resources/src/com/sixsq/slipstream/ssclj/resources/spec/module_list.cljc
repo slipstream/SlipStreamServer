@@ -1,9 +1,8 @@
-(ns com.sixsq.slipstream.ssclj.resources.spec.module-versions
+(ns com.sixsq.slipstream.ssclj.resources.spec.module-list
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as cimi-common]
-    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 
@@ -20,4 +19,4 @@
                                             {:req-un [::path ::type ::versions]
                                              :opt-un [::logo]}]))
 
-(s/def ::module-versions (su/only-keys-maps module-keys-spec))
+(s/def ::module-list (su/only-keys-maps module-keys-spec))

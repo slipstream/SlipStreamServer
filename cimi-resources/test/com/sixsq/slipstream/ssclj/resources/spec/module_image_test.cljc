@@ -32,7 +32,7 @@
               :volatileDisk 500
               :networkType  "public"
 
-              :imageIds     {:some-cloud       "my-great-image-1"
+              :imageIDs     {:some-cloud       "my-great-image-1"
                              :some-other-cloud "great-stuff"}
 
               :relatedImage {:href "module/other"}}]
