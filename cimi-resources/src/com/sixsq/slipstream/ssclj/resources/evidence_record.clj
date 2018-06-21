@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.evidence
+(ns com.sixsq.slipstream.ssclj.resources.evidence-record
   (:require
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
@@ -7,17 +7,17 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.service-attribute-namespace :as sn]
     [com.sixsq.slipstream.ssclj.resources.service-catalog.utils :as sc]
-    [com.sixsq.slipstream.ssclj.resources.spec.evidence]
+    [com.sixsq.slipstream.ssclj.resources.spec.evidence-record]
     [superstring.core :as str]))
 
 
-(def ^:const resource-name "Evidence")
+(def ^:const resource-name "EvidenceRecord")
 
 (def ^:const resource-tag (keyword (str (str/camel-case resource-name) "s")))
 
 (def ^:const resource-url (u/de-camelcase resource-name))
 
-(def ^:const collection-name "EvidenceCollection")
+(def ^:const collection-name "EvidenceRecordCollection")
 
 (def ^:const resource-uri (str c/slipstream-schema-uri resource-name))
 
@@ -49,7 +49,7 @@
       (sc/throw-wrong-namespace))))
 
 ;
-(def validate-fn (u/create-spec-validation-fn :cimi/evidence))
+(def validate-fn (u/create-spec-validation-fn :cimi/evidence-record))
 (defmethod crud/validate resource-uri
   [resource]
   (-> resource
@@ -96,4 +96,4 @@
 ;;
 (defn initialize
   []
-  (std-crud/initialize resource-url :cimi/evidence))
+  (std-crud/initialize resource-url :cimi/evidence-record))

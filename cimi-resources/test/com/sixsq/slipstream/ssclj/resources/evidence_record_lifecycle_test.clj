@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.evidence-lifecycle-test
+(ns com.sixsq.slipstream.ssclj.resources.evidence-record-lifecycle-test
   (:require
     [clojure.data.json :as json]
     [clojure.test :refer :all]
@@ -8,7 +8,7 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.service-attribute-namespace :as sn]
-    [com.sixsq.slipstream.ssclj.resources.evidence :refer :all]
+    [com.sixsq.slipstream.ssclj.resources.evidence-record :refer :all]
     [peridot.core :refer :all]
     [ring.util.codec :as rc]))
 

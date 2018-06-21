@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.evidence-test
+(ns com.sixsq.slipstream.ssclj.resources.evidence-record-test
   (:require
     [clojure.test :refer :all]
     [com.sixsq.slipstream.ssclj.resources.service-catalog.utils :as sc]))
