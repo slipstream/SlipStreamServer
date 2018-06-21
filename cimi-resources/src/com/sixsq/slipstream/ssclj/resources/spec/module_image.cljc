@@ -14,22 +14,14 @@
 
 (s/def ::os #{"CentOS" "Debian" "Fedora" "OpenSuSE" "RedHat" "SLES" "Ubuntu" "Windows" "Other"})
 
-(def connector-href-regex #"^connector.*/[a-z]+(-[a-z]+)*$")
-(s/def ::connector-href (s/and string? #(re-matches connector-href-regex %)))
+(s/def ::connector keyword?)
 
 (s/def ::loginUser ::cimi-core/nonblank-string)
 (s/def ::sudo boolean?)
 
-(s/def ::connectorClass (s/keys :req-un [:connector/href
-                                         ::imageID]))
+(s/def ::imageId ::cimi-core/nonblank-string)
 
-(s/def ::connectorClasses (s/nilable (s/coll-of ::connectorClass :min-count 1 :kind vector?)))
-
-(s/def ::imageID ::cimi-core/nonblank-string)
-
-(s/def :connector/href ::connector-href)
-(s/def ::connector (s/keys :req-un [:connector/href
-                                    ::imageID]))
+(s/def ::imageIds (s/map-of ::connector ::imageID))
 
 (s/def ::connectors (s/nilable (s/coll-of ::connector :min-count 1 :kind vector?)))
 
@@ -41,8 +33,7 @@
 
 (def module-image-keys-spec (su/merge-keys-specs [c/common-attrs
                                                   {:req-un [::os ::loginUser ::networkType]
-                                                   :opt-un [::connectors ::connectorClasses
-                                                            ::sudo ::relatedImage
+                                                   :opt-un [::imageIds ::sudo ::relatedImage
                                                             ::cpu ::ram ::disk ::volatileDisk]}]))
 
 (s/def ::module-image (su/only-keys-maps module-image-keys-spec))

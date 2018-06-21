@@ -238,7 +238,7 @@ def convert_os(os):
 
 
 def image_attributes(module):
-    image = {'cloud_image_ids': get_cloud_image_ids(module),
+    image = {'imageIds': get_cloud_image_ids(module),
              'os': convert_os(module.get('platform')),
              'loginUser': module.get('loginUser', 'root')}
     res_req, cloud_params, inputParams, outputParams = split_parameters(module)
