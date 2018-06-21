@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.module-list-lifecycle-test
+(ns com.sixsq.slipstream.ssclj.resources.module-lifecycle-test
   (:require
     [clojure.data.json :as json]
     [clojure.test :refer [are deftest is use-fixtures]]
@@ -7,7 +7,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.resources.module-list :as module-list]
+    [com.sixsq.slipstream.ssclj.resources.module :as module-list]
     [peridot.core :refer :all]))
 
 

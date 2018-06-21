@@ -1,19 +1,19 @@
-(ns com.sixsq.slipstream.ssclj.resources.module-list
+(ns com.sixsq.slipstream.ssclj.resources.module
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.spec.module-list :as module-list]
+    [com.sixsq.slipstream.ssclj.resources.spec.module :as module]
     [superstring.core :as str]))
 
-(def ^:const resource-name "ModuleList")
+(def ^:const resource-name "Module")
 
 (def ^:const resource-tag (keyword (str (str/camel-case resource-name) "s")))
 
 (def ^:const resource-url (u/de-camelcase resource-name))
 
-(def ^:const collection-name "ModuleListCollection")
+(def ^:const collection-name "ModuleCollection")
 
 (def ^:const resource-uri (str c/slipstream-schema-uri resource-name))
 
@@ -31,7 +31,7 @@
 ;; multimethods for validation and operations
 ;;
 
-(def validate-fn (u/create-spec-validation-fn ::module-list/module-list))
+(def validate-fn (u/create-spec-validation-fn ::module/module))
 (defmethod crud/validate resource-uri
   [resource]
   (validate-fn resource))
@@ -88,4 +88,4 @@
 ;;
 (defn initialize
   []
-  (std-crud/initialize resource-url ::module-list/module-list))
+  (std-crud/initialize resource-url ::module/module))

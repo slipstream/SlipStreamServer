@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.spec.module-list
+(ns com.sixsq.slipstream.ssclj.resources.spec.module
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
@@ -19,4 +19,4 @@
                                             {:req-un [::path ::type ::versions]
                                              :opt-un [::logo]}]))
 
-(s/def ::module-list (su/only-keys-maps module-keys-spec))
+(s/def ::module (su/only-keys-maps module-keys-spec))
