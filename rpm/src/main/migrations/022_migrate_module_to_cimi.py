@@ -28,6 +28,10 @@ import argparse
 from slipstream.api import Api
 from slipstream.api.api import _mod_url
 
+
+api_kb = Api('https://localhost', insecure=True)
+print(api_kb.login_internal('super', 'supeRsupeR'))
+
 default_endpoint = os.environ.get('SLIPSTREAM_ENDPOINT') or 'https://nuv.la'
 
 
@@ -168,6 +172,13 @@ def _get_list(x):
     return x if isinstance(x, list) else [x]
 
 
+def use_default_when_blank(value, default=None):
+    if not value or not value.strip():
+        value = default
+    return value
+
+
+
 def _get_modules_from_slipstream(api, paths, recurse=False, get_versions=False):
     for path in paths:
         try:
@@ -217,11 +228,11 @@ def convert_module(module):
 def kb_convert_module(module_type, module):
     cimi_module = kb_get_cimi_module_common_attributes(module)
     if module_type == 'IMAGE':
-        cimi_module.update(image_attributes(module))
+        cimi_module['content'] = image_attributes(module)
     elif module_type == 'COMPONENT':
-        cimi_module.update(component_attributes(module))
+        cimi_module['content'] = component_attributes(module)
     elif module_type == 'APPLICATION':
-        cimi_module.update(application_attributes(module))
+        cimi_module['content'] = application_attributes(module)
     return cimi_module
 
 
@@ -238,9 +249,11 @@ def convert_os(os):
 
 
 def image_attributes(module):
-    image = {'imageIds': get_cloud_image_ids(module),
+    login_user = use_default_when_blank(module.get('loginUser', 'root'), 'root')
+
+    image = {'imageIDs': get_cloud_image_ids(module),
              'os': convert_os(module.get('platform')),
-             'loginUser': module.get('loginUser', 'root')}
+             'loginUser': login_user}
     res_req, cloud_params, inputParams, outputParams = split_parameters(module)
     print(cloud_params)
     if _to_int(res_req.get('cpu.nb')):
@@ -251,7 +264,7 @@ def image_attributes(module):
         image['disk'] = _to_float(res_req.get('disk.GB'))
     if _to_float(res_req.get('extra.disk.volatile')):
         image['volatileDisk'] = _to_float(res_req.get('extra.disk.volatile'))
-    image['networkType'] = _to_str(res_req.get('network', 'Public'))
+    image['networkType'] = _to_str(res_req.get('network', 'public')).lower()
     return image
 
 
@@ -268,34 +281,41 @@ def component_attributes(module):
         component['disk'] = _to_float(res_req.get('disk.GB'))
     if _to_float(res_req.get('extra.disk.volatile')):
         component['volatileDisk'] = _to_float(res_req.get('extra.disk.volatile'))
-    component['networkType'] = _to_str(res_req.get('network', 'Public'))
+    component['networkType'] = _to_str(res_req.get('network', 'public')).lower()
     if module.get('prerecipe'):
-        component.setdefault('workflow', {}).update({'preinstall': module.get('prerecipe')})
+        component.setdefault('targets', {}).update({'preinstall': module.get('prerecipe')})
     if packages:
-        component.setdefault('workflow', {}).update({'packages': packages})
+        component.setdefault('targets', {}).update({'packages': packages})
     if module.get('recipe'):
-        component.setdefault('workflow', {}).update({'postinstall': module.get('recipe')})
+        component.setdefault('targets', {}).update({'postinstall': module.get('recipe')})
     if targets.get('execute'):
-        component.setdefault('workflow', {}).update({'deployment': targets.get('execute')})
+        component.setdefault('targets', {}).update({'deployment': targets.get('execute')})
     if targets.get('onvmadd'):
-        component.setdefault('workflow', {}).update({'onVmAdd': targets.get('onvmadd')})
+        component.setdefault('targets', {}).update({'onVmAdd': targets.get('onvmadd')})
     if targets.get('onvmremove'):
-        component.setdefault('workflow', {}).update({'onVmRemove': targets.get('onvmremove')})
+        component.setdefault('targets', {}).update({'onVmRemove': targets.get('onvmremove')})
     if module.get('prescale'):
-        component.setdefault('workflow', {}).update({'prescale': module.get('prescale')})
+        component.setdefault('targets', {}).update({'prescale': module.get('prescale')})
     if module.get('postscale'):
-        component.setdefault('workflow', {}).update({'postscale': module.get('postscale')})
+        component.setdefault('targets', {}).update({'postscale': module.get('postscale')})
     if inputParams:
         component['inputParameters'] = inputParams
     if outputParams:
         component['outputParameters'] = outputParams
     return component
 
+def search_component_href(name):
+    res = api_kb.cimi_search('modules', filter='path="{}"'.format(name))
+    if res.count != 1:
+        raise Exception('Something wrong with module reference: {}'.format(name))
+    else:
+        return res.resources_list[0].id
+
 
 def application_attributes(module):
     nodes = {}
     for n in _get_list(_get_dict(module.get('nodes', {})).get('entry', [])):
-        node = {'component': n['node']['imageUri'][7:],
+        node = {'component': {'href': search_component_href(n['node']['imageUri'][7:])},
                 'multiplicity': _to_int(n['node'].get('multiplicity', 1))}
         if _to_int(n['node'].get('maxProvisioningFailures')):
             node['maxProvisioningFailures'] = _to_int(n['node'].get('maxProvisioningFailures'))
@@ -417,7 +437,7 @@ def kb_get_cimi_module_common_attributes(module):
     return {'name': module['shortName'],
             'path': get_path(module),
             'description': module.get('description', ''),
-            'logo': module.get('logoLink'),
+            'logo': {'href': 'external-object/logo'.format(module.get('logoLink'))},
             'type': kb_category_to_type(module),
             'created': convert_date(module['creation']),
             'updated': convert_date(module['lastModified']),
@@ -436,7 +456,8 @@ def get_cloud_image_ids(version):
     ids = _get_list(_get_dict(version.get('cloudImageIdentifiers', {})).get('cloudImageIdentifier', []))
 
     if ids:
-        return {i['cloudImageIdentifier']: i['cloudServiceName'] for i in ids}
+        print(ids)
+        return {i['cloudServiceName']: _to_str(i['cloudImageIdentifier']) for i in ids if _to_str(i['cloudImageIdentifier']).strip()}
     return {}
 
 
@@ -615,18 +636,25 @@ def cimi_add(api, resource_type, element):
 #         print('No version for module "{}". Skipping'.format(get_path(module)))
 
 
-def convert_and_upload_modules(config, modules):
+def convert_and_upload_modules(config, modules, type):
+    if type == 'APPLICATION':
+        print('youpi')
+
     api = get_api(config)
+
+    from pprint import pprint
 
     for module in modules:
         print('{} with {} versions'.format(get_module_path(module), len(module.get('versions', []))))
         module_type = kb_category_to_type(module)
 
-        if not module_type:
+        print(module_type)
+        if not module_type or module_type != type:
             continue
 
         cimi_module = kb_convert_module(module_type, module)
-        print(cimi_module)
+        pprint(cimi_module)
+        print(api_kb.cimi_add('modules', cimi_module))
 
 
 def main():
@@ -638,7 +666,9 @@ def main():
 
     config = parse_arguments()
     modules = get_modules(config)
-    convert_and_upload_modules(config, modules)
+    #convert_and_upload_modules(config, modules, 'IMAGE')
+    #convert_and_upload_modules(config, modules, 'COMPONENT')
+    convert_and_upload_modules(config, modules, 'APPLICATION')
 
 
 if __name__ == '__main__':

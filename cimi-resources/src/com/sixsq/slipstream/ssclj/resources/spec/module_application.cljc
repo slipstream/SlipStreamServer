@@ -12,7 +12,7 @@
 (s/def ::multiplicity nat-int?)
 (s/def ::maxProvisioningFailures nat-int?)
 
-(def module-href-regex #"^module/[a-z]+(-[a-z]+)*$")
+(def module-href-regex #"^module/[a-z0-9]+(-[a-z0-9]+)*$")
 (s/def ::href (s/and string? #(re-matches module-href-regex %)))
 (s/def ::component (s/keys :req-un [::href]))
 

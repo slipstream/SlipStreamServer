@@ -12,7 +12,7 @@
 (s/def ::volatileDisk pos-int?)
 (s/def ::networkType #{"public" "private"})
 
-(s/def ::name (s/and keyword? #(re-matches #"^[a-z0-9]+([\.-][a-z0-9]+)*$" (name %))))
+(s/def ::name (s/and keyword? #(re-matches #"^[a-z0-9]+([_\.-][a-z0-9]+)*$" (name %))))
 (s/def ::description ::cimi-core/nonblank-string)
 (s/def ::value ::cimi-core/nonblank-string)
 
