@@ -80,11 +80,11 @@
   (retrieve-impl request))
 
 
-(def edit-impl (std-crud/edit-fn resource-name))
+; (def edit-impl (std-crud/edit-fn resource-name))
 
-(defmethod crud/edit resource-name
-  [request]
-  (edit-impl request))
+; (defmethod crud/edit resource-name
+;   [request]
+;   (edit-impl request))
 
 
 (def delete-impl (std-crud/delete-fn resource-name))
