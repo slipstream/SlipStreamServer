@@ -1,17 +1,18 @@
 (ns com.sixsq.slipstream.ssclj.resources.module
   (:require
+    [clojure.string :as s]
+    [com.sixsq.slipstream.auth.acl :as a]
+    [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.spec.module :as module]
-    [com.sixsq.slipstream.ssclj.resources.module-image :as module-image]
-    [com.sixsq.slipstream.ssclj.resources.module-component :as module-component]
     [com.sixsq.slipstream.ssclj.resources.module-application :as module-application]
-    [superstring.core :as str]
-    [com.sixsq.slipstream.db.impl :as db]
-    [com.sixsq.slipstream.auth.acl :as a]
-    [com.sixsq.slipstream.util.response :as r]))
+    [com.sixsq.slipstream.ssclj.resources.module-component :as module-component]
+    [com.sixsq.slipstream.ssclj.resources.module-image :as module-image]
+    [com.sixsq.slipstream.ssclj.resources.spec.module :as module]
+    [com.sixsq.slipstream.util.response :as r]
+    [superstring.core :as str]))
 
 (def ^:const resource-name "Module")
 
@@ -104,22 +105,40 @@
           crud/validate)
       {})))
 
+(defn split-uuid
+  [uuid]
+  (let [[uuid-module index] (s/split uuid #"_")
+        index (some-> index read-string)]
+    [uuid-module index]))
 
 (defn retrieve-edn
   [{{uuid :uuid} :params :as request}]
-  (-> (str (u/de-camelcase resource-name) "/" uuid)
+  (-> (str (u/de-camelcase resource-name) "/" (-> uuid split-uuid first))
       (db/retrieve request)
       (a/can-view? request)))
 
 
+(defn retrieve-content-id
+  [versions index]
+  (if index
+    (-> versions (nth index) :href)
+    (->> versions (remove nil?) last :href)))
+
 (defmethod crud/retrieve resource-name
-  [request]
+  [{{uuid :uuid} :params :as request}]
   (try
     (let [{:keys [versions] :as module-meta} (retrieve-edn request)
-          module-content (crud/retrieve-by-id-as-admin (-> versions last :href))]
+          version-index (second (split-uuid uuid))
+          version-id (retrieve-content-id versions version-index)
+          module-content (if version-id
+                           (crud/retrieve-by-id-as-admin version-id)
+                           (when version-index
+                             (throw (r/ex-not-found (str "Module version not found: " resource-url "/" uuid)))))]
       (-> (assoc module-meta :content module-content)
           (crud/set-operations request)
           (r/json-response)))
+    (catch IndexOutOfBoundsException _
+      (r/response-not-found (str resource-url "/" uuid)))
     (catch Exception e
       (or (ex-data e) (throw e)))))
 
@@ -156,13 +175,67 @@
     (catch Exception e
       (or (ex-data e) (throw e)))))
 
+(defn remove-version
+  [versions index]
+  (let [part-a (subvec versions 0 index)
+        part-b (subvec versions (inc index))]
+    (concat part-a [nil] part-b)))
+
 
 (def delete-impl (std-crud/delete-fn resource-name))
 
+(defn delete-content
+  [content-id type]
+  (let [delete-request {:params   {:uuid          (-> content-id u/split-resource-id second)
+                                   :resource-name (type->resource-name type)}
+                        :identity std-crud/internal-identity
+                        :body     {:id content-id}}]
+    (crud/delete delete-request)))
+
+(defn delete-all
+  [request {:keys [type versions] :as module-meta}]
+  (doseq [version versions]
+    (when version
+      (delete-content (:href version) type)))
+  (delete-impl request))
+
+(defn delete-item
+  [request {:keys [type versions] :as module-meta} version-index]
+  (let [content-id (retrieve-content-id versions version-index)
+        delete-response (delete-content content-id type)
+        updated-versions (remove-version versions version-index)
+        module-meta (assoc module-meta :versions updated-versions)
+        {:keys [status]} (edit-impl (assoc request :request-method :put
+                                  :body module-meta))]
+    (when (not= status 200)
+      (throw (r/ex-response "A failure happened during delete module item" 500)))
+
+    delete-response))
 
 (defmethod crud/delete resource-name
-  [request]
-  (delete-impl request))
+  [{{uuid-full :uuid} :params :as request}]
+  (try
+
+    (let [module-meta (retrieve-edn request)
+
+          _ (a/can-modify? module-meta request)
+
+          [uuid version-index] (split-uuid uuid-full)
+          request (assoc-in request [:params :uuid] uuid)]
+
+      (if version-index
+        (delete-item request module-meta version-index)
+        (delete-all request module-meta)))
+
+    (catch IndexOutOfBoundsException _
+      (r/response-not-found (str resource-url "/" uuid-full)))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
+
+#_(defmethod crud/delete resource-name
+    [request]
+    (println request)
+    (delete-impl request))
 
 
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))

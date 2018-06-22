@@ -133,6 +133,16 @@
             (ltu/body->edn)
             (ltu/is-status 403)))
 
+      ;; insert 5 more versions
+      (doseq [_ (range 5)]
+        (-> session-admin
+            (request abs-uri
+                     :request-method :put
+                     :body (json/write-str (assoc valid-entry :content valid-image)))
+            (ltu/body->edn)
+            (ltu/is-status 200)))
+
+
       (let [versions (-> session-admin
                          (request abs-uri
                                   :request-method :put
@@ -142,7 +152,44 @@
                          :response
                          :body
                          :versions)]
-        (is (= 2 (count versions))))
+        (is (= 7 (count versions)))
+
+        ;; extract by indexes or last
+        (doseq [[i n] [["_0" 0] ["_1" 1] ["" 6]]]
+          (let [content-id (-> session-admin
+                               (request (str abs-uri i))
+                               (ltu/body->edn)
+                               (ltu/is-status 200)
+                               :response
+                               :body
+                               :content
+                               :id)]
+            (is (= (-> versions (nth n) :href) content-id)))))
+
+      (doseq [i ["_0" "_1"]]
+        (-> session-admin
+            (request (str abs-uri i)
+                     :request-method :delete)
+            (ltu/body->edn)
+            (ltu/is-status 200))
+
+        (-> session-admin
+            (request (str abs-uri i))
+            (ltu/body->edn)
+            (ltu/is-status 404)))
+
+
+      ;; delete out of bound index should return 404
+      (-> session-admin
+          (request (str abs-uri "_50")
+                   :request-method :delete)
+          (ltu/body->edn)
+          (ltu/is-status 404))
+
+      (-> session-admin
+          (request (str abs-uri "_50"))
+          (ltu/body->edn)
+          (ltu/is-status 404))
 
       ;; delete: OK for admin; NOK for others
       (doseq [session [session-anon session-user]]

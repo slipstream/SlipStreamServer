@@ -10,7 +10,7 @@
 
 (s/def ::type #{"IMAGE" "COMPONENT" "APPLICATION"})
 
-(s/def ::versions ::cimi-common/resource-links)
+(s/def ::versions (s/coll-of (s/nilable ::cimi-common/resource-link) :min-count 1))
 
 (s/def ::logo ::cimi-common/resource-link)
 

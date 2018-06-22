@@ -23,6 +23,7 @@
               :path        "a/b/c"
               :type        "IMAGE"
               :versions    [{:href "module-image/xyz"}
+                            nil
                             {:href "module-image/abc"}]
               :logo        {:href "external-object/xyz"}}]
 
