@@ -7,18 +7,17 @@
 
 (s/def ::clientID ::cimi-core/token)
 (s/def ::clientSecret ::cimi-core/token)
-(s/def ::baseURL ::cimi-core/token)
 (s/def ::authorizeURL ::cimi-core/token)
 (s/def ::tokenURL ::cimi-core/token)
 (s/def ::publicKey ::cimi-core/nonblank-string)             ;; allows jwk JSON representation
 
 (def configuration-template-keys-spec-req
-  {:req-un [::ps/instance ::clientID  ::publicKey]
-   :opt-un [::baseURL ::authorizeURL ::tokenURL ::clientSecret]})
+  {:req-un [::ps/instance ::clientID ::publicKey ::authorizeURL ::tokenURL]
+   :opt-un [::clientSecret]})
 
 (def configuration-template-keys-spec-create
-  {:req-un [::ps/instance ::clientID ::publicKey]
-   :opt-un [::baseURL ::authorizeURL ::tokenURL ::clientSecret]})
+  {:req-un [::ps/instance ::clientID ::publicKey ::authorizeURL ::tokenURL]
+   :opt-un [::clientSecret]})
 
 ;; Defines the contents of the OIDC authentication ConfigurationTemplate resource itself.
 (s/def ::session-oidc

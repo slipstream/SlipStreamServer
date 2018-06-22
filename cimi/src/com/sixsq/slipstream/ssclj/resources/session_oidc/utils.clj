@@ -83,15 +83,27 @@
 (defn throw-user-exists [username redirectURI]
   (logu/log-error-and-throw-with-redirect 400 (str "account already exists (" username ")") redirectURI))
 
+
+
+(defn valid-mitreid-config?
+  [{:keys [clientID clientSecret publicKey authorizeURL tokenURL userProfileURL] :as config}]
+  (and clientID clientSecret authorizeURL tokenURL userProfileURL publicKey))
+
+(defn valid-oidc-config?
+  "An OIDC config without clientSecret is valid (e.g KeyCloak)"
+  [{:keys [clientID publicKey authorizeURL tokenURL] :as config}]
+  (and clientID authorizeURL tokenURL publicKey))
+
 ;; retrieval of configuration parameters
 
 (defn config-oidc-params
   [redirectURI instance]
   (let [cfg-id (str "configuration/session-oidc-" instance)]
     (try
-      (let [{:keys [clientID clientSecret baseURL publicKey authorizeURL tokenURL]} (crud/retrieve-by-id-as-admin cfg-id)]
-        (if (or (and clientID baseURL publicKey) (and clientID clientSecret authorizeURL tokenURL publicKey))
-          [clientID clientSecret baseURL publicKey authorizeURL tokenURL]
+      (let [oidc-config (crud/retrieve-by-id-as-admin cfg-id)
+            {:keys [clientID clientSecret publicKey authorizeURL tokenURL]} oidc-config]
+        (if (valid-oidc-config? oidc-config)
+          [clientID clientSecret publicKey authorizeURL tokenURL]
           (throw-bad-client-config cfg-id redirectURI)))
       (catch Exception _
         (throw-bad-client-config cfg-id redirectURI)))))
@@ -100,9 +112,10 @@
   [redirectURI instance]
   (let [cfg-id (str "configuration/session-mitreid-" instance)]
     (try
-      (let [{:keys [clientID clientSecret baseURL publicKey authorizeURL tokenURL userInfoURL]} (crud/retrieve-by-id-as-admin cfg-id)]
-        (if (and clientID clientSecret authorizeURL tokenURL userInfoURL publicKey)
-          [clientID clientSecret baseURL publicKey authorizeURL tokenURL userInfoURL]
+      (let [mitreid-config (crud/retrieve-by-id-as-admin cfg-id)
+            {:keys [clientID clientSecret publicKey authorizeURL tokenURL userProfileURL]} mitreid-config]
+        (if (valid-mitreid-config? mitreid-config)
+          [clientID clientSecret publicKey authorizeURL tokenURL userProfileURL]
           (throw-bad-client-config cfg-id redirectURI)))
       (catch Exception _
         (throw-bad-client-config cfg-id redirectURI)))))
@@ -128,16 +141,14 @@
         (throw (ex-info msg (r/map-response msg 500 session-id)))))))
 
 (defn create-redirect-url
-  "Generate a callback-url. By default, use authorizeURL if provided,
-  otherwise fallback to base-url/auth"
-  [base-url authorizeURL client-id callback-url]
-  (let [url-params-format "?response_type=code&client_id=%s&redirect_uri=%s"
-        base-redirect-url (or authorizeURL (str base-url "/auth"))]
-    (str base-redirect-url (format url-params-format client-id callback-url))))
+  "Generate a redirect-url from the provided authorizeURL"
+  [authorizeURL client-id callback-url]
+  (let [url-params-format "?response_type=code&client_id=%s&redirect_uri=%s"]
+    (str authorizeURL (format url-params-format client-id callback-url))))
 
 (defn get-mitreid-userinfo
-  [userInfoURL access_token]
-  (-> (http/get userInfoURL
+  [userProfileURL access_token]
+  (-> (http/get userProfileURL
                 {:headers      {"Accept" "application/json"}
                  :query-params {::access_token access_token}})
       :body

@@ -41,17 +41,13 @@
     "jVunw8YkO7dsBhVP/8bqLDLw/8NsSAKwlzsoNKbrjVQ/NmHMJ88QkiKwv+E6lidy"
     "3wIDAQAB"))
 
-(def configuration-user-oidc-legacy {:configurationTemplate {:service   "session-oidc" ;;reusing configuration from session OIDC
-                                                             :instance  oidc/registration-method
-                                                             :clientID  "FAKE_CLIENT_ID"
-                                                             :baseURL   "https://oidc.example.com"
-                                                             :publicKey auth-pubkey}})
-
-(def configuration-user-oidc (-> configuration-user-oidc-legacy
-                                 (update-in [:configurationTemplate] dissoc :baseURL)
-                                 (assoc-in [:configurationTemplate :clientSecret] "MyOIDCClientSecret")
-                                 (assoc-in [:configurationTemplate :authorizeURL] "https://authorize.oidc.com/authorize")
-                                 (assoc-in [:configurationTemplate :tokenURL] "https://token.oidc.com/token")))
+(def configuration-user-oidc {:configurationTemplate {:service      "session-oidc" ;;reusing configuration from session
+                                                         :instance     oidc/registration-method
+                                                         :clientID     "FAKE_CLIENT_ID"
+                                                         :clientSecret "MyClientSecret"
+                                                         :authorizeURL "https://authorize.oidc.com/authorize"
+                                                         :tokenURL     "https://token.oidc.com/token"
+                                                         :publicKey    auth-pubkey}})
 
 (deftest lifecycle
 
@@ -115,10 +111,10 @@
       (let [;;
             ;; create the session-oidc configuration to use for these tests
             ;;
-            cfg-href-legacy (-> session-admin
+            cfg-href (-> session-admin
                                 (request configuration-base-uri
                                          :request-method :post
-                                         :body (json/write-str configuration-user-oidc-legacy))
+                                         :body (json/write-str configuration-user-oidc))
                                 (ltu/body->edn)
                                 (ltu/is-status 201)
                                 (ltu/location))
@@ -131,7 +127,7 @@
 
 
 
-(is (= cfg-href-legacy (str "configuration/session-oidc-" oidc/registration-method)))
+(is (= cfg-href (str "configuration/session-oidc-" oidc/registration-method)))
 
 (let [uri (-> session-anon
               (request base-uri
@@ -192,7 +188,7 @@
 
     ;; remove the authentication configuration
     (-> session-admin
-        (request (str p/service-context cfg-href-legacy)
+        (request (str p/service-context cfg-href)
                  :request-method :delete)
         (ltu/body->edn)
         (ltu/is-status 200))
@@ -223,7 +219,7 @@
     (-> session-admin
         (request configuration-base-uri
                  :request-method :post
-                 :body (json/write-str configuration-user-oidc-legacy))
+                 :body (json/write-str configuration-user-oidc))
         (ltu/body->edn)
         (ltu/is-status 201))
 
@@ -273,7 +269,7 @@
             bad-claims {}
             bad-token (sign/sign-claims bad-claims)]
 
-        (with-redefs [auth-oidc/get-access-token (fn [client-id client-secret base-url tokenurl oauth-code redirect-uri]
+        (with-redefs [auth-oidc/get-access-token (fn [client-id client-secret tokenurl oauth-code redirect-uri]
                                                         (case oauth-code
                                                           "GOOD" good-token
                                                           "BAD" bad-token

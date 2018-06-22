@@ -6,7 +6,8 @@ services:
     command: --web --docker --docker.exposedByDefault=false --loglevel=info
     volumes:
      - /var/run/docker.sock:/var/run/docker.sock:ro
-     - ./components/traefik/traefik-self-signed.toml:/traefik.toml
+     - ./traefik/traefik.toml:/traefik.toml
+     - ./traefik/cert:/ssl:ro
     ports:
      - "80:80"
      - "443:443"
@@ -30,27 +31,27 @@ services:
     ports:
      - "5601:5601"
   rc:
-    image: sixsq/ring-container:${SLIPSTREAM_VERSION}
+    image: sixsq/ring-container:latest
     ports:
      - "5000:5000"
     volumes:
      - ringcontainer:/opt/slipstream/ring-container
      - ringcontainerexample:/opt/slipstream/ring-example
   cimi:
-    image: sixsq/cimi:${SLIPSTREAM_VERSION}
+    image: sixsq/cimi:latest
     ports:
      - "8201:8201"
     labels:
      - "traefik.enable=true"
      - "traefik.backend=cimi"
-     - "traefik.frontend.headers.customRequestHeaders=slipstream-authn-info:"
+    #  - "traefik.frontend.headers.customRequestHeaders=slipstream-authn-info:"
      - "traefik.frontend.rule=PathPrefix:/,/"
     volumes:
      - ringcontainer:/opt/slipstream/ring-container
      - ringcontainerexample:/opt/slipstream/ring-example
      - resources:/opt/slipstream/cimi/extra-resources
   cimi-resources:
-    image: sixsq/cimi-resources:${SLIPSTREAM_VERSION}
+    image: sixsq/cimi-resources:latest
     volumes:
      - resources:/opt/slipstream/cimi/lib
 

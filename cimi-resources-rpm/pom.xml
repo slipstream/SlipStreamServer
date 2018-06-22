@@ -80,6 +80,7 @@
                       <runCmd>ssh-keygen -q -f ${slipstream.user.home}/.ssh/id_rsa -N ""</runCmd>
                       <runCmd>chown -R slipstream.slipstream ${slipstream.user.home}/.ssh</runCmd>
                     </runCmds>
+                    <tags>latest</tags>
                     <workdir>${cimi.installation.dir}</workdir>
                     <cmd>tail -f /dev/null</cmd>
                   </build>
