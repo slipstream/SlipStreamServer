@@ -1,7 +1,8 @@
-(ns com.sixsq.slipstream.ssclj.resources.evidence-record-test
+(ns com.sixsq.slipstream.ssclj.resources.service-catalog.utils-test
   (:require
-    [clojure.test :refer :all]
+    [clojure.test :refer [deftest is]]
     [com.sixsq.slipstream.ssclj.resources.service-catalog.utils :as sc]))
+
 
 (deftest test-valid-attribute-name
   (is (not (sc/valid-attribute-name? #{"schema-org"} "a1")))

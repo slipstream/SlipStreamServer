@@ -5,10 +5,10 @@
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.evidence-record :refer :all]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as t]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.service-attribute-namespace :as sn]
-    [com.sixsq.slipstream.ssclj.resources.evidence-record :refer :all]
     [peridot.core :refer :all]
     [ring.util.codec :as rc]))
 

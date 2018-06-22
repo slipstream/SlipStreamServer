@@ -48,13 +48,14 @@
       resource
       (sc/throw-wrong-namespace))))
 
-;
+
 (def validate-fn (u/create-spec-validation-fn :cimi/evidence-record))
 (defmethod crud/validate resource-uri
   [resource]
   (-> resource
       validate-fn
       validate-attributes))
+
 
 (defmethod crud/add-acl resource-uri
   [resource request]
@@ -64,25 +65,34 @@
 ;;
 ;; CRUD operations
 ;;
+
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
+
 (defmethod crud/add resource-name
   [request]
   (add-impl request))
 
+
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
+
 (defmethod crud/retrieve resource-name
   [request]
   (retrieve-impl request))
 
+
 (def edit-impl (std-crud/edit-fn resource-name))
+
 (defmethod crud/edit resource-name
   [request]
   (edit-impl request))
 
+
 (def delete-impl (std-crud/delete-fn resource-name))
+
 (defmethod crud/delete resource-name
   [request]
   (delete-impl request))
+
 
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
 

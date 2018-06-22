@@ -2,7 +2,7 @@
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as cimi-common]
-    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]  
+    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 
@@ -14,13 +14,8 @@
 (s/def ::passed boolean?)
 (s/def ::log (s/coll-of string?))
 
-(def evidence-record-spec
-  {:req-un [::endTime
-    ::startTime
-    ::planID
-    ::passed
-    ::class]
-   :opt-un [::log]})
+(def evidence-record-spec {:req-un [::endTime ::startTime ::planID ::passed ::class]
+                           :opt-un [::log]})
 
 (s/def :cimi/evidence-record
   (su/constrained-map keyword? any?
