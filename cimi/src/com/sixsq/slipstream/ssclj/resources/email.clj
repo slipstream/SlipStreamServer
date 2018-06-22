@@ -52,7 +52,7 @@
 ;; resource identifier is the MD5 checksum of the email address
 (defmethod crud/new-identifier resource-name
   [resource resource-name]
-  (if-let [new-id (some-> resource :address email-utils/md5)]
+  (if-let [new-id (some-> resource :address u/md5)]
     (assoc resource :id (str (u/de-camelcase resource-name) "/" new-id))))
 
 
