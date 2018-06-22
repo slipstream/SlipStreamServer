@@ -11,7 +11,8 @@
     [superstring.core :as str])
   (:import
     (java.util Date UUID)
-    (org.joda.time DateTime)))
+    (org.joda.time DateTime)
+    (java.security MessageDigest)))
 
 
 (def ^:const form-urlencoded "application/x-www-form-urlencoded")
@@ -60,6 +61,11 @@
 (defn cimi-collection? [resourceURI]
   (and (instance? String resourceURI)
        (.endsWith ^String resourceURI "Collection")))
+
+(defn md5 [^String s]
+  (let [algorithm (MessageDigest/getInstance "MD5")
+        raw (.digest algorithm (.getBytes s))]
+    (format "%032x" (BigInteger. 1 raw))))
 
 ;;
 ;; utilities for handling common attributes

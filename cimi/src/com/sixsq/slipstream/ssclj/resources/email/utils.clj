@@ -6,9 +6,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.util.response :as r]
-    [postal.core :as postal])
-  (:import
-    (java.security MessageDigest)))
+    [postal.core :as postal]))
 
 
 (def validation-email-body
@@ -26,12 +24,6 @@
                      ["By clicking the link and validating your email address you accept the Terms"
                       "and Conditions:"
                       "\n    %s\n"])))
-
-
-(defn md5 [^String s]
-  (let [algorithm (MessageDigest/getInstance "MD5")
-        raw (.digest algorithm (.getBytes s))]
-    (format "%032x" (BigInteger. 1 raw))))
 
 
 ;; FIXME: Fix ugliness around needing to create ring requests with authentication!
