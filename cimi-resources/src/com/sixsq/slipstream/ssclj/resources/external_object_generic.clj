@@ -4,11 +4,11 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
     [com.sixsq.slipstream.ssclj.resources.external-object-template-generic :as eot]
-    [com.sixsq.slipstream.ssclj.resources.spec.external-object-generic]))
+    [com.sixsq.slipstream.ssclj.resources.spec.external-object-generic :as eo-generic]))
 
 ;; multimethods for validation
 
-(def validate-fn (u/create-spec-validation-fn :cimi/external-object.generic))
+(def validate-fn (u/create-spec-validation-fn ::eo-generic/generic))
 (defmethod eo/validate-subtype eot/objectType
   [resource]
   (validate-fn resource))
@@ -19,5 +19,5 @@
 ;;
 (defn initialize
   []
-  (std-crud/initialize eo/resource-url :cimi/external-object.generic))
+  (std-crud/initialize eo/resource-url ::eo-generic/generic))
 

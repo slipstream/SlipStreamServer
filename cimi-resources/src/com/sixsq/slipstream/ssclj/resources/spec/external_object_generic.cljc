@@ -11,5 +11,5 @@
   (su/merge-keys-specs [c/common-attrs
                         external-object-generic-keys-spec]))
 
-(s/def :cimi/external-object.generic
+(s/def ::generic
   (su/only-keys-maps resource-keys-spec))

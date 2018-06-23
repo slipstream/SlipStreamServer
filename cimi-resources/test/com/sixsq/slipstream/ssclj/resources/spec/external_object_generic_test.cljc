@@ -4,7 +4,7 @@
     [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
     [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
     [com.sixsq.slipstream.ssclj.resources.external-object-template-generic :as tpl]
-    [com.sixsq.slipstream.ssclj.resources.spec.external-object-generic]
+    [com.sixsq.slipstream.ssclj.resources.spec.external-object-generic :as eo-generic]
     [com.sixsq.slipstream.ssclj.resources.spec.util :as u]))
 
 
@@ -24,13 +24,13 @@
                      :acl             valid-acl
                      :state           eo/state-new})]
 
-    (u/spec-valid? :cimi/external-object.generic root)
+    (u/spec-valid? ::eo-generic/generic root)
 
     ;; mandatory keywords
     (doseq [k #{:id :resourceURI :created :updated :acl
                 :objectType :state :objectName :bucketName :objectStoreCred}]
-      (u/spec-not-valid? :cimi/external-object.generic (dissoc root k)))
+      (u/spec-not-valid? ::eo-generic/generic (dissoc root k)))
 
     ;; optional keywords
     (doseq [k #{:contentType}]
-      (u/spec-valid? :cimi/external-object.generic (dissoc root k)))))
+      (u/spec-valid? ::eo-generic/generic (dissoc root k)))))
