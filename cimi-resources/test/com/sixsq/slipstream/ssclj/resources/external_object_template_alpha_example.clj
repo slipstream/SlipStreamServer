@@ -2,10 +2,10 @@
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
+    [com.sixsq.slipstream.ssclj.resources.external-object :as eo-resource]
     [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
-    [com.sixsq.slipstream.ssclj.resources.spec.external-object :as eos]
+    [com.sixsq.slipstream.ssclj.resources.spec.external-object :as eo]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 (def ^:const objectType "alpha")
@@ -17,9 +17,9 @@
 (s/def :cimi.external-object.alpha/alphaKey pos-int?)
 
 (def external-object-keys-spec
-  (u/remove-req eos/external-object-keys-spec #{:cimi.external-object/bucketName
-                                                :cimi.external-object/objectName
-                                                :cimi.external-object/objectStoreCred}))
+  (u/remove-req eo/external-object-keys-spec #{::eo/bucketName
+                                               ::eo/objectName
+                                               ::eo/objectStoreCred}))
 
 (def external-object-alpha-keys-spec
   (su/merge-keys-specs [external-object-keys-spec
@@ -35,7 +35,7 @@
 
 (s/def :cimi.external-object-template.alpha/externalObjectTemplate
   (su/only-keys-maps c/template-attrs
-                     (u/remove-req external-object-alpha-keys-spec #{:cimi.external-object/state})))
+                     (u/remove-req external-object-alpha-keys-spec #{::eo/state})))
 
 (s/def :cimi/external-object-template.alpha-create
   (su/only-keys-maps c/create-attrs
@@ -72,12 +72,12 @@
 ;;
 
 (def validate-fn (u/create-spec-validation-fn :cimi/external-object.alpha))
-(defmethod eo/validate-subtype objectType
+(defmethod eo-resource/validate-subtype objectType
   [resource]
   (validate-fn resource))
 
 (def validate-fn (u/create-spec-validation-fn :cimi/external-object-template.alpha-create))
-(defmethod eo/create-validate-subtype objectType
+(defmethod eo-resource/create-validate-subtype objectType
   [resource]
   (validate-fn resource))
 

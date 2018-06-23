@@ -4,16 +4,16 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
-    [com.sixsq.slipstream.ssclj.resources.spec.external-object]
+    [com.sixsq.slipstream.ssclj.resources.spec.external-object :as eo]
     [com.sixsq.slipstream.ssclj.resources.spec.external-object-report :as eor]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 
 (def template-resource-keys-spec
-  (u/remove-req eor/external-object-report-keys-spec #{:cimi.external-object/state
-                                                       :cimi.external-object/objectName
-                                                       :cimi.external-object/bucketName
-                                                       :cimi.external-object/objectStoreCred}))
+  (u/remove-req eor/external-object-report-keys-spec #{::eo/state
+                                                       ::eo/objectName
+                                                       ::eo/bucketName
+                                                       ::eo/objectStoreCred}))
 
 (s/def :cimi.external-object-template.report/filename ::cimi-core/nonblank-string)
 
