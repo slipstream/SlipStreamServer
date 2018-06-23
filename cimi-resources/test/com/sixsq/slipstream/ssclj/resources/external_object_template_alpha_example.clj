@@ -17,7 +17,7 @@
 (s/def :cimi.external-object.alpha/alphaKey pos-int?)
 
 (def external-object-keys-spec
-  (u/remove-req eo/external-object-keys-spec #{::eo/bucketName
+  (u/remove-req eo/common-external-object-attrs #{::eo/bucketName
                                                ::eo/objectName
                                                ::eo/objectStoreCred}))
 

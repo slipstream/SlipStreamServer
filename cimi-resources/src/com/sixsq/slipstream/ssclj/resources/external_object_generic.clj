@@ -8,7 +8,7 @@
 
 ;; multimethods for validation
 
-(def validate-fn (u/create-spec-validation-fn ::eo-generic/generic))
+(def validate-fn (u/create-spec-validation-fn ::eo-generic/external-object))
 (defmethod eo/validate-subtype eot/objectType
   [resource]
   (validate-fn resource))
@@ -19,5 +19,5 @@
 ;;
 (defn initialize
   []
-  (std-crud/initialize eo/resource-url ::eo-generic/generic))
+  (std-crud/initialize eo/resource-url ::eo-generic/external-object))
 

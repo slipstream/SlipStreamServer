@@ -7,7 +7,7 @@
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 
-(s/def :cimi.test/external-object (su/only-keys-maps eos/external-object-keys-spec))
+(s/def :cimi.test/external-object (su/only-keys-maps eos/common-external-object-attrs))
 
 (deftest test-schema-check
   (let [root {:state           "new"

@@ -60,7 +60,7 @@
 ;;
 ;; multimethods for validation
 ;;
-(def validate-fn (u/create-spec-validation-fn ::eo-generic/generic))
+(def validate-fn (u/create-spec-validation-fn ::eo-generic/external-object))
 (defmethod eo/validate-subtype objectType
   [resource]
   (validate-fn resource))

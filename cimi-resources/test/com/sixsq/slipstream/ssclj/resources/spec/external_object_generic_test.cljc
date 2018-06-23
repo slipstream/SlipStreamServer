@@ -24,13 +24,13 @@
                      :acl             valid-acl
                      :state           eo/state-new})]
 
-    (u/spec-valid? ::eo-generic/generic root)
+    (u/spec-valid? ::eo-generic/external-object root)
 
     ;; mandatory keywords
     (doseq [k #{:id :resourceURI :created :updated :acl
                 :objectType :state :objectName :bucketName :objectStoreCred}]
-      (u/spec-not-valid? ::eo-generic/generic (dissoc root k)))
+      (u/spec-not-valid? ::eo-generic/external-object (dissoc root k)))
 
     ;; optional keywords
     (doseq [k #{:contentType}]
-      (u/spec-valid? ::eo-generic/generic (dissoc root k)))))
+      (u/spec-valid? ::eo-generic/external-object (dissoc root k)))))

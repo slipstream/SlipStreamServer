@@ -8,7 +8,7 @@
 
 
 (def template-resource-keys-spec
-  (u/remove-req eo/external-object-keys-spec #{::eo/state}))
+  (u/remove-req eo/common-external-object-attrs #{::eo/state}))
 
 ;; Defines the contents of the generic template used in a create resource.
 ;; NOTE: The name must match the key defined by the resource, :externalObjectTemplate here.

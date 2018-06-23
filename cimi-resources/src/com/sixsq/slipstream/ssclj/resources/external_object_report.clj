@@ -7,7 +7,7 @@
     [com.sixsq.slipstream.ssclj.resources.configuration-slipstream :as conf-ss]
     [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
     [com.sixsq.slipstream.ssclj.resources.external-object-template-report :as eot]
-    [com.sixsq.slipstream.ssclj.resources.spec.external-object-report]
+    [com.sixsq.slipstream.ssclj.resources.spec.external-object-report :as eo-report]
     [com.sixsq.slipstream.ssclj.resources.spec.external-object-template-report]))
 
 
@@ -59,7 +59,7 @@
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi/external-object.report))
+(def validate-fn (u/create-spec-validation-fn ::eo-report/external-object))
 (defmethod eo/validate-subtype eot/objectType
   [resource]
   (validate-fn resource))
@@ -70,4 +70,4 @@
 ;;
 (defn initialize
   []
-  (std-crud/initialize eo/resource-url :cimi/external-object.report))
+  (std-crud/initialize eo/resource-url :eo-report/external-object))

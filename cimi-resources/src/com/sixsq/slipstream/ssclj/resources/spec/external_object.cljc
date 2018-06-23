@@ -15,10 +15,10 @@
 (def external-object-template-regex #"^external-object-template/[a-z]+(-[a-z]+)*$")
 (s/def ::href (s/and string? #(re-matches external-object-template-regex %)))
 
-(def external-object-keys-spec {:req-un [::objectType
-                                         ::state
-                                         ::objectName
-                                         ::bucketName
-                                         ::objectStoreCred]
-                                :opt-un [::contentType
-                                         ::href]})
+(def common-external-object-attrs {:req-un [::objectType
+                                            ::state
+                                            ::objectName
+                                            ::bucketName
+                                            ::objectStoreCred]
+                                   :opt-un [::contentType
+                                            ::href]})
