@@ -2,9 +2,10 @@
   (:require
     [clojure.spec.alpha :as s]
     [clojure.test :refer [are deftest is]]
-    [com.sixsq.slipstream.ssclj.resources.service-attribute :as sa]))
+    [com.sixsq.slipstream.ssclj.resources.service-attribute :as sa-resource]
+    [com.sixsq.slipstream.ssclj.resources.spec.service-attribute :as sa]))
 
-(def valid? (partial s/valid? :cimi/service-attribute))
+(def valid? (partial s/valid? ::sa/service-attribute))
 (def invalid? (complement valid?))
 
 (def valid-acl {:owner {:principal "ADMIN"
@@ -15,10 +16,10 @@
 
 (deftest check-attribute
   (let [timestamp "1964-08-25T10:00:00.0Z"
-        attr {:id            (str sa/resource-url "/test-attribute")
+        attr {:id            (str sa-resource/resource-url "/test-attribute")
               :name          "Test Attribute"
               :description   "A attribute containing a test value."
-              :resourceURI   sa/resource-uri
+              :resourceURI   sa-resource/resource-uri
               :created       timestamp
               :updated       timestamp
               :acl           valid-acl

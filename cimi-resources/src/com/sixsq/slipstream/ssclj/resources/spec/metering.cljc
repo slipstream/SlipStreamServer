@@ -7,11 +7,11 @@
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 
-(s/def :cimi.metering/snapshot-time ::cimi-core/timestamp)
+(s/def ::snapshot-time ::cimi-core/timestamp)
 
 
 (def metering-keys-spec (su/merge-keys-specs [c/common-attrs
                                               vm/virtual-machine-specs
-                                              {:req-un [:cimi.metering/snapshot-time]}]))
+                                              {:req-un [::snapshot-time]}]))
 
-(s/def :cimi/metering (su/only-keys-maps metering-keys-spec))
+(s/def ::metering (su/only-keys-maps metering-keys-spec))

@@ -6,7 +6,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.quota.utils :as quota-utils]
-    [com.sixsq.slipstream.ssclj.resources.spec.quota]
+    [com.sixsq.slipstream.ssclj.resources.spec.quota :as quota]
     [com.sixsq.slipstream.util.response :as sr]
     [superstring.core :as str]))
 
@@ -32,7 +32,7 @@
 ;; multimethods for validation and operations
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi/quota))
+(def validate-fn (u/create-spec-validation-fn ::quota/quota))
 (defmethod crud/validate resource-uri
   [resource]
   (validate-fn resource))
@@ -116,4 +116,4 @@
 ;;
 (defn initialize
   []
-  (std-crud/initialize resource-url :cimi/quota))
+  (std-crud/initialize resource-url ::quota/quota))

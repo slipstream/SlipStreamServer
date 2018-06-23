@@ -1,12 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.resources.service-attribute-namespace
   (:require
-    [com.sixsq.slipstream.db.es.binding :as esb]
     [com.sixsq.slipstream.db.filter.parser :as parser]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.spec.service-attribute-namespace]
+    [com.sixsq.slipstream.ssclj.resources.spec.service-attribute-namespace :as san]
     [com.sixsq.slipstream.util.response :as response]
     [superstring.core :as str]))
 
@@ -38,7 +37,7 @@
 ;; multimethods for validation and operations
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi/service-attribute-namespace))
+(def validate-fn (u/create-spec-validation-fn ::san/service-attribute-namespace))
 (defmethod crud/validate resource-uri
   [resource]
   (validate-fn resource))
@@ -127,4 +126,4 @@
 ;;
 (defn initialize
   []
-  (std-crud/initialize resource-url :cimi/service-attribute-namespace))
+  (std-crud/initialize resource-url ::san/service-attribute-namespace))

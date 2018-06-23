@@ -3,7 +3,8 @@
     [clojure.spec.alpha :as s]
     [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.event :refer :all]))
+    [com.sixsq.slipstream.ssclj.resources.event :refer :all]
+    [com.sixsq.slipstream.ssclj.resources.spec.event :as event]))
 
 (def event-timestamp "2015-01-16T08:05:00.0Z")
 
@@ -25,7 +26,7 @@
                   :severity    "critical"
                   })
 
-(defn valid? [event] (s/valid? :cimi/event event))
+(defn valid? [event] (s/valid? ::event/event event))
 (def invalid? (complement valid?))
 
 (deftest check-event

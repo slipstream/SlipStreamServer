@@ -7,7 +7,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.job.utils :as ju]
-    [com.sixsq.slipstream.ssclj.resources.spec.job]
+    [com.sixsq.slipstream.ssclj.resources.spec.job :as job]
     [superstring.core :as str]))
 
 (def ^:const resource-name "Job")
@@ -33,7 +33,7 @@
 ;;
 (defn initialize
   []
-  (std-crud/initialize resource-url :cimi/job)
+  (std-crud/initialize resource-url ::job/job)
   (ju/create-job-queue))
 
 
@@ -41,7 +41,7 @@
 ;; multimethods for validation and operations
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi/job))
+(def validate-fn (u/create-spec-validation-fn ::job/job))
 (defmethod crud/validate resource-uri
   [resource]
   (validate-fn resource))

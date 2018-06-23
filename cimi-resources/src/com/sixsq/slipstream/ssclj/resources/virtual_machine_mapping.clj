@@ -6,7 +6,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.spec.virtual-machine-mapping]))
+    [com.sixsq.slipstream.ssclj.resources.spec.virtual-machine-mapping :as vmm]))
 
 (def ^:const resource-tag :virtualMachineMappings)
 
@@ -55,7 +55,7 @@
 ;;
 ;; resource validation
 ;;
-(def validate-fn (u/create-spec-validation-fn :cimi/virtual-machine-mapping))
+(def validate-fn (u/create-spec-validation-fn ::vmm/virtual-machine-mapping))
 (defmethod crud/validate
   resource-uri
   [resource]
@@ -116,4 +116,4 @@
 ;;
 (defn initialize
   []
-  (std-crud/initialize resource-url :cimi/virtual-machine-mapping))
+  (std-crud/initialize resource-url ::vmm/virtual-machine-mapping))

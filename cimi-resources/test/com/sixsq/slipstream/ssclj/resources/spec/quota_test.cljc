@@ -2,9 +2,10 @@
   (:require
     [clojure.spec.alpha :as s]
     [clojure.test :refer [are deftest is]]
-    [com.sixsq.slipstream.ssclj.resources.quota :as sq]))
+    [com.sixsq.slipstream.ssclj.resources.quota :as sq]
+    [com.sixsq.slipstream.ssclj.resources.spec.quota :as quota]))
 
-(def valid? (partial s/valid? :cimi/quota))
+(def valid? (partial s/valid? ::quota/quota))
 (def invalid? (complement valid?))
 
 (def valid-acl {:owner {:principal "ADMIN"
