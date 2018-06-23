@@ -52,7 +52,7 @@
 ;;
 ;; multimethods for validation
 ;;
-(def validate-fn (u/create-spec-validation-fn :eo-report/external-object))
+(def validate-fn (u/create-spec-validation-fn ::eo-report/external-object))
 (defmethod eo/validate-subtype objectType
   [resource]
   (validate-fn resource))
