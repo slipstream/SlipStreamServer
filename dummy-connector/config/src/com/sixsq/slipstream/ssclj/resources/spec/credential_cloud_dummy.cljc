@@ -4,19 +4,19 @@
     [com.sixsq.slipstream.ssclj.resources.spec.credential :as cred]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template :as ps]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template-cloud :as ctc]
-    [com.sixsq.slipstream.ssclj.resources.spec.credential-template-cloud-dummy]
+    [com.sixsq.slipstream.ssclj.resources.spec.credential-template-cloud-dummy :as dummy-tpl]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
-(s/def :cimi.credential.cloud-dummy/domain-name string?)
+(s/def ::domain-name string?)
 
 (def credential-keys-spec
   (update-in ctc/credential-template-cloud-keys-spec
-    [:opt-un] concat [:cimi.credential.cloud-dummy/domain-name]))
+    [:opt-un] concat [::domain-name]))
 
-(s/def :cimi/credential.cloud-dummy
+(s/def ::credential
   (su/only-keys-maps cred/credential-keys-spec
                      credential-keys-spec))
 
-(s/def :cimi/credential.cloud-dummy.create
+(s/def ::credential-create
   (su/only-keys-maps ps/create-keys-spec
-                     {:req-un [:cimi.credential-template.cloud-dummy/credentialTemplate]}))
+                     {:req-un [::dummy-tpl/credentialTemplate]}))

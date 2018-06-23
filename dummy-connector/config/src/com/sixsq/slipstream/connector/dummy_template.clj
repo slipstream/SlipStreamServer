@@ -24,15 +24,15 @@
 (s/def :cimi.connector-template.dummy/orchestratorInstanceType ::cimi-core/nonblank-string)
 (s/def :cimi.connector-template.dummy/zone ::cimi-core/nonblank-string)
 (s/def :cimi.connector-template.dummy/orchestratorDisk ::cimi-core/nonblank-string)
-(s/def :cimi.connector-template.dummy/objectStoreEndpoint :cimi.connector-template/objectStoreEndpoint)
+(s/def :cimi.connector-template.dummy/objectStoreEndpoint ::ps/objectStoreEndpoint)
 
-(def keys-spec {:req-un [:cimi.connector-template/endpoint
+(def keys-spec {:req-un [::ps/endpoint
                          :cimi.connector-template.dummy/objectStoreEndpoint
-                         :cimi.connector-template/nativeContextualization
-                         :cimi.connector-template/orchestratorSSHUsername
-                         :cimi.connector-template/orchestratorSSHPassword
-                         :cimi.connector-template/securityGroups
-                         :cimi.connector-template/updateClientURL
+                         ::ps/nativeContextualization
+                         ::ps/orchestratorSSHUsername
+                         ::ps/orchestratorSSHPassword
+                         ::ps/securityGroups
+                         ::ps/updateClientURL
 
                          :cimi.connector-template.dummy/orchestratorInstanceType
                          :cimi.connector-template.dummy/zone

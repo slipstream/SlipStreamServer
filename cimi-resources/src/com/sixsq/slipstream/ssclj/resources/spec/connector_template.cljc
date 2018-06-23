@@ -18,13 +18,13 @@
 
 ;; Common parameters, but which are not used by all.
 ;; Add these to the connector schema as necessary.
-(s/def :cimi.connector-template/endpoint string?)
-(s/def :cimi.connector-template/objectStoreEndpoint string?)
-(s/def :cimi.connector-template/nativeContextualization ::cimi-core/nonblank-string)
-(s/def :cimi.connector-template/orchestratorSSHUsername string?)
-(s/def :cimi.connector-template/orchestratorSSHPassword string?)
-(s/def :cimi.connector-template/securityGroups string?)
-(s/def :cimi.connector-template/updateClientURL string?)
+(s/def ::endpoint string?)
+(s/def ::objectStoreEndpoint string?)
+(s/def ::nativeContextualization ::cimi-core/nonblank-string)
+(s/def ::orchestratorSSHUsername string?)
+(s/def ::orchestratorSSHPassword string?)
+(s/def ::securityGroups string?)
+(s/def ::updateClientURL string?)
 
 (def connector-template-regex #"^connector-template/[a-z0-9]+(-[a-z0-9]+)*$")
 (s/def ::href (s/and string? #(re-matches connector-template-regex %)))

@@ -17,7 +17,7 @@
 ;;
 
 (s/def :cimi.connector-template.alpha/alphaKey pos-int?)
-(s/def :cimi.connector-template.alpha/objectStoreEndpoint :cimi.connector-template/objectStoreEndpoint)
+(s/def :cimi.connector-template.alpha/objectStoreEndpoint ::ps/objectStoreEndpoint)
 
 ;; Defines the contents of the alpha ConnectorTemplate resource itself.
 (s/def :cimi/connector-template.alpha
