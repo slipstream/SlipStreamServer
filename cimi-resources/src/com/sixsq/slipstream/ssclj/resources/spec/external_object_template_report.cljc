@@ -15,16 +15,15 @@
                                                        ::eo/bucketName
                                                        ::eo/objectStoreCred}))
 
-(s/def :cimi.external-object-template.report/filename ::cimi-core/nonblank-string)
+(s/def ::filename ::cimi-core/nonblank-string)
 
 ;; Defines the contents of the generic template used in a create resource.
 ;; NOTE: The name must match the key defined by the resource, :externalObjectTemplate here.
-(s/def :cimi.external-object-template.report/externalObjectTemplate
+(s/def ::externalObjectTemplate
   (su/only-keys-maps c/template-attrs
                      template-resource-keys-spec
-                     {:req-un [:cimi.external-object-template.report/filename]}))
+                     {:req-un [::filename]}))
 
-(s/def :cimi/external-object-template.report-create
+(s/def ::external-object-create
   (su/only-keys-maps c/create-attrs
-                     {:req-un [:cimi.external-object-template.report/externalObjectTemplate]}))
-
+                     {:req-un [::externalObjectTemplate]}))

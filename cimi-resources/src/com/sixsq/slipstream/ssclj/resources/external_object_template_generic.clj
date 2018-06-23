@@ -4,7 +4,7 @@
     [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
     [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
     [com.sixsq.slipstream.ssclj.resources.spec.external-object-generic :as eo-generic]
-    [com.sixsq.slipstream.ssclj.resources.spec.external-object-template-generic]))
+    [com.sixsq.slipstream.ssclj.resources.spec.external-object-template-generic :as eot-generic]))
 
 (def ^:const objectType "generic")
 
@@ -65,12 +65,12 @@
   [resource]
   (validate-fn resource))
 
-(def create-validate-fn (u/create-spec-validation-fn :cimi/external-object-template.generic-create))
+(def create-validate-fn (u/create-spec-validation-fn ::eot-generic/external-object-create))
 (defmethod eo/create-validate-subtype objectType
   [resource]
   (create-validate-fn resource))
 
-(def validate-fn (u/create-spec-validation-fn :cimi.external-object-template.generic/externalObjectTemplate))
+(def validate-fn (u/create-spec-validation-fn ::eot-generic/externalObjectTemplate))
 (defmethod eot/validate-subtype-template objectType
   [resource]
   (validate-fn resource))

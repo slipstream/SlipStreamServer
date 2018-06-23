@@ -12,10 +12,10 @@
 
 ;; Defines the contents of the generic template used in a create resource.
 ;; NOTE: The name must match the key defined by the resource, :externalObjectTemplate here.
-(s/def :cimi.external-object-template.generic/externalObjectTemplate
+(s/def ::externalObjectTemplate
   (su/only-keys-maps c/template-attrs
                      template-resource-keys-spec))
 
-(s/def :cimi/external-object-template.generic-create
+(s/def ::external-object-create
   (su/only-keys-maps c/create-attrs
-                     {:req-un [:cimi.external-object-template.generic/externalObjectTemplate]}))
+                     {:req-un [::externalObjectTemplate]}))
