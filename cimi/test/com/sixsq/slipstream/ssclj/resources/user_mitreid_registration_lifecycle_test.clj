@@ -326,6 +326,7 @@
                                :request-method :get)
                       (ltu/is-status 201))
 
+
                   (is (= "SUCCEEDED" (-> session-admin
                                          (request (str p/service-context cb-id))
                                          (ltu/body->edn)
@@ -335,12 +336,13 @@
                                          :state)))
 
 
-                  (let [ss-username (db/find-username-by-authn :mitreid username)]
+
+                  (let [ss-username (db/find-username-by-authn :mitreid username)
+                        user-record (->> username
+                                  (db/find-username-by-authn :mitreid)
+                                  (db/get-user))]
                     (is (not (nil? ss-username)))
-                    (is (= email (->> username
-                                      (db/find-username-by-authn :mitreid)
-                                      (db/get-user)
-                                      :name))))
+                    (is (= email (:name user-record))))
 
                   ;; try creating the same user again, should fail
                   (reset-callback! cb-id)
