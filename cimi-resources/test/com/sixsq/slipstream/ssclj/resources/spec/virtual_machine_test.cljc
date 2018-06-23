@@ -2,8 +2,8 @@
   (:require
     [clojure.spec.alpha :as s]
     [clojure.test :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.virtual-machine :as vm-resource]
-    [com.sixsq.slipstream.ssclj.resources.spec.virtual-machine :as vm]))
+    [com.sixsq.slipstream.ssclj.resources.spec.virtual-machine :as vm]
+    [com.sixsq.slipstream.ssclj.resources.virtual-machine :as vm-resource]))
 
 (def valid-acl {:owner {:principal "ADMIN",
                         :type      "ROLE"},
