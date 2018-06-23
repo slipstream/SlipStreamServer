@@ -4,12 +4,15 @@
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.external :as ex]
     [com.sixsq.slipstream.auth.oidc :as auth-oidc]
+    [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.auth.utils.http :as uh]
     [com.sixsq.slipstream.auth.utils.sign :as sign]
     [com.sixsq.slipstream.ssclj.resources.callback :as callback]
     [com.sixsq.slipstream.ssclj.resources.callback.utils :as utils]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as oidc-utils]
+    [com.sixsq.slipstream.ssclj.resources.user :as user]
+    [com.sixsq.slipstream.ssclj.resources.user-template-mitreid-registration :as ut]
     [com.sixsq.slipstream.util.response :as r]))
 
 
@@ -30,13 +33,15 @@
                           :value)]
             (log/debugf "MITREid access token claims for %s: %s" instance (pr-str claims))
             (if sub
-              (if-let [matched-user (ex/create-user-when-missing! :mitreid {:external-login    username
-                                                                            :external-email    (or email (str username "@fake-email.com"))
-                                                                            :firstname         givenName
-                                                                            :lastname          familyName
-                                                                            :instance          instance
-                                                                            :fail-on-existing? true})]
-                matched-user
+              (if-let [matched-user (ex/create-user-when-missing! (keyword ut/registration-method) {:external-login    username
+                                                                                                    :external-email    (or email (str username "@fake-email.com"))
+                                                                                                    :firstname         givenName
+                                                                                                    :lastname          familyName
+                                                                                                    :instance          instance
+                                                                                                    :fail-on-existing? true})]
+                (do
+                  (ex/post-user-add-dispatch matched-user ut/registration-method request)
+                  matched-user)
                 (oidc-utils/throw-user-exists sub redirectURI))
               (oidc-utils/throw-no-subject redirectURI)))
           (catch Exception e

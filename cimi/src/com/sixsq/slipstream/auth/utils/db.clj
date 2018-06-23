@@ -172,7 +172,7 @@
                                :isSuperUser  false
                                :state        (or state "ACTIVE")}
                               authn-method (assoc
-                                             :externalIdentity [(str (or instance (name authn-method))":" (or external-login authn-login))]
+                                             :externalIdentity [(str (or instance (name authn-method)) ":" (or external-login authn-login))]
                                              :name email)
                               firstname (assoc :firstName firstname)
                               lastname (assoc :lastName lastname)
@@ -246,3 +246,4 @@
   [username]
   (let [{super? :isSuperUser} (get-active-user-by-name username)]
     (if super? "ADMIN USER ANON" "USER ANON")))
+

@@ -3,7 +3,8 @@
     [clojure.string :as str]
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.utils.db :as db]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.user :as user]))
 
 
 (defn- mapped-user
@@ -71,3 +72,11 @@
                                                                :authn-method (name authn-method)))
                                     (when-not fail-on-existing?
                                       (or external-login username)))))))
+
+(defn post-user-add-dispatch
+  [username method request]
+  (-> username
+      (db/get-user)
+      (assoc :method method)
+      (user/post-user-add request)))
+

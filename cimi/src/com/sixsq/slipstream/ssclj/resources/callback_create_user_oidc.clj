@@ -10,6 +10,7 @@
     [com.sixsq.slipstream.ssclj.resources.callback.utils :as utils]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as oidc-utils]
+    [com.sixsq.slipstream.ssclj.resources.user-template-oidc-registration :as ut]
     [com.sixsq.slipstream.util.response :as r]))
 
 
@@ -33,7 +34,9 @@
                                                                          :organization      realm
                                                                          :instance          instance
                                                                          :fail-on-existing? true})]
-                matched-user
+                (do
+                  (ex/post-user-add-dispatch matched-user ut/registration-method request)
+                  matched-user)
                 (oidc-utils/throw-user-exists sub redirectURI))
               (oidc-utils/throw-no-subject redirectURI)))
           (catch Exception e
