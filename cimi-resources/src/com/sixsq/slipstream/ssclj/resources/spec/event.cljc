@@ -5,28 +5,27 @@
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
-(s/def :cimi.event/severity #{"critical" "high" "medium" "low"})
-(s/def :cimi.event/type #{"state" "alarm" "action" "system"})
+(s/def ::severity #{"critical" "high" "medium" "low"})
+(s/def ::type #{"state" "alarm" "action" "system"})
 
 ;; Events may need to reference resources that do not follow the CIMI.
 ;; conventions.  Allow for a more flexible schema to be used here.
-(s/def :cimi.event.link/href (s/and string? #(re-matches #"^[a-zA-Z0-9]+[a-zA-Z0-9_./-]*$" %)))
-(s/def :cimi.event/resource-link (s/keys :req-un [:cimi.event.link/href]))
+(s/def ::href (s/and string? #(re-matches #"^[a-zA-Z0-9]+[a-zA-Z0-9_./-]*$" %)))
+(s/def ::resource-link (s/keys :req-un [::href]))
 
-(s/def :cimi.event/state string?)
-(s/def :cimi.event/resource :cimi.event/resource-link)
-(s/def :cimi.event/content (su/only-keys :req-un [:cimi.event/resource
-                                                  :cimi.event/state]))
+(s/def ::state string?)
+(s/def ::resource ::resource-link)
+(s/def ::content (su/only-keys :req-un [::resource ::state]))
 
-(s/def :cimi/event
+(s/def ::event
   (su/only-keys :req-un [::cimi-common/id
                          ::cimi-common/resourceURI
                          ::cimi-common/acl
 
                          ::cimi-core/timestamp
-                         :cimi.event/content
-                         :cimi.event/type
-                         :cimi.event/severity]
+                         ::content
+                         ::type
+                         ::severity]
                 :opt-un [::cimi-common/created              ;; FIXME: should be required
                          ::cimi-common/updated              ;; FIXME: should be required
                          ::cimi-common/name

@@ -6,16 +6,16 @@
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 (def prefix-regex #"^[a-z]([a-z0-9-]*[a-z0-9])?$")
-(s/def :cimi.service-attribute/prefix (s/and string? #(re-matches prefix-regex %)))
+(s/def ::prefix (s/and string? #(re-matches prefix-regex %)))
 
-(s/def :cimi.service-attribute/attributeName ::cimi-core/nonblank-string)
+(s/def ::attributeName ::cimi-core/nonblank-string)
 
-(s/def :cimi.service-attribute/type ::cimi-core/nonblank-string)
+(s/def ::type ::cimi-core/nonblank-string)
 
-(s/def :cimi/service-attribute
+(s/def ::service-attribute
   (su/only-keys-maps cimi-common/common-attrs
                      {:req-un [::cimi-common/name           ;; name is required
                                ::cimi-common/description    ;; description is required
-                               :cimi.service-attribute/prefix
-                               :cimi.service-attribute/attributeName
-                               :cimi.service-attribute/type]}))
+                               ::prefix
+                               ::attributeName
+                               ::type]}))

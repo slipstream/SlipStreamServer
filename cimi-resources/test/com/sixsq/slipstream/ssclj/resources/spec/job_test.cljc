@@ -2,9 +2,10 @@
   (:require
     [clojure.spec.alpha :as s]
     [clojure.test :refer [are deftest is]]
-    [com.sixsq.slipstream.ssclj.resources.job :as sj]))
+    [com.sixsq.slipstream.ssclj.resources.job :as sj]
+    [com.sixsq.slipstream.ssclj.resources.spec.job :as job]))
 
-(def valid? (partial s/valid? :cimi/job))
+(def valid? (partial s/valid? ::job/job))
 (def invalid? (complement valid?))
 
 (def valid-acl {:owner {:principal "ADMIN"

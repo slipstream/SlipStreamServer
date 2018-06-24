@@ -7,7 +7,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.credential-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.spec.credential-template-cloud-dummy]
+    [com.sixsq.slipstream.ssclj.resources.spec.credential-template-cloud-dummy :as dummy-tpl]
     [com.sixsq.slipstream.ssclj.util.userparamsdesc :refer [slurp-cloud-cred-desc]]))
 
 (def ^:const credential-type (str "cloud-cred-" ct/cloud-service-type))
@@ -52,7 +52,7 @@
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi/credential-template.cloud-dummy))
+(def validate-fn (u/create-spec-validation-fn ::dummy-tpl/credential-template))
 (defmethod p/validate-subtype method
   [resource]
   (validate-fn resource))

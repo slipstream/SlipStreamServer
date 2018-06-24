@@ -6,7 +6,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.service-attribute-namespace :as san]
-    [com.sixsq.slipstream.ssclj.resources.spec.service-attribute]
+    [com.sixsq.slipstream.ssclj.resources.spec.service-attribute :as sa]
     [com.sixsq.slipstream.util.response :as sr]
     [ring.util.response :as r]
     [superstring.core :as str])
@@ -49,7 +49,7 @@
                        (r/status code))]
       (throw (ex-info msg response)))))
 
-(def validate-fn (u/create-spec-validation-fn :cimi/service-attribute))
+(def validate-fn (u/create-spec-validation-fn ::sa/service-attribute))
 (defmethod crud/validate resource-uri
   [resource]
   (-> resource
@@ -123,4 +123,4 @@
 ;;
 (defn initialize
   []
-  (std-crud/initialize resource-url :cimi/service-attribute))
+  (std-crud/initialize resource-url ::sa/service-attribute))

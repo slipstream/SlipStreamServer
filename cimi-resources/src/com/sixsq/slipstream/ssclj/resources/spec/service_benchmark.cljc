@@ -5,11 +5,11 @@
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 
-(s/def :cimi.service-benchmark/credentials (s/coll-of ::cimi-common/resource-link))
-(s/def :cimi.service-benchmark/serviceOffer ::cimi-common/resource-link)
+(s/def ::credentials (s/coll-of ::cimi-common/resource-link))
+(s/def ::serviceOffer ::cimi-common/resource-link)
 
-(s/def :cimi/service-benchmark
+(s/def ::service-benchmark
   (su/constrained-map keyword? any?
                       cimi-common/common-attrs
-                      {:req-un [:cimi.service-benchmark/credentials
-                                :cimi.service-benchmark/serviceOffer]}))
+                      {:req-un [::credentials
+                                ::serviceOffer]}))

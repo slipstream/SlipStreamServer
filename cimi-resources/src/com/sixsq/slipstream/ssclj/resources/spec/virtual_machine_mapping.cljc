@@ -5,20 +5,20 @@
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
-(s/def :cimi.virtual-machine-mapping/cloud ::cimi-core/nonblank-string)
-(s/def :cimi.virtual-machine-mapping/instanceID ::cimi-core/nonblank-string)
+(s/def ::cloud ::cimi-core/nonblank-string)
+(s/def ::instanceID ::cimi-core/nonblank-string)
 
-(s/def :cimi.virtual-machine-mapping/runUUID ::cimi-core/nonblank-string)
-(s/def :cimi.virtual-machine-mapping/owner ::cimi-core/nonblank-string)
-(s/def :cimi.virtual-machine-mapping/serviceOffer ::cimi-common/resource-link)
+(s/def ::runUUID ::cimi-core/nonblank-string)
+(s/def ::owner ::cimi-core/nonblank-string)
+(s/def ::serviceOffer ::cimi-common/resource-link)
 
-(def virtual-machine-mapping-specs {:req-un [:cimi.virtual-machine-mapping/cloud
-                                             :cimi.virtual-machine-mapping/instanceID]
-                                    :opt-un [:cimi.virtual-machine-mapping/runUUID
-                                             :cimi.virtual-machine-mapping/owner
-                                             :cimi.virtual-machine-mapping/serviceOffer]})
+(def virtual-machine-mapping-specs {:req-un [::cloud
+                                             ::instanceID]
+                                    :opt-un [::runUUID
+                                             ::owner
+                                             ::serviceOffer]})
 
 (def virtual-machine-mapping-keys-spec (su/merge-keys-specs [cimi-common/common-attrs
                                                              virtual-machine-mapping-specs]))
 
-(s/def :cimi/virtual-machine-mapping (su/only-keys-maps virtual-machine-mapping-keys-spec))
+(s/def ::virtual-machine-mapping (su/only-keys-maps virtual-machine-mapping-keys-spec))

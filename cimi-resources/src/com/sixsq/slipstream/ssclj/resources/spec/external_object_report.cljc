@@ -6,17 +6,17 @@
     [com.sixsq.slipstream.ssclj.resources.spec.external-object :as eo]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
-(s/def :cimi.external-object.report/runUUID ::cimi-core/nonblank-string)
-(s/def :cimi.external-object.report/component ::cimi-core/nonblank-string)
+(s/def ::runUUID ::cimi-core/nonblank-string)
+(s/def ::component ::cimi-core/nonblank-string)
 
 (def external-object-report-keys-spec
-  (su/merge-keys-specs [eo/external-object-keys-spec
-                        {:req-un [:cimi.external-object.report/runUUID
-                                  :cimi.external-object.report/component]}]))
+  (su/merge-keys-specs [eo/common-external-object-attrs
+                        {:req-un [::runUUID
+                                  ::component]}]))
 
 (def resource-keys-spec
   (su/merge-keys-specs [c/common-attrs
                         external-object-report-keys-spec]))
 
-(s/def :cimi/external-object.report
+(s/def ::external-object
   (su/only-keys-maps resource-keys-spec))

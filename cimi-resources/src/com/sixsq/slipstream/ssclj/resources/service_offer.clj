@@ -6,7 +6,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.service-attribute-namespace :as sn]
-    [com.sixsq.slipstream.ssclj.resources.spec.service-offer]
+    [com.sixsq.slipstream.ssclj.resources.spec.service-offer :as so]
     [com.sixsq.slipstream.util.response :as sr]
     [ring.util.response :as r]
     [superstring.core :as str]))
@@ -64,7 +64,7 @@
       resource
       (throw-wrong-namespace))))
 
-(def validate-fn (u/create-spec-validation-fn :cimi/service-offer))
+(def validate-fn (u/create-spec-validation-fn ::so/service-offer))
 (defmethod crud/validate resource-uri
   [resource]
   (-> resource
@@ -115,4 +115,4 @@
 ;;
 (defn initialize
   []
-  (std-crud/initialize resource-url :cimi/service-offer))
+  (std-crud/initialize resource-url ::so/service-offer))

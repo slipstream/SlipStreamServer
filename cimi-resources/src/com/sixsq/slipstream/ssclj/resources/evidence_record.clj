@@ -7,7 +7,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.service-attribute-namespace :as sn]
     [com.sixsq.slipstream.ssclj.resources.service-catalog.utils :as sc]
-    [com.sixsq.slipstream.ssclj.resources.spec.evidence-record]
+    [com.sixsq.slipstream.ssclj.resources.spec.evidence-record :as er]
     [superstring.core :as str]))
 
 
@@ -49,7 +49,7 @@
       (sc/throw-wrong-namespace))))
 
 
-(def validate-fn (u/create-spec-validation-fn :cimi/evidence-record))
+(def validate-fn (u/create-spec-validation-fn ::er/evidence-record))
 (defmethod crud/validate resource-uri
   [resource]
   (-> resource
@@ -99,4 +99,4 @@
 ;;
 (defn initialize
   []
-  (std-crud/initialize resource-url :cimi/evidence-record))
+  (std-crud/initialize resource-url ::er/evidence-record))

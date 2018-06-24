@@ -6,7 +6,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.spec.metering]
+    [com.sixsq.slipstream.ssclj.resources.spec.metering :as metering]
     [superstring.core :as str]))
 
 (def ^:const resource-name "Metering")
@@ -43,7 +43,7 @@
             :type      "USER"
             :right     "VIEW"}]})
 
-(def validate-fn (u/create-spec-validation-fn :cimi/metering))
+(def validate-fn (u/create-spec-validation-fn ::metering/metering))
 (defmethod crud/validate
   resource-uri
   [resource]
@@ -99,4 +99,4 @@
 ;;
 (defn initialize
   []
-  (std-crud/initialize resource-url :cimi/metering))
+  (std-crud/initialize resource-url ::metering/metering))

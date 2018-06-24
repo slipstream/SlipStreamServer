@@ -6,7 +6,6 @@
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 
-; (s/def ::credentials (s/coll-of ::cimi-common/resource-link))
 (s/def ::class ::cimi-core/nonblank-string)
 (s/def ::endTime ::cimi-core/timestamp)
 (s/def ::startTime ::cimi-core/timestamp)
@@ -17,7 +16,7 @@
 (def evidence-record-spec {:req-un [::endTime ::startTime ::planID ::passed ::class]
                            :opt-un [::log]})
 
-(s/def :cimi/evidence-record
+(s/def ::evidence-record
   (su/constrained-map keyword? any?
                       cimi-common/common-attrs
                       evidence-record-spec))
