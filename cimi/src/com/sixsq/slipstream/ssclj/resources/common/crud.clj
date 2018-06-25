@@ -60,6 +60,7 @@
    the authentication enforcement at the database level."
   [resource-id]
   (let [opts {:user-name "INTERNAL" :user-roles ["ADMIN"]}]
+    (println )
     (retrieve-by-id resource-id opts)))
 
 (defmulti edit resource-name-dispatch)

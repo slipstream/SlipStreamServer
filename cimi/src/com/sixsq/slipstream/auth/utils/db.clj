@@ -172,7 +172,7 @@
                                :isSuperUser  false
                                :state        (or state "ACTIVE")}
                               authn-method (assoc
-                                             :externalIdentity [(str (or instance (name authn-method))":" (or external-login authn-login))]
+                                             :externalIdentity [(str (or instance (name authn-method)) ":" (or external-login authn-login))]
                                              :name email)
                               firstname (assoc :firstName firstname)
                               lastname (assoc :lastName lastname)
@@ -217,12 +217,22 @@
      (when (not fail-on-existing?)
        authn-login)
      (do
+
+
        ;; create user, will always use direct method as all fields are available
        (crud/add (user-create-request user-record))
 
        ;; reset the method to the one actually used
-       (let [user (crud/retrieve-by-id-as-admin authn-login)]
-         (crud/edit (assoc user :method (name authn-method))))
+       (let [user (crud/retrieve-by-id-as-admin (str "user/" authn-login))]
+         (crud/edit {:identity     {:current "internal"
+                                    :authentications
+                                             {"internal" {:roles #{"ADMIN"}, :identity "internal"}}}
+                     :sixsq.slipstream.authn/claims
+                                   {:username "internal", :roles "ADMIN"}
+                     :params       {:resource-name "user"}
+                     :route-params {:resource-name "user"}
+                     :user-roles   #{"ANON"}
+                     :body         (assoc user :method (name authn-method))}))
 
        ;; return the user identifier
        authn-login)))

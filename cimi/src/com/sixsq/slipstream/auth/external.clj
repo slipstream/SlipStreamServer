@@ -63,11 +63,13 @@
       (when-not username-by-authn (if-not
                                     (or (db/user-exists? (or external-login username))
                                         (db/external-identity-exists? authn-method (or external-login username)))
-                                    (create-slipstream-user! (assoc external-record
-                                                               :authn-login username
-                                                               :external-login external-login
-                                                               :email external-email
-                                                               :instance (or instance (name authn-method))
-                                                               :authn-method (name authn-method)))
+                                    (let [created-user (create-slipstream-user! (assoc external-record
+                                                                                  :authn-login username
+                                                                                  :external-login external-login
+                                                                                  :email external-email
+                                                                                  :instance (or instance (name authn-method))
+                                                                                  :authn-method (name authn-method)))]
+
+                                      created-user)
                                     (when-not fail-on-existing?
                                       (or external-login username)))))))
