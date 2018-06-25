@@ -232,11 +232,6 @@
     (catch Exception e
       (or (ex-data e) (throw e)))))
 
-#_(defmethod crud/delete resource-name
-    [request]
-    (println request)
-    (delete-impl request))
-
 
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
 
