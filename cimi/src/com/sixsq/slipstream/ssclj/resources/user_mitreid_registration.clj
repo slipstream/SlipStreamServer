@@ -38,10 +38,3 @@
         callback-url (user-utils/create-user-mitreid-callback base-uri href data)
         redirect-url (oidc-utils/create-redirect-url authorizeURL client-id callback-url)]
     [{:status 303, :headers {"Location" redirect-url}} nil]))
-
-
-
-(defmethod p/post-user-add user-template/registration-method
-  [resource request]
-  nil
-  )

@@ -186,7 +186,7 @@
                                                   (crud/validate)
                                                   (:userTemplate)
                                                   (merge-with-defaults)
-                                                  (tpl->user request)
+                                                  (tpl->user request) ;; returns a tuple [response-fragment, resource-body]
                                                   (merge desc-attrs)
                                                   (revert-method authn-method))]
 

@@ -39,15 +39,3 @@
         callback-url (user-utils/create-user-oidc-callback base-uri href data)
         redirect-url (oidc-utils/create-redirect-url authorizeURL client-id callback-url)]
         [{:status 303, :headers {"Location" redirect-url}} nil]))
-
-
-;;
-;; creates email validation callback after user is created
-;; logs and then ignores any exceptions when creating callback
-;;
-
-(defmethod p/post-user-add user-template/registration-method
-  [{:keys [id emailAddress] :as resource} {:keys [base-uri] :as request}]
-
-
-  )

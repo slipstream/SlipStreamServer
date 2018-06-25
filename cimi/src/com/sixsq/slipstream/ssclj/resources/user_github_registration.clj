@@ -41,11 +41,3 @@
             redirect-url (format gu/github-oath-endpoint client-id callback-url)]
         [{:status 303, :headers {"Location" redirect-url}} nil])
       (gu/throw-bad-client-config user-template/registration-method redirectURI))))
-
-
-
-
-(defmethod p/post-user-add user-template/registration-method
-  [resource request]
-  nil
-  )
