@@ -45,17 +45,7 @@
 
 
 
-
-;;
-;; creates email validation callback after user is created
-;; logs and then ignores any exceptions when creating callback
-;;
-
 (defmethod p/post-user-add user-template/registration-method
-  [{:keys [id emailAddress] :as resource} {:keys [base-uri] :as request}]
-  (try
-    (-> id
-        (user-utils/create-user-email-callback base-uri)
-        (email-utils/send-validation-email emailAddress))
-    (catch Exception e
-      (log/error (str e)))))
+  [resource request]
+  nil
+  )

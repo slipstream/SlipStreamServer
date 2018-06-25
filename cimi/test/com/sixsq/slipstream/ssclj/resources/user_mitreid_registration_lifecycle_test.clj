@@ -335,12 +335,13 @@
                                          :state)))
 
 
-                  (let [ss-username (db/find-username-by-authn :mitreid username)]
+                  (let [ss-username (db/find-username-by-authn :mitreid username)
+                        user-record (->> username
+                                         (db/find-username-by-authn :mitreid)
+                                         (db/get-user))]
                     (is (not (nil? ss-username)))
-                    (is (= email (->> username
-                                      (db/find-username-by-authn :mitreid)
-                                      (db/get-user)
-                                      :name))))
+                    (is (= email (:name user-record)))
+                    (is (= mitreid/registration-method (:method user-record))))
 
                   ;; try creating the same user again, should fail
                   (reset-callback! cb-id)

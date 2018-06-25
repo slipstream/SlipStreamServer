@@ -160,6 +160,15 @@
 
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
+(defn revert-method
+  [[fragment {:keys [method] :as body}] original-method]
+  (if (and original-method (= tpl/registration-method method))
+    [fragment (assoc body :method original-method)]
+    [fragment body]))
+
+(defn merge-attrs
+  [[fragment m] desc-attrs]
+  [fragment (merge m desc-attrs)])
 
 ;; requires a UserTemplate to create new User
 (defmethod crud/add resource-name
@@ -167,6 +176,7 @@
 
   (let [idmap {:identity (:identity request)}
         body (if (u/is-form? headers) (u/convert-form :userTemplate form-params) body)
+        authn-method (-> body :userTemplate :method)
         desc-attrs (u/select-desc-keys body)
         [resp-fragment {:keys [id] :as body}] (-> body
                                                   (assoc :resourceURI create-uri)
@@ -177,7 +187,8 @@
                                                   (:userTemplate)
                                                   (merge-with-defaults)
                                                   (tpl->user request)
-                                                  (merge desc-attrs))]
+                                                  (merge desc-attrs)
+                                                  (revert-method authn-method))]
 
     (if resp-fragment
       ;;possibly a redirect
