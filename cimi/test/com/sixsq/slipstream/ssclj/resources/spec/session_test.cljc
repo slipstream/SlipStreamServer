@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.session-test
   (:require
-    [clojure.spec.alpha :as s]
     [clojure.test :refer [deftest is]]
     [com.sixsq.slipstream.ssclj.resources.session :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.spec.session :as session]))
+    [com.sixsq.slipstream.ssclj.resources.spec.session :as session]
+    [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]))
 
 (def valid-acl {:owner {:principal "ADMIN"
                         :type      "ROLE"}
@@ -26,8 +26,10 @@
              :redirectURI     "https://nuv.la/webui/profile"
              :sessionTemplate {:href "session-template/internal"}}]
 
-    (is (s/valid? ::session/session cfg))
+    (stu/is-valid ::session/session cfg)
+
     (doseq [attr #{:id :resourceURI :created :updated :acl :method :expiry :sessionTemplate}]
-      (is (not (s/valid? ::session/session (dissoc cfg attr)))))
+      (stu/is-invalid ::session/session (dissoc cfg attr)))
+
     (doseq [attr #{:username :server :clientIP}]
-      (is (s/valid? ::session/session (dissoc cfg attr))))))
+      (stu/is-valid ::session/session (dissoc cfg attr)))))

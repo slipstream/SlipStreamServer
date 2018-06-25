@@ -1,19 +1,23 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.configuration-template-test
   (:require
     [clojure.spec.alpha :as s]
-    [clojure.test :refer :all]
+    [clojure.test :refer [deftest]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.spec.configuration-template :as cts]
+    [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
-(s/def :cimi.test/configuration-template (su/only-keys-maps cts/resource-keys-spec))
+
+(s/def ::configuration-template (su/only-keys-maps cts/resource-keys-spec))
+
 
 (def valid-acl {:owner {:principal "ADMIN"
                         :type      "ROLE"}
                 :rules [{:principal "ANON"
                          :type      "ROLE"
                          :right     "VIEW"}]})
+
 
 (deftest test-configuration-template-schema-check
   (let [timestamp "1964-08-25T10:00:00.0Z"
@@ -23,6 +27,8 @@
               :updated     timestamp
               :acl         valid-acl
               :service     "cloud-software-solution"}]
-    (is (s/valid? :cimi.test/configuration-template root))
+
+    (stu/is-valid ::configuration-template root)
+
     (doseq [k (into #{} (keys (dissoc root :id :resourceURI)))]
-      (is (not (s/valid? :cimi.test/configuration-template (dissoc root k)))))))
+      (stu/is-invalid ::configuration-template (dissoc root k)))))

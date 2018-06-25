@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.callback-test
   (:require
-    [clojure.spec.alpha :as s]
     [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.ssclj.resources.callback :as t]
-    [com.sixsq.slipstream.ssclj.resources.spec.callback :as callback]))
+    [com.sixsq.slipstream.ssclj.resources.spec.callback :as callback]
+    [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]))
 
 
 (def valid-acl {:owner {:principal "ADMIN"
@@ -27,12 +27,13 @@
                   :data           {:some    "value"
                                    :another "value"}}]
 
-    (is (s/valid? ::callback/callback callback))
-    (is (s/valid? ::callback/callback (assoc callback :state "SUCCEEDED")))
-    (is (s/valid? ::callback/callback (assoc callback :state "FAILED")))
-    (is (not (s/valid? ::callback/callback (assoc callback :state "UNKNOWN"))))
+    (stu/is-valid ::callback/callback callback)
+    (stu/is-valid ::callback/callback (assoc callback :state "SUCCEEDED"))
+    (stu/is-valid ::callback/callback (assoc callback :state "FAILED"))
+    (stu/is-invalid ::callback/callback (assoc callback :state "UNKNOWN"))
+
     (doseq [attr #{:id :resourceURI :created :updated :acl :action :state}]
-      (is (not (s/valid? ::callback/callback (dissoc callback attr)))))
-    (doseq [attr #{:targetResource
-                   :expires :data}]
-      (is (s/valid? ::callback/callback (dissoc callback attr))))))
+      (stu/is-invalid ::callback/callback (dissoc callback attr)))
+
+    (doseq [attr #{:targetResource :expires :data}]
+      (stu/is-valid ::callback/callback (dissoc callback attr)))))
