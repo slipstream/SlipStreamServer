@@ -10,9 +10,9 @@
     [expound.alpha :as expound]
     [superstring.core :as str])
   (:import
-    (java.security MessageDigest)
     (java.util Date UUID)
-    (org.joda.time DateTime)))
+    (org.joda.time DateTime)
+    (java.security MessageDigest)))
 
 
 (def ^:const form-urlencoded "application/x-www-form-urlencoded")

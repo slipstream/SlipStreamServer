@@ -22,22 +22,19 @@
         [client-id client-secret public-key authorizeURL tokenURL] (oidc-utils/config-oidc-params redirectURI instance)]
     (if-let [code (uh/param-value request :code)]
       (if-let [access-token (auth-oidc/get-access-token client-id client-secret tokenURL code (str base-uri (or callback-id "unknown-id") "/execute"))]
-
         (try
           (let [{:keys [sub email given_name family_name realm] :as claims} (sign/unsign-claims access-token public-key)]
             (log/debugf "oidc access token claims for %s: %s" instance (pr-str claims))
             (if sub
-              (do
-                (if-let [matched-user (ex/create-user-when-missing! :oidc {:external-login    sub
-                                                                           :external-email    (or email (str sub "@fake-email.com")) ;;some OIDC server do not return emails
-                                                                           :firstname         given_name
-                                                                           :lastname          family_name
-                                                                           :organization      realm
-                                                                           :instance          instance
-                                                                           :fail-on-existing? true})]
-
-                  matched-user
-                  (oidc-utils/throw-user-exists sub redirectURI)))
+              (if-let [matched-user (ex/create-user-when-missing! :oidc {:external-login    sub
+                                                                         :external-email    (or email (str sub "@fake-email.com")) ;;some OIDC server do not return emails
+                                                                         :firstname         given_name
+                                                                         :lastname          family_name
+                                                                         :organization      realm
+                                                                         :instance          instance
+                                                                         :fail-on-existing? true})]
+                matched-user
+                (oidc-utils/throw-user-exists sub redirectURI))
               (oidc-utils/throw-no-subject redirectURI)))
           (catch Exception e
             (oidc-utils/throw-invalid-access-code (str e) redirectURI)))

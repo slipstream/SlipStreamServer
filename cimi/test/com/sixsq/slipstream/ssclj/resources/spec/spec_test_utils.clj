@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils
   (:require
-    [clojure.pprint :refer [pprint]]
     [clojure.spec.alpha :as s]
     [clojure.test :refer [is]]
-    [expound.alpha :as expound]))
+    [expound.alpha :as expound]
+    [clojure.pprint :refer [pprint]]))
 
 
 (defmacro is-valid

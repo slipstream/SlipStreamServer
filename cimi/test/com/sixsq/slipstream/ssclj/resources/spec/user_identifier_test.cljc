@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.user-identifier-test
   (:require
     [clojure.test :refer [deftest is]]
-    [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]
+    [com.sixsq.slipstream.ssclj.resources.user-identifier :as ui]
     [com.sixsq.slipstream.ssclj.resources.spec.user-identifier :as ui-spec]
-    [com.sixsq.slipstream.ssclj.resources.user-identifier :as ui]))
+    [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]))
 
 
 (def valid-acl {:owner {:principal "ADMIN"

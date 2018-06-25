@@ -13,6 +13,7 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.user :as user]
     [com.sixsq.slipstream.ssclj.resources.user-template :as ut]
+    [com.sixsq.slipstream.ssclj.resources.user-template-github-registration :as utg]
     [com.sixsq.slipstream.ssclj.resources.user-template-github-registration :as github]
     [peridot.core :refer :all]
     [ring.util.codec :as codec]))
@@ -33,14 +34,14 @@
 
 
 (def configuration-user-github {:configurationTemplate {:service      "session-github" ;;reusing configuration from session GitHub
-                                                        :instance     github/registration-method
+                                                        :instance     utg/registration-method
 
                                                         :clientID     "FAKE_CLIENT_ID"
                                                         :clientSecret "ABCDEF..."}})
 
 (deftest lifecycle
 
-  (let [href (str ut/resource-url "/" github/registration-method)
+  (let [href (str ut/resource-url "/" utg/registration-method)
 
         session-anon (-> (ltu/ring-app)
                          session
@@ -100,7 +101,7 @@
                          (ltu/is-status 201)
                          (ltu/location))]
 
-        (is (= cfg-href (str "configuration/session-github-" github/registration-method)))
+        (is (= cfg-href (str "configuration/session-github-" utg/registration-method)))
 
         (let [resp (-> session-anon
                        (request base-uri
@@ -250,13 +251,13 @@
 
 
 
-                  (let [ss-username (db/find-username-by-authn :github github-login)
-                        user-record (->> github-login
-                                         (db/find-username-by-authn :github)
-                                         (db/get-user))]
+                  (let [ss-username (db/find-username-by-authn :github github-login)]
                     (is (not (nil? ss-username)))
-                    (is (= email (:name user-record)))
-                    (is (= github/registration-method (:method user-record))))
+
+                    (is (= email (->> github-login
+                                      (db/find-username-by-authn :github)
+                                      (db/get-user)
+                                      :name))))
 
                   ;; try creating the same user again, should fail
                   (reset-callback! callback)
