@@ -69,7 +69,6 @@
                                                                                   :email external-email
                                                                                   :instance (or instance (name authn-method))
                                                                                   :authn-method (name authn-method)))]
-
                                       created-user)
                                     (when-not fail-on-existing?
                                       (or external-login username)))))))
