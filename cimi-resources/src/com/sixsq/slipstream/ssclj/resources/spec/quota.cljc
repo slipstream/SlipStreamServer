@@ -15,15 +15,12 @@
     (catch Throwable _ false)))
 
 
-(s/def :cimi.quota/resource ::cimi-core/nonblank-string)
-(s/def :cimi.quota/selection (s/and string? valid-cimi-filter?))
-(s/def :cimi.quota/aggregation ::cimi-core/nonblank-string)
-(s/def :cimi.quota/limit pos-int?)
+(s/def ::resource ::cimi-core/nonblank-string)
+(s/def ::selection (s/and string? valid-cimi-filter?))
+(s/def ::aggregation ::cimi-core/nonblank-string)
+(s/def ::limit pos-int?)
 
 
-(s/def :cimi/quota
+(s/def ::quota
   (su/only-keys-maps c/common-attrs
-                     {:req-un [:cimi.quota/resource
-                               :cimi.quota/selection
-                               :cimi.quota/aggregation
-                               :cimi.quota/limit]}))
+                     {:req-un [::resource ::selection ::aggregation ::limit]}))

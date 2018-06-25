@@ -70,7 +70,7 @@
                      (ltu/body->edn)
                      (ltu/is-status 200))
             desc-body (get-in desc [:response :body])]
-        (println desc-body)
+
         (is (nil? (get ops (c/action-uri :add))))
         (is (get ops (c/action-uri :edit)))
         (is (get ops (c/action-uri :delete)))

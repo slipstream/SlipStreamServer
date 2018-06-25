@@ -1,8 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.service-benchmark-test
   (:require
     [clojure.spec.alpha :as s]
-    [clojure.test :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.service-benchmark :as sb]))
+    [clojure.test :refer [are deftest]]
+    [com.sixsq.slipstream.ssclj.resources.service-benchmark :as sb-resource]
+    [com.sixsq.slipstream.ssclj.resources.spec.service-benchmark :as sb]))
 
 (def valid-acl {:owner {:principal "ADMIN"
                         :type      "ROLE"}
@@ -12,8 +13,8 @@
 
 (def timestamp "1964-08-25T10:00:00.0Z")
 
-(def service-bmk {:id            (str sb/resource-url "/uuid")
-                  :resourceURI   sb/resource-uri
+(def service-bmk {:id            (str sb-resource/resource-url "/uuid")
+                  :resourceURI   sb-resource/resource-uri
                   :created       timestamp
                   :updated       timestamp
                   :acl           valid-acl
@@ -41,7 +42,7 @@
 
 (deftest check-ServiceInfo
 
-  (are [expect-fn arg] (expect-fn (s/valid? :cimi/service-benchmark arg))
+  (are [expect-fn arg] (expect-fn (s/valid? ::sb/service-benchmark arg))
                        true? service-bmk
                        false? (dissoc service-bmk :created)
                        false? (dissoc service-bmk :updated)

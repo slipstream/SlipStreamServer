@@ -9,10 +9,10 @@
 (def prefix-regex #"^[a-z]([a-z0-9-]*[a-z0-9])?$")
 
 
-(s/def :cimi.service-attribute-namespace/prefix (s/and string? #(re-matches prefix-regex %)))
+(s/def ::prefix (s/and string? #(re-matches prefix-regex %)))
 
 
-(s/def :cimi/service-attribute-namespace
+(s/def ::service-attribute-namespace
   (su/only-keys-maps c/common-attrs
-                     {:req-un [:cimi.service-attribute-namespace/prefix
+                     {:req-un [::prefix
                                ::cimi-core/uri]}))

@@ -3,7 +3,7 @@
     [clojure.spec.alpha :as s]
     [clojure.test :refer :all]
     [com.sixsq.slipstream.ssclj.resources.metering :as m]
-    [com.sixsq.slipstream.ssclj.resources.spec.metering :as t]
+    [com.sixsq.slipstream.ssclj.resources.spec.metering :as metering]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 (def valid-acl {:owner {:principal "ADMIN",
@@ -49,15 +49,15 @@
                       :snapshot-time timestamp})
 
 (deftest test-schema-check
-  (are [expect-fn arg] (expect-fn (s/valid? :cimi/metering arg))
+  (are [expect-fn arg] (expect-fn (s/valid? ::metering/metering arg))
                        true? metering-sample
                        false? (assoc metering-sample :bad-attr {})
                        false? (assoc metering-sample :bad-attr "test"))
 
   ;; mandatory keywords
   (doseq [k #{:credentials :state :instanceID :snapshot-time}]
-    (is (not (s/valid? :cimi/metering (dissoc metering-sample k)))))
+    (is (not (s/valid? ::metering/metering (dissoc metering-sample k)))))
 
   ;; optional keywords
   (doseq [k #{:run :serviceOffer :ip}]
-    (is (s/valid? :cimi/metering (dissoc metering-sample k)))))
+    (is (s/valid? ::metering/metering (dissoc metering-sample k)))))

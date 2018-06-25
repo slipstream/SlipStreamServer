@@ -41,21 +41,3 @@
             redirect-url (format gu/github-oath-endpoint client-id callback-url)]
         [{:status 303, :headers {"Location" redirect-url}} nil])
       (gu/throw-bad-client-config user-template/registration-method redirectURI))))
-
-
-
-
-
-;;
-;; creates email validation callback after user is created
-;; logs and then ignores any exceptions when creating callback
-;;
-
-(defmethod p/post-user-add user-template/registration-method
-  [{:keys [id emailAddress] :as resource} {:keys [base-uri] :as request}]
-  (try
-    (-> id
-        (user-utils/create-user-email-callback base-uri)
-        (email-utils/send-validation-email emailAddress))
-    (catch Exception e
-      (log/error (str e)))))

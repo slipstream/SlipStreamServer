@@ -4,27 +4,26 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
-    [com.sixsq.slipstream.ssclj.resources.spec.external-object]
+    [com.sixsq.slipstream.ssclj.resources.spec.external-object :as eo]
     [com.sixsq.slipstream.ssclj.resources.spec.external-object-report :as eor]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 
 (def template-resource-keys-spec
-  (u/remove-req eor/external-object-report-keys-spec #{:cimi.external-object/state
-                                                       :cimi.external-object/objectName
-                                                       :cimi.external-object/bucketName
-                                                       :cimi.external-object/objectStoreCred}))
+  (u/remove-req eor/external-object-report-keys-spec #{::eo/state
+                                                       ::eo/objectName
+                                                       ::eo/bucketName
+                                                       ::eo/objectStoreCred}))
 
-(s/def :cimi.external-object-template.report/filename ::cimi-core/nonblank-string)
+(s/def ::filename ::cimi-core/nonblank-string)
 
 ;; Defines the contents of the generic template used in a create resource.
 ;; NOTE: The name must match the key defined by the resource, :externalObjectTemplate here.
-(s/def :cimi.external-object-template.report/externalObjectTemplate
+(s/def ::externalObjectTemplate
   (su/only-keys-maps c/template-attrs
                      template-resource-keys-spec
-                     {:req-un [:cimi.external-object-template.report/filename]}))
+                     {:req-un [::filename]}))
 
-(s/def :cimi/external-object-template.report-create
+(s/def ::external-object-create
   (su/only-keys-maps c/create-attrs
-                     {:req-un [:cimi.external-object-template.report/externalObjectTemplate]}))
-
+                     {:req-un [::externalObjectTemplate]}))

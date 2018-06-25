@@ -2,10 +2,8 @@
   (:require
     [clojure.spec.alpha :as s]
     [clojure.test :refer :all]
-
-    [com.sixsq.slipstream.ssclj.resources.spec.virtual-machine :as t]
-    [com.sixsq.slipstream.ssclj.resources.virtual-machine :as vm]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]))
+    [com.sixsq.slipstream.ssclj.resources.spec.virtual-machine :as vm]
+    [com.sixsq.slipstream.ssclj.resources.virtual-machine :as vm-resource]))
 
 (def valid-acl {:owner {:principal "ADMIN",
                         :type      "ROLE"},
@@ -23,8 +21,8 @@
                          :right     "VIEW"}]})
 
 (def timestamp "1964-08-25T10:00:00.0Z")
-(def vm-sample {:id           (str vm/resource-url "/uuid")
-                :resourceURI  vm/resource-uri
+(def vm-sample {:id           (str vm-resource/resource-url "/uuid")
+                :resourceURI  vm-resource/resource-uri
                 :created      timestamp
                 :updated      timestamp
                 :acl          valid-acl
@@ -46,7 +44,7 @@
                                :resource:instanceType "Large"}})
 
 (deftest test-schema-check
-  (are [expect-fn arg] (expect-fn (s/valid? :cimi/virtual-machine arg))
+  (are [expect-fn arg] (expect-fn (s/valid? ::vm/virtual-machine arg))
                        true? vm-sample
                        false? (assoc vm-sample :bad-attr {})
                        false? (assoc vm-sample :bad-attr "test")
@@ -58,8 +56,8 @@
 
   ;; mandatory keywords
   (doseq [k #{:credentials :state :instanceID :connector}]
-    (is (not (s/valid? :cimi/virtual-machine (dissoc vm-sample k)))))
+    (is (not (s/valid? ::vm/virtual-machine (dissoc vm-sample k)))))
 
   ;; optional keywords
   (doseq [k #{:deployment :serviceOffer :ip}]
-    (is (s/valid? :cimi/virtual-machine (dissoc vm-sample k)))))
+    (is (s/valid? ::vm/virtual-machine (dissoc vm-sample k)))))

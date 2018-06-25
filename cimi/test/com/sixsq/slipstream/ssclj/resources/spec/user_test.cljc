@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.user-test
   (:require
-    [clojure.spec.alpha :as s]
     [clojure.test :refer [deftest is]]
+    [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]
     [com.sixsq.slipstream.ssclj.resources.spec.user]
     [com.sixsq.slipstream.ssclj.resources.user :refer :all]))
 
@@ -44,13 +44,15 @@
              :externalIdentity ["github:aGithubLogin"]
              :name             "me@example.com"}]
 
-    (is (s/valid? :cimi/user cfg))
-    (is (s/valid? :cimi/user (assoc cfg :externalIdentity nil)))
-    (is (s/valid? :cimi/user (update cfg :externalIdentity conj "oidc:aOidcLogin")))
-    (is (not (s/valid? :cimi/user (assoc cfg :unknown "value"))))
+    (stu/is-valid :cimi/user cfg)
+    (stu/is-valid :cimi/user (assoc cfg :externalIdentity nil))
+    (stu/is-valid :cimi/user (update cfg :externalIdentity conj "oidc:aOidcLogin"))
+    (stu/is-invalid :cimi/user (assoc cfg :unknown "value"))
+
     (doseq [attr #{:id :resourceURI :created :updated :acl :username :emailAddress}]
-      (is (not (s/valid? :cimi/user (dissoc cfg attr)))))
+      (stu/is-invalid :cimi/user (dissoc cfg attr)))
+
     (doseq [attr #{:firstName :lastName :organization :method :href :password
                    :roles :isSuperUser :state :deleted :creation :lastOnline
                    :lastExecute :activeSince :githublogin :cyclonelogin :externalIdentity :name}]
-      (is (s/valid? :cimi/user (dissoc cfg attr))))))
+      (stu/is-valid :cimi/user (dissoc cfg attr)))))

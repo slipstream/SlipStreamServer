@@ -7,7 +7,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.service-attribute-namespace :as sn]
     [com.sixsq.slipstream.ssclj.resources.service-catalog.utils :as sc]
-    [com.sixsq.slipstream.ssclj.resources.spec.service-benchmark]
+    [com.sixsq.slipstream.ssclj.resources.spec.service-benchmark :as sb]
     [superstring.core :as str]))
 
 
@@ -45,7 +45,7 @@
       (sc/throw-wrong-namespace))))
 
 ;
-(def validate-fn (u/create-spec-validation-fn :cimi/service-benchmark))
+(def validate-fn (u/create-spec-validation-fn ::sb/service-benchmark))
 (defmethod crud/validate resource-uri
   [resource]
   (-> resource
@@ -92,4 +92,4 @@
 ;;
 (defn initialize
   []
-  (std-crud/initialize resource-url :cimi/service-benchmark))
+  (std-crud/initialize resource-url ::sb/service-benchmark))
