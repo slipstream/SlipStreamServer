@@ -3,8 +3,11 @@
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
-    [com.sixsq.slipstream.ssclj.resources.spec.virtual-machine :as vm]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
+
+(def module-href-regex #"^module/[a-z0-9]+(-[a-z0-9]+)*$")
+(s/def ::href (s/and string? #(re-matches module-href-regex %)))
+(s/def ::parent (s/keys :req-un [::href]))
 
 (s/def ::cpu pos-int?)
 (s/def ::ram pos-int?)
@@ -42,7 +45,7 @@
 
 
 (def module-component-keys-spec (su/merge-keys-specs [c/common-attrs
-                                                      {:req-un [::networkType ::outputParameters]
+                                                      {:req-un [::parent ::networkType ::outputParameters]
                                                        :opt-un [::inputParameters ::cpu ::ram ::disk ::volatileDisk ::targets]}]))
 
 (s/def ::module-component (su/only-keys-maps module-component-keys-spec))

@@ -33,6 +33,8 @@
                   :updated          timestamp
                   :acl              valid-acl
 
+                  :parent           {:href "module/my-parent-module"}
+
                   :cpu              2
                   :ram              2048
                   :disk             100
