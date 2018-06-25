@@ -172,7 +172,7 @@
                                :isSuperUser  false
                                :state        (or state "ACTIVE")}
                               authn-method (assoc
-                                             :externalIdentity [(str (or instance (name authn-method))":" (or external-login authn-login))]
+                                             :externalIdentity [(str (or instance (name authn-method)) ":" (or external-login authn-login))]
                                              :name email)
                               firstname (assoc :firstName firstname)
                               lastname (assoc :lastName lastname)
@@ -212,12 +212,29 @@
    must be provided. NOTE: The 'authn-login' value may be modified to avoid
    collisions with existing users. The value used to create the account is
    returned."
-  ([{:keys [authn-login fail-on-existing?] :as user-record}]
+  ([{:keys [authn-login authn-method fail-on-existing?] :as user-record}]
    (if ((existing-user-names) authn-login)
      (when (not fail-on-existing?)
        authn-login)
      (do
+
+
+       ;; create user, will always use direct method as all fields are available
        (crud/add (user-create-request user-record))
+
+       ;; reset the method to the one actually used
+       (let [user (crud/retrieve-by-id-as-admin (str "user/" authn-login))]
+         (crud/edit {:identity     {:current "internal"
+                                    :authentications
+                                             {"internal" {:roles #{"ADMIN"}, :identity "internal"}}}
+                     :sixsq.slipstream.authn/claims
+                                   {:username "internal", :roles "ADMIN"}
+                     :params       {:resource-name "user"}
+                     :route-params {:resource-name "user"}
+                     :user-roles   #{"ANON"}
+                     :body         (assoc user :method (name authn-method))}))
+
+       ;; return the user identifier
        authn-login)))
 
   ([authn-method authn-login email external-login]
