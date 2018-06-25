@@ -1,15 +1,17 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.session-template-internal-test
   (:require
-    [clojure.spec.alpha :as s]
     [clojure.test :refer [deftest is]]
     [com.sixsq.slipstream.ssclj.resources.session-template :as st]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-internal :as session-tpl]))
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-internal :as session-tpl]
+    [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]))
+
 
 (def valid-acl {:owner {:principal "ADMIN"
                         :type      "ROLE"}
                 :rules [{:type      "ROLE",
                          :principal "ADMIN",
                          :right     "ALL"}]})
+
 
 (deftest check-session-template-internal-schema
   (let [timestamp "1964-08-25T10:00:00.0Z"
@@ -27,8 +29,10 @@
              :username    "user"
              :password    "pass"}]
 
-    (is (s/valid? ::session-tpl/internal cfg))
+    (stu/is-valid ::session-tpl/internal cfg)
+
     (doseq [attr #{:id :resourceURI :created :updated :acl :method :instance :username :password}]
-      (is (not (s/valid? ::session-tpl/internal (dissoc cfg attr)))))
+      (stu/is-invalid ::session-tpl/internal (dissoc cfg attr)))
+
     (doseq [attr #{:group :redirectURI}]
-      (is (s/valid? ::session-tpl/internal (dissoc cfg attr))))))
+      (stu/is-valid ::session-tpl/internal (dissoc cfg attr)))))
