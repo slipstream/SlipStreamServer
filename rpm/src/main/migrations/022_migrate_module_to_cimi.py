@@ -19,7 +19,6 @@
 from __future__ import print_function
 
 import os
-# import sys
 import json
 import codecs
 import logging
@@ -27,7 +26,6 @@ import argparse
 
 from slipstream.api import Api
 from slipstream.api.api import _mod_url
-
 
 api_kb = Api('https://localhost', insecure=True)
 print(api_kb.login_internal('super', 'supeRsupeR'))
@@ -62,10 +60,6 @@ def parse_arguments():
     parser.add_argument('-v', '--verbose', dest='verbose_level',
                         help='Verbose level. Add more to get more details.',
                         action='count', default=0)
-
-    #    parser.add_argument('--source', dest='source', choices=['files', 'slipstream'],
-    #                        help='Where to take the source module(s). Default: slipstream'.format(default_endpoint),
-    #                        default='slipstream')
 
     parser.add_argument('path', nargs='*',
                         help='Path of a module on SlipStream or on the file system')
@@ -107,11 +101,23 @@ def get_api(config):
     return api
 
 
-def get_modules(config):
-    #    if config.source == 'file':
-    #        return get_modules_from_files(config)
-    #    else:
-    return get_modules_from_slipstream(config)
+def cimi_add(api, resource_type, element):
+    try:
+        return api.cimi_add(resource_type, element)
+    except Exception as e:
+        print('Failed to add "{}" to CIMI resource "{}": {}'.format(element.get('name'), resource_type, e))
+        print(element)
+        return None
+        # import code; code.interact(local=locals())
+
+
+def cimi_edit(api, id, element):
+    try:
+        return api.cimi_edit(id, element)
+    except Exception as e:
+        print('Failed to edit "{}" to CIMI resource "{}": {}'.format(element.get('name'), id, e))
+        return None
+        # import code; code.interact(local=locals())
 
 
 def get_modules_from_files(config):
@@ -178,7 +184,6 @@ def use_default_when_blank(value, default=None):
     return value
 
 
-
 def _get_modules_from_slipstream(api, paths, recurse=False, get_versions=False):
     for path in paths:
         try:
@@ -187,7 +192,7 @@ def _get_modules_from_slipstream(api, paths, recurse=False, get_versions=False):
             print('Failed to get module "{}": {}'.format(path, e))
             continue
 
-        if get_versions:
+        if get_versions and module['category'] != 'Project':
             # import code; code.interact(local=locals())
             module['versions'] = []
             versions = _get_list(_get_dict(api.get_module_versions(path).get('versionList', {})).get('item', []))
@@ -209,7 +214,7 @@ def _get_modules_from_slipstream(api, paths, recurse=False, get_versions=False):
                 children_paths = ['{}/{}'.format(path, child['name']) for child in children]
             except Exception as e:
                 print('Failed to get children of "{}": {}'.format(path, e))
-                import code;
+                import code
                 code.interact(local=locals())
                 raise
 
@@ -221,12 +226,8 @@ def get_module_path(module):
     return '{}/{}'.format(module.get('parentUri', ''), module['shortName'])
 
 
-def convert_module(module):
-    return module
-
-
-def kb_convert_module(module_type, module):
-    cimi_module = kb_get_cimi_module_common_attributes(module)
+def convert_module(module_type, module):
+    cimi_module = get_cimi_module_common_attributes(module, module_type)
     if module_type == 'IMAGE':
         cimi_module['content'] = image_attributes(module)
     elif module_type == 'COMPONENT':
@@ -255,13 +256,12 @@ def image_attributes(module):
              'os': convert_os(module.get('platform')),
              'loginUser': login_user}
     res_req, cloud_params, inputParams, outputParams = split_parameters(module)
-    print(cloud_params)
     if _to_int(res_req.get('cpu.nb')):
         image['cpu'] = _to_int(res_req.get('cpu.nb'))
     if _to_float(res_req.get('ram.GB')):
-        image['ram'] = _to_float(res_req.get('ram.GB'))
+        image['ram'] = _to_int(res_req.get('ram.GB'))
     if _to_float(res_req.get('disk.GB')):
-        image['disk'] = _to_float(res_req.get('disk.GB'))
+        image['disk'] = _to_int(res_req.get('disk.GB'))
     if _to_float(res_req.get('extra.disk.volatile')):
         image['volatileDisk'] = _to_float(res_req.get('extra.disk.volatile'))
     image['networkType'] = _to_str(res_req.get('network', 'public')).lower()
@@ -304,6 +304,7 @@ def component_attributes(module):
         component['outputParameters'] = outputParams
     return component
 
+
 def search_component_href(name):
     res = api_kb.cimi_search('modules', filter='path="{}"'.format(name))
     if res.count != 1:
@@ -326,58 +327,12 @@ def application_attributes(module):
     return {'nodes': nodes}
 
 
-# def convert_component(version):
-#     res_req, cloud_params, params = split_parameters(version)
-#     targets = get_targets_by_name(version)
-#     packages = get_packages(version)
-#
-#     return {
-#         'native': version.get('isBase'),
-#         'parent_component': version.get('parentUri'),
-#         'cloud_image_ids': get_cloud_image_ids(version),
-#         'operating_system': {
-#             'platform': version.get('platform'),
-#             'username': version.get('loginUser')
-#         },
-#         'resources_requirements': {
-#             'cpu': _to_int(res_req.get('cpu.nb')),
-#             'ram': _to_float(res_req.get('ram.GB')),
-#             'disk': _to_float(res_req.get('disk.GB')),
-#             'extra_disk': _to_float(res_req.get('extra.disk.volatile')),
-#             'network': _to_str(res_req.get('network', 'Public'))
-#         },
-#         'cloud_parameters': cloud_params,
-#         'parameters': params,
-#         'workflow': {
-#             'prerecipe': version.get('prerecipe'),
-#             'packages': packages,
-#             'recipe': version.get('recipe'),
-#             'execute': targets.get('execute'),
-#             'report': targets.get('report'),
-#             'onvmadd': targets.get('onvmadd'),
-#             'onvmremove': targets.get('onvmremove'),
-#             'prescale': targets.get('prescale'),
-#             'postscale': targets.get('postscale')
-#         }
-#     }
-
-
-# def convert_application(module):
-#     pass
-
-
 def convert_date(date):
     d = date.split(' ')
     return '{}T{}Z'.format(d[0], d[1])
 
 
-def category_to_type(category):
-    return {'Project': 'project',
-            'Image': 'component',
-            'Deployment': 'application'}.get(category)
-
-
-def kb_category_to_type(module):
+def category_to_type(module):
     category = module['category']
     if "Image" == category:
         if module.get('isBase', False):
@@ -418,46 +373,23 @@ def get_path(module):
     return parent + '/' + name if parent else name
 
 
-def get_cimi_module_common_attributes(module):
-    name = module['shortName']
-    parent = module['parentUri'][7:]
-
-    return {'name': name,
-            'path': get_path(module),
-            'parent': parent,
-            'description': module.get('description', ''),
-            'logo': module.get('logoLink'),
-            'type': category_to_type(module['category']),
-            'created': convert_date(module['creation']),
-            'updated': convert_date(module['lastModified']),
-            'acl': get_cimi_acl(module)}
-
-
-def kb_get_cimi_module_common_attributes(module):
+def get_cimi_module_common_attributes(module, module_type):
     return {'name': module['shortName'],
             'path': get_path(module),
             'description': module.get('description', ''),
             'logo': {'href': 'external-object/logo'.format(module.get('logoLink'))},
-            'type': kb_category_to_type(module),
+            'type': module_type,
             'created': convert_date(module['creation']),
             'updated': convert_date(module['lastModified']),
             'acl': get_cimi_acl(module)}
-
-
-def get_cimi_module(module, versions_hrefs):
-    cimi_module = get_cimi_module_common_attributes(module)
-    cimi_module.update(
-        {'versions': versions_hrefs}
-    )
-    return cimi_module
 
 
 def get_cloud_image_ids(version):
     ids = _get_list(_get_dict(version.get('cloudImageIdentifiers', {})).get('cloudImageIdentifier', []))
 
     if ids:
-        print(ids)
-        return {i['cloudServiceName']: _to_str(i['cloudImageIdentifier']) for i in ids if _to_str(i['cloudImageIdentifier']).strip()}
+        return {i['cloudServiceName']: _to_str(i['cloudImageIdentifier']) for i in ids if
+                _to_str(i['cloudImageIdentifier']).strip()}
     return {}
 
 
@@ -514,43 +446,6 @@ def get_packages(version):
     return [p['name'] for p in packages]
 
 
-# def get_cimi_version_for_component(version):
-#     res_req, cloud_params, params = split_parameters(version)
-#     targets = get_targets_by_name(version)
-#     packages = get_packages(version)
-#
-#     return {
-#         'native': version.get('isBase'),
-#         'parent_component': version.get('parentUri'),
-#         'cloud_image_ids': get_cloud_image_ids(version),
-#         'operating_system': {
-#             'platform': version.get('platform'),
-#             'username': version.get('loginUser')
-#         },
-#         'resources_requirements': {
-#             'cpu': _to_int(res_req.get('cpu.nb')),
-#             'ram': _to_float(res_req.get('ram.GB')),
-#             'disk': _to_float(res_req.get('disk.GB')),
-#             'extra_disk': _to_float(res_req.get('extra.disk.volatile')),
-#             'network': _to_str(res_req.get('network', 'Public'))
-#         },
-#         'cloud_parameters': cloud_params,
-#         'parameters': params,
-#         'workflow': {
-#             'prerecipe': version.get('prerecipe'),
-#             'packages': packages,
-#             'recipe': version.get('recipe'),
-#             'execute': targets.get('execute'),
-#             'report': targets.get('report'),
-#             'onvmadd': targets.get('onvmadd'),
-#             'onvmremove': targets.get('onvmremove'),
-#             'prescale': targets.get('prescale'),
-#             'postscale': targets.get('postscale')
-#         }
-#
-#     }
-
-
 def get_mappings(node):
     cimi_mappings = {}
     mappings = _get_list(_get_dict(node.get('parameterMappings', {})).get('entry', []))
@@ -566,95 +461,36 @@ def get_mappings(node):
     return cimi_mappings
 
 
-# def get_cimi_version_for_application(version):
-#     cimi_nodes = []
-#     nodes = _get_list(_get_dict(version.get('nodes', {})).get('entry', []))
-#
-#     for n in nodes:
-#         node = n['node']
-#         cimi_nodes.append({
-#             'name': node['name'],
-#             'component': {'href': node['imageUri'][7:]},
-#             'cloud': {'href': node.get('cloudService')},
-#             'multiplicity': _to_int(node.get('multiplicity')),
-#             'max_provisioning_failures': _to_int(node.get('maxProvisioningFailures')),
-#             'mappings': get_mappings(node)
-#         })
-#
-#     return {
-#         'nodes': cimi_nodes
-#     }
+def upload_module(module, module_type):
+    versions = sorted(module.get('versions', []), key=lambda k: k['version'])
+    first = True
+
+    id = None
+
+    for version in versions:
+        cimi_module = convert_module(module_type, version)
+        if first:
+            cimi_resp = cimi_add(api_kb, 'modules', cimi_module)
+            id = cimi_resp.json['resource-id']
+            first = False
+        else:
+            cimi_edit(api_kb, id, cimi_module)
+
+    if len(versions) == 0:
+        print('No version for module "{}". Skipping'.format(get_path(module)))
 
 
-# def get_cimi_version_for_type(version_type, version):
-#     if version_type == 'component':
-#         return get_cimi_version_for_component(version)
-#     elif version_type == 'application':
-#         return get_cimi_version_for_application(version)
-#     return {}
-
-
-# def get_cimi_version(version):
-#     cimi_version = get_cimi_module_common_attributes(version)
-#
-#     commit = version.get('commit', {})
-#     cimi_version.update(
-#         {'commit': {
-#             'author': commit.get('author'),
-#             'message': commit.get('comment')
-#         }}
-#
-#     )
-#
-#     cimi_version.update(get_cimi_version_for_type(cimi_version['type'], version))
-#
-#     return cimi_version
-
-
-def cimi_add(api, resource_type, element):
-    try:
-        return api.cimi_add(resource_type, element)
-    except Exception as e:
-        print('Failed to upload "{}" to CIMI resource "{}": {}'.format(element.get('name'), resource_type, e))
-        return None
-        # import code; code.interact(local=locals())
-
-
-# def upload_module(api, module):  # FIXME take into account versions
-#     versions_hrefs = []
-#
-#     for version in module['versions']:
-#         cimi_resp = cimi_add(api, 'versions', get_cimi_version(version))
-#         if cimi_resp is not None:
-#             version_href = {'href': cimi_resp.json['resource-id']}
-#             versions_hrefs.append(version_href)
-#
-#     if versions_hrefs:
-#         print("cimi_add modules: {}".format(versions_hrefs))
-#         cimi_add(api, 'modules', get_cimi_module(module, versions_hrefs))
-#     else:
-#         print('No version for module "{}". Skipping'.format(get_path(module)))
-
-
-def convert_and_upload_modules(config, modules, type):
-    if type == 'APPLICATION':
-        print('youpi')
-
-    api = get_api(config)
-
-    from pprint import pprint
+def convert_and_upload_modules(modules, only_type):
 
     for module in modules:
         print('{} with {} versions'.format(get_module_path(module), len(module.get('versions', []))))
-        module_type = kb_category_to_type(module)
+        module_type = category_to_type(module)
 
         print(module_type)
-        if not module_type or module_type != type:
+        if not module_type or module_type != only_type:
             continue
 
-        cimi_module = kb_convert_module(module_type, module)
-        pprint(cimi_module)
-        print(api_kb.cimi_add('modules', cimi_module))
+        upload_module(module, module_type)
 
 
 def main():
@@ -665,10 +501,10 @@ def main():
     requests_log.propagate = True
 
     config = parse_arguments()
-    modules = get_modules(config)
-    #convert_and_upload_modules(config, modules, 'IMAGE')
-    #convert_and_upload_modules(config, modules, 'COMPONENT')
-    convert_and_upload_modules(config, modules, 'APPLICATION')
+    modules = list(get_modules_from_slipstream(config))
+    convert_and_upload_modules(modules, 'IMAGE')
+    convert_and_upload_modules(modules, 'COMPONENT')
+    convert_and_upload_modules(modules, 'APPLICATION')
 
 
 if __name__ == '__main__':
