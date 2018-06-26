@@ -263,7 +263,7 @@ def image_attributes(module):
     if _to_float(res_req.get('disk.GB')):
         image['disk'] = _to_int(res_req.get('disk.GB'))
     if _to_float(res_req.get('extra.disk.volatile')):
-        image['volatileDisk'] = _to_float(res_req.get('extra.disk.volatile'))
+        image['volatileDisk'] = _to_int(res_req.get('extra.disk.volatile'))
     image['networkType'] = _to_str(res_req.get('network', 'public')).lower()
     return image
 
@@ -276,11 +276,11 @@ def component_attributes(module):
     if _to_int(res_req.get('cpu.nb')):
         component['cpu'] = _to_int(res_req.get('cpu.nb'))
     if _to_float(res_req.get('ram.GB')):
-        component['ram'] = _to_float(res_req.get('ram.GB'))
+        component['ram'] = _to_int(res_req.get('ram.GB'))
     if _to_float(res_req.get('disk.GB')):
-        component['disk'] = _to_float(res_req.get('disk.GB'))
+        component['disk'] = _to_int(res_req.get('disk.GB'))
     if _to_float(res_req.get('extra.disk.volatile')):
-        component['volatileDisk'] = _to_float(res_req.get('extra.disk.volatile'))
+        component['volatileDisk'] = _to_int(res_req.get('extra.disk.volatile'))
     component['networkType'] = _to_str(res_req.get('network', 'public')).lower()
     if module.get('prerecipe'):
         component.setdefault('targets', {}).update({'preinstall': module.get('prerecipe')})
