@@ -6,7 +6,15 @@
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 
-(s/def ::path (s/and string? #(re-matches #"^[a-zA-Z][\w\.-]*(/[a-zA-Z][\w\.-]*)*$" %)))
+(def ^:const path-regex #"^[a-zA-Z][\w\.-]*(/[a-zA-Z][\w\.-]*)*$")
+
+(defn path? [v] (re-matches path-regex v))
+
+(defn parent-path? [v] (or (= "" v) (re-matches path-regex v)))
+
+(s/def ::path (s/and string? path?))
+
+(s/def ::parentPath (s/and string? parent-path?))
 
 (s/def ::type #{"IMAGE" "COMPONENT" "APPLICATION"})
 
@@ -16,7 +24,7 @@
 
 
 (def module-keys-spec (su/merge-keys-specs [c/common-attrs
-                                            {:req-un [::path ::type ::versions]
+                                            {:req-un [::path ::parentPath ::type ::versions]
                                              :opt-un [::logo]}]))
 
 (s/def ::module (su/only-keys-maps module-keys-spec))

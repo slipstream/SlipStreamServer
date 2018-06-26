@@ -33,6 +33,7 @@
                   :created     timestamp
                   :updated     timestamp
                   :acl         valid-acl
+                  :parentPath  "a/b"
                   :path        "a/b/c"
                   :type        "IMAGE"
                   :versions    [{:href "module-image/xyz"}

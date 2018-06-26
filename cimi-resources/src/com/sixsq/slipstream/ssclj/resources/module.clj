@@ -7,6 +7,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.module.utils :as module-utils]
     [com.sixsq.slipstream.ssclj.resources.module-application :as module-application]
     [com.sixsq.slipstream.ssclj.resources.module-component :as module-component]
     [com.sixsq.slipstream.ssclj.resources.module-image :as module-image]
@@ -53,12 +55,6 @@
 ;; CRUD operations
 ;;
 
-(defn split-resource
-  [{:keys [content] :as body}]
-  (let [module-meta (dissoc body :content)]
-    [module-meta content]))
-
-
 (defn type->resource-name
   [type]
   (case type
@@ -80,11 +76,12 @@
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
   (a/can-modify? {:acl collection-acl} request)
-  (let [[{:keys [type] :as module-meta} module-content] (-> body u/strip-service-attrs split-resource)
+  (let [[{:keys [type] :as module-meta} module-content] (-> body u/strip-service-attrs module-utils/split-resource)
         content-url (type->resource-name type)
         content-uri (type->resource-uri type)
 
         content-body (merge module-content {:resourceURI content-uri})
+
         content-request {:params   {:resource-name content-url}
                          :identity std-crud/internal-identity
                          :body     content-body}
@@ -92,7 +89,8 @@
         response (crud/add content-request)
 
         content-id (-> response :body :resource-id)
-        module-meta (assoc module-meta :versions [{:href content-id}])]
+        module-meta (-> (assoc module-meta :versions [{:href content-id}])
+                        module-utils/set-parent-path)]
 
     (db/add
       resource-name
@@ -124,6 +122,7 @@
     (-> versions (nth index) :href)
     (->> versions (remove nil?) last :href)))
 
+
 (defmethod crud/retrieve resource-name
   [{{uuid :uuid} :params :as request}]
   (try
@@ -150,7 +149,7 @@
   [{:keys [body] :as request}]
   (try
     (let [id (str resource-url "/" (-> request :params :uuid))
-          [module-meta module-content] (-> body u/strip-service-attrs split-resource)
+          [module-meta module-content] (-> body u/strip-service-attrs module-utils/split-resource)
           {:keys [type versions acl]} (crud/retrieve-by-id-as-admin id)
 
           _ (a/can-modify? {:acl acl} request)
@@ -159,6 +158,7 @@
           content-uri (type->resource-uri type)
 
           content-body (merge module-content {:resourceURI content-uri})
+
           content-request {:params   {:resource-name content-url}
                            :identity std-crud/internal-identity
                            :body     content-body}
@@ -168,8 +168,9 @@
           content-id (-> response :body :resource-id)
 
           versions (conj versions {:href content-id})
-          module-meta (assoc module-meta :versions versions
-                                         :type type)]
+          module-meta (-> (assoc module-meta :versions versions
+                                             :type type)
+                          module-utils/set-parent-path)]
 
       (edit-impl (assoc request :body module-meta)))
     (catch Exception e
@@ -206,7 +207,7 @@
         updated-versions (remove-version versions version-index)
         module-meta (assoc module-meta :versions updated-versions)
         {:keys [status]} (edit-impl (assoc request :request-method :put
-                                  :body module-meta))]
+                                                   :body module-meta))]
     (when (not= status 200)
       (throw (r/ex-response "A failure happened during delete module item" 500)))
 
