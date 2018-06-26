@@ -5,9 +5,19 @@
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
-(def module-href-regex #"^module/[a-z0-9]+(-[a-z0-9]+)*$")
+
+;; module links used for components and applications
+(def ^:const module-href-regex #"^module/[a-z0-9]+(-[a-z0-9]+)*$")
 (s/def ::href (s/and string? #(re-matches module-href-regex %)))
-(s/def ::parent (s/keys :req-un [::href]))
+(s/def ::module-link (s/keys :req-un [::href]))
+
+
+;; parameter keywords are used in components and application parameter mappings
+(def ^:const parameter-name-regex #"^[a-zA-Z0-9]+([_\.-][a-zA-Z0-9]+)*$")
+(s/def ::parameter-keyword (s/and keyword? #(re-matches parameter-name-regex (name %))))
+
+
+(s/def ::parent ::module-link)
 
 (s/def ::cpu pos-int?)
 (s/def ::ram pos-int?)
@@ -15,14 +25,14 @@
 (s/def ::volatileDisk pos-int?)
 (s/def ::networkType #{"public" "private"})
 
-(s/def ::name (s/and keyword? #(re-matches #"^[a-zA-Z0-9]+([_\.-][a-zA-Z0-9]+)*$" (name %))))
 (s/def ::description ::cimi-core/nonblank-string)
 (s/def ::value ::cimi-core/nonblank-string)
 
-(s/def ::parameterMap (su/only-keys :opt-un [::description ::value]))
+(s/def ::parameterValue (su/only-keys :opt-un [::description ::value]))
+(s/def ::parameterMap (s/map-of ::parameter-keyword ::parameterValue))
 
-(s/def ::inputParameters (s/map-of ::name ::parameterMap))
-(s/def ::outputParameters (s/map-of ::name ::parameterMap))
+(s/def ::inputParameters ::parameterMap)
+(s/def ::outputParameters ::parameterMap)
 
 (s/def ::target ::cimi-core/nonblank-string)
 (s/def ::package-list (s/coll-of ::cimi-core/nonblank-string :min-count 1 :kind vector?))

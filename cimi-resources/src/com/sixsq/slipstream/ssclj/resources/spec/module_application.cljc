@@ -2,6 +2,7 @@
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
+    [com.sixsq.slipstream.ssclj.resources.spec.module-component :as module-component]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 
@@ -10,18 +11,14 @@
 (s/def ::multiplicity nat-int?)
 (s/def ::maxProvisioningFailures nat-int?)
 
-(def module-href-regex #"^module/[a-z0-9]+(-[a-z0-9]+)*$")
-(s/def ::href (s/and string? #(re-matches module-href-regex %)))
-(s/def ::component (s/keys :req-un [::href]))
-
-(s/def ::parameter-name (s/and keyword? #(re-matches #"^[a-z0-9]+([\.-][a-z0-9]+)*$" (name %))))
+(s/def ::component ::module-component/module-link)
 
 (s/def ::mapped boolean?)
 (s/def ::value string?)
 
 (s/def ::parameterMapping (su/only-keys :req-un [::mapped ::value]))
 
-(s/def ::parameterMappings (s/map-of ::parameter-name ::parameterMapping))
+(s/def ::parameterMappings (s/map-of ::module-component/parameter-keyword ::parameterMapping))
 
 (s/def ::node (su/only-keys :req-un [::multiplicity ::component]
                             :opt-un [::maxProvisioningFailures

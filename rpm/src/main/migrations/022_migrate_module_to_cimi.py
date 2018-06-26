@@ -307,8 +307,11 @@ def component_attributes(module):
 
 def search_component_href(name):
     res = api_kb.cimi_search('modules', filter='path="{}"'.format(name))
-    if res.count != 1:
-        raise Exception('Something wrong with module reference: {}'.format(name))
+    if res.count == 0:
+        raise Exception('Module reference not found: {}'.format(name))
+    elif res.count > 1:
+        print('warning: multiple module references found: {}'.format(name))
+        return res.resources_list[0].id
     else:
         return res.resources_list[0].id
 
