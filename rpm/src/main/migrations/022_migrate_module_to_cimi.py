@@ -27,8 +27,8 @@ import argparse
 from slipstream.api import Api
 from slipstream.api.api import _mod_url
 
-api_kb = Api('https://localhost', insecure=True)
-print(api_kb.login_internal('super', 'supeRsupeR'))
+api_kb = Api('https://185.19.29.154', insecure=True)
+print(api_kb.login_internal('super', 'de268cf32f6b'))
 
 default_endpoint = os.environ.get('SLIPSTREAM_ENDPOINT') or 'https://nuv.la'
 
@@ -344,6 +344,8 @@ def category_to_type(module):
             return "COMPONENT"
     elif "Deployment" == category:
         return "APPLICATION"
+    elif "Project" == category:
+        return  "PROJECT"
     else:
         return None
 
@@ -504,7 +506,8 @@ def main():
     requests_log.propagate = True
 
     config = parse_arguments()
-    modules = list(get_modules_from_slipstream(config))
+    modules = get_modules_from_slipstream(config)
+    convert_and_upload_modules(modules, 'PROJECT')
     convert_and_upload_modules(modules, 'IMAGE')
     convert_and_upload_modules(modules, 'COMPONENT')
     convert_and_upload_modules(modules, 'APPLICATION')

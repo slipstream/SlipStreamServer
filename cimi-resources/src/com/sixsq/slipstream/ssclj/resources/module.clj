@@ -76,32 +76,45 @@
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
   (a/can-modify? {:acl collection-acl} request)
-  (let [[{:keys [type] :as module-meta} module-content] (-> body u/strip-service-attrs module-utils/split-resource)
-        content-url (type->resource-name type)
-        content-uri (type->resource-uri type)
+  (let [[{:keys [type] :as module-meta} module-content] (-> body u/strip-service-attrs module-utils/split-resource)]
+    (if (= "PROJECT" type)
+      (let [module-meta (module-utils/set-parent-path module-meta)]
 
-        content-body (merge module-content {:resourceURI content-uri})
+        (db/add
+          resource-name
+          (-> module-meta
+              u/strip-service-attrs
+              (crud/new-identifier resource-name)
+              (assoc :resourceURI resource-uri)
+              u/update-timestamps
+              (crud/add-acl request)
+              crud/validate)
+          {}))
+      (let [content-url (type->resource-name type)
+            content-uri (type->resource-uri type)
 
-        content-request {:params   {:resource-name content-url}
-                         :identity std-crud/internal-identity
-                         :body     content-body}
+            content-body (merge module-content {:resourceURI content-uri})
 
-        response (crud/add content-request)
+            content-request {:params   {:resource-name content-url}
+                             :identity std-crud/internal-identity
+                             :body     content-body}
 
-        content-id (-> response :body :resource-id)
-        module-meta (-> (assoc module-meta :versions [{:href content-id}])
-                        module-utils/set-parent-path)]
+            response (crud/add content-request)
 
-    (db/add
-      resource-name
-      (-> module-meta
-          u/strip-service-attrs
-          (crud/new-identifier resource-name)
-          (assoc :resourceURI resource-uri)
-          u/update-timestamps
-          (crud/add-acl request)
-          crud/validate)
-      {})))
+            content-id (-> response :body :resource-id)
+            module-meta (-> (assoc module-meta :versions [{:href content-id}])
+                            module-utils/set-parent-path)]
+
+        (db/add
+          resource-name
+          (-> module-meta
+              u/strip-service-attrs
+              (crud/new-identifier resource-name)
+              (assoc :resourceURI resource-uri)
+              u/update-timestamps
+              (crud/add-acl request)
+              crud/validate)
+          {})))))
 
 (defn split-uuid
   [uuid]
