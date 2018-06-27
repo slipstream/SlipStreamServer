@@ -33,9 +33,9 @@
     (is (false? (s/valid? ::module/module (assoc root :type "BAD_VALUE"))))
 
     ;; required attributes
-    (doseq [k #{:id :resourceURI :created :updated :acl :path :type :versions}]
+    (doseq [k #{:id :resourceURI :created :updated :acl :path :type}]
       (is (false? (s/valid? ::module/module (dissoc root k)))))
 
     ;; optional attributes
-    (doseq [k #{:logo}]
+    (doseq [k #{:logo :versions}]
       (is (true? (s/valid? ::module/module (dissoc root k)))))))

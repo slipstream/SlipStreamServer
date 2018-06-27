@@ -16,15 +16,14 @@
 
 (s/def ::parentPath (s/and string? parent-path?))
 
-(s/def ::type #{"IMAGE" "COMPONENT" "APPLICATION"})
+(s/def ::type #{"PROJECT" "IMAGE" "COMPONENT" "APPLICATION"})
 
 (s/def ::versions (s/coll-of (s/nilable ::cimi-common/resource-link) :min-count 1))
 
 (s/def ::logo ::cimi-common/resource-link)
 
-
 (def module-keys-spec (su/merge-keys-specs [c/common-attrs
-                                            {:req-un [::path ::parentPath ::type ::versions]
-                                             :opt-un [::logo]}]))
+                                                      {:req-un [::path ::parentPath ::type]
+                                                       :opt-un [::logo ::versions]}]))
 
 (s/def ::module (su/only-keys-maps module-keys-spec))
