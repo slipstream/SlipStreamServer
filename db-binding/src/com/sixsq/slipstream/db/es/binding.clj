@@ -98,9 +98,11 @@
   (edit [_ {:keys [id] :as data} options]
     (let [[type docid] (cu/split-id id)
           updated-doc (prepare-data data)]
-      (if (esu/update client (escu/id->index id) type docid updated-doc)
+      (try
+        (esu/update client (escu/id->index id) type docid updated-doc)
         (response/json-response data)
-        (response/response-conflict id))))
+        (catch VersionConflictEngineException _
+          (response/response-conflict id)))))
 
 
   (query [_ collection-id options]
