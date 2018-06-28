@@ -170,20 +170,23 @@
 (defmethod crud/add resource-name
   [{:keys [body form-params headers] :as request}]
 
-  (let [idmap {:identity (:identity request)}
-        body (if (u/is-form? headers) (u/convert-form :sessionTemplate form-params) body)
-        desc-attrs (u/select-desc-keys body)
-        [cookie-header {:keys [id] :as body}] (-> body
-                                                  (assoc :resourceURI create-uri)
-                                                  (std-crud/resolve-hrefs idmap true)
-                                                  (update-in [:sessionTemplate] merge desc-attrs) ;; validate desc attrs
-                                                  (crud/validate)
-                                                  (:sessionTemplate)
-                                                  (tpl->session request))]
-    (-> request
-        (assoc :id id :body (merge body desc-attrs))
-        add-impl
-        (merge cookie-header))))
+  (try
+    (let [idmap {:identity (:identity request)}
+          body (if (u/is-form? headers) (u/convert-form :sessionTemplate form-params) body)
+          desc-attrs (u/select-desc-keys body)
+          [cookie-header {:keys [id] :as body}] (-> body
+                                                    (assoc :resourceURI create-uri)
+                                                    (std-crud/resolve-hrefs idmap true)
+                                                    (update-in [:sessionTemplate] merge desc-attrs) ;; validate desc attrs
+                                                    (crud/validate)
+                                                    (:sessionTemplate)
+                                                    (tpl->session request))]
+      (-> request
+          (assoc :id id :body (merge body desc-attrs))
+          add-impl
+          (merge cookie-header)))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 
