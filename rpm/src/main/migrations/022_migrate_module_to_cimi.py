@@ -18,17 +18,19 @@
 """
 from __future__ import print_function
 
-import os
-import json
-import codecs
-import logging
 import argparse
+import codecs
+import json
+import logging
+import os
 
 from slipstream.api import Api
 from slipstream.api.api import _mod_url
 
 api_kb = Api('https://185.19.29.154', insecure=True)
 print(api_kb.login_internal('super', 'de268cf32f6b'))
+
+mapping_old_version = {}
 
 default_endpoint = os.environ.get('SLIPSTREAM_ENDPOINT') or 'https://nuv.la'
 
@@ -129,8 +131,7 @@ def get_modules_from_files(config):
             yield module
 
 
-def get_modules_from_slipstream(config):
-    api = get_api(config)
+def get_modules_from_slipstream(api, config):
 
     paths = config.path if config.path else _get_root_modules(api)
 
@@ -226,14 +227,14 @@ def get_module_path(module):
     return '{}/{}'.format(module.get('parentUri', ''), module['shortName'])
 
 
-def convert_module(module_type, module):
+def convert_module(api, module_type, module):
     cimi_module = get_cimi_module_common_attributes(module, module_type)
     if module_type == 'IMAGE':
         cimi_module['content'] = image_attributes(module)
     elif module_type == 'COMPONENT':
         cimi_module['content'] = component_attributes(module)
     elif module_type == 'APPLICATION':
-        cimi_module['content'] = application_attributes(module)
+        cimi_module['content'] = application_attributes(api, module)
     return cimi_module
 
 
@@ -247,6 +248,26 @@ def convert_os(os):
             'ubuntu': 'Ubuntu',
             'windows': 'Windows',
             'other': 'Other'}.get(os.lower())
+
+
+def search_cimi_module(path):
+    return api_kb.cimi_search('modules', filter='path="{}"'.format(path))
+
+
+# def module_exist(path):
+#     return search_cimi_module(path).count > 0
+#
+#
+# def search_component_href(path):
+#     res = search_cimi_module(path)
+#     if res.count == 0:
+#         # TODO fetch module
+#         raise Exception('Module reference not found: {}'.format(path))
+#     elif res.count > 1:
+#         print('warning: multiple module references found: {}'.format(path))
+#         return res.resources_list[0].id
+#     else:
+#         return res.resources_list[0].id
 
 
 def image_attributes(module):
@@ -273,6 +294,8 @@ def component_attributes(module):
     targets = get_targets_by_name(module)
     packages = get_packages(module)
     component = {}
+    if module.get('moduleReferenceUri'):
+        component['parent'] = {'href': mapping_old_version[module.get('moduleReferenceUri')]}
     if _to_int(res_req.get('cpu.nb')):
         component['cpu'] = _to_int(res_req.get('cpu.nb'))
     if _to_float(res_req.get('ram.GB')):
@@ -305,21 +328,14 @@ def component_attributes(module):
     return component
 
 
-def search_component_href(name):
-    res = api_kb.cimi_search('modules', filter='path="{}"'.format(name))
-    if res.count == 0:
-        raise Exception('Module reference not found: {}'.format(name))
-    elif res.count > 1:
-        print('warning: multiple module references found: {}'.format(name))
-        return res.resources_list[0].id
-    else:
-        return res.resources_list[0].id
-
-
-def application_attributes(module):
+def application_attributes(api, module):
     nodes = {}
     for n in _get_list(_get_dict(module.get('nodes', {})).get('entry', [])):
-        node = {'component': {'href': search_component_href(n['node']['imageUri'][7:])},
+        node_component = n['node']['imageUri']
+        if not mapping_old_version.get(node_component):
+            component_module = api.get_module(node_component)
+            upload_module(api, component_module, category_to_type(component_module))
+        node = {'component': {'href': mapping_old_version[node_component]},
                 'multiplicity': _to_int(n['node'].get('multiplicity', 1))}
         if _to_int(n['node'].get('maxProvisioningFailures')):
             node['maxProvisioningFailures'] = _to_int(n['node'].get('maxProvisioningFailures'))
@@ -345,7 +361,7 @@ def category_to_type(module):
     elif "Deployment" == category:
         return "APPLICATION"
     elif "Project" == category:
-        return  "PROJECT"
+        return "PROJECT"
     else:
         return None
 
@@ -466,36 +482,51 @@ def get_mappings(node):
     return cimi_mappings
 
 
-def upload_module(module, module_type):
-    versions = sorted(module.get('versions', []), key=lambda k: k['version'])
-    first = True
+def upload_module(api, module, module_type):
+    module_versions = sorted(module.get('versions', [module]), key=lambda k: k['version'])
+    path = get_path(module)
+
+    if mapping_old_version.get(path):
+        return None
 
     id = None
+    first = True
 
-    for version in versions:
-        cimi_module = convert_module(module_type, version)
+    for version_index, module_version in enumerate(module_versions):
+        if module_type == 'COMPONENT':
+            parent = module.get('moduleReferenceUri')
+            print('parent is {}'.format(parent))
+            if not mapping_old_version.get(parent):
+                print('fetch parent {}'.format(parent))
+                parent_module = api.get_module(parent)
+                upload_module(api, parent_module, category_to_type(parent_module))
+
+        cimi_module = convert_module(api, module_type, module_version)
+
         if first:
             cimi_resp = cimi_add(api_kb, 'modules', cimi_module)
             id = cimi_resp.json['resource-id']
             first = False
         else:
             cimi_edit(api_kb, id, cimi_module)
+        mapping_old_version["module/{}/{}".format(path, module_version['version'])] \
+            = "{}_{}".format(id, version_index)
+    mapping_old_version["module/{}".format(path)] = "{}".format(id)
 
-    if len(versions) == 0:
+    if len(module_versions) == 0:
         print('No version for module "{}". Skipping'.format(get_path(module)))
 
 
-def convert_and_upload_modules(modules, only_type):
-
+def convert_and_upload_modules(api, modules):
     for module in modules:
         print('{} with {} versions'.format(get_module_path(module), len(module.get('versions', []))))
         module_type = category_to_type(module)
 
         print(module_type)
-        if not module_type or module_type != only_type:
+        if not module_type:
             continue
 
-        upload_module(module, module_type)
+        upload_module(api, module, module_type)
 
 
 def main():
@@ -506,11 +537,9 @@ def main():
     requests_log.propagate = True
 
     config = parse_arguments()
-    modules = get_modules_from_slipstream(config)
-    convert_and_upload_modules(modules, 'PROJECT')
-    convert_and_upload_modules(modules, 'IMAGE')
-    convert_and_upload_modules(modules, 'COMPONENT')
-    convert_and_upload_modules(modules, 'APPLICATION')
+    api = get_api(config)
+    modules = get_modules_from_slipstream(api, config)
+    convert_and_upload_modules(api, modules)
 
 
 if __name__ == '__main__':
