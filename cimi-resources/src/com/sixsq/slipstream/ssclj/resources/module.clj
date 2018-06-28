@@ -76,11 +76,13 @@
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
   (a/can-modify? {:acl collection-acl} request)
-  (let [[{:keys [type] :as module-meta} module-content] (-> body u/strip-service-attrs module-utils/split-resource)]
+  (let [[{:keys [type] :as module-meta}
+         {:keys [author commit] :as module-content}] (-> body u/strip-service-attrs module-utils/split-resource)]
+
     (if (= "PROJECT" type)
       (let [module-meta (module-utils/set-parent-path module-meta)]
 
-        (db/add
+        (db/add                                             ; FIXME duplicated code
           resource-name
           (-> module-meta
               u/strip-service-attrs
@@ -102,7 +104,9 @@
             response (crud/add content-request)
 
             content-id (-> response :body :resource-id)
-            module-meta (-> (assoc module-meta :versions [{:href content-id}])
+            module-meta (-> (assoc module-meta :versions [(cond-> {:href   content-id
+                                                                   :author author}
+                                                                  commit (assoc :commit commit))])
                             module-utils/set-parent-path)]
 
         (db/add
@@ -162,7 +166,7 @@
   [{:keys [body] :as request}]
   (try
     (let [id (str resource-url "/" (-> request :params :uuid))
-          [module-meta module-content] (-> body u/strip-service-attrs module-utils/split-resource)
+          [module-meta {:keys [author commit] :as module-content}] (-> body u/strip-service-attrs module-utils/split-resource)
           {:keys [type versions acl]} (crud/retrieve-by-id-as-admin id)
 
           _ (a/can-modify? {:acl acl} request)
@@ -180,7 +184,9 @@
 
           content-id (-> response :body :resource-id)
 
-          versions (conj versions {:href content-id})
+          versions (conj versions (cond-> {:href   content-id
+                                           :author author}
+                                          commit (assoc :commit commit)))
           module-meta (-> (assoc module-meta :versions versions
                                              :type type)
                           module-utils/set-parent-path)]

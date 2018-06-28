@@ -3,8 +3,13 @@
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
     [com.sixsq.slipstream.ssclj.resources.spec.module-component :as module-component]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]))
+    [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
+    [clojure.spec.alpha :as s]))
 
+
+(s/def ::commit ::cimi-core/nonblank-string)
+(s/def ::author ::cimi-core/nonblank-string)
 
 (s/def ::node-name (s/and keyword? #(re-matches #"^[a-z0-9]+(_[a-z0-9]+)*$" (name %))))
 
@@ -24,9 +29,11 @@
                             :opt-un [::maxProvisioningFailures
                                      ::parameterMappings]))
 
-(s/def ::nodes (s/map-of  ::node-name ::node))
+(s/def ::nodes (s/map-of ::node-name ::node))
 
 (def module-application-keys-spec (su/merge-keys-specs [c/common-attrs
-                                                        {:req-un [::nodes]}]))
+                                                        {:req-un [::nodes
+                                                                  ::author]
+                                                         :opt-un [::commit]}]))
 
 (s/def ::module-application (su/only-keys-maps module-application-keys-spec))

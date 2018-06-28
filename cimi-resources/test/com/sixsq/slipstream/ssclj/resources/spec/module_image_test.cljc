@@ -35,7 +35,9 @@
               :imageIDs     {:some-cloud       "my-great-image-1"
                              :some-other-cloud "great-stuff"}
 
-              :relatedImage {:href "module/other"}}]
+              :relatedImage {:href "module/other"}
+              :author "someone"
+              :commit "wip"}]
 
     (expound/expound ::module-image/module-image root)
     (is (s/valid? ::module-image/module-image root))
@@ -43,10 +45,10 @@
     (is (false? (s/valid? ::module-image/module-image (assoc root :os "BAD_OS"))))
 
     ;; required attributes
-    (doseq [k #{:id :resourceURI :created :updated :acl :os :loginUser :networkType}]
+    (doseq [k #{:id :resourceURI :created :updated :acl :os :loginUser :networkType :author}]
       (is (false? (s/valid? ::module-image/module-image (dissoc root k)))))
 
     ;; optional attributes
     (doseq [k #{:connectors :connectorClasses :sudo :relatedImage
-                :cpu :ram :disk :volatileDisk}]
+                :cpu :ram :disk :volatileDisk :commit}]
       (is (true? (s/valid? ::module-image/module-image (dissoc root k)))))))

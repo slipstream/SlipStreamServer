@@ -5,6 +5,8 @@
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
+(s/def ::commit ::cimi-core/nonblank-string)
+(s/def ::author ::cimi-core/nonblank-string)
 
 ;; module links used for components and applications
 (def ^:const module-href-regex #"^module/[a-z0-9]+(-[a-z0-9]+)*$")
@@ -55,7 +57,16 @@
 
 
 (def module-component-keys-spec (su/merge-keys-specs [c/common-attrs
-                                                      {:req-un [::parent ::networkType ::outputParameters]
-                                                       :opt-un [::inputParameters ::cpu ::ram ::disk ::volatileDisk ::targets]}]))
+                                                      {:req-un [::parent
+                                                                ::networkType
+                                                                ::outputParameters
+                                                                ::author]
+                                                       :opt-un [::inputParameters
+                                                                ::cpu
+                                                                ::ram
+                                                                ::disk
+                                                                ::volatileDisk
+                                                                ::targets
+                                                                ::commit]}]))
 
 (s/def ::module-component (su/only-keys-maps module-component-keys-spec))

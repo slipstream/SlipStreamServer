@@ -250,8 +250,8 @@ def convert_os(os):
             'other': 'Other'}.get(os.lower())
 
 
-def search_cimi_module(path):
-    return api_kb.cimi_search('modules', filter='path="{}"'.format(path))
+# def search_cimi_module(path):
+#     return api_kb.cimi_search('modules', filter='path="{}"'.format(path))
 
 
 # def module_exist(path):
@@ -276,6 +276,10 @@ def image_attributes(module):
     image = {'imageIDs': get_cloud_image_ids(module),
              'os': convert_os(module.get('platform')),
              'loginUser': login_user}
+
+    if use_default_when_blank(module['commit'].get('comment'), None):
+        image['commit'] = module['commit'].get('comment')
+    image['author'] = module['commit']['author']
     res_req, cloud_params, inputParams, outputParams = split_parameters(module)
     if _to_int(res_req.get('cpu.nb')):
         image['cpu'] = _to_int(res_req.get('cpu.nb'))
@@ -294,6 +298,9 @@ def component_attributes(module):
     targets = get_targets_by_name(module)
     packages = get_packages(module)
     component = {}
+    if use_default_when_blank(module['commit'].get('comment'), None):
+        component['commit'] = module['commit'].get('comment')
+    component['author'] = module['commit']['author']
     if module.get('moduleReferenceUri'):
         component['parent'] = {'href': mapping_old_version[module.get('moduleReferenceUri')]}
     if _to_int(res_req.get('cpu.nb')):
@@ -329,6 +336,10 @@ def component_attributes(module):
 
 
 def application_attributes(api, module):
+    application = {}
+    if use_default_when_blank(module['commit'].get('comment'), None):
+        application['commit'] = module['commit'].get('comment')
+    application['author'] = module['commit']['author']
     nodes = {}
     for n in _get_list(_get_dict(module.get('nodes', {})).get('entry', [])):
         node_component = n['node']['imageUri']
@@ -343,7 +354,8 @@ def application_attributes(api, module):
         if mappings:
             node['parameterMappings'] = mappings
         nodes[n['node']['name']] = node
-    return {'nodes': nodes}
+    application['nodes'] = nodes
+    return application
 
 
 def convert_date(date):

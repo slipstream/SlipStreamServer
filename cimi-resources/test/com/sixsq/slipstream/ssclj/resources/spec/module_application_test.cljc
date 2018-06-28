@@ -30,15 +30,17 @@
                                          :multiplicity            20
                                          :maxProvisioningFailures 10
                                          :parameterMappings       {:param.1-2 {:mapped true, :value "param.2-3"}
-                                                                   :param.3-4 {:mapped false, :value "default"}}}}}]
+                                                                   :param.3-4 {:mapped false, :value "default"}}}}
+              :author      "someone"
+              :commit      "wip"}]
 
     (is (s/valid? ::module-app/module-application root))
     (is (false? (s/valid? ::module-app/module-application (assoc root :badKey "badValue"))))
 
     ;; required attributes
-    (doseq [k #{:id :resourceURI :created :updated :acl :nodes}]
+    (doseq [k #{:id :resourceURI :created :updated :acl :nodes :author}]
       (is (false? (s/valid? ::module-app/module-application (dissoc root k)))))
 
     ;; optional attributes
-    (doseq [k #{:parameterMappings}]
+    (doseq [k #{:parameterMappings :commit}]
       (is (true? (s/valid? ::module-app/module-application (dissoc root k)))))))

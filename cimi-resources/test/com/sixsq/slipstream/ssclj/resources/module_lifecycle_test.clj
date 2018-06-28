@@ -36,8 +36,12 @@
                   :parentPath  "a/b"
                   :path        "a/b/c"
                   :type        "IMAGE"
-                  :versions    [{:href "module-image/xyz"}
-                                {:href "module-image/abc"}]
+                  :versions    [{:href "module-image/xyz"
+                                 :author "someone"
+                                 :commit "wip"}
+                                {:href "module-image/abc"
+                                 :author "someone"
+                                 :commit "wip"}]
                   :logo        {:href "external-object/xyz"}})
 
 (def valid-image {:resourceURI  module-image/resource-uri
@@ -55,7 +59,10 @@
                   :imageIDs     {:some-cloud       "my-great-image-1"
                                  :some-other-cloud "great-stuff"}
 
-                  :relatedImage {:href "module/other"}})
+                  :relatedImage {:href "module/other"}
+
+                  :author       "someone"
+                  :commit       "wip"})
 
 
 (deftest lifecycle
@@ -165,7 +172,9 @@
                                :body
                                :content
                                :id)]
-            (is (= (-> versions (nth n) :href) content-id)))))
+            (is (= (-> versions (nth n) :href) content-id))
+            (is (= (-> versions (nth n) :author) "someone"))
+            (is (= (-> versions (nth n) :commit) "wip")))))
 
       (doseq [i ["_0" "_1"]]
         (-> session-admin

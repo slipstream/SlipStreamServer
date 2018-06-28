@@ -44,15 +44,17 @@
                                  :onVmAdd     "onVmAdd"
                                  :onVmRemove  "onVmRemove"
                                  :prescale    "prescale"
-                                 :postscale   "postscale"}}]
+                                 :postscale   "postscale"}
+              :author           "someone"
+              :commit           "wip"}]
 
     (is (s/valid? ::module-component/module-component root))
     (is (false? (s/valid? ::module-component/module-component (assoc root :badKey "badValue"))))
 
     ;; required attributes
-    (doseq [k #{:id :resourceURI :created :updated :acl :networkType :outputParameters}]
+    (doseq [k #{:id :resourceURI :created :updated :acl :networkType :outputParameters :author}]
       (is (false? (s/valid? ::module-component/module-component (dissoc root k)))))
 
     ;; optional attributes
-    (doseq [k #{:cpu :ram :disk :volatileDisk :targets :inputParameters}]
+    (doseq [k #{:cpu :ram :disk :volatileDisk :targets :inputParameters :commit}]
       (is (true? (s/valid? ::module-component/module-component (dissoc root k)))))))

@@ -56,7 +56,10 @@
                                      :onVmAdd     "onVmAdd"
                                      :onVmRemove  "onVmRemove"
                                      :prescale    "prescale"
-                                     :postscale   "postscale"}})
+                                     :postscale   "postscale"}
+                  :author           "someone"
+                  :commit           "wip"
+                  })
 
 
 (deftest lifecycle

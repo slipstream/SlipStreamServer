@@ -46,7 +46,10 @@
                   :imageIDs     {:some-cloud       "my-great-image-1"
                                  :some-other-cloud "great-stuff"}
 
-                  :relatedImage {:href "module/other"}})
+                  :relatedImage {:href "module/other"}
+
+                  :author "someone"
+                  :commit "wip"})
 
 
 (deftest lifecycle

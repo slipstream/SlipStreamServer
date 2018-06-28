@@ -42,7 +42,10 @@
                                              :multiplicity            20
                                              :maxProvisioningFailures 10
                                              :parameterMappings       {:param.1-2 {:mapped true, :value "param.2-3"}
-                                                                       :param.3-4 {:mapped false, :value "default"}}}}})
+                                                                       :param.3-4 {:mapped false, :value "default"}}}}
+
+                  :author      "someone"
+                  :commit      "wip"})
 
 
 (deftest lifecycle

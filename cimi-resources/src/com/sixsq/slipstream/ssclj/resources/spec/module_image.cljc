@@ -6,6 +6,9 @@
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 
+(s/def ::commit ::cimi-core/nonblank-string)
+(s/def ::author ::cimi-core/nonblank-string)
+
 (s/def ::cpu pos-int?)
 (s/def ::ram pos-int?)
 (s/def ::disk pos-int?)
@@ -32,8 +35,17 @@
 
 
 (def module-image-keys-spec (su/merge-keys-specs [c/common-attrs
-                                                  {:req-un [::os ::loginUser ::networkType]
-                                                   :opt-un [::imageIDs ::sudo ::relatedImage
-                                                            ::cpu ::ram ::disk ::volatileDisk]}]))
+                                                  {:req-un [::os
+                                                            ::loginUser
+                                                            ::networkType
+                                                            ::author]
+                                                   :opt-un [::imageIDs
+                                                            ::sudo
+                                                            ::relatedImage
+                                                            ::cpu
+                                                            ::ram
+                                                            ::disk
+                                                            ::volatileDisk
+                                                            ::commit]}]))
 
 (s/def ::module-image (su/only-keys-maps module-image-keys-spec))

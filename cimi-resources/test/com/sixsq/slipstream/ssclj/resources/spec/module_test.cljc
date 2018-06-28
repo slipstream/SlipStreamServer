@@ -23,7 +23,9 @@
               :parentPath  "a/b"
               :path        "a/b/c"
               :type        "IMAGE"
-              :versions    [{:href "module-image/xyz"}
+              :versions    [{:href   "module-image/xyz"
+                             :author "someone"
+                             :commit "wip"}
                             nil
                             {:href "module-image/abc"}]
               :logo        {:href "external-object/xyz"}}]
