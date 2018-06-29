@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 """
  SlipStream Client
  =====
@@ -132,7 +132,6 @@ def get_modules_from_files(config):
 
 
 def get_modules_from_slipstream(api, config):
-
     paths = config.path if config.path else _get_root_modules(api)
 
     return _get_modules_from_slipstream(api, paths, config.recurse, config.versions)
@@ -407,14 +406,19 @@ def get_path(module):
 
 
 def get_cimi_module_common_attributes(module, module_type):
-    return {'name': module['shortName'],
+    meta = {'name': module['shortName'],
             'path': get_path(module),
             'description': module.get('description', ''),
-            'logo': {'href': 'external-object/logo'.format(module.get('logoLink'))},
             'type': module_type,
             'created': convert_date(module['creation']),
             'updated': convert_date(module['lastModified']),
             'acl': get_cimi_acl(module)}
+
+    logo_link = use_default_when_blank(module.get('logoLink'))
+    if logo_link is not None:
+        meta['logo'] = {'href': logo_link}
+
+    return meta
 
 
 def get_cloud_image_ids(version):
