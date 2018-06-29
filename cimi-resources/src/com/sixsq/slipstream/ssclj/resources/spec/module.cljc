@@ -3,6 +3,7 @@
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as cimi-common]
+    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 
@@ -20,7 +21,9 @@
 
 (s/def ::versions (s/coll-of (s/nilable ::cimi-common/resource-link) :min-count 1))
 
-(s/def ::logo ::cimi-common/resource-link)
+;; relax the href schema to allow any URL to be used for logo
+(s/def ::href ::cimi-core/nonblank-string)
+(s/def ::logo (su/only-keys :req-un [::href]))
 
 (def module-keys-spec (su/merge-keys-specs [c/common-attrs
                                                       {:req-un [::path ::parentPath ::type]
