@@ -8,10 +8,10 @@
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.module.utils :as module-utils]
     [com.sixsq.slipstream.ssclj.resources.module-application :as module-application]
     [com.sixsq.slipstream.ssclj.resources.module-component :as module-component]
     [com.sixsq.slipstream.ssclj.resources.module-image :as module-image]
+    [com.sixsq.slipstream.ssclj.resources.module.utils :as module-utils]
     [com.sixsq.slipstream.ssclj.resources.spec.module :as module]
     [com.sixsq.slipstream.util.response :as r]
     [superstring.core :as str]))

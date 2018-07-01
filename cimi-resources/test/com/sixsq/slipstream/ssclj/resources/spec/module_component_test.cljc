@@ -28,13 +28,13 @@
               :volatileDisk     500
               :networkType      "public"
 
-              :inputParameters  {:iparam-1 {:description "desc2" :value "100"}
-                                 :iparam-2 {:description "desc2"}
-                                 :iparam-3 {}}
+              :inputParameters  [{:parameter "iparam-1" :description "desc2" :value "100"}
+                                 {:parameter "iparam-2" :description "desc2"}
+                                 {:parameter "iparam-3"}]
 
-              :outputParameters {:param-1 {:description "desc2" :value "100"}
-                                 :param-2 {:description "desc2"}
-                                 :param-3 {}}
+              :outputParameters [{:parameter "iparam-1" :description "desc2" :value "100"}
+                                 {:parameter "iparam-2" :description "desc2"}
+                                 {:parameter "iparam-3"}]
 
               :targets          {:preinstall  "preinstall"
                                  :packages    ["emacs-nox" "vim"]

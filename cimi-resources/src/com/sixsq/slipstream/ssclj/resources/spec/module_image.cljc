@@ -3,6 +3,7 @@
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
+    [com.sixsq.slipstream.ssclj.resources.spec.module :as module]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 
@@ -28,10 +29,7 @@
 
 (s/def ::connectors (s/nilable (s/coll-of ::connector :min-count 1 :kind vector?)))
 
-(def module-href-regex #"^module/[a-z0-9]+(-[a-z0-9]+)*(_\d+)?$")
-
-(s/def ::href (s/and string? #(re-matches module-href-regex %)))
-(s/def ::relatedImage (s/keys :req-un [::href]))
+(s/def ::relatedImage ::module/link)
 
 
 (def module-image-keys-spec (su/merge-keys-specs [c/common-attrs

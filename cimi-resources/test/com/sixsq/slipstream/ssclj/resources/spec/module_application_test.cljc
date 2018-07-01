@@ -21,16 +21,19 @@
               :updated     timestamp
               :acl         valid-acl
 
-              :nodes       {:node_alpha {:component    {:href "module/a-b"}
-                                         :multiplicity 1}
-                            :node_beta  {:component               {:href "module/c-d"}
-                                         :multiplicity            2
-                                         :maxProvisioningFailures 1}
-                            :node_gamma {:component               {:href "module/e-f"}
-                                         :multiplicity            20
-                                         :maxProvisioningFailures 10
-                                         :parameterMappings       {:param.1-2 {:mapped true, :value "param.2-3"}
-                                                                   :param.3-4 {:mapped false, :value "default"}}}}
+              :nodes       [{:node         "node_alpha"
+                             :component    {:href "module/a-b"}
+                             :multiplicity 1}
+                            {:node                    "node_beta"
+                             :component               {:href "module/c-d"}
+                             :multiplicity            2
+                             :maxProvisioningFailures 1}
+                            {:node                    "node_gamma"
+                             :component               {:href "module/e-f"}
+                             :multiplicity            20
+                             :maxProvisioningFailures 10
+                             :parameterMappings       [{:parameter "param.1-2" :mapped true, :value "param.2-3"}
+                                                       {:parameter "param.3-4" :mapped false, :value "default"}]}]
               :author      "someone"
               :commit      "wip"}]
 
