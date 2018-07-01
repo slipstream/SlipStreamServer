@@ -9,7 +9,7 @@
 (s/def ::author ::cimi-core/nonblank-string)
 
 ;; module links used for components and applications
-(def ^:const module-href-regex #"^module/[a-z0-9]+(-[a-z0-9]+)*$")
+(def ^:const module-href-regex #"^module/[a-z0-9]+(-[a-z0-9]+)*(_\d+)?$")
 (s/def ::href (s/and string? #(re-matches module-href-regex %)))
 (s/def ::module-link (s/keys :req-un [::href]))
 

@@ -345,7 +345,10 @@ def application_attributes(api, module):
         if not mapping_old_version.get(node_component):
             component_module = api.get_module(node_component)
             upload_module(api, component_module, category_to_type(component_module))
-        node = {'component': {'href': mapping_old_version[node_component]},
+        component_href = mapping_old_version[node_component]
+        if component_href == "None":
+            print('ERROR: mapped reference was "None": {}, {}'.format(node_component, component_href))
+        node = {'component': {'href': component_href},
                 'multiplicity': _to_int(n['node'].get('multiplicity', 1))}
         if _to_int(n['node'].get('maxProvisioningFailures')):
             node['maxProvisioningFailures'] = _to_int(n['node'].get('maxProvisioningFailures'))
@@ -499,35 +502,66 @@ def get_mappings(node):
 
 
 def upload_module(api, module, module_type):
-    module_versions = sorted(module.get('versions', [module]), key=lambda k: k['version'])
-    path = get_path(module)
 
+    path = get_path(module)
     if mapping_old_version.get(path):
         return None
 
+    print('called upload_module for {} of type {}'.format(path, module_type))
+
     id = None
     first = True
+    module_versions = sorted(module.get('versions', [module]), key=lambda k: k['version'])
 
     for version_index, module_version in enumerate(module_versions):
+
+        current_module_type = category_to_type(module_version)
+        if module_type != current_module_type:
+            print('WARNING: module type changed from {} to {} for {}. Skipping...'.format(module_type, current_module_type, path))
+            continue
+
         if module_type == 'COMPONENT':
-            parent = module.get('moduleReferenceUri')
-            print('parent is {}'.format(parent))
-            if not mapping_old_version.get(parent):
-                print('fetch parent {}'.format(parent))
-                parent_module = api.get_module(parent)
-                upload_module(api, parent_module, category_to_type(parent_module))
 
-        cimi_module = convert_module(api, module_type, module_version)
+            # parent may be different for each version!
+            parent = module_version.get('moduleReferenceUri')
+            print('DEBUG: parent is {}'.format(parent))
+            print('DEBUG: version parent is {}'.format(module_version.get('moduleReferenceUri')))
 
-        if first:
-            cimi_resp = cimi_add(api_kb, 'modules', cimi_module)
-            id = cimi_resp.json['resource-id']
-            first = False
-        else:
-            cimi_edit(api_kb, id, cimi_module)
-        mapping_old_version["module/{}/{}".format(path, module_version['version'])] \
-            = "{}_{}".format(id, version_index)
-    mapping_old_version["module/{}".format(path)] = "{}".format(id)
+            if parent is None:
+                print('WARNING: component has no parent.  Skipping... {}, {}'.format(path, module_version['version']))
+                continue
+            else:
+                print('parent is {}'.format(parent))
+                if not mapping_old_version.get(parent):
+                    try:
+                        print('fetch parent {}'.format(parent))
+                        parent_module = api.get_module(parent)
+                        upload_module(api, parent_module, category_to_type(parent_module))
+                    except Exception as e:
+                        print('ERROR: referenced parent does not exist.  Using invalid module reference... {}, {}, {}'.format(path, parent, module_version['version']))
+                        mapping_old_version["module/{}/{}".format(path, module_version['version'])] \
+                            = "{}_{}".format('module/invalid', version_index)
+                        mapping_old_version["module/{}".format(path)] = "{}".format('module/invalid')
+                        continue
+
+        try:
+            cimi_module = convert_module(api, module_type, module_version)
+
+            if first:
+                cimi_resp = cimi_add(api_kb, 'modules', cimi_module)
+                id = cimi_resp.json['resource-id']
+                first = False
+            else:
+                cimi_edit(api_kb, id, cimi_module)
+            mapping_old_version["module/{}/{}".format(path, module_version['version'])] \
+                = "{}_{}".format(id, version_index)
+        except Exception as e:
+            print('WARNING: exception raised while processing module {} version {}.  Not copied.'.format(path, module_version['version']))
+
+    if id is not None:
+        mapping_old_version["module/{}".format(path)] = "{}".format(id)
+    else:
+        mapping_old_version["module/{}".format(path)] = "{}".format('module/invalid')
 
     if len(module_versions) == 0:
         print('No version for module "{}". Skipping'.format(get_path(module)))

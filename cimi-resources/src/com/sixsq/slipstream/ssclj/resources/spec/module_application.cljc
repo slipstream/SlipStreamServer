@@ -11,7 +11,7 @@
 (s/def ::commit ::cimi-core/nonblank-string)
 (s/def ::author ::cimi-core/nonblank-string)
 
-(s/def ::node-name (s/and keyword? #(re-matches #"^[a-z0-9]+(_[a-z0-9]+)*$" (name %))))
+(s/def ::node-name (s/and keyword? #(re-matches #"^[a-zA-Z0-9]+(_[a-zA-Z0-9]+)*$" (name %))))
 
 (s/def ::multiplicity nat-int?)
 (s/def ::maxProvisioningFailures nat-int?)

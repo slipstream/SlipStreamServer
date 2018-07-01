@@ -28,7 +28,7 @@
 
 (s/def ::connectors (s/nilable (s/coll-of ::connector :min-count 1 :kind vector?)))
 
-(def module-href-regex #"^module/[a-z]+(-[a-z]+)*$")
+(def module-href-regex #"^module/[a-z0-9]+(-[a-z0-9]+)*(_\d+)?$")
 
 (s/def ::href (s/and string? #(re-matches module-href-regex %)))
 (s/def ::relatedImage (s/keys :req-un [::href]))
