@@ -41,9 +41,9 @@
     (is (false? (s/valid? ::module-app/module-application (assoc root :badKey "badValue"))))
 
     ;; required attributes
-    (doseq [k #{:id :resourceURI :created :updated :acl :nodes :author}]
+    (doseq [k #{:id :resourceURI :created :updated :acl :author}]
       (is (false? (s/valid? ::module-app/module-application (dissoc root k)))))
 
     ;; optional attributes
-    (doseq [k #{:parameterMappings :commit}]
+    (doseq [k #{:nodes :parameterMappings :commit}]
       (is (true? (s/valid? ::module-app/module-application (dissoc root k)))))))

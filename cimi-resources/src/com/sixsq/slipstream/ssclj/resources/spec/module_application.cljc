@@ -34,8 +34,8 @@
 (s/def ::nodes (s/coll-of ::node-map :min-count 1 :kind vector?))
 
 (def module-application-keys-spec (su/merge-keys-specs [c/common-attrs
-                                                        {:req-un [::nodes
-                                                                  ::author]
-                                                         :opt-un [::commit]}]))
+                                                        {:req-un [::author]
+                                                         :opt-un [::nodes
+                                                                  ::commit]}]))
 
 (s/def ::module-application (su/only-keys-maps module-application-keys-spec))
