@@ -326,7 +326,10 @@
                                          :state)))
 
 
-                  (let [ss-username (db/find-username-by-authn :oidc username)
+                  (let [
+                        _ (println "-----[ELG] expect user already created for " username)
+                        ss-username (db/find-username-by-authn :oidc username)
+                        _ (println "-----[ELG] ss-username " ss-username)
                         user-record (->> username
                                          (db/find-username-by-authn :oidc)
                                          (db/get-user))]

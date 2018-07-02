@@ -3,7 +3,8 @@
     [com.sixsq.slipstream.db.filter.parser :as parser]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.user-params-template-exec :as up-tmpl-exec])
+    [com.sixsq.slipstream.ssclj.resources.user-params-template-exec :as up-tmpl-exec]
+    [clojure.string :as str])
   (:import
     (java.util UUID)))
 
@@ -66,7 +67,40 @@
   (keyword (str (name authn-method) "login")))
 
 
+
 (defn find-username-by-authn
+  [authn-method authn-id]
+  (println "----[ELG] looking username for " authn-method " and external login =" authn-id)
+  (when (and authn-method authn-id)
+    (let [filter-str (format "identifier=='%s:%s' and %s" (name authn-method) authn-id active-user-filter)
+          _ (println "user-identifier filter " filter-str)
+          filter-str-fallback (format "%s='%s' and %s" (name (to-am-kw authn-method)) authn-id active-user-filter)
+          create-filter (fn [filter-string] {:filter (parser/parse-cimi-filter filter-string)})
+          filter (create-filter filter-str)
+          filter-fallback (create-filter filter-str-fallback)
+          query-user-identifiers (fn [f] (try
+                                           (second (db/query "user-identifier" {:cimi-params f
+                                                                                :user-roles  ["ADMIN"]}))
+                                           (catch Exception _ [])))
+          query-users-fallback (fn [f] (try
+                                         (second (db/query resource-name {:cimi-params f
+                                                                          :user-roles  ["ADMIN"]}))
+                                         (catch Exception _ [])))
+          matched-user-identifiers (query-user-identifiers filter)
+          _ (println "found user-identifiers " (count matched-user-identifiers))
+          matched-users-fallback (query-users-fallback filter-fallback)
+          get-user-from-identifier (fn [user-identifier] (:username (crud/retrieve-by-id (-> user-identifier :user :href))))
+          get-user (fn [users] (:username (first users)))
+          throw-ex (fn [users] (throw (Exception. (str "There should be only one result for "
+                                                       authn-id ". But found " (count users)))))
+          ] (cond
+              (= (count matched-user-identifiers) 1) (get-user-from-identifier (first matched-user-identifiers))
+              (> (count matched-user-identifiers) 1) (throw-ex matched-user-identifiers)
+              (= (count matched-users-fallback) 1) (get-user matched-users-fallback)
+              (> (count matched-users-fallback) 1) (throw-ex matched-users-fallback)))))
+
+
+#_(defn find-username-by-authn
   [authn-method authn-id]
   ;;assume authn-method is :github or :oidc (i.e not :githublogin)
   (when (and authn-method authn-id)
@@ -172,7 +206,7 @@
                                :isSuperUser  false
                                :state        (or state "ACTIVE")}
                               authn-method (assoc :method authn-method
-                                                  :externalIdentity [(str (or instance (name authn-method)) ":" (or external-login authn-login))]
+                                                  ;;:externalIdentity [(str (or instance (name authn-method)) ":" (or external-login authn-login))]
                                                   :name email)
                               firstname (assoc :firstName firstname)
                               lastname (assoc :lastName lastname)
@@ -206,18 +240,41 @@
   [user-name]
   (crud/add (user-param-create-request user-name)))
 
+(defn create-user-identifier
+  [user-id identifier]
+  (let [user-name (-> user-id
+                      (str/split #"/")
+                      second)]
+    (println "----[ELG] create-user-identifier for user-id " user-id "and identifier " identifier)
+    (crud/add
+      {:identity     {:current "internal"
+                      :authentications
+                               {"internal" {:roles #{"ADMIN"}, :identity "internal"}}}
+       :sixsq.slipstream.authn/claims
+                     {:username "internal", :roles "ADMIN"}
+       :params       {:resource-name "user-identifier"}
+       :route-params {:resource-name "user-identifier"}
+       :user-roles   #{"USER"}
+       :body         {:identifier identifier
+                      :user       {:href user-id}}})))
+
 
 (defn create-user!
   "Create a new user in the database. Values for 'email' and 'authn-login'
    must be provided. NOTE: The 'authn-login' value may be modified to avoid
    collisions with existing users. The value used to create the account is
    returned."
-  ([{:keys [authn-login fail-on-existing?] :as user-record}]
+  ([{:keys [authn-login authn-method external-login instance fail-on-existing?] :as user-record}]
    (if ((existing-user-names) authn-login)
      (when (not fail-on-existing?)
        authn-login)
      (do
        (crud/add (user-create-request user-record))
+
+       ;:create a user-identifier request
+       (when authn-method
+         (create-user-identifier
+           (str "user/" authn-login) (str (or instance (name authn-method)) ":" (or external-login authn-login))))
        authn-login)))
 
   ([authn-method authn-login email external-login]
@@ -246,3 +303,5 @@
   [username]
   (let [{super? :isSuperUser} (get-active-user-by-name username)]
     (if super? "ADMIN USER ANON" "USER ANON")))
+
+

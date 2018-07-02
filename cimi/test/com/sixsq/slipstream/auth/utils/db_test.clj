@@ -6,7 +6,9 @@
     [com.sixsq.slipstream.auth.test-helper :as th]
     [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]))
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [clojure.string :as str]))
 
 
 (use-fixtures :each ltu/with-test-server-fixture)
@@ -263,3 +265,24 @@
               :isSuperUser false}]
     (th/add-user-for-test! user)
     (is (= "USER ANON" (db/find-roles-for-username username)))))
+
+
+(deftest create-user-identifier
+  (let [name "some-username"
+        user {:id           (str "user/" name)
+              :username     name
+              :password     "12345"
+              :emailAddress "a@b.c"}
+        identifier "some-identifier"
+        user-response (th/add-user-for-test! user)
+        user-id (-> user-response :body :resource-id)
+        user-identifier-response (db/create-user-identifier user-id identifier)
+        user-identifier-id (-> user-identifier-response :body :resource-id)]
+    (is (= 201 (:status user-identifier-response)))
+    (is (= (u/md5 identifier) (-> user-identifier-id (str/split #"/") second)))
+
+    (let [resource (crud/retrieve-by-id user-identifier-id)]
+      (is (= identifier (:identifier resource)))
+      (is (= {:href user-id} (:user resource))))))
+
+

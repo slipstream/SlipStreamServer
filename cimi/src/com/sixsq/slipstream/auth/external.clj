@@ -16,7 +16,7 @@
   [authn-method slipstream-username external-login]
   (log/infof "Mapping external (%s) user '%s' to existing SlipStream user '%s'"
              authn-method external-login slipstream-username)
-  (db/update-user-authn-info authn-method slipstream-username external-login))
+  (db/update-user-authn-info authn-method slipstream-username external-login)
 
 
 (defn- create-slipstream-user!
