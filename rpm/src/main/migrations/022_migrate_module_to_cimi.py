@@ -23,12 +23,19 @@ import codecs
 import json
 import logging
 import os
+import sys
+from traceback import print_exc
 
 from slipstream.api import Api
 from slipstream.api.api import _mod_url
 
+logging.basicConfig(level=logging.WARNING,
+                    format='%(levelname)-8s: %(message)s')
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARNING)
+
 api_kb = Api('https://185.19.29.154', insecure=True)
-print(api_kb.login_internal('super', 'de268cf32f6b'))
+logger.info(api_kb.login_internal('super', 'de268cf32f6b'))
 
 mapping_old_version = {}
 
@@ -71,7 +78,7 @@ def parse_arguments():
 
 def patch_api():
     def _json_get(self, url, **params):
-        print('Get {}'.format(url))
+        logger.debug('Get {}'.format(url))
         response = self.session.get('%s%s' % (self.endpoint, url),
                                     headers={'Accept': 'application/json'},
                                     params=params)
@@ -107,8 +114,8 @@ def cimi_add(api, resource_type, element):
     try:
         return api.cimi_add(resource_type, element)
     except Exception as e:
-        print('Failed to add "{}" to CIMI resource "{}": {}'.format(element.get('name'), resource_type, e))
-        print(element)
+        logger.error('Failed to add "{}" to CIMI resource "{}": {}'.format(element.get('name'), resource_type, e))
+        logger.error(str(element))
         return None
         # import code; code.interact(local=locals())
 
@@ -117,7 +124,7 @@ def cimi_edit(api, id, element):
     try:
         return api.cimi_edit(id, element)
     except Exception as e:
-        print('Failed to edit "{}" to CIMI resource "{}": {}'.format(element.get('name'), id, e))
+        logger.error('Failed to edit "{}" to CIMI resource "{}": {}'.format(element.get('name'), id, e))
         return None
         # import code; code.interact(local=locals())
 
@@ -148,7 +155,7 @@ def _to_str(x):
     try:
         return str(x)
     except UnicodeEncodeError as e:
-        print('warning: character encoding error: {}'.format(e))
+        logger.warning('character encoding error: {}'.format(e))
         return str(codecs.encode(x, 'utf-8', 'ignore'))
 
 
@@ -189,7 +196,7 @@ def _get_modules_from_slipstream(api, paths, recurse=False, get_versions=False):
         try:
             module = api.get_module(path)
         except Exception as e:
-            print('Failed to get module "{}": {}'.format(path, e))
+            logger.error('Failed to get module "{}": {}'.format(path, e))
             continue
 
         if get_versions and module['category'] != 'Project':
@@ -201,7 +208,7 @@ def _get_modules_from_slipstream(api, paths, recurse=False, get_versions=False):
                 try:
                     module['versions'].append(api.get_module(path_version))
                 except Exception as e:
-                    print('Failed to get module version "{}": {}'.format(path_version, e))
+                    logger.error('Failed to get module version "{}": {}'.format(path_version, e))
                     continue
         else:
             module['versions'] = [module]
@@ -213,7 +220,7 @@ def _get_modules_from_slipstream(api, paths, recurse=False, get_versions=False):
                 children = _get_list(_get_dict(module.get('children', {})).get('item', []))
                 children_paths = ['{}/{}'.format(path, child['name']) for child in children]
             except Exception as e:
-                print('Failed to get children of "{}": {}'.format(path, e))
+                logger.error('Failed to get children of "{}": {}'.format(path, e))
                 import code
                 code.interact(local=locals())
                 raise
@@ -339,24 +346,27 @@ def application_attributes(api, module):
     if use_default_when_blank(module['commit'].get('comment'), None):
         application['commit'] = module['commit'].get('comment')
     application['author'] = module['commit']['author']
-    nodes = {}
+    nodes = []
     for n in _get_list(_get_dict(module.get('nodes', {})).get('entry', [])):
+        node_name = n['node']['name'].strip()
         node_component = n['node']['imageUri']
         if not mapping_old_version.get(node_component):
             component_module = api.get_module(node_component)
             upload_module(api, component_module, category_to_type(component_module))
         component_href = mapping_old_version[node_component]
         if component_href == "None":
-            print('ERROR: mapped reference was "None": {}, {}'.format(node_component, component_href))
-        node = {'component': {'href': component_href},
+            logger.error('mapped reference was "None": {}, {}'.format(node_component, component_href))
+        node = {'node': node_name,
+                'component': {'href': component_href},
                 'multiplicity': _to_int(n['node'].get('multiplicity', 1))}
         if _to_int(n['node'].get('maxProvisioningFailures')):
             node['maxProvisioningFailures'] = _to_int(n['node'].get('maxProvisioningFailures'))
         mappings = get_mappings(n['node'])
         if mappings:
             node['parameterMappings'] = mappings
-        nodes[n['node']['name']] = node
-    application['nodes'] = nodes
+        nodes.append(node)
+    if nodes:
+        application['nodes'] = nodes
     return application
 
 
@@ -437,8 +447,8 @@ def split_parameters(module):
     version_parameters = _get_list(_get_dict(module.get('parameters', {})).get('entry'))
     resources_requirements = {}
     cloud_parameters = {}
-    inputParameters = {}
-    outputParameters = {}
+    inputParameters = []
+    outputParameters = []
 
     if version_parameters:
         for p in version_parameters:
@@ -451,19 +461,21 @@ def split_parameters(module):
             if category == 'Cloud':
                 resources_requirements[name] = value
             elif category == 'Input':
-                inputParameters[name] = {}
+                input_parameter_dict = {'parameter': name.strip()}
                 if description:
-                    inputParameters[name]['description'] = description
+                    input_parameter_dict['description'] = description
                 if value:
-                    inputParameters[name]['value'] = str(value)
+                    input_parameter_dict['value'] = str(value)
+                inputParameters.append(input_parameter_dict)
             elif category == 'Output':
-                outputParameters[name] = {}
+                output_parameter_dict = {'parameter': name.strip()}
                 if description:
-                    outputParameters[name]['description'] = description
+                    output_parameter_dict['description'] = description
                 if value:
-                    outputParameters[name]['value'] = str(value)
+                    output_parameter_dict['value'] = str(value)
+                outputParameters.append(output_parameter_dict)
             elif not category:
-                print('warning: parameter category null or empty for "{}": {}. Skipping this parameter'.format(
+                logger.warning('parameter category null or empty for "{}": {}. Skipping this parameter'.format(
                     get_path(module), param))
 
             else:
@@ -487,7 +499,7 @@ def get_packages(version):
 
 
 def get_mappings(node):
-    cimi_mappings = {}
+    cimi_mappings = []
     mappings = _get_list(_get_dict(node.get('parameterMappings', {})).get('entry', []))
 
     for mapping in mappings:
@@ -496,18 +508,21 @@ def get_mappings(node):
         value = _to_str(parameter['value'])
         name = parameter['name']
 
-        cimi_mappings[name] = {'mapped': is_map, 'value': value}
+        mapping_value = {'parameter': name.strip(),
+                         'mapped': is_map,
+                         'value': value}
+
+        cimi_mappings.append(mapping_value)
 
     return cimi_mappings
 
 
 def upload_module(api, module, module_type):
-
     path = get_path(module)
     if mapping_old_version.get(path):
         return None
 
-    print('called upload_module for {} of type {}'.format(path, module_type))
+    logger.debug('called upload_module for {} of type {}'.format(path, module_type))
 
     id = None
     first = True
@@ -517,28 +532,31 @@ def upload_module(api, module, module_type):
 
         current_module_type = category_to_type(module_version)
         if module_type != current_module_type:
-            print('WARNING: module type changed from {} to {} for {}. Skipping...'.format(module_type, current_module_type, path))
+            logger.warning('module type changed from {} to {} for {}. Skipping...'.format(module_type,
+                                                                                          current_module_type, path))
             continue
 
         if module_type == 'COMPONENT':
 
             # parent may be different for each version!
             parent = module_version.get('moduleReferenceUri')
-            print('DEBUG: parent is {}'.format(parent))
-            print('DEBUG: version parent is {}'.format(module_version.get('moduleReferenceUri')))
+            logger.debug('parent is {}'.format(parent))
+            logger.debug('version parent is {}'.format(module_version.get('moduleReferenceUri')))
 
             if parent is None:
-                print('WARNING: component has no parent.  Skipping... {}, {}'.format(path, module_version['version']))
+                logger.warning('component has no parent.  Skipping... {}, {}'.format(path, module_version['version']))
                 continue
             else:
-                print('parent is {}'.format(parent))
+                logger.info('parent is {}'.format(parent))
                 if not mapping_old_version.get(parent):
                     try:
-                        print('fetch parent {}'.format(parent))
+                        logger.info('fetch parent {}'.format(parent))
                         parent_module = api.get_module(parent)
                         upload_module(api, parent_module, category_to_type(parent_module))
                     except Exception as e:
-                        print('ERROR: referenced parent does not exist.  Using invalid module reference... {}, {}, {}'.format(path, parent, module_version['version']))
+                        logger.error(
+                            'referenced parent does not exist.  Using invalid module reference... {}, {}, {}'.format(
+                                path, parent, module_version['version']))
                         mapping_old_version["module/{}/{}".format(path, module_version['version'])] \
                             = "{}_{}".format('module/invalid', version_index)
                         mapping_old_version["module/{}".format(path)] = "{}".format('module/invalid')
@@ -556,7 +574,9 @@ def upload_module(api, module, module_type):
             mapping_old_version["module/{}/{}".format(path, module_version['version'])] \
                 = "{}_{}".format(id, version_index)
         except Exception as e:
-            print('WARNING: exception raised while processing module {} version {}.  Not copied.'.format(path, module_version['version']))
+            print_exc(file=sys.stdout)
+            logger.warning('exception raised while processing module {} version {}.  Not copied.'.format(
+                path, module_version['version']))
 
     if id is not None:
         mapping_old_version["module/{}".format(path)] = "{}".format(id)
@@ -564,15 +584,15 @@ def upload_module(api, module, module_type):
         mapping_old_version["module/{}".format(path)] = "{}".format('module/invalid')
 
     if len(module_versions) == 0:
-        print('No version for module "{}". Skipping'.format(get_path(module)))
+        logger.warning('No version for module "{}". Skipping'.format(get_path(module)))
 
 
 def convert_and_upload_modules(api, modules):
     for module in modules:
-        print('{} with {} versions'.format(get_module_path(module), len(module.get('versions', []))))
         module_type = category_to_type(module)
-
-        print(module_type)
+        logger.info('{} of type {} with {} versions'.format(get_module_path(module),
+                                                             module_type,
+                                                             len(module.get('versions', []))))
         if not module_type:
             continue
 
@@ -580,11 +600,11 @@ def convert_and_upload_modules(api, modules):
 
 
 def main():
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.WARNING)
 
     requests_log = logging.getLogger("requests")
     requests_log.setLevel(logging.INFO)
-    requests_log.propagate = True
+    requests_log.propagate = False
 
     config = parse_arguments()
     api = get_api(config)
