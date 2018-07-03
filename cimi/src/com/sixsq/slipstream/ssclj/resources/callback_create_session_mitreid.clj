@@ -37,7 +37,7 @@
                 {:keys [username] :as userinfo} (when sub (oidc-utils/get-mitreid-userinfo userProfileURL access-token))]
             (log/debug "MITREid access token claims for" instance ":" (pr-str claims))
             (if sub
-              (if-let [matched-user (ex/match-oidc-username username instance)]
+              (if-let [matched-user (ex/match-oidc-username :mitreid username instance)]
                 (let [claims (cond-> (auth-internal/create-claims matched-user)
                                      session-id (assoc :session session-id)
                                      session-id (update :roles #(str session-id " " %))
