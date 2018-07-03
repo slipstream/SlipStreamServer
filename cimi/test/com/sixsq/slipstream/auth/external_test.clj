@@ -71,7 +71,7 @@
                             :state        "ACTIVE"})
     (let [users (db/get-all-users)]
       (is (= 1 (count users))))
-    
+
     (is (= ["oidc:not-missing"] (get-identifiers :oidc {:external-login    "not-missing"
                                                         :external-email    "bad-address@example.com"
                                                         :fail-on-existing? false})))

@@ -36,7 +36,7 @@
                                                                             :instance          instance
                                                                             :fail-on-existing? true})]
                 (do
-                  (uiu/add-user-identifier! matched-user :mitreid sub instance)
+                  (uiu/add-user-identifier! matched-user :mitreid username instance)
                   matched-user)
                 (oidc-utils/throw-user-exists sub redirectURI))
               (oidc-utils/throw-no-subject redirectURI)))
