@@ -61,7 +61,7 @@
 
 (deftest check-create-user-when-missing!
   (let [users (db/get-active-users)
-        authn-methods #{:oidc :github :other :foo}]
+        authn-methods #{:oidc :github :other}]
 
 
     (is (zero? (count users)))

@@ -168,13 +168,12 @@
 
 
 
-
 (defn create-user!
   "Create a new user in the database. Values for 'email' and 'authn-login'
    must be provided. NOTE: The 'authn-login' value may be modified to avoid
    collisions with existing users. The value used to create the account is
    returned."
-  ([{:keys [authn-login authn-method external-login instance fail-on-existing?] :as user-record}]
+  ([{:keys [authn-login fail-on-existing?] :as user-record}]
    (if ((existing-user-names) authn-login)
      (when (not fail-on-existing?)
        authn-login)

@@ -30,6 +30,7 @@
        :body         {:identifier identifier
                       :user       {:href user-id}}})))
 
+
 (defn- to-am-kw
   [authn-method]
   (keyword (str (name authn-method) "login")))
@@ -66,6 +67,7 @@
       (= (count matched-users-fallback) 1) (get-user matched-users-fallback)
       (> (count matched-users-fallback) 1) (throw-ex matched-users-fallback))))
 
+
 (defn external-identity-exists?
   [authn-method external-login]
   (let [identifier (generate-identifier authn-method external-login)
@@ -74,6 +76,7 @@
                                  (catch Exception _
                                    nil))]
     (not (nil? user-identifier-record))))
+
 
 (defn find-identities-by-user
   [user-id]

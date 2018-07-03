@@ -44,8 +44,7 @@
         authn-methods #{:some-method :other-method :third-method}]
 
     (doseq [authn-method authn-methods]
-      (uiu/add-user-identifier! name authn-method external-login nil)
-      )
+      (uiu/add-user-identifier! name authn-method external-login nil))
 
     (let [results (uiu/find-identities-by-user (:id user))]
       (is (= (count authn-methods) (count results)))

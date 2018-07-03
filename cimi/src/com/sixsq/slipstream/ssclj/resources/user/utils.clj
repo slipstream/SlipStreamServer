@@ -111,8 +111,3 @@
            (throw (ex-info msg (r/map-response msg 500 resource-id)))))
        (let [msg "cannot create user callback"]
          (throw (ex-info msg (r/map-response msg 500 ""))))))))
-
-(defn create-user-identifier
-  []
-  (crud/add {})
-  )
