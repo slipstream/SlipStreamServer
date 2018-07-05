@@ -9,6 +9,7 @@
     [com.sixsq.slipstream.ssclj.resources.callback.utils :as utils]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.github.utils :as gu]
+    [com.sixsq.slipstream.ssclj.resources.user.user-identifier-utils :as uiu]
     [com.sixsq.slipstream.util.response :as r]))
 
 
@@ -30,7 +31,9 @@
                 (if-let [matched-user (ex/create-user-when-missing! :github {:external-login    github-login
                                                                              :external-email    github-email
                                                                              :fail-on-existing? true})]
-                  matched-user
+                  (do
+                    (uiu/add-user-identifier! matched-user :github github-login nil)
+                    matched-user)
                   (gu/throw-user-exists github-login redirectURI))
                 (gu/throw-no-matched-user redirectURI))))
           (gu/throw-no-user-info redirectURI))

@@ -10,6 +10,7 @@
     [com.sixsq.slipstream.ssclj.resources.callback.utils :as utils]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as oidc-utils]
+    [com.sixsq.slipstream.ssclj.resources.user.user-identifier-utils :as uiu]
     [com.sixsq.slipstream.util.response :as r]))
 
 
@@ -33,7 +34,9 @@
                                                                          :organization      realm
                                                                          :instance          instance
                                                                          :fail-on-existing? true})]
-                matched-user
+                (do
+                  (uiu/add-user-identifier! matched-user :oidc sub instance)
+                  matched-user)
                 (oidc-utils/throw-user-exists sub redirectURI))
               (oidc-utils/throw-no-subject redirectURI)))
           (catch Exception e

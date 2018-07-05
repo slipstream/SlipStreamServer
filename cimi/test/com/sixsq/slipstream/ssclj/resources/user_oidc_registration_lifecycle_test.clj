@@ -14,6 +14,7 @@
     [com.sixsq.slipstream.ssclj.resources.user :as user]
     [com.sixsq.slipstream.ssclj.resources.user-template :as ut]
     [com.sixsq.slipstream.ssclj.resources.user-template-oidc-registration :as oidc]
+    [com.sixsq.slipstream.ssclj.resources.user.user-identifier-utils :as uiu]
     [peridot.core :refer :all]
     [ring.util.codec :as codec]))
 
@@ -326,9 +327,10 @@
                                          :state)))
 
 
-                  (let [ss-username (db/find-username-by-authn :oidc username)
+                  (let [instance oidc/registration-method
+                        ss-username (uiu/find-username-by-identifier :oidc nil username)
                         user-record (->> username
-                                         (db/find-username-by-authn :oidc)
+                                         (uiu/find-username-by-identifier :oidc instance)
                                          (db/get-user))]
                     (is (not (nil? ss-username)))
                     (is (= email (:name user-record)))

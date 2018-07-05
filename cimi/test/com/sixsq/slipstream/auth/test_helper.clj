@@ -7,7 +7,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.user :as ur]
     [com.sixsq.slipstream.ssclj.resources.user-template :as ct]
-    [com.sixsq.slipstream.ssclj.resources.user-template-direct :as direct]))
+    [com.sixsq.slipstream.ssclj.resources.user-template-direct :as direct]
+    [com.sixsq.slipstream.ssclj.resources.user.user-identifier-utils :as uiu]))
 
 
 (def rname ur/resource-url)
@@ -46,3 +47,4 @@
 (defn add-user-for-test!
   [user]
   (crud/add (user-request user)))
+

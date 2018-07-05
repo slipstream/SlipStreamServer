@@ -378,7 +378,7 @@
                                                              {:login "GITHUB_USER"
                                                               :email "user@example.com"}))
 
-                        ex/match-existing-external-user (fn [authn-method external-login external-email]
+                        ex/match-existing-external-user (fn [authn-method external-login instance]
                                                           "MATCHED_USER" )
 
                         db/find-roles-for-username (fn [username]

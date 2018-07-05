@@ -10,11 +10,10 @@
     [com.sixsq.slipstream.ssclj.resources.callback.utils :as utils]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as oidc-utils]
+    [com.sixsq.slipstream.ssclj.resources.user.user-identifier-utils :as uiu]
     [com.sixsq.slipstream.util.response :as r]))
 
-
 (def ^:const action-name "user-mitreid-creation")
-
 
 (defn register-user
   [{{href :href} :targetResource {:keys [redirectURI]} :data callback-id :id :as callback-resource} {:keys [headers base-uri uri] :as request}]
@@ -36,7 +35,9 @@
                                                                             :lastname          familyName
                                                                             :instance          instance
                                                                             :fail-on-existing? true})]
-                matched-user
+                (do
+                  (uiu/add-user-identifier! matched-user :mitreid username instance)
+                  matched-user)
                 (oidc-utils/throw-user-exists sub redirectURI))
               (oidc-utils/throw-no-subject redirectURI)))
           (catch Exception e
