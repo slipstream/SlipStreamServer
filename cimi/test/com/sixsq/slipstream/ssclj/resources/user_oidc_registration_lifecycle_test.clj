@@ -251,9 +251,10 @@
 
             ;; try now with a fake code
 
-            (doseq [[user-number return-code cb-id val-url] (map (fn [n rc cb vu] [n rc cb vu])
+            (doseq [[user-number return-code create-status cb-id val-url] (map (fn [n rc cs cb vu] [n rc cs cb vu])
                                                                  (range)
                                                                  [400 303 303] ;; Expect 303 even on errors when redirectURI is provided
+                                                                 [201 303 303]
                                                                  [callback-id callback-id2 callback-id3]
                                                                  [validate-url validate-url2 validate-url3])]
 
@@ -316,7 +317,7 @@
                   (-> session-anon
                       (request (str val-url "?code=GOOD")
                                :request-method :get)
-                      (ltu/is-status 201))
+                      (ltu/is-status create-status))
 
                   (is (= "SUCCEEDED" (-> session-admin
                                          (request (str p/service-context cb-id))

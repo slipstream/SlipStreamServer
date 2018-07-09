@@ -129,7 +129,7 @@
                        (request base-uri
                                 :request-method :post
                                 :body (codec/form-encode {:href        href
-                                                          :redirectURI redirect-uri}))
+                                                          :redirectURI redirect-uri-example}))
                        (ltu/body->edn)
                        (ltu/is-status 303))
               uri3 (-> resp ltu/location)
@@ -194,7 +194,7 @@
 
             ;; try hitting the callback without the OAuth code parameter
             ;; when a redirectURI is present, the return is 303 even on errors
-            (doseq [[callback url status] (map vector callbacks validate-urls [400 303 303])]
+            (doseq [[callback url  status] (map vector callbacks validate-urls[400 303 303])]
               (reset-callback! callback)
               (-> session-anon
                   (request url
@@ -204,7 +204,7 @@
                   (ltu/is-status status)))
 
             ;; try hitting the callback with mocked codes
-            (doseq [[callback url status n] (map vector callbacks validate-urls [400 303 303] (range))]
+            (doseq [[callback url status create-status n] (map vector callbacks validate-urls [400 303 303] [201 303 303](range))]
               (reset-callback! callback)
 
               (let [github-login (str "GITHUB_USER_" n)
@@ -246,9 +246,7 @@
                       (request (str url "?code=GOOD")
                                :request-method :get)
                       (ltu/body->edn)
-                      (ltu/is-status 201))
-
-
+                      (ltu/is-status create-status))
 
                   (let [ss-username (uiu/find-username-by-identifier :github nil github-login)
                         user-record (->> github-login
