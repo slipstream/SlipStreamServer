@@ -23,14 +23,15 @@
                     :mandatory   true
                     :readOnly    true
                     :order       0
-                    :enum        ["a" "b" "c"]}
+                    :enum        ["andorra" "burmuda" "canada"]
+                    :autocomplete "country"}
         resource-desc {:identifier valid-desc
                        :other      valid-desc
                        :acl        valid-acl}]
 
     (stu/is-valid ::desc-spec/parameter-description valid-desc)
 
-    (doseq [k #{:category :description :mandatory :readOnly :order :enum}]
+    (doseq [k #{:category :description :mandatory :readOnly :order :enum :autocomplete}]
       (stu/is-valid ::desc-spec/parameter-description (dissoc valid-desc k)))
 
     (stu/is-invalid ::desc-spec/parameter-description (assoc valid-desc :displayName 1))
