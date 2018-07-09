@@ -24,20 +24,22 @@
 ;;
 (def ^:const desc
   (merge p/SessionTemplateDescription
-         {:username {:displayName "Username"
-                     :category    "general"
-                     :description "username"
-                     :type        "string"
-                     :mandatory   true
-                     :readOnly    false
-                     :order       20}
-          :password {:displayName "Password"
-                     :category    "general"
-                     :description "password"
-                     :type        "password"
-                     :mandatory   true
-                     :readOnly    false
-                     :order       21}}))
+         {:username {:displayName  "Username"
+                     :category     "general"
+                     :description  "username"
+                     :type         "string"
+                     :mandatory    true
+                     :readOnly     false
+                     :order        20
+                     :autocomplete "username"}
+          :password {:displayName  "Password"
+                     :category     "general"
+                     :description  "password"
+                     :type         "password"
+                     :mandatory    true
+                     :readOnly     false
+                     :order        21
+                     :autocomplete "password"}}))
 
 
 ;;

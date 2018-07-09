@@ -23,6 +23,20 @@
 (s/def ::enum (s/coll-of ::cimi-core/nonblank-string :min-count 1))
 (s/def ::instructions ::cimi-core/nonblank-string)
 
+;;
+;; This field is intended as a hint to browser (and other visual)
+;; clients on autofilling values.  If not specified, clients should
+;; default to a value of 'off'; otherwise, the value should be used.
+;;
+;; The HTML5 specification provides an exhaustive list of the values
+;; and how the browsers should behave.  Support is not perfect, but
+;; should be good enough to provide reasonable behavior.
+;;
+;; https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill
+;;
+(s/def ::autocomplete ::cimi-core/nonblank-string)
+
+
 (s/def ::parameter-description
   (su/only-keys :req-un [::type]
                 :opt-un [::displayName
@@ -32,6 +46,7 @@
                          ::readOnly
                          ::order
                          ::enum
+                         ::autocomplete
                          ::instructions]))
 
 (s/def ::resource-description
