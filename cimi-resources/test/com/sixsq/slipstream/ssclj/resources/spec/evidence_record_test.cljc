@@ -2,9 +2,8 @@
   (:require
     [clojure.spec.alpha :as s]
     [clojure.test :refer [deftest]]
-    [clojure.test :refer :all]
     [com.sixsq.slipstream.ssclj.resources.spec.evidence-record :as evspec]
-    [com.sixsq.slipstream.ssclj.resources.spec.util :as sut]
+    [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 (s/def :cimi.test/evidence-record (su/only-keys-maps evspec/evidence-record-spec))
@@ -39,13 +38,13 @@
               :class     "className"
               :log       ["log1", "log2"]}]
 
-    (sut/spec-valid? :cimi.test/evidence-record root)
+    (stu/is-valid :cimi.test/evidence-record root)
 
     ;; mandatory keywords
     (doseq [k #{:endTime :class :passed :planID :startTime}]
-      (sut/spec-not-valid? :cimi.test/evidence-record (dissoc root k)))
+      (stu/is-invalid :cimi.test/evidence-record (dissoc root k)))
 
     ;; optional keywords
     (doseq [k #{:log}]
-      (sut/spec-valid? :cimi.test/evidence-record (dissoc root k)))))
+      (stu/is-valid :cimi.test/evidence-record (dissoc root k)))))
 

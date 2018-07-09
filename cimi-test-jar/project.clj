@@ -27,6 +27,7 @@
                  [com.sixsq.slipstream/SlipStreamDbTesting-jar ~+version+ :scope "compile"]
                  [org.apache.curator/curator-test :scope "compile"]
                  [peridot :scope "compile"]
+                 [expound :scope "compile"]
                  [org.clojure/data.json]
                  [compojure]
                  [com.cemerick/url]

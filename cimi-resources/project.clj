@@ -21,6 +21,7 @@
 
   :source-paths ["src"]
 
+
   :pom-location "target/"
 
   :jvm-opts ["-Xmx2000m"]
