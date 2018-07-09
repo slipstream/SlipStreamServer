@@ -74,12 +74,13 @@
             href-create {:name         name-attr
                          :description  description-attr
                          :properties   properties-attr
-                         :resourceURI  "http://sixsq.com/slipstream/1/UserTemplateCreate" ;; FIXME: Why is this needed?
                          :userTemplate {:href           href
                                         :username       uname
                                         :password       plaintext-password
                                         :passwordRepeat plaintext-password
                                         :emailAddress   "jane@example.org"}}
+
+            href-create-redirect (assoc-in href-create [:userTemplate :redirectURI] "http://redirect.example.org")
             invalid-create (assoc-in href-create [:userTemplate :href] "user-template/unknown-template")]
 
 
@@ -111,6 +112,23 @@
                        :body (json/write-str invalid-create))
               (ltu/body->edn)
               (ltu/is-status 404)))
+
+
+
+        ;;Create user with redirect
+        (let [resp (-> session-anon
+                       (request base-uri
+                                :request-method :post
+                                :body (json/write-str href-create-redirect))
+                       (ltu/body->edn)
+                       (ltu/is-status 303))
+              id (get-in resp [:response :body :resource-id])
+              uri (-> resp
+                      (ltu/location))
+              abs-uri (str p/service-context (u/de-camelcase uri))]
+          (is (= "http://redirect.example.org" uri))
+          )
+
 
         ;; create a user anonymously
         (let [resp (-> session-anon
