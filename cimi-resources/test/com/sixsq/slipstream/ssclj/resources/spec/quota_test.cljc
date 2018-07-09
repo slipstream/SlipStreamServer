@@ -1,18 +1,17 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.quota-test
   (:require
-    [clojure.spec.alpha :as s]
-    [clojure.test :refer [are deftest is]]
+    [clojure.test :refer [deftest]]
     [com.sixsq.slipstream.ssclj.resources.quota :as sq]
-    [com.sixsq.slipstream.ssclj.resources.spec.quota :as quota]))
+    [com.sixsq.slipstream.ssclj.resources.spec.quota :as quota]
+    [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]))
 
-(def valid? (partial s/valid? ::quota/quota))
-(def invalid? (complement valid?))
 
 (def valid-acl {:owner {:principal "ADMIN"
                         :type      "ROLE"}
                 :rules [{:principal "jane"
                          :type      "USER"
                          :right     "VIEW"}]})
+
 
 (deftest check-quota
   (let [timestamp "1964-08-25T10:00:00.0Z"
@@ -29,28 +28,26 @@
                :aggregation "count:id"
                :limit       100}]
 
-    (are [expect-fn arg] (expect-fn arg)
-                         valid? quota
-                         valid? (dissoc quota :name)
-                         valid? (dissoc quota :description)
-                         invalid? (dissoc quota :resourceURI)
-                         invalid? (dissoc quota :created)
-                         invalid? (dissoc quota :updated)
-                         invalid? (dissoc quota :acl)
+    (stu/is-valid ::quota/quota quota)
 
-                         invalid? (dissoc quota :resource)
-                         invalid? (assoc quota :resource 0)
-                         invalid? (assoc quota :resource "")
+    (stu/is-invalid ::quota/quota (assoc quota :resource 0))
+    (stu/is-invalid ::quota/quota (assoc quota :resource ""))
 
-                         invalid? (dissoc quota :selection)
-                         invalid? (assoc quota :selection 0)
-                         invalid? (assoc quota :selection "")
-                         invalid? (assoc quota :selection "BAD==='FILTER'")
+    (stu/is-invalid ::quota/quota (assoc quota :selection 0))
+    (stu/is-invalid ::quota/quota (assoc quota :selection ""))
+    (stu/is-invalid ::quota/quota (assoc quota :selection "BAD==='FILTER'"))
 
-                         invalid? (dissoc quota :aggregation)
-                         invalid? (assoc quota :aggregation 0)
-                         invalid? (assoc quota :aggregation "")
+    (stu/is-invalid ::quota/quota (assoc quota :aggregation 0))
+    (stu/is-invalid ::quota/quota (assoc quota :aggregation ""))
 
-                         invalid? (dissoc quota :limit)
-                         invalid? (assoc quota :limit 0)
-                         invalid? (assoc quota :limit ""))))
+    (stu/is-invalid ::quota/quota (assoc quota :limit 0))
+    (stu/is-invalid ::quota/quota (assoc quota :limit ""))
+
+
+    ;; mandatory keywords
+    (doseq [k #{:id :resourceURI :created :updated :acl :resource :selection :aggregation :limit}]
+      (stu/is-invalid ::quota/quota (dissoc quota k)))
+
+    ;; optional keywords
+    (doseq [k #{:name :description}]
+      (stu/is-valid ::quota/quota (dissoc quota k)))))

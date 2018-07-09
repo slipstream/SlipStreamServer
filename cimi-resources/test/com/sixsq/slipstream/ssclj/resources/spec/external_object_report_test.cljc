@@ -1,11 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.external-object-report-test
   (:require
-    [clojure.test :refer [deftest is]]
+    [clojure.test :refer [deftest]]
     [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
     [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
     [com.sixsq.slipstream.ssclj.resources.external-object-template-report :as tpl]
     [com.sixsq.slipstream.ssclj.resources.spec.external-object-report :as eo-report]
-    [com.sixsq.slipstream.ssclj.resources.spec.util :as u]))
+    [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]))
 
 
 (def valid-acl {:owner {:principal "ADMIN"
@@ -27,13 +27,13 @@
                      :bucketName      "bucket-name"
                      :objectStoreCred {:href "credential/uuid"}})]
 
-    (u/spec-valid? ::eo-report/external-object root)
+    (stu/is-valid ::eo-report/external-object root)
 
     ;; mandatory keywords
     (doseq [k #{:id :resourceURI :created :updated :acl
                 :objectType :state :runUUID :component :objectName :bucketName :objectStoreCred}]
-      (u/spec-not-valid? ::eo-report/external-object (dissoc root k)))
+      (stu/is-invalid ::eo-report/external-object (dissoc root k)))
 
     ;; optional keywords
     (doseq [k #{:contentType}]
-      (u/spec-valid? ::eo-report/external-object (dissoc root k)))))
+      (stu/is-valid ::eo-report/external-object (dissoc root k)))))

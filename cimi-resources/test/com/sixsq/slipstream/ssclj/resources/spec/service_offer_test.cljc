@@ -1,15 +1,17 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.service-offer-test
   (:require
-    [clojure.spec.alpha :as s]
-    [clojure.test :refer [are deftest]]
+    [clojure.test :refer [deftest]]
     [com.sixsq.slipstream.ssclj.resources.service-offer :as so-resource]
-    [com.sixsq.slipstream.ssclj.resources.spec.service-offer :as so]))
+    [com.sixsq.slipstream.ssclj.resources.spec.service-offer :as so]
+    [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]))
+
 
 (def valid-acl {:owner {:principal "ADMIN"
                         :type      "ROLE"}
                 :rules [{:principal "ANON"
                          :type      "ROLE"
                          :right     "VIEW"}]})
+
 
 (deftest check-ServiceInfo
   (let [timestamp "1964-08-25T10:00:00.0Z"
@@ -21,10 +23,12 @@
                        :connector   {:href "myconnector"}
                        :other       "value"}]
 
-    (are [expect-fn arg] (expect-fn (s/valid? ::so/service-offer arg))
-                         true? service-offer
-                         false? (dissoc service-offer :created)
-                         false? (dissoc service-offer :updated)
-                         false? (dissoc service-offer :acl)
-                         false? (dissoc service-offer :connector)
-                         true? (dissoc service-offer :other))))
+    (stu/is-valid ::so/service-offer service-offer)
+
+    ;; mandatory keywords
+    (doseq [k #{:created :updated :acl :connector}]
+      (stu/is-invalid ::so/service-offer (dissoc service-offer k)))
+
+    ;; optional keywords
+    (doseq [k #{:other}]
+      (stu/is-valid ::so/service-offer (dissoc service-offer k)))))

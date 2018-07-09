@@ -1,18 +1,17 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.service-attribute-test
   (:require
-    [clojure.spec.alpha :as s]
-    [clojure.test :refer [are deftest is]]
+    [clojure.test :refer [deftest]]
     [com.sixsq.slipstream.ssclj.resources.service-attribute :as sa-resource]
-    [com.sixsq.slipstream.ssclj.resources.spec.service-attribute :as sa]))
+    [com.sixsq.slipstream.ssclj.resources.spec.service-attribute :as sa]
+    [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]))
 
-(def valid? (partial s/valid? ::sa/service-attribute))
-(def invalid? (complement valid?))
 
 (def valid-acl {:owner {:principal "ADMIN"
                         :type      "ROLE"}
                 :rules [{:principal "ANON"
                          :type      "ROLE"
                          :right     "VIEW"}]})
+
 
 (deftest check-attribute
   (let [timestamp "1964-08-25T10:00:00.0Z"
@@ -28,22 +27,17 @@
               :attributeName "test-attribute"
               :type          "string"}]
 
-    (are [expect-fn arg] (expect-fn arg)
-                         valid? attr
-                         invalid? (dissoc attr :name)
-                         invalid? (dissoc attr :description)
-                         invalid? (dissoc attr :created)
-                         invalid? (dissoc attr :updated)
-                         invalid? (dissoc attr :acl)
 
-                         invalid? (dissoc attr :prefix)
-                         invalid? (assoc attr :prefix 0)
-                         invalid? (assoc attr :prefix "")
+    (stu/is-valid ::sa/service-attribute attr)
 
-                         invalid? (dissoc attr :attributeName)
-                         invalid? (assoc attr :attributeName 0)
-                         invalid? (assoc attr :attributeName "")
+    (stu/is-invalid ::sa/service-attribute (assoc attr :prefix 0))
+    (stu/is-invalid ::sa/service-attribute (assoc attr :prefix ""))
 
-                         invalid? (dissoc attr :type)
-                         invalid? (assoc attr :type 0)
-                         valid? (assoc attr :type "string"))))
+    (stu/is-invalid ::sa/service-attribute (assoc attr :attributeName 0))
+    (stu/is-invalid ::sa/service-attribute (assoc attr :attributeName ""))
+
+    (stu/is-valid ::sa/service-attribute (assoc attr :type "string"))
+
+    ;; mandatory keywords
+    (doseq [k #{:id :name :description :created :updated :acl :prefix :attributeName :type}]
+      (stu/is-invalid ::sa/service-attribute (dissoc attr k)))))

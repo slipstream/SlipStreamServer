@@ -1,9 +1,10 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.service-benchmark-test
   (:require
-    [clojure.spec.alpha :as s]
-    [clojure.test :refer [are deftest]]
+    [clojure.test :refer [deftest]]
     [com.sixsq.slipstream.ssclj.resources.service-benchmark :as sb-resource]
-    [com.sixsq.slipstream.ssclj.resources.spec.service-benchmark :as sb]))
+    [com.sixsq.slipstream.ssclj.resources.spec.service-benchmark :as sb]
+    [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]))
+
 
 (def valid-acl {:owner {:principal "ADMIN"
                         :type      "ROLE"}
@@ -12,6 +13,7 @@
                          :right     "VIEW"}]})
 
 (def timestamp "1964-08-25T10:00:00.0Z")
+
 
 (def service-bmk {:id            (str sb-resource/resource-url "/uuid")
                   :resourceURI   sb-resource/resource-uri
@@ -42,12 +44,12 @@
 
 (deftest check-ServiceInfo
 
-  (are [expect-fn arg] (expect-fn (s/valid? ::sb/service-benchmark arg))
-                       true? service-bmk
-                       false? (dissoc service-bmk :created)
-                       false? (dissoc service-bmk :updated)
-                       false? (dissoc service-bmk :acl)
-                       false? (dissoc service-bmk :credentials)
-                       false? (dissoc service-bmk :serviceOffer)
-                       true? (dissoc service-bmk :bmkname:score)
-                       true? (dissoc service-bmk :other)))
+  (stu/is-valid ::sb/service-benchmark service-bmk)
+
+  ;; mandatory keywords
+  (doseq [k #{:created :updated :acl :credentials :serviceOffer}]
+    (stu/is-invalid ::sb/service-benchmark (dissoc service-bmk k)))
+
+  ;; optional keywords
+  (doseq [k #{:bmkname:score :other}]
+    (stu/is-valid ::sb/service-benchmark (dissoc service-bmk k))))
