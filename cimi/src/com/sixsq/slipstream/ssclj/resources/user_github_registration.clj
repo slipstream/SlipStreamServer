@@ -32,7 +32,6 @@
 
 
 (defmethod p/tpl->user user-template/registration-method
-
   [{:keys [href redirectURI] :as resource} {:keys [headers base-uri] :as request}]
   (let [[client-id clientSecret] (gu/config-github-params redirectURI (u/document-id href))]
     (if (and client-id clientSecret)

@@ -32,11 +32,16 @@
 
 
 (defmethod p/tpl->user user-template/registration-method
-  [{:keys [password] :as resource} request]
-  [nil (-> resource
-           (merge user-defaults)
-           (dissoc :passwordRepeat :instance :redirectURI)
-           (assoc :password (internal/hash-password password)))])
+  [{:keys [password redirectURI] :as resource} request]
+  (if redirectURI
+    [{:status 303, :headers {"Location" redirectURI}} (-> resource
+                                                          (merge user-defaults)
+                                                          (dissoc :passwordRepeat :instance :redirectURI)
+                                                          (assoc :password (internal/hash-password password)))]
+    [nil (-> resource
+             (merge user-defaults)
+             (dissoc :passwordRepeat :instance :redirectURI)
+             (assoc :password (internal/hash-password password)))]))
 
 
 ;;

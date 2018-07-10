@@ -1,18 +1,17 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.job-test
   (:require
-    [clojure.spec.alpha :as s]
-    [clojure.test :refer [are deftest is]]
+    [clojure.test :refer [deftest]]
     [com.sixsq.slipstream.ssclj.resources.job :as sj]
-    [com.sixsq.slipstream.ssclj.resources.spec.job :as job]))
+    [com.sixsq.slipstream.ssclj.resources.spec.job :as job]
+    [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]))
 
-(def valid? (partial s/valid? ::job/job))
-(def invalid? (complement valid?))
 
 (def valid-acl {:owner {:principal "ADMIN"
                         :type      "ROLE"}
                 :rules [{:principal "jane"
                          :type      "USER"
                          :right     "VIEW"}]})
+
 
 (deftest check-job
   (let [timestamp "1964-08-25T10:00:00.0Z"
@@ -26,15 +25,22 @@
              :action      "add"
              :targetResource {:href "abc/def"}
              :affectedResources [{:href "abc/def"}]}]
-    (are [expect-fn arg] (expect-fn arg)
-                         valid? job
-                         valid? (assoc job :parentJob "job/id")
-                         valid? (assoc job :state "RUNNING")
-                         valid? (assoc job :returnCode 10000)
-                         valid? (dissoc job :targetResource)
-                         valid? (dissoc job :affectedResources)
-                         valid? (assoc job :progress 100)
-                         invalid? (assoc job :progress 101)
-                         invalid? (assoc job :state "XY")
-                         invalid? (assoc job :parentJob "notjob/id")
-                         )))
+
+    (stu/is-valid ::job/job job)
+
+    (stu/is-valid ::job/job (assoc job :parentJob "job/id"))
+    (stu/is-valid ::job/job (assoc job :state "RUNNING"))
+    (stu/is-valid ::job/job (assoc job :returnCode 10000))
+    (stu/is-valid ::job/job (assoc job :progress 100))
+
+    (stu/is-invalid ::job/job (assoc job :progress 101))
+    (stu/is-invalid ::job/job (assoc job :state "XY"))
+    (stu/is-invalid ::job/job (assoc job :parentJob "notjob/id"))
+
+    ;; mandatory keywords
+    (doseq [k #{:id :resourceURI :created :updated :acl :state :progress :action}]
+      (stu/is-invalid ::job/job (dissoc job k)))
+
+    ;; optional keywords
+    (doseq [k #{:targetResource :affectedResources}]
+      (stu/is-valid ::job/job (dissoc job k)))))

@@ -14,6 +14,7 @@
     [com.sixsq.slipstream.ssclj.resources.user :as user]
     [com.sixsq.slipstream.ssclj.resources.user-template :as ut]
     [com.sixsq.slipstream.ssclj.resources.user-template-oidc-registration :as oidc]
+    [com.sixsq.slipstream.ssclj.resources.user.user-identifier-utils :as uiu]
     [peridot.core :refer :all]
     [ring.util.codec :as codec]))
 
@@ -250,11 +251,12 @@
 
             ;; try now with a fake code
 
-            (doseq [[user-number return-code cb-id val-url] (map (fn [n rc cb vu] [n rc cb vu])
-                                                                 (range)
-                                                                 [400 303 303] ;; Expect 303 even on errors when redirectURI is provided
-                                                                 [callback-id callback-id2 callback-id3]
-                                                                 [validate-url validate-url2 validate-url3])]
+            (doseq [[user-number return-code create-status cb-id val-url] (map (fn [n rc cs cb vu] [n rc cs cb vu])
+                                                                               (range)
+                                                                               [400 303 303] ;; Expect 303 even on errors when redirectURI is provided
+                                                                               [201 303 303]
+                                                                               [callback-id callback-id2 callback-id3]
+                                                                               [validate-url validate-url2 validate-url3])]
 
               (let [username (str "OIDC_USER_" user-number)
                     email (format "user-%s@example.com" user-number)
@@ -315,7 +317,7 @@
                   (-> session-anon
                       (request (str val-url "?code=GOOD")
                                :request-method :get)
-                      (ltu/is-status 201))
+                      (ltu/is-status create-status))
 
                   (is (= "SUCCEEDED" (-> session-admin
                                          (request (str p/service-context cb-id))
@@ -326,9 +328,10 @@
                                          :state)))
 
 
-                  (let [ss-username (db/find-username-by-authn :oidc username)
+                  (let [instance oidc/registration-method
+                        ss-username (uiu/find-username-by-identifier :oidc nil username)
                         user-record (->> username
-                                         (db/find-username-by-authn :oidc)
+                                         (uiu/find-username-by-identifier :oidc instance)
                                          (db/get-user))]
                     (is (not (nil? ss-username)))
                     (is (= email (:name user-record)))

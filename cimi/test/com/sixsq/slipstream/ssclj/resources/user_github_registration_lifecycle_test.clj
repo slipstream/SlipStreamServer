@@ -14,6 +14,7 @@
     [com.sixsq.slipstream.ssclj.resources.user :as user]
     [com.sixsq.slipstream.ssclj.resources.user-template :as ut]
     [com.sixsq.slipstream.ssclj.resources.user-template-github-registration :as github]
+    [com.sixsq.slipstream.ssclj.resources.user.user-identifier-utils :as uiu]
     [peridot.core :refer :all]
     [ring.util.codec :as codec]))
 
@@ -34,7 +35,6 @@
 
 (def configuration-user-github {:configurationTemplate {:service      "session-github" ;;reusing configuration from session GitHub
                                                         :instance     github/registration-method
-
                                                         :clientID     "FAKE_CLIENT_ID"
                                                         :clientSecret "ABCDEF..."}})
 
@@ -129,7 +129,7 @@
                        (request base-uri
                                 :request-method :post
                                 :body (codec/form-encode {:href        href
-                                                          :redirectURI redirect-uri}))
+                                                          :redirectURI redirect-uri-example}))
                        (ltu/body->edn)
                        (ltu/is-status 303))
               uri3 (-> resp ltu/location)
@@ -204,7 +204,7 @@
                   (ltu/is-status status)))
 
             ;; try hitting the callback with mocked codes
-            (doseq [[callback url status n] (map vector callbacks validate-urls [400 303 303] (range))]
+            (doseq [[callback url status create-status n] (map vector callbacks validate-urls [400 303 303] [201 303 303] (range))]
               (reset-callback! callback)
 
               (let [github-login (str "GITHUB_USER_" n)
@@ -219,7 +219,7 @@
                                                                  (when (= access-code "GOOD_ACCESS_CODE")
                                                                    {:login github-login, :email email}))
 
-                              ex/match-existing-external-user (fn [authn-method external-login external-email]
+                              ex/match-existing-external-user (fn [authn-method external-login instance]
                                                                 "MATCHED_USER")]
 
                   (-> session-anon
@@ -239,21 +239,19 @@
                       (ltu/message-matches #".*unable to retrieve GitHub user information.*")
                       (ltu/is-status status))
 
-                  (is (nil? (db/find-username-by-authn :github github-login)))
+                  (is (nil? (uiu/find-username-by-identifier :github nil github-login)))
 
                   (reset-callback! callback)
                   (-> session-anon
                       (request (str url "?code=GOOD")
                                :request-method :get)
                       (ltu/body->edn)
-                      (ltu/is-status 201))
+                      (ltu/is-status create-status))
 
-
-
-                  (let [ss-username (db/find-username-by-authn :github github-login)
+                  (let [ss-username (uiu/find-username-by-identifier :github nil github-login)
                         user-record (->> github-login
-                             (db/find-username-by-authn :github)
-                             (db/get-user))]
+                                         (uiu/find-username-by-identifier :github nil)
+                                         (db/get-user))]
                     (is (not (nil? ss-username)))
 
                     (is (= email (:name user-record)))

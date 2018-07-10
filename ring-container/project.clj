@@ -1,6 +1,6 @@
-(def +version+ "3.54-SNAPSHOT")
+(def +version+ "3.55-SNAPSHOT")
 
-(defproject com.sixsq.slipstream/slipstream-ring-container "3.54-SNAPSHOT"
+(defproject com.sixsq.slipstream/slipstream-ring-container "3.55-SNAPSHOT"
 
   :description "simple ring container for micro-services"
 

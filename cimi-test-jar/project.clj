@@ -1,6 +1,6 @@
-(def +version+ "3.54-SNAPSHOT")
+(def +version+ "3.55-SNAPSHOT")
 
-(defproject com.sixsq.slipstream/SlipStreamCljResourcesTests-jar "3.54-SNAPSHOT"
+(defproject com.sixsq.slipstream/SlipStreamCljResourcesTests-jar "3.55-SNAPSHOT"
 
   :description "cimi server testing utilities"
 
@@ -27,6 +27,7 @@
                  [com.sixsq.slipstream/SlipStreamDbTesting-jar ~+version+ :scope "compile"]
                  [org.apache.curator/curator-test :scope "compile"]
                  [peridot :scope "compile"]
+                 [expound :scope "compile"]
                  [org.clojure/data.json]
                  [compojure]
                  [com.cemerick/url]

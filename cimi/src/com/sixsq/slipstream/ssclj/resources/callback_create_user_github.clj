@@ -9,6 +9,7 @@
     [com.sixsq.slipstream.ssclj.resources.callback.utils :as utils]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.github.utils :as gu]
+    [com.sixsq.slipstream.ssclj.resources.user.user-identifier-utils :as uiu]
     [com.sixsq.slipstream.util.response :as r]))
 
 
@@ -17,6 +18,7 @@
 
 (defn register-user
   [{{href :href} :targetResource {:keys [redirectURI]} :data :as callback-resource} request]
+
   (let [instance (u/document-id href)
         [client-id client-secret] (gu/config-github-params redirectURI instance)]
     (if-let [code (uh/param-value request :code)]
@@ -30,7 +32,9 @@
                 (if-let [matched-user (ex/create-user-when-missing! :github {:external-login    github-login
                                                                              :external-email    github-email
                                                                              :fail-on-existing? true})]
-                  matched-user
+                  (do
+                    (uiu/add-user-identifier! matched-user :github github-login nil)
+                    matched-user)
                   (gu/throw-user-exists github-login redirectURI))
                 (gu/throw-no-matched-user redirectURI))))
           (gu/throw-no-user-info redirectURI))
@@ -39,13 +43,15 @@
 
 
 (defmethod callback/execute action-name
-  [{callback-id :id :as callback-resource} request]
+  [{callback-id :id {:keys [redirectURI]} :data :as callback-resource} request]
   (log/debug "Executing callback" callback-id)
   (try
     (if-let [username (register-user callback-resource request)]
       (do
         (utils/callback-succeeded! callback-id)
-        (r/map-response (format "user '%s' created" username) 201))
+        (if redirectURI
+          (r/map-response (format "user '%s' created" username) 303 callback-id (or redirectURI "/"))
+          (r/map-response (format "user '%s' created" username) 201)))
       (do
         (utils/callback-failed! callback-id)
         (r/map-response "could not create github user" 400)))
