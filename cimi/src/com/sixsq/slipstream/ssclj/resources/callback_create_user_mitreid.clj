@@ -47,13 +47,15 @@
 
 
 (defmethod callback/execute action-name
-  [{callback-id :id :as callback-resource} request]
+  [{callback-id :id {:keys [redirectURI]} :data :as callback-resource} request]
   (log/debug "Executing callback" callback-id)
   (try
     (if-let [username (register-user callback-resource request)]
       (do
         (utils/callback-succeeded! callback-id)
-        (r/map-response (format "user '%s' created" username) 201))
+        (if redirectURI
+          (r/map-response (format "user '%s' created" username) 303 callback-id redirectURI)
+          (r/map-response (format "user '%s' created" username) 201)))
       (do
         (utils/callback-failed! callback-id)
         (r/map-response "could not create MITREid user" 400)))
