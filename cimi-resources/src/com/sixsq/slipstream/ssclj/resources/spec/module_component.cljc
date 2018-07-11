@@ -11,14 +11,14 @@
 
 (s/def ::parent ::module/link)
 
-(s/def ::cpu pos-int?)
-(s/def ::ram pos-int?)
-(s/def ::disk pos-int?)
-(s/def ::volatileDisk pos-int?)
+(s/def ::cpu nat-int?)
+(s/def ::ram nat-int?)
+(s/def ::disk nat-int?)
+(s/def ::volatileDisk nat-int?)
 (s/def ::networkType #{"public" "private"})
 
 ;; parameter keywords are used in components and application parameter mappings
-(def ^:const parameter-name-regex #"^[a-zA-Z0-9]+([_\.-][a-zA-Z0-9]+)*$")
+(def ^:const parameter-name-regex #"^[a-zA-Z0-9]+([_\.-][a-zA-Z0-9]*)*$")
 (s/def ::parameter (s/and string? #(re-matches parameter-name-regex %)))
 
 (s/def ::description ::cimi-core/nonblank-string)

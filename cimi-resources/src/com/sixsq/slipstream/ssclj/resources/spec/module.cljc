@@ -13,7 +13,7 @@
 (s/def ::link (s/keys :req-un [::href]))
 
 
-(def ^:const path-regex #"^[a-zA-Z][\w\.-]*(/[a-zA-Z][\w\.-]*)*$")
+(def ^:const path-regex #"^[a-zA-Z0-9][\w\.-]*(/[a-zA-Z0-9][\w\.-]*)*$")
 
 (defn path? [v] (boolean (re-matches path-regex v)))
 

@@ -10,10 +10,10 @@
 (s/def ::commit ::cimi-core/nonblank-string)
 (s/def ::author ::cimi-core/nonblank-string)
 
-(s/def ::cpu pos-int?)
-(s/def ::ram pos-int?)
-(s/def ::disk pos-int?)
-(s/def ::volatileDisk pos-int?)
+(s/def ::cpu nat-int?)
+(s/def ::ram nat-int?)
+(s/def ::disk nat-int?)
+(s/def ::volatileDisk nat-int?)
 (s/def ::networkType #{"public" "private"})
 
 (s/def ::os #{"CentOS" "Debian" "Fedora" "OpenSuSE" "RedHat" "SLES" "Ubuntu" "Windows" "Other"})

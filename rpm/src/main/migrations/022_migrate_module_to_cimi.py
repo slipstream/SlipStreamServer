@@ -23,6 +23,7 @@ import codecs
 import json
 import logging
 import os
+import re
 import sys
 from traceback import print_exc
 
@@ -34,8 +35,8 @@ logging.basicConfig(level=logging.WARNING,
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
 
-api_kb = Api('https://185.19.29.154', insecure=True)
-logger.info(api_kb.login_internal('super', 'de268cf32f6b'))
+api_kb = Api('https://159.100.243.87', insecure=True)
+logger.info(api_kb.login_internal('super', 'c92687479230'))
 
 mapping_old_version = {}
 
@@ -245,15 +246,16 @@ def convert_module(api, module_type, module):
 
 
 def convert_os(os):
-    return {'centos': 'CentOS',
-            'debian': 'Debian',
-            'fedora': 'Fedora',
-            'opensuse': 'OpenSuSE',
-            'redhat': 'RedHat',
-            'sles': 'SLES',
-            'ubuntu': 'Ubuntu',
-            'windows': 'Windows',
-            'other': 'Other'}.get(os.lower())
+    conversions = {'centos': 'CentOS',
+                   'debian': 'Debian',
+                   'fedora': 'Fedora',
+                   'opensuse': 'OpenSuSE',
+                   'redhat': 'RedHat',
+                   'sles': 'SLES',
+                   'ubuntu': 'Ubuntu',
+                   'windows': 'Windows',
+                   'other': 'Other'}
+    return conversions.get(os.lower(), "Other")
 
 
 # def search_cimi_module(path):
@@ -306,7 +308,13 @@ def component_attributes(module):
     component = {}
     if use_default_when_blank(module['commit'].get('comment'), None):
         component['commit'] = module['commit'].get('comment')
-    component['author'] = module['commit']['author']
+
+    author = module['commit']['author']
+    if author:
+        component['author'] = module['commit']['author']
+    else:
+        component['author'] = 'super'
+
     if module.get('moduleReferenceUri'):
         component['parent'] = {'href': mapping_old_version[module.get('moduleReferenceUri')]}
     if _to_int(res_req.get('cpu.nb')):
@@ -496,6 +504,22 @@ def get_targets_by_name(version):
 def get_packages(version):
     packages = _get_list(_get_dict(version.get('packages', {})).get('package', []))
     return [p['name'] for p in packages]
+
+
+def fix_parameter_name(parameter):
+
+    # remove all whitespace
+    updated_parameter = re.sub(r'\s+', '', parameter)
+
+    # remove anything before a colon
+    updated_parameter = re.sub(r'.+:', '', updated_parameter)
+
+    # remove invalid characters
+    updated_parameter = re.sub(r'[^a-zA-Z0-9_.-]+', '', updated_parameter)
+
+    if updated_parameter != parameter:
+        logger.warning('parameter name changed from {} to {}.'.format(parameter, updated_parameter))
+    return updated_parameter
 
 
 def get_mappings(node):
