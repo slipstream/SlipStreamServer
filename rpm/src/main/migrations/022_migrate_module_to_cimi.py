@@ -154,10 +154,13 @@ def _to_str(x):
     if x is None:
         return None
     try:
-        return str(codecs.encode(x, 'utf-8'))
-    except ValueError as e:
-        logger.warning('ignoring character encoding error: {}'.format(e))
-        return str(codecs.encode(x, 'utf-8', 'ignore'))
+        return str(x)
+    except ValueError:
+        try:
+            return str(codecs.encode(x, 'utf-8'))
+        except ValueError as e:
+            logger.warning('ignoring character encoding error: {}'.format(e))
+            return str(codecs.encode(x, 'utf-8', 'ignore'))
 
 
 def _to_int(x):
