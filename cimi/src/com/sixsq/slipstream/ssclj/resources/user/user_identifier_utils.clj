@@ -35,13 +35,22 @@
   [authn-method]
   (keyword (str (name authn-method) "login")))
 
+(defn sanitize-login-name
+  "Replace characters not satisfying [a-zA-Z0-9_] with underscore"
+  [s]
+  (when s (str/replace s #"[^a-zA-Z0-9_-]" "_")))
+
 (defn find-username-by-identifier
   [authn-method instance external-login]
   (let [identifier (generate-identifier authn-method external-login instance)
-        user-identifier-record (try
-                                 (crud/retrieve-by-id (str "user-identifier/" (u/md5 identifier)))
-                                 (catch Exception _
-                                   nil))
+        sanitized-identifier (generate-identifier authn-method (sanitize-login-name external-login) instance)
+        query-identifier (fn [i] (try
+                                   (crud/retrieve-by-id (str "user-identifier/" (u/md5 i)))
+                                   (catch Exception _
+                                     nil)))
+        user-identifier-record (query-identifier identifier)
+        user-identifier-sanitized (query-identifier sanitized-identifier)
+        user-identifier-in-use (or user-identifier-record user-identifier-sanitized)
         filter-str-fallback (format "%s='%s' and %s" (name (to-am-kw authn-method)) external-login active-user-filter)
         create-filter (fn [filter-string] {:filter (parser/parse-cimi-filter filter-string)})
         filter-fallback (create-filter filter-str-fallback)
@@ -57,15 +66,14 @@
         get-user (fn [users] (:username (first users)))
         throw-ex (fn [users] (throw (Exception. (str "There should be only one result for "
                                                      external-login ". But found " (count users)))))]
-    (cond
-      user-identifier-record (some-> user-identifier-record
-                                     :user
-                                     :href
-                                     (ignore-user-when-deleted)
-                                     (str/split #"/")
-                                     second)
-      (= (count matched-users-fallback) 1) (get-user matched-users-fallback)
-      (> (count matched-users-fallback) 1) (throw-ex matched-users-fallback))))
+    (cond user-identifier-in-use (some-> user-identifier-in-use
+                                         :user
+                                         :href
+                                         (ignore-user-when-deleted)
+                                         (str/split #"/")
+                                         second)
+          (= (count matched-users-fallback) 1) (get-user matched-users-fallback)
+          (> (count matched-users-fallback) 1) (throw-ex matched-users-fallback))))
 
 
 (defn external-identity-exists?
