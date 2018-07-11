@@ -154,9 +154,9 @@ def _to_str(x):
     if x is None:
         return None
     try:
-        return str(x)
-    except UnicodeEncodeError as e:
-        logger.warning('character encoding error: {}'.format(e))
+        return str(codecs.encode(x, 'utf-8'))
+    except ValueError as e:
+        logger.warning('ignoring character encoding error: {}'.format(e))
         return str(codecs.encode(x, 'utf-8', 'ignore'))
 
 
