@@ -73,14 +73,12 @@
         authn-method :some-method
         unsanitized-external-login "120720737412@eduid_chhttps#$$**eduid_ch_idp_shibboleth!https//fed-id.nuv.la]]samlbridge%module^php_*saml/sp\\metadata}php_sixsq}saml|bridge'iqqrh4oiyshzcw9o40cvo0;pgka_"
         sanitized-external-login (uiu/sanitize-login-name unsanitized-external-login)
-
         user {:id           (str "user/" name)
               :username     name
               :password     "12345"
               :emailAddress "a@b.c"}
         _ (th/add-user-for-test! user)
-        instances #{"instance1" "instance2" "instance3"}
-        ]
+        instances #{"instance1" "instance2" "instance3"}]
 
     ;;Username should be found both sanitized and unsanitized login
     (doseq [instance instances]
@@ -95,7 +93,7 @@
     (let [identifiers (uiu/find-identities-by-user (:id user))]
     (is (= (count instances) (count identifiers)))
 
-    ;;Check that eventually the identifier is the unsanitized one
+    ;;Check that eventually the stored identifier is the unsanitized one
     (is( = unsanitized-external-login (->> identifiers
                                               (map :identifier)
                                               (map #(str/split % #":"))

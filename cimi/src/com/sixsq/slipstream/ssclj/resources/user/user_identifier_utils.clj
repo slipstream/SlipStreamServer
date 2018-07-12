@@ -115,11 +115,11 @@
                                                       (str/split #"/")
                                                       second)
                        (= (count matched-users-fallback) 1) (get-user matched-users-fallback)
-                       (> (count matched-users-fallback) 1) (throw-ex matched-users-fallback))
-        ]
-    (update-sanitized-identifiers! username authn-method instance external-login)
-    username
-    ))
+                       (> (count matched-users-fallback) 1) (throw-ex matched-users-fallback))]
+    (do
+      ;;update mangled identifiers to their unmangled version when needed
+      (update-sanitized-identifiers! username authn-method instance external-login)
+      username)))
 
 (defn find-identities-by-user
   [user-id]
