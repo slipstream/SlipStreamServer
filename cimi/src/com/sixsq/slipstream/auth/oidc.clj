@@ -24,7 +24,7 @@
         :access_token)
     (catch Exception e
       (let [client-secret? (str (boolean client-secret))]
-        (if-let [{:keys [status :as data]} (ex-data e)]
+        (if-let [{:keys [status] :as data} (ex-data e)]
           (log/errorf "error status %s getting access token from %s with client_id %s, code %s, and client_secret %s\n%s"
                       status tokenURL client-id oidc-code client-secret? (with-out-str (pprint data)))
           (log/errorf "unexpected error when getting access token from %s with client_id %s, code %s, and client_secret %s\n%s"
