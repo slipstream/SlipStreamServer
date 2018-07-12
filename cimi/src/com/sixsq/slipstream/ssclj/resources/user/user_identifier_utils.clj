@@ -1,12 +1,14 @@
 (ns com.sixsq.slipstream.ssclj.resources.user.user-identifier-utils
-  (:require [clojure.string :as str]
-            [clojure.tools.logging :as log]
-            [com.sixsq.slipstream.db.filter.parser :as parser]
-            [com.sixsq.slipstream.db.impl :as db]
-            [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-            [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+  (:require
+    [clojure.string :as str]
+    [com.sixsq.slipstream.db.filter.parser :as parser]
+    [com.sixsq.slipstream.db.impl :as db]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+
 
 (def ^:private active-user-filter "(state='ACTIVE')")
+
 
 (defn generate-identifier
   ([authn-method external-login]
@@ -32,11 +34,10 @@
                       :user       {:href user-id}}})))
 
 
-
-
 (defn- to-am-kw
   [authn-method]
   (keyword (str (name authn-method) "login")))
+
 
 (defn external-identity-exists?
   ([authn-method external-login]
@@ -53,6 +54,7 @@
                                   (catch Exception _
                                     nil))]
      (not (nil? user-identifier-record)))))
+
 
 (defn sanitize-login-name
   "Replace characters not satisfying [a-zA-Z0-9_] with underscore"
@@ -121,6 +123,7 @@
       (update-sanitized-identifiers! username authn-method instance external-login)
       username)))
 
+
 (defn find-identities-by-user
   [user-id]
   (let [filter-str (format "user/href='%s'" user-id)
@@ -130,5 +133,4 @@
                                         (second (db/query "UserIdentifier" {:cimi-params f
                                                                             :user-roles  ["ADMIN"]}))
                                         (catch Exception _ [])))]
-
     (query-user-identities filter)))
