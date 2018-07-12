@@ -63,7 +63,7 @@
       username-by-authn
       (when-not username-by-authn (if-not
                                     (or (db/user-exists? (or external-login username))
-                                        (uiu/external-identity-exists? authn-method (or external-login username)))
+                                        (uiu/user-identity-exists? authn-method (or external-login username)))
                                     (create-slipstream-user! (assoc external-record
                                                                :authn-login username
                                                                :external-login external-login
