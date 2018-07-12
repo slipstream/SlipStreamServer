@@ -67,3 +67,37 @@
     (let [results (uiu/find-identities-by-user (:id user))]
       (is (= 1 (count results)))
       (is (= (set (map :identifier results)) (set (map #(uiu/generate-identifier % external-login instance) authn-methods)))))))
+
+(deftest find-username-by-identifier
+  (let [name "some-username"
+        authn-method :some-method
+        unsanitized-external-login "120720737412@eduid_chhttps#$$**eduid_ch_idp_shibboleth!https//fed-id.nuv.la]]samlbridge%module^php_*saml/sp\\metadata}php_sixsq}saml|bridge'iqqrh4oiyshzcw9o40cvo0;pgka_"
+        sanitized-external-login (uiu/sanitize-login-name unsanitized-external-login)
+
+        user {:id           (str "user/" name)
+              :username     name
+              :password     "12345"
+              :emailAddress "a@b.c"}
+        _ (th/add-user-for-test! user)
+        instances #{"instance1" "instance2" "instance3"}
+        ]
+
+    ;;Username should be found both sanitized and unsanitized login
+    (doseq [instance instances]
+      ;;Create User identifier with a sanitized identifier
+      (uiu/add-user-identifier! name authn-method sanitized-external-login instance)
+      (is (= name (uiu/find-username-by-identifier authn-method instance sanitized-external-login)))
+      (is (= name (uiu/find-username-by-identifier authn-method instance unsanitized-external-login))))
+
+
+    (Thread/sleep 2000) ;; Need some time for complete removal of the sanitized identifier
+
+    (let [identifiers (uiu/find-identities-by-user (:id user))]
+    (is (= (count instances) (count identifiers)))
+
+    ;;Check that eventually the identifier is the unsanitized one
+    (is( = unsanitized-external-login (->> identifiers
+                                              (map :identifier)
+                                              (map #(str/split % #":"))
+                                              (map second)
+                                              first))))))
