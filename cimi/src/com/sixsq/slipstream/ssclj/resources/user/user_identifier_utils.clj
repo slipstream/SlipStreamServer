@@ -10,8 +10,7 @@
 (def ^:private active-user-filter "(state='ACTIVE')")
 
 
-(defn
-  generate-identifier
+(defn generate-identifier
   ([authn-method external-login]
    (generate-identifier authn-method external-login nil))
   ([authn-method external-login instance]
