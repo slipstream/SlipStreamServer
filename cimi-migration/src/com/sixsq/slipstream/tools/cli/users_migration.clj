@@ -3,7 +3,9 @@
     [com.sixsq.slipstream.db.filter.parser :as parser]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.db.loader :as db-loader]
-    [taoensso.timbre :as log])
+    [com.sixsq.slipstream.ssclj.resources.user.user-identifier-utils :as uiu]
+    [taoensso.timbre :as log]
+    [clojure.string :as str])
   (:gen-class)
   )
 
@@ -18,7 +20,6 @@
 (defn init-db-client
   [binding-ns]
   (db-loader/load-and-set-persistent-db-binding binding-ns))
-
 
 
 (defn- find-users
@@ -38,77 +39,81 @@
         matched-users (find-users filter-str)]
     matched-users))
 
+(defn split-identifier
+  "returns a tuple containing the 2 parts of an identifier"
+  [identifier]
+  (let [ [instance login] (str/split identifier #":") ]
+    [instance login]))
+
+
+(defn migrate-users-with-external-identity
+[users]
+  (doseq [{:keys [username externalIdentity] :as u} users]
+    (let [identifier-tuples (map split-identifier externalIdentity)]
+      (doseq [[inst login]  identifier-tuples  ]
+        (log/debugf "Add User Identifier username = %s external-login = %s and instance  = %s" username login inst)
+        #_(uiu/add-user-identifier! username nil external-login instance)))))
+
 
 (defn find-users-with-githublogin
   []
-  (let [filter-str (format "githublogin!=null and %s" active-user-filter)
+  (let [filter-str (format "githublogin!=null and externalIdentity=null and %s" active-user-filter)
         matched-users (find-users filter-str)]
     matched-users))
+
+(defn migrate-users-with-githublogin
+  [users]
+  (doseq [{:keys [username githublogin] :as u} users]
+    (log/debugf "Add User Identifier username = %s authn-method=github and external-login = %s " username githublogin)
+    #_(uiu/add-user-identifier! username "github" githublogin nil)))
 
 
 (defn find-users-by-organization
   [org]
-  (let [filter-str (format "organization='%s' and %s" org active-user-filter)
-        matched-users (find-users filter-str)
-        ]
-    matched-users
+  (let [no-github-no-external-filter "githublogin=null and externalIdentity=null"
+        filter-str (format "organization='%s' and %s and %s" org active-user-filter no-github-no-external-filter)
+        matched-users (find-users filter-str)]
+    matched-users))
+
+(defn migrate-hn-users
+  [users]
+  (doseq [{:keys [ username organization]   } users]
+    (log/debugf "username = %s method oidc and external-login=%s and instance = %s"  username username (str/lower-case organization))
+    #_(uiu/add-user-identifier! username nil username (str/lower-case organization))
     ))
 
-  (defn filter-not-in-orgs
-    [orgs]
-    (str
-      (subs (->> orgs
-                 (map #(str " and organization!='" % "'"))
-                 (concat)
-                 (apply str)) 5)
-      " and " active-user-filter))
-
-  (defn find-non-other-long-names
-    []
-    (let [filter-str (str (filter-not-in-orgs hn-orgs)
-                          " and  " (filter-not-in-orgs biosphere-orgs)
-                          " and externalIdentity=null"
-                          " and githublogin=null"
-                          " and " active-user-filter)
-          non-hn-users (find-users filter-str)
-          long-name? (fn [user] (< 20
-                                   (-> user
-                                       :username
-                                       count
-                                       )))
-          matched-users (filter long-name? non-hn-users)]
-      (doseq [u matched-users]
-        (log/debugf "Username %s belongs to organization %s" (:username u) (:organization u))
-        )
-      matched-users
-      ))
-
-
-(defn print-users
+(defn migrate-biosphere-users
   [users]
-  (doseq [u users]
-    (clojure.pprint/pprint (str (:username u) " (" (:firstName u)" " (:lastName u)")  => " (:organization u)))
-    )
-  )
+  (doseq [{:keys [ id username ]   } users]
+    (when (not= username (-> id
+                           (str/split #"/")
+                           second
+                           ))
+      (log/warnf "username = %s but user-id = %s" username id))
+    (log/debugf "username = %s method oidc and external-login=%s and instance = biosphere"  username username)
+    #_(uiu/add-user-identifier! username nil username "biosphere")))
 
 
   (defn -main [& args]
     (let [_ (init-db-client default-db-binding-ns)
-          extIdentity (find-users-with-externalIdentities)
-          githublogin (find-users-with-githublogin)
-          hn-users (mapcat find-users-by-organization hn-orgs)
-          biosphere-users (mapcat find-users-by-organization biosphere-orgs)
-          remaining (find-non-other-long-names)
-          ]
+            extIdentity (find-users-with-externalIdentities)
+            githublogin-users (find-users-with-githublogin)
+            hn-users (mapcat find-users-by-organization hn-orgs)
+            biosphere-users (mapcat find-users-by-organization biosphere-orgs)]
+      (log/info "=== Migrating user identifiers ===")
 
+      (log/debugf "----- %s users are found with an externalIdentity attribute " (count extIdentity))
+      (log/debug  "----------------------------------------------------------------")
+      (migrate-users-with-external-identity extIdentity)
 
-      (log/debug "Migrating user identifiers")
-      (log/debugf "%s users are found with an externalIdentity attribute " (count extIdentity))
-      (log/debugf "%s users are found with an githublogin attribute " (count githublogin))
-      (log/debugf "%s users are found with a HnSciCloud organization " (count hn-users))
-      (log/debugf "%s users are found with a BioSphere organization " (count biosphere-users))
-      (log/debugf "%s users are left with other organization and long username" (count remaining))
+      (log/debugf "----- %s users are found with an githublogin attribute " (count githublogin-users))
+      (log/debug  "----------------------------------------------------------------")
+      (migrate-users-with-githublogin githublogin-users)
 
-      ))
+      (log/debugf "----- %s users are found with a HnSciCloud organization " (count hn-users))
+      (log/debug  "----------------------------------------------------------------")
+      (migrate-hn-users hn-users)
 
-
+      (log/debugf "----- %s users are found with a BioSphere organization " (count biosphere-users))
+      (log/debug  "----------------------------------------------------------------")
+      (migrate-biosphere-users biosphere-users)))
