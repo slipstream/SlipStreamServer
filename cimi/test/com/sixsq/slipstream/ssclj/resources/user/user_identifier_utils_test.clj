@@ -70,15 +70,37 @@
       (is (= (set (map :identifier results)) (set (map #(uiu/generate-identifier % external-login instance) authn-methods)))))))
 
 
-(deftest find-username-by-identifier
+
+(deftest double-user-identifier
   (let [name "some-username"
-        authn-method :some-method
-        unsanitized-external-login "120720737412@eduid_chhttps#$$**eduid_ch_idp_shibboleth!https//fed-id.nuv.la]]samlbridge%module^php_*saml/sp\\metadata}php_sixsq}saml|bridge'iqqrh4oiyshzcw9o40cvo0;pgka_"
-        sanitized-external-login (uiu/sanitize-login-name unsanitized-external-login)
+        name2 "other"
         user {:id           (str "user/" name)
               :username     name
               :password     "12345"
               :emailAddress "a@b.c"}
+
+        user2 (assoc user :username name2)
+        authn-method :sample-method
+        external-login "some-external-login"
+        instance "some-instance"
+        _ (th/add-user-for-test! user2)
+        user-identifier-response (uiu/add-user-identifier! name authn-method external-login instance)
+        user-identifier-response2 (uiu/add-user-identifier! name2 authn-method external-login instance)]
+    (is (= 201 (:status user-identifier-response)))
+    (is (= 409 (:status user-identifier-response2)))))
+
+
+
+
+(deftest find-username-by-identifier
+  (let [name "some-username"
+        user {:id           (str "user/" name)
+              :username     name
+              :password     "12345"
+              :emailAddress "a@b.c"}
+        authn-method :some-method
+        unsanitized-external-login "120720737412@eduid_chhttps#$$**eduid_ch_idp_shibboleth!https//fed-id.nuv.la]]samlbridge%module^php_*saml/sp\\metadata}php_sixsq}saml|bridge'iqqrh4oiyshzcw9o40cvo0;pgka_"
+        sanitized-external-login (uiu/sanitize-login-name unsanitized-external-login)
         _ (th/add-user-for-test! user)
         instances #{"instance1" "instance2" "instance3"}]
 

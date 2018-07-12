@@ -14,7 +14,6 @@
 (def default-db-binding-ns "com.sixsq.slipstream.db.es.loader")
 
 (def ^:const hn-orgs #{"SixSq" "RHEA" "CERN" "CNRS" "DESY"  "KIT" "INFN" "IFAE" "EMBL" "SURFSara"})
-(def ^:const biosphere-orgs #{"IFB" "Biosphere"})
 
 
 (defn init-db-client
@@ -99,7 +98,7 @@
             extIdentity (find-users-with-externalIdentities)
             githublogin-users (find-users-with-githublogin)
             hn-users (mapcat find-users-by-organization hn-orgs)
-            biosphere-users (mapcat find-users-by-organization biosphere-orgs)]
+            biosphere-users (find-users-by-organization "Biosphere")]
       (log/info "=== Migrating user identifiers ===")
 
       (log/debugf "----- %s users are found with an externalIdentity attribute " (count extIdentity))
