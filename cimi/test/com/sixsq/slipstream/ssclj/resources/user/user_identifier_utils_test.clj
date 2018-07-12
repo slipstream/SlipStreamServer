@@ -84,7 +84,7 @@
 
     ;; Username should be found both sanitized and unsanitized login
     (doseq [instance instances]
-      ;;Create User identifier with a sanitized identifier
+      ;; Create User identifier with a sanitized identifier
       (uiu/add-user-identifier! name authn-method sanitized-external-login instance)
       (is (= name (uiu/find-username-by-identifier authn-method instance sanitized-external-login)))
       (is (= name (uiu/find-username-by-identifier authn-method instance unsanitized-external-login))))

@@ -10,7 +10,8 @@
 (def ^:private active-user-filter "(state='ACTIVE')")
 
 
-(defn generate-identifier
+(defn
+  generate-identifier
   ([authn-method external-login]
    (generate-identifier authn-method external-login nil))
   ([authn-method external-login instance]
@@ -40,20 +41,13 @@
 
 
 (defn external-identity-exists?
-  ([authn-method external-login]
-   (let [identifier (generate-identifier authn-method external-login)
-         user-identifier-record (try
-                                  (crud/retrieve-by-id (str "user-identifier/" (u/md5 identifier)))
-                                  (catch Exception _
-                                    nil))]
-     (not (nil? user-identifier-record))))
-  ([authn-method external-login instance]
-   (let [identifier (generate-identifier authn-method external-login instance)
-         user-identifier-record (try
-                                  (crud/retrieve-by-id (str "user-identifier/" (u/md5 identifier)))
-                                  (catch Exception _
-                                    nil))]
-     (not (nil? user-identifier-record)))))
+  [authn-method external-login & [instance]]
+  (let [identifier (generate-identifier authn-method external-login instance)
+        user-identifier-record (try
+                                 (crud/retrieve-by-id (str "user-identifier/" (u/md5 identifier)))
+                                 (catch Exception _
+                                   nil))]
+    (not (nil? user-identifier-record))))
 
 
 (defn sanitize-login-name
