@@ -45,7 +45,6 @@
     (mapped-user authn-method username-mapped)))
 
 
-
 (defn match-oidc-username
   [authn-method external-login instance]
   (log/debug "Matching via OIDC/MITREid username" external-login)
