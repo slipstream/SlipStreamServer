@@ -67,3 +67,22 @@
     (let [results (uiu/find-identities-by-user (:id user))]
       (is (= 1 (count results)))
       (is (= (set (map :identifier results)) (set (map #(uiu/generate-identifier % external-login instance) authn-methods)))))))
+
+
+(deftest double-user-identifier
+  (let [name "some-username"
+        name2 "other"
+        user {:id           (str "user/" name)
+              :username     name
+              :password     "12345"
+              :emailAddress "a@b.c"}
+        user2 (assoc user :username name2)
+        authn-method :sample-method
+        external-login "some-external-login"
+        instance "some-instance"
+        _ (th/add-user-for-test! user2)
+        user-identifier-response (uiu/add-user-identifier! name authn-method external-login instance)
+        user-identifier-response2 (uiu/add-user-identifier! name2 authn-method external-login instance)]
+    (is (= 201 (:status user-identifier-response)))
+    (is (= 409 (:status user-identifier-response2)))))
+
