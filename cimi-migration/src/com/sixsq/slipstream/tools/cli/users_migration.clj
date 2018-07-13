@@ -1,17 +1,19 @@
 (ns com.sixsq.slipstream.tools.cli.users-migration
   (:require
+    [clojure.string :as str]
     [com.sixsq.slipstream.db.filter.parser :as parser]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.db.loader :as db-loader]
     [com.sixsq.slipstream.ssclj.resources.user-identifier]
     [com.sixsq.slipstream.ssclj.resources.user.user-identifier-utils :as uiu]
-    [taoensso.timbre :as log]
-    [clojure.string :as str])
+    [taoensso.timbre :as log])
   (:gen-class))
+
 
 (def ^:private active-user-filter "(state='ACTIVE')")
 
 (def default-db-binding-ns "com.sixsq.slipstream.db.es.loader")
+
 
 (def ^:const hn-orgs #{"SixSq" "RHEA" "CERN" "CNRS" "DESY" "KIT" "INFN" "IFAE" "EMBL" "SURFSara"})
 
@@ -26,6 +28,7 @@
                               "lionel" "doug"
                               "m.betti.rhea" "gbol16" "cedricseynat" "hnrp2"
                               "evamvako" "evamvak" "vamvakop"})
+
 
 
 (defn init-db-client
@@ -77,6 +80,7 @@
   (doseq [{:keys [username githublogin] :as u} users]
     (log/debugf "Add User Identifier username = %s authn-method=github and external-login = %s " username githublogin)
     (uiu/add-user-identifier! username "github" githublogin nil)))
+
 
 (defn find-users-by-organization
   [org]
@@ -145,3 +149,4 @@
     (log/debugf "----- %s users are found with a BioSphere organization " (count biosphere-users))
     (log/debug "----------------------------------------------------------------")
     (migrate-biosphere-users biosphere-users)))
+

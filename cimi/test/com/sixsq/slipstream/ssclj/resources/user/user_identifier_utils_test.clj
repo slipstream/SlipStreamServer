@@ -70,7 +70,6 @@
       (is (= (set (map :identifier results)) (set (map #(uiu/generate-identifier % external-login instance) authn-methods)))))))
 
 
-
 (deftest double-user-identifier
   (let [name "some-username"
         name2 "other"
@@ -78,7 +77,6 @@
               :username     name
               :password     "12345"
               :emailAddress "a@b.c"}
-
         user2 (assoc user :username name2)
         authn-method :sample-method
         external-login "some-external-login"
@@ -88,6 +86,7 @@
         user-identifier-response2 (uiu/add-user-identifier! name2 authn-method external-login instance)]
     (is (= 201 (:status user-identifier-response)))
     (is (= 409 (:status user-identifier-response2)))))
+
 
 
 
