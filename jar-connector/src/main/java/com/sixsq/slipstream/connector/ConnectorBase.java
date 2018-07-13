@@ -235,6 +235,10 @@ public abstract class ConnectorBase implements Connector {
         setRuntimeParameterValue(RuntimeParameter.GLOBAL_RUN_APIKEY_KEY, key, run);
     }
 
+    protected static void setDeploymentCredential(Run run, String value) {
+        setRuntimeParameterValue(RuntimeParameter.GLOBAL_DEPLOYMENT_CREDENTIAL, value, run);
+    }
+
     private String getSshUrl(Run run, String instanceHostname) {
 
         String user = null;
