@@ -22,23 +22,23 @@
     (if-let [code (uh/param-value request :code)]
       (if-let [access-token (auth-oidc/get-access-token client-id client-secret tokenURL code (str base-uri (or callback-id "unknown-id") "/execute"))]
         (try
-          (let [{:keys [sub] :as claims} (sign/unsign-claims access-token public-key)
-                {:keys [username givenName familyName emails] :as userinfo} (when sub (oidc-utils/get-mitreid-userinfo userProfileURL access-token))
-                email (-> (filter :primary emails)
-                          first
-                          :value)]
+          (let [{:keys [sub] :as claims} (sign/unsign-claims access-token public-key)]
             (log/debugf "MITREid access token claims for %s: %s" instance (pr-str claims))
             (if sub
-              (if-let [matched-user (ex/create-user-when-missing! :mitreid {:external-login    username
-                                                                            :external-email    (or email (str username "@fake-email.com"))
-                                                                            :firstname         givenName
-                                                                            :lastname          familyName
-                                                                            :instance          instance
-                                                                            :fail-on-existing? true})]
-                (do
-                  (uiu/add-user-identifier! matched-user :mitreid username instance)
-                  matched-user)
-                (oidc-utils/throw-user-exists sub redirectURI))
+              (let [{:keys [givenName familyName emails] :as userinfo} (when sub (oidc-utils/get-mitreid-userinfo userProfileURL access-token))
+                    email (->> emails (filter :primary) first :value)]
+                (if email
+                  (if-let [matched-user (ex/create-user-when-missing! :mitreid {:external-login    sub
+                                                                                :external-email    email
+                                                                                :firstname         givenName
+                                                                                :lastname          familyName
+                                                                                :instance          instance
+                                                                                :fail-on-existing? true})]
+                    (do
+                      (uiu/add-user-identifier! matched-user :mitreid sub instance)
+                      matched-user)
+                    (oidc-utils/throw-user-exists sub redirectURI))
+                  (oidc-utils/throw-no-email redirectURI)))
               (oidc-utils/throw-no-subject redirectURI)))
           (catch Exception e
             (oidc-utils/throw-invalid-access-code (str e) redirectURI)))

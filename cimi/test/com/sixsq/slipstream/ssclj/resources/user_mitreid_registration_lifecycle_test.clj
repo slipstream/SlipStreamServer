@@ -110,23 +110,21 @@
           (ltu/message-matches #".*missing or incorrect configuration.*")
           (ltu/is-status 500))
 
-      ;; anonymous create must succeed (normal create and href create)
-      (let [;;
-            ;; create the session-mitreid configuration to use for these tests
-            ;;
-            cfg-href (-> session-admin
+      ;;
+      ;; create the session-mitreid configuration to use for these tests
+      ;;
+      (let [cfg-href (-> session-admin
                          (request configuration-base-uri
                                   :request-method :post
                                   :body (json/write-str configuration-user-mitreid))
                          (ltu/body->edn)
                          (ltu/is-status 201)
-                         (ltu/location))
-            ]
-
+                         (ltu/location))]
 
 
         (is (= cfg-href (str "configuration/session-mitreid-" mitreid/registration-method)))
 
+        ;; anonymous create must succeed (normal create and href create)
         (let [uri (-> session-anon
                       (request base-uri
                                :request-method :post
@@ -257,7 +255,7 @@
 
               (let [username (str "MITREid_USER_" user-number)
                     email (format "user-%s@example.com" user-number)
-                    good-claims {:sub         username
+                    good-claims {:sub         user-number
                                  :email       email
                                  :given_name  "John"
                                  :family_name "Smith"
@@ -338,10 +336,8 @@
 
 
                   (let [instance mitreid/registration-method
-                        ss-username (uiu/find-username-by-identifier :mitreid instance username)
-                        user-record (->> username
-                                         (uiu/find-username-by-identifier :mitreid instance)
-                                         (db/get-user))]
+                        ss-username (uiu/find-username-by-identifier :mitreid instance user-number)
+                        user-record (db/get-user ss-username)]
                     (is (not (nil? ss-username)))
                     (is (= email (:name user-record)))
                     (is (= mitreid/registration-method (:method user-record))))
