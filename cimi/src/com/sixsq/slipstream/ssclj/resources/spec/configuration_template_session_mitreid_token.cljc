@@ -6,17 +6,17 @@
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 
-(s/def ::publicKey ::cimi-core/nonblank-string)             ;; allows jwk JSON representation
-(s/def ::authzClientIP ::cimi-core/token)
-(s/def ::authnMethod ::cimi-core/token)
+(s/def ::clientIPs (s/coll-of ::cimi-core/token :min-count 1 :kind vector?))
 
 
 (def configuration-template-keys-spec-req
-  {:req-un [::ps/instance ::publicKey ::authzClientIP ::authnMethod]})
+  {:req-un [::ps/instance]
+   :opt-un [::clientIPs]})
 
 
 (def configuration-template-keys-spec-create
-  {:req-un [::ps/instance ::publicKey ::authzClientIP ::authnMethod]})
+  {:req-un [::ps/instance]
+   :opt-un [::clientIPs]})
 
 
 ;; Defines the contents of the OIDC authentication ConfigurationTemplate resource itself.

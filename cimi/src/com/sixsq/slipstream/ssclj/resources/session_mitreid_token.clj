@@ -14,7 +14,7 @@
     [com.sixsq.slipstream.ssclj.resources.session-template-api-key :as tpl]
     [com.sixsq.slipstream.ssclj.resources.session.utils :as sutils]
     [com.sixsq.slipstream.ssclj.resources.spec.session :as session]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-api-key :as session-tpl]))
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-mitreid-token :as session-tpl]))
 
 
 (def ^:const authn-method "mitreid-token")
@@ -44,7 +44,7 @@
   (validate-fn resource))
 
 
-(def create-validate-fn (u/create-spec-validation-fn ::session-tpl/oidc-token-create))
+(def create-validate-fn (u/create-spec-validation-fn ::session-tpl/mitreid-token-create))
 (defmethod p/create-validate-subtype authn-method
   [resource]
   (create-validate-fn resource))
@@ -56,7 +56,8 @@
 
 (defmethod p/tpl->session authn-method
   [{:keys [token instance href redirectURI] :as resource} {:keys [headers] :as request}]
-  (let [{:keys [publicKey]} (oidc-utils/config-mitreid-params redirectURI instance)]
+  (let [{:keys [clientIPs] :as mitreid-token-config} (oidc-utils/config-mitreid-token-params redirectURI instance)
+        {:keys [publicKey]} (oidc-utils/config-mitreid-params redirectURI instance)]
     (if token
       (try
         (let [{:keys [sub] :as claims} (sign/unsign-claims token publicKey)

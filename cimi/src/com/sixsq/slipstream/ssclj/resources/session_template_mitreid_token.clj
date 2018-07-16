@@ -33,16 +33,18 @@
 ;;
 ;; initialization: register this Session template
 ;;
+
 (defn initialize
   []
   (p/register authn-method desc)
-  (std-crud/initialize p/resource-url ::session-tpl/oidc-token))
+  (std-crud/initialize p/resource-url ::session-tpl/mitreid-token))
 
 
 ;;
 ;; multimethods for validation
 ;;
-(def validate-fn (u/create-spec-validation-fn ::session-tpl/oidc-token))
+
+(def validate-fn (u/create-spec-validation-fn ::session-tpl/mitreid-token))
 (defmethod p/validate-subtype authn-method
   [resource]
   (validate-fn resource))

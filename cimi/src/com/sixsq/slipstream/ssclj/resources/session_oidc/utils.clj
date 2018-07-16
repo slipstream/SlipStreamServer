@@ -95,6 +95,8 @@
 (def mitreid-keys #{:clientID :clientSecret :publicKey :authorizeURL :tokenURL :userProfileURL})
 
 
+(def mitreid-token-keys #{:authzClientIP :publicKey :authnMethod})
+
 
 (defn config-params
   [prefix key-set redirectURI instance]
@@ -112,6 +114,9 @@
 
 
 (def config-mitreid-params (partial config-params "configuration/session-mitreid-" mitreid-keys))
+
+
+(def config-mitreid-token-params (partial config-params "configuration/session-mitreid-token-" mitreid-token-keys))
 
 
 ;; FIXME: Fix ugliness around needing to create ring requests with authentication!

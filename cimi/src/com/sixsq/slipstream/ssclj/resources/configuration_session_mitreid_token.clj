@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.configuration-session-oidc-token
+(ns com.sixsq.slipstream.ssclj.resources.configuration-session-mitreid-token
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
@@ -7,7 +7,7 @@
     [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-mitreid-token :as ct-mitreid-token]))
 
 
-(def ^:const service "session-oidc-token")
+(def ^:const service "session-mitreid-token")
 
 
 (def ConfigurationDescription
