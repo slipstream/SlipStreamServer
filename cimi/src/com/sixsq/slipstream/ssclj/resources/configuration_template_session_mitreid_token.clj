@@ -1,8 +1,8 @@
-(ns com.sixsq.slipstream.ssclj.resources.configuration-template-session-oidc-token
+(ns com.sixsq.slipstream.ssclj.resources.configuration-template-session-mitreid-token
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-oidc-token :as ct-oidc-token]))
+    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-mitreid-token :as ct-oidc-token]))
 
 
 (def ^:const service "session-oidc-token")
@@ -58,7 +58,7 @@
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn ::ct-oidc-token/session-oidc-token))
+(def validate-fn (u/create-spec-validation-fn ::ct-oidc-token/session-mitreid-token))
 (defmethod p/validate-subtype service
   [resource]
   (validate-fn resource))

@@ -1,12 +1,12 @@
-(ns com.sixsq.slipstream.ssclj.resources.session-template-oidc-token
+(ns com.sixsq.slipstream.ssclj.resources.session-template-mitreid-token
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.session-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-oidc-token :as session-tpl]))
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-mitreid-token :as session-tpl]))
 
 
-(def ^:const authn-method "oidc-token")
+(def ^:const authn-method "mitreid-token")
 
 
 (def default-template {:method      authn-method

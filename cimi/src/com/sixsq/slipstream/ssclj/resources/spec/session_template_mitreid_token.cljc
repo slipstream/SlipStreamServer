@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.spec.session-template-oidc-token
+(ns com.sixsq.slipstream.ssclj.resources.spec.session-template-mitreid-token
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
@@ -12,7 +12,7 @@
   {:req-un [::token]})
 
 ;; Defines the contents of the oidc-token SessionTemplate resource itself.
-(s/def ::oidc-token
+(s/def ::mitreid-token
   (su/only-keys-maps ps/resource-keys-spec
                      session-template-keys-spec))
 
@@ -22,6 +22,6 @@
   (su/only-keys-maps ps/template-keys-spec
                      session-template-keys-spec))
 
-(s/def ::oidc-token-create
+(s/def ::mitreid-token-create
   (su/only-keys-maps ps/create-keys-spec
                      {:req-un [::sessionTemplate]}))

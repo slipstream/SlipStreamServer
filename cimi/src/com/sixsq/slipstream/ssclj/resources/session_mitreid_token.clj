@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.session-oidc-token
+(ns com.sixsq.slipstream.ssclj.resources.session-mitreid-token
   (:require
     [clojure.string :as str]
     [clojure.tools.logging :as log]
@@ -17,7 +17,7 @@
     [com.sixsq.slipstream.ssclj.resources.spec.session-template-api-key :as session-tpl]))
 
 
-(def ^:const authn-method "oidc-token")
+(def ^:const authn-method "mitreid-token")
 
 
 ;;
