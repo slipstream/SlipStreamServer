@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.configuration-template-lifecycle-test
   (:require
-    [clojure.test :refer :all]
+    [clojure.test :refer [deftest use-fixtures]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as ct]
@@ -9,10 +9,10 @@
     [com.sixsq.slipstream.ssclj.resources.configuration-template-session-mitreid :as mitreid]
     [com.sixsq.slipstream.ssclj.resources.configuration-template-session-oidc :as oidc]
     [com.sixsq.slipstream.ssclj.resources.configuration-template-slipstream :as slipstream]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [peridot.core :refer :all]))
+    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
+
 
 (def base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
 

@@ -87,41 +87,32 @@
   (logu/log-error-and-throw-with-redirect 400 (str "account already exists (" username ")") redirectURI))
 
 
-
-(defn valid-mitreid-config?
-  [{:keys [clientID clientSecret publicKey authorizeURL tokenURL userProfileURL] :as config}]
-  (and clientID clientSecret authorizeURL tokenURL userProfileURL publicKey))
-
-(defn valid-oidc-config?
-  "An OIDC config without clientSecret is valid (e.g KeyCloak)"
-  [{:keys [clientID publicKey authorizeURL tokenURL] :as config}]
-  (and clientID authorizeURL tokenURL publicKey))
-
 ;; retrieval of configuration parameters
 
-(defn config-oidc-params
-  [redirectURI instance]
-  (let [cfg-id (str "configuration/session-oidc-" instance)]
+(def oidc-keys #{:clientID :clientSecret :publicKey :authorizeURL :tokenURL})
+
+
+(def mitreid-keys #{:clientID :clientSecret :publicKey :authorizeURL :tokenURL :userProfileURL})
+
+
+
+(defn config-params
+  [prefix key-set redirectURI instance]
+  (let [cfg-id (str prefix instance)]
     (try
-      (let [oidc-config (crud/retrieve-by-id-as-admin cfg-id)
-            {:keys [clientID clientSecret publicKey authorizeURL tokenURL]} oidc-config]
-        (if (valid-oidc-config? oidc-config)
-          [clientID clientSecret publicKey authorizeURL tokenURL]
+      (let [config (some-> cfg-id crud/retrieve-by-id-as-admin (select-keys key-set))]
+        (if (->> config vals (every? (complement nil?)))
+          config
           (throw-bad-client-config cfg-id redirectURI)))
       (catch Exception _
         (throw-bad-client-config cfg-id redirectURI)))))
 
-(defn config-mitreid-params
-  [redirectURI instance]
-  (let [cfg-id (str "configuration/session-mitreid-" instance)]
-    (try
-      (let [mitreid-config (crud/retrieve-by-id-as-admin cfg-id)
-            {:keys [clientID clientSecret publicKey authorizeURL tokenURL userProfileURL]} mitreid-config]
-        (if (valid-mitreid-config? mitreid-config)
-          [clientID clientSecret publicKey authorizeURL tokenURL userProfileURL]
-          (throw-bad-client-config cfg-id redirectURI)))
-      (catch Exception _
-        (throw-bad-client-config cfg-id redirectURI)))))
+
+(def config-oidc-params (partial config-params "configuration/session-oidc-" oidc-keys))
+
+
+(def config-mitreid-params (partial config-params "configuration/session-mitreid-" mitreid-keys))
+
 
 ;; FIXME: Fix ugliness around needing to create ring requests with authentication!
 (defn create-callback [baseURI session-id action]

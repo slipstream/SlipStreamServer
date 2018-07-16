@@ -34,7 +34,7 @@
                           :order       22}
           :authzClientIP {:displayName "Authz. Client IP"
                           :type        "string"
-                          :description "client IP address from which OIDC token authentication is allowed"
+                          :description "authorized client IP address from which OIDC token authentication is allowed"
                           :mandatory   true
                           :readOnly    false
                           :order       23}
@@ -58,7 +58,7 @@
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn ::ct-oidc-token/session-oidc))
+(def validate-fn (u/create-spec-validation-fn ::ct-oidc-token/session-oidc-token))
 (defmethod p/validate-subtype service
   [resource]
   (validate-fn resource))
