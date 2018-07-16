@@ -71,6 +71,9 @@
 (defn throw-no-access-token [redirectURI]
   (logu/log-error-and-throw-with-redirect 400 "unable to retrieve OIDC/MITREid access token" redirectURI))
 
+(defn throw-no-email [redirectURI]
+  (logu/log-error-and-throw-with-redirect 400 (str "cannot retrieve OIDC/MITREid primary email") redirectURI))
+
 (defn throw-no-subject [redirectURI]
   (logu/log-error-and-throw-with-redirect 400 (str "OIDC/MITREid token is missing subject (sub) attribute") redirectURI))
 
