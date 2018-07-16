@@ -29,6 +29,7 @@
                   :readOnly    false
                   :order       20}}))
 
+
 ;;
 ;; initialization: register this Session template
 ;;
@@ -37,10 +38,10 @@
   (p/register authn-method desc)
   (std-crud/initialize p/resource-url ::session-tpl/oidc-token))
 
+
 ;;
 ;; multimethods for validation
 ;;
-
 (def validate-fn (u/create-spec-validation-fn ::session-tpl/oidc-token))
 (defmethod p/validate-subtype authn-method
   [resource]

@@ -15,7 +15,9 @@
     [com.sixsq.slipstream.ssclj.resources.spec.session :as session]
     [com.sixsq.slipstream.ssclj.resources.spec.session-template-api-key :as session-tpl]
     [com.sixsq.slipstream.util.response :as r]
-    [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as oidc-utils]))
+    [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as oidc-utils]
+    [com.sixsq.slipstream.auth.external :as ex]
+    [com.sixsq.slipstream.auth.internal :as auth-internal]))
 
 (def ^:const authn-method "oidc-token")
 
@@ -105,7 +107,13 @@
 
 (defn validate-access-token
   [access-token]
-  (let [[client-id client-secret public-key authorizeURL tokenURL userProfileURL] (oidc-utils/config-mitreid-params redirectURI instance)]
+  (let [redirectURI nil
+        instance nil
+        session-id nil
+        server nil
+        clientIP nil
+        current-session nil
+        [client-id client-secret public-key authorizeURL tokenURL userProfileURL] (oidc-utils/config-mitreid-params redirectURI instance)]
     (if access-token
       (try
         (let [{:keys [sub] :as claims} (sign/unsign-claims access-token public-key)
