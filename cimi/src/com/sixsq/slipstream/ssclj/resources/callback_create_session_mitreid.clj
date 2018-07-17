@@ -26,11 +26,11 @@
 
   (let [{:keys [server clientIP redirectURI] {:keys [href]} :sessionTemplate :as current-session} (sutils/retrieve-session-by-id session-id)
         instance (u/document-id href)
-        [client-id client-secret public-key authorizeURL tokenURL userProfileURL] (oidc-utils/config-mitreid-params redirectURI instance)]
+        {:keys [clientID clientSecret publicKey tokenURL userProfileURL]} (oidc-utils/config-mitreid-params redirectURI instance)]
     (if-let [code (uh/param-value request :code)]
-      (if-let [access-token (auth-oidc/get-access-token client-id client-secret tokenURL code (str base-uri (or callback-id "unknown-id") "/execute"))]
+      (if-let [access-token (auth-oidc/get-access-token clientID clientSecret tokenURL code (str base-uri (or callback-id "unknown-id") "/execute"))]
         (try
-          (let [{:keys [sub] :as claims} (sign/unsign-claims access-token public-key)
+          (let [{:keys [sub] :as claims} (sign/unsign-claims access-token publicKey)
                 roles (concat (oidc-utils/extract-roles claims)
                               (oidc-utils/extract-groups claims)
                               (oidc-utils/extract-entitlements claims))
