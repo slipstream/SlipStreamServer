@@ -10,6 +10,12 @@
   [^String term ^String value]
   (QueryBuilders/prefixQuery term value))
 
+(defn full-text-query
+  [^String term ^String value]
+  (-> value
+      QueryBuilders/simpleQueryStringQuery
+      (.field term)))
+
 (defn must-exist-query
   [^String term]
   (QueryBuilders/existsQuery term))
@@ -92,14 +98,15 @@
   (let [args (rest v)]
     (if (= 1 (count args))
       (first args)                                          ;; (a=1 and b=2) case
-      (let [{:keys [Attribute EqOp RelOp PrefixOp Value] :as m} (into {} args)
-            Op (or EqOp RelOp PrefixOp)
+      (let [{:keys [Attribute EqOp RelOp PrefixOp FullTextOp Value] :as m} (into {} args)
+            Op (or EqOp RelOp PrefixOp FullTextOp)
             order (ffirst args)]
         (case [Op order]
           ["=" :Attribute] (if (nil? Value) (must-not-exist Attribute) (term-query Attribute Value))
           ["!=" :Attribute] (if (nil? Value) (must-exist-query Attribute) (not-equal-query Attribute Value))
 
           ["^=" :Attribute] (prefix-query Attribute Value)
+          ["==" :Attribute] (full-text-query Attribute Value)
 
           [">=" :Attribute] (range-ge-query Attribute Value)
           [">" :Attribute] (range-gt-query Attribute Value)
