@@ -86,6 +86,9 @@
 (defn throw-user-exists [username redirectURI]
   (logu/log-error-and-throw-with-redirect 400 (str "account already exists (" username ")") redirectURI))
 
+(defn throw-invalid-address [ip redirectURI]
+  (logu/log-error-and-throw-with-redirect 400 (str "request from invalid IP address (" ip ")") redirectURI))
+
 
 ;; retrieval of configuration parameters
 
@@ -95,7 +98,7 @@
 (def mitreid-keys #{:clientID :clientSecret :publicKey :authorizeURL :tokenURL :userProfileURL})
 
 
-(def mitreid-token-keys #{:authzClientIP :publicKey :authnMethod})
+(def mitreid-token-keys #{:clientIPs})
 
 
 (defn config-params

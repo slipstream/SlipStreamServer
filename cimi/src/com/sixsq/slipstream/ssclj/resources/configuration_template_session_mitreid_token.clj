@@ -12,13 +12,11 @@
 ;; resource
 ;;
 (def ^:const resource
-  {:service       service
-   :name          "OIDC Token Authentication Configuration"
-   :description   "OpenID Connect Token Authentication Configuration"
-   :instance      "authn-name"
-   :publicKey     "ABCDEF..."
-   :authzClientIP "127.0.0.1"
-   :authnMethod   "other-oidc"})
+  {:service     service
+   :name        "OIDC Token Authentication Configuration"
+   :description "OpenID Connect Token Authentication Configuration"
+   :instance    "authn-name"
+   :clientIPs   ["127.0.0.1"]})
 
 
 ;;
@@ -26,24 +24,12 @@
 ;;
 (def ^:const desc
   (merge p/ConfigurationTemplateDescription
-         {:publicKey     {:displayName "Public Key"
-                          :type        "string"
-                          :description "public key to verify signed tokens from the OIDC server"
-                          :mandatory   true
-                          :readOnly    false
-                          :order       22}
-          :authzClientIP {:displayName "Authz. Client IP"
-                          :type        "string"
-                          :description "authorized client IP address from which OIDC token authentication is allowed"
-                          :mandatory   true
-                          :readOnly    false
-                          :order       23}
-          :authnMethod   {:displayName "Authn. Method"
-                          :type        "string"
-                          :description "authentication method for user matching"
-                          :mandatory   true
-                          :readOnly    false
-                          :order       24}}))
+         {:clientIPs {:displayName "Authorized Client IPs"
+                      :type        "string"
+                      :description "list of authorized client IP address for OIDC token authentication"
+                      :mandatory   true
+                      :readOnly    false
+                      :order       22}}))
 
 
 ;;

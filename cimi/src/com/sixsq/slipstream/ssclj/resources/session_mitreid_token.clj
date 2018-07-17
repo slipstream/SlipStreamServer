@@ -56,9 +56,9 @@
 
 (defmethod p/tpl->session authn-method
   [{:keys [token instance href redirectURI] :as resource} {:keys [headers] :as request}]
-  (let [{:keys [clientIPs] :as mitreid-token-config} (oidc-utils/config-mitreid-token-params redirectURI instance)
-        {:keys [publicKey]} (oidc-utils/config-mitreid-params redirectURI instance)]
-    (if token
+  (if token
+    (let [{:keys [clientIPs]} (oidc-utils/config-mitreid-token-params redirectURI instance)
+          {:keys [publicKey]} (oidc-utils/config-mitreid-params redirectURI instance)]
       (try
         (let [{:keys [sub] :as claims} (sign/unsign-claims token publicKey)
               roles (concat (oidc-utils/extract-roles claims)
@@ -68,16 +68,22 @@
           (if sub
             (if-let [matched-user (ex/match-oidc-username :mitreid sub instance)]
               (let [session-info {:href href, :username matched-user, :redirectURI redirectURI}
-                    {session-id :id :as session} (sutils/create-session session-info headers authn-method)
+                    {:keys [id clientIP] :as session} (sutils/create-session session-info headers authn-method)
                     claims (cond-> (auth-internal/create-claims matched-user)
-                                   session-id (assoc :session session-id)
-                                   session-id (update :roles #(str session-id " " %))
+                                   id (assoc :session id)
+                                   id (update :roles #(str id " " %))
                                    roles (update :roles #(str % " " (str/join " " roles))))
                     cookie (cookies/claims-cookie claims)
                     expires (ts/rfc822->iso8601 (:expires cookie))
                     claims-roles (:roles claims)
                     session (cond-> (assoc session :expiry expires)
                                     claims-roles (assoc :roles claims-roles))]
+
+                ;; only validate the client IP address, if the parameter is set
+                (when clientIPs
+                  (when-not ((set clientIPs) clientIP)
+                    (oidc-utils/throw-invalid-address clientIP redirectURI)))
+
                 (log/debug "MITREid cookie token claims for" (u/document-id href) ":" (pr-str claims))
                 (let [cookies {(sutils/cookie-name (:id session)) cookie}]
                   (if redirectURI
@@ -86,8 +92,8 @@
               (oidc-utils/throw-inactive-user sub nil))
             (oidc-utils/throw-no-subject nil)))
         (catch Exception e
-          (oidc-utils/throw-invalid-access-code (str e) nil)))
-      (oidc-utils/throw-no-access-token nil))))
+          (oidc-utils/throw-invalid-access-code (str e) nil))))
+    (oidc-utils/throw-no-access-token nil)))
 
 
 ;;

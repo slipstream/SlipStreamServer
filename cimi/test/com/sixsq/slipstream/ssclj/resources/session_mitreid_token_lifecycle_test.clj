@@ -51,6 +51,9 @@
                    (->> rdr line-seq (remove marker?) (str/join ""))))
 
 
+(def valid-ip "192.168.100.100")
+
+
 (def configuration-session-mitreid
   {:configurationTemplate {:service        "session-mitreid"
                            :instance       instance
@@ -65,7 +68,7 @@
 (def configuration-session-mitreid-token
   {:configurationTemplate {:service   "session-mitreid-token"
                            :instance  instance
-                           :clientIPs ["192.168.100.100"]}})
+                           :clientIPs [valid-ip]}})
 
 
 (deftest lifecycle
@@ -158,23 +161,19 @@
               (ltu/body->edn)
               (ltu/is-status 400))
 
-          ;; standard anonymous create works with 201 response
+          ;; standard anonymous create fails because of wrong IP address
           (-> session-anon
+              (header "x-real-ip" "127.0.0.1")              ;; not an allowed IP address
               (request base-uri
                        :request-method :post
                        :body (json/write-str valid-create))
               (ltu/body->edn)
-              (ltu/is-status 201))
+              (ltu/is-status 400))
 
-          ;; with redirect should always return a 303
-          (-> session-anon
-              (request base-uri
-                       :request-method :post
-                       :body (json/write-str valid-create-redirect))
-              (ltu/body->edn)
-              (ltu/is-status 303))
-
-          (let [resp (-> session-anon
+          (let [
+                ;; standard anonymous create works with 201 response
+                resp (-> session-anon
+                         (header "x-real-ip" valid-ip)
                          (request base-uri
                                   :request-method :post
                                   :body (json/write-str valid-create))
@@ -188,7 +187,9 @@
                 uri (-> resp ltu/location)
                 abs-uri (str p/service-context uri)
 
+                ;; with redirect should always return a 303
                 resp (-> session-anon
+                         (header "x-real-ip" valid-ip)
                          (request base-uri
                                   :request-method :post
                                   :body (json/write-str valid-create-redirect))
@@ -204,13 +205,13 @@
 
             ;; check claims in cookie
             (is (= "slipstream-username" (:username claims)))
-            (is (= #{"USER" "ANON" id} (-> claims :roles (str/split #"\s+") set)))
+            (is (= #{"USER" "ANON" id} (some-> claims :roles (str/split #"\s+") set)))
             (is (= uri (:session claims)))
             (is (not (nil? (:exp claims))))
 
             ;; check claims in cookie for redirect
             (is (= "slipstream-username" (:username claims2)))
-            (is (= #{"USER" "ANON" id2} (-> claims2 :roles (str/split #"\s+") set)))
+            (is (= #{"USER" "ANON" id2} (some-> claims2 :roles (str/split #"\s+") set)))
             (is (= id2 (:session claims2)))
             (is (not (nil? (:exp claims2))))
             (is (= "http://redirect.example.org" uri2))

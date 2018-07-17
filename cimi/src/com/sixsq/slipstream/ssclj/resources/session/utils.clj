@@ -52,8 +52,11 @@
    the client's IP address, and the virtual host being used. NOTE: The expiry
    is not included and MUST be added afterwards."
   [{:keys [href username redirectURI]} headers authn-method]
-  (let [server (:slipstream-ssl-server-name headers)
-        client-ip (:x-real-ip headers)]
+
+  ;; supports headers that have either string or keyword keys
+  ;; ring spec defines headers as lower-cased strings
+  (let [server (or (get headers "slipstream-ssl-server-name") (:slipstream-ssl-server-name headers))
+        client-ip (or (get headers "x-real-ip") (:x-real-ip headers))]
     (crud/new-identifier
       (cond-> {:method          authn-method
                :sessionTemplate {:href href}}
