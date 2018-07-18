@@ -433,7 +433,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 
 		environment.put("SLIPSTREAM_SS_CACHE_KEY", UUID.randomUUID().toString());
 
-		setDeploymentCredentials(run, user, environment);
+		setDeploymentCredentialIds(run, user, environment);
 
 		genAndSetRunApiKey(run, user, environment);
 
@@ -453,7 +453,7 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		setApiKeyOnRun(run, apiKeySecret.get(API_KEY_KEY));
 	}
 
-	static List<String> extractDeploymentCredentials(Run run, User user) {
+	static List<String> extractDeploymentCredentialIds(Run run, User user) {
 
 		List<String> deploymentCredentials = new ArrayList<String>();
 
@@ -477,8 +477,8 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		return deploymentCredentials;
 	}
 
-	static void setDeploymentCredentials(Run run, User user, Map<String, String> environment) throws ValidationException {
-		String credentialIds = String.join(",", extractDeploymentCredentials(run, user));
+	static void setDeploymentCredentialIds(Run run, User user, Map<String, String> environment) throws ValidationException {
+		String credentialIds = String.join(",", extractDeploymentCredentialIds(run, user));
 		environment.put("SLIPSTREAM_DEPLOYMENT_CREDENTIAL_IDS", credentialIds);
 		setDeploymentCredentials(run, credentialIds);
 	}
