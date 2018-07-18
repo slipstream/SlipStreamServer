@@ -9,9 +9,12 @@ Comp            ::= Attribute EqOp Value
                     | OrdinalValue RelOp Attribute
                     | Attribute PrefixOp StringValue
                     | StringValue PrefixOp Attribute
+                    | Attribute FullTextOp StringValue
+                    | StringValue FullTextOp Attribute
                     | PropExpr
                     | WS <'('> Filter <')'> WS
 
+FullTextOp      ::= '=='
 PrefixOp        ::= '^='
 EqOp            ::= '=' | '!='
 RelOp           ::= '<' | '<=' | '>=' | '>'

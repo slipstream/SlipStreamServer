@@ -20,11 +20,11 @@
 (defn register-user
   [{{href :href} :targetResource {:keys [redirectURI]} :data callback-id :id :as callback-resource} {:keys [headers base-uri uri] :as request}]
   (let [instance (u/document-id href)
-        [client-id client-secret public-key authorizeURL tokenURL] (oidc-utils/config-oidc-params redirectURI instance)]
+        {:keys [clientID clientSecret publicKey tokenURL]} (oidc-utils/config-oidc-params redirectURI instance)]
     (if-let [code (uh/param-value request :code)]
-      (if-let [access-token (auth-oidc/get-access-token client-id client-secret tokenURL code (str base-uri (or callback-id "unknown-id") "/execute"))]
+      (if-let [access-token (auth-oidc/get-access-token clientID clientSecret tokenURL code (str base-uri (or callback-id "unknown-id") "/execute"))]
         (try
-          (let [{:keys [sub email given_name family_name realm] :as claims} (sign/unsign-claims access-token public-key)]
+          (let [{:keys [sub email given_name family_name realm] :as claims} (sign/unsign-claims access-token publicKey)]
             (log/debugf "oidc access token claims for %s: %s" instance (pr-str claims))
             (if sub
               (if-let [matched-user (ex/create-user-when-missing! :oidc {:external-login    sub
