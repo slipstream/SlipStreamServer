@@ -28,11 +28,11 @@
 
 (def instance "test-mitreid")
 
-(def session-template-mitreid {:method       mitreid/authn-method
-                               :instance     instance
-                               :name         "MITREid Connect"
-                               :description  "External Authentication via MITREid Connect Protocol"
-                               :acl          st/resource-acl})
+(def session-template-mitreid {:method      mitreid/authn-method
+                               :instance    instance
+                               :name        "MITREid Connect"
+                               :description "External Authentication via MITREid Connect Protocol"
+                               :acl         st/resource-acl})
 
 
 (def ^:const callback-pattern #".*/api/callback/.*/execute")
@@ -51,14 +51,15 @@
     "jVunw8YkO7dsBhVP/8bqLDLw/8NsSAKwlzsoNKbrjVQ/NmHMJ88QkiKwv+E6lidy"
     "3wIDAQAB"))
 
-(def configuration-session-mitreid {:configurationTemplate {:service        "session-mitreid" ;;reusing configuration from session MITREid
-                                                            :instance       instance
-                                                            :clientID       "FAKE_CLIENT_ID"
-                                                            :clientSecret   "MyMITREidClientSecret"
-                                                            :authorizeURL   "https://authorize.mitreid.com/authorize"
-                                                            :tokenURL       "https://token.mitreid.com/token"
-                                                            :userProfileURL "https://userinfo.mitreid.com/api/user/me"
-                                                            :publicKey      auth-pubkey}})
+(def configuration-session-mitreid
+  {:configurationTemplate {:service        "session-mitreid" ;;reusing configuration from session MITREid
+                           :instance       instance
+                           :clientID       "FAKE_CLIENT_ID"
+                           :clientSecret   "MyMITREidClientSecret"
+                           :authorizeURL   "https://authorize.mitreid.com/authorize"
+                           :tokenURL       "https://token.mitreid.com/token"
+                           :userProfileURL "https://userinfo.mitreid.com/api/user/me"
+                           :publicKey      auth-pubkey}})
 
 
 (deftest lifecycle

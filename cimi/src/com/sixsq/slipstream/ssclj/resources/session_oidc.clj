@@ -49,13 +49,13 @@
 ;;
 (defmethod p/tpl->session authn-method
   [{:keys [href redirectURI] :as resource} {:keys [headers base-uri] :as request}]
-  (let [[client-id client-secret  public-key authorizeURL tokenURL] (oidc-utils/config-oidc-params redirectURI (u/document-id href))
+  (let [{:keys [clientID authorizeURL]} (oidc-utils/config-oidc-params redirectURI (u/document-id href))
         session-init (cond-> {:href href}
                              redirectURI (assoc :redirectURI redirectURI))
         session (sutils/create-session session-init headers authn-method)
         session (assoc session :expiry (ts/rfc822->iso8601 (ts/expiry-later-rfc822 login-request-timeout)))
         callback-url (oidc-utils/create-callback base-uri (:id session) cb/action-name)
-        redirect-url (oidc-utils/create-redirect-url authorizeURL client-id callback-url)]
+        redirect-url (oidc-utils/create-redirect-url authorizeURL clientID callback-url)]
         [{:status 303, :headers {"Location" redirect-url}} session]))
 
 ;;
