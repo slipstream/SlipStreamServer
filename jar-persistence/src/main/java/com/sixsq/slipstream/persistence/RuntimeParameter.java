@@ -112,8 +112,8 @@ public class RuntimeParameter extends Metadata {
 	public final static String GLOBAL_RUN_APIKEY_KEY = GLOBAL_NAMESPACE_PREFIX + "run.api.key";
 	public final static String GLOBAL_RUN_APIKEY_DESCRIPTION = "API key for the run";
 
-	public final static String GLOBAL_DEPLOYMENT_CREDENTIAL = GLOBAL_NAMESPACE_PREFIX + "deployment.credential";
-	public final static String GLOBAL_DEPLOYMENT_CREDENTIAL_DESCRIPTION = "Cloud credential for managing deployment";
+	public final static String GLOBAL_DEPLOYMENT_CREDENTIAL_IDS = GLOBAL_NAMESPACE_PREFIX + "deployment.credential.ids";
+	public final static String GLOBAL_DEPLOYMENT_CREDENTIAL_IDS_DESCRIPTION = "Cloud credentials IDs for managing deployment";
 
 	public final static String IMAGE_ID_PARAMETER_NAME = "image.id";
 	public final static String IMAGE_ID_PARAMETER_DESCRIPTION = "Cloud image id";
