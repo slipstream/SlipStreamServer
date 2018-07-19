@@ -35,8 +35,8 @@ logging.basicConfig(level=logging.WARNING,
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
 
-api_kb = Api('https://159.100.243.87', insecure=True)
-logger.info(api_kb.login_internal('super', 'c92687479230'))
+api_kb = Api('https://159.100.243.182', insecure=True)
+logger.info(api_kb.login_internal('super', '5357442b1f20'))
 
 mapping_old_version = {}
 
