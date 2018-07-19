@@ -47,6 +47,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -457,19 +458,13 @@ public abstract class CliConnectorBase extends ConnectorBase {
 
 		List<String> deploymentCredentials = new ArrayList<String>();
 
-		// Get the list of cloud services being used for the deployment
-		String[] cloudServiceNames = run.getCloudServiceNamesList();
-
-		Set<String> cloudServiceNamesSet = new HashSet<String>();
-		for (String cloudServiceName : cloudServiceNames) {
-			cloudServiceNamesSet.add("connector/" + cloudServiceName);
-		}
+		// Get the set of cloud services being used for the deployment
+		Set<String> cloudServiceNamesSet = new HashSet<>(Arrays.asList(run.getCloudServiceNamesList()));
 
 		// Get the credentials visible to the user
 		CloudCredentialCollection cloudCredentials = User.findCloudCredentials(user);
-
 		for (CloudCredential cloudCredential : cloudCredentials.getCredentials()) {
-			if (cloudServiceNamesSet.contains(cloudCredential.href)) {
+			if (cloudServiceNamesSet.contains(cloudCredential.connector.getRefResourceName())) {
 				deploymentCredentials.add(cloudCredential.id);
 			}
 		}
