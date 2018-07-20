@@ -4,7 +4,8 @@
     [com.sixsq.slipstream.db.filter.parser :as parser]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [clojure.tools.logging :as log]))
 
 
 (def ^:private active-user-filter "(state='ACTIVE')")
@@ -21,6 +22,7 @@
   [username authn-method external-login instance]
   (let [user-id (str "user/" username)
         identifier (generate-identifier authn-method external-login instance)]
+    (log/debugf "Creating a UserIdentifier resource for user %s with identifier %s" username identifier)
     (crud/add
       {:identity     {:current "internal"
                       :authentications

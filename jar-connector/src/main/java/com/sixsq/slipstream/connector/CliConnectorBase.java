@@ -22,8 +22,9 @@ package com.sixsq.slipstream.connector;
 
 import com.google.gson.Gson;
 import com.sixsq.slipstream.configuration.Configuration;
+import com.sixsq.slipstream.credentials.CloudCredential;
+import com.sixsq.slipstream.credentials.CloudCredentialCollection;
 import com.sixsq.slipstream.credentials.Credentials;
-import com.sixsq.slipstream.exceptions.AbortException;
 import com.sixsq.slipstream.exceptions.ConfigurationException;
 import com.sixsq.slipstream.exceptions.NotFoundException;
 import com.sixsq.slipstream.exceptions.ProcessException;
@@ -46,10 +47,13 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.Properties;
 import java.util.logging.Logger;
@@ -175,11 +179,13 @@ public abstract class CliConnectorBase extends ConnectorBase {
 	@Override
 	public void terminate(Run run, User user) throws SlipStreamException {
 
+		loadCloudCredentials(run, user, this.log);
+
 		validateCredentials(user);
 
 		List<String> instanceIds = getCloudNodeInstanceIds(run);
-		if(instanceIds.isEmpty()){
-			throw new SlipStreamClientException("There is no instances to terminate");
+		if (instanceIds.isEmpty()){
+			throw new SlipStreamClientException("There are no instances to terminate.");
 		}
 
 		StringBuilder instances = new StringBuilder();
@@ -232,15 +238,45 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		connectorCleanupAfterCliCall();
 	}
 
+	public static void loadCloudCredentials(Run run, User user, Logger log) {
+
+		try {
+
+			List<CloudCredential> credentials = new ArrayList<>();
+
+			String key = run.getRuntimeParameterValueIgnoreAbort(RuntimeParameter.GLOBAL_DEPLOYMENT_CREDENTIAL_IDS);
+
+			String[] credentialIds = key.split(",");
+			for (String credentialId : credentialIds) {
+				try {
+					Response response = SscljProxy.get(SscljProxy.BASE_RESOURCE + credentialId, "super ADMIN", true);
+					String json = response.getEntityAsText();
+					CloudCredential cloudCredential = (CloudCredential) CloudCredential.fromJson(json, CloudCredential.class);
+					credentials.add(cloudCredential);
+				} catch (Exception e) {
+					log.warning(String.format("Could not retrieve credential %s on run %s with: %s",
+							key, run.getUuid(), e.getMessage()));
+				}
+			}
+
+			user.addCloudCredentialParametersIntoUser(credentials);
+
+		} catch (NotFoundException e) {
+			log.warning(String.format("No value for parameter %s on run %s.",
+					RuntimeParameter.GLOBAL_DEPLOYMENT_CREDENTIAL_IDS, run.getUuid()));
+			e.printStackTrace();
+		}
+	}
+
 	public static void deleteApiKeySecret(Run run, User user, Logger log) {
-	    String key = null;
+		String key = null;
 		try {
 			key = run.getRuntimeParameterValueIgnoreAbort(RuntimeParameter.GLOBAL_RUN_APIKEY_KEY);
 		} catch (NotFoundException e) {
 			e.printStackTrace();
 		}
 		if (null != key && key.startsWith("credential/")) {
-		    try {
+			try {
 				SscljProxy.delete(SscljProxy.BASE_RESOURCE + key, user.getName() + " USER", true);
 			} catch (Exception e) {
 				log.warning(String.format("Failed to delete API key %s on run %s with: %s",
@@ -398,6 +434,8 @@ public abstract class CliConnectorBase extends ConnectorBase {
 
 		environment.put("SLIPSTREAM_SS_CACHE_KEY", UUID.randomUUID().toString());
 
+		setDeploymentCredentialIds(run, user, environment);
+
 		genAndSetRunApiKey(run, user, environment);
 
 		environment.put("SLIPSTREAM_USERNAME", username);
@@ -414,6 +452,30 @@ public abstract class CliConnectorBase extends ConnectorBase {
 		environment.put("SLIPSTREAM_API_KEY", apiKeySecret.get(API_KEY_KEY));
 		environment.put("SLIPSTREAM_API_SECRET", apiKeySecret.get(API_SECRET_KEY));
 		setApiKeyOnRun(run, apiKeySecret.get(API_KEY_KEY));
+	}
+
+	static List<String> extractDeploymentCredentialIds(Run run, User user) {
+
+		List<String> deploymentCredentials = new ArrayList<String>();
+
+		// Get the set of cloud services being used for the deployment
+		Set<String> cloudServiceNamesSet = new HashSet<>(Arrays.asList(run.getCloudServiceNamesList()));
+
+		// Get the credentials visible to the user
+		CloudCredentialCollection cloudCredentials = User.findCloudCredentials(user);
+		for (CloudCredential cloudCredential : cloudCredentials.getCredentials()) {
+			if (cloudServiceNamesSet.contains(cloudCredential.connector.getRefResourceName())) {
+				deploymentCredentials.add(cloudCredential.id);
+			}
+		}
+
+		return deploymentCredentials;
+	}
+
+	static void setDeploymentCredentialIds(Run run, User user, Map<String, String> environment) throws ValidationException {
+		String credentialIds = String.join(",", extractDeploymentCredentialIds(run, user));
+		environment.put("SLIPSTREAM_DEPLOYMENT_CREDENTIAL_IDS", credentialIds);
+		setDeploymentCredentials(run, credentialIds);
 	}
 
 	protected Map<String, String> getCommonEnvironment(User user)
