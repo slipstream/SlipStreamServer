@@ -33,11 +33,10 @@
           (let [{:keys [sub] :as claims} (sign/unsign-claims access-token publicKey)
                 roles (concat (oidc-utils/extract-roles claims)
                               (oidc-utils/extract-groups claims)
-                              (oidc-utils/extract-entitlements claims))
-                {:keys [username] :as userinfo} (when sub (oidc-utils/get-mitreid-userinfo userProfileURL access-token))]
+                              (oidc-utils/extract-entitlements claims))]
             (log/debug "MITREid access token claims for" instance ":" (pr-str claims))
             (if sub
-              (if-let [matched-user (ex/match-oidc-username :mitreid username instance)]
+              (if-let [matched-user (ex/match-oidc-username :mitreid sub instance)]
                 (let [claims (cond-> (auth-internal/create-claims matched-user)
                                      session-id (assoc :session session-id)
                                      session-id (update :roles #(str session-id " " %))
@@ -57,7 +56,7 @@
                       (if redirectURI
                         (r/response-final-redirect redirectURI cookie-tuple)
                         (r/response-created session-id cookie-tuple)))))
-                (oidc-utils/throw-inactive-user sub redirectURI))
+                (oidc-utils/throw-inactive-user (str instance ":" sub) redirectURI))
               (oidc-utils/throw-no-subject redirectURI)))
           (catch Exception e
             (oidc-utils/throw-invalid-access-code (str e) redirectURI)))
