@@ -13,7 +13,7 @@
 (s/def ::quota nat-int?)
 (s/def ::manager (su/only-keys :req-un [::cimi-acl/principal
                                         ::cimi-acl/type]))
-(s/def ::managers (s/coll-of ::manager :min-count 1))
+(s/def ::managers (s/coll-of ::manager :min-count 1 :kind vector?))
 
 (def credential-template-cloud-keys-spec
   {:req-un [::key
