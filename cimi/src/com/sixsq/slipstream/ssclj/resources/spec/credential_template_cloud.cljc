@@ -1,10 +1,10 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.credential-template-cloud
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [com.sixsq.slipstream.ssclj.resources.spec.acl :as cimi-acl]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as cimi-common]
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
-    [com.sixsq.slipstream.ssclj.resources.spec.acl :as cimi-acl]))
+    [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 ;; FIXME: see https://github.com/slipstream/SlipStreamServer/issues/1309
 (s/def ::key string?)                                       ;; ::cimi-core/nonblank-string

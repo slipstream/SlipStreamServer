@@ -1,11 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.resources.user.user-identifier-utils
   (:require
     [clojure.string :as str]
+    [clojure.tools.logging :as log]
     [com.sixsq.slipstream.db.filter.parser :as parser]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [clojure.tools.logging :as log]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 
 (def ^:private active-user-filter "(state='ACTIVE')")
