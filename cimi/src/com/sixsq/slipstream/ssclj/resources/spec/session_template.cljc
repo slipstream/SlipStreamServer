@@ -3,6 +3,7 @@
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
+    [com.sixsq.slipstream.ssclj.resources.spec.ui-hints :as hints]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 ;; All session resources must have a 'method' attribute.
@@ -11,14 +12,6 @@
 ;; All session resources must have a 'instance' attribute that is used in
 ;; the template identifier.
 (s/def ::instance ::cimi-core/identifier)
-
-;; Session template resources may have a 'group' attribute that is used to group
-;; authentication methods together.  Primarily geared towards visualization of
-;; the authentication methods.
-(s/def ::group ::cimi-core/nonblank-string)
-
-;; Sessions may provide a redirect URI to be used on successful authentication.
-(s/def ::redirectURI ::cimi-core/nonblank-string)
 
 ;; Restrict the href used to create sessions.
 (def session-template-regex #"^session-template/[a-z]+(-[a-z]+)*$")
@@ -30,11 +23,11 @@
 ;; is no sense in defining map resources for the resource itself.
 ;;
 
-(def session-template-keys-spec {:req-un [::method ::instance]
-                                 :opt-un [::group ::redirectURI]})
+(def session-template-keys-spec {:req-un [::method ::instance]})
 
 (def resource-keys-spec
   (su/merge-keys-specs [c/common-attrs
+                        hints/ui-hints-spec
                         session-template-keys-spec]))
 
 (def create-keys-spec
@@ -42,6 +35,7 @@
 
 (def template-keys-spec
   (su/merge-keys-specs [c/template-attrs
+                        hints/ui-hints-spec
                         session-template-keys-spec
                         {:req-un [::href]}]))
 

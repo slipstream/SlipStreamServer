@@ -5,6 +5,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
+    [com.sixsq.slipstream.ssclj.resources.common.ui-hints :as hints]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.session-template]
     [com.sixsq.slipstream.util.response :as r]))
@@ -69,6 +70,7 @@
 
 (def SessionTemplateDescription
   (merge c/CommonParameterDescription
+         hints/UIHintsParameterDescription
          {:method      {:displayName "Authentication Method"
                         :category    "general"
                         :description "method to be used to authenticate user"
@@ -82,21 +84,7 @@
                         :type        "string"
                         :mandatory   true
                         :readOnly    true
-                        :order       11}
-          :group       {:displayName "Authentication Group"
-                        :category    "general"
-                        :description "optional label to group authentication methods"
-                        :type        "string"
-                        :mandatory   false
-                        :readOnly    false
-                        :order       12}
-          :redirectURI {:displayName "Redirect URI"
-                        :category    "general"
-                        :description "optional redirect URI to be used on success"
-                        :type        "hidden"
-                        :mandatory   false
-                        :readOnly    false
-                        :order       13}}))
+                        :order       11}}))
 ;;
 ;; multimethods for validation
 ;;

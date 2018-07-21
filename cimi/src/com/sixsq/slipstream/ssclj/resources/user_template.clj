@@ -5,6 +5,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
+    [com.sixsq.slipstream.ssclj.resources.common.ui-hints :as hints]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.user-template]
     [com.sixsq.slipstream.util.response :as r]))
@@ -73,6 +74,7 @@
 
 (def UserTemplateDescription
   (merge c/CommonParameterDescription
+         hints/UIHintsParameterDescription
          {:method   {:displayName "Registration Method"
                      :category    "general"
                      :description "method to be used to register user"
