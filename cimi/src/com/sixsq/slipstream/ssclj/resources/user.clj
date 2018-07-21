@@ -8,7 +8,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.user-template-direct :as tpl]
-    [com.sixsq.slipstream.ssclj.util.log :as logu]))
+    [com.sixsq.slipstream.ssclj.util.log :as logu]
+    [com.sixsq.slipstream.util.response :as r]))
 
 (def ^:const resource-tag :users)
 
@@ -174,31 +175,38 @@
 (defmethod crud/add resource-name
   [{:keys [body form-params headers] :as request}]
 
-  (let [idmap {:identity (:identity request)}
-        body (if (u/is-form? headers) (u/convert-form :userTemplate form-params) body)
-        authn-method (-> body :userTemplate :method)
-        desc-attrs (u/select-desc-keys body)
-        [resp-fragment {:keys [id] :as body}] (-> body
-                                                  (assoc :resourceURI create-uri)
-                                                  (update-in [:userTemplate] dissoc :method :id) ;; forces use of template reference
-                                                  (std-crud/resolve-hrefs idmap true)
-                                                  (update-in [:userTemplate] merge desc-attrs) ;; validate desc attrs
-                                                  (crud/validate)
-                                                  (:userTemplate)
-                                                  (merge-with-defaults)
-                                                  (tpl->user request) ;; returns a tuple [response-fragment, resource-body]
-                                                  (merge desc-attrs)
-                                                  (revert-method authn-method))]
+  (try
+    (let [idmap {:identity (:identity request)}
+          body (if (u/is-form? headers) (u/convert-form :userTemplate form-params) body)
+          authn-method (-> body :userTemplate :method)
+          desc-attrs (u/select-desc-keys body)
+          [resp-fragment {:keys [id] :as body}] (-> body
+                                                    (assoc :resourceURI create-uri)
+                                                    (update-in [:userTemplate] dissoc :method :id) ;; forces use of template reference
+                                                    (std-crud/resolve-hrefs idmap true)
+                                                    (update-in [:userTemplate] merge desc-attrs) ;; validate desc attrs
+                                                    (crud/validate)
+                                                    (:userTemplate)
+                                                    (merge-with-defaults)
+                                                    (tpl->user request) ;; returns a tuple [response-fragment, resource-body]
+                                                    (merge desc-attrs)
+                                                    (revert-method authn-method))]
 
-    (if resp-fragment
-      ;;possibly a redirect
-      resp-fragment
+      (if resp-fragment
+        ;;possibly a redirect
+        resp-fragment
 
-      ;; ensure desc attrs are added
-      (let [{{:keys [status resource-id]} :body :as result} (add-impl (assoc request :id id :body body))]
-        (when (and resource-id (= 201 status))
-          (post-user-add (assoc body :id resource-id) request))
-        result))))
+        ;; ensure desc attrs are added
+        (let [{{:keys [status resource-id]} :body :as result} (add-impl (assoc request :id id :body body))]
+          (when (and resource-id (= 201 status))
+            (post-user-add (assoc body :id resource-id) request))
+          result)))
+    (catch Exception e
+      (let [redirectURI (get-in body [:userTemplate :redirectURI])
+            {:keys [status] :as http-response} (ex-data e)]
+        (if (and redirectURI (= 400 status))
+          (throw (r/ex-redirect (str "invalid parameter values provided") nil redirectURI))
+          (or http-response (throw e)))))))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 (defmethod crud/retrieve resource-name

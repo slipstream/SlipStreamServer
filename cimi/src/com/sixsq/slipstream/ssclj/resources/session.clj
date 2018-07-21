@@ -10,7 +10,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.util.log :as log-util]))
+    [com.sixsq.slipstream.ssclj.util.log :as log-util]
+    [com.sixsq.slipstream.util.response :as r]))
 
 (def ^:const resource-tag :sessions)
 
@@ -186,7 +187,11 @@
           add-impl
           (merge cookie-header)))
     (catch Exception e
-      (or (ex-data e) (throw e)))))
+      (let [redirectURI (get-in body [:sessionTemplate :redirectURI])
+            {:keys [status] :as http-response} (ex-data e)]
+        (if (and redirectURI (= 400 status))
+          (throw (r/ex-redirect (str "invalid parameter values provided") nil redirectURI))
+          (or http-response (throw e)))))))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 
