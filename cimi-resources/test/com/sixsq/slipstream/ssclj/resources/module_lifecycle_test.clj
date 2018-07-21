@@ -32,17 +32,9 @@
                   :resourceURI module/resource-uri
                   :created     timestamp
                   :updated     timestamp
-                  :acl         valid-acl
                   :parentPath  "a/b"
                   :path        "a/b/c"
-                  :type        "IMAGE"
-                  :versions    [{:href "module-image/xyz"
-                                 :author "someone"
-                                 :commit "wip"}
-                                {:href "module-image/abc"
-                                 :author "someone"
-                                 :commit "wip"}]
-                  :logo        {:href "external-object/xyz"}})
+                  :type        "IMAGE"})
 
 (def valid-image {:resourceURI  module-image/resource-uri
 
@@ -59,8 +51,6 @@
                   :imageIDs     {:some-cloud       "my-great-image-1"
                                  :some-other-cloud "great-stuff"}
 
-                  :relatedImage {:href "module/other"}
-
                   :author       "someone"
                   :commit       "wip"})
 
@@ -72,27 +62,26 @@
         session-admin (header session-anon authn-info-header "super ADMIN USER ANON")
         session-user (header session-anon authn-info-header "jane USER ANON")]
 
-    ;; create: NOK for anon, users
-    (doseq [session [session-anon session-user]]
-      (-> session
-          (request base-uri
-                   :request-method :post
-                   :body (json/write-str (assoc valid-entry :content valid-image)))
-          (ltu/body->edn)
-          (ltu/is-status 403)))
+    ;; create: NOK for anon
+    (-> session-anon
+        (request base-uri
+                 :request-method :post
+                 :body (json/write-str (assoc valid-entry :content valid-image)))
+        (ltu/body->edn)
+        (ltu/is-status 403))
 
-    ;; queries: OK for admin, NOK for others
-    (doseq [session [session-anon session-user]]
+    ;; queries: NOK for anon
+    (-> session-anon
+        (request base-uri)
+        (ltu/body->edn)
+        (ltu/is-status 403))
+
+    (doseq [session [session-admin session-user]]
       (-> session
           (request base-uri)
           (ltu/body->edn)
-          (ltu/is-status 403)))
-
-    (-> session-admin
-        (request base-uri)
-        (ltu/body->edn)
-        (ltu/is-status 200)
-        (ltu/is-count zero?))
+          (ltu/is-status 200)
+          (ltu/is-count zero?)))
 
 
     ;; invalid module type
@@ -106,120 +95,118 @@
         (ltu/is-status 400))
 
     ;; adding, retrieving and  deleting entry as user should succeed
-    (let [uri (-> session-admin
-                  (request base-uri
-                           :request-method :post
-                           :body (json/write-str (assoc valid-entry :content valid-image)))
-                  (ltu/body->edn)
-                  (ltu/is-status 201)
-                  (ltu/location))
+    (doseq [session [session-admin session-user]]
+      (let [uri (-> session
+                   (request base-uri
+                            :request-method :post
+                            :body (json/write-str (assoc valid-entry :content valid-image)))
+                   (ltu/body->edn)
+                   (ltu/is-status 201)
+                   (ltu/location))
 
-          abs-uri (str p/service-context (u/de-camelcase uri))]
+           abs-uri (str p/service-context (u/de-camelcase uri))]
 
-      ;; retrieve: OK for admin; NOK for others
-      (doseq [session [session-anon session-user]]
-        (-> session
-            (request abs-uri)
-            (ltu/body->edn)
-            (ltu/is-status 403)))
+       ;; retrieve: NOK for anon
+       (-> session-anon
+           (request abs-uri)
+           (ltu/body->edn)
+           (ltu/is-status 403))
 
-      (let [content (-> session-admin
-                        (request abs-uri)
-                        (ltu/body->edn)
-                        (ltu/is-status 200)
-                        :response
-                        :body
-                        :content)]
-        (is (= valid-image (select-keys content (keys valid-image)))))
-
-      ;; edit: OK for admin; NOK for others
-      (doseq [session [session-anon session-user]]
-        (-> session
-            (request abs-uri
-                     :request-method :put
-                     :body (json/write-str (assoc valid-entry :content valid-image)))
-            (ltu/body->edn)
-            (ltu/is-status 403)))
-
-      ;; insert 5 more versions
-      (doseq [_ (range 5)]
-        (-> session-admin
-            (request abs-uri
-                     :request-method :put
-                     :body (json/write-str (assoc valid-entry :content valid-image)))
-            (ltu/body->edn)
-            (ltu/is-status 200)))
-
-
-      (let [versions (-> session-admin
-                         (request abs-uri
-                                  :request-method :put
-                                  :body (json/write-str (assoc valid-entry :content valid-image)))
+       (let [content (-> session-admin
+                         (request abs-uri)
                          (ltu/body->edn)
                          (ltu/is-status 200)
                          :response
                          :body
-                         :versions)]
-        (is (= 7 (count versions)))
+                         :content)]
+         (is (= valid-image (select-keys content (keys valid-image)))))
 
-        ;; extract by indexes or last
-        (doseq [[i n] [["_0" 0] ["_1" 1] ["" 6]]]
-          (let [content-id (-> session-admin
-                               (request (str abs-uri i))
-                               (ltu/body->edn)
-                               (ltu/is-status 200)
-                               :response
-                               :body
-                               :content
-                               :id)]
-            (is (= (-> versions (nth n) :href) content-id))
-            (is (= (-> versions (nth n) :author) "someone"))
-            (is (= (-> versions (nth n) :commit) "wip")))))
+       ;; edit: NOK for anon
+       (-> session-anon
+           (request abs-uri
+                    :request-method :put
+                    :body (json/write-str (assoc valid-entry :content valid-image)))
+           (ltu/body->edn)
+           (ltu/is-status 403))
 
-      (doseq [i ["_0" "_1"]]
-        (-> session-admin
-            (request (str abs-uri i)
-                     :request-method :delete)
-            (ltu/body->edn)
-            (ltu/is-status 200))
-
-        (-> session-admin
-            (request (str abs-uri i))
-            (ltu/body->edn)
-            (ltu/is-status 404)))
+       ;; insert 5 more versions
+       (doseq [_ (range 5)]
+         (-> session-admin
+             (request abs-uri
+                      :request-method :put
+                      :body (json/write-str (assoc valid-entry :content valid-image)))
+             (ltu/body->edn)
+             (ltu/is-status 200)))
 
 
-      ;; delete out of bound index should return 404
-      (-> session-admin
-          (request (str abs-uri "_50")
-                   :request-method :delete)
-          (ltu/body->edn)
-          (ltu/is-status 404))
+       (let [versions (-> session-admin
+                          (request abs-uri
+                                   :request-method :put
+                                   :body (json/write-str (assoc valid-entry :content valid-image)))
+                          (ltu/body->edn)
+                          (ltu/is-status 200)
+                          :response
+                          :body
+                          :versions)]
+         (is (= 7 (count versions)))
 
-      (-> session-admin
-          (request (str abs-uri "_50"))
-          (ltu/body->edn)
-          (ltu/is-status 404))
+         ;; extract by indexes or last
+         (doseq [[i n] [["_0" 0] ["_1" 1] ["" 6]]]
+           (let [content-id (-> session-admin
+                                (request (str abs-uri i))
+                                (ltu/body->edn)
+                                (ltu/is-status 200)
+                                :response
+                                :body
+                                :content
+                                :id)]
+             (is (= (-> versions (nth n) :href) content-id))
+             (is (= (-> versions (nth n) :author) "someone"))
+             (is (= (-> versions (nth n) :commit) "wip")))))
 
-      ;; delete: OK for admin; NOK for others
-      (doseq [session [session-anon session-user]]
-        (-> session
-            (request abs-uri
-                     :request-method :delete)
-            (ltu/body->edn)
-            (ltu/is-status 403)))
+       (doseq [i ["_0" "_1"]]
+         (-> session-admin
+             (request (str abs-uri i)
+                      :request-method :delete)
+             (ltu/body->edn)
+             (ltu/is-status 200))
 
-      (-> session-admin
-          (request abs-uri
-                   :request-method :delete)
-          (ltu/body->edn)
-          (ltu/is-status 200))
+         (-> session-admin
+             (request (str abs-uri i))
+             (ltu/body->edn)
+             (ltu/is-status 404)))
 
-      ;; verify that the resource was deleted.
-      (-> session-admin
-          (request abs-uri)
-          (ltu/body->edn)
-          (ltu/is-status 404)))))
+
+       ;; delete out of bound index should return 404
+       (-> session-admin
+           (request (str abs-uri "_50")
+                    :request-method :delete)
+           (ltu/body->edn)
+           (ltu/is-status 404))
+
+       (-> session-admin
+           (request (str abs-uri "_50"))
+           (ltu/body->edn)
+           (ltu/is-status 404))
+
+       ;; delete: NOK for anon
+       (-> session-anon
+           (request abs-uri
+                    :request-method :delete)
+           (ltu/body->edn)
+           (ltu/is-status 403))
+
+       (-> session-admin
+           (request abs-uri
+                    :request-method :delete)
+           (ltu/body->edn)
+           (ltu/is-status 200))
+
+       ;; verify that the resource was deleted.
+       (-> session-admin
+           (request abs-uri)
+           (ltu/body->edn)
+           (ltu/is-status 404))))))
 
 
 (deftest bad-methods
