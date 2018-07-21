@@ -92,7 +92,8 @@
                        :sessionTemplate {:href href}}
           href-create-redirect {:sessionTemplate {:href        href
                                                   :redirectURI redirect-uri-example}}
-          invalid-create (assoc-in href-create-redirect [:sessionTemplate :invalid] "BAD")]
+          invalid-create (assoc-in href-create [:sessionTemplate :invalid] "BAD")
+          invalid-create-redirect (assoc-in href-create-redirect [:sessionTemplate :invalid] "BAD")]
 
       ;; anonymous query should succeed but have no entries
       (-> session-anon
@@ -379,7 +380,7 @@
                                                               :email "user@example.com"}))
 
                         ex/match-existing-external-user (fn [authn-method external-login instance]
-                                                          "MATCHED_USER" )
+                                                          "MATCHED_USER")
 
                         db/find-roles-for-username (fn [username]
                                                      "USER ANON alpha")]
@@ -511,4 +512,11 @@
                      :request-method :post
                      :body (json/write-str invalid-create))
             (ltu/body->edn)
-            (ltu/is-status 400))))))
+            (ltu/is-status 400))
+
+        (-> session-anon
+            (request base-uri
+                     :request-method :post
+                     :body (json/write-str invalid-create-redirect))
+            (ltu/body->edn)
+            (ltu/is-status 303))))))
