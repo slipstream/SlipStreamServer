@@ -30,9 +30,9 @@
 
 (def collection-acl {:owner {:principal "ADMIN"
                              :type      "ROLE"}
-                     :rules [{:principal "ADMIN"
+                     :rules [{:principal "USER"
                               :type      "ROLE"
-                              :right     "ALL"}]})
+                              :right     "MODIFY"}]})
 
 ;;
 ;; multimethods for validation and operations
