@@ -9,7 +9,7 @@
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamConnector-Dummy-java</artifactId>
-    <version>3.55</version>
+    <version>3.56-SNAPSHOT</version>
   </parent>
 
   <dependencies>
