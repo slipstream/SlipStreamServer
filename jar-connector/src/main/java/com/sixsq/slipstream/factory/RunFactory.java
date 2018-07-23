@@ -256,6 +256,9 @@ public abstract class RunFactory {
 
 		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_RUN_APIKEY_KEY, "",
 				RuntimeParameter.GLOBAL_RUN_APIKEY_DESCRIPTION);
+
+		run.assignRuntimeParameter(RuntimeParameter.GLOBAL_DEPLOYMENT_CREDENTIAL_IDS, "",
+				RuntimeParameter.GLOBAL_DEPLOYMENT_CREDENTIAL_IDS_DESCRIPTION);
 	}
 
 	private static void initializeOrchestratorParameters(Run run, String cloudService) throws ValidationException {

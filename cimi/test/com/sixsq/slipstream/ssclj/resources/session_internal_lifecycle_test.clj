@@ -2,7 +2,7 @@
   (:require
     [clojure.data.json :as json]
     [clojure.string :as str]
-    [clojure.test :refer :all]
+    [clojure.test :refer [deftest is use-fixtures]]
     [com.sixsq.slipstream.auth.internal :as auth-internal]
     [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.auth.utils.sign :as sign]
@@ -11,15 +11,17 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.session :as session]
-    [com.sixsq.slipstream.ssclj.resources.session-internal :as si]
     [com.sixsq.slipstream.ssclj.resources.session-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.session-template :as st]
     [com.sixsq.slipstream.ssclj.resources.session-template-internal :as internal]
     [peridot.core :refer :all]))
 
+
 (use-fixtures :each ltu/with-test-server-fixture)
 
+
 (def base-uri (str p/service-context (u/de-camelcase session/resource-name)))
+
 
 (def session-template-base-uri (str p/service-context (u/de-camelcase ct/resource-name)))
 
@@ -32,12 +34,14 @@
                                 :password    "password"
                                 :acl         st/resource-acl})
 
+
 (defn mock-login-valid?
   "Will return true if the username and password are identical;
    false otherwise.  Avoids having to start a real database and
    populate it with users."
   [{:keys [username password]}]
   (= username password))
+
 
 (defn mock-roles
   "Mocking function to return the roles for a given user.  For
@@ -48,23 +52,6 @@
                   "root" ["ADMIN" "USER" "ANON"]
                   ["USER" "ANON"])))
 
-#_(deftest check-create-claims
-  (with-redefs [db/find-roles-for-username mock-roles]
-    (let [username "root"
-          server "nuv.la"
-          headers {:slipstream-ssl-server-name server}
-          session-id "session/72e9f3d8-805a-421b-b3df-86f1af294233"
-          client-ip "127.0.0.1"]
-      (is (= {:username username
-              :session  session-id
-              :roles    (str/join " " ["ADMIN" "USER" "ANON" session-id])
-              :server   server
-              :clientIP client-ip}
-             (si/create-claims username headers session-id client-ip)))
-      (is (= {:username "not-root"
-              :roles    (str/join " " ["USER" "ANON"])
-              :server   server}
-             (si/create-claims "not-root" headers nil nil))))))
 
 (deftest lifecycle
 
@@ -109,7 +96,8 @@
                                           :password "user"}}
           valid-create-redirect (assoc-in valid-create [:sessionTemplate :redirectURI] "http://redirect.example.org")
           unauthorized-create (update-in valid-create [:sessionTemplate :password] (constantly "BAD"))
-          invalid-create (assoc-in valid-create [:sessionTemplate :invalid] "BAD")]
+          invalid-create (assoc-in valid-create [:sessionTemplate :invalid] "BAD")
+          invalid-create-redirect (assoc-in valid-create-redirect [:sessionTemplate :invalid] "BAD")]
 
       ;; anonymous query should succeed but have no entries
       (-> session-anon
@@ -285,5 +273,12 @@
                    :request-method :post
                    :body (json/write-str invalid-create))
           (ltu/body->edn)
-          (ltu/is-status 400)))))
+          (ltu/is-status 400))
+
+      (-> session-admin
+          (request base-uri
+                   :request-method :post
+                   :body (json/write-str invalid-create-redirect))
+          (ltu/body->edn)
+          (ltu/is-status 303)))))
 

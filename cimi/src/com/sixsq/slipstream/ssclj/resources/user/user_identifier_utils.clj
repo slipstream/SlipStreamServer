@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.user.user-identifier-utils
   (:require
     [clojure.string :as str]
+    [clojure.tools.logging :as log]
     [com.sixsq.slipstream.db.filter.parser :as parser]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
@@ -21,6 +22,7 @@
   [username authn-method external-login instance]
   (let [user-id (str "user/" username)
         identifier (generate-identifier authn-method external-login instance)]
+    (log/debugf "Creating a UserIdentifier resource for user %s with identifier %s" username identifier)
     (crud/add
       {:identity     {:current "internal"
                       :authentications

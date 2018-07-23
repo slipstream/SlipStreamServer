@@ -532,11 +532,11 @@ public class User extends Metadata {
         return  gson.fromJson(resp.getEntityAsText(), User.class);
     }
 
-    private static CloudCredentialCollection findCloudCredentials(User user) {
+    public static CloudCredentialCollection findCloudCredentials(User user) {
         return User.findCloudCredentials(user, "");
     }
 
-    private static CloudCredentialCollection findCloudCredentials(User user, String cimiQuery) {
+    public static CloudCredentialCollection findCloudCredentials(User user, String cimiQuery) {
         if (null == user) {
             return new CloudCredentialCollection();
         }
@@ -555,42 +555,47 @@ public class User extends Metadata {
                 CloudCredentialCollection.class);
     }
 
-	private static Map<String, UserParameter> loadCloudCredentials
-			(List<CloudCredential> creds, User user) {
-		Map<String, UserParameter> cloudCredParams = new HashMap<>();
-		if (null == user || creds.isEmpty()) {
-			return cloudCredParams;
-		}
-		for (CloudCredential cred : creds) {
-			Response resp;
-			try {
-			    // Loading connectors requires super user with ADMIN role.
-				resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + cred.connector.href, "super ADMIN", true);
-			} catch (Exception e) {
-				logger.warning("Failed to get connector document " + cred.connector.href + " with: " + e.getMessage());
-				continue;
-			}
-			CloudConnector conn = CloudConnector.fromJson(resp.getEntityAsText());
-			Connector connector;
-			try {
-				connector = ConnectorFactory.loadConnector(conn.cloudServiceType, conn.instanceName);
-			} catch (Exception e) {
-				e.printStackTrace();
-				logger.warning("Failed to load connector " + conn.instanceName + " with: " + e.getMessage());
-				continue;
-			}
-			resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + cred.id, getCimiAuthnInfoUser(user));
-			try {
-				Credentials cloudCredTmpl = connector.getCredentials(user);
-				cloudCredParams.putAll(cloudCredTmpl.setUserParametersValues(resp.getEntityAsText()));
-			} catch (ValidationException e) {
-				e.printStackTrace();
-				logger.warning("Failed to transform user " + user.getName() + " cloud credentials " +
-						conn.instanceName + " with: " + e.getMessage());
-			}
-		}
-		return cloudCredParams;
-	}
+    private static Map<String, UserParameter> loadCloudCredentials(List<CloudCredential> creds, User user) {
+        return loadCloudCredentials(creds, user, getCimiAuthnInfoUser(user));
+    }
+
+    private static Map<String, UserParameter> loadCloudCredentials
+            (List<CloudCredential> creds, User user, String authnInfo) {
+
+        Map<String, UserParameter> cloudCredParams = new HashMap<>();
+        if (null == user || creds.isEmpty()) {
+            return cloudCredParams;
+        }
+        for (CloudCredential cred : creds) {
+            Response resp;
+            try {
+                // Loading connectors requires super user with ADMIN role.
+                resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + cred.connector.href, "super ADMIN", true);
+            } catch (Exception e) {
+                logger.warning("Failed to get connector document " + cred.connector.href + " with: " + e.getMessage());
+                continue;
+            }
+            CloudConnector conn = CloudConnector.fromJson(resp.getEntityAsText());
+            Connector connector;
+            try {
+                connector = ConnectorFactory.loadConnector(conn.cloudServiceType, conn.instanceName);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warning("Failed to load connector " + conn.instanceName + " with: " + e.getMessage());
+                continue;
+            }
+            resp = SscljProxy.get(SscljProxy.BASE_RESOURCE + cred.id, authnInfo);
+            try {
+                Credentials cloudCredTmpl = connector.getCredentials(user);
+                cloudCredParams.putAll(cloudCredTmpl.setUserParametersValues(resp.getEntityAsText()));
+            } catch (ValidationException e) {
+                e.printStackTrace();
+                logger.warning("Failed to transform user " + user.getName() + " cloud credentials " +
+                        conn.instanceName + " with: " + e.getMessage());
+            }
+        }
+        return cloudCredParams;
+    }
 
     private static Map<String, UserParameter> loadCloudCredentials(User user) throws ValidationException {
         if (user == null) {
@@ -645,6 +650,19 @@ public class User extends Metadata {
             } catch (ValidationException e) {
             }
         }
+    }
+
+    public void addCloudCredentialParametersIntoUser(List<CloudCredential> credentials)
+            throws ConfigurationException {
+
+        Map<String, UserParameter> cloudParameters = loadCloudCredentials(credentials, this, "super ADMIN");
+
+        if (parameters == null) {
+            parameters = cloudParameters;
+        } else {
+            parameters.putAll(cloudParameters);
+        }
+
     }
 
     public void remove() {

@@ -81,7 +81,10 @@
                                         :emailAddress   "jane@example.org"}}
 
             href-create-redirect (assoc-in href-create [:userTemplate :redirectURI] "http://redirect.example.org")
-            invalid-create (assoc-in href-create [:userTemplate :href] "user-template/unknown-template")]
+            invalid-create (assoc-in href-create [:userTemplate :href] "user-template/unknown-template")
+
+            bad-params-create (assoc-in href-create [:userTemplate :invalid] "BAD")
+            bad-params-create-redirect (assoc-in href-create-redirect [:userTemplate :invalid] "BAD")]
 
 
         ;; user collection query should succeed but be empty for all users
@@ -113,9 +116,25 @@
               (ltu/body->edn)
               (ltu/is-status 404)))
 
+        ;; create with bad parameters fails
+        (doseq [session [session-anon session-user session-admin]]
+          (-> session
+              (request base-uri
+                       :request-method :post
+                       :body (json/write-str bad-params-create))
+              (ltu/body->edn)
+              (ltu/is-status 400)))
+
+        (doseq [session [session-anon session-user session-admin]]
+          (-> session
+              (request base-uri
+                       :request-method :post
+                       :body (json/write-str bad-params-create-redirect))
+              (ltu/body->edn)
+              (ltu/is-status 303)))
 
 
-        ;;Create user with redirect
+        ;; create user with redirect
         (let [resp (-> session-anon
                        (request base-uri
                                 :request-method :post
@@ -126,8 +145,7 @@
               uri (-> resp
                       (ltu/location))
               abs-uri (str p/service-context (u/de-camelcase uri))]
-          (is (= "http://redirect.example.org" uri))
-          )
+          (is (= "http://redirect.example.org" uri)))
 
 
         ;; create a user anonymously
