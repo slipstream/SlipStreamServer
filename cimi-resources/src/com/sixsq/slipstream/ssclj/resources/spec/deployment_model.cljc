@@ -19,7 +19,7 @@
 (s/def ::disk nat-int?)
 
 (s/def ::node (su/only-keys :req-un [::nodeID ::credential]
-                          :opt-un [::cpu ::ram ::disk]))
+                            :opt-un [::cpu ::ram ::disk]))
 
 (s/def ::nodes (s/coll-of ::node :kind vector? :min-count 1))
 
