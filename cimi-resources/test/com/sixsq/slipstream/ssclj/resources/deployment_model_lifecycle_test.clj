@@ -5,6 +5,7 @@
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.deployment-model :as dm]
     [com.sixsq.slipstream.ssclj.resources.deployment-model-template :as dmt]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
@@ -120,15 +121,19 @@
         (let [pair-fn (juxt :id #(str p/service-context (:id %)))
               pairs (map pair-fn entries)]
           (doseq [[id entry-uri] pairs]
-            (-> session-user
-                (request entry-uri)
-                (ltu/body->edn)
-                (ltu/is-operation-present "delete")
-                (ltu/is-operation-present "edit")
-                (ltu/is-operation-absent "activate")
-                (ltu/is-operation-absent "quarantine")
-                (ltu/is-status 200)
-                (ltu/is-id id)))))
+            (let [new-model (-> session-user
+                                (request entry-uri)
+                                (ltu/body->edn)
+                                (ltu/is-operation-present "delete")
+                                (ltu/is-operation-present "edit")
+                                (ltu/is-operation-present (:start c/action-uri))
+                                (ltu/is-status 200))
+                  start-uri (str p/service-context (ltu/get-op new-model (:start c/action-uri)))]
+              (-> session-user
+                  (request start-uri
+                           :request-method :post)
+                  (ltu/body->edn)
+                  (ltu/is-status 201))))))
 
       ;; user delete succeeds
       (-> session-user

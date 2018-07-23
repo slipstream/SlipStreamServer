@@ -9,7 +9,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.module :as m]
     [com.sixsq.slipstream.ssclj.resources.spec.deployment-model :as dm]
-    [com.sixsq.slipstream.ssclj.resources.spec.deployment-model-template :as dmt]))
+    [com.sixsq.slipstream.ssclj.resources.spec.deployment-model-template :as dmt]
+    [ring.util.response :as r]))
 
 (def ^:const resource-tag :deploymentModels)
 
@@ -156,12 +157,20 @@
 ;; methods like GitHub and OpenID Connect) to validate a given session
 ;;
 
+(defmethod crud/set-operations resource-uri
+  [{:keys [id] :as resource} request]
+  (let [href (str id "/start")
+        start-op {:rel (:start c/action-uri) :href href}]
+    (-> (crud/set-standard-operations resource request)
+        (update-in [:operations] conj start-op))))
+
+
 (defmethod crud/do-action [resource-url "start"]
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)
           model (crud/retrieve-by-id-as-admin id)]
-      (log/info (with-out-str (clojure.pprint/pprint model)))) ;; FIXME: Do something!
+      (r/created "deployment/my-new-deployment-uuid" model)) ;; FIXME: Actually create something!
     (catch Exception e
       (or (ex-data e) (throw e)))))
 
