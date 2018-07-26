@@ -31,17 +31,21 @@
                     :state       "NEW"})
 
 
+(defn create-user-map
+  [{:keys [password] :as resource}]
+  (-> resource
+      (merge user-defaults)
+      (dissoc :passwordRepeat :instance :redirectURI
+              :group :order :icon :hidden)
+      (assoc :password (internal/hash-password password))))
+
+
 (defmethod p/tpl->user user-template/registration-method
   [{:keys [password redirectURI] :as resource} request]
   (if redirectURI
-    [{:status 303, :headers {"Location" redirectURI}} (-> resource
-                                                          (merge user-defaults)
-                                                          (dissoc :passwordRepeat :instance :redirectURI)
-                                                          (assoc :password (internal/hash-password password)))]
-    [nil (-> resource
-             (merge user-defaults)
-             (dissoc :passwordRepeat :instance :redirectURI)
-             (assoc :password (internal/hash-password password)))]))
+    [{:status 303, :headers {"Location" redirectURI}}
+     (create-user-map resource)]
+    [nil (create-user-map resource)]))
 
 
 ;;
