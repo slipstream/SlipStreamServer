@@ -40,6 +40,7 @@
     (stu/is-invalid ::quota/quota (assoc quota :aggregation 0))
     (stu/is-invalid ::quota/quota (assoc quota :aggregation ""))
 
+    (stu/is-valid ::quota/quota (assoc quota :limit 0))
     (stu/is-invalid ::quota/quota (assoc quota :limit -1))
     (stu/is-invalid ::quota/quota (assoc quota :limit ""))
 
