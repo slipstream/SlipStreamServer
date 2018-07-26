@@ -192,15 +192,23 @@
                                                     (merge desc-attrs)
                                                     (revert-method authn-method))]
 
-      (if resp-fragment
-        ;;possibly a redirect
-        resp-fragment
+      (cond
 
-        ;; ensure desc attrs are added
-        (let [{{:keys [status resource-id]} :body :as result} (add-impl (assoc request :id id :body body))]
-          (when (and resource-id (= 201 status))
-            (post-user-add (assoc body :id resource-id) request))
-          result)))
+        ;; pure redirect that hasn't created a user account
+        (and resp-fragment (nil? body)) resp-fragment
+
+        ;; requested redirect with method that created a user
+        (and resp-fragment body) (let [{{:keys [status resource-id]} :body :as result} (add-impl (assoc request :id id :body body))]
+                                   (when (and resource-id (= 201 status))
+                                     (post-user-add (assoc body :id resource-id) request))
+                                   (cond-> resp-fragment
+                                           resource-id (assoc-in [:body :resource-id] resource-id)))
+
+        ;; normal case: no redirect and user was created
+        :else (let [{{:keys [status resource-id]} :body :as result} (add-impl (assoc request :id id :body body))]
+                (when (and resource-id (= 201 status))
+                  (post-user-add (assoc body :id resource-id) request))
+                result)))
     (catch Exception e
       (let [redirectURI (get-in body [:userTemplate :redirectURI])
             {:keys [status] :as http-response} (ex-data e)]

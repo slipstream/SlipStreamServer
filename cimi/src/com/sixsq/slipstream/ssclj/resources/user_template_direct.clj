@@ -29,6 +29,10 @@
    :emailAddress "user@example.com"
    :organization ""
    :roles        ""
+   :group        "administrator"
+   :icon         "key"
+   :hidden       true
+   :order        0
    :acl          resource-acl})
 
 ;;

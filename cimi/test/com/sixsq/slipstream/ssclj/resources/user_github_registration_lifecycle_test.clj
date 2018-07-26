@@ -41,6 +41,7 @@
 (deftest lifecycle
 
   (let [href (str ut/resource-url "/" github/registration-method)
+        template-url (str p/service-context ut/resource-url "/" github/registration-method)
 
         session-anon (-> (ltu/ring-app)
                          session
@@ -54,11 +55,24 @@
         redirect-uri-example "https://example.com/webui"]
 
     ;; must create the github user template; this is not created automatically
-    (-> session-admin
-        (request user-template-base-uri
-                 :request-method :post
-                 :body (json/write-str github/resource))
-        (ltu/is-status 201))
+    (let [user-template (->> {:group  "my-group"
+                              :icon   "some-icon"
+                              :order  10
+                              :hidden false}
+                             (merge github/resource)
+                             json/write-str)]
+
+      (-> session-admin
+          (request user-template-base-uri
+                   :request-method :post
+                   :body user-template)
+          (ltu/is-status 201))
+
+      (-> session-anon
+          (request template-url)
+          (ltu/body->edn)
+          (ltu/is-status 200)
+          (get-in [:response :body])))
 
     ;; get user template so that user resources can be tested
     (let [name-attr "name"
