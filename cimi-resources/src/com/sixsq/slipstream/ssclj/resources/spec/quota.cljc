@@ -18,7 +18,7 @@
 (s/def ::resource ::cimi-core/nonblank-string)
 (s/def ::selection (s/and string? valid-cimi-filter?))
 (s/def ::aggregation ::cimi-core/nonblank-string)
-(s/def ::limit pos-int?)
+(s/def ::limit nat-int?)
 
 
 (s/def ::quota
