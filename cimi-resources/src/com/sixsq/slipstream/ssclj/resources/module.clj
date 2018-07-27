@@ -14,8 +14,7 @@
     [com.sixsq.slipstream.ssclj.resources.module.utils :as module-utils]
     [com.sixsq.slipstream.ssclj.resources.spec.module :as module]
     [com.sixsq.slipstream.util.response :as r]
-    [superstring.core :as str]
-    [clojure.tools.logging :as log]))
+    [superstring.core :as str]))
 
 (def ^:const resource-name "Module")
 
@@ -145,18 +144,12 @@
   [{{uuid :uuid} :params :as request}]
   (try
     (let [{:keys [versions] :as module-meta} (retrieve-edn request)
-
-          _ (log/error module-meta)
-          _ (log/error "req idmap" (with-out-str (clojure.pprint/pprint request)))
-
           version-index (second (split-uuid uuid))
           version-id (retrieve-content-id versions version-index)
           module-content (if version-id
                            (crud/retrieve-by-id-as-admin version-id)
                            (when version-index
-                             (throw (r/ex-not-found (str "Module version not found: " resource-url "/" uuid)))))
-          _ (log/error module-content)
-          ]
+                             (throw (r/ex-not-found (str "Module version not found: " resource-url "/" uuid)))))]
       (-> (assoc module-meta :content module-content)
           (crud/set-operations request)
           (r/json-response)))

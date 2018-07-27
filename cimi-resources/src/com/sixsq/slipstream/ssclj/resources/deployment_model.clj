@@ -1,17 +1,16 @@
 (ns com.sixsq.slipstream.ssclj.resources.deployment-model
   (:require
+    [clojure.string :as str]
+    [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.acl :as a]
-    [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.module :as m]
     [com.sixsq.slipstream.ssclj.resources.spec.deployment-model :as dm]
     [com.sixsq.slipstream.ssclj.resources.spec.deployment-model-template :as dmt]
-    [com.sixsq.slipstream.ssclj.resources.module :as m]
-    [clojure.tools.logging :as log]
-    [clojure.string :as str]
-    [com.sixsq.slipstream.auth.acl :as acl]))
+    [ring.util.response :as r]))
 
 (def ^:const resource-tag :deploymentModels)
 
@@ -71,18 +70,19 @@
 
 ;; FIXME: Add real implementation.
 (defn tpl->model
-  [{:keys [module] :as resource} request]
-  (let [model {:module module
-               :nodes  [{:nodeID     "my-node-uuid"
-                         :credential {:href "my-cred-uuid"}
-                         :cpu        10
-                         :ram        20
-                         :disk       30}
-                        {:nodeID     "my-second-node-uuid"
-                         :credential {:href "my-second-cred-uuid"}
-                         :cpu        100
-                         :ram        200
-                         :disk       300}]}]
+  [{:keys [resourceURI module] :as resource} request]
+  (let [model {:resourceURI resourceURI
+               :module      module
+               :nodes       [{:nodeID     "my-node-uuid"
+                              :credential {:href "my-cred-uuid"}
+                              :cpu        10
+                              :ram        20
+                              :disk       30}
+                             {:nodeID     "my-second-node-uuid"
+                              :credential {:href "my-second-cred-uuid"}
+                              :cpu        100
+                              :ram        200
+                              :disk       300}]}]
     model))
 
 
@@ -90,56 +90,37 @@
 ;; CRUD operations
 ;;
 
-(defn add-impl [{:keys [id body] :as request}]
-  (a/can-modify? {:acl collection-acl} request)
-  (db/add
-    resource-name
-    (-> body
-        u/strip-service-attrs
-        (assoc :id id)
-        (assoc :resourceURI resource-uri)
-        u/update-timestamps
-        (crud/add-acl request)
-        crud/validate)
-    {}))
-
-
 (defn resolve-hrefs
   [body idmap]
   (let [module-href (get-in body [:deploymentModelTemplate :module :href])
-        request-module {:sixsq.slipstream.authn/claims (acl/current-authentication idmap)
-                        :params                        {:uuid          (some-> module-href (str/split #"/") second)
-                                                        :resource-name m/resource-url}
-                        :route-params                  {:uuid          (some-> module-href (str/split #"/") second)
-                                                        :resource-name m/resource-url}
-                        :identity                      idmap
-                        }
-        _ (log/error idmap)
+        request-module {:params   {:uuid          (some-> module-href (str/split #"/") second)
+                                   :resource-name m/resource-url}
+                        :identity idmap #_std-crud/internal-identity}
         module (some-> request-module
                        crud/retrieve
                        :body
-                       (dissoc :versions))]
+                       (dissoc :versions :operations :acl))]
     (-> body
         (assoc-in [:deploymentModelTemplate :module] module)
         (std-crud/resolve-hrefs idmap)
         (assoc-in [:deploymentModelTemplate :module :href] module-href))))
 
 
+(def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
+
+
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
-  (let [idmap      {:identity (:identity request)}
+  (let [idmap {:identity (:identity request)}
         desc-attrs (u/select-desc-keys body)
-        [create-resp {:keys [id] :as body}] (-> body
-                                                (assoc :resourceURI create-uri)
-                                                (resolve-hrefs idmap)
-                                                (update-in [:deploymentModelTemplate] merge desc-attrs) ;; ensure desc attrs are validated
-                                                crud/validate
-                                                :deploymentModelTemplate
-                                                (tpl->model request))]
-    (-> request
-        (assoc :id id :body (merge body desc-attrs))
-        add-impl
-        (update-in [:body] merge create-resp))))
+        body (-> body
+                 (assoc :resourceURI create-uri)
+                 (resolve-hrefs idmap)
+                 (update-in [:deploymentModelTemplate] merge desc-attrs) ;; ensure desc attrs are validated
+                 crud/validate
+                 :deploymentModelTemplate
+                 (tpl->model request))]
+    (add-impl (assoc request :body body))))
 
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
@@ -150,7 +131,16 @@
   (retrieve-impl request))
 
 
+(def edit-impl (std-crud/edit-fn resource-name))
+
+
+(defmethod crud/edit resource-name
+  [request]
+  (edit-impl request))
+
+
 (def delete-impl (std-crud/delete-fn resource-name))
+
 
 (defmethod crud/delete resource-name
   [request]
@@ -167,12 +157,20 @@
 ;; methods like GitHub and OpenID Connect) to validate a given session
 ;;
 
+(defmethod crud/set-operations resource-uri
+  [{:keys [id] :as resource} request]
+  (let [href (str id "/start")
+        start-op {:rel (:start c/action-uri) :href href}]
+    (-> (crud/set-standard-operations resource request)
+        (update-in [:operations] conj start-op))))
+
+
 (defmethod crud/do-action [resource-url "start"]
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)
           model (crud/retrieve-by-id-as-admin id)]
-      (log/info (with-out-str (clojure.pprint/pprint model)))) ;; FIXME: Do something!
+      (r/created "deployment/my-new-deployment-uuid" model)) ;; FIXME: Actually create something!
     (catch Exception e
       (or (ex-data e) (throw e)))))
 

@@ -1,16 +1,16 @@
 (ns com.sixsq.slipstream.ssclj.resources.deployment-model-lifecycle-test
   (:require
     [clojure.data.json :as json]
-    [clojure.test :refer :all]
+    [clojure.test :refer [deftest is use-fixtures]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.deployment-model :as dm]
     [com.sixsq.slipstream.ssclj.resources.deployment-model-template :as dmt]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.module-lifecycle-test :as module-test]
-    [peridot.core :refer :all]
-    [clojure.tools.logging :as log]))
+    [peridot.core :refer :all]))
 
 
 (use-fixtures :each ltu/with-test-server-fixture)
@@ -39,12 +39,6 @@
                        (ltu/is-status 201)
                        (ltu/location))
 
-        _ (-> session-user
-              (request (str p/service-context module-uri))
-              (ltu/body->edn)
-              (ltu/is-status 200)
-              (log/error "end user retireve test"))
-
         resp (-> session-admin
                  (request template-url)
                  (ltu/body->edn)
@@ -61,7 +55,7 @@
                  :request-method :post
                  :body (json/write-str valid-create))
         (ltu/body->edn)
-        (ltu/is-status 400))
+        (ltu/is-status 403))
 
     ;; admin create with invalid template fails
     (-> session-admin
@@ -72,7 +66,7 @@
         (ltu/is-status 400))
 
     ;; full connector lifecycle as user should work
-    (let [uri (-> session-admin
+    (let [uri (-> session-user
                   (request collection-uri
                            :request-method :post
                            :body (json/write-str valid-create))
@@ -93,14 +87,13 @@
           (ltu/body->edn)
           (ltu/is-status 200))
 
-      ;; FIXME:
       ;; user update works
       (-> session-user
           (request resource-uri
                    :request-method :put
                    :body (json/write-str {}))
           (ltu/body->edn)
-          (ltu/is-status 403))
+          (ltu/is-status 200))
 
       ;; user query succeeds
       (-> session-user
@@ -128,15 +121,19 @@
         (let [pair-fn (juxt :id #(str p/service-context (:id %)))
               pairs (map pair-fn entries)]
           (doseq [[id entry-uri] pairs]
-            (-> session-user
-                (request entry-uri)
-                (ltu/body->edn)
-                (ltu/is-operation-present "delete")
-                (ltu/is-operation-present "edit")
-                (ltu/is-operation-absent "activate")
-                (ltu/is-operation-absent "quarantine")
-                (ltu/is-status 200)
-                (ltu/is-id id)))))
+            (let [new-model (-> session-user
+                                (request entry-uri)
+                                (ltu/body->edn)
+                                (ltu/is-operation-present "delete")
+                                (ltu/is-operation-present "edit")
+                                (ltu/is-operation-present (:start c/action-uri))
+                                (ltu/is-status 200))
+                  start-uri (str p/service-context (ltu/get-op new-model (:start c/action-uri)))]
+              (-> session-user
+                  (request start-uri
+                           :request-method :post)
+                  (ltu/body->edn)
+                  (ltu/is-status 201))))))
 
       ;; user delete succeeds
       (-> session-user

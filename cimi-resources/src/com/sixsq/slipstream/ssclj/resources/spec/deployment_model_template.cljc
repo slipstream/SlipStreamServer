@@ -8,9 +8,7 @@
 
 (s/def ::module ::cimi-common/resource-link)
 
-(def deployment-model-template-keys-spec
-  (su/merge-keys-specs [cimi-common/common-attrs
-                        {:req-un [::module]}]))
+(def deployment-model-template-keys-spec {:req-un [::module]})
 
 (s/def ::deployment-model-template (su/only-keys-maps deployment-model-template-keys-spec))
 
