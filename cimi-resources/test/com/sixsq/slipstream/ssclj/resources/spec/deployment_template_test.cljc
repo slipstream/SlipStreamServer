@@ -1,9 +1,9 @@
-(ns com.sixsq.slipstream.ssclj.resources.spec.deployment-model-template-test
+(ns com.sixsq.slipstream.ssclj.resources.spec.deployment-template-test
   (:require
     [clojure.spec.alpha :as s]
     [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.ssclj.resources.module :as t]
-    [com.sixsq.slipstream.ssclj.resources.spec.deployment-model-template :as dmt]
+    [com.sixsq.slipstream.ssclj.resources.spec.deployment-template :as dmt]
     [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]))
 
 
@@ -24,9 +24,9 @@
 
               :module      {:href "module/my-image"}}]
 
-    (stu/is-valid ::dmt/deployment-model-template root)
-    (stu/is-invalid ::dmt/deployment-model-template (assoc root :badKey "badValue"))
+    (stu/is-valid ::dmt/deployment-template root)
+    (stu/is-invalid ::dmt/deployment-template (assoc root :badKey "badValue"))
 
     ;; required attributes
     (doseq [k #{:id :resourceURI :created :updated :acl :module}]
-      (stu/is-invalid ::dmt/deployment-model-template (dissoc root k)))))
+      (stu/is-invalid ::dmt/deployment-template (dissoc root k)))))
