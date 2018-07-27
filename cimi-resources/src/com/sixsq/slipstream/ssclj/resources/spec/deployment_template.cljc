@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.deployment-template
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as cimi-common]
+    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 

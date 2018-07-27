@@ -16,13 +16,13 @@
 (def timestamp "1964-08-25T10:00:00.0Z")
 
 
-(def valid-model {:id          (str d/resource-url "/connector-uuid")
+(def valid-module {:id          (str d/resource-url "/connector-uuid")
                   :resourceURI d/resource-uri
                   :created     timestamp
                   :updated     timestamp
                   :acl         valid-acl
 
-                  :module      {:href "my-model-uuid"}
+                  :module      {:href "my-module-uuid"}
 
                   :nodes       [{:nodeID     "my-node-uuid"
                                  :credential {:href "my-cred-uuid"}
@@ -43,7 +43,7 @@
                        :acl         valid-acl
 
                        :state       "RUNNING"
-                       :model       (merge {:href "my-model-uuid"} valid-model)})
+                       :module       (merge {:href "my-module-uuid"} valid-module)})
 
 
 (deftest test-schema-check
@@ -52,5 +52,5 @@
   (stu/is-invalid ::ds/deployment (assoc valid-deployment :module "must-be-href"))
 
   ;; required attributes
-  (doseq [k #{:id :resourceURI :created :updated :acl :state :model}]
+  (doseq [k #{:id :resourceURI :created :updated :acl :state :module}]
     (stu/is-invalid ::ds/deployment (dissoc valid-deployment k))))

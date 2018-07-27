@@ -1,16 +1,16 @@
 (ns com.sixsq.slipstream.ssclj.resources.deployment-template
   (:require
+    [clojure.string :as str]
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.module :as m]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template]
     [com.sixsq.slipstream.ssclj.resources.spec.deployment-template :as dt]
-    [com.sixsq.slipstream.util.response :as r]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
-    [clojure.string :as str]
-    [com.sixsq.slipstream.ssclj.resources.module :as m]))
+    [com.sixsq.slipstream.util.response :as r]))
 
 (def ^:const resource-tag :deploymentTemplates)
 
@@ -78,8 +78,7 @@
         request-module {:params   {:uuid          (some-> module-href (str/split #"/") second)
                                    :resource-name m/resource-url}
                         :identity idmap}
-        {:keys [body status] :as module-response} (some-> request-module
-                                                          crud/retrieve)]
+        {:keys [body status] :as module-response} (crud/retrieve request-module)]
 
     (if (= status 200)
       (let [module (dissoc body :versions :operations :acl)]
@@ -87,16 +86,19 @@
             (assoc :module module)
             (std-crud/resolve-hrefs idmap)
             (assoc-in [:module :href] module-href)))
-      (ex-info nil body))))
+      (throw (ex-info nil body)))))
 
 
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
-  (let [idmap (:identity request)
-        resolved-body (resolve-hrefs body idmap)]
-    (add-impl (assoc request :body resolved-body))))
+  (try
+    (let [idmap (:identity request)
+          resolved-body (resolve-hrefs body idmap)]
+      (add-impl (assoc request :body resolved-body)))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
