@@ -1,6 +1,6 @@
-(def +version+ "3.55-SNAPSHOT")
+(def +version+ "3.56-SNAPSHOT")
 
-(defproject com.sixsq.slipstream/SlipStreamAsync "3.55-SNAPSHOT"
+(defproject com.sixsq.slipstream/SlipStreamAsync "3.56-SNAPSHOT"
 
   :description "utilities for asynchronous actions"
 
@@ -12,7 +12,7 @@
 
   :plugins [[lein-parent "0.3.2"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "5.3.9"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.3.11"]
                    :inherit [:plugins
                              :min-lein-version
                              :managed-dependencies

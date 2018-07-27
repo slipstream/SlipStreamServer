@@ -22,7 +22,7 @@
              :acl         valid-acl
 
              :identifier  "some-long-identifier"
-             :user        {:href "user/abc"}}]
+             :user        {:href "user/35413_univ_lyon1_frurn_mace_cru_fr_federation_univ_lyon1_fr_https___fed_id_nuv_la_samlbridge_module_php_saml_sp_metadata_php_sixsq_saml_bridge_umef2do_i7rkfnhwwkq6fxwhx9u_"}}]
 
     (stu/is-valid ::ui-spec/user-identifier cfg)
     (stu/is-invalid ::ui-spec/user-identifier (assoc cfg :bad-attr "BAD_ATTR"))

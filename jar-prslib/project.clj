@@ -1,6 +1,6 @@
-(def +version+ "3.55-SNAPSHOT")
+(def +version+ "3.56-SNAPSHOT")
 
-(defproject com.sixsq.slipstream/SlipStreamServerPRSlib-jar "3.55-SNAPSHOT"
+(defproject com.sixsq.slipstream/SlipStreamServerPRSlib-jar "3.56-SNAPSHOT"
 
   :description "Placement and Ranking Service"
 
@@ -13,7 +13,7 @@
   :plugins [[lein-parent "0.3.2"]
             [lein-localrepo "0.5.4"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "5.3.9"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.3.11"]
                    :inherit [:plugins
                              :min-lein-version
                              :managed-dependencies

@@ -4,14 +4,14 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>SlipStreamMigration</artifactId>
-  <packaging>pom</packaging>
+  <packaging>jar</packaging>
   <name>SlipStreamServer/cimi-migration</name>
   <url>http://sixsq.com</url>
 
   <parent>
     <groupId>com.sixsq.slipstream</groupId>
     <artifactId>SlipStreamServer</artifactId>
-    <version>3.55-SNAPSHOT</version>
+    <version>3.56-SNAPSHOT</version>
   </parent>
 
   <licenses>
@@ -20,5 +20,29 @@
       <url>http://www.apache.org/licenses/LICENSE-2.0</url>
     </license>
   </licenses>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>sources</id>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <appendAssemblyId>false</appendAssemblyId>
+              <attach>true</attach>
+              <descriptors>
+                <descriptor>src/assembly/src.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>    
+    </plugins>
+  </build>
 
 </project>

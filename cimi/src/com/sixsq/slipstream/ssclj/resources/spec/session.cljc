@@ -4,6 +4,7 @@
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.resources.spec.session-template :as session-tpl]
+    [com.sixsq.slipstream.ssclj.resources.spec.ui-hints :as hints]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 (s/def ::method ::session-tpl/method)
@@ -26,11 +27,7 @@
 (s/def ::server ::cimi-core/nonblank-string)
 (s/def ::clientIP ::cimi-core/nonblank-string)
 
-;; supports use of the resource through browser clients,
-;; specifically allows use of form submit buttons
-(s/def ::redirectURI ::cimi-core/nonblank-string)
-
 (s/def ::session
   (su/only-keys-maps c/common-attrs
                      {:req-un [::method ::sessionTemplate ::expiry]
-                      :opt-un [::username ::roles ::server ::clientIP ::redirectURI]}))
+                      :opt-un [::username ::roles ::server ::clientIP ::hints/redirectURI]}))
