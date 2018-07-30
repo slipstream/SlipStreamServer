@@ -2,7 +2,6 @@
   (:require
     [com.sixsq.slipstream.auth.utils.timestamp :as ts]
     [com.sixsq.slipstream.ssclj.resources.callback-create-session-oidc :as cb]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.session :as p]
@@ -48,8 +47,8 @@
 ;; transform template into session resource
 ;;
 (defmethod p/tpl->session authn-method
-  [{:keys [href redirectURI] :as resource} {:keys [headers base-uri] :as request}]
-  (let [{:keys [clientID authorizeURL]} (oidc-utils/config-oidc-params redirectURI (u/document-id href))
+  [{:keys [href instance redirectURI] :as resource} {:keys [headers base-uri] :as request}]
+  (let [{:keys [clientID authorizeURL]} (oidc-utils/config-oidc-params redirectURI instance)
         session-init (cond-> {:href href}
                              redirectURI (assoc :redirectURI redirectURI))
         session (sutils/create-session session-init headers authn-method)

@@ -7,7 +7,7 @@
     [com.sixsq.slipstream.auth.utils.http :as uh]
     [com.sixsq.slipstream.ssclj.resources.callback :as callback]
     [com.sixsq.slipstream.ssclj.resources.callback.utils :as utils]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.github.utils :as gu]
     [com.sixsq.slipstream.ssclj.resources.user.user-identifier-utils :as uiu]
     [com.sixsq.slipstream.util.response :as r]))
@@ -17,9 +17,8 @@
 
 
 (defn register-user
-  [{{href :href} :targetResource {:keys [redirectURI]} :data :as callback-resource} request]
-
-  (let [instance (u/document-id href)
+  [{{:keys [href]} :targetResource {:keys [redirectURI]} :data :as callback-resource} request]
+  (let [{:keys [instance]} (crud/retrieve-by-id-as-admin href)
         [client-id client-secret] (gu/config-github-params redirectURI instance)]
     (if-let [code (uh/param-value request :code)]
       (if-let [access-token (auth-github/get-github-access-token client-id client-secret code)]
