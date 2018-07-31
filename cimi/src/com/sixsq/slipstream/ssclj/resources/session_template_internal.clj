@@ -22,6 +22,7 @@
 ;;
 ;; description
 ;;
+
 (def ^:const desc
   (merge p/SessionTemplateDescription
          {:username {:displayName  "Username"
@@ -45,11 +46,12 @@
 ;;
 ;; initialization: register this Session template and create internal authentication template
 ;;
+
 (defn initialize
   []
   (p/register authn-method desc)
   (std-crud/initialize p/resource-url ::session-tpl/internal)
-  (std-crud/add-if-absent "session-template/internal" p/resource-url default-template))
+  (std-crud/add-if-absent (str "session-template/" authn-method) p/resource-url default-template))
 
 
 ;;

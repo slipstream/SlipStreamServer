@@ -133,6 +133,38 @@
 
 
 ;;
+;; general utility for creating a new callback in other resources
+;;
+
+;; FIXME: Fix ugliness around needing to create ring requests with authentication!
+(defn create
+  "Creates a callback resource with the given action-name, baseURI, target
+   resource, data (optional). Returns the URL to trigger the callback's action."
+  ([action-name baseURI href]
+   (create action-name baseURI href nil))
+  ([action-name baseURI href data]
+   (let [callback-request {:params   {:resource-name resource-url}
+                           :body     (cond-> {:action         action-name
+                                              :targetResource {:href href}}
+                                             data (assoc :data data))
+                           :identity {:current         "INTERNAL"
+                                      :authentications {"INTERNAL" {:identity "INTERNAL"
+                                                                    :roles    ["ADMIN"]}}}}
+         {{:keys [resource-id]} :body status :status} (crud/add callback-request)]
+
+     (if (= 201 status)
+       (if-let [callback-resource (crud/set-operations (crud/retrieve-by-id-as-admin resource-id) {})]
+         (if-let [validate-op (u/get-op callback-resource "execute")]
+           (str baseURI validate-op)
+           (let [msg "callback does not have execute operation"]
+             (throw (ex-info msg (r/map-response msg 500 resource-id)))))
+         (let [msg "cannot retrieve user create callback"]
+           (throw (ex-info msg (r/map-response msg 500 resource-id)))))
+       (let [msg "cannot create user callback"]
+         (throw (ex-info msg (r/map-response msg 500 ""))))))))
+
+
+;;
 ;; initialization: common schema for all subtypes
 ;;
 (defn initialize

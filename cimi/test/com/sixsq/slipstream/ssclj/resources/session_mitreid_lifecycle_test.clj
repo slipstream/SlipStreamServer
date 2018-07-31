@@ -1,7 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-mitreid-lifecycle-test
   (:require
     [clojure.data.json :as json]
-    [clojure.test :refer :all]
+    [clojure.test :refer [deftest is use-fixtures]]
     [com.sixsq.slipstream.auth.oidc :as auth-oidc]
     [com.sixsq.slipstream.auth.utils.db :as db]
     [com.sixsq.slipstream.auth.utils.sign :as sign]

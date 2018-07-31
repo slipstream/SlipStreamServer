@@ -8,7 +8,7 @@
     [com.sixsq.slipstream.auth.utils.sign :as sign]
     [com.sixsq.slipstream.ssclj.resources.callback :as callback]
     [com.sixsq.slipstream.ssclj.resources.callback.utils :as utils]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as oidc-utils]
     [com.sixsq.slipstream.ssclj.resources.user.user-identifier-utils :as uiu]
     [com.sixsq.slipstream.util.response :as r]))
@@ -18,8 +18,8 @@
 
 
 (defn register-user
-  [{{href :href} :targetResource {:keys [redirectURI]} :data callback-id :id :as callback-resource} {:keys [headers base-uri uri] :as request}]
-  (let [instance (u/document-id href)
+  [{{href :href} :targetResource {:keys [redirectURI]} :data callback-id :id :as callback-resource} {:keys [base-uri] :as request}]
+  (let [{:keys [instance]} (crud/retrieve-by-id-as-admin href)
         {:keys [clientID clientSecret publicKey tokenURL]} (oidc-utils/config-oidc-params redirectURI instance)]
     (if-let [code (uh/param-value request :code)]
       (if-let [access-token (auth-oidc/get-access-token clientID clientSecret tokenURL code (str base-uri (or callback-id "unknown-id") "/execute"))]

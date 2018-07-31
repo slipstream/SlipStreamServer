@@ -2,6 +2,8 @@
   (:require
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.internal :as internal]
+    [com.sixsq.slipstream.ssclj.resources.callback :as callback]
+    [com.sixsq.slipstream.ssclj.resources.callback-user-email-validation :as user-email-callback]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.email.utils :as email-utils]
     [com.sixsq.slipstream.ssclj.resources.spec.user]
@@ -53,11 +55,13 @@
 ;; logs and then ignores any exceptions when creating callback
 ;;
 
+(def create-user-email-callback (partial callback/create user-email-callback/action-name))
+
+
 (defmethod p/post-user-add user-template/registration-method
   [{:keys [id emailAddress] :as resource} {:keys [base-uri] :as request}]
   (try
-    (-> id
-        (user-utils/create-user-email-callback base-uri)
+    (-> (create-user-email-callback base-uri id)
         (email-utils/send-validation-email emailAddress))
     (catch Exception e
       (log/error (str e)))))

@@ -107,10 +107,12 @@
 ;; identifiers for these resources are the same as the :instance value
 ;;
 (defmethod crud/new-identifier resource-name
-  [{:keys [instance] :as resource} resource-name]
-  (->> instance
-       (str resource-url "/")
-       (assoc resource :id)))
+  [{:keys [instance method] :as resource} resource-name]
+  (let [new-id (if (= method instance)
+                 instance
+                 (str method "-" instance))]
+    (assoc resource :id (str resource-url "/" new-id))))
+
 
 ;;
 ;; CRUD operations

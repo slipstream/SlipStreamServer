@@ -12,7 +12,7 @@
     [com.sixsq.slipstream.auth.utils.timestamp :as ts]
     [com.sixsq.slipstream.ssclj.resources.callback :as callback]
     [com.sixsq.slipstream.ssclj.resources.callback.utils :as utils]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as oidc-utils]
     [com.sixsq.slipstream.ssclj.resources.session.utils :as sutils]
     [com.sixsq.slipstream.util.response :as r]))
@@ -22,11 +22,11 @@
 
 
 (defn validate-session
-  [{{session-id :href} :targetResource callback-id :id :as callback-resource} {:keys [headers base-uri uri] :as request}]
+  [{{session-id :href} :targetResource callback-id :id :as callback-resource} {:keys [base-uri] :as request}]
 
   (let [{:keys [server clientIP redirectURI] {:keys [href]} :sessionTemplate :as current-session} (sutils/retrieve-session-by-id session-id)
-        instance (u/document-id href)
-        {:keys [clientID clientSecret publicKey tokenURL userProfileURL]} (oidc-utils/config-mitreid-params redirectURI instance)]
+        {:keys [instance]} (crud/retrieve-by-id-as-admin href)
+        {:keys [clientID clientSecret publicKey tokenURL]} (oidc-utils/config-mitreid-params redirectURI instance)]
     (if-let [code (uh/param-value request :code)]
       (if-let [access-token (auth-oidc/get-access-token clientID clientSecret tokenURL code (str base-uri (or callback-id "unknown-id") "/execute"))]
         (try

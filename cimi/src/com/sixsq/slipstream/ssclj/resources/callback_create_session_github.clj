@@ -10,7 +10,7 @@
     [com.sixsq.slipstream.auth.utils.timestamp :as ts]
     [com.sixsq.slipstream.ssclj.resources.callback :as callback]
     [com.sixsq.slipstream.ssclj.resources.callback.utils :as utils]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.github.utils :as gu]
     [com.sixsq.slipstream.ssclj.resources.session.utils :as sutils]
     [com.sixsq.slipstream.util.response :as r]))
@@ -20,13 +20,13 @@
 
 
 (defn validate-session
-  [{:keys [headers uri redirectURI] :as request} session-id]
+  [request session-id]
   (let [{:keys [server clientIP redirectURI] {:keys [href]} :sessionTemplate :as current-session} (sutils/retrieve-session-by-id session-id)
-        instance (u/document-id href)
+        {:keys [instance]} (crud/retrieve-by-id-as-admin href)
         [client-id client-secret] (gu/config-github-params redirectURI instance)]
     (if-let [code (uh/param-value request :code)]
       (if-let [access-token (auth-github/get-github-access-token client-id client-secret code)]
-        (if-let [{:keys [user email] :as user-info} (auth-github/get-github-user-info access-token)]
+        (if-let [user-info (auth-github/get-github-user-info access-token)]
           (do
             (log/debug "github user info for" instance ":" user-info)
             (let [external-login (:login user-info)
