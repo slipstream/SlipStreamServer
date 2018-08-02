@@ -9,7 +9,8 @@
     [com.sixsq.slipstream.ssclj.resources.deployment-template :as deployment-template]
     [com.sixsq.slipstream.ssclj.resources.spec.deployment :as deployment-spec]
     [com.sixsq.slipstream.ssclj.resources.spec.deployment-template :as deployment-template-spec]
-    [com.sixsq.slipstream.util.response :as r]))
+    [com.sixsq.slipstream.util.response :as r]
+    [com.sixsq.slipstream.db.impl :as db]))
 
 (def ^:const resource-tag :deployments)
 
@@ -109,7 +110,28 @@
   (edit-impl request))
 
 
-(def delete-impl (std-crud/delete-fn resource-name))
+(defn can-delete?
+  [{:keys [state] :as resource}]
+  (#{"CREATED" "STOPPED"} state))
+
+
+(defn verify-can-delete
+  [{:keys [id state] :as resource}]
+  (if (can-delete? resource)
+    resource
+    (throw (r/ex-response (str "invalid state (" state ") for delete on " id) 409 id))))
+
+
+(defn delete-impl
+  [{{uuid :uuid} :params :as request}]
+  (try
+    (-> (str (u/de-camelcase resource-name) "/" uuid)
+        (db/retrieve request)
+        verify-can-delete
+        (a/can-modify? request)
+        (db/delete request))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 (defmethod crud/delete resource-name
   [request]
@@ -128,28 +150,45 @@
 ;; methods like GitHub and OpenID Connect) to validate a given session
 ;;
 
+(defn remove-delete
+  [operations]
+  (vec (remove #(= (:delete c/action-uri) (:rel %)) operations)))
+
+
 (defmethod crud/set-operations resource-uri
-  [{:keys [id] :as resource} request]
-  (let [href (str id "/start")
-        start-op {:rel (:start c/action-uri) :href href}
-        stop-op {:rel (:stop c/action-uri) :href href}]
-    (-> (crud/set-standard-operations resource request)
-        (update :operations conj start-op stop-op))))
+  [{:keys [id state] :as resource} request]
+  (let [start-op {:rel (:start c/action-uri) :href (str id "/start")}
+        stop-op {:rel (:stop c/action-uri) :href (str id "/stop")}]
+    (cond-> (crud/set-standard-operations resource request)
+            (#{"CREATED"} state) (update :operations conj start-op)
+            (#{"STARTING" "STARTED" "ERROR"} state) (update :operations conj stop-op)
+            (not (can-delete? resource)) (update :operations remove-delete))))
 
 
 (defmethod crud/do-action [resource-url "start"]
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
+      (-> id
+          (db/retrieve request)
+          (a/can-modify? request)
+          (assoc :state "STARTING")
+          (db/edit request))
       (r/map-response (str "starting " id) 202 id "job/created-start-job")) ;; FIXME: Actually do something, create start job
     (catch Exception e
       (or (ex-data e) (throw e)))))
+
 
 (defmethod crud/do-action [resource-url "stop"]
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
-      (r/map-response (str "stopping " id) 202 id "job/created-stop-job")) ;; FIXME: Actually do something, create stop job
+      (-> id
+          (db/retrieve request)
+          (a/can-modify? request)
+          (assoc :state "STOPPING")
+          (db/edit request))
+      (r/map-response (str "stopping " id) 202 id "job/created-stop-job")) ;; FIXME: Actually do something, create start job
     (catch Exception e
       (or (ex-data e) (throw e)))))
 

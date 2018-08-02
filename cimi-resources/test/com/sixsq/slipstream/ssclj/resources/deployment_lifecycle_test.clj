@@ -86,14 +86,16 @@
           (ltu/entries deployment/resource-tag))
 
       ;; user view: OK
-      (let [start-op (-> session-user
+      (let [
+            ;; CREATED state on creation
+            start-op (-> session-user
                          (request abs-uri)
                          (ltu/body->edn)
                          (ltu/is-status 200)
                          (ltu/is-operation-present "edit")
                          (ltu/is-operation-present "delete")
                          (ltu/is-operation-present (:start c/action-uri))
-                         (ltu/is-operation-present (:stop c/action-uri))
+                         (ltu/is-operation-absent (:stop c/action-uri))
                          (ltu/get-op "start"))
             abs-start-uri (str p/service-context (u/de-camelcase start-op))
 
@@ -103,13 +105,45 @@
                            (ltu/body->edn)
                            (ltu/is-status 202)
                            :response
-                           :body)]
+                           :body)
+
+            ;; STARTING state after start action
+            stop-op (-> session-user
+                        (request abs-uri)
+                        (ltu/body->edn)
+                        (ltu/is-status 200)
+                        (ltu/is-operation-present "edit")
+                        (ltu/is-operation-absent "delete")
+                        (ltu/is-operation-absent (:start c/action-uri))
+                        (ltu/is-operation-present (:stop c/action-uri))
+                        (ltu/get-op "stop"))
+            abs-stop-uri (str p/service-context (u/de-camelcase stop-op))
+
+            stop-resp (-> session-user
+                          (request abs-stop-uri
+                                   :request-method :post)
+                          (ltu/body->edn)
+                          (ltu/is-status 202)
+                          :response
+                          :body)
+            ]
+
+        ;; STOPPING state after stop action
+        (-> session-user
+            (request abs-uri)
+            (ltu/body->edn)
+            (ltu/is-status 200)
+            (ltu/is-operation-present "edit")
+            (ltu/is-operation-absent "delete")
+            (ltu/is-operation-absent (:start c/action-uri))
+            (ltu/is-operation-absent (:stop c/action-uri))
+            (ltu/is-key-value :state "STOPPING"))
 
         ;; user delete: FAIL
         (-> session-user
             (request abs-uri :request-method :delete)
             (ltu/body->edn)
-            (ltu/is-status 200))))))
+            (ltu/is-status 409))))))
 
 (deftest bad-methods
   (let [resource-uri (str p/service-context (u/new-resource-id deployment/resource-name))]

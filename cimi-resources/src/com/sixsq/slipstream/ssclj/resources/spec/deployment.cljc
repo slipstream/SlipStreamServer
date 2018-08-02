@@ -6,7 +6,12 @@
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 
-(s/def ::state string?)
+(s/def ::state #{"CREATED",
+                 "STARTING", "STARTED",
+                 "STOPPING", "STOPPED",
+                 "PAUSING", "PAUSED",
+                 "SUSPENDING", "SUSPENDED",
+                 "ERROR"})
 
 (s/def ::module ::cimi-common/resource-link)
 
