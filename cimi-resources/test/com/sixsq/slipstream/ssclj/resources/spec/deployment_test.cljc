@@ -42,7 +42,7 @@
                        :updated     timestamp
                        :acl         valid-acl
 
-                       :state       "RUNNING"
+                       :state       "STARTED"
                        :module       (merge {:href "my-module-uuid"} valid-module)})
 
 
