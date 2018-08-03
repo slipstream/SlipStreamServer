@@ -99,13 +99,14 @@
                          (ltu/get-op "start"))
             abs-start-uri (str p/service-context (u/de-camelcase start-op))
 
-            start-resp (-> session-user
-                           (request abs-start-uri
-                                    :request-method :post)
-                           (ltu/body->edn)
-                           (ltu/is-status 202)
-                           :response
-                           :body)
+            start-job-uri (-> session-user
+                              (request abs-start-uri
+                                       :request-method :post)
+                              (ltu/body->edn)
+                              (ltu/is-status 202)
+                              (ltu/location))
+
+            abs-start-job-uri (str p/service-context start-job-uri)
 
             ;; STARTING state after start action
             stop-op (-> session-user
@@ -119,14 +120,23 @@
                         (ltu/get-op "stop"))
             abs-stop-uri (str p/service-context (u/de-camelcase stop-op))
 
-            stop-resp (-> session-user
-                          (request abs-stop-uri
-                                   :request-method :post)
-                          (ltu/body->edn)
-                          (ltu/is-status 202)
-                          :response
-                          :body)
-            ]
+            stop-job-uri (-> session-user
+                             (request abs-stop-uri
+                                      :request-method :post)
+                             (ltu/body->edn)
+                             (ltu/is-status 202)
+                             (ltu/location))
+            abs-stop-job-uri (str p/service-context stop-job-uri)]
+
+        (-> session-user
+            (request abs-start-job-uri)
+            (ltu/body->edn)
+            (ltu/is-status 200))
+
+        (-> session-user
+            (request abs-stop-job-uri)
+            (ltu/body->edn)
+            (ltu/is-status 200))
 
         ;; STOPPING state after stop action
         (-> session-user

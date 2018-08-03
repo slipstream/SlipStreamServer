@@ -10,7 +10,9 @@
     [com.sixsq.slipstream.ssclj.resources.spec.deployment :as deployment-spec]
     [com.sixsq.slipstream.ssclj.resources.spec.deployment-template :as deployment-template-spec]
     [com.sixsq.slipstream.util.response :as r]
-    [com.sixsq.slipstream.db.impl :as db]))
+    [com.sixsq.slipstream.ssclj.resources.job :as job]
+    [com.sixsq.slipstream.db.impl :as db]
+    [taoensso.timbre :as log]))
 
 (def ^:const resource-tag :deployments)
 
@@ -168,13 +170,28 @@
 (defmethod crud/do-action [resource-url "start"]
   [{{uuid :uuid} :params :as request}]
   (try
-    (let [id (str resource-url "/" uuid)]
+    (let [id (str resource-url "/" uuid)
+          user-id (:identity (a/current-authentication request))
+          request-job-creation {:identity std-crud/internal-identity
+                                :body     {:action         "start_deployment"
+                                           :targetResource {:href id}
+                                           :acl            {:owner {:principal "ADMIN"
+                                                                    :type      "ROLE"}
+                                                            :rules [{:principal user-id
+                                                                     :right     "VIEW"
+                                                                     :type      "USER"}]}}
+                                :params   {:resource-name job/resource-url}}
+
+          {{job-id :resource-id job-status :status} :body :as job-start-response} (crud/add request-job-creation)]
+      (when (not= job-status 201)
+        (throw (r/ex-response "unable to create async job to start deployment" 500 id)))
       (-> id
           (db/retrieve request)
           (a/can-modify? request)
           (assoc :state "STARTING")
           (db/edit request))
-      (r/map-response (str "starting " id) 202 id "job/created-start-job")) ;; FIXME: Actually do something, create start job
+
+      (r/map-response (str "starting " id " with async " job-id) 202 id job-id))
     (catch Exception e
       (or (ex-data e) (throw e)))))
 
@@ -182,13 +199,28 @@
 (defmethod crud/do-action [resource-url "stop"]
   [{{uuid :uuid} :params :as request}]
   (try
-    (let [id (str resource-url "/" uuid)]
+    (let [id (str resource-url "/" uuid)
+          user-id (:identity (a/current-authentication request))
+          request-job-creation {:identity std-crud/internal-identity
+                                :body     {:action         "stop_deployment"
+                                           :targetResource {:href id}
+                                           :acl            {:owner {:principal "ADMIN"
+                                                                    :type      "ROLE"}
+                                                            :rules [{:principal user-id
+                                                                     :right     "VIEW"
+                                                                     :type      "USER"}]}
+                                           }
+                                :params   {:resource-name job/resource-url}}
+
+          {{job-id :resource-id job-status :status} :body :as job-stop-response} (crud/add request-job-creation)]
+      (when (not= job-status 201)
+        (throw (r/ex-response "unable to create async job to stop deployment" 500 id)))
       (-> id
           (db/retrieve request)
           (a/can-modify? request)
           (assoc :state "STOPPING")
           (db/edit request))
-      (r/map-response (str "stopping " id) 202 id "job/created-stop-job")) ;; FIXME: Actually do something, create start job
+      (r/map-response (str "stopping " id " with async " job-id) 202 id job-id))
     (catch Exception e
       (or (ex-data e) (throw e)))))
 
