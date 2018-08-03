@@ -18,13 +18,6 @@
 (def base-uri (str p/service-context (u/de-camelcase module/resource-name)))
 
 
-(def valid-acl {:owner {:type      "ROLE"
-                        :principal "ADMIN"}
-                :rules [{:principal "ADMIN"
-                         :right     "ALL"
-                         :type      "ROLE"}]})
-
-
 (def timestamp "1964-08-25T10:00:00.0Z")
 
 
