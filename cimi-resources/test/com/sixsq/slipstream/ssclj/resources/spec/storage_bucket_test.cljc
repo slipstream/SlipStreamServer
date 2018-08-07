@@ -37,8 +37,8 @@
                 :usage        123.456
                 :connector    {:href "connector/0123-4567-8912"}
                 :credentials  [{:href  "connector/0123-4567-8912",
-                                :roles ["realm:cern", "realm:my-accounting-group"]
-                                :users ["long-user-id-1", "long-user-id-2"]}]
+                                :roles ["realm:cern" "realm:my-accounting-group"]
+                                :users ["long-user-id-1" "long-user-id-2"]}]
                 :externalObject   {:href "external-object/aaa-bbb-ccc", :user {:href "user/test"}}
                 :serviceOffer {:href                  "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
                                :resource:storage         1

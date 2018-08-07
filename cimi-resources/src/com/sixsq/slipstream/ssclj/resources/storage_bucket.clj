@@ -46,8 +46,8 @@
 ;; set the resource identifier to "storage-bucket/uuid(connector-href, instanceID)"
 ;;
 (defmethod crud/new-identifier resource-name [json resource-name]
-  (let [credential-href (get (first (get json :credentials)) :href)
-        bucketName (get json :bucketName)
+  (let [credential-href (-> json :credentials first :href)
+        bucketName (:bucketName json)
         id (u/from-data-uuid (str credential-href bucketName))]
     (assoc json :id (str resource-url "/" id))))
 
