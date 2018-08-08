@@ -25,7 +25,7 @@
      :credentials [{:href cloud}]
      :created     "2017-09-04T09:39:35.651Z"
      :bucketName  "MyBucketName"
-     :usage       123.456
+     :usage       123456
      :externalObject         {:href "external-object/4824efe2-59e9-4db6-be6b-fc1c8b3edf40"
                    :user {:href (str "user/" user)}}
      :acl         {:owner {:type      "USER"
@@ -87,13 +87,11 @@
                                          :b "two"}
 
                           :bucketName   "aaa-bbb-111"
-                          :usage        123.456
+                          :usage        123456
                           :connector    {:href "connector/0123-4567-8912"}
 
 
-                          :credentials  [{:href  "credential/0123-4567-8912",
-                                          :roles ["realm:cern", "realm:my-accounting-group"]
-                                          :users ["long-user-id-1", "long-user-id-2"]}]
+                          :credentials  [{:href  "credential/0123-4567-8912"}]
 
 
                           :externalObject   {:href "external-object/aaa-bbb-ccc",

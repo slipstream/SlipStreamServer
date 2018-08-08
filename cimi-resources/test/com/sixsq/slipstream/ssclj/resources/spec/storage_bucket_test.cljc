@@ -34,11 +34,9 @@
                 :description  "short description",
                 :properties   {:a "one", :b "two"}
                 :bucketName   "aaa-bbb-111"
-                :usage        123.456
+                :usage        123456
                 :connector    {:href "connector/0123-4567-8912"}
-                :credentials  [{:href  "connector/0123-4567-8912",
-                                :roles ["realm:cern" "realm:my-accounting-group"]
-                                :users ["long-user-id-1" "long-user-id-2"]}]
+                :credentials  [{:href  "credentials/0123-4567-8912"}]
                 :externalObject   {:href "external-object/aaa-bbb-ccc", :user {:href "user/test"}}
                 :serviceOffer {:href                  "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
                                :resource:storage         1
@@ -56,7 +54,7 @@
   (stu/is-valid ::bucky/storage-bucket (assoc bucky-sample :name "name"))
 
   ;; TODO: Remove when credential resource is being used
-  (stu/is-valid ::bucky/storage-bucket (assoc bucky-sample :credentials [{:href "user/123456789@toto-aai.chhttps://aai-login.toto-aai.com/idp/shibboleth!https://fed-id.nuv.la/samlbridge/module.php/saml/sp/metadata.php/sixsq-saml-bridge!qwertyuiopasdfghjklzxcvbnm1234567890="}]))
+  (stu/is-valid ::bucky/storage-bucket (assoc bucky-sample :credentials [{:href "credential/1234"}]))
 
   (stu/is-invalid ::bucky/storage-bucket (assoc bucky-sample :bad-attr {}))
   (stu/is-invalid ::bucky/storage-bucket (assoc bucky-sample :bad-attr "test"))
