@@ -53,7 +53,6 @@
   (stu/is-valid ::bucky/storage-bucket (assoc bucky-sample :externalObject {:href "external-object/fff-42"}))
   (stu/is-valid ::bucky/storage-bucket (assoc bucky-sample :name "name"))
 
-  ;; TODO: Remove when credential resource is being used
   (stu/is-valid ::bucky/storage-bucket (assoc bucky-sample :credentials [{:href "credential/1234"}]))
 
   (stu/is-invalid ::bucky/storage-bucket (assoc bucky-sample :bad-attr {}))
