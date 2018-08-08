@@ -19,23 +19,23 @@
         doc-id (str resource-type "/" (u/random-uuid))
         cloud (rand-nth ["connector/cloud-1" "connector/cloud-2" "connector/cloud-3"])
         user (rand-nth ["user-1" "user-2" "user-3"])]
-    {:id          doc-id
-     :resourceURI "http://sixsq.com/slipstream/1/VirtualMachine"
-     :updated     "2017-09-04T09:39:35.679Z"
-     :credentials [{:href cloud}]
-     :created     "2017-09-04T09:39:35.651Z"
-     :bucketName  "MyBucketName"
-     :usage       123456
-     :externalObject         {:href "external-object/4824efe2-59e9-4db6-be6b-fc1c8b3edf40"
-                   :user {:href (str "user/" user)}}
-     :acl         {:owner {:type      "USER"
-                           :principal "ADMIN"}
-                   :rules [{:principal "ADMIN"
-                            :right     "ALL"
-                            :type      "USER"}
-                           {:principal user
-                            :right     "VIEW"
-                            :type      "USER"}]}}))
+    {:id             doc-id
+     :resourceURI    "http://sixsq.com/slipstream/1/VirtualMachine"
+     :updated        "2017-09-04T09:39:35.679Z"
+     :credentials    [{:href cloud}]
+     :created        "2017-09-04T09:39:35.651Z"
+     :bucketName     "MyBucketName"
+     :usage          123456
+     :externalObject {:href "external-object/4824efe2-59e9-4db6-be6b-fc1c8b3edf40"
+                      :user {:href (str "user/" user)}}
+     :acl            {:owner {:type      "USER"
+                              :principal "ADMIN"}
+                      :rules [{:principal "ADMIN"
+                               :right     "ALL"
+                               :type      "USER"}
+                              {:principal user
+                               :right     "VIEW"
+                               :type      "USER"}]}}))
 
 
 (deftest lifecycle
@@ -76,39 +76,39 @@
 
     ;; create a bucky as a normal user
     (let [timestamp "1964-08-25T10:00:00.0Z"
-          create-test-bucky {:id           (str bucky/resource-url "/uuid")
-                          :resourceURI  bucky/resource-uri
-                          :created      timestamp
-                          :updated      timestamp
+          create-test-bucky {:id             (str bucky/resource-url "/uuid")
+                             :resourceURI    bucky/resource-uri
+                             :created        timestamp
+                             :updated        timestamp
 
-                          :name         "short name"
-                          :description  "short description",
-                          :properties   {:a "one",
-                                         :b "two"}
+                             :name           "short name"
+                             :description    "short description",
+                             :properties     {:a "one",
+                                              :b "two"}
 
-                          :bucketName   "aaa-bbb-111"
-                          :usage        123456
-                          :connector    {:href "connector/0123-4567-8912"}
-
-
-                          :credentials  [{:href  "credential/0123-4567-8912"}]
+                             :bucketName     "aaa-bbb-111"
+                             :usage          123456
+                             :connector      {:href "connector/0123-4567-8912"}
 
 
-                          :externalObject   {:href "external-object/aaa-bbb-ccc",
-                                         :user {:href "user/test"}}
+                             :credentials    [{:href "credential/0123-4567-8912"}]
 
-                          :serviceOffer {:href                  "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
-                                        :resource:storage         1
-                                        :resource:host         "s3-eu-west-1.amazonaws.com"
-                                        :price:currency        "EUR"
-                                        :price:unitCode        "HUR"
-                                        :price:unitCost        "0.018"
-                                        :resource:platform "S3"}}
+
+                             :externalObject {:href "external-object/aaa-bbb-ccc",
+                                              :user {:href "user/test"}}
+
+                             :serviceOffer   {:href              "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
+                                              :resource:storage  1
+                                              :resource:host     "s3-eu-west-1.amazonaws.com"
+                                              :price:currency    "EUR"
+                                              :price:unitCode    "HUR"
+                                              :price:unitCost    "0.018"
+                                              :resource:platform "S3"}}
 
           create-jane-bucky (-> create-test-bucky
-                             (assoc :externalObject {:href "external-object/444-555-666"
-                                                 :user {:href "user/jane"}})
-                             (assoc :bucketName "otherName"))
+                                (assoc :externalObject {:href "external-object/444-555-666"
+                                                        :user {:href "user/jane"}})
+                                (assoc :bucketName "otherName"))
 
           resp-test (-> session-admin
                         (request base-uri
@@ -168,22 +168,22 @@
 
       ;; check contents and editing
       (let [reread-test-bucky (-> session-admin
-                               (request test-uri)
-                               (ltu/body->edn)
-                               (ltu/is-status 200)
-                               :response
-                               :body)]
+                                  (request test-uri)
+                                  (ltu/body->edn)
+                                  (ltu/is-status 200)
+                                  :response
+                                  :body)]
 
         (is (= (ltu/strip-unwanted-attrs reread-test-bucky) (ltu/strip-unwanted-attrs create-test-bucky)))
 
         (let [edited-test-bucky (-> session-admin
-                                 (request test-uri
-                                          :request-method :put
-                                          :body (json/write-str (assoc reread-test-bucky :bucketName "NewName!")))
-                                 (ltu/body->edn)
-                                 (ltu/is-status 200)
-                                 :response
-                                 :body)]
+                                    (request test-uri
+                                             :request-method :put
+                                             :body (json/write-str (assoc reread-test-bucky :bucketName "NewName!")))
+                                    (ltu/body->edn)
+                                    (ltu/is-status 200)
+                                    :response
+                                    :body)]
 
           (is (= (assoc (ltu/strip-unwanted-attrs reread-test-bucky) :bucketName "NewName!")
                  (ltu/strip-unwanted-attrs edited-test-bucky)))))

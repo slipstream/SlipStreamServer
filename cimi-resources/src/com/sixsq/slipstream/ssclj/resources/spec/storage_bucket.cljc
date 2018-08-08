@@ -13,13 +13,13 @@
 (s/def ::externalObject ::cimi-common/resource-link)
 
 (def storage-bucket-specs {:req-un [::credentials
-                                     ::bucketName
-                                     ::connector
-                                     ::usage]
-                            :opt-un [::externalObject
-                                     ::serviceOffer]})
+                                    ::bucketName
+                                    ::connector
+                                    ::usage]
+                           :opt-un [::externalObject
+                                    ::serviceOffer]})
 
 (def storage-bucket-keys-spec (su/merge-keys-specs [cimi-common/common-attrs
-                                                     storage-bucket-specs]))
+                                                    storage-bucket-specs]))
 
 (s/def ::storage-bucket (su/only-keys-maps storage-bucket-keys-spec))

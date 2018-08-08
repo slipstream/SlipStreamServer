@@ -25,26 +25,26 @@
 (def timestamp "1964-08-25T10:00:00.0Z")
 
 
-(def bucky-sample {:id           (str bucky-resource/resource-url "/uuid")
-                :resourceURI  bucky-resource/resource-uri
-                :created      timestamp
-                :updated      timestamp
-                :acl          valid-acl
-                :name         "short name"
-                :description  "short description",
-                :properties   {:a "one", :b "two"}
-                :bucketName   "aaa-bbb-111"
-                :usage        123456
-                :connector    {:href "connector/0123-4567-8912"}
-                :credentials  [{:href  "credentials/0123-4567-8912"}]
-                :externalObject   {:href "external-object/aaa-bbb-ccc", :user {:href "user/test"}}
-                :serviceOffer {:href                  "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
-                               :resource:storage         1
-                               :resource:host         "s3-eu-west-1.amazonaws.com"
-                               :price:currency        "EUR"
-                               :price:unitCode        "HUR"
-                               :price:unitCost        "0.018"
-                               :resource:platform "S3"}})
+(def bucky-sample {:id             (str bucky-resource/resource-url "/uuid")
+                   :resourceURI    bucky-resource/resource-uri
+                   :created        timestamp
+                   :updated        timestamp
+                   :acl            valid-acl
+                   :name           "short name"
+                   :description    "short description",
+                   :properties     {:a "one", :b "two"}
+                   :bucketName     "aaa-bbb-111"
+                   :usage          123456
+                   :connector      {:href "connector/0123-4567-8912"}
+                   :credentials    [{:href "credentials/0123-4567-8912"}]
+                   :externalObject {:href "external-object/aaa-bbb-ccc", :user {:href "user/test"}}
+                   :serviceOffer   {:href              "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
+                                    :resource:storage  1
+                                    :resource:host     "s3-eu-west-1.amazonaws.com"
+                                    :price:currency    "EUR"
+                                    :price:unitCode    "HUR"
+                                    :price:unitCost    "0.018"
+                                    :resource:platform "S3"}})
 
 
 (deftest test-schema-check
