@@ -6,7 +6,6 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [clojure.pprint :as pp]
     [com.sixsq.slipstream.ssclj.resources.spec.storage-bucket :as bucky]))
 
 (def ^:const resource-tag :storageBuckets)
