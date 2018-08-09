@@ -152,7 +152,10 @@
                                   :response
                                   :body)]
 
-        (is (= (ltu/strip-unwanted-attrs reread-test-bucky) (ltu/strip-unwanted-attrs create-test-bucky)))
+        ;; Currency attribute should be copied from serviceOffer
+        (is (= (-> reread-test-bucky :serviceOffer :price:currency) (:currency reread-test-bucky) ))
+        (is (= (ltu/strip-unwanted-attrs reread-test-bucky) (ltu/strip-unwanted-attrs (assoc create-test-bucky :currency "EUR"))))
+
 
         (let [edited-test-bucky (-> session-admin
                                     (request test-uri

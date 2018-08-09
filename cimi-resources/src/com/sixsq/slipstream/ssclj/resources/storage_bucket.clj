@@ -73,8 +73,11 @@
 ;;
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 (defmethod crud/add resource-name
-  [request]
-  (add-impl request))
+  [{{:keys [serviceOffer]} :body :as request}]
+  ;;Create a `currency` attribute when it is defined in the linked serviceOffer
+  (if (:price:currency serviceOffer)
+    (add-impl (assoc-in request [:body :currency] (:price:currency serviceOffer)))
+    (add-impl request)))
 
 (def edit-impl (std-crud/edit-fn resource-name))
 (defmethod crud/edit resource-name
