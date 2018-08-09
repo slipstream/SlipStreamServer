@@ -46,11 +46,11 @@
 (deftest lifecycle
   (let [resource-index (utils/random-uuid)
         resource-type "virtual-machine"
-        resource-search-url (t/search-url resource-index resource-type)
+        resource-search-url (first (t/search-urls [resource-index] [resource-type]))
         metering-index (utils/random-uuid)
         metering-type "metering"
         metering-action (t/index-action metering-index metering-type)
-        metering-search-url (t/search-url metering-index metering-type)
+        metering-search-url (first (t/search-urls [metering-index] [metering-type]))
         rest-map (spu/provide-mock-rest-client)]
     (with-open [client (:client rest-map)]
       (when (spu/cluster-ready? client)

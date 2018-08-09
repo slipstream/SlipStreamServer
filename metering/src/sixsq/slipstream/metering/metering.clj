@@ -26,22 +26,26 @@
   {:index {:_index index, :_type type}})
 
 
-(defn search-url [index type]
-  (str/join "/" [index type "_search"]))
+(defn search-urls [indices types]
+  (map #(str/join "/" [%1 %2 "_search"]) indices types))
+
+
 
 
 (defn process-options
   [{:keys [es-host es-port
            vm-index
+           bucky-index
            metering-index
            metering-period-minutes]
     :or   {es-host                 "127.0.0.1"
            es-port                 9200
            vm-index                "slipstream-virtual-machine"
+           bucky-index             "slipstream-storage-bucket"
            metering-index          "slipstream-metering"
            metering-period-minutes 1}}]
   {:hosts                   (es-hosts es-host es-port)
-   :resource-search-url     (search-url vm-index doc-type)
+   :resource-search-urls     (search-urls [vm-index bucky-index] [doc-type doc-type])
    :metering-action         (index-action metering-index doc-type)
    :metering-period-minutes metering-period-minutes})
 

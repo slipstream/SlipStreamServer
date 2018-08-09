@@ -8,8 +8,9 @@
     [sixsq.slipstream.metering.utils :as utils]))
 
 
-(defn meter-resources-sync [hosts resource-search-url metering-action]
-  (async/<!! (metering/meter-resources hosts resource-search-url metering-action)))
+(defn meter-resources-sync [hosts resource-search-urls metering-action]
+  (doseq [resource-search-url resource-search-urls]
+  (async/<!! (metering/meter-resources hosts resource-search-url metering-action))))
 
 
 (defn handler [request]
@@ -25,16 +26,16 @@
 
 (defn init []
   (let [{:keys [hosts
-                resource-search-url
+                resource-search-urls
                 metering-action
                 metering-period-minutes]}
         (metering/process-options env/env)]
     (log/info "starting service"
               "\nhosts:" hosts
-              "\nresource-search-url: " resource-search-url
+              "\nresource-search-urls: " resource-search-urls
               "\nmetering-action:" metering-action)
     (scheduler/periodically #(meter-resources-sync hosts
-                                                   resource-search-url
+                                                   resource-search-urls
                                                    metering-action)
                             (utils/str->int metering-period-minutes)))
   [handler cleanup])
