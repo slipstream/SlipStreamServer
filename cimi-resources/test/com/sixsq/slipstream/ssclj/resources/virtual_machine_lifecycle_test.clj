@@ -105,7 +105,8 @@
                                          :resource:vcpu         1
                                          :resource:ram          4096
                                          :resource:disk         10
-                                         :resource:instanceType "Large"}}
+                                         :resource:instanceType "Large"
+                                         :price:currency "EUR"}}
 
           create-jane-vm (-> create-test-vm
                              (assoc :deployment {:href "run/444-555-666"
@@ -176,7 +177,9 @@
                                :response
                                :body)]
 
-        (is (= (ltu/strip-unwanted-attrs reread-test-vm) (ltu/strip-unwanted-attrs create-test-vm)))
+        ;; Currency attribute should be copied from serviceOffer
+        (is (= (-> reread-test-vm :serviceOffer :price:currency) (:currency reread-test-vm) ))
+        (is (= (ltu/strip-unwanted-attrs reread-test-vm) (ltu/strip-unwanted-attrs (assoc create-test-vm :currency "EUR"))))
 
         (let [edited-test-vm (-> session-admin
                                  (request test-uri
