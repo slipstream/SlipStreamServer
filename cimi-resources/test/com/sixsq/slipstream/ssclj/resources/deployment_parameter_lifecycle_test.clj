@@ -79,7 +79,6 @@
           id-test (get-in resp-test [:response :body :resource-id])
 
           location-test (str p/service-context (-> resp-test ltu/location))
-          location-jane (str p/service-context (-> resp-jane ltu/location))
 
           test-uri (str p/service-context id-test)]
 
