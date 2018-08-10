@@ -72,21 +72,28 @@
 ;;
 
 
-(defn resolve-hrefs
-  [deployment-template idmap]
-  (let [module-href (get-in deployment-template [:module :href])
-        request-module {:params   {:uuid          (some-> module-href (str/split #"/") second)
+(defn resolve-module [module-href idmap]
+  (let [request-module {:params   {:uuid          (some-> module-href (str/split #"/") second)
                                    :resource-name m/resource-url}
                         :identity idmap}
-        {:keys [body status] :as module-response} (crud/retrieve request-module)]
-
+        {:keys [body status] :as module-response} (crud/retrieve request-module)
+        parent-href (get-in body [:content :parent :href])]
     (if (= status 200)
-      (let [module (dissoc body :versions :operations :acl)]
-        (-> deployment-template
-            (assoc :module module)
-            (std-crud/resolve-hrefs idmap)
-            (assoc-in [:module :href] module-href)))
+      (let [module-resolved (-> body
+                                (dissoc :versions :operations)
+                                (update :content #(dissoc % :parent))
+                                (std-crud/resolve-hrefs idmap true))]
+        (if parent-href
+          (assoc-in module-resolved [:content :parent] (resolve-module parent-href idmap))
+          (assoc module-resolved :href module-href)))
       (throw (ex-info nil body)))))
+
+(defn resolve-hrefs
+  [deployment-template idmap]
+  (let [module-href (get-in deployment-template [:module :href])]
+    (let [module (-> (resolve-module module-href idmap)
+                     (assoc :href module-href))]
+      (assoc deployment-template :module module))))
 
 
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
