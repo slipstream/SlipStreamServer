@@ -9,8 +9,7 @@
 
 
 (defn meter-resources-sync [hosts resource-search-urls metering-action]
-  (doseq [resource-search-url resource-search-urls]
-  (async/<!! (metering/meter-resources hosts resource-search-url metering-action))))
+  (async/<!! (metering/meter-resources hosts resource-search-urls metering-action)))
 
 
 (defn handler [request]

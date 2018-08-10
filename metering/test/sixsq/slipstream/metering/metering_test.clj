@@ -19,7 +19,10 @@
 
 
 (deftest check-search-url
-  (is (= "index/type/_search" (first (t/search-urls ["index"] ["type"])))))
+  (is (= "index/type/_search" (t/search-url "index" "type"))))
+
+(deftest check-search-urls
+  (is (= #{"index1/type1/_search" "index2/type2/_search"} (set(t/search-urls ["index1" "index2"] ["type1" "type2"])))))
 
 
 (deftest check-process-options
@@ -32,7 +35,7 @@
 
     (is (= 4 (count options)))
     (is (= ["http://127.0.0.1:9200"] hosts))
-    (is (= ["slipstream-virtual-machine/_doc/_search" "slipstream-storage-bucket/_doc/_search"] resource-search-urls))
+    (is (= #{"slipstream-virtual-machine/_doc/_search" "slipstream-storage-bucket/_doc/_search"} (set resource-search-urls)))
     (is (= "slipstream-metering" (-> metering-action :index :_index)))
     (is (= t/doc-type (-> metering-action :index :_type)))
     (is (= 1 metering-period-minutes)))
@@ -40,7 +43,7 @@
   (is (= ["http://elasticsearch:1234"] (:hosts (t/process-options {:es-host "elasticsearch"
                                                                    :es-port 1234}))))
   (is (= 2 (:metering-period-minutes (t/process-options {:metering-period-minutes 2}))))
-  (is (= #{"alpha/_doc/_search" "beta/_doc/_search"} (set (:resource-search-urls (t/process-options {:vm-index "alpha" :bucky-index "beta"})))))
+  (is (= #{"alpha/_doc/_search" "beta/_doc/_search"} (set(:resource-search-urls (t/process-options {:vm-index "alpha" :bucky-index "beta"})))))
 
   (let [{:keys [metering-action]}
         (t/process-options {:metering-index "gamma"})]

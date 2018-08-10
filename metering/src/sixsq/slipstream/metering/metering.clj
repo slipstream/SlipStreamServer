@@ -25,11 +25,12 @@
 (defn index-action [index type]
   {:index {:_index index, :_type type}})
 
+(defn search-url [index type]
+  (str/join "/" [index type "_search"]))
+
 
 (defn search-urls [indices types]
-  (map #(str/join "/" [%1 %2 "_search"]) indices types))
-
-
+  (map #(search-url %1 %2) indices types))
 
 
 (defn process-options
@@ -45,7 +46,7 @@
            metering-index          "slipstream-metering"
            metering-period-minutes 1}}]
   {:hosts                   (es-hosts es-host es-port)
-   :resource-search-urls     (search-urls [vm-index bucky-index] [doc-type doc-type])
+   :resource-search-urls    (search-urls [vm-index bucky-index] [doc-type doc-type])
    :metering-action         (index-action metering-index doc-type)
    :metering-period-minutes metering-period-minutes})
 
@@ -151,7 +152,9 @@
     results))
 
 
-(defn meter-resources
+
+
+(defn- meter-resource
   [hosts resource-search-url metering-action]
   (async/go
     (with-open [client (spandex/client {:hosts hosts})]
@@ -183,3 +186,7 @@
               (log/error msg)
               (log/info msg))
             stats))))))
+
+(defn meter-resources
+  [hosts resource-search-urls metering-action]
+  (map #(meter-resource hosts % metering-action) resource-search-urls))
