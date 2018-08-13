@@ -22,7 +22,7 @@
   (is (= "index/type/_search" (t/search-url "index" "type"))))
 
 (deftest check-search-urls
-  (is (= #{"index1/type1/_search" "index2/type2/_search"} (set(t/search-urls ["index1" "index2"] ["type1" "type2"])))))
+  (is (= #{"index1/type1/_search" "index2/type2/_search"} (set (t/search-urls ["index1" "index2"] ["type1" "type2"])))))
 
 
 (deftest check-process-options
@@ -43,7 +43,7 @@
   (is (= ["http://elasticsearch:1234"] (:hosts (t/process-options {:es-host "elasticsearch"
                                                                    :es-port 1234}))))
   (is (= 2 (:metering-period-minutes (t/process-options {:metering-period-minutes 2}))))
-  (is (= #{"alpha/_doc/_search" "beta/_doc/_search"} (set(:resource-search-urls (t/process-options {:vm-index "alpha" :bucky-index "beta"})))))
+  (is (= #{"alpha/_doc/_search" "beta/_doc/_search"} (set (:resource-search-urls (t/process-options {:vm-index "alpha" :bucky-index "beta"})))))
 
   (let [{:keys [metering-action]}
         (t/process-options {:metering-index "gamma"})]
@@ -76,6 +76,26 @@
                                 :users ["long-user-id-1", "long-user-id-2"]}]
                  :deployment  {:href "run/aaa-bbb-ccc",
                                :user {:href "user/test"}}}
+        base-bucky {:id             (str "metering/" (utils/random-uuid))
+                    :resourceURI    "http://sixsq.com/slipstream/1/StorageBucket"
+                    :created        timestamp
+                    :updated        timestamp
+
+                    :name           "short name"
+                    :description    "short description",
+                    :properties     {:a "one",
+                                     :b "two"}
+
+                    :bucketName     "aaa-bbb-111"
+                    :usage          12
+                    :connector      {:href "connector/0123-4567-8912"}
+
+
+                    :credentials    [{:href "credential/0123-4567-8912"}]
+
+
+                    :externalObject {:href "external-object/aaa-bbb-ccc",
+                                     :user {:href "user/test"}}}
         so-no-price {:href                  "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
                      :resource:vcpu         1
                      :resource:ram          4096
@@ -132,7 +152,22 @@
                     :href          "service-offer/unknown"
                     :resource:vcpu 1
                     :resource:ram  512.0
-                    :resource:disk 10.0}]
+                    :resource:disk 10.0}
+
+        s3cost 0.018
+        sample-usage-kb (* 42 1024 1024)                    ;; i.e 42 Gb
+
+        so-sb {
+               :href              "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
+               :resource:storage  1
+               :resource:host     "s3-eu-west-1.amazonaws.com"
+               :price:currency    "EUR"
+               :price:unitCode    "HUR"
+               :price:unitCost    s3cost
+               :resource:platform "S3"
+               }
+
+        ]
     (is (= {} (t/assoc-price {})))
     (is (nil? (:price (t/assoc-price {::bad " BAD! "}))))
     (is (nil? (:price (t/assoc-price {:serviceOffer " BAD! "}))))
@@ -142,7 +177,50 @@
     (is (= (/ (:price:unitCost so-hour) 60) (:price (t/assoc-price (assoc base-vm :serviceOffer so-hour)))))
     (is (nil? (:price (t/assoc-price (assoc base-vm :serviceOffer so-unknown-period)))))
     (is (nil? (:price (t/assoc-price (assoc base-vm :serviceOffer so-unitCode-but-no-cost)))))
-    (is (nil? (:price (t/assoc-price (assoc base-vm :serviceOffer so-unknown)))))))
+    (is (nil? (:price (t/assoc-price (assoc base-vm :serviceOffer so-unknown)))))
+
+    (is (nil? (:price (t/assoc-price base-bucky))))
+    (is (nil? (:price (t/assoc-price (assoc base-bucky :serviceOffer so-no-price)))))
+    (is (nil? (:price (t/assoc-price (assoc base-bucky :serviceOffer so-unknown-period)))))
+    (is (nil? (:price (t/assoc-price (assoc base-bucky :serviceOffer so-unitCode-but-no-cost)))))
+    (is (nil? (:price (t/assoc-price (assoc base-bucky :serviceOffer so-unknown)))))
+
+    ;;storage bucket with usage defaulting in kb
+    (is (= (-> sample-usage-kb
+               (/ 60)
+               (* s3cost)
+               (/ 1024)
+               (/ 1024))
+           (:price (t/assoc-price (assoc base-bucky :serviceOffer so-sb :usage sample-usage-kb)))))
+
+    ;;explicit KB unit
+    (is (= (-> sample-usage-kb
+               (/ 60)
+               (* s3cost)
+               (/ 1024)
+               (/ 1024))
+           (:price (t/assoc-price (assoc base-bucky :serviceOffer so-sb :usage sample-usage-kb :unit "KB")))))
+
+    ;;unknown unit should fallback to default "KB"
+    (is (= (-> sample-usage-kb
+               (/ 60)
+               (* s3cost)
+               (/ 1024)
+               (/ 1024))
+           (:price (t/assoc-price (assoc base-bucky :serviceOffer so-sb :usage sample-usage-kb :unit "XX")))))
+
+    ;; MB unit
+    (is (= (-> 42
+               (/ 60)
+               (* s3cost)
+               (/ 1024))
+           (:price (t/assoc-price (assoc base-bucky :serviceOffer so-sb :usage 42 :unit "MB")))))
+
+    ;; GB unit
+    (is (= (-> 42
+               (/ 60)
+               (* s3cost))
+           (:price (t/assoc-price (assoc base-bucky :serviceOffer so-sb :usage 42 :unit "GB")))))))
 
 (deftest check-update-id
   (let [uuid "5b24caac-e87c-4446-96bc-a20b21450a1"

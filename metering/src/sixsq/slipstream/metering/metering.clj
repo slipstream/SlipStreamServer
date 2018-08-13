@@ -15,6 +15,8 @@
 ;; per Year = ANN, per Month = MON, per Week = WEE, per Day = DAY, per Hour = HUR, per Minute = MIN, per Second = SEC.
 (def ^:const price-divisor {"SEC" (/ 1. 60), "MIN" 1, "HUR" 60, "DAY" (* 60 24), "WEE" (* 60 24 7)})
 
+(def ^:const to-GB {"KB" (* 1024 1024) "MB" 1024 "GB" 1})
+
 (def ^:const doc-type "_doc")
 
 (defn es-hosts
@@ -55,6 +57,13 @@
   [timestamp m]
   (assoc m :snapshot-time timestamp))
 
+
+(defn quantity
+  [{:keys [usage unit] :as resource}]
+  (let [conversion (or (get to-GB unit) (get to-GB "KB"))]
+    (if usage (/ usage conversion) 1)))
+
+
 ;; TODO: quantization for hour period, i.e apply the full hour price to first minute then zero for the rest of the hour
 (defn assoc-price
   [{:keys [serviceOffer] :as m}]
@@ -63,6 +72,7 @@
                              :price:unitCode
                              (get price-divisor)
                              (/ (:price:unitCost serviceOffer))
+                             (* (quantity m))
                              (assoc {} :price)))]
     (merge m price-map)))
 
@@ -150,9 +160,6 @@
                     stats))]
     (log/debug "bulk insert stats:" results)
     results))
-
-
-
 
 (defn- meter-resource
   [hosts resource-search-url metering-action]
