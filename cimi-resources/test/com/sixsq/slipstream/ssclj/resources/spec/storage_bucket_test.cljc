@@ -65,4 +65,7 @@
 
   ;; optional keywords
   (doseq [k #{:externalObject :serviceOffer :unit}]
-    (stu/is-valid ::bucky/storage-bucket (dissoc bucky-sample k))))
+    (stu/is-valid ::bucky/storage-bucket (dissoc bucky-sample k)))
+
+  ;;units are case dependant
+  (stu/is-invalid ::bucky/storage-bucket (assoc bucky-sample :unit "Kb")))
