@@ -88,6 +88,7 @@
 
                     :bucketName     "aaa-bbb-111"
                     :usage          12
+                    :unit           "KiB"
                     :connector      {:href "connector/0123-4567-8912"}
 
 
@@ -147,13 +148,28 @@
         s3cost 0.018
         sample-usage-kb (* 42 1024 1024)                    ;; i.e 42 Gb
 
-        so-sb {:href              "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
-               :resource:storage  1
-               :resource:host     "s3-eu-west-1.amazonaws.com"
-               :price:currency    "EUR"
-               :price:unitCode    "HUR"
-               :price:unitCost    s3cost
-               :resource:platform "S3"}]
+        so-sb-gibh {:connector               {
+                                              :href "exoscale-ch-dk"
+                                              },
+                    :description             "Data volume (objects) stored in S3 in all Exoscale zones",
+                    :price:currency          "EUR",
+                    :resource:storage        1,
+                    :price:unitCost          s3cost,
+
+                    :price:billingPeriodCode "MON",
+                    :name                    "Object Storage in Exoscale",
+
+                    :price:freeUnits         0,
+                    :resource:host           "sos.exo.io",
+
+                    :resource:country        "CH",
+                    :resource:platform       "S3",
+                    :resourceURI             "http://sixsq.com/slipstream/1/ServiceOffer",
+                    :resource:type           "DATA",
+                    :price:billingUnit       "GiBh"}
+        so-sb-mibh (assoc so-sb-gibh :price:billingUnit "MiBh")
+
+        ]
     (is (= {} (t/assoc-price {})))
     (is (nil? (:price (t/assoc-price {::bad " BAD! "}))))
     (is (nil? (:price (t/assoc-price {:serviceOffer " BAD! "}))))
@@ -170,42 +186,21 @@
     (is (nil? (:price (t/assoc-price (assoc base-bucky :serviceOffer so-unitCode-but-no-cost)))))
     (is (nil? (:price (t/assoc-price (assoc base-bucky :serviceOffer so-unknown)))))
 
-    ;;storage bucket with usage defaulting in kb
+    ;;storage bucket with billing in GiBH
     (is (= (-> sample-usage-kb
                (/ 60)
                (* s3cost)
                (/ 1024)
                (/ 1024))
-           (:price (t/assoc-price (assoc base-bucky :serviceOffer so-sb :usage sample-usage-kb)))))
+           (:price (t/assoc-price (assoc base-bucky :serviceOffer so-sb-gibh :usage sample-usage-kb)))))
 
-    ;;explicit KB unit
+    ;;storage bucket with billing in MiBH
     (is (= (-> sample-usage-kb
                (/ 60)
                (* s3cost)
-               (/ 1024)
                (/ 1024))
-           (:price (t/assoc-price (assoc base-bucky :serviceOffer so-sb :usage sample-usage-kb :unit "KB")))))
-
-    ;;unknown unit should fallback to default "KB"
-    (is (= (-> sample-usage-kb
-               (/ 60)
-               (* s3cost)
-               (/ 1024)
-               (/ 1024))
-           (:price (t/assoc-price (assoc base-bucky :serviceOffer so-sb :usage sample-usage-kb :unit "XX")))))
-
-    ;; MB unit
-    (is (= (-> 42
-               (/ 60)
-               (* s3cost)
-               (/ 1024))
-           (:price (t/assoc-price (assoc base-bucky :serviceOffer so-sb :usage 42 :unit "MB")))))
-
-    ;; GB unit
-    (is (= (-> 42
-               (/ 60)
-               (* s3cost))
-           (:price (t/assoc-price (assoc base-bucky :serviceOffer so-sb :usage 42 :unit "GB")))))))
+           (:price (t/assoc-price (assoc base-bucky :serviceOffer so-sb-mibh :usage sample-usage-kb)))))
+    ))
 
 (deftest check-update-id
   (let [uuid "5b24caac-e87c-4446-96bc-a20b21450a1"

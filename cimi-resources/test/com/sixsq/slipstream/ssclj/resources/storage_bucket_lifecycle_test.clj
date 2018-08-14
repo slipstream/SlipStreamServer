@@ -66,6 +66,7 @@
 
                              :bucketName     "aaa-bbb-111"
                              :usage          123456
+                             :unit           "KiB"
                              :connector      {:href "connector/0123-4567-8912"}
 
 

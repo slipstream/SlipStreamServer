@@ -8,7 +8,7 @@
 (s/def ::credentials (s/coll-of ::cimi-common/resource-link))
 (s/def ::bucketName ::cimi-core/nonblank-string)
 (s/def ::usage pos-int?)
-(s/def ::unit #{"B","KB","MB", "GB"})
+(s/def ::unit #{"KiB"})
 (s/def ::connector ::cimi-common/resource-link)
 (s/def ::serviceOffer ::cimi-common/resource-link)
 (s/def ::externalObject ::cimi-common/resource-link)
@@ -16,10 +16,10 @@
 (def storage-bucket-specs {:req-un [::credentials
                                     ::bucketName
                                     ::connector
-                                    ::usage]
+                                    ::usage
+                                    ::unit]
                            :opt-un [::externalObject
-                                    ::serviceOffer
-                                    ::unit]})
+                                    ::serviceOffer]})
 
 (def storage-bucket-keys-spec (su/merge-keys-specs [cimi-common/common-attrs
                                                     storage-bucket-specs]))
