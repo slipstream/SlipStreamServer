@@ -35,6 +35,7 @@
                    :properties     {:a "one", :b "two"}
                    :bucketName     "aaa-bbb-111"
                    :usage          123456
+                   :unit           "KB"
                    :connector      {:href "connector/0123-4567-8912"}
                    :credentials    [{:href "credentials/0123-4567-8912"}]
                    :externalObject {:href "external-object/aaa-bbb-ccc", :user {:href "user/test"}}
@@ -63,5 +64,8 @@
     (stu/is-invalid ::bucky/storage-bucket (dissoc bucky-sample k)))
 
   ;; optional keywords
-  (doseq [k #{:externalObject :serviceOffer}]
-    (stu/is-valid ::bucky/storage-bucket (dissoc bucky-sample k))))
+  (doseq [k #{:externalObject :serviceOffer :unit}]
+    (stu/is-valid ::bucky/storage-bucket (dissoc bucky-sample k)))
+
+  ;;units are case dependant
+  (stu/is-invalid ::bucky/storage-bucket (assoc bucky-sample :unit "Kb")))
