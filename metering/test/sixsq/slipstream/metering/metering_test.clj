@@ -101,8 +101,7 @@
                      :resource:ram          4096
                      :resource:disk         10
                      :resource:instanceType "Large"}
-        so-minute {
-                   :price:currency          "EUR"
+        so-minute {:price:currency          "EUR"
                    :resource:vcpu           8
                    :price:unitCost          0.4686389
                    :price:unitCode          "MIN"
@@ -111,10 +110,8 @@
                    :resource:instanceType   "s1.2xlarge"
                    :resource:ram            32768.0
                    :resource:disk           0.0
-                   :href                    " service-offer/a4953f05-affe-46d0-a5ac-a4c8f1af810b "
-                   }
-        so-hour {
-                 :price:currency          "EUR"
+                   :href                    " service-offer/a4953f05-affe-46d0-a5ac-a4c8f1af810b "}
+        so-hour {:price:currency          "EUR"
                  :resource:vcpu           2
                  :price:unitCost          0.09122021
                  :price:unitCode          "HUR"
@@ -123,10 +120,8 @@
                  :resource:instanceType   "t2.large"
                  :resource:ram            8192.0
                  :resource:disk           10.0
-                 :href                    "service-offer/cc87133e-343b-40f1-8094-46f80a1b3042"
-                 }
-        so-unknown-period {
-                           :price:currency          "EUR"
+                 :href                    "service-offer/cc87133e-343b-40f1-8094-46f80a1b3042"}
+        so-unknown-period {:price:currency          "EUR"
                            :resource:vcpu           2
                            :price:unitCost          0.09122021
                            :price:unitCode          "XXX"
@@ -135,10 +130,8 @@
                            :resource:instanceType   "t2.large"
                            :resource:ram            8192.0
                            :resource:disk           10.0
-                           :href                    "service-offer/cc87133e-343b-40f1-8094-46f80a1b3042"
-                           }
-        so-unitCode-but-no-cost {
-                                 :price:currency          "EUR"
+                           :href                    "service-offer/cc87133e-343b-40f1-8094-46f80a1b3042"}
+        so-unitCode-but-no-cost {:price:currency          "EUR"
                                  :resource:vcpu           8
                                  :price:unitCode          "MIN"
                                  :price:billingPeriodCode "MIN"
@@ -146,28 +139,21 @@
                                  :resource:instanceType   "s1.2xlarge"
                                  :resource:ram            32768.0
                                  :resource:disk           0.0
-                                 :href                    " service-offer/a4953f05-affe-46d0-a5ac-a4c8f1af810b "
-                                 }
-        so-unknown {
-                    :href          "service-offer/unknown"
+                                 :href                    " service-offer/a4953f05-affe-46d0-a5ac-a4c8f1af810b "}
+        so-unknown {:href          "service-offer/unknown"
                     :resource:vcpu 1
                     :resource:ram  512.0
                     :resource:disk 10.0}
-
         s3cost 0.018
         sample-usage-kb (* 42 1024 1024)                    ;; i.e 42 Gb
 
-        so-sb {
-               :href              "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
+        so-sb {:href              "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
                :resource:storage  1
                :resource:host     "s3-eu-west-1.amazonaws.com"
                :price:currency    "EUR"
                :price:unitCode    "HUR"
                :price:unitCost    s3cost
-               :resource:platform "S3"
-               }
-
-        ]
+               :resource:platform "S3"}]
     (is (= {} (t/assoc-price {})))
     (is (nil? (:price (t/assoc-price {::bad " BAD! "}))))
     (is (nil? (:price (t/assoc-price {:serviceOffer " BAD! "}))))
@@ -178,7 +164,6 @@
     (is (nil? (:price (t/assoc-price (assoc base-vm :serviceOffer so-unknown-period)))))
     (is (nil? (:price (t/assoc-price (assoc base-vm :serviceOffer so-unitCode-but-no-cost)))))
     (is (nil? (:price (t/assoc-price (assoc base-vm :serviceOffer so-unknown)))))
-
     (is (nil? (:price (t/assoc-price base-bucky))))
     (is (nil? (:price (t/assoc-price (assoc base-bucky :serviceOffer so-no-price)))))
     (is (nil? (:price (t/assoc-price (assoc base-bucky :serviceOffer so-unknown-period)))))

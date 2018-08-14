@@ -30,10 +30,8 @@
 (defn search-url [index type]
   (str/join "/" [index type "_search"]))
 
-
 (defn search-urls [indices types]
   (map #(search-url %1 %2) indices types))
-
 
 (defn process-options
   [{:keys [es-host es-port
@@ -52,17 +50,14 @@
    :metering-action         (index-action metering-index doc-type)
    :metering-period-minutes metering-period-minutes})
 
-
 (defn assoc-snapshot-time
   [timestamp m]
   (assoc m :snapshot-time timestamp))
-
 
 (defn quantity
   [{:keys [usage unit] :as resource}]
   (let [conversion (or (get to-GB unit) (get to-GB "KB"))]
     (if usage (/ usage conversion) 1)))
-
 
 ;; TODO: quantization for hour period, i.e apply the full hour price to first minute then zero for the rest of the hour
 (defn assoc-price

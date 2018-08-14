@@ -81,12 +81,7 @@
         resource-index2 (utils/random-uuid)
         resource-type1 "virtual-machine"
         resource-type2 "bucky"
-
-        ;;resource-search-url (t/search-url resource-index "virtual-machine")
-
-        ;;resource-search-urls [resource-search-url]
         resource-search-urls (t/search-urls [resource-index1 resource-index2] [resource-type1 resource-type2])
-
         metering-index (utils/random-uuid)
         metering-type "metering"
         metering-action (t/index-action metering-index metering-type)
@@ -101,9 +96,7 @@
                 docs1 (repeatedly n1 (partial random-vm-doc resource-type1))
                 docs2 (repeatedly n2 (partial random-bucky-doc resource-type2))
                 ids1 (set (map :id docs1))
-                ids2 (set (map :id docs2))
-
-                ]
+                ids2 (set (map :id docs2))]
             (doall (map (partial spu/index-add client resource-index1) docs1))
             (doall (map (partial spu/index-add client resource-index2) docs2))
 
