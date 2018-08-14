@@ -167,9 +167,7 @@
                     :resourceURI             "http://sixsq.com/slipstream/1/ServiceOffer",
                     :resource:type           "DATA",
                     :price:billingUnit       "GiBh"}
-        so-sb-mibh (assoc so-sb-gibh :price:billingUnit "MiBh")
-
-        ]
+        so-sb-mibh (assoc so-sb-gibh :price:billingUnit "MiBh")]
     (is (= {} (t/assoc-price {})))
     (is (nil? (:price (t/assoc-price {::bad " BAD! "}))))
     (is (nil? (:price (t/assoc-price {:serviceOffer " BAD! "}))))
@@ -199,8 +197,7 @@
                (/ 60)
                (* s3cost)
                (/ 1024))
-           (:price (t/assoc-price (assoc base-bucky :serviceOffer so-sb-mibh :usage sample-usage-kb)))))
-    ))
+           (:price (t/assoc-price (assoc base-bucky :serviceOffer so-sb-mibh :usage sample-usage-kb)))))))
 
 (deftest check-update-id
   (let [uuid "5b24caac-e87c-4446-96bc-a20b21450a1"
