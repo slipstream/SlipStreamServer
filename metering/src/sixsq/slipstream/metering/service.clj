@@ -9,7 +9,7 @@
 
 
 (defn meter-resources-sync [hosts resource-search-urls metering-action]
-  (async/<!! (metering/meter-resources hosts resource-search-urls metering-action)))
+  (map async/<!! (metering/meter-resources hosts resource-search-urls metering-action)))
 
 
 (defn handler [request]

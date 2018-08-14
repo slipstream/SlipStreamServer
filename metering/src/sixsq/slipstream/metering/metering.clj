@@ -196,4 +196,4 @@
 
 (defn meter-resources
   [hosts resource-search-urls metering-action]
-  (map #(meter-resource hosts % metering-action) resource-search-urls))
+  (doall(map #(meter-resource hosts % metering-action) resource-search-urls)))
