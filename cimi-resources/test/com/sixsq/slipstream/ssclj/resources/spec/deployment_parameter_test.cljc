@@ -32,9 +32,9 @@
     (stu/is-invalid ::dp/deployment-parameter (assoc root :value "   "))
 
     ;; required attributes
-    (doseq [k #{:id :resourceURI :created :updated :acl :deployment :nodeID :name}]
+    (doseq [k #{:id :resourceURI :created :updated :acl :deployment :name}]
       (stu/is-invalid ::dp/deployment-parameter (dissoc root k)))
 
     ;; optional attributes
-    (doseq [k #{:values}]
+    (doseq [k #{:values :nodeID}]
       (stu/is-valid ::dp/deployment-parameter (dissoc root k)))))

@@ -7,7 +7,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.deployment-parameter :as deployment-parameter]
-    [superstring.core :as str]))
+    [superstring.core :as str]
+    [clojure.string :as s]))
 
 (def ^:const resource-name "DeploymentParameter")
 
@@ -45,6 +46,14 @@
   resource-uri
   [resource]
   (validate-fn resource))
+
+;;
+;; set the resource identifier to "deployment-parameter/predictable-uuid3-from-string"
+;;
+(defmethod crud/new-identifier resource-name
+  [{:keys [deployment nodeID name] :as json} resource-name]
+  (let [id (s/join ":" [(:href deployment) nodeID name])]
+    (assoc json :id (str resource-url "/" (u/from-data-uuid id)))))
 
 ;;
 ;; CRUD operations

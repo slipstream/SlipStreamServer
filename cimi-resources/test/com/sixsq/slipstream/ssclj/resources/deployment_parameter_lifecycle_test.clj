@@ -84,11 +84,12 @@
 
       (is (= location-test test-uri))
 
-      ;; admin should be able to see everyone's records
+      ;; admin should be able to see everyone's records. Deployment parameter href is predictable
       (-> session-admin
           (request test-uri)
           (ltu/body->edn)
           (ltu/is-status 200)
+          (ltu/is-id "deployment-parameter/324c6138-0484-34b5-bf35-af3ad15815db")
           (ltu/is-operation-present "delete")
           (ltu/is-operation-present "edit"))
 
