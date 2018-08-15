@@ -41,11 +41,11 @@
   (let [doc-id (str resource-type "/" (utils/random-uuid))
         cred (rand-nth ["credential/123" "credential/456" "credential/789"])
         user (rand-nth ["user-1" "user-2" "user-3"])]
-    {:id           doc-id
-     :resourceURI  "http://sixsq.com/slipstream/1/StorageBucket"
-     :updated      "2017-09-04T09:39:35.679Z"
-     :credentials   [{:href cred}]
-     :created      "2017-09-04T09:39:35.651Z"
+    {:id             doc-id
+     :resourceURI    "http://sixsq.com/slipstream/1/StorageBucket"
+     :updated        "2017-09-04T09:39:35.679Z"
+     :credentials    [{:href cred}]
+     :created        "2017-09-04T09:39:35.651Z"
      :serviceOffer   {:href              "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
                       :resource:storage  1
                       :resource:host     "s3-eu-west-1.amazonaws.com"
@@ -53,19 +53,19 @@
                       :price:unitCode    "HUR"
                       :price:unitCost    0.018
                       :resource:platform "S3"}
-     :bucketName    (utils/random-uuid)
-     :usageInKiB          123456
+     :bucketName     (utils/random-uuid)
+     :usageInKiB     123456
      :connector      {:href "connector/0123-4567-8912"}
      :externalObject {:href "external-object/aaa-bbb-ccc",
                       :user {:href "user"}}
-     :acl          {:owner {:type      "USER"
-                            :principal "ADMIN"}
-                    :rules [{:principal "ADMIN"
-                             :right     "ALL"
-                             :type      "USER"}
-                            {:principal user
-                             :right     "VIEW"
-                             :type      "USER"}]}}))
+     :acl            {:owner {:type      "USER"
+                              :principal "ADMIN"}
+                      :rules [{:principal "ADMIN"
+                               :right     "ALL"
+                               :type      "USER"}
+                              {:principal user
+                               :right     "VIEW"
+                               :type      "USER"}]}}))
 
 
 
@@ -103,23 +103,23 @@
             (spu/index-refresh client resource-index1)
             (spu/index-refresh client resource-index2)
 
-            (doseq [[search-url nb ids] (map (fn [s n i] [s n i] ) resource-search-urls [n1 n2] [ids1 ids2])]
-            (let [ch (spandex/scroll-chan client
-                                          {:url  search-url
-                                           :body {:query {:match_all {}}}})
-                  db-ids (loop [existing-ids []]
-                           (if-let [resp (<!! ch)]
-                             (let [ids (->> (-> resp :body :hits :hits)
-                                            (map :_source)
-                                            (map :id))]
-                               (recur (concat existing-ids ids)))
-                             existing-ids))]
-              (is (= nb (count ids)))
-              (is (= nb (count db-ids)))
-              (is (= ids (set db-ids)))))
+            (doseq [[search-url nb ids] (map (fn [s n i] [s n i]) resource-search-urls [n1 n2] [ids1 ids2])]
+              (let [ch (spandex/scroll-chan client
+                                            {:url  search-url
+                                             :body {:query {:match_all {}}}})
+                    db-ids (loop [existing-ids []]
+                             (if-let [resp (<!! ch)]
+                               (let [ids (->> (-> resp :body :hits :hits)
+                                              (map :_source)
+                                              (map :id))]
+                                 (recur (concat existing-ids ids)))
+                               existing-ids))]
+                (is (= nb (count ids)))
+                (is (= nb (count db-ids)))
+                (is (= ids (set db-ids)))))
 
 
-            (is (= [[n1 n1 n1][n2 n2 n2]] (map <!! (t/meter-resources (:hosts rest-map) resource-search-urls metering-action))))
+            (is (= [[n1 n1 n1] [n2 n2 n2]] (map <!! (t/meter-resources (:hosts rest-map) resource-search-urls metering-action))))
 
             (spu/index-refresh client metering-index)
 

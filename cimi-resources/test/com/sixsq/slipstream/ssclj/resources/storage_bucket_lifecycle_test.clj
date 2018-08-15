@@ -65,7 +65,7 @@
                                               :b "two"}
 
                              :bucketName     "aaa-bbb-111"
-                             :usageInKiB          123456
+                             :usageInKiB     123456
                              :connector      {:href "connector/0123-4567-8912"}
 
 

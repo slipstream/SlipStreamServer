@@ -13,9 +13,9 @@
 
 ;; https://github.com/SixSq/SlipStreamPricing/blob/master/Schema.md
 ;; per Year = ANN, per Month = MON, per Week = WEE, per Day = DAY, per Hour = HUR, per Minute = MIN, per Second = SEC.
-(def ^:const price-divisor {"SEC" (/ 1. 60), "MIN" 1, "HUR" 60, "GiBh" 60, "MiBh" 60,"DAY" (* 60 24), "WEE" (* 60 24 7)})
+(def ^:const price-divisor {"SEC" (/ 1. 60), "MIN" 1, "HUR" 60, "GiBh" 60, "MiBh" 60, "DAY" (* 60 24), "WEE" (* 60 24 7)})
 
-(def ^:const quantity-divisor {"GiBh" (* 1024 1024), "MiBh" 1024 })
+(def ^:const quantity-divisor {"GiBh" (* 1024 1024), "MiBh" 1024})
 
 (def ^:const doc-type "_doc")
 
@@ -57,9 +57,9 @@
 (defn quantity
   [{:keys [usageInKiB] :as resource}]
   (let [billingUnit (when usageInKiB (-> resource
-                                    :serviceOffer
-                                    :price:billingUnit))]
-  (if usageInKiB (/ usageInKiB (get quantity-divisor billingUnit (* 1024 1024))) 1)))
+                                         :serviceOffer
+                                         :price:billingUnit))]
+    (if usageInKiB (/ usageInKiB (get quantity-divisor billingUnit (* 1024 1024))) 1)))
 
 (defn add-unitCode
   [{:keys [price:unitCode] :as serviceOffer}]
@@ -73,7 +73,7 @@
 ;; TODO: quantization for hour period, i.e apply the full hour price to first minute then zero for the rest of the hour
 (defn assoc-price
   [{:keys [serviceOffer] :as m}]
-  (let [so (when (and serviceOffer (map? serviceOffer))(add-unitCode serviceOffer))
+  (let [so (when (and serviceOffer (map? serviceOffer)) (add-unitCode serviceOffer))
         price-map (when (:price:unitCost so)
                     (some->> so
                              :price:unitCode

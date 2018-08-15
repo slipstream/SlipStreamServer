@@ -87,7 +87,7 @@
                                      :b "two"}
 
                     :bucketName     "aaa-bbb-111"
-                    :usageInKiB          12
+                    :usageInKiB     12
                     :connector      {:href "connector/0123-4567-8912"}
 
 
@@ -145,7 +145,7 @@
                     :resource:ram  512.0
                     :resource:disk 10.0}
         s3cost 0.018
-        sample-usage-KiB (* 42 1024 1024)                    ;; i.e 42 Gb
+        sample-usage-KiB (* 42 1024 1024)                   ;; i.e 42 Gb
 
         so-sb-gibh {:connector               {
                                               :href "exoscale-ch-dk"
