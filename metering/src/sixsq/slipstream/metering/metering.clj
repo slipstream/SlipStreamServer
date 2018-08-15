@@ -13,9 +13,9 @@
 
 ;; https://github.com/SixSq/SlipStreamPricing/blob/master/Schema.md
 ;; per Year = ANN, per Month = MON, per Week = WEE, per Day = DAY, per Hour = HUR, per Minute = MIN, per Second = SEC.
-(def ^:const price-divisor {"SEC" (/ 1. 60), "MIN" 1, "HUR" 60, "DAY" (* 60 24), "WEE" (* 60 24 7)})
+(def ^:const price-divisor {"SEC" (/ 1. 60), "MIN" 1, "HUR" 60, "GiBh" 60, "MiBh" 60,"DAY" (* 60 24), "WEE" (* 60 24 7)})
 
-(def ^:const to-GB {"KB" (* 1024 1024) "MB" 1024 "GB" 1})
+(def ^:const quantity-divisor {"GiBh" (* 1024 1024), "MiBh" 1024 })
 
 (def ^:const doc-type "_doc")
 
@@ -55,15 +55,27 @@
   (assoc m :snapshot-time timestamp))
 
 (defn quantity
-  [{:keys [usage unit] :as resource}]
-  (let [conversion (or (get to-GB unit) (get to-GB "KB"))]
-    (if usage (/ usage conversion) 1)))
+  [{:keys [usageInKiB] :as resource}]
+  (let [billingUnit (when usageInKiB (-> resource
+                                    :serviceOffer
+                                    :price:billingUnit))]
+  (if usageInKiB (/ usageInKiB (get quantity-divisor billingUnit (* 1024 1024))) 1)))
+
+(defn add-unitCode
+  [{:keys [price:unitCode] :as serviceOffer}]
+  (if price:unitCode
+    serviceOffer
+    (assoc serviceOffer
+      :price:unitCode
+      (or (:price:billingUnit serviceOffer)
+          (:price:billingUnitCode serviceOffer)))))
 
 ;; TODO: quantization for hour period, i.e apply the full hour price to first minute then zero for the rest of the hour
 (defn assoc-price
   [{:keys [serviceOffer] :as m}]
-  (let [price-map (when (:price:unitCost serviceOffer)
-                    (some->> serviceOffer
+  (let [so (when (and serviceOffer (map? serviceOffer))(add-unitCode serviceOffer))
+        price-map (when (:price:unitCost so)
+                    (some->> so
                              :price:unitCode
                              (get price-divisor)
                              (/ (:price:unitCost serviceOffer))
@@ -191,4 +203,4 @@
 
 (defn meter-resources
   [hosts resource-search-urls metering-action]
-  (doall(map #(meter-resource hosts % metering-action) resource-search-urls)))
+  (doall (map #(meter-resource hosts % metering-action) resource-search-urls)))

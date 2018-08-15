@@ -54,7 +54,7 @@
                       :price:unitCost    0.018
                       :resource:platform "S3"}
      :bucketName    (utils/random-uuid)
-     :usage          123456
+     :usageInKiB          123456
      :connector      {:href "connector/0123-4567-8912"}
      :externalObject {:href "external-object/aaa-bbb-ccc",
                       :user {:href "user"}}
