@@ -87,8 +87,7 @@
                                      :b "two"}
 
                     :bucketName     "aaa-bbb-111"
-                    :usage          12
-                    :unit           "KiB"
+                    :usageInKiB          12
                     :connector      {:href "connector/0123-4567-8912"}
 
 
@@ -146,7 +145,7 @@
                     :resource:ram  512.0
                     :resource:disk 10.0}
         s3cost 0.018
-        sample-usage-kb (* 42 1024 1024)                    ;; i.e 42 Gb
+        sample-usage-KiB (* 42 1024 1024)                    ;; i.e 42 Gb
 
         so-sb-gibh {:connector               {
                                               :href "exoscale-ch-dk"
@@ -185,19 +184,19 @@
     (is (nil? (:price (t/assoc-price (assoc base-bucky :serviceOffer so-unknown)))))
 
     ;;storage bucket with billing in GiBH
-    (is (= (-> sample-usage-kb
+    (is (= (-> sample-usage-KiB
                (/ 60)
                (* s3cost)
                (/ 1024)
                (/ 1024))
-           (:price (t/assoc-price (assoc base-bucky :serviceOffer so-sb-gibh :usage sample-usage-kb)))))
+           (:price (t/assoc-price (assoc base-bucky :serviceOffer so-sb-gibh :usageInKiB sample-usage-KiB)))))
 
     ;;storage bucket with billing in MiBH
-    (is (= (-> sample-usage-kb
+    (is (= (-> sample-usage-KiB
                (/ 60)
                (* s3cost)
                (/ 1024))
-           (:price (t/assoc-price (assoc base-bucky :serviceOffer so-sb-mibh :usage sample-usage-kb)))))))
+           (:price (t/assoc-price (assoc base-bucky :serviceOffer so-sb-mibh :usageInKiB sample-usage-KiB)))))))
 
 (deftest check-update-id
   (let [uuid "5b24caac-e87c-4446-96bc-a20b21450a1"

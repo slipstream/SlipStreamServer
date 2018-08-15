@@ -34,8 +34,7 @@
                    :description    "short description",
                    :properties     {:a "one", :b "two"}
                    :bucketName     "aaa-bbb-111"
-                   :usage          123456
-                   :unit           "KiB"
+                   :usageInKiB          123456
                    :connector      {:href "connector/0123-4567-8912"}
                    :credentials    [{:href "credentials/0123-4567-8912"}]
                    :externalObject {:href "external-object/aaa-bbb-ccc", :user {:href "user/test"}}
@@ -60,12 +59,9 @@
   (stu/is-invalid ::bucky/storage-bucket (assoc bucky-sample :bad-attr "test"))
 
   ;; mandatory keywords
-  (doseq [k #{:credentials :bucketName :connector :usage :unit}]
+  (doseq [k #{:credentials :bucketName :connector :usageInKiB}]
     (stu/is-invalid ::bucky/storage-bucket (dissoc bucky-sample k)))
 
   ;; optional keywords
   (doseq [k #{:externalObject :serviceOffer}]
-    (stu/is-valid ::bucky/storage-bucket (dissoc bucky-sample k)))
-
-  ;;units are case dependant
-  (stu/is-invalid ::bucky/storage-bucket (assoc bucky-sample :unit "kib")))
+    (stu/is-valid ::bucky/storage-bucket (dissoc bucky-sample k))))

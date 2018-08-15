@@ -55,13 +55,11 @@
   (assoc m :snapshot-time timestamp))
 
 (defn quantity
-  "When usage is defined, its unit is always implicitly KiB
-  and the accounting quantity is implictly in GiB"
-  [{:keys [usage] :as resource}]
-  (let [billingUnit (when usage (-> resource
+  [{:keys [usageInKiB] :as resource}]
+  (let [billingUnit (when usageInKiB (-> resource
                                     :serviceOffer
                                     :price:billingUnit))]
-  (if usage (/ usage (get quantity-divisor billingUnit (* 1024 1024))) 1)))
+  (if usageInKiB (/ usageInKiB (get quantity-divisor billingUnit (* 1024 1024))) 1)))
 
 (defn add-unitCode
   [{:keys [price:unitCode] :as serviceOffer}]
