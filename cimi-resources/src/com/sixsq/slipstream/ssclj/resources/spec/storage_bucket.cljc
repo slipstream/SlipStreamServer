@@ -7,7 +7,7 @@
 
 (s/def ::credentials (s/coll-of ::cimi-common/resource-link))
 (s/def ::bucketName ::cimi-core/nonblank-string)
-(s/def ::usage pos-int?)
+(s/def ::usageInKiB pos-int?)
 (s/def ::connector ::cimi-common/resource-link)
 (s/def ::serviceOffer ::cimi-common/resource-link)
 (s/def ::externalObject ::cimi-common/resource-link)
@@ -16,7 +16,7 @@
 (def storage-bucket-specs {:req-un [::credentials
                                     ::bucketName
                                     ::connector
-                                    ::usage]
+                                    ::usageInKiB]
                            :opt-un [::externalObject
                                     ::serviceOffer
                                     ::currency]})

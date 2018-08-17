@@ -5,7 +5,7 @@
     [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-mitreid-token :as ct-oidc-token]))
 
 
-(def ^:const service "session-oidc-token")
+(def ^:const service "session-mitreid-token")
 
 
 ;;
