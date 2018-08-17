@@ -9,15 +9,20 @@
     [qbits.spandex :as spandex]
     [sixsq.slipstream.metering.utils :as utils]))
 
+
 (def ^:const metering-resource-uri "http://sixsq.com/slipstream/1/Metering")
+
 
 ;; https://github.com/SixSq/SlipStreamPricing/blob/master/Schema.md
 ;; per Year = ANN, per Month = MON, per Week = WEE, per Day = DAY, per Hour = HUR, per Minute = MIN, per Second = SEC.
 (def ^:const price-divisor {"SEC" (/ 1. 60), "MIN" 1, "HUR" 60, "GiBh" 60, "MiBh" 60, "DAY" (* 60 24), "WEE" (* 60 24 7)})
 
+
 (def ^:const quantity-divisor {"GiBh" (* 1024 1024), "MiBh" 1024})
 
+
 (def ^:const doc-type "_doc")
+
 
 (defn es-hosts
   [host port]
@@ -27,11 +32,14 @@
 (defn index-action [index type]
   {:index {:_index index, :_type type}})
 
+
 (defn search-url [index type]
   (str/join "/" [index type "_search"]))
 
+
 (defn search-urls [indices types]
   (map #(search-url %1 %2) indices types))
+
 
 (defn process-options
   [{:keys [es-host es-port
@@ -50,9 +58,11 @@
    :metering-action         (index-action metering-index doc-type)
    :metering-period-minutes metering-period-minutes})
 
+
 (defn assoc-snapshot-time
   [timestamp m]
   (assoc m :snapshot-time timestamp))
+
 
 (defn quantity
   [{:keys [usageInKiB] :as resource}]
@@ -60,6 +70,7 @@
                                          :serviceOffer
                                          :price:billingUnit))]
     (if usageInKiB (/ usageInKiB (get quantity-divisor billingUnit (* 1024 1024))) 1)))
+
 
 (defn add-unitCode
   [{:keys [price:unitCode] :as serviceOffer}]
@@ -69,6 +80,7 @@
       :price:unitCode
       (or (:price:billingUnit serviceOffer)
           (:price:billingUnitCode serviceOffer)))))
+
 
 ;; TODO: quantization for hour period, i.e apply the full hour price to first minute then zero for the rest of the hour
 (defn assoc-price
@@ -82,6 +94,12 @@
                              (* (quantity m))
                              (assoc {} :price)))]
     (merge m price-map)))
+
+
+(defn assoc-type
+  [{{resource-type :resource:type} :serviceOffer :as m}]
+  (if resource-type (assoc m :resource:type resource-type) m))
+
 
 (defn update-id
   [timestamp {:keys [id] :as m}]
@@ -117,6 +135,7 @@
        (map :_source)
        (map (partial assoc-snapshot-time timestamp))
        (map assoc-price)
+       (map assoc-type)
        (map (partial update-id timestamp))
        (map replace-resource-uri)
        (map (partial complete-index-action index-action))))
@@ -168,6 +187,7 @@
     (log/debug "bulk insert stats:" results)
     results))
 
+
 (defn- meter-resource
   [hosts resource-search-url metering-action]
   (async/go
@@ -200,6 +220,7 @@
               (log/error msg)
               (log/info msg))
             stats))))))
+
 
 (defn meter-resources
   [hosts resource-search-urls metering-action]
