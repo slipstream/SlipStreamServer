@@ -203,6 +203,7 @@
                (/ 1024))
            (:price (t/assoc-price (assoc base-bucky :serviceOffer so-sb-mibh :usageInKiB sample-usage-KiB)))))))
 
+
 (deftest check-assoc-type
   (let [timestamp "1964-08-25T10:00:00.0Z"
         base-vm {:id          (str "metering/" (utils/random-uuid))
@@ -244,7 +245,7 @@
                                      :user {:href "user/test"}}}
 
         so-bucky-with-type {:price:currency          "EUR",
-                            :resource:storage       1,
+                            :resource:storage        1,
                             :price:unitCost          0.0018,
                             :price:billingPeriodCode "MON",
                             :name                    "Object Storage in Exoscale",
@@ -304,6 +305,7 @@
     (is (nil? (:resource:type (t/assoc-type base-bucky))))
     (is (= "DATA" (:resource:type (t/assoc-type (assoc base-bucky :serviceOffer so-bucky-with-type)))))
     (is (nil? (:resource:type (t/assoc-type (assoc base-bucky :serviceOffer so-no-type)))))))
+
 
 (deftest check-update-id
   (let [uuid "5b24caac-e87c-4446-96bc-a20b21450a1"
