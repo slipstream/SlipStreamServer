@@ -44,7 +44,8 @@
                                     :price:currency    "EUR"
                                     :price:unitCode    "HUR"
                                     :price:unitCost    "0.018"
-                                    :resource:platform "S3"}})
+                                    :resource:platform "S3"}
+                   :currency       "EUR"})
 
 
 (deftest test-schema-check
@@ -63,5 +64,5 @@
     (stu/is-invalid ::bucky/storage-bucket (dissoc bucky-sample k)))
 
   ;; optional keywords
-  (doseq [k #{:externalObject :serviceOffer}]
+  (doseq [k #{:externalObject :serviceOffer :currency}]
     (stu/is-valid ::bucky/storage-bucket (dissoc bucky-sample k))))

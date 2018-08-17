@@ -13,6 +13,8 @@
 (s/def ::connector ::cimi-common/resource-link)
 (s/def ::serviceOffer ::cimi-common/resource-link)
 (s/def ::deployment ::cimi-common/resource-link)
+(s/def ::currency ::cimi-core/nonblank-string)
+
 
 (def virtual-machine-specs {:req-un [::credentials
                                      ::instanceID
@@ -20,7 +22,8 @@
                                      ::state]
                             :opt-un [::deployment
                                      ::serviceOffer
-                                     ::ip]})
+                                     ::ip
+                                     ::currency]})
 
 (def virtual-machine-keys-spec (su/merge-keys-specs [cimi-common/common-attrs
                                                      virtual-machine-specs]))

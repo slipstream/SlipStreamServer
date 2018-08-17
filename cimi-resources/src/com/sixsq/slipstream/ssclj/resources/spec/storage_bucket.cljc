@@ -11,13 +11,15 @@
 (s/def ::connector ::cimi-common/resource-link)
 (s/def ::serviceOffer ::cimi-common/resource-link)
 (s/def ::externalObject ::cimi-common/resource-link)
+(s/def ::currency ::cimi-core/nonblank-string)
 
 (def storage-bucket-specs {:req-un [::credentials
                                     ::bucketName
                                     ::connector
                                     ::usageInKiB]
                            :opt-un [::externalObject
-                                    ::serviceOffer]})
+                                    ::serviceOffer
+                                    ::currency]})
 
 (def storage-bucket-keys-spec (su/merge-keys-specs [cimi-common/common-attrs
                                                     storage-bucket-specs]))

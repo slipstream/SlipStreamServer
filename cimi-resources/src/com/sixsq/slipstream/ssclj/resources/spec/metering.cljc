@@ -8,10 +8,14 @@
 
 
 (s/def ::snapshot-time ::cimi-core/timestamp)
+(s/def ::price number?)
+(s/def ::currency ::cimi-core/nonblank-string)
 
 
 (def metering-keys-spec (su/merge-keys-specs [c/common-attrs
                                               vm/virtual-machine-specs
-                                              {:req-un [::snapshot-time]}]))
+                                              {:req-un [::snapshot-time]
+                                               :opt-un [::price
+                                                        ::currency]}]))
 
 (s/def ::metering (su/only-keys-maps metering-keys-spec))
