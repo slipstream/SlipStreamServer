@@ -27,7 +27,7 @@
           (let [{:keys [sub] :as claims} (sign/unsign-claims access-token publicKey)]
             (log/debugf "MITREid access token claims for %s: %s" instance (pr-str claims))
             (if sub
-              (let [{:keys [givenName familyName emails] :as userinfo} (when sub (oidc-utils/get-mitreid-userinfo userProfileURL access-token))
+              (let [{:keys [givenName familyName emails] :as userinfo} (oidc-utils/get-mitreid-userinfo userProfileURL access-token)
                     email (->> emails (filter :primary) first :value)]
                 (if email
                   (if-let [matched-user (ex/create-user-when-missing! :mitreid {:external-login    sub
