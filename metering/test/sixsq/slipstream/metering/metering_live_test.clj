@@ -52,7 +52,8 @@
                       :price:currency    "EUR"
                       :price:unitCode    "HUR"
                       :price:unitCost    0.018
-                      :resource:platform "S3"}
+                      :resource:platform "S3"
+                      :resource:type "DATA"}
      :bucketName     (utils/random-uuid)
      :usageInKiB     123456
      :connector      {:href "connector/0123-4567-8912"}

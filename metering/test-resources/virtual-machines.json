@@ -66,6 +66,7 @@
               "resource:instanceType": "m1.large",
               "resource:ram": 8192,
               "resource:disk": 20,
+              "resource:type": "VM",
               "href": "service-offer/a509a07c-8ec1-405e-a41b-00fb93cfb9bc"
             }
           }
@@ -123,6 +124,7 @@
               "resource:instanceType": "Medium",
               "resource:ram": 4096,
               "resource:disk": 0,
+              "resource:type": "VM",
               "href": "service-offer/fb29e5cd-eba8-484d-b656-7067fddbd735"
             }
           }
@@ -180,6 +182,7 @@
               "resource:instanceType": "Medium",
               "resource:ram": 4096,
               "resource:disk": 0,
+              "resource:type": "VM"
               "href": "service-offer/fb29e5cd-eba8-484d-b656-7067fddbd735"
             }
           }
@@ -238,6 +241,7 @@
               "resource:instanceType": "os.4",
               "resource:ram": 8192,
               "resource:disk": 20,
+              "resource:type": "VM"
               "href": "service-offer/ad1d512a-b8db-4ed9-91ab-d2bcc4341518"
             }
           }
@@ -295,6 +299,7 @@
               "resource:instanceType": "Large",
               "resource:ram": 8192,
               "resource:disk": 0,
+              "resource:type": "VM"
               "href": "service-offer/9f8e1172-7464-4c1f-92dc-7ad0878d7dfa"
             }
           }
@@ -352,6 +357,7 @@
               "resource:instanceType": "Large",
               "resource:ram": 8192,
               "resource:disk": 0,
+              "resource:type": "VM"
               "href": "service-offer/9f8e1172-7464-4c1f-92dc-7ad0878d7dfa"
             }
           }
@@ -422,6 +428,7 @@
               "resource:instanceType": "Huge",
               "resource:ram": 32768,
               "resource:disk": 0,
+              "resource:type": "VM"
               "href": "service-offer/c34014cf-e6cd-45fe-8656-201641d13805"
             }
           }
@@ -492,6 +499,7 @@
               "resource:instanceType": "Medium",
               "resource:ram": 4096,
               "resource:disk": 0,
+              "resource:type": "VM"
               "href": "service-offer/696de313-17b5-44c8-bf26-2f2ed4fbc6df"
             }
           }
@@ -562,6 +570,7 @@
               "resource:instanceType": "Huge",
               "resource:ram": 32768,
               "resource:disk": 0,
+              "resource:type": "VM"
               "href": "service-offer/c34014cf-e6cd-45fe-8656-201641d13805"
             }
           }
@@ -632,6 +641,7 @@
               "resource:instanceType": "Micro",
               "resource:ram": 512,
               "resource:disk": 0,
+              "resource:type": "VM"
               "href": "service-offer/4f60dce1-8c24-4a82-9fe4-78680b74ebd7"
             }
           }

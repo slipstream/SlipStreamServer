@@ -83,6 +83,11 @@
                              (assoc {} :price)))]
     (merge m price-map)))
 
+(defn assoc-type
+  [{{resource-type :resource:type} :serviceOffer :as m}]
+  (if resource-type (assoc m :resource:type resource-type) m))
+
+
 (defn update-id
   [timestamp {:keys [id] :as m}]
   (let [uuid (second (str/split (or id (utils/random-uuid)) #"/"))
@@ -117,6 +122,7 @@
        (map :_source)
        (map (partial assoc-snapshot-time timestamp))
        (map assoc-price)
+       (map assoc-type)
        (map (partial update-id timestamp))
        (map replace-resource-uri)
        (map (partial complete-index-action index-action))))
