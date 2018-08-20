@@ -3,5 +3,6 @@ SLIPSTREAM_RING_CONTAINER_PORT=5001
 ES_HOST=localhost
 ES_PORT=9200
 VM_INDEX=slipstream-virtual-machine
+BUCKY_INDEX=slipstream-storage-bucket
 METERING_INDEX=slipstream-metering
 METERING_PERIOD_MINUTES=1
