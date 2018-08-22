@@ -82,8 +82,7 @@
                 :request-method :put
                 :body (json/write-str {:name "dep 1 new name"}))
           (ltu/body->edn)
-          (ltu/is-status 200)
-          (ltu/dump))
+          (ltu/is-status 200))
 
       ;; admin query: ok
       (-> session-admin
