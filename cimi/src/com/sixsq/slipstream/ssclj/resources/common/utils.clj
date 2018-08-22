@@ -83,6 +83,12 @@
   [m]
   (dissoc m :id :created :updated :resourceURI :operations))
 
+(defn strip-select-from-mandatory-attrs
+  "Strips non removable attributes from the set. These include
+  :id :created :updated :resourceURI :acl"
+  [s]
+  (disj s :id :created :updated :resourceURI :acl))
+
 (defn unparse-timestamp-datetime
   "Returns the string representation of the given timestamp."
   [^DateTime timestamp]

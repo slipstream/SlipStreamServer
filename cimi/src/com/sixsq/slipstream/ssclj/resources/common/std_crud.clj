@@ -50,12 +50,16 @@ internal-identity
 
 (defn edit-fn
   [resource-name]
-  (fn [{{uuid :uuid} :params body :body :as request}]
+  (fn [{{select :select} :cimi-params {uuid :uuid} :params body :body :as request}]
     (try
       (let [current (-> (str (u/de-camelcase resource-name) "/" uuid)
-                        (db/retrieve request)
+                        (db/retrieve (assoc-in request [:cimi-params :select] nil))
                         (a/can-modify? request))
-            merged (merge current body)]
+            dissoc-keys (-> (map keyword select)
+                            (set)
+                            (u/strip-select-from-mandatory-attrs))
+            current-without-selected (apply dissoc current dissoc-keys)
+            merged (merge current-without-selected body)]
         (-> merged
             (u/update-timestamps)
             (crud/validate)

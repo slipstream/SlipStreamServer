@@ -45,7 +45,9 @@
                                :resource:vcpu         1
                                :resource:ram          4096
                                :resource:disk         10
-                               :resource:instanceType "Large"}})
+                               :resource:instanceType "Large"
+                               :price:currency        "EUR"}
+                :currency     "EUR"})
 
 
 (deftest test-schema-check
@@ -65,5 +67,5 @@
     (stu/is-invalid ::vm/virtual-machine (dissoc vm-sample k)))
 
   ;; optional keywords
-  (doseq [k #{:deployment :serviceOffer :ip}]
+  (doseq [k #{:deployment :serviceOffer :ip :currency}]
     (stu/is-valid ::vm/virtual-machine (dissoc vm-sample k))))

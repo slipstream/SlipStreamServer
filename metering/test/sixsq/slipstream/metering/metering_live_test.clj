@@ -7,7 +7,7 @@
     [sixsq.slipstream.metering.metering :as t]
     [sixsq.slipstream.metering.utils :as utils]))
 
-(defn random-doc
+(defn random-vm-doc
   [resource-type]
   (let [doc-id (str resource-type "/" (utils/random-uuid))
         instance-id (utils/random-uuid)
@@ -36,6 +36,40 @@
                              :right     "VIEW"
                              :type      "USER"}]}}))
 
+(defn random-bucky-doc
+  [resource-type]
+  (let [doc-id (str resource-type "/" (utils/random-uuid))
+        cred (rand-nth ["credential/123" "credential/456" "credential/789"])
+        user (rand-nth ["user-1" "user-2" "user-3"])]
+    {:id             doc-id
+     :resourceURI    "http://sixsq.com/slipstream/1/StorageBucket"
+     :updated        "2017-09-04T09:39:35.679Z"
+     :credentials    [{:href cred}]
+     :created        "2017-09-04T09:39:35.651Z"
+     :serviceOffer   {:href              "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
+                      :resource:storage  1
+                      :resource:host     "s3-eu-west-1.amazonaws.com"
+                      :price:currency    "EUR"
+                      :price:unitCode    "HUR"
+                      :price:unitCost    0.018
+                      :resource:platform "S3"
+                      :resource:type     "DATA"}
+     :bucketName     (utils/random-uuid)
+     :usageInKiB     123456
+     :connector      {:href "connector/0123-4567-8912"}
+     :externalObject {:href "external-object/aaa-bbb-ccc",
+                      :user {:href "user"}}
+     :acl            {:owner {:type      "USER"
+                              :principal "ADMIN"}
+                      :rules [{:principal "ADMIN"
+                               :right     "ALL"
+                               :type      "USER"}
+                              {:principal user
+                               :right     "VIEW"
+                               :type      "USER"}]}}))
+
+
+
 
 (deftest check-empty-bulk-insert
   (let [hosts ["http://localhost:9200"]]
@@ -44,9 +78,11 @@
         (is (nil? (<!! ch)))))))
 
 (deftest lifecycle
-  (let [resource-index (utils/random-uuid)
-        resource-type "virtual-machine"
-        resource-search-url (t/search-url resource-index resource-type)
+  (let [resource-index1 (utils/random-uuid)
+        resource-index2 (utils/random-uuid)
+        resource-type1 "virtual-machine"
+        resource-type2 "bucky"
+        resource-search-urls (t/search-urls [resource-index1 resource-index2] [resource-type1 resource-type2])
         metering-index (utils/random-uuid)
         metering-type "metering"
         metering-action (t/index-action metering-index metering-type)
@@ -54,29 +90,37 @@
         rest-map (spu/provide-mock-rest-client)]
     (with-open [client (:client rest-map)]
       (when (spu/cluster-ready? client)
-        (spu/index-create client resource-index)
+        (spu/index-create client resource-index1)
         (try
-          (let [n 199
-                docs (repeatedly n (partial random-doc resource-type))
-                ids (set (map :id docs))]
-            (doall (map (partial spu/index-add client resource-index) docs))
+          (let [n1 199
+                n2 42
+                docs1 (repeatedly n1 (partial random-vm-doc resource-type1))
+                docs2 (repeatedly n2 (partial random-bucky-doc resource-type2))
+                ids1 (set (map :id docs1))
+                ids2 (set (map :id docs2))]
+            (doall (map (partial spu/index-add client resource-index1) docs1))
+            (doall (map (partial spu/index-add client resource-index2) docs2))
 
-            (spu/index-refresh client resource-index)
+            (spu/index-refresh client resource-index1)
+            (spu/index-refresh client resource-index2)
 
-            (let [ch (spandex/scroll-chan client
-                                          {:url  resource-search-url
-                                           :body {:query {:match_all {}}}})
-                  db-ids (loop [existing-ids []]
-                           (if-let [resp (<!! ch)]
-                             (let [ids (->> (-> resp :body :hits :hits)
-                                            (map :_source)
-                                            (map :id))]
-                               (recur (concat existing-ids ids)))
-                             existing-ids))]
-              (is (= n (count ids)))
-              (is (= n (count db-ids)))
-              (is (= ids (set db-ids)))
-              (is (= [n n n] (<!! (t/meter-resources (:hosts rest-map) resource-search-url metering-action)))))
+            (doseq [[search-url nb ids] (map (fn [s n i] [s n i]) resource-search-urls [n1 n2] [ids1 ids2])]
+              (let [ch (spandex/scroll-chan client
+                                            {:url  search-url
+                                             :body {:query {:match_all {}}}})
+                    db-ids (loop [existing-ids []]
+                             (if-let [resp (<!! ch)]
+                               (let [ids (->> (-> resp :body :hits :hits)
+                                              (map :_source)
+                                              (map :id))]
+                                 (recur (concat existing-ids ids)))
+                               existing-ids))]
+                (is (= nb (count ids)))
+                (is (= nb (count db-ids)))
+                (is (= ids (set db-ids)))))
+
+
+            (is (= [[n1 n1 n1] [n2 n2 n2]] (map <!! (t/meter-resources (:hosts rest-map) resource-search-urls metering-action))))
 
             (spu/index-refresh client metering-index)
 
@@ -89,7 +133,7 @@
                                             (map (juxt #(str (:_type %) "/" (:_id %)) #(-> % :_source :id))))]
                                (recur (concat existing-ids ids)))
                              existing-ids))]
-              (is (= n (count db-ids)))
+              (is (= (+ n1 n2) (count db-ids)))
 
               ;; check consistency between the CIMI resourceID and the Elasticsearch :_id and :_type keys.
               (is (apply = (first db-ids)))
@@ -97,7 +141,7 @@
 
           (finally
             (try
-              (spu/index-delete client resource-index)
+              (spu/index-delete client resource-index1)
               (catch Exception _))
             (try
               (spu/index-delete client metering-index)

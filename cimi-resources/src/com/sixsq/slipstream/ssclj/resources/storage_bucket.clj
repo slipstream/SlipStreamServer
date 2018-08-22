@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.virtual-machine
+(ns com.sixsq.slipstream.ssclj.resources.storage-bucket
   (:require
     [clojure.string :as str]
     [com.sixsq.slipstream.auth.acl :as a]
@@ -6,15 +6,15 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.spec.virtual-machine :as vm]))
+    [com.sixsq.slipstream.ssclj.resources.spec.storage-bucket :as bucky]))
 
-(def ^:const resource-tag :virtualMachines)
+(def ^:const resource-tag :storageBuckets)
 
-(def ^:const resource-name "VirtualMachine")
+(def ^:const resource-name "StorageBucket")
 
 (def ^:const resource-url (u/de-camelcase resource-name))
 
-(def ^:const collection-name "VirtualMachineCollection")
+(def ^:const collection-name "StorageBucketCollection")
 
 (def ^:const resource-uri (str c/slipstream-schema-uri resource-name))
 
@@ -42,15 +42,15 @@
             :right     "VIEW"}]})
 
 ;;
-;; set the resource identifier to "virtual-machine/uuid(connector-href, instanceID)"
+;; set the resource identifier to "storage-bucket/uuid(connector-href, instanceID)"
 ;;
 (defmethod crud/new-identifier resource-name [json resource-name]
-  (let [connector-href (get-in json [:connector :href])
-        instanceID (get json :instanceID)
-        id (u/from-data-uuid (str connector-href instanceID))]
+  (let [credential-href (-> json :credentials first :href)
+        bucketName (:bucketName json)
+        id (u/from-data-uuid (str credential-href bucketName))]
     (assoc json :id (str resource-url "/" id))))
 
-(def validate-fn (u/create-spec-validation-fn ::vm/virtual-machine))
+(def validate-fn (u/create-spec-validation-fn ::bucky/storage-bucket))
 (defmethod crud/validate
   resource-uri
   [resource]
@@ -62,7 +62,7 @@
     resource
     (let [user-id (:identity (a/current-authentication request))
           run-owner (some-> request
-                            (get-in [:body :deployment :user :href])
+                            (get-in [:body :externalObject :user :href])
                             (str/replace #"^user/" ""))]
       (if run-owner
         (assoc resource :acl (create-acl run-owner))
@@ -105,4 +105,4 @@
 ;;
 (defn initialize
   []
-  (std-crud/initialize resource-url ::vm/virtual-machine))
+  (std-crud/initialize resource-url ::bucky/storage-bucket))

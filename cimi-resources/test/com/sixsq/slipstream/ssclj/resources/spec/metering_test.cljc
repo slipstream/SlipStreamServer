@@ -48,7 +48,13 @@
                                       :resource:vcpu         1
                                       :resource:ram          4096
                                       :resource:disk         10
-                                      :resource:instanceType "Large"}
+                                      :resource:instanceType "Large"
+                                      :price:unitCost 42
+                                      :price:unitCode "HUR"
+                                      :price:currency "EUR"
+                                      }
+                      :price 0.89883
+                      :currency "EUR"
                       :snapshot-time timestamp})
 
 
@@ -64,5 +70,5 @@
     (stu/is-invalid ::metering/metering (dissoc metering-sample k)))
 
   ;; optional keywords
-  (doseq [k #{:run :serviceOffer :ip}]
+  (doseq [k #{:run :serviceOffer :ip :price :currency}]
     (stu/is-valid ::metering/metering (dissoc metering-sample k))))

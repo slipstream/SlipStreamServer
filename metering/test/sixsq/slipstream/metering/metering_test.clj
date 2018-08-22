@@ -21,10 +21,13 @@
 (deftest check-search-url
   (is (= "index/type/_search" (t/search-url "index" "type"))))
 
+(deftest check-search-urls
+  (is (= #{"index1/type1/_search" "index2/type2/_search"} (set (t/search-urls ["index1" "index2"] ["type1" "type2"])))))
+
 
 (deftest check-process-options
   (let [{:keys [hosts
-                resource-search-url
+                resource-search-urls
                 metering-action
                 metering-period-minutes]
          :as   options}
@@ -32,7 +35,7 @@
 
     (is (= 4 (count options)))
     (is (= ["http://127.0.0.1:9200"] hosts))
-    (is (= "slipstream-virtual-machine/_doc/_search" resource-search-url))
+    (is (= #{"slipstream-virtual-machine/_doc/_search" "slipstream-storage-bucket/_doc/_search"} (set resource-search-urls)))
     (is (= "slipstream-metering" (-> metering-action :index :_index)))
     (is (= t/doc-type (-> metering-action :index :_type)))
     (is (= 1 metering-period-minutes)))
@@ -40,7 +43,7 @@
   (is (= ["http://elasticsearch:1234"] (:hosts (t/process-options {:es-host "elasticsearch"
                                                                    :es-port 1234}))))
   (is (= 2 (:metering-period-minutes (t/process-options {:metering-period-minutes 2}))))
-  (is (= "alpha/_doc/_search" (:resource-search-url (t/process-options {:vm-index "alpha"}))))
+  (is (= #{"alpha/_doc/_search" "beta/_doc/_search"} (set (:resource-search-urls (t/process-options {:vm-index "alpha" :bucky-index "beta"})))))
 
   (let [{:keys [metering-action]}
         (t/process-options {:metering-index "gamma"})]
@@ -73,13 +76,33 @@
                                 :users ["long-user-id-1", "long-user-id-2"]}]
                  :deployment  {:href "run/aaa-bbb-ccc",
                                :user {:href "user/test"}}}
+        base-bucky {:id             (str "metering/" (utils/random-uuid))
+                    :resourceURI    "http://sixsq.com/slipstream/1/StorageBucket"
+                    :created        timestamp
+                    :updated        timestamp
+
+                    :name           "short name"
+                    :description    "short description",
+                    :properties     {:a "one",
+                                     :b "two"}
+
+                    :bucketName     "aaa-bbb-111"
+                    :usageInKiB     12
+                    :connector      {:href "connector/0123-4567-8912"}
+
+
+                    :credentials    [{:href "credential/0123-4567-8912"}]
+
+
+                    :externalObject {:href "external-object/aaa-bbb-ccc",
+                                     :user {:href "user/test"}}}
         so-no-price {:href                  "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
                      :resource:vcpu         1
                      :resource:ram          4096
                      :resource:disk         10
+                     :resource:type         "VM"
                      :resource:instanceType "Large"}
-        so-minute {
-                   :price:currency          "EUR"
+        so-minute {:price:currency          "EUR"
                    :resource:vcpu           8
                    :price:unitCost          0.4686389
                    :price:unitCode          "MIN"
@@ -88,22 +111,20 @@
                    :resource:instanceType   "s1.2xlarge"
                    :resource:ram            32768.0
                    :resource:disk           0.0
-                   :href                    " service-offer/a4953f05-affe-46d0-a5ac-a4c8f1af810b "
-                   }
-        so-hour {
-                 :price:currency          "EUR"
+                   :resource:type           "VM"
+                   :href                    " service-offer/a4953f05-affe-46d0-a5ac-a4c8f1af810b "}
+        so-hour {:price:currency          "EUR"
                  :resource:vcpu           2
                  :price:unitCost          0.09122021
                  :price:unitCode          "HUR"
                  :price:billingPeriodCode "HUR"
                  :price:freeUnits         0.0
+                 :resource:type           "VM"
                  :resource:instanceType   "t2.large"
                  :resource:ram            8192.0
                  :resource:disk           10.0
-                 :href                    "service-offer/cc87133e-343b-40f1-8094-46f80a1b3042"
-                 }
-        so-unknown-period {
-                           :price:currency          "EUR"
+                 :href                    "service-offer/cc87133e-343b-40f1-8094-46f80a1b3042"}
+        so-unknown-period {:price:currency          "EUR"
                            :resource:vcpu           2
                            :price:unitCost          0.09122021
                            :price:unitCode          "XXX"
@@ -112,10 +133,9 @@
                            :resource:instanceType   "t2.large"
                            :resource:ram            8192.0
                            :resource:disk           10.0
-                           :href                    "service-offer/cc87133e-343b-40f1-8094-46f80a1b3042"
-                           }
-        so-unitCode-but-no-cost {
-                                 :price:currency          "EUR"
+                           :resource:type           "VM"
+                           :href                    "service-offer/cc87133e-343b-40f1-8094-46f80a1b3042"}
+        so-unitCode-but-no-cost {:price:currency          "EUR"
                                  :resource:vcpu           8
                                  :price:unitCode          "MIN"
                                  :price:billingPeriodCode "MIN"
@@ -123,13 +143,35 @@
                                  :resource:instanceType   "s1.2xlarge"
                                  :resource:ram            32768.0
                                  :resource:disk           0.0
-                                 :href                    " service-offer/a4953f05-affe-46d0-a5ac-a4c8f1af810b "
-                                 }
-        so-unknown {
-                    :href          "service-offer/unknown"
+                                 :resource:type           "VM"
+                                 :href                    " service-offer/a4953f05-affe-46d0-a5ac-a4c8f1af810b "}
+        so-unknown {:href          "service-offer/unknown"
                     :resource:vcpu 1
                     :resource:ram  512.0
-                    :resource:disk 10.0}]
+                    :resource:disk 10.0}
+        s3cost 0.018
+        sample-usage-KiB (* 42 1024 1024)                   ;; i.e 42 Gb
+
+        so-sb-gibh {:connector               {
+                                              :href "exoscale-ch-dk"
+                                              },
+                    :description             "Data volume (objects) stored in S3 in all Exoscale zones",
+                    :price:currency          "EUR",
+                    :resource:storage        1,
+                    :price:unitCost          s3cost,
+
+                    :price:billingPeriodCode "MON",
+                    :name                    "Object Storage in Exoscale",
+
+                    :price:freeUnits         0,
+                    :resource:host           "sos.exo.io",
+
+                    :resource:country        "CH",
+                    :resource:platform       "S3",
+                    :resourceURI             "http://sixsq.com/slipstream/1/ServiceOffer",
+                    :resource:type           "DATA",
+                    :price:billingUnit       "GiBh"}
+        so-sb-mibh (assoc so-sb-gibh :price:billingUnit "MiBh")]
     (is (= {} (t/assoc-price {})))
     (is (nil? (:price (t/assoc-price {::bad " BAD! "}))))
     (is (nil? (:price (t/assoc-price {:serviceOffer " BAD! "}))))
@@ -139,7 +181,131 @@
     (is (= (/ (:price:unitCost so-hour) 60) (:price (t/assoc-price (assoc base-vm :serviceOffer so-hour)))))
     (is (nil? (:price (t/assoc-price (assoc base-vm :serviceOffer so-unknown-period)))))
     (is (nil? (:price (t/assoc-price (assoc base-vm :serviceOffer so-unitCode-but-no-cost)))))
-    (is (nil? (:price (t/assoc-price (assoc base-vm :serviceOffer so-unknown)))))))
+    (is (nil? (:price (t/assoc-price (assoc base-vm :serviceOffer so-unknown)))))
+    (is (nil? (:price (t/assoc-price base-bucky))))
+    (is (nil? (:price (t/assoc-price (assoc base-bucky :serviceOffer so-no-price)))))
+    (is (nil? (:price (t/assoc-price (assoc base-bucky :serviceOffer so-unknown-period)))))
+    (is (nil? (:price (t/assoc-price (assoc base-bucky :serviceOffer so-unitCode-but-no-cost)))))
+    (is (nil? (:price (t/assoc-price (assoc base-bucky :serviceOffer so-unknown)))))
+
+    ;;storage bucket with billing in GiBH
+    (is (= (-> sample-usage-KiB
+               (/ 60)
+               (* s3cost)
+               (/ 1024)
+               (/ 1024))
+           (:price (t/assoc-price (assoc base-bucky :serviceOffer so-sb-gibh :usageInKiB sample-usage-KiB)))))
+
+    ;;storage bucket with billing in MiBH
+    (is (= (-> sample-usage-KiB
+               (/ 60)
+               (* s3cost)
+               (/ 1024))
+           (:price (t/assoc-price (assoc base-bucky :serviceOffer so-sb-mibh :usageInKiB sample-usage-KiB)))))))
+
+
+(deftest check-assoc-type
+  (let [timestamp "1964-08-25T10:00:00.0Z"
+        base-vm {:id          (str "metering/" (utils/random-uuid))
+                 :resourceURI "http://sixsq.com/slipstream/1/VirtualMachine"
+                 :created     timestamp
+                 :updated     timestamp
+                 :name        "short name"
+                 :description "short description",
+                 :properties  {:a "one",
+                               :b "two"}
+                 :instanceID  "aaa-bbb-111"
+                 :connector   {:href "connector/0123-4567-8912"}
+                 :state       "Running"
+                 :ip          "127.0.0.1"
+                 :credentials [{:href  "credential/0123-4567-8912",
+                                :roles ["realm:cern", "realm:my-accounting-group"]
+                                :users ["long-user-id-1", "long-user-id-2"]}]
+                 :deployment  {:href "run/aaa-bbb-ccc",
+                               :user {:href "user/test"}}}
+        base-bucky {:id             (str "metering/" (utils/random-uuid))
+                    :resourceURI    "http://sixsq.com/slipstream/1/StorageBucket"
+                    :created        timestamp
+                    :updated        timestamp
+
+                    :name           "short name"
+                    :description    "short description",
+                    :properties     {:a "one",
+                                     :b "two"}
+
+                    :bucketName     "aaa-bbb-111"
+                    :usageInKiB     12
+                    :connector      {:href "connector/0123-4567-8912"}
+
+
+                    :credentials    [{:href "credential/0123-4567-8912"}]
+
+
+                    :externalObject {:href "external-object/aaa-bbb-ccc",
+                                     :user {:href "user/test"}}}
+
+        so-bucky-with-type {:price:currency          "EUR",
+                            :resource:storage        1,
+                            :price:unitCost          0.0018,
+                            :price:billingPeriodCode "MON",
+                            :name                    "Object Storage in Exoscale",
+                            :price:freeUnits         0,
+                            :resource:host           "sos.exo.io",
+                            :resource:country        "CH",
+                            :resource:platform       "S3",
+                            :resourceURI             "http://sixsq.com/slipstream/1/ServiceOffer",
+                            :resource:type           "DATA",
+                            :price:billingUnit       "GiBh"}
+
+        so-hour {:price:currency          "EUR"
+                 :resource:vcpu           2
+                 :price:unitCost          0.09122021
+                 :price:unitCode          "HUR"
+                 :price:billingPeriodCode "HUR"
+                 :price:freeUnits         0.0
+                 :resource:type           "VM"
+                 :resource:instanceType   "t2.large"
+                 :resource:ram            8192.0
+                 :resource:disk           10.0
+                 :href                    "service-offer/cc87133e-343b-40f1-8094-46f80a1b3042"}
+        so-unknown-period {:price:currency          "EUR"
+                           :resource:vcpu           2
+                           :price:unitCost          0.09122021
+                           :price:unitCode          "XXX"
+                           :price:billingPeriodCode "XXX"
+                           :price:freeUnits         0.0
+                           :resource:instanceType   "t2.large"
+                           :resource:ram            8192.0
+                           :resource:disk           10.0
+                           :resource:type           "VM"
+                           :href                    "service-offer/cc87133e-343b-40f1-8094-46f80a1b3042"}
+        so-unitCode-but-no-cost {:price:currency          "EUR"
+                                 :resource:vcpu           8
+                                 :price:unitCode          "MIN"
+                                 :price:billingPeriodCode "MIN"
+                                 :price:freeUnits         0.0
+                                 :resource:instanceType   "s1.2xlarge"
+                                 :resource:ram            32768.0
+                                 :resource:disk           0.0
+                                 :resource:type           "VM"
+                                 :href                    " service-offer/a4953f05-affe-46d0-a5ac-a4c8f1af810b "}
+        so-no-type {:href          "service-offer/unknown"
+                    :resource:vcpu 1
+                    :resource:ram  512.0
+                    :resource:disk 10.0}]
+
+    (is (= {} (t/assoc-type {})))
+    (is (nil? (:resource:type (t/assoc-type {::bad " BAD! "}))))
+    (is (nil? (:resource:type (t/assoc-type {:serviceOffer " BAD! "}))))
+    (is (nil? (:resource:type (t/assoc-type base-vm))))
+    (is (= "VM" (:resource:type (t/assoc-type (assoc base-vm :serviceOffer so-hour)))))
+    (is (= "VM" (:resource:type (t/assoc-type (assoc base-vm :serviceOffer so-unknown-period)))))
+    (is (= "VM" (:resource:type (t/assoc-type (assoc base-vm :serviceOffer so-unitCode-but-no-cost)))))
+    (is (nil? (:resource:type (t/assoc-type (assoc base-vm :serviceOffer so-no-type)))))
+    (is (nil? (:resource:type (t/assoc-type base-bucky))))
+    (is (= "DATA" (:resource:type (t/assoc-type (assoc base-bucky :serviceOffer so-bucky-with-type)))))
+    (is (nil? (:resource:type (t/assoc-type (assoc base-bucky :serviceOffer so-no-type)))))))
+
 
 (deftest check-update-id
   (let [uuid "5b24caac-e87c-4446-96bc-a20b21450a1"

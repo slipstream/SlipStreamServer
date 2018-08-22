@@ -167,13 +167,21 @@
         crud/validate)
     {}))
 
+
+(defn convert-request-body
+  [{:keys [body form-params headers] :as request}]
+  (if (u/is-form? headers)
+    (u/convert-form :sessionTemplate form-params)
+    body))
+
+
 ;; requires a SessionTemplate to create new Session
 (defmethod crud/add resource-name
   [{:keys [body form-params headers] :as request}]
 
   (try
     (let [idmap {:identity (:identity request)}
-          body (if (u/is-form? headers) (u/convert-form :sessionTemplate form-params) body)
+          body (convert-request-body request)
           desc-attrs (u/select-desc-keys body)
           [cookie-header {:keys [id] :as body}] (-> body
                                                     (assoc :resourceURI create-uri)
@@ -187,7 +195,7 @@
           add-impl
           (merge cookie-header)))
     (catch Exception e
-      (let [redirectURI (get-in body [:sessionTemplate :redirectURI])
+      (let [redirectURI (-> request convert-request-body :sessionTemplate :redirectURI)
             {:keys [status] :as http-response} (ex-data e)]
         (if (and redirectURI (= 400 status))
           (throw (r/ex-redirect (str "invalid parameter values provided") nil redirectURI))

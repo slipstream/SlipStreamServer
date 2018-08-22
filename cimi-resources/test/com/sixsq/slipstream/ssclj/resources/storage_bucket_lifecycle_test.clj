@@ -1,42 +1,19 @@
-(ns com.sixsq.slipstream.ssclj.resources.virtual-machine-lifecycle-test
+(ns com.sixsq.slipstream.ssclj.resources.storage-bucket-lifecycle-test
   (:require
     [clojure.data.json :as json]
-    [clojure.test :refer :all]
+    [clojure.test :refer [deftest is use-fixtures]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.resources.virtual-machine :as vm]
+    [com.sixsq.slipstream.ssclj.resources.storage-bucket :as bucky]
     [peridot.core :refer :all]))
+
 
 (use-fixtures :each ltu/with-test-server-fixture)
 
-(def base-uri (str p/service-context (u/de-camelcase vm/resource-url)))
 
-(defn random-virtual-machine
-  []
-  (let [resource-type "virtual-machine"
-        doc-id (str resource-type "/" (u/random-uuid))
-        instance-id (u/random-uuid)
-        cloud (rand-nth ["connector/cloud-1" "connector/cloud-2" "connector/cloud-3"])
-        user (rand-nth ["user-1" "user-2" "user-3"])]
-    {:id          doc-id
-     :resourceURI "http://sixsq.com/slipstream/1/VirtualMachine"
-     :updated     "2017-09-04T09:39:35.679Z"
-     :credential  {:href cloud}
-     :created     "2017-09-04T09:39:35.651Z"
-     :state       "Running"
-     :instanceID  instance-id
-     :run         {:href "run/4824efe2-59e9-4db6-be6b-fc1c8b3edf40"
-                   :user {:href (str "user/" user)}}
-     :acl         {:owner {:type      "USER"
-                           :principal "ADMIN"}
-                   :rules [{:principal "ADMIN"
-                            :right     "ALL"
-                            :type      "USER"}
-                           {:principal user
-                            :right     "VIEW"
-                            :type      "USER"}]}}))
+(def base-uri (str p/service-context (u/de-camelcase bucky/resource-url)))
 
 
 (deftest lifecycle
@@ -57,7 +34,7 @@
         (ltu/is-operation-absent "delete")
         (ltu/is-operation-absent "edit"))
 
-    ;; normal user collection query should succeed but be empty (no vm created yet)
+    ;; normal user collection query should succeed but be empty (no bucky created yet)
     (-> session-jane
         (request base-uri)
         (ltu/body->edn)
@@ -75,63 +52,61 @@
         (ltu/is-status 403))
 
 
-    ;; create a vm as a normal user
+    ;; create a bucky as a normal user
     (let [timestamp "1964-08-25T10:00:00.0Z"
-          create-test-vm {:id           (str vm/resource-url "/uuid")
-                          :resourceURI  vm/resource-uri
-                          :created      timestamp
-                          :updated      timestamp
+          create-test-bucky {:id             (str bucky/resource-url "/uuid")
+                             :resourceURI    bucky/resource-uri
+                             :created        timestamp
+                             :updated        timestamp
 
-                          :name         "short name"
-                          :description  "short description",
-                          :properties   {:a "one",
-                                         :b "two"}
+                             :name           "short name"
+                             :description    "short description",
+                             :properties     {:a "one",
+                                              :b "two"}
 
-                          :instanceID   "aaa-bbb-111"
-                          :connector    {:href "connector/0123-4567-8912"}
-                          :state        "Running"
-                          :ip           "127.0.0.1"
-
-
-                          :credentials  [{:href  "credential/0123-4567-8912",
-                                          :roles ["realm:cern", "realm:my-accounting-group"]
-                                          :users ["long-user-id-1", "long-user-id-2"]}]
+                             :bucketName     "aaa-bbb-111"
+                             :usageInKiB     123456
+                             :connector      {:href "connector/0123-4567-8912"}
 
 
-                          :deployment   {:href "run/aaa-bbb-ccc",
-                                         :user {:href "user/test"}}
+                             :credentials    [{:href "credential/0123-4567-8912"}]
 
-                          :serviceOffer {:href                  "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
-                                         :resource:vcpu         1
-                                         :resource:ram          4096
-                                         :resource:disk         10
-                                         :resource:instanceType "Large"
-                                         :price:currency "EUR"}}
 
-          create-jane-vm (-> create-test-vm
-                             (assoc :deployment {:href "run/444-555-666"
-                                                 :user {:href "user/jane"}})
-                             (assoc :instanceID "otherID"))
+                             :externalObject {:href "external-object/aaa-bbb-ccc",
+                                              :user {:href "user/test"}}
+
+                             :serviceOffer   {:href              "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
+                                              :resource:storage  1
+                                              :resource:host     "s3-eu-west-1.amazonaws.com"
+                                              :price:currency    "EUR"
+                                              :price:unitCode    "HUR"
+                                              :price:unitCost    "0.018"
+                                              :resource:platform "S3"}}
+
+          create-jane-bucky (-> create-test-bucky
+                                (assoc :externalObject {:href "external-object/444-555-666"
+                                                        :user {:href "user/jane"}})
+                                (assoc :bucketName "otherName"))
 
           resp-test (-> session-admin
                         (request base-uri
                                  :request-method :post
-                                 :body (json/write-str create-test-vm))
+                                 :body (json/write-str create-test-bucky))
                         (ltu/body->edn)
                         (ltu/is-status 201))
 
-          ; duplicated vm will fail (with same instanceID and connector/href)
+          ; duplicated bucky will fail (with same instanceID and connector/href)
           resp-test2 (-> session-admin
                          (request base-uri
                                   :request-method :post
-                                  :body (json/write-str create-test-vm))
+                                  :body (json/write-str create-test-bucky))
                          (ltu/body->edn)
                          (ltu/is-status 409))
 
           resp-jane (-> session-admin
                         (request base-uri
                                  :request-method :post
-                                 :body (json/write-str create-jane-vm))
+                                 :body (json/write-str create-jane-bucky))
                         (ltu/body->edn)
                         (ltu/is-status 201))
 
@@ -170,41 +145,42 @@
           (ltu/is-operation-absent "edit"))
 
       ;; check contents and editing
-      (let [reread-test-vm (-> session-admin
-                               (request test-uri)
-                               (ltu/body->edn)
-                               (ltu/is-status 200)
-                               :response
-                               :body)]
+      (let [reread-test-bucky (-> session-admin
+                                  (request test-uri)
+                                  (ltu/body->edn)
+                                  (ltu/is-status 200)
+                                  :response
+                                  :body)]
 
         ;; Currency attribute should be copied from serviceOffer
-        (is (= (-> reread-test-vm :serviceOffer :price:currency) (:currency reread-test-vm) ))
-        (is (= (ltu/strip-unwanted-attrs reread-test-vm) (ltu/strip-unwanted-attrs (assoc create-test-vm :currency "EUR"))))
+        (is (= (-> reread-test-bucky :serviceOffer :price:currency) (:currency reread-test-bucky) ))
+        (is (= (ltu/strip-unwanted-attrs reread-test-bucky) (ltu/strip-unwanted-attrs (assoc create-test-bucky :currency "EUR"))))
 
-        (let [edited-test-vm (-> session-admin
-                                 (request test-uri
-                                          :request-method :put
-                                          :body (json/write-str (assoc reread-test-vm :state "UPDATED!")))
-                                 (ltu/body->edn)
-                                 (ltu/is-status 200)
-                                 :response
-                                 :body)]
 
-          (is (= (assoc (ltu/strip-unwanted-attrs reread-test-vm) :state "UPDATED!")
-                 (ltu/strip-unwanted-attrs edited-test-vm)))))
+        (let [edited-test-bucky (-> session-admin
+                                    (request test-uri
+                                             :request-method :put
+                                             :body (json/write-str (assoc reread-test-bucky :bucketName "NewName!")))
+                                    (ltu/body->edn)
+                                    (ltu/is-status 200)
+                                    :response
+                                    :body)]
+
+          (is (= (assoc (ltu/strip-unwanted-attrs reread-test-bucky) :bucketName "NewName!")
+                 (ltu/strip-unwanted-attrs edited-test-bucky)))))
 
       ;; disallowed edits
       (-> session-jane
           (request test-uri
                    :request-method :put
-                   :body (json/write-str create-test-vm))
+                   :body (json/write-str create-test-bucky))
           (ltu/body->edn)
           (ltu/is-status 403))
 
       (-> session-anon
           (request test-uri
                    :request-method :put
-                   :body (json/write-str create-test-vm))
+                   :body (json/write-str create-test-bucky))
           (ltu/body->edn)
           (ltu/is-status 403))
 
@@ -212,7 +188,7 @@
       (-> session-admin
           (request base-uri
                    :request-method :put
-                   :body (json/write-str create-test-vm))
+                   :body (json/write-str create-test-bucky))
           (ltu/body->edn)
           (ltu/is-count 2)
           (ltu/is-status 200))
@@ -245,7 +221,7 @@
 
 
 (deftest bad-methods
-  (let [resource-uri (str p/service-context (u/new-resource-id vm/resource-name))]
+  (let [resource-uri (str p/service-context (u/new-resource-id bucky/resource-name))]
     (ltu/verify-405-status [[base-uri :options]
                             [base-uri :delete]
                             [resource-uri :options]
