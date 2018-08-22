@@ -41,7 +41,7 @@
                                     (ltu/body->edn)
                                     (ltu/is-status 201)
                                     (ltu/location))
-        valid-deployment {:deploymentTemplate {:href deployment-template-uri}}]
+        valid-deployment {:deploymentTemplate {:href deployment-template-uri} :name "dep1" :description "dep1 desc"}]
 
     ;; anonymous create should fail
     (-> session-anon
@@ -75,6 +75,15 @@
           (ltu/is-resource-uri deployment/collection-uri)
           (ltu/is-count #(= 1 %))
           (ltu/entries deployment/resource-tag))
+
+      ;; user is able to change name and remove existing description attribute
+      (-> session-user
+          (request (str abs-uri "?$select=id,acl,description,name")
+                :request-method :put
+                :body (json/write-str {:name "dep 1 new name"}))
+          (ltu/body->edn)
+          (ltu/is-status 200)
+          (ltu/dump))
 
       ;; admin query: ok
       (-> session-admin
