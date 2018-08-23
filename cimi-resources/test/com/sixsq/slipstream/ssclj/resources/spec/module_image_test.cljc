@@ -39,7 +39,7 @@
               :author "someone"
               :commit "wip"}]
 
-    (expound/expound ::module-image/module-image root)
+    (is (s/valid? ::module-image/module-image root))
     (is (s/valid? ::module-image/module-image root))
     (is (false? (s/valid? ::module-image/module-image (assoc root :badKey "badValue"))))
     (is (false? (s/valid? ::module-image/module-image (assoc root :os "BAD_OS"))))

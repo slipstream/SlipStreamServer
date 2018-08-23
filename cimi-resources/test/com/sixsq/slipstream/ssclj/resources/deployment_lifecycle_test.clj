@@ -78,11 +78,20 @@
 
       ;; user is able to change name and remove existing description attribute
       (-> session-user
-          (request (str abs-uri "?$select=id,acl,description,name")
+          (request (str abs-uri "?$select=description")
                 :request-method :put
                 :body (json/write-str {:name "dep 1 new name"}))
           (ltu/body->edn)
-          (ltu/is-status 200))
+          (ltu/is-status 200)
+          (ltu/is-key-value :name "dep 1 new name")
+          (#(is (not (contains? % :description)))))
+
+      (-> session-user
+          (request abs-uri)
+          (ltu/body->edn)
+          (ltu/is-status 200)
+          (ltu/is-key-value :name "dep 1 new name")
+          (#(is (not (contains? (-> % :response :body) :description)))))
 
       ;; admin query: ok
       (-> session-admin

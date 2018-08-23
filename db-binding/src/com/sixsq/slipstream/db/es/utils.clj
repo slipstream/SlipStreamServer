@@ -69,9 +69,9 @@
 (defn update
   [^Client client index type docid json]
   (.. client
-      (prepareUpdate index doc-type docid)
+      (prepareIndex index doc-type docid)
       (setRefreshPolicy WriteRequest$RefreshPolicy/IMMEDIATE)
-      (setDoc json XContentType/JSON)
+      (setSource json XContentType/JSON)
       (get)))
 
 (defn delete
