@@ -4,7 +4,7 @@
     [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.ssclj.resources.connector :as t]  ;; FIXME: Change to module-version when available.
     [com.sixsq.slipstream.ssclj.resources.spec.module-image :as module-image]
-    [expound.alpha :as expound]))
+    [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]))
 
 
 (def valid-acl {:owner {:principal "ADMIN"
@@ -39,16 +39,15 @@
               :author "someone"
               :commit "wip"}]
 
-    (is (s/valid? ::module-image/module-image root))
-    (is (s/valid? ::module-image/module-image root))
-    (is (false? (s/valid? ::module-image/module-image (assoc root :badKey "badValue"))))
-    (is (false? (s/valid? ::module-image/module-image (assoc root :os "BAD_OS"))))
+    (stu/is-valid ::module-image/module-image root)
+    (stu/is-invalid ::module-image/module-image (assoc root :badKey "badValue"))
+    (stu/is-invalid ::module-image/module-image (assoc root :os "BAD_OS"))
 
     ;; required attributes
     (doseq [k #{:id :resourceURI :created :updated :acl :os :loginUser :networkType :author}]
-      (is (false? (s/valid? ::module-image/module-image (dissoc root k)))))
+      (stu/is-invalid ::module-image/module-image (dissoc root k)))
 
     ;; optional attributes
     (doseq [k #{:connectors :connectorClasses :sudo :relatedImage
                 :cpu :ram :disk :volatileDisk :commit}]
-      (is (true? (s/valid? ::module-image/module-image (dissoc root k)))))))
+      (stu/is-valid ::module-image/module-image (dissoc root k)))))
