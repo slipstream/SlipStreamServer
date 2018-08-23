@@ -3,7 +3,8 @@
     [clojure.spec.alpha :as s]
     [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.ssclj.resources.connector :as t]  ;; FIXME: Change to module-version when available.
-    [com.sixsq.slipstream.ssclj.resources.spec.module-application :as module-app]))
+    [com.sixsq.slipstream.ssclj.resources.spec.module-application :as module-app]
+    [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]))
 
 
 (def valid-acl {:owner {:principal "ADMIN"
@@ -37,13 +38,13 @@
               :author      "someone"
               :commit      "wip"}]
 
-    (is (s/valid? ::module-app/module-application root))
-    (is (false? (s/valid? ::module-app/module-application (assoc root :badKey "badValue"))))
+    (stu/is-valid ::module-app/module-application root)
+    (stu/is-invalid ::module-app/module-application (assoc root :badKey "badValue"))
 
     ;; required attributes
     (doseq [k #{:id :resourceURI :created :updated :acl :author}]
-      (is (false? (s/valid? ::module-app/module-application (dissoc root k)))))
+      (stu/is-invalid ::module-app/module-application (dissoc root k)))
 
     ;; optional attributes
     (doseq [k #{:nodes :parameterMappings :commit}]
-      (is (true? (s/valid? ::module-app/module-application (dissoc root k)))))))
+      (stu/is-valid ::module-app/module-application (dissoc root k)))))

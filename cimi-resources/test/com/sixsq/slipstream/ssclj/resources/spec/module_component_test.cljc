@@ -3,7 +3,8 @@
     [clojure.spec.alpha :as s]
     [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.ssclj.resources.connector :as t]  ;; FIXME: Change to module-version when available.
-    [com.sixsq.slipstream.ssclj.resources.spec.module-component :as module-component]))
+    [com.sixsq.slipstream.ssclj.resources.spec.module-component :as module-component]
+    [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]))
 
 
 (def valid-acl {:owner {:principal "ADMIN"
@@ -48,13 +49,13 @@
               :author           "someone"
               :commit           "wip"}]
 
-    (is (s/valid? ::module-component/module-component root))
-    (is (false? (s/valid? ::module-component/module-component (assoc root :badKey "badValue"))))
+    (stu/is-valid ::module-component/module-component root)
+    (stu/is-invalid ::module-component/module-component (assoc root :badKey "badValue"))
 
     ;; required attributes
     (doseq [k #{:id :resourceURI :created :updated :acl :networkType :outputParameters :author}]
-      (is (false? (s/valid? ::module-component/module-component (dissoc root k)))))
+      (stu/is-invalid ::module-component/module-component (dissoc root k)))
 
     ;; optional attributes
     (doseq [k #{:cpu :ram :disk :volatileDisk :targets :inputParameters :commit}]
-      (is (true? (s/valid? ::module-component/module-component (dissoc root k)))))))
+      (stu/is-valid ::module-component/module-component (dissoc root k)))))

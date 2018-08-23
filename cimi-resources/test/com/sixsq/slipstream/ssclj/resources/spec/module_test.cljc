@@ -3,7 +3,8 @@
     [clojure.spec.alpha :as s]
     [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.ssclj.resources.module :as t]
-    [com.sixsq.slipstream.ssclj.resources.spec.module :as module]))
+    [com.sixsq.slipstream.ssclj.resources.spec.module :as module]
+    [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]))
 
 
 (def valid-acl {:owner {:principal "ADMIN"
@@ -30,14 +31,14 @@
                             {:href "module-image/abc"}]
               :logo        {:href "external-object/xyz"}}]
 
-    (is (true? (s/valid? ::module/module root)))
-    (is (false? (s/valid? ::module/module (assoc root :badKey "badValue"))))
-    (is (false? (s/valid? ::module/module (assoc root :type "BAD_VALUE"))))
+    (stu/is-valid ::module/module root)
+    (stu/is-invalid ::module/module (assoc root :badKey "badValue"))
+    (stu/is-invalid ::module/module (assoc root :type "BAD_VALUE"))
 
     ;; required attributes
     (doseq [k #{:id :resourceURI :created :updated :acl :path :type}]
-      (is (false? (s/valid? ::module/module (dissoc root k)))))
+      (stu/is-invalid ::module/module (dissoc root k)))
 
     ;; optional attributes
     (doseq [k #{:logo :versions}]
-      (is (true? (s/valid? ::module/module (dissoc root k)))))))
+      (stu/is-valid ::module/module (dissoc root k)))))
