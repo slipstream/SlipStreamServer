@@ -25,6 +25,27 @@
                          :right     "MODIFY"}]}})
 
 
+(def valid-state-entry
+  {:name       "ss:state"
+   :value      "initializing"
+   :deployment {:href "deployment/uuid"}
+   :acl        {:owner {:principal "ADMIN"
+                        :type      "ROLE"}
+                :rules [{:principal "jane"
+                         :type      "USER"
+                         :right     "VIEW"}]}})
+
+(def valid-complete-entry
+  {:name       "complete"
+   :nodeID     "machine"
+   :deployment {:href "deployment/uuid"}
+   :acl        {:owner {:principal "ADMIN"
+                        :type      "ROLE"}
+                :rules [{:principal "jane"
+                         :type      "USER"
+                         :right     "MODIFY"}]}})
+
+
 (deftest lifecycle
   (let [session (-> (ltu/ring-app)
                     session
@@ -69,18 +90,18 @@
                         (ltu/body->edn)
                         (ltu/is-status 201))
 
-          resp-jane (-> session-jane
-                        (request base-uri
-                                 :request-method :post
-                                 :body (json/write-str valid-entry))
-                        (ltu/body->edn)
-                        (ltu/is-status 403))
-
           id-test (get-in resp-test [:response :body :resource-id])
 
           location-test (str p/service-context (-> resp-test ltu/location))
 
           test-uri (str p/service-context id-test)]
+
+      (-> session-jane
+          (request base-uri
+                   :request-method :post
+                   :body (json/write-str valid-entry))
+          (ltu/body->edn)
+          (ltu/is-status 403))
 
       (is (= location-test test-uri))
 
@@ -126,7 +147,82 @@
           (request test-uri
                    :request-method :delete)
           (ltu/body->edn)
-          (ltu/is-status 404)))))
+          (ltu/is-status 404))
+
+      (let [state-uri (-> session-admin
+                          (request base-uri
+                                   :request-method :post
+                                   :body (json/write-str valid-state-entry))
+                          (ltu/body->edn)
+                          (ltu/is-status 201)
+                          (ltu/location))
+
+            state-abs-uri (str p/service-context (u/de-camelcase state-uri))
+
+
+            complete-uri (-> session-admin
+                             (request base-uri
+                                      :request-method :post
+                                      :body (json/write-str valid-complete-entry))
+                             (ltu/body->edn)
+                             (ltu/is-status 201)
+                             (ltu/location))
+            abs-complete-uri (str p/service-context (u/de-camelcase complete-uri))]
+
+        (-> session-jane
+            (request abs-complete-uri
+                     :request-method :put
+                     :body (json/write-str {:value "Executing"}))
+            (ltu/body->edn)
+            (ltu/is-status 200))
+
+        (-> session-jane
+            (request state-abs-uri)
+            (ltu/body->edn)
+            (ltu/is-status 200)
+            (ltu/is-key-value :value "SendingReports"))
+
+        ;; complete same state is idempotent
+        (-> session-jane
+            (request abs-complete-uri
+                     :request-method :put
+                     :body (json/write-str {:value "Executing"}))
+            (ltu/body->edn)
+            (ltu/is-status 200))
+
+        (-> session-jane
+            (request state-abs-uri)
+            (ltu/body->edn)
+            (ltu/is-status 200)
+            (ltu/is-key-value :value "SendingReports"))
+
+        (-> session-jane
+            (request abs-complete-uri
+                     :request-method :put
+                     :body (json/write-str {:value "SendingReports"}))
+            (ltu/body->edn)
+            (ltu/is-status 200))
+
+        (-> session-jane
+            (request state-abs-uri)
+            (ltu/body->edn)
+            (ltu/is-status 200)
+            (ltu/is-key-value :value "Ready"))
+
+        (-> session-jane
+            (request abs-complete-uri
+                     :request-method :put
+                     :body (json/write-str {:value "Ready"}))
+            (ltu/body->edn)
+            (ltu/is-status 200))
+
+        (-> session-jane
+            (request state-abs-uri)
+            (ltu/body->edn)
+            (ltu/is-status 200)
+            (ltu/is-key-value :value "Ready"))
+
+        ))))
 
 
 (deftest bad-methods

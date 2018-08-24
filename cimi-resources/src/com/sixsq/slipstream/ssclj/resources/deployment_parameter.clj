@@ -8,7 +8,9 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.deployment-parameter :as deployment-parameter]
     [superstring.core :as str]
-    [clojure.string :as s]))
+    [clojure.string :as s]
+    [com.sixsq.slipstream.util.response :as r]
+    [taoensso.timbre :as log]))
 
 (def ^:const resource-name "DeploymentParameter")
 
@@ -32,6 +34,46 @@
                               :type      "ROLE"
                               :right     "VIEW"}]})
 
+
+(defn parameter->uiid
+  [deployment-href nodeID name]
+  (let [id (s/join ":" [deployment-href nodeID name])]
+    (u/from-data-uuid id)))
+
+
+(def next-state-machine-transition-map {"Executing"      "SendingReports"
+                                        "SendingReports" "Ready"
+                                        "Ready"          "Ready"
+                                        "Done"           "Done"
+                                        "Aborted"        "Aborted"
+                                        "Cancelled"      "Cancelled"})
+
+
+(defn next-state
+  [current-state]
+  (let [next-state (get next-state-machine-transition-map current-state)]
+    (if (nil? next-state)
+      (throw (r/ex-bad-request (str "complete state invalid: " current-state)))
+      next-state)))
+
+
+(defn is-complete-parameter?
+  [name]
+  (= name "complete"))
+
+
+(defn update-state
+  [new-state deployment-href]
+  (let [uuid (parameter->uiid deployment-href nil "ss:state")
+        content-request {:params   {:resource-name resource-url
+                                    :uuid          uuid}
+                         :identity std-crud/internal-identity
+                         :body     {:value new-state}}
+        status (-> content-request crud/edit :status)]
+    (when (not= status 200)
+      (throw (r/ex-response "A failure happened during update of deployment state" 500)))))
+
+
 ;;
 ;; multimethod for ACLs
 ;;
@@ -42,18 +84,25 @@
 
 
 (def validate-fn (u/create-spec-validation-fn ::deployment-parameter/deployment-parameter))
-(defmethod crud/validate
-  resource-uri
-  [resource]
+(defmethod crud/validate resource-uri
+  [{:keys [name value deployment] :as resource}]
+  (case name
+    "complete" (some-> value
+                       (next-state)
+                       (update-state (:href deployment)))
+    "ss:abort" (when value (update-state (:href deployment) "Aborted"))
+    nil)
   (validate-fn resource))
 
 ;;
 ;; set the resource identifier to "deployment-parameter/predictable-uuid3-from-string"
 ;;
+
 (defmethod crud/new-identifier resource-name
-  [{:keys [deployment nodeID name] :as json} resource-name]
-  (let [id (s/join ":" [(:href deployment) nodeID name])]
-    (assoc json :id (str resource-url "/" (u/from-data-uuid id)))))
+  [{:keys [deployment nodeID name] :as parameter} resource-name]
+  (->> (parameter->uiid (:href deployment) nodeID name)
+       (str resource-url "/")
+       (assoc parameter :id)))
 
 ;;
 ;; CRUD operations
