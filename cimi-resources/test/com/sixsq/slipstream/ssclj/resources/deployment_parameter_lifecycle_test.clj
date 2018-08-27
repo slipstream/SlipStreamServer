@@ -7,7 +7,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.deployment-parameter :as dp]
-    [peridot.core :refer :all]))
+    [peridot.core :refer :all]
+    [taoensso.timbre :as log]))
 
 
 (use-fixtures :each ltu/with-test-server-fixture)
@@ -33,7 +34,7 @@
                         :type      "ROLE"}
                 :rules [{:principal "jane"
                          :type      "USER"
-                         :right     "VIEW"}]}})
+                         :right     "MODIFY"}]}})
 
 (def valid-complete-entry
   {:name       "complete"

@@ -7,6 +7,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.deployment-parameter :as deployment-parameter]
+    [com.sixsq.slipstream.ssclj.resources.deployment :as d]
     [superstring.core :as str]
     [clojure.string :as s]
     [com.sixsq.slipstream.util.response :as r]
@@ -69,9 +70,10 @@
                                     :uuid          uuid}
                          :identity std-crud/internal-identity
                          :body     {:value new-state}}
-        status (-> content-request crud/edit :status)]
+        {:keys [status] :as response} (-> content-request crud/edit)]
     (when (not= status 200)
-      (throw (r/ex-response "A failure happened during update of deployment state" 500)))))
+      (log/error response)
+      (throw (r/ex-response (str "A failure happened during update of deployment state." response) 500)))))
 
 
 ;;
@@ -86,12 +88,26 @@
 (def validate-fn (u/create-spec-validation-fn ::deployment-parameter/deployment-parameter))
 (defmethod crud/validate resource-uri
   [{:keys [name value deployment] :as resource}]
-  (case name
-    "complete" (some-> value
-                       (next-state)
-                       (update-state (:href deployment)))
-    "ss:abort" (when value (update-state (:href deployment) "Aborted"))
-    nil)
+  (let [deployment-href (:href deployment)]
+    (case name
+      "complete" (some-> value
+                         (next-state)
+                         (update-state deployment-href))
+      "ss:abort" (when value (update-state "Aborted" deployment-href))
+      "ss:state" (let [deployment-request {:params      {:resource-name d/resource-url
+                                                         :uuid          (u/document-id deployment-href)}
+                                           :cimi-params {:select #{"keepRunning"}}
+                                           :identity    std-crud/internal-identity}
+                       deployment-data (-> deployment-request crud/retrieve :body)
+                       keep-running (get deployment-data :keepRunning "Always")]
+                   (when (or (and (= keep-running "Never") (#{"Ready" "Aborted"} value))
+                             (and (= keep-running "On Success") (= value "Aborted"))
+                             (and (= keep-running "On Error") (= value "Ready")))
+                     (crud/do-action {:params   {:action        "stop"
+                                                 :resource-name d/resource-url
+                                                 :uuid          (u/document-id deployment-href)}
+                                      :identity std-crud/internal-identity})))
+      nil))
   (validate-fn resource))
 
 ;;
