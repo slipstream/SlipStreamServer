@@ -1,6 +1,6 @@
-(def +version+ "3.58-SNAPSHOT")
+(def +version+ "3.58")
 
-(defproject com.sixsq.slipstream/SlipStreamToolsCli-jar "3.58-SNAPSHOT"
+(defproject com.sixsq.slipstream/SlipStreamToolsCli-jar "3.58"
 
   :distribution "command line utilities"
   :url "https://github.com/slipstream/SlipStreamServer"
