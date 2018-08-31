@@ -1,6 +1,6 @@
-(def +version+ "3.58")
+(def +version+ "3.59-SNAPSHOT")
 
-(defproject com.sixsq.slipstream/SlipStreamCljResourcesTestServer-jar "3.58"
+(defproject com.sixsq.slipstream/SlipStreamCljResourcesTestServer-jar "3.59-SNAPSHOT"
 
   :description "complete test server"
 
