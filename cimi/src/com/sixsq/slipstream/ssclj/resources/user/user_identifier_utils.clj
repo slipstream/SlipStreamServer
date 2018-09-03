@@ -114,7 +114,7 @@
                                                       :user
                                                       :href
                                                       ignore-user-when-deleted
-                                                      (str/split #"/")
+                                                      (str/split #"/" 2)
                                                       second)
                        (= (count matched-users-fallback) 1) (get-user matched-users-fallback)
                        (> (count matched-users-fallback) 1) (throw-ex matched-users-fallback))]
