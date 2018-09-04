@@ -1,6 +1,6 @@
-(def +version+ "3.58-SNAPSHOT")
+(def +version+ "3.59-SNAPSHOT")
 
-(defproject com.sixsq.slipstream/SlipStreamConnector-Dummy-conf "3.58-SNAPSHOT"
+(defproject com.sixsq.slipstream/SlipStreamConnector-Dummy-conf "3.59-SNAPSHOT"
 
   :description "dummy connector for testing"
 
