@@ -92,7 +92,7 @@
 
 
 (deftest find-username-by-identifier
-  (let [name "some-username"
+  (let [name "some-username-before-slashes/after-slash/and-more-after-second-slash"
         user {:id           (str "user/" name)
               :username     name
               :password     "12345"
@@ -122,3 +122,5 @@
                                              (map #(str/split % #":"))
                                              (map second)
                                              first))))))
+
+
