@@ -16,12 +16,8 @@
   [binding-ns]
   (db-loader/load-and-set-persistent-db-binding binding-ns))
 
-
-
-
 (def cli-options
-  [
-   ["-u" "--user USER" "Create user identifier for provided user id."]
+  [["-u" "--user USER" "Create user identifier for provided user id."]
    ["-i" "--instance INSTANCE" "Will be used as prefix in identifier, eg SixSq"]
    ["-e" "--external EXTERNAL-LOGIN" "The unmangled federated username"]
    ["-h" "--help"]
@@ -54,21 +50,15 @@
 
 (defn add-identifier
   [username instance external-login]
-
-
   (log/info (str "Creating user identifier for user/" username " with " instance":"external-login) )
-  (uiu/add-user-identifier! username :oidc external-login instance)
-
-  )
+  (uiu/add-user-identifier! username :oidc external-login instance))
 
 
 (defn -main [& args]
   (let [{:keys [options summary]} (cli/parse-opts args cli-options)
         required-params? (and (:user options) (:instance options) (:external options))
         _ (init-db-client default-db-binding-ns)]
-
     (log/set-level! (:level options :info))
-
     (cond
       (:help options) (clojure.pprint/pprint (success summary))
       required-params? (add-identifier (:user options) (:instance options) (:external options))
