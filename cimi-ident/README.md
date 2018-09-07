@@ -35,14 +35,14 @@ SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further detail
 
 E.g :
 
-```a```
+``````
 java -jar -jar SlipStreamIdentity-jar-3.59-SNAPSHOT-standalone.jar  -- -u usertest -i instance -e '273149@vho-switchaai.chhttps://aai-logon.vho-switchaai.ch/idp/shibboleth!https://fed-id.nuv.la/samlbridge/module.php/saml/sp/metadata.php/sixsq-saml-bridge!+lbxsfaq+vvwm/iajeyszg+pc3q='
-```
-```
+``````
 
 This will create a new identifier
 
-```{
+``````
+{
   "updated" : "2018-09-07T09:31:50.310Z",
   "created" : "2018-09-07T09:31:50.310Z",
   "id" : "user-identifier/d223292e2041f21234770a760807bed0",
@@ -73,4 +73,4 @@ This will create a new identifier
   "user" : {
     "href" : "user/usertest"
   }
-}```
+}``````
