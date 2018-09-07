@@ -1,0 +1,40 @@
+(def +version+ "3.59-SNAPSHOT")
+
+(defproject com.sixsq.slipstream/SlipStreamIdentity-jar "3.59-SNAPSHOT"
+
+  :distribution "utilities to manage with user identifiers"
+  :url "https://github.com/slipstream/SlipStreamServer"
+
+  :license {:name         "Apache 2.0"
+            :url          "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            :distribution :repo}
+
+  :plugins [[lein-parent "0.3.2"]]
+
+  :parent-project {:coords  [sixsq/slipstream-parent "5.3.11"]
+                   :inherit [:plugins
+                             :min-lein-version
+                             :managed-dependencies
+                             :repositories
+                             :deploy-repositories]}
+
+  :source-paths ["src"]
+
+  :resource-paths ["resources"]
+
+  :pom-location "target/"
+
+  :main com.sixsq.slipstream.tools.cli.users-identifiers
+
+
+  :dependencies
+  [[org.clojure/clojure]
+   [org.clojure/tools.cli]
+   [com.taoensso/timbre]
+   [com.sixsq.slipstream/SlipStreamDbBinding-jar ~+version+]
+   [com.sixsq.slipstream/SlipStreamDbSerializers-jar ~+version+]
+   [com.sixsq.slipstream/SlipStreamCljResources-jar ~+version+]
+   [com.sixsq.slipstream/SlipStreamServer-cimi-resources ~+version+]
+   ]
+
+  )
