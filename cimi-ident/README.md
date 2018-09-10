@@ -1,4 +1,5 @@
-This script allows for a "manual" creation of a user-identifier document for 
+This script allows for a "manual" creation of a user-identifier document for
+
 - A user  
 - An instance (the OIDC organization)
   The external login
@@ -16,7 +17,7 @@ Copy the jar on a machine accessing ES
 2 - run the script
 ------------------
 
-``````java -jar SlipStreamIdentity-jar-3.59-SNAPSHOT-standalone.jar -h
+```java -jar SlipStreamIdentity-jar-3.59-SNAPSHOT-standalone.jar -h
 SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
 SLF4J: Defaulting to no-operation (NOP) logger implementation
 SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
@@ -31,17 +32,17 @@ SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further detail
   -e, --external EXTERNAL-LOGIN         The unmangled federated username
   -h, --help
       --logging LEVEL            :info  Logging level: trace, debug, info, warn, error, fatal, or report.
-``````
+```
 
 E.g :
 
-``````
+```
 java -jar -jar SlipStreamIdentity-jar-3.59-SNAPSHOT-standalone.jar  -- -u usertest -i instance -e '273149@vho-switchaai.chhttps://aai-logon.vho-switchaai.ch/idp/shibboleth!https://fed-id.nuv.la/samlbridge/module.php/saml/sp/metadata.php/sixsq-saml-bridge!+lbxsfaq+vvwm/iajeyszg+pc3q='
-``````
+```
 
 This will create a new identifier
 
-``````
+```
 {
   "updated" : "2018-09-07T09:31:50.310Z",
   "created" : "2018-09-07T09:31:50.310Z",
@@ -73,4 +74,5 @@ This will create a new identifier
   "user" : {
     "href" : "user/usertest"
   }
-}``````
+}
+```
