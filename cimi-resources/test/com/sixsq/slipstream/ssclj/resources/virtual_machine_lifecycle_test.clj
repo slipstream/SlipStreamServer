@@ -13,31 +13,6 @@
 
 (def base-uri (str p/service-context (u/de-camelcase vm/resource-url)))
 
-(defn random-virtual-machine
-  []
-  (let [resource-type "virtual-machine"
-        doc-id (str resource-type "/" (u/random-uuid))
-        instance-id (u/random-uuid)
-        cloud (rand-nth ["connector/cloud-1" "connector/cloud-2" "connector/cloud-3"])
-        user (rand-nth ["user-1" "user-2" "user-3"])]
-    {:id          doc-id
-     :resourceURI "http://sixsq.com/slipstream/1/VirtualMachine"
-     :updated     "2017-09-04T09:39:35.679Z"
-     :credential  {:href cloud}
-     :created     "2017-09-04T09:39:35.651Z"
-     :state       "Running"
-     :instanceID  instance-id
-     :run         {:href "run/4824efe2-59e9-4db6-be6b-fc1c8b3edf40"
-                   :user {:href (str "user/" user)}}
-     :acl         {:owner {:type      "USER"
-                           :principal "ADMIN"}
-                   :rules [{:principal "ADMIN"
-                            :right     "ALL"
-                            :type      "USER"}
-                           {:principal user
-                            :right     "VIEW"
-                            :type      "USER"}]}}))
-
 
 (deftest lifecycle
   (let [session (-> (ltu/ring-app)
@@ -102,12 +77,12 @@
                           :deployment   {:href "run/aaa-bbb-ccc",
                                          :user {:href "user/test"}}
 
-                          :serviceOffer {:href           "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
-                                         :resource:vcpu  1
-                                         :resource:ram   4096
-                                         :resource:disk  10
+                          :serviceOffer {:href                  "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
+                                         :resource:vcpu         1
+                                         :resource:ram          4096
+                                         :resource:disk         10
                                          :resource:instanceType "Large"
-                                         :price:currency "EUR"}}
+                                         :price:currency        "EUR"}}
 
           create-jane-vm (-> create-test-vm
                              (assoc :deployment {:href "run/444-555-666"
