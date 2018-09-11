@@ -90,6 +90,7 @@
                           :instanceID   "aaa-bbb-111"
                           :connector    {:href "connector/0123-4567-8912"}
                           :state        "Running"
+                          :billable     true
                           :ip           "127.0.0.1"
 
 
@@ -101,10 +102,10 @@
                           :deployment   {:href "run/aaa-bbb-ccc",
                                          :user {:href "user/test"}}
 
-                          :serviceOffer {:href                  "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
-                                         :resource:vcpu         1
-                                         :resource:ram          4096
-                                         :resource:disk         10
+                          :serviceOffer {:href           "service-offer/e3db10f4-ad81-4b3e-8c04-4994450da9e3"
+                                         :resource:vcpu  1
+                                         :resource:ram   4096
+                                         :resource:disk  10
                                          :resource:instanceType "Large"
                                          :price:currency "EUR"}}
 
@@ -178,7 +179,7 @@
                                :body)]
 
         ;; Currency attribute should be copied from serviceOffer
-        (is (= (-> reread-test-vm :serviceOffer :price:currency) (:currency reread-test-vm) ))
+        (is (= (-> reread-test-vm :serviceOffer :price:currency) (:currency reread-test-vm)))
         (is (= (ltu/strip-unwanted-attrs reread-test-vm) (ltu/strip-unwanted-attrs (assoc create-test-vm :currency "EUR"))))
 
         (let [edited-test-vm (-> session-admin
