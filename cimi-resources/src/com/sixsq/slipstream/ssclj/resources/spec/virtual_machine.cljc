@@ -14,6 +14,7 @@
 (s/def ::serviceOffer ::cimi-common/resource-link)
 (s/def ::deployment ::cimi-common/resource-link)
 (s/def ::currency ::cimi-core/nonblank-string)
+(s/def ::billable boolean?)
 
 
 (def virtual-machine-specs {:req-un [::credentials
@@ -23,7 +24,8 @@
                             :opt-un [::deployment
                                      ::serviceOffer
                                      ::ip
-                                     ::currency]})
+                                     ::currency
+                                     ::billable]})
 
 (def virtual-machine-keys-spec (su/merge-keys-specs [cimi-common/common-attrs
                                                      virtual-machine-specs]))

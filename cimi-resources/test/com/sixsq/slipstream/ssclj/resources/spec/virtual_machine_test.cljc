@@ -36,6 +36,7 @@
                 :instanceID   "aaa-bbb-111"
                 :connector    {:href "connector/0123-4567-8912"}
                 :state        "Running"
+                :billable     true
                 :ip           "127.0.0.1"
                 :credentials  [{:href  "connector/0123-4567-8912",
                                 :roles ["realm:cern", "realm:my-accounting-group"]
@@ -67,5 +68,5 @@
     (stu/is-invalid ::vm/virtual-machine (dissoc vm-sample k)))
 
   ;; optional keywords
-  (doseq [k #{:deployment :serviceOffer :ip :currency}]
+  (doseq [k #{:deployment :serviceOffer :ip :currency :billable}]
     (stu/is-valid ::vm/virtual-machine (dissoc vm-sample k))))
