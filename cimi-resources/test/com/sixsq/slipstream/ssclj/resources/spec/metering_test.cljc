@@ -38,6 +38,7 @@
                       :instanceID    "aaa-bbb-111"
                       :connector     {:href "connector/0123-4567-8912"}
                       :state         "Running"
+                      :billable      true
                       :ip            "127.0.0.1"
                       :credentials   [{:href  "credential/0123-4567-8912",
                                        :roles ["realm:cern", "realm:my-accounting-group"]
@@ -49,12 +50,12 @@
                                       :resource:ram          4096
                                       :resource:disk         10
                                       :resource:instanceType "Large"
-                                      :price:unitCost 42
-                                      :price:unitCode "HUR"
-                                      :price:currency "EUR"
+                                      :price:unitCost        42
+                                      :price:unitCode        "HUR"
+                                      :price:currency        "EUR"
                                       }
-                      :price 0.89883
-                      :currency "EUR"
+                      :price         0.89883
+                      :currency      "EUR"
                       :snapshot-time timestamp})
 
 
@@ -70,5 +71,5 @@
     (stu/is-invalid ::metering/metering (dissoc metering-sample k)))
 
   ;; optional keywords
-  (doseq [k #{:run :serviceOffer :ip :price :currency}]
+  (doseq [k #{:run :serviceOffer :ip :price :currency :billable}]
     (stu/is-valid ::metering/metering (dissoc metering-sample k))))

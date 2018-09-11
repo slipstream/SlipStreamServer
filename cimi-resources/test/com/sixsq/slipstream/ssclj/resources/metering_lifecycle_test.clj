@@ -61,6 +61,7 @@
                                 :instanceID    "aaa-bbb-111"
                                 :connector     {:href "connector/0123-4567-8912"}
                                 :state         "Running"
+                                :billable      true
                                 :ip            "127.0.0.1"
 
                                 :credentials   [{:href  "credential/0123-4567-8912",
@@ -217,6 +218,7 @@
                      :instanceID   "aaa-bbb-111"
                      :connector    {:href "connector/0123-4567-8912"}
                      :state        "Running"
+                     :billable      true
                      :ip           "127.0.0.1"
 
                      :credentials  [{:href  "credential/0123-4567-8912",
@@ -280,8 +282,7 @@
                      "count:id" (* 2 n)
                      "sum:serviceOffer/resource:vcpu" (double (* 2 n)))
 
-      (let [after-15mn (time/plus timestamp (time/minutes 15))
-            after-3days (time/plus timestamp (time/days 3))
+      (let [after-3days (time/plus timestamp (time/days 3))
             after-1day (time/plus timestamp (time/days 1))]
 
         (are [query from to v] (is (= v (agg-meter query from to)))
