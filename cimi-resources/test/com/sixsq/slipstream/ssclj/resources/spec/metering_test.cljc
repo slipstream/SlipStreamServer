@@ -52,8 +52,7 @@
                                       :resource:instanceType "Large"
                                       :price:unitCost        42
                                       :price:unitCode        "HUR"
-                                      :price:currency        "EUR"
-                                      }
+                                      :price:currency        "EUR"}
                       :price         0.89883
                       :currency      "EUR"
                       :snapshot-time timestamp})

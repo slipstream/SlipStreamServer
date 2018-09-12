@@ -218,7 +218,7 @@
                      :instanceID   "aaa-bbb-111"
                      :connector    {:href "connector/0123-4567-8912"}
                      :state        "Running"
-                     :billable      true
+                     :billable     true
                      :ip           "127.0.0.1"
 
                      :credentials  [{:href  "credential/0123-4567-8912",
