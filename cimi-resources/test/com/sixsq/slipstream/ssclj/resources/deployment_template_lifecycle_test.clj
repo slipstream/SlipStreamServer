@@ -7,6 +7,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.deployment-template :as dt]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [com.sixsq.slipstream.ssclj.resources.module :as module]
     [com.sixsq.slipstream.ssclj.resources.module-lifecycle-test :as module-test]
     [peridot.core :refer :all]))
 
@@ -16,6 +17,30 @@
 
 (def collection-uri (str p/service-context (u/de-camelcase dt/resource-name)))
 
+(defn valid-comp [image-id] {:parent           {:href image-id}
+
+                             :networkType      "public"
+
+
+                             :inputParameters  [{:parameter "iparam-1" :description "desc2" :value "100"}
+                                                {:parameter "iparam-2" :description "desc2"}
+                                                {:parameter "iparam-3"}]
+
+                             :outputParameters [{:parameter "iparam-1" :description "desc2" :value "100"}
+                                                {:parameter "iparam-2" :description "desc2"}
+                                                {:parameter "iparam-3"}]
+
+                             :targets          {:preinstall  "preinstall"
+                                                :packages    ["emacs-nox" "vim"]
+                                                :postinstall "postinstall"
+                                                :deployment  "deployment"
+                                                :reporting   "reporting"
+                                                :onVmAdd     "onVmAdd"
+                                                :onVmRemove  "onVmRemove"
+                                                :prescale    "prescale"
+                                                :postscale   "postscale"}
+                             :author           "someone"
+                             :commit           "wip"})
 
 (deftest lifecycle
 
@@ -26,11 +51,23 @@
         session-tarzan (header session-anon authn-info-header "tarzan USER")
         session-admin (header session-anon authn-info-header "root ADMIN")
 
+        module-img-uri (-> session-user
+                           (request module-test/base-uri
+                                    :request-method :post
+                                    :body (json/write-str (assoc module-test/valid-entry
+                                                            :content module-test/valid-image)))
+                           (ltu/body->edn)
+                           (ltu/is-status 201)
+                           (ltu/location))
+
         module-uri (-> session-user
                        (request module-test/base-uri
                                 :request-method :post
-                                :body (json/write-str (assoc module-test/valid-entry
-                                                        :content module-test/valid-image)))
+                                :body (json/write-str (assoc {:resourceURI module/resource-uri
+                                                              :parentPath  "a/b"
+                                                              :path        "a/b/c"
+                                                              :type        "COMPONENT"}
+                                                        :content (valid-comp module-img-uri))))
                        (ltu/body->edn)
                        (ltu/is-status 201)
                        (ltu/location))

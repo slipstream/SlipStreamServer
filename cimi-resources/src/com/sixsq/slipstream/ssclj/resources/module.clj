@@ -147,7 +147,9 @@
           version-index (second (split-uuid uuid))
           version-id (retrieve-content-id versions version-index)
           module-content (if version-id
-                           (crud/retrieve-by-id-as-admin version-id)
+                           (-> version-id
+                               (crud/retrieve-by-id-as-admin)
+                               (dissoc :resourceURI :operations :acl))
                            (when version-index
                              (throw (r/ex-not-found (str "Module version not found: " resource-url "/" uuid)))))]
       (-> (assoc module-meta :content module-content)

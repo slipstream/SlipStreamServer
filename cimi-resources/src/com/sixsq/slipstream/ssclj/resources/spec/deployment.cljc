@@ -17,10 +17,16 @@
 
 (s/def ::deploymentTemplate ::cimi-common/resource-link)
 
+(s/def ::keepRunning #{"Always",
+                       "On Success",
+                       "On Error",
+                       "Never"})
+
 (def deployment-keys-spec
   (su/merge-keys-specs [cimi-common/common-attrs
                         {:req-un [::state
                                   ::module]
-                         :opt-un [::deploymentTemplate]}]))
+                         :opt-un [::keepRunning
+                                  ::deploymentTemplate]}]))
 
 (s/def ::deployment (su/only-keys-maps deployment-keys-spec))

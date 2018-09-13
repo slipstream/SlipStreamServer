@@ -16,7 +16,7 @@
 
 (def deployment-parameter-keys-spec
   (su/merge-keys-specs [cimi-common/common-attrs
-                        {:req-un [::deployment ::nodeID ::name]
-                         :opt-un [::value]}]))
+                        {:req-un [::deployment ::name]
+                         :opt-un [::nodeID ::value]}]))
 
 (s/def ::deployment-parameter (su/only-keys-maps deployment-parameter-keys-spec))
