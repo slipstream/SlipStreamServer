@@ -96,7 +96,7 @@
     (let [uri (-> session-admin
                   (request base-uri
                            :request-method :post
-                           :body (json/write-str (assoc valid-job :priority 100)))
+                           :body (json/write-str (assoc valid-job :priority 50)))
                   (ltu/body->edn)
                   (ltu/is-status 201)
                   (ltu/location))
@@ -107,5 +107,5 @@
                              (ltu/is-status 200)
                              (ltu/is-operation-present "stop")
                              (get-in [:response :body :properties :zookeeper-path]))]
-      (is (s/starts-with? zookeeper-path (str zk-job-path-start-subs "100-"))))
+      (is (s/starts-with? zookeeper-path (str zk-job-path-start-subs "050-"))))
     ))

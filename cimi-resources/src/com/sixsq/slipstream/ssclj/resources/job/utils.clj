@@ -26,7 +26,7 @@
 (def locking-queue-path (str job-base-node locking-queue))
 
 (defn add-job-to-queue [job-id priority]
-  (uzk/create (str locking-queue-path "/" kazoo-queue-prefix priority "-")
+  (uzk/create (str locking-queue-path "/" kazoo-queue-prefix (format "%03d" priority) "-")
               :data (uzk/string-to-byte job-id) :sequential? true :persistent? true))
 
 (defn create-job-queue []
