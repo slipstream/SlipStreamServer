@@ -10,6 +10,7 @@
     [com.sixsq.slipstream.ssclj.resources.spec.job :as job]
     [superstring.core :as str]))
 
+
 (def ^:const resource-name "Job")
 
 (def ^:const resource-tag (keyword (str (str/camel-case resource-name) "s")))
@@ -58,10 +59,10 @@
 ;; CRUD operations
 ;;
 
-(defn add-impl [{body :body :as request}]
+(defn add-impl [{{:keys [priority] :or {priority 999} :as body} :body :as request}]
   (a/can-modify? {:acl collection-acl} request)
   (let [id (u/new-resource-id (u/de-camelcase resource-name))
-        zookeeper-path (ju/add-job-to-queue id)
+        zookeeper-path (ju/add-job-to-queue id priority)
         new-job (-> body
                     u/strip-service-attrs
                     (assoc :resourceURI resource-uri)
@@ -78,42 +79,22 @@
   [request]
   (add-impl request))
 
-
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 
 (defmethod crud/retrieve resource-name
   [request]
   (retrieve-impl request))
 
-(defn edit-impl [{{uuid :uuid} :params {:keys [statusMessage] :as body} :body :as request}]
-  (try
-    (let [current (-> (str (u/de-camelcase resource-name) "/" uuid)
-                      (db/retrieve request)
-                      (a/can-modify? request)
-                      (cond-> statusMessage ju/update-timeOfStatusChange))
-          merged (merge current body)]
-      (-> merged
-          u/update-timestamps
-          ju/job-cond->edition
-          crud/validate
-          (db/edit request)))
-    (catch Exception e
-      (or (ex-data e) (throw e)))))
+(def std-edit-impl (std-crud/edit-fn resource-name))
+
+(defn edit-impl [{:keys [body] :as request}]
+  (std-edit-impl (assoc request :body (ju/job-cond->edition body))))
 
 (defmethod crud/edit resource-name
   [request]
   (edit-impl request))
 
-(defn delete-impl [{{uuid :uuid} :params :as request}]
-  (try
-    (-> (str (u/de-camelcase resource-name) "/" uuid)
-        (db/retrieve request)
-        (a/can-modify? request)
-        (ju/stop)
-        (db/delete request))
-    (catch Exception e
-      (or (ex-data e) (throw e)))))
-
+(def delete-impl (std-crud/delete-fn resource-name))
 
 (defmethod crud/delete resource-name
   [request]
@@ -131,11 +112,12 @@
 ;;
 
 (defmethod crud/set-operations resource-uri
-  [{:keys [id resourceURI username] :as resource} request]
+  [{:keys [id] :as resource} request]
   (let [href (str id "/stop")
         collect-op {:rel (:stop c/action-uri) :href href}]
     (-> (crud/set-standard-operations resource request)
         (update-in [:operations] conj collect-op))))
+
 
 (defmethod crud/do-action [resource-url "stop"]
   [{{uuid :uuid} :params :as request}]

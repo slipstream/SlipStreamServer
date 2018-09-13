@@ -1,7 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.job-lifecycle-test
   (:require
     [clojure.data.json :as json]
-    [clojure.test :refer :all]
+    [clojure.string :as s]
+    [clojure.test :refer [deftest is use-fixtures]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
@@ -21,6 +22,8 @@
    :action      "collect"
    :acl         {:owner {:type "USER" :principal "admin"}
                  :rules [{:type "USER" :principal "jane" :right "VIEW"}]}})
+
+(def zk-job-path-start-subs "/job/entries/entry-")
 
 (deftest lifecycle
   (let [session-anon (-> (ltu/ring-app)
@@ -67,6 +70,8 @@
 
       (is (= "QUEUED" (:state job)))
 
+      (is (s/starts-with? zookeeper-path (str zk-job-path-start-subs "999-")))
+
       (is (= (uzk/get-data zookeeper-path) uri))
 
       (-> session-user
@@ -86,4 +91,21 @@
       (-> session-admin
           (request abs-uri :request-method :delete)
           (ltu/body->edn)
-          (ltu/is-status 200)))))
+          (ltu/is-status 200)))
+
+    (let [uri (-> session-admin
+                  (request base-uri
+                           :request-method :post
+                           :body (json/write-str (assoc valid-job :priority 50)))
+                  (ltu/body->edn)
+                  (ltu/is-status 201)
+                  (ltu/location))
+          abs-uri (str p/service-context (u/de-camelcase uri))
+          zookeeper-path (-> session-user
+                             (request abs-uri)
+                             (ltu/body->edn)
+                             (ltu/is-status 200)
+                             (ltu/is-operation-present "stop")
+                             (get-in [:response :body :properties :zookeeper-path]))]
+      (is (s/starts-with? zookeeper-path (str zk-job-path-start-subs "050-"))))
+    ))

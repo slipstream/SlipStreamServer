@@ -175,6 +175,7 @@
           request-job-creation {:identity std-crud/internal-identity
                                 :body     {:action         "start_deployment"
                                            :targetResource {:href id}
+                                           :priority       50
                                            :acl            {:owner {:principal "ADMIN"
                                                                     :type      "ROLE"}
                                                             :rules [{:principal user-id
@@ -204,6 +205,7 @@
           request-job-creation {:identity std-crud/internal-identity
                                 :body     {:action         "stop_deployment"
                                            :targetResource {:href id}
+                                           :priority       60
                                            :acl            {:owner {:principal "ADMIN"
                                                                     :type      "ROLE"}
                                                             :rules [{:principal user-id

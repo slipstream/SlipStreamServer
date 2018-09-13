@@ -15,15 +15,15 @@
 
 (deftest check-job
   (let [timestamp "1964-08-25T10:00:00.0Z"
-        job {:id          (str sj/resource-url "/test-job")
-             :resourceURI sj/resource-uri
-             :created     timestamp
-             :updated     timestamp
-             :acl         valid-acl
-             :state       "QUEUED"
-             :progress    0
-             :action      "add"
-             :targetResource {:href "abc/def"}
+        job {:id                (str sj/resource-url "/test-job")
+             :resourceURI       sj/resource-uri
+             :created           timestamp
+             :updated           timestamp
+             :acl               valid-acl
+             :state             "QUEUED"
+             :progress          0
+             :action            "add"
+             :targetResource    {:href "abc/def"}
              :affectedResources [{:href "abc/def"}]}]
 
     (stu/is-valid ::job/job job)
@@ -32,6 +32,8 @@
     (stu/is-valid ::job/job (assoc job :state "RUNNING"))
     (stu/is-valid ::job/job (assoc job :returnCode 10000))
     (stu/is-valid ::job/job (assoc job :progress 100))
+    (stu/is-invalid ::job/job (assoc job :priority 1000))
+    (stu/is-valid ::job/job (assoc job :priority 90))
 
     (stu/is-invalid ::job/job (assoc job :progress 101))
     (stu/is-invalid ::job/job (assoc job :state "XY"))

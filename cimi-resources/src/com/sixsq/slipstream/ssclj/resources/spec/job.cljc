@@ -19,6 +19,8 @@
 (s/def ::action ::cimi-common-operation/rel)
 (s/def ::parentJob ::href)
 (s/def ::nestedJobs (s/coll-of ::href))
+; An optional priority as an integer with at most 3 digits. Lower values signify higher priority.
+(s/def ::priority (s/int-in 0 1000))
 
 
 (s/def ::job
@@ -32,4 +34,5 @@
                                ::statusMessage
                                ::timeOfStatusChange
                                ::parentJob
-                               ::nestedJobs]}))
+                               ::nestedJobs
+                               ::priority]}))
