@@ -21,13 +21,12 @@
     job))
 
 (def kazoo-queue-prefix "entry-")
-(def kazoo-queue-priority "100")
 (def job-base-node "/job")
 (def locking-queue "/entries")
 (def locking-queue-path (str job-base-node locking-queue))
 
-(defn add-job-to-queue [job-id]
-  (uzk/create (str locking-queue-path "/" kazoo-queue-prefix kazoo-queue-priority "-")
+(defn add-job-to-queue [job-id priority]
+  (uzk/create (str locking-queue-path "/" kazoo-queue-prefix priority "-")
               :data (uzk/string-to-byte job-id) :sequential? true :persistent? true))
 
 (defn create-job-queue []
@@ -39,7 +38,6 @@
 
 (defn add-targetResource-in-affectedResources [{:keys [targetResource affectedResources] :as job}]
   (assoc job :affectedResources (conj affectedResources targetResource)))
-
 
 (defn should_insert_targetResource-in-affectedResources? [{:keys [targetResource affectedResources] :as job}]
   (when targetResource
@@ -54,7 +52,8 @@
           (not progress) (assoc :progress 0)
           (should_insert_targetResource-in-affectedResources? job) add-targetResource-in-affectedResources))
 
-(defn job-cond->edition [job]
+(defn job-cond->edition [{:keys [statusMessage] :as job}]
   (cond-> job
-          (is-final-state? job) (assoc :progress 100)
-          (should_insert_targetResource-in-affectedResources? job) add-targetResource-in-affectedResources))
+          true (dissoc :priority)
+          statusMessage (update-timeOfStatusChange)
+          (is-final-state? job) (assoc :progress 100)))
