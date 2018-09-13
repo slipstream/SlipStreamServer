@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.job-lifecycle-test
   (:require
     [clojure.data.json :as json]
+    [clojure.string :as s]
     [clojure.test :refer [deftest is use-fixtures]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
@@ -10,8 +11,7 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
-    [peridot.core :refer :all]
-    [clojure.string :as s]))
+    [peridot.core :refer :all]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 

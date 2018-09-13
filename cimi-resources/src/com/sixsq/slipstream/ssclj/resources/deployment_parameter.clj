@@ -1,16 +1,16 @@
 (ns com.sixsq.slipstream.ssclj.resources.deployment-parameter
   (:require
-    [com.sixsq.slipstream.auth.acl :as a]
+    [clojure.string :as s]
 
+    [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.spec.deployment-parameter :as deployment-parameter]
     [com.sixsq.slipstream.ssclj.resources.deployment :as d]
-    [superstring.core :as str]
-    [clojure.string :as s]
+    [com.sixsq.slipstream.ssclj.resources.spec.deployment-parameter :as deployment-parameter]
     [com.sixsq.slipstream.util.response :as r]
+    [superstring.core :as str]
     [taoensso.timbre :as log]))
 
 (def ^:const resource-name "DeploymentParameter")
