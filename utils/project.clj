@@ -1,6 +1,6 @@
-(def +version+ "3.59-SNAPSHOT")
+(def +version+ "3.59")
 
-(defproject com.sixsq.slipstream/utils "3.59-SNAPSHOT"
+(defproject com.sixsq.slipstream/utils "3.59"
 
   :description "general server utilities"
 
