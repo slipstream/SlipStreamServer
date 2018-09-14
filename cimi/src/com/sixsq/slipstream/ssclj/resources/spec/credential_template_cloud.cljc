@@ -15,11 +15,15 @@
                                         ::cimi-acl/type]))
 (s/def ::managers (s/coll-of ::manager :min-count 1 :kind vector?))
 
+(s/def ::disabledMonitoring boolean?)
+
+
 (def credential-template-cloud-keys-spec
   {:req-un [::key
             ::secret
             ::connector
             ::quota]
-   :opt-un [::managers]})
+   :opt-un [::managers
+            ::disabledMonitoring]})
 
 (def credential-template-create-keys-spec credential-template-cloud-keys-spec)
