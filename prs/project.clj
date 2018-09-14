@@ -1,6 +1,6 @@
-(def +version+ "3.59")
+(def +version+ "3.60-SNAPSHOT")
 
-(defproject com.sixsq.slipstream/SlipStreamPricingService-jar "3.59"
+(defproject com.sixsq.slipstream/SlipStreamPricingService-jar "3.60-SNAPSHOT"
 
   :description "pricing service"
 
