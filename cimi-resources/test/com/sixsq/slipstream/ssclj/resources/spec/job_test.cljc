@@ -23,6 +23,8 @@
              :state             "QUEUED"
              :progress          0
              :action            "add"
+             :started           timestamp
+             :duration          30
              :targetResource    {:href "abc/def"}
              :affectedResources [{:href "abc/def"}]}]
 
@@ -44,5 +46,5 @@
       (stu/is-invalid ::job/job (dissoc job k)))
 
     ;; optional keywords
-    (doseq [k #{:targetResource :affectedResources}]
+    (doseq [k #{:targetResource :affectedResources :started :duration}]
       (stu/is-valid ::job/job (dissoc job k)))))

@@ -9,7 +9,6 @@
     [com.sixsq.slipstream.ssclj.resources.job :refer :all]
     [com.sixsq.slipstream.ssclj.resources.job.utils :as ju]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
     [peridot.core :refer :all]))
 
@@ -80,13 +79,21 @@
           (ltu/is-status 200)
           (get-in [:response :body]))
 
-      ;; set state to a final state make progress to set 100 automatically
-      (is (= 100 (-> session-admin
-                     (request abs-uri :request-method :put
-                              :body (json/write-str {:state "SUCCESS"}))
-                     (ltu/body->edn)
-                     (ltu/is-status 200)
-                     (get-in [:response :body :progress]))))
+      (-> session-admin
+          (request abs-uri :request-method :put
+                   :body (json/write-str {:state ju/state-running}))
+          (ltu/body->edn)
+          (ltu/is-status 200)
+          (ltu/is-key-value string? :started true))
+
+      ;; set state to a final state make progress to set 100 automatically and set duration
+      (-> session-admin
+          (request abs-uri :request-method :put
+                   :body (json/write-str {:state ju/state-success}))
+          (ltu/body->edn)
+          (ltu/is-status 200)
+          (ltu/is-key-value :progress 100)
+          (ltu/is-key-value nat-int? :duration true))
 
       (-> session-admin
           (request abs-uri :request-method :delete)
