@@ -4,7 +4,8 @@
     [com.sixsq.slipstream.ssclj.resources.spec.common :as cimi-common]
     [com.sixsq.slipstream.ssclj.resources.spec.common-operation :as cimi-common-operation]
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]))
+    [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [clojure.spec.alpha :as s]))
 
 (def job-href-regex #"^job/[a-z]+(-[a-z]+)*$")
 (s/def ::href (s/and string? #(re-matches job-href-regex %)))
@@ -21,6 +22,8 @@
 (s/def ::nestedJobs (s/coll-of ::href))
 ; An optional priority as an integer with at most 3 digits. Lower values signify higher priority.
 (s/def ::priority (s/int-in 0 1000))
+(s/def ::started ::cimi-core/timestamp)
+(s/def ::duration (s/nilable nat-int?))
 
 
 (s/def ::job
@@ -35,4 +38,6 @@
                                ::timeOfStatusChange
                                ::parentJob
                                ::nestedJobs
-                               ::priority]}))
+                               ::priority
+                               ::started
+                               ::duration]}))

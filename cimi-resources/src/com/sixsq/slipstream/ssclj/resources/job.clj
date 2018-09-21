@@ -85,10 +85,24 @@
   [request]
   (retrieve-impl request))
 
-(def std-edit-impl (std-crud/edit-fn resource-name))
-
-(defn edit-impl [{:keys [body] :as request}]
-  (std-edit-impl (assoc request :body (ju/job-cond->edition body))))
+(defn edit-impl
+  [{{select :select} :cimi-params {uuid :uuid} :params body :body :as request}]
+  (try
+    (let [current (-> (str (u/de-camelcase resource-name) "/" uuid)
+                      (db/retrieve (assoc-in request [:cimi-params :select] nil))
+                      (a/can-modify? request))
+          dissoc-keys (-> (map keyword select)
+                          (set)
+                          (u/strip-select-from-mandatory-attrs))
+          current-without-selected (apply dissoc current dissoc-keys)
+          merged (merge current-without-selected body)]
+      (-> merged
+          (u/update-timestamps)
+          (ju/job-cond->edition)
+          (crud/validate)
+          (db/edit request)))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 (defmethod crud/edit resource-name
   [request]
