@@ -71,7 +71,8 @@
 (defn job-cond->edition
   [{:keys [statusMessage state started] :as job}]
   (cond-> job
-          (= state state-running) (assoc :started (u/unparse-timestamp-datetime (time/now)))
+          (and (not started)
+               (= state state-running)) (assoc :started (u/unparse-timestamp-datetime (time/now)))
           true (dissoc :priority)
           statusMessage (update-timeOfStatusChange)
           (is-final-state? job) (assoc :progress 100
