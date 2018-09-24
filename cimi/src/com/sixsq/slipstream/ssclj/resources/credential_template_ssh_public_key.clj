@@ -24,7 +24,9 @@
    :name        "Import SSH Public Key"
    :description "import public key of an existing SSH key pair"
    :publicKey   "ssh-public-key"
-   :acl         resource-acl})
+   :acl         resource-acl
+   :enabled     true
+   })
 
 ;;
 ;; description

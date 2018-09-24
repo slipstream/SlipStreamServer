@@ -17,17 +17,17 @@
 (use-fixtures :each ltu/with-test-server-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase credential/resource-url)))
+(def session-anon (-> (ltu/ring-app)
+                     session
+                     (content-type "application/json")))
+(def session-admin (header session-anon authn-info-header "root ADMIN"))
+(def session-user (header session-anon authn-info-header "jane USER ANON"))
+
+(def template-url (str p/service-context ct/resource-url "/" spk/credential-type))
 
 
 (deftest lifecycle-import
-  (let [session (-> (ltu/ring-app)
-                    session
-                    (content-type "application/json"))
-        session-admin (header session authn-info-header "root ADMIN USER ANON")
-        session-user (header session authn-info-header "jane USER ANON")
-        session-anon (header session authn-info-header "unknown ANON")
-
-        href (str ct/resource-url "/" spk/method)
+  (let [href (str ct/resource-url "/" spk/method)
         template-url (str p/service-context ct/resource-url "/" spk/method)
 
         template (-> session-admin
@@ -96,6 +96,7 @@
                             :request-method :post
                             :body (json/write-str create-import-href))
                    (ltu/body->edn)
+
                    (ltu/is-status 201))
           id (get-in resp [:response :body :resource-id])
           uri (-> resp
@@ -122,6 +123,7 @@
                          :response
                          :body)]
         (is (= "rsa" (:algorithm resource)))
+        (is (:enabled resource))
         (is (= (:fingerprint resource) (:fingerprint imported-ssh-key-info)))
         (is (= (:publicKey resource) (:publicKey imported-ssh-key-info))))
 
@@ -133,14 +135,7 @@
           (ltu/is-status 200)))))
 
 (deftest lifecycle-generate
-  (let [session (-> (ltu/ring-app)
-                    session
-                    (content-type "application/json"))
-        session-admin (header session authn-info-header "root ADMIN USER ANON")
-        session-user (header session authn-info-header "jane USER ANON")
-        session-anon (header session authn-info-header "unknown ANON")
-
-        href (str ct/resource-url "/" skp/method)
+  (let [href (str ct/resource-url "/" skp/method)
         template-url (str p/service-context ct/resource-url "/" skp/method)
 
         template (-> session-admin
@@ -216,3 +211,56 @@
                    :request-method :delete)
           (ltu/body->edn)
           (ltu/is-status 200)))))
+
+(defn get-valid-create-tmpl
+  []
+  {:credentialTemplate {:href      (str ct/resource-url "/" spk/method)
+                        :publicKey (:publicKey (ssh-utils/generate))}})
+
+(deftest disable-operation
+  "Check the disable operation"
+  (let [valid-create (get-valid-create-tmpl)
+        uri (-> session-admin
+                (request base-uri
+                         :request-method :post
+                         :body (json/write-str valid-create))
+                (ltu/body->edn)
+                (ltu/is-status 201)
+                (ltu/location))
+        abs-uri (str p/service-context (u/de-camelcase uri))
+        disable-op (-> session-admin
+                       (request abs-uri)
+                       (ltu/body->edn)
+                       (ltu/is-operation-present "disable")
+                       (ltu/is-status 200)
+                       (ltu/get-op "disable"))
+        abs-disable-uri (str p/service-context (u/de-camelcase disable-op))]
+
+    ;; can not disable credential as anon
+    (-> session-anon
+        (request abs-disable-uri
+                 :request-method :post)
+        (ltu/body->edn)
+        (ltu/is-status 403))
+
+    ;can not disable credential as user
+    (-> session-user
+        (request abs-disable-uri
+                 :request-method :post)
+        (ltu/body->edn)
+        (ltu/is-status 403))
+
+    ;enabled should now be set to false
+    (-> session-admin
+        (request abs-disable-uri
+                 :request-method :post)
+        (ltu/body->edn)
+        (ltu/is-status 200)
+        (ltu/is-key-value :enabled false))
+
+    ;disabling an already disabled should not be possible
+    (-> session-admin
+        (request abs-disable-uri
+                 :request-method :post)
+        (ltu/body->edn)
+        (ltu/is-status 400))))

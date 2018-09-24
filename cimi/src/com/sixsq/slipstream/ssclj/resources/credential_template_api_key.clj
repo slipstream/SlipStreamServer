@@ -23,6 +23,7 @@
    :name        "Generate API Key"
    :description "generates an API key and stores hash"
    :ttl         0
+   :enabled true
    :acl         resource-acl})
 
 ;;

@@ -11,4 +11,5 @@
 
 (def credential-keys-spec (su/merge-keys-specs [c/common-attrs
                                                 {:req-un [:cimi.credential/type
-                                                          :cimi.credential/method]}]))
+                                                          :cimi.credential/method]
+                                                 :opt-un [:cimi.credential-template/enabled]}]))
