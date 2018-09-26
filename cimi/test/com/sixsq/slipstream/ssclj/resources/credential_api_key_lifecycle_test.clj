@@ -54,9 +54,7 @@
         create-import-href-zero-ttl {:credentialTemplate {:href href
                                                           :ttl  0}}
 
-        create-import-href-no-ttl {:credentialTemplate {:href href}}
-
-        invalid-create-href (assoc-in create-import-href [:credentialTemplate :href] "credential-template/unknown-template")]
+        create-import-href-no-ttl {:credentialTemplate {:href href}}]
 
     ;; admin/user query should succeed but be empty (no credentials created yet)
     (doseq [session [session-admin session-user]]
@@ -230,17 +228,45 @@
         (is (nil? expiry))
         (is claims)
 
-        ;; update the credential by changing the name attribute
+        ;; update the credential by changing the name attribute for user should succeed
+        ;; claims are not editable for user
         (-> session-user
             (request abs-uri
                      :request-method :put
-                     :body (json/write-str (assoc current :name "UPDATED!")))
+                     :body (json/write-str (assoc current :name "UPDATED!"
+                                                          :claims {:identity "super",
+                                                                   :roles    ["USER" "ANON" "ADMIN"]})))
             (ltu/body->edn)
             (ltu/is-status 200))
 
         ;; verify that the attribute has been changed
         (let [expected (assoc current :name "UPDATED!")
               reread (-> session-user
+                         (request abs-uri)
+                         (ltu/body->edn)
+                         (ltu/is-status 200)
+                         :response
+                         :body)]
+
+          (is (= (dissoc expected :updated) (dissoc reread :updated)))
+          (is (not= (:updated expected) (:updated reread))))
+
+        ;; update the credential by changing the name attribute
+        ;; claims are editable for super
+        (-> session-admin
+            (request abs-uri
+                     :request-method :put
+                     :body (json/write-str (assoc current :name "UPDATED by super!"
+                                                          :claims {:identity "super",
+                                                                   :roles    ["USER" "ANON" "ADMIN"]})))
+            (ltu/body->edn)
+            (ltu/is-status 200))
+
+        ;; verify that the attribute has been changed
+        (let [expected (assoc current :name "UPDATED by super!"
+                                      :claims {:identity "super",
+                                               :roles    ["USER" "ANON" "ADMIN"]})
+              reread (-> session-admin
                          (request abs-uri)
                          (ltu/body->edn)
                          (ltu/is-status 200)

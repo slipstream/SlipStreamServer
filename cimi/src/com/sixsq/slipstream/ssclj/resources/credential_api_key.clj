@@ -51,6 +51,15 @@
 
 
 ;;
+;; multimethod for edition
+;;
+(defmethod p/special-edit tpl/credential-type
+  [resource request]
+  (if ((:user-roles request) "ADMIN")
+    resource
+    (dissoc resource :claims)))
+
+;;
 ;; initialization: no schema for this parent resource
 ;;
 (defn initialize
