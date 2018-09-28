@@ -168,7 +168,8 @@
   [{:keys [body] :as request}]
   (try
     (let [id (str resource-url "/" (-> request :params :uuid))
-          [module-meta {:keys [author commit] :as module-content}] (-> body u/strip-service-attrs module-utils/split-resource)
+          [module-meta {:keys [author commit] :as module-content}]
+          (-> body u/strip-service-attrs module-utils/split-resource)
           {:keys [type versions acl]} (crud/retrieve-by-id-as-admin id)
 
           _ (a/can-modify? {:acl acl} request)

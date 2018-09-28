@@ -17,33 +17,40 @@
 
 
 (def valid-module {:id          (str d/resource-url "/connector-uuid")
-                  :resourceURI d/resource-uri
-                  :created     timestamp
-                  :updated     timestamp
-                  :acl         valid-acl
+                   :resourceURI d/resource-uri
+                   :created     timestamp
+                   :updated     timestamp
+                   :acl         valid-acl
 
-                  :module      {:href "my-module-uuid"}
+                   :module      {:href "my-module-uuid"}
 
-                  :nodes       [{:nodeID     "my-node-uuid"
-                                 :credential {:href "my-cred-uuid"}
-                                 :cpu        10
-                                 :ram        20
-                                 :disk       30}
-                                {:nodeID     "my-second-node-uuid"
-                                 :credential {:href "my-second-cred-uuid"}
-                                 :cpu        100
-                                 :ram        200
-                                 :disk       300}]})
+                   :nodes       [{:nodeID     "my-node-uuid"
+                                  :credential {:href "my-cred-uuid"}
+                                  :cpu        10
+                                  :ram        20
+                                  :disk       30}
+                                 {:nodeID     "my-second-node-uuid"
+                                  :credential {:href "my-second-cred-uuid"}
+                                  :cpu        100
+                                  :ram        200
+                                  :disk       300}]})
 
 
-(def valid-deployment {:id          (str d/resource-url "/connector-uuid")
-                       :resourceURI d/resource-uri
-                       :created     timestamp
-                       :updated     timestamp
-                       :acl         valid-acl
+(def valid-deployment {:id               (str d/resource-url "/connector-uuid")
+                       :resourceURI      d/resource-uri
+                       :created          timestamp
+                       :updated          timestamp
+                       :acl              valid-acl
 
-                       :state       "STARTED"
-                       :module       (merge {:href "my-module-uuid"} valid-module)})
+                       :state            "STARTED"
+
+                       :clientApiKey     {:href   "credential/uuid"
+                                          :secret "api secret"}
+
+                       :sshPublicKeys   "ssh-rsa publickeys ssh-rsa ..."
+
+                       :outputParameters [{:parameter "param-1"}]
+                       :module           (merge {:href "my-module-uuid"} valid-module)})
 
 
 (deftest test-schema-check

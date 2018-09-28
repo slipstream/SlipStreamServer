@@ -18,7 +18,7 @@
 (s/def ::networkType #{"public" "private"})
 
 ;; parameter keywords are used in components and application parameter mappings
-(def ^:const parameter-name-regex #"^[a-zA-Z0-9]+([_\.-][a-zA-Z0-9]*)*$")
+(def ^:const parameter-name-regex #"^[a-zA-Z0-9]+([-_\.:][a-zA-Z0-9]*)*$")
 (s/def ::parameter (s/and string? #(re-matches parameter-name-regex %)))
 
 (s/def ::description ::cimi-core/nonblank-string)

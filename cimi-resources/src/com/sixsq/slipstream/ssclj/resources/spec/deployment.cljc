@@ -15,18 +15,22 @@
 
 (s/def ::module ::cimi-common/resource-link)
 
-(s/def ::deploymentTemplate ::cimi-common/resource-link)
+(def ^:const credential-href-regex #"^credential/[a-z0-9]+(-[a-z0-9]+)*(_\d+)?$")
+(s/def ::href (s/and string? #(re-matches credential-href-regex %)))
+(s/def ::secret string?)
+(s/def ::clientApiKey (su/only-keys :req-un [::href
+                                             ::secret]))
 
-(s/def ::keepRunning #{"Always",
-                       "On Success",
-                       "On Error",
-                       "Never"})
+(s/def ::sshPublicKeys string?)
+
+(s/def ::deploymentTemplate ::cimi-common/resource-link)
 
 (def deployment-keys-spec
   (su/merge-keys-specs [cimi-common/common-attrs
+                        deployment-template/deployment-template-keys-spec
                         {:req-un [::state
-                                  ::module]
-                         :opt-un [::keepRunning
-                                  ::deploymentTemplate]}]))
+                                  ::clientApiKey]
+                         :opt-un [::deploymentTemplate
+                                  ::sshPublicKeys]}]))
 
 (s/def ::deployment (su/only-keys-maps deployment-keys-spec))

@@ -11,6 +11,8 @@
     [com.sixsq.slipstream.ssclj.resources.job :as job]
     [com.sixsq.slipstream.ssclj.resources.spec.deployment :as deployment-spec]
     [com.sixsq.slipstream.ssclj.resources.spec.deployment-template :as deployment-template-spec]
+    [com.sixsq.slipstream.ssclj.resources.credential :as credential]
+    [com.sixsq.slipstream.ssclj.resources.credential-template-api-key :as cred-api-key]
     [com.sixsq.slipstream.util.response :as r]
     [taoensso.timbre :as log]))
 
@@ -80,12 +82,24 @@
 
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
+(defn generate-api-key-secret
+  [{:keys [identity] :as request}]
+  (let [request-api-key {:params   {:resource-name credential/resource-url}
+                         :body     {:credentialTemplate {:href (str "credential-template/" cred-api-key/method)}}
+                         :identity identity}
+        {{:keys [status resource-id secretKey] :as body} :body :as response} (crud/add request-api-key)]
+    (if (= status 201)
+      [resource-id secretKey]
+      (throw (ex-info "" body)))))
+
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
   (try
+    (a/can-modify? {:acl collection-acl} request)
     (let [idmap (:identity request)
           desc-attrs (u/select-desc-keys body)
           deployment-tmpl-href (get-in body [:deploymentTemplate :href])
+          [api-key secret] (generate-api-key-secret request)
           deployment (-> body
                          (assoc :resourceURI create-uri)
                          (resolve-hrefs idmap)
@@ -93,6 +107,8 @@
                          crud/validate
                          :deploymentTemplate
                          (assoc :deploymentTemplate {:href deployment-tmpl-href})
+                         (assoc :clientApiKey {:href api-key,
+                                               :secret secret})
                          (assoc :state "CREATED"))]
       (add-impl (assoc request :body deployment)))
     (catch Exception e
@@ -109,7 +125,7 @@
 
 (defmethod crud/edit resource-name
   [request]
-  (edit-impl request))
+  (edit-impl (update request :body dissoc :clientApiKey)))
 
 
 (defn can-delete?

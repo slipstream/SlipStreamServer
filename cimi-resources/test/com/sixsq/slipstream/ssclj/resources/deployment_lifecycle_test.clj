@@ -10,7 +10,8 @@
     [com.sixsq.slipstream.ssclj.resources.deployment-template :as deployment-template]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.module-lifecycle-test :as module-test]
-    [peridot.core :refer :all]))
+    [peridot.core :refer :all]
+    [taoensso.timbre :as log]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 
@@ -33,7 +34,8 @@
                        (ltu/body->edn)
                        (ltu/is-status 201)
                        (ltu/location))
-        valid-deployment-template-create {:module {:href module-uri}}
+        valid-deployment-template-create {:module {:href module-uri}
+                                          :outputParameters [{:parameter "ss:state"}]}
         deployment-template-uri (-> session-user
                                     (request deployment-template-collection-uri
                                              :request-method :post
@@ -65,7 +67,17 @@
                   (ltu/body->edn)
                   (ltu/is-status 201)
                   (ltu/location))
-          abs-uri (str p/service-context (u/de-camelcase uri))]
+          abs-uri (str p/service-context (u/de-camelcase uri))
+          deployment (-> session-user
+                         (request (str abs-uri "?$select=description")
+                                  :request-method :put
+                                  :body (json/write-str {:name "dep 1 new name"
+                                                         :clientApiKey "this field should be ignored, not editable"}))
+                         (ltu/body->edn)
+                         (ltu/is-status 200))
+          cred-uri (str p/service-context
+                        (u/de-camelcase
+                          (get-in deployment [:response :body :clientApiKey :href])))]
 
       ;; user query: ok
       (-> session-user
@@ -77,12 +89,8 @@
           (ltu/entries deployment/resource-tag))
 
       ;; user is able to change name and remove existing description attribute
-      (-> session-user
-          (request (str abs-uri "?$select=description")
-                :request-method :put
-                :body (json/write-str {:name "dep 1 new name"}))
-          (ltu/body->edn)
-          (ltu/is-status 200)
+      ;; but should not able to edit clientApiKey
+      (-> deployment
           (ltu/is-key-value :name "dep 1 new name")
           (#(is (not (contains? % :description)))))
 
@@ -91,7 +99,15 @@
           (ltu/body->edn)
           (ltu/is-status 200)
           (ltu/is-key-value :name "dep 1 new name")
+          (ltu/is-key-value map? :clientApiKey true)
           (#(is (not (contains? (-> % :response :body) :description)))))
+
+      ;; generated api key secret are with user identity claims
+      (-> session-user
+          (request cred-uri)
+          (ltu/body->edn)
+          (ltu/is-status 200)
+          (ltu/is-key-value :claims {:identity "jane", :roles ["USER" "ANON"]}))
 
       ;; admin query: ok
       (-> session-admin

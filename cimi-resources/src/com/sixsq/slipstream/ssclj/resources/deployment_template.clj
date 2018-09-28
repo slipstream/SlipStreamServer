@@ -10,6 +10,7 @@
     [com.sixsq.slipstream.ssclj.resources.module :as m]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template]
     [com.sixsq.slipstream.ssclj.resources.spec.deployment-template :as dt]
+    [com.sixsq.slipstream.ssclj.resources.deployment.utils :as du]
     [com.sixsq.slipstream.util.response :as r]))
 
 (def ^:const resource-tag :deploymentTemplates)
@@ -95,15 +96,15 @@
                      (assoc :href module-href))]
       (assoc deployment-template :module module))))
 
-
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
   (try
     (let [idmap (:identity request)
-          resolved-body (resolve-hrefs body idmap)]
-      (add-impl (assoc request :body resolved-body)))
+          resolved-body (resolve-hrefs body idmap)
+          resolved-body-service-params (du/add-service-params resolved-body)]
+      (add-impl (assoc request :body resolved-body-service-params)))
     (catch Exception e
       (or (ex-data e) (throw e)))))
 
