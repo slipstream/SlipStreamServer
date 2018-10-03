@@ -21,14 +21,15 @@
 
                              :networkType      "public"
 
+                             :disk 200
 
                              :inputParameters  [{:parameter "iparam-1" :description "desc2" :value "100"}
                                                 {:parameter "iparam-2" :description "desc2"}
                                                 {:parameter "iparam-3"}]
 
-                             :outputParameters [{:parameter "iparam-1" :description "desc2" :value "100"}
-                                                {:parameter "iparam-2" :description "desc2"}
-                                                {:parameter "iparam-3"}]
+                             :outputParameters [{:parameter "oparam-1" :description "desc2" :value "100"}
+                                                {:parameter "oparam-2" :description "desc2"}
+                                                {:parameter "oparam-3"}]
 
                              :targets          {:preinstall  "preinstall"
                                                 :packages    ["emacs-nox" "vim"]
@@ -102,6 +103,7 @@
       (-> session-admin
           (request resource-uri)
           (ltu/body->edn)
+          (ltu/dump)
           (ltu/is-status 200))
 
       ;; user get succeeds
