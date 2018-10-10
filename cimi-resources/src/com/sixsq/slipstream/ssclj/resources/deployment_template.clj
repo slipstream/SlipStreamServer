@@ -96,15 +96,18 @@
                      (assoc :href module-href))]
       (assoc deployment-template :module module))))
 
+
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
   (try
     (let [idmap (:identity request)
-          resolved-body (resolve-hrefs body idmap)
-          resolved-body-service-params (du/add-service-params resolved-body)]
-      (add-impl (assoc request :body resolved-body-service-params)))
+          resolved-body (-> body
+                            (resolve-hrefs idmap)
+                            (du/add-global-params))
+          deployment-template (du/create-deployment-template resolved-body)]
+      (add-impl (assoc request :body deployment-template)))
     (catch Exception e
       (or (ex-data e) (throw e)))))
 
