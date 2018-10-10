@@ -103,7 +103,6 @@
       (-> session-admin
           (request resource-uri)
           (ltu/body->edn)
-          (ltu/dump)
           (ltu/is-status 200))
 
       ;; user get succeeds

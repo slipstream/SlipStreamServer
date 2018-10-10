@@ -113,12 +113,15 @@ internal-identity
   "Pulls in the resource identified by the value of the :href key and merges
    that resource with argument. Keys specified directly in the argument take
    precedence. Common attributes in the referenced resource are stripped. If
-   :href doesn't exist the argument is returned unchanged.
+   :href doesn't exist or start with http(s):// the argument is returned
+   unchanged.
 
    If a referenced document doesn't exist or if the user doesn't have read
    access to the document, then the method will throw."
   [{:keys [href] :as resource} idmap]
-  (if-not (str/blank? href)
+  (if-not (or (str/blank? href)
+              (str/starts-with? href "http://")
+              (str/starts-with? href "https://"))
     (if-let [refdoc (crud/retrieve-by-id href)]
       (try
         (a/can-view? refdoc idmap)

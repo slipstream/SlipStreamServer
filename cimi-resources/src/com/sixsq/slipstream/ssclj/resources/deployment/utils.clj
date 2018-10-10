@@ -99,8 +99,6 @@
 
 (defn image-ids-merge
   [{:keys [content] :as module} image-ids-aggregator]
-  (log/error module)
-  (log/error (get content :imageIDs {}) image-ids-aggregator)
   (merge (get content :imageIDs {}) image-ids-aggregator))
 
 
