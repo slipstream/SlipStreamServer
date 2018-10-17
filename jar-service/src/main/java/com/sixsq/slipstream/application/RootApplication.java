@@ -55,7 +55,6 @@ import com.sixsq.slipstream.resource.ModulesChooserResource;
 import com.sixsq.slipstream.resource.RootRedirectResource;
 import com.sixsq.slipstream.resource.NuvlaboxAdminRouter;
 import com.sixsq.slipstream.run.RunRouter;
-import com.sixsq.slipstream.run.VmsRouter;
 import com.sixsq.slipstream.ui.UIResourceRouter;
 import com.sixsq.slipstream.usage.UsageRouter;
 import com.sixsq.slipstream.user.UserRouter;
@@ -235,7 +234,6 @@ public class RootApplication extends Application {
 			attachModule(router);
 			attachUser(router);
 			attachDashboard(router);
-			attachVms(router);
 			attachRun(router);
 			attachTeapot(router);
 			attachRootRedirect(router);
@@ -332,10 +330,6 @@ public class RootApplication extends Application {
 		guardAndAttach(router, new DashboardRouter(getContext()), "dashboard");
 	}
 
-	private void attachVms(RootRouter router) {
-		guardAndAttach(router, new VmsRouter(getContext()), "vms");
-	}
-
 	private Authenticators getAuthenticators(Application application) {
 		Authenticators authenticators = new Authenticators();
 
@@ -353,14 +347,6 @@ public class RootApplication extends Application {
 		TemplateRoute route = rootRouter.attach(convertToRouterRoot(rootUri), authenticator);
 		route.getTemplate().setMatchingMode(Template.MODE_STARTS_WITH);
 		return route;
-	}
-
-	private AuthenticatorsTemplateRoute guardAndAttach(Router rootRouter, Class<? extends ServerResource> router,
-			String rootUri) {
-		Authenticators authenticators = getAuthenticators(rootRouter.getApplication());
-		authenticators.getLast().setNext(router);
-		TemplateRoute route = attach(rootRouter, rootUri, authenticators.getFirst());
-		return new AuthenticatorsTemplateRoute(route, authenticators);
 	}
 
 	private AuthenticatorsTemplateRoute guardAndAttach(Router rootRouter, Router router, String rootUri) {
