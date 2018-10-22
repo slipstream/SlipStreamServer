@@ -37,6 +37,7 @@
    [expound]
    [instaparse]
    [log4j]
+   [metosin/spec-tools]
    [metrics-clojure]
    [metrics-clojure-ring]
    [metrics-clojure-jvm]

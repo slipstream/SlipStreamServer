@@ -4,57 +4,96 @@
     [clojure.spec.alpha :as s]
     [clojure.string :as str]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]))
+    [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [spec-tools.core :as st]))
 
 ;;
 ;; basic types
 ;;
 
-(s/def ::nonblank-string (s/and string? (complement str/blank?)))
+(s/def ::nonblank-string
+  (-> (st/spec (s/and string? (complement str/blank?)))
+      (assoc :name "non-blank string"
+             :description "a string containing something other than only whitespace"
+             :type :string)))
 
-(s/def ::text cu/as-text)
+
+(s/def ::text
+  (-> (st/spec cu/as-text)
+      (assoc :name "text"
+             :description "text containing something other than only whitespace"
+             :type :string)))
 
 (defn token? [s] (re-matches #"^\S+$" s))
-(s/def
-  ::token (s/and string? token?))
+(s/def ::token
+  (-> (st/spec (s/and string? token?))
+      (assoc :name "token"
+             :description "a sequence of one or more non-whitespace characters"
+             :type :string)))
 
-(s/def ::port (s/int-in 1 65536))
+(s/def ::port
+  (-> (st/spec (s/int-in 1 65536))
+      (assoc :name "port"
+             :description "port number in the range 1 to 65535"
+             :type :integer)))
 
 ;; FIXME: Provide an implementation that works with ClojureScript.
-(s/def ::timestamp cu/as-datetime)
+(s/def ::timestamp
+  (-> (st/spec cu/as-datetime)
+      (assoc :name "timestamp"
+             :description "timestamp in ISO8601 format with mandatory Z (UTC) timezone"
+             :type :string)))
 
 ;; FIXME: Remove this definition when resources treat the timestamp as optional rather than allowing an empty value.
 (s/def ::optional-timestamp (s/or :empty #{""} :not-empty ::timestamp))
 
 ;; FIXME: Replace this spec with one that enforces the URI grammar.
-(s/def ::uri ::nonblank-string)
+(s/def ::uri
+  (-> (st/spec ::nonblank-string)
+      (assoc :name "URI"
+             :description "Uniform Resource Identifier"
+             :type :string)))
 
-;; A username can only consist of letters, digits and underscores.
-(s/def ::username (s/and string? #(re-matches #"^[a-zA-Z0-9_]+$" %)))
+(s/def ::username
+  (-> (st/spec (s/and string? #(re-matches #"^[a-zA-Z0-9_]+$" %)))
+      (assoc :name "username"
+             :description "string consisting only of letters, digits, and underscores"
+             :type :string)))
 
-;; A kebab identifier consists of lowercased words separated by dashes.
-(s/def ::kebab-identifier (s/and string? #(re-matches #"^[a-z]+(-[a-z]+)*$" %)))
+(s/def ::kebab-identifier
+  (-> (st/spec (s/and string? #(re-matches #"^[a-z]+(-[a-z]+)*$" %)))
+      (assoc :name "kebab-identifier"
+             :description "string consisting of lowercased words separated by dashes"
+             :type :string)))
 
-;; A resource identifier consists of words of letters and digits separated
-;; by underscores or dashes.
-(s/def ::resource-identifier (s/and string? #(re-matches #"^[a-zA-Z0-9]+([_-][a-zA-Z0-9]+)*$" %)))
+(s/def ::resource-identifier
+  (-> (st/spec (s/and string? #(re-matches #"^[a-zA-Z0-9]+([_-][a-zA-Z0-9]+)*$" %)))
+      (assoc :name "resource identifier"
+             :description "string consisting of letters and digits separated by single underscores or dashes"
+             :type :string)))
 
 ;; Words consisting of lowercase letters and digits, separated by dashes.
-(s/def ::identifier (s/and string? #(re-matches #"^[a-z0-9]+(-[a-z0-9]+)*$" %)))
+(s/def ::identifier
+  (-> (st/spec (s/and string? #(re-matches #"^[a-z0-9]+(-[a-z0-9]+)*$" %)))
+      (assoc :name "identifier"
+             :description "string consisting of words of lowercase letters and digits separated by single dashes"
+             :type :string)))
 
 (s/def ::resource-type ::kebab-identifier)
 
-;; Email address verifier.
+
 (def email-regex #"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 (defn email? [s] (re-matches email-regex s))
 (s/def ::email
-  (s/and string? email?))
+  (-> (st/spec (s/and string? email?))
+      (assoc :name "email"
+             :description "string containing a valid email address"
+             :type :string)))
 
-;;
-;; A resource href is the concatenation of a resource type and resource identifier separated
-;; with a slash.  The later part is optional for singleton resources like the cloud-entry-point.
-;;
 
 (def resource-href-regex #"^[a-z]([a-z-]*[a-z])?(/[a-zA-Z0-9]([a-zA-Z0-9_-]*[a-zA-Z0-9])?)?$")
-(s/def ::resource-href (s/and string? #(re-matches resource-href-regex %)))
+(s/def ::resource-href
+  (-> (st/spec (s/and string? #(re-matches resource-href-regex %)))
+      (assoc :name "resource HREF"
+             :description "concatenation of a resource type and resource identifier separated with a slash")))
 
