@@ -1,8 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.util.userparamsdesc
   (:require
     [com.sixsq.slipstream.ssclj.util.config :as uc])
-  (:import
-    [java.util.HashMap])
   (:gen-class
     :name com.sixsq.slipstream.ssclj.util.UserParamsDesc
     :methods [#^{:static true} [getCloudDesc [java.lang.String] java.util.Map]
