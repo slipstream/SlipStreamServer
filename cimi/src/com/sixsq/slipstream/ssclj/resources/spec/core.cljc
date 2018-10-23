@@ -10,13 +10,17 @@
 ;; basic types
 ;;
 
+(s/def ::scalar (s/or :string string?
+                      :double double?
+                      :integer int?
+                      :boolean boolean?))
+
 (s/def ::nonblank-string (s/and string? (complement str/blank?)))
 
 (s/def ::text cu/as-text)
 
 (defn token? [s] (re-matches #"^\S+$" s))
-(s/def
-  ::token (s/and string? token?))
+(s/def ::token (s/and string? token?))
 
 (s/def ::port (s/int-in 1 65536))
 
@@ -39,6 +43,9 @@
 ;; by underscores or dashes.
 (s/def ::resource-identifier (s/and string? #(re-matches #"^[a-zA-Z0-9]+([_-][a-zA-Z0-9]+)*$" %)))
 
+;; A resource name is a Pascal case token.
+(s/def ::resource-name (s/and string? #(re-matches #"^([A-Z]+[a-z]*)+$" %)))
+
 ;; Words consisting of lowercase letters and digits, separated by dashes.
 (s/def ::identifier (s/and string? #(re-matches #"^[a-z0-9]+(-[a-z0-9]+)*$" %)))
 
@@ -49,6 +56,11 @@
 (defn email? [s] (re-matches email-regex s))
 (s/def ::email
   (s/and string? email?))
+
+(def mimetype-regex #"[a-zA-Z0-9][a-zA-Z0-9!#$&^_-]{0,126}/[a-zA-Z0-9][a-zA-Z0-9!#$&^_-]{0,126}")
+(defn mimetype? [s] (re-matches mimetype-regex s))
+(s/def ::mimetype
+  (s/and string? mimetype?))
 
 ;;
 ;; A resource href is the concatenation of a resource type and resource identifier separated
