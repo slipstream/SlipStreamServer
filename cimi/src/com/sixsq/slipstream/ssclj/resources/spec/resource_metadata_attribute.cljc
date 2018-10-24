@@ -12,7 +12,8 @@
 
 (s/def ::uri ::cimi-core/uri)
 
-(s/def ::type #{"boolean" "dateTime" "duration" "integer" "string" "ref" "double"})
+(s/def ::type #{"boolean" "dateTime" "duration" "integer" "string" "ref" "double" "URI"
+                "map" "Array" "Any"})
 
 (s/def ::providerMandatory boolean?)
 
