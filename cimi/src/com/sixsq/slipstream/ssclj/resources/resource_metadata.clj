@@ -24,6 +24,16 @@
 
 (def ^:const collection-uri (str c/cimi-schema-uri collection-name))
 
+(def default-resource-acl {:owner {:principal "ADMIN"
+                                   :type      "ROLE"}
+                           :rules [{:principal "ADMIN"
+                                    :type      "ROLE"
+                                    :right     "MODIFY"}
+                                   {:principal "ANON"
+                                    :type      "ROLE"
+                                    :right     "VIEW"}]})
+
+
 (def collection-acl {:owner {:principal "ADMIN"
                              :type      "ROLE"}
                      :rules [{:principal "ADMIN"
@@ -43,6 +53,14 @@
        u/md5
        (str resource-url "/")
        (assoc resource :id)))
+
+
+;;
+;; normally resource metadata should be accessible to anyone
+;;
+(defmethod crud/add-acl resource-uri
+  [{:keys [acl] :as resource} request]
+  (assoc resource :acl (or acl default-resource-acl)))
 
 
 (def validate-fn (u/create-spec-validation-fn ::resource-metadata/resource-metadata))
