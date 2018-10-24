@@ -3,7 +3,8 @@
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]))
+    [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [spec-tools.core :as st]))
 
 (s/def ::name ::cimi-core/token)
 
@@ -25,4 +26,6 @@
                                        ::outputMessage]
                               :opt-un [::description]))
 
-(s/def ::actions (s/coll-of ::action :min-count 1 :type vector?))
+(s/def ::actions
+  (st/spec {:spec                  (s/coll-of ::action :min-count 1 :type vector?)
+            :slipstream.es/mapping {:type "object", :enabled false}}))

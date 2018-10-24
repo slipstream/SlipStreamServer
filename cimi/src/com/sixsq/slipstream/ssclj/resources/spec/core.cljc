@@ -4,7 +4,8 @@
     [clojure.spec.alpha :as s]
     [clojure.string :as str]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]))
+    [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [spec-tools.core :as st]))
 
 ;;
 ;; basic types
@@ -17,7 +18,9 @@
 
 (s/def ::nonblank-string (s/and string? (complement str/blank?)))
 
-(s/def ::text cu/as-text)
+(s/def ::text
+  (st/spec {:spec                  cu/as-text
+            :slipstream.es/mapping {:type "text"}}))
 
 (defn token? [s] (re-matches #"^\S+$" s))
 (s/def ::token (s/and string? token?))
@@ -25,7 +28,10 @@
 (s/def ::port (s/int-in 1 65536))
 
 ;; FIXME: Provide an implementation that works with ClojureScript.
-(s/def ::timestamp cu/as-datetime)
+(s/def ::timestamp
+  (st/spec {:spec                  cu/as-datetime
+            :slipstream.es/mapping {:type   "date"
+                                    :format "strict_date_optional_time||epoch_millis"}}))
 
 ;; FIXME: Remove this definition when resources treat the timestamp as optional rather than allowing an empty value.
 (s/def ::optional-timestamp (s/or :empty #{""} :not-empty ::timestamp))

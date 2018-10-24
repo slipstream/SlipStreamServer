@@ -5,7 +5,8 @@
     [com.sixsq.slipstream.ssclj.resources.spec.acl :as cimi-acl]
     [com.sixsq.slipstream.ssclj.resources.spec.common-operation :as cimi-common-operation]
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]))
+    [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [spec-tools.core :as st]))
 
 ;;
 ;; common CIMI attributes
@@ -27,7 +28,9 @@
 ;; resource operations
 (s/def ::operation (su/only-keys :req-un [::cimi-common-operation/href
                                           ::cimi-common-operation/rel]))
-(s/def ::operations (s/coll-of ::operation :min-count 1))
+(s/def ::operations
+  (st/spec {:spec                  (s/coll-of ::operation :min-count 1)
+            :slipstream.es/mapping {:type "object", :enabled false}}))
 
 ;; client-controlled properties
 (s/def ::kw-or-str (s/or :keyword keyword? :string ::cimi-core/nonblank-string))

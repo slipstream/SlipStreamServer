@@ -20,7 +20,7 @@
                                                                         "type"      {:type "keyword"},
                                                                         "right"     {:type "keyword"}}}}}
 
-                       ::common/operations {:type "object", :properties {"href" {:type "keyword"}, "rel" {:type "keyword"}}}
+                       ::common/operations {:type "object", :enabled false}
 
 
                        ::common/properties {:type "object"}

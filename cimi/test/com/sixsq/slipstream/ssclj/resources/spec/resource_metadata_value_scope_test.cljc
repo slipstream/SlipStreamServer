@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.resource-metadata-value-scope-test
   (:require
     [clojure.test :refer [are deftest is]]
+    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.resource-metadata-value-scope :as spec]
     [com.sixsq.slipstream.ssclj.resources.spec.resource-metadata-value-scope-item-test :as item]
     [com.sixsq.slipstream.ssclj.resources.spec.resource-metadata-value-scope-enumeration-test :as enumeration]
@@ -18,6 +19,8 @@
 
 
 (deftest check-value-scope
+
+  (s/explain ::spec/vscope valid)
 
   (stu/is-valid ::spec/vscope valid)
 
