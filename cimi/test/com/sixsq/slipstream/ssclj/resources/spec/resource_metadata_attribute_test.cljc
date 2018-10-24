@@ -13,12 +13,16 @@
             :consumerWritable  true
 
             :namespace         "https://sixsq.com/slipstream/"
+            :uri               "https://sixsq.com/slipstream/param-info"
+            :displayName       "my action"
             :description       "a wonderful attribute"
             :help              "just give me a value"
-            :displayName       "my action"
+            :group             "body"
             :category          "some string for a category"
             :order             10
-            :enum              ["a" "b" "c"]})
+            :hidden            false
+            :sensitive         false
+            :lines             3})
 
 
 (deftest check-attribute
@@ -27,7 +31,7 @@
 
   (stu/is-valid ::spec/attribute valid)
 
-  (doseq [k #{:namespace :description :help :displayName :category :order :enum}]
+  (doseq [k #{:namespace :uri :displayName :description :help :group :category :order :hidden :sensitive :lines}]
     (stu/is-valid ::spec/attribute (dissoc valid k)))
 
   (doseq [k #{:name :type :providerMandatory :consumerMandatory :mutable :consumerWritable}]

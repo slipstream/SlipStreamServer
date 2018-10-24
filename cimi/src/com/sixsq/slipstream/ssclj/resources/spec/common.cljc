@@ -14,8 +14,10 @@
 
 ;; simple attributes
 (s/def ::id ::cimi-core/resource-href)
+
+
 (s/def ::resourceURI ::cimi-core/uri)
-(s/def ::created ::cimi-core/timestamp)
+(s/def ::created (-> (st/spec ::cimi-core/timestamp) (assoc :json-schema/name "UTC timestamp for when resource was created")))
 (s/def ::updated ::cimi-core/timestamp)
 (s/def ::name ::cimi-core/nonblank-string)
 (s/def ::description ::cimi-core/text)

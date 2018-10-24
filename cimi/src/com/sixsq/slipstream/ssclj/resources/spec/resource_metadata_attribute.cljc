@@ -12,8 +12,7 @@
 
 (s/def ::uri ::cimi-core/uri)
 
-(s/def ::type #{"string" "text" "boolean" "uri" "integer" "float" "double"
-                "timestamp" "enum" "password" "hidden" "object" "array"})
+(s/def ::type #{"boolean" "dateTime" "duration" "integer" "string" "ref" "double"})
 
 (s/def ::providerMandatory boolean?)
 
@@ -29,17 +28,23 @@
 ;; useful for rendering forms for browser-based clients
 ;;
 
+(s/def ::displayName ::cimi-core/nonblank-string)
+
 (s/def ::description ::cimi-core/nonblank-string)
 
 (s/def ::help ::cimi-core/nonblank-string)
 
-(s/def ::displayName ::cimi-core/nonblank-string)
+(s/def ::group #{"metadata" "body" "acl"})
 
 (s/def ::category ::cimi-core/nonblank-string)
 
 (s/def ::order nat-int?)
 
-(s/def ::enum (s/coll-of ::cimi-core/nonblank-string :min-count 1))
+(s/def ::hidden boolean?)
+
+(s/def ::sensitive boolean?)
+
+(s/def ::lines pos-int?)
 
 
 ;;
@@ -55,12 +60,16 @@
                                           ::mutable
                                           ::consumerWritable]
                                  :opt-un [::namespace
+                                          ::uri
+                                          ::displayName
                                           ::description
                                           ::help
-                                          ::displayName
+                                          ::group
                                           ::category
                                           ::order
-                                          ::enum]))
+                                          ::hidden
+                                          ::sensitive
+                                          ::lines]))
 
 (s/def ::attributes
   (st/spec {:spec                  (s/coll-of ::attribute :min-count 1 :type vector?)
