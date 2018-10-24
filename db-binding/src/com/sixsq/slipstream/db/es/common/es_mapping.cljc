@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.db.es.common.es-mapping
   "Utility for converting clojure.spec definitions to Elasticsearch mappings."
   (:require
+    [spec-tools.core :as st]
     [spec-tools.impl :as impl]
     [spec-tools.parse :as parse]
     [spec-tools.visitor :as visitor]))
@@ -39,12 +40,6 @@
    (transform spec nil))
   ([spec options]
    (visitor/visit spec accept-spec options)))
-
-
-(defmethod accept-spec 'com.sixsq.slipstream.ssclj.resources.common.utils/as-datetime [_ _ _ _] {:type   "date"
-                                                                                                 :format "strict_date_optional_time||epoch_millis"})
-
-(defmethod accept-spec 'com.sixsq.slipstream.ssclj.resources.common.utils/as-text [_ _ _ _] {:type "text"})
 
 
 ;;
@@ -251,8 +246,16 @@
 (defmethod accept-spec 'clojure.spec.alpha/int-in-range? [_ _ _ _]
   {:type "long"})
 
-(defmethod accept-spec ::visitor/spec [_ _ children _]
-  (impl/unwrap children))
+;;
+;; if the spec (defined with spec-tools) contains the metadata key
+;; :slipstream.es/mapping, then the value is used in preference to
+;; any generated mapping.  This can be used to change the indexing
+;; type (e.g. {:type "text"}) or to turn off indexing entirely:
+;; {:index false}.
+;;
+(defmethod accept-spec ::visitor/spec [_ spec children _]
+  (let [[_ {:keys [:slipstream.es/mapping] :as data}] (impl/extract-form spec)]
+    (or mapping (impl/unwrap children))))
 
 (defmethod accept-spec ::default [_ _ _ _]
   {})

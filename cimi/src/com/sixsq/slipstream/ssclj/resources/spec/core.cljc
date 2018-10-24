@@ -11,6 +11,11 @@
 ;; basic types
 ;;
 
+(s/def ::scalar (s/or :string string?
+                      :double double?
+                      :integer int?
+                      :boolean boolean?))
+
 (s/def ::nonblank-string
   (-> (st/spec (s/and string? (complement str/blank?)))
       (assoc :name "non-blank string"
@@ -24,12 +29,14 @@
              :description "text containing something other than only whitespace"
              :type :string)))
 
+
 (defn token? [s] (re-matches #"^\S+$" s))
 (s/def ::token
   (-> (st/spec (s/and string? token?))
       (assoc :name "token"
              :description "a sequence of one or more non-whitespace characters"
              :type :string)))
+
 
 (s/def ::port
   (-> (st/spec (s/int-in 1 65536))
@@ -39,10 +46,9 @@
 
 ;; FIXME: Provide an implementation that works with ClojureScript.
 (s/def ::timestamp
-  (-> (st/spec cu/as-datetime)
-      (assoc :name "timestamp"
-             :description "timestamp in ISO8601 format with mandatory Z (UTC) timezone"
-             :type :string)))
+  (st/spec {:spec                  cu/as-datetime
+            :slipstream.es/mapping {:type   "date"
+                                    :format "strict_date_optional_time||epoch_millis"}}))
 
 ;; FIXME: Remove this definition when resources treat the timestamp as optional rather than allowing an empty value.
 (s/def ::optional-timestamp (s/or :empty #{""} :not-empty ::timestamp))
@@ -72,6 +78,9 @@
              :description "string consisting of letters and digits separated by single underscores or dashes"
              :type :string)))
 
+;; A resource name is a Pascal case token.
+(s/def ::resource-name (s/and string? #(re-matches #"^([A-Z]+[a-z]*)+$" %)))
+
 ;; Words consisting of lowercase letters and digits, separated by dashes.
 (s/def ::identifier
   (-> (st/spec (s/and string? #(re-matches #"^[a-z0-9]+(-[a-z0-9]+)*$" %)))
@@ -90,6 +99,15 @@
              :description "string containing a valid email address"
              :type :string)))
 
+(def mimetype-regex #"[a-zA-Z0-9][a-zA-Z0-9!#$&^_-]{0,126}/[a-zA-Z0-9][a-zA-Z0-9!#$&^_-]{0,126}")
+(defn mimetype? [s] (re-matches mimetype-regex s))
+(s/def ::mimetype
+  (s/and string? mimetype?))
+
+;;
+;; A resource href is the concatenation of a resource type and resource identifier separated
+;; with a slash.  The later part is optional for singleton resources like the cloud-entry-point.
+;;
 
 (def resource-href-regex #"^[a-z]([a-z-]*[a-z])?(/[a-zA-Z0-9]([a-zA-Z0-9_-]*[a-zA-Z0-9])?)?$")
 (s/def ::resource-href
