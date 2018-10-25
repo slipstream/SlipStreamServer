@@ -257,11 +257,8 @@
              :slipstream.es/mapping {:type "object", :enabled false})))
 
 
-(s/def ::kw-or-str (s/or :keyword keyword? :string ::cimi-core/nonblank-string))
-
-
 (s/def ::properties
-  (-> (st/spec (s/map-of ::kw-or-str string? :min-count 1))
+  (-> (st/spec (s/map-of keyword? string? :min-count 1))
       (assoc :name "properties"
              :type :map
              :json-schema/name "properties"
@@ -283,11 +280,7 @@
              :json-schema/sensitive false)))
 
 
-(s/def ::acl (su/only-keys :req-un [::cimi-acl/owner]
-                           :opt-un [::cimi-acl/rules]))
-
-
-#_(s/def ::acl
+(s/def ::acl
     (-> (st/spec (su/only-keys :req-un [::cimi-acl/owner]
                                :opt-un [::cimi-acl/rules]))
         (assoc :name "acl"

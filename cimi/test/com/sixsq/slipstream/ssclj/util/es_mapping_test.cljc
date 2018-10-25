@@ -34,5 +34,4 @@
                        ::common/href {:type "keyword"}
                        ::common/resource-link {:type "object", :properties {"href" {:type "keyword"}}}
                        ::common/resource-links {:type "object", :properties {"href" {:type "keyword"}}}
-                       ::common/operation {:type "object", :properties {"href" {:type "keyword"}, "rel" {:type "keyword"}}}
-                       ::common/kw-or-str {:type "keyword"}))
+                       ::common/operation {:type "object", :properties {"href" {:type "keyword"}, "rel" {:type "keyword"}}}))

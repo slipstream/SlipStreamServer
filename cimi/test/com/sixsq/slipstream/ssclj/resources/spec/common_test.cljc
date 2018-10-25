@@ -47,14 +47,13 @@
   (stu/is-valid ::cimi-common/operations [{:href "uri" :rel "add"} {:href "uri" :rel "delete"}])
   (stu/is-invalid ::cimi-common/operations []))
 
-;; FIXME: What's wrong with the following definitions!
-;
-;(deftest check-properties
-;  (doseq [v #{{:a "ok"}, {:a "ok" :b "ok"}, {"a" "ok"}, {"a" "ok" "b" "ok"}}]
-;    (stu/is-valid ::cimi-common/properties v))
-;
-;  (doseq [v #{{}, {1 "bad"}, {"bad" 1}, [:bad "bad"]}]
-;    (stu/is-invalid ::cimi-common/properties v)))
+
+(deftest check-properties
+  (doseq [v #{{:a "ok"}, {:a "ok" :b "ok"}}]
+    (stu/is-valid ::cimi-common/properties v))
+
+  (doseq [v #{{}, {1 "bad"}, {"bad" 1}, [:bad "bad"], {"a" "ok"}, {"a" "ok" "b" "ok"}}]
+    (stu/is-invalid ::cimi-common/properties v)))
 
 
 (deftest check-owner
@@ -129,7 +128,7 @@
         maximal (assoc minimal
                   :name "name"
                   :description "description"
-                  :properties {"a" "b"}
+                  :properties {:a "b"}
                   :operations [{:rel "add" :href "/add"}]
                   :acl acl)]
 
