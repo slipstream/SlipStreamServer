@@ -4,7 +4,11 @@
   (:require
     [clojure.set :as set]
     [clojure.spec.alpha :as s]
-    [spec-tools.core :as st]))
+    [spec-tools.core :as st]
+    [spec-tools.parse :as st-parse]
+    [spec-tools.visitor :as visitor]
+    [spec-tools.json-schema :as jsc]
+    [com.sixsq.slipstream.db.es.common.es-mapping :as es-mapping]))
 
 (def ^:private all-ascii-chars (map str (map char (range 0 256))))
 
@@ -83,3 +87,62 @@
                                       any?)
                       :link (s/tuple ~key-spec ~value-spec)))
        (s/keys ~@(apply concat (vec map-spec))))))
+
+
+;;
+;; spec parsing patches
+;;
+
+(defmethod st-parse/parse-form 'com.sixsq.slipstream.ssclj.util.spec/only-keys [dispatch form]
+  (st-parse/parse-form 'clojure.spec.alpha/keys form))
+
+
+(defmethod st-parse/parse-form 'com.sixsq.slipstream.ssclj.util.spec/only-keys-maps [dispatch form]
+  (st-parse/parse-form 'clojure.spec.alpha/keys form))
+
+
+(defmethod st-parse/parse-form 'com.sixsq.slipstream.ssclj.util.spec/constrained-map [dispatch form]
+  (st-parse/parse-form 'clojure.spec.alpha/keys form))
+
+;;
+;; patches for spec walking via visitor
+;;
+
+(defmethod visitor/visit-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys [spec accept options]
+  (visitor/visit-spec 'clojure.spec.alpha/keys accept options))
+
+
+(defmethod visitor/visit-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys-maps [spec accept options]
+  (visitor/visit-spec 'clojure.spec.alpha/keys accept options))
+
+
+(defmethod visitor/visit-spec 'com.sixsq.slipstream.ssclj.util.spec/constrained-map [spec accept options]
+  (visitor/visit-spec 'clojure.spec.alpha/keys accept options))
+
+;;
+;; patch transform of spec into ES mapping
+;;
+
+(defmethod es-mapping/accept-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys [dispatch spec children arg]
+  (es-mapping/accept-spec 'clojure.spec.alpha/keys spec children arg))
+
+
+(defmethod es-mapping/accept-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys-maps [dispatch spec children arg]
+  (es-mapping/accept-spec 'clojure.spec.alpha/keys spec children arg))
+
+
+(defmethod es-mapping/accept-spec 'com.sixsq.slipstream.ssclj.util.spec/constrained-map [dispatch spec children arg]
+  (es-mapping/accept-spec 'clojure.spec.alpha/keys spec children arg))
+
+
+;;
+;; provide alternate entry points to ensure monkey patches have been applied
+;;
+
+(def es-mapping es-mapping/transform)
+
+
+(def visit visitor/visit)
+
+
+(def json-schema jsc/transform)
