@@ -28,20 +28,6 @@
                                  :opt-un [:ns4/four]}
                                 {:opt-un [:ns6/six]}])))))
 
-(deftest check-unnamespaced-kws
-  (is (= #{} (t/unnamespaced-kws nil)))
-  (is (= #{} (t/unnamespaced-kws [])))
-  (is (= #{:a :b :c} (t/unnamespaced-kws [:a :alpha/b :alpha.beta/c])))
-  (is (thrown? Exception (t/unnamespaced-kws [:a 3]))))
-
-(deftest check-allowed-keys
-  (let [keys-spec {:req     [:ns1/one :ns2/two]
-                   :req-un  [:ns3/three]
-                   :opt     [:ns4/four]
-                   :opt-un  [:ns5/five :ns6/six]
-                   :ignored [:ns7/seven]}]
-    (is (= #{:ns1/one :ns2/two :three :ns4/four :five :six} (t/allowed-keys keys-spec)))))
-
 (s/def :ns1/one boolean?)
 (s/def :ns2/two string?)
 (s/def :ns3/three keyword?)

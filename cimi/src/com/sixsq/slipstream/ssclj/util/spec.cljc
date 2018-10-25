@@ -4,9 +4,9 @@
   (:require
     [clojure.set :as set]
     [clojure.spec.alpha :as s]
-    [spec-tools.core :as st]
     [spec-tools.parse :as st-parse]
     [spec-tools.visitor :as visitor]
+    [spec-tools.impl :as impl]
     [com.sixsq.slipstream.db.es.common.es-mapping :as es-mapping]))
 
 (def ^:private all-ascii-chars (map str (map char (range 0 256))))
@@ -29,21 +29,6 @@
   (->> map-specs
        (map eval)
        (apply merge-with merge-kw-lists)))
-
-(defn unnamespaced-kws
-  "Removes the namespaces from the provided list of keywords
-   and returns the resulting set."
-  [kws]
-  (set (map (comp keyword name) kws)))
-
-(defn allowed-keys
-  "Returns a set of all the allowed keys from a clojure.spec/keys
-   specification provided as a map."
-  [{:keys [req req-un opt opt-un]}]
-  (st/spec (set (concat req
-                        (unnamespaced-kws req-un)
-                        opt
-                        (unnamespaced-kws opt-un)))))
 
 (defmacro only-keys
   "Creates a closed map definition where only the defined keys are
@@ -108,15 +93,18 @@
 ;;
 
 (defmethod visitor/visit-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys [spec accept options]
-  (visitor/visit-spec 'clojure.spec.alpha/keys accept options))
+  (let [keys (impl/extract-keys (impl/extract-form spec))]
+    (accept 'com.sixsq.slipstream.ssclj.util.spec/only-keys spec (mapv #(visitor/visit % accept options) keys) options)))
 
 
 (defmethod visitor/visit-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys-maps [spec accept options]
-  (visitor/visit-spec 'clojure.spec.alpha/keys accept options))
+  (let [keys (impl/extract-keys (impl/extract-form spec))]
+    (accept 'com.sixsq.slipstream.ssclj.util.spec/only-keys-maps spec (mapv #(visitor/visit % accept options) keys) options)))
 
 
 (defmethod visitor/visit-spec 'com.sixsq.slipstream.ssclj.util.spec/constrained-map [spec accept options]
-  (visitor/visit-spec 'clojure.spec.alpha/keys accept options))
+  (let [keys (impl/extract-keys (impl/extract-form spec))]
+    (accept 'com.sixsq.slipstream.ssclj.util.spec/constrained-map spec (mapv #(visitor/visit % accept options) keys) options)))
 
 ;;
 ;; patch transform of spec into ES mapping
