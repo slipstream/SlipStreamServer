@@ -5,19 +5,7 @@
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.resources.spec.common-namespaces :as common-ns]
     [com.sixsq.slipstream.ssclj.util.spec :as su]
-    [spec-tools.core :as st]
-    [spec-tools.parse :as st-parse]
-    [spec-tools.impl :as impl]))
-
-
-(defmethod st-parse/parse-form 'com.sixsq.slipstream.ssclj.util.spec/only-keys [_ form]
-  (let [{:keys [req opt req-un opt-un key->spec]} (impl/parse-keys form)]
-    (println "DEBUG DEBUG DEBUG DEBUG: " form)
-    (cond-> {:type       :map
-             ::st-parse/key->spec key->spec
-             ::st-parse/keys      (set (concat req opt req-un opt-un))}
-            (or req req-un) (assoc ::st-parse/keys-req (set (concat req req-un)))
-            (or opt opt-un) (assoc ::st-parse/keys-opt (set (concat opt opt-un))))))
+    [spec-tools.core :as st]))
 
 
 (s/def ::principal ::cimi-core/nonblank-string)
@@ -37,10 +25,7 @@
 
 
 (s/def ::owner
-  (-> (st/spec (com.sixsq.slipstream.ssclj.util.spec/only-keys :req-un [::principal ::type])
-               #_(s/merge (s/keys :req-un [::principal
-                                           ::type])
-                          (s/map-of #{:principal :type} any?)))
+  (-> (st/spec (su/only-keys :req-un [::principal ::type]))
       (assoc :name "owner"
              :type :map
              :json-schema/name "owner"
