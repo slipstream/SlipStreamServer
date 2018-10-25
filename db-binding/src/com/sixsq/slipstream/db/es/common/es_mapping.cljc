@@ -176,6 +176,15 @@
     {:type       "object"
      :properties (zipmap (concat names names-un) children)}))
 
+
+(defmethod accept-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys [_ spec children _]
+  (let [{:keys [req req-un opt opt-un]} (impl/parse-keys (impl/extract-form spec))
+        names-un (map name (concat req-un opt-un))
+        names (map impl/qualified-name (concat req opt))]
+    {:type       "object"
+     :properties (zipmap (concat names names-un) children)}))
+
+
 (defmethod accept-spec 'clojure.spec.alpha/or [_ _ children _]
   (first children))
 

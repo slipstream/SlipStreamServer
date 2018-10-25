@@ -3,16 +3,11 @@
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.acl :as cimi-acl]
+    [com.sixsq.slipstream.ssclj.resources.spec.common-namespaces :as common-ns]
     [com.sixsq.slipstream.ssclj.resources.spec.common-operation :as cimi-common-operation]
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.util.spec :as su]
     [spec-tools.core :as st]))
-
-
-(def cimi-namespace "http://schemas.dmtf.org/cimi/2")
-
-
-(def cimi-uri "https://www.dmtf.org/sites/default/files/standards/documents/DSP0263_2.0.0.pdf")
 
 
 (s/def ::id
@@ -20,8 +15,8 @@
       (assoc :name "id"
              :type :string
              :json-schema/name "id"
-             :json-schema/namespace cimi-namespace
-             :json-schema/uri cimi-uri
+             :json-schema/namespace common-ns/cimi-namespace
+             :json-schema/uri common-ns/cimi-uri
              :json-schema/type "string"
              :json-schema/providerMandatory true
              :json-schema/consumerMandatory false
@@ -43,8 +38,8 @@
       (assoc :name "resourceURI"
              :type :uri
              :json-schema/name "resourceURI"
-             :json-schema/namespace cimi-namespace
-             :json-schema/uri cimi-uri
+             :json-schema/namespace common-ns/cimi-namespace
+             :json-schema/uri common-ns/cimi-uri
              :json-schema/type "URI"
              :json-schema/providerMandatory true
              :json-schema/consumerMandatory false
@@ -66,8 +61,8 @@
       (assoc :name "created"
              :type :string
              :json-schema/name "created"
-             :json-schema/namespace cimi-namespace
-             :json-schema/uri cimi-uri
+             :json-schema/namespace common-ns/cimi-namespace
+             :json-schema/uri common-ns/cimi-uri
              :json-schema/type "dateTime"
              :json-schema/providerMandatory true
              :json-schema/consumerMandatory false
@@ -89,8 +84,8 @@
       (assoc :name "updated"
              :type :string
              :json-schema/name "updated"
-             :json-schema/namespace cimi-namespace
-             :json-schema/uri cimi-uri
+             :json-schema/namespace common-ns/cimi-namespace
+             :json-schema/uri common-ns/cimi-uri
              :json-schema/type "dateTime"
              :json-schema/providerMandatory true
              :json-schema/consumerMandatory false
@@ -112,8 +107,8 @@
       (assoc :name "name"
              :type :string
              :json-schema/name "name"
-             :json-schema/namespace cimi-namespace
-             :json-schema/uri cimi-uri
+             :json-schema/namespace common-ns/cimi-namespace
+             :json-schema/uri common-ns/cimi-uri
              :json-schema/type "string"
              :json-schema/providerMandatory false
              :json-schema/consumerMandatory false
@@ -135,8 +130,8 @@
       (assoc :name "description"
              :type :string
              :json-schema/name "description"
-             :json-schema/namespace cimi-namespace
-             :json-schema/uri cimi-uri
+             :json-schema/namespace common-ns/cimi-namespace
+             :json-schema/uri common-ns/cimi-uri
              :json-schema/type "string"
              :json-schema/providerMandatory false
              :json-schema/consumerMandatory false
@@ -158,8 +153,8 @@
       (assoc :name "href"
              :type :uri
              :json-schema/name "href"
-             :json-schema/namespace cimi-namespace
-             :json-schema/uri cimi-uri
+             :json-schema/namespace common-ns/cimi-namespace
+             :json-schema/uri common-ns/cimi-uri
              :json-schema/type "URI"
              :json-schema/providerMandatory false
              :json-schema/consumerMandatory false
@@ -178,8 +173,8 @@
       (assoc :name "resourceLink"
              :type :map
              :json-schema/name "resourceLink"
-             :json-schema/namespace cimi-namespace
-             :json-schema/uri cimi-uri
+             :json-schema/namespace common-ns/cimi-namespace
+             :json-schema/uri common-ns/cimi-uri
              :json-schema/type "map"
              :json-schema/providerMandatory false
              :json-schema/consumerMandatory false
@@ -198,8 +193,8 @@
       (assoc :name "resourceLinks"
              :type :vector
              :json-schema/name "resourceLinks"
-             :json-schema/namespace cimi-namespace
-             :json-schema/uri cimi-uri
+             :json-schema/namespace common-ns/cimi-namespace
+             :json-schema/uri common-ns/cimi-uri
              :json-schema/type "Array"
              :json-schema/providerMandatory false
              :json-schema/consumerMandatory false
@@ -219,8 +214,8 @@
       (assoc :name "operation"
              :type :map
              :json-schema/name "operation"
-             :json-schema/namespace cimi-namespace
-             :json-schema/uri cimi-uri
+             :json-schema/namespace common-ns/cimi-namespace
+             :json-schema/uri common-ns/cimi-uri
              :json-schema/type "map"
              :json-schema/providerMandatory false
              :json-schema/consumerMandatory false
@@ -242,8 +237,8 @@
       (assoc :name "operations"
              :type :vector
              :json-schema/name "operations"
-             :json-schema/namespace cimi-namespace
-             :json-schema/uri cimi-uri
+             :json-schema/namespace common-ns/cimi-namespace
+             :json-schema/uri common-ns/cimi-uri
              :json-schema/type "Array"
              :json-schema/providerMandatory false
              :json-schema/consumerMandatory false
@@ -270,8 +265,8 @@
       (assoc :name "properties"
              :type :map
              :json-schema/name "properties"
-             :json-schema/namespace cimi-namespace
-             :json-schema/uri cimi-uri
+             :json-schema/namespace common-ns/cimi-namespace
+             :json-schema/uri common-ns/cimi-uri
              :json-schema/type "map"
              :json-schema/providerMandatory false
              :json-schema/consumerMandatory false
@@ -298,8 +293,8 @@
         (assoc :name "acl"
                :type :map
                :json-schema/name "acl"
-               :json-schema/namespace cimi-namespace
-               :json-schema/uri cimi-uri
+               :json-schema/namespace common-ns/cimi-namespace
+               :json-schema/uri common-ns/cimi-uri
                :json-schema/type "map"
                :json-schema/providerMandatory true
                :json-schema/consumerMandatory false
