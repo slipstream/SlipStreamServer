@@ -18,7 +18,7 @@
 (deftest check-select-desc-keys
   (let [resource {:name "name"
                   :description "description"
-                  :properties {"first" "one", "second" "two"}}]
+                  :properties {:first "one", :second "two"}}]
     (is (= resource (t/select-desc-keys resource)))
     (is (= resource (t/select-desc-keys (assoc resource :other "ignored"))))
     (is (= (dissoc resource :name) (t/select-desc-keys (dissoc resource :name))))))

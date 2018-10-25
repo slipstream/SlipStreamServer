@@ -20,7 +20,7 @@
              :name        "my-template"
              :description "my template"
              :group       "my group"
-             :properties  {"a" "1", "b" "2"}
+             :properties  {:a "1", :b "2"}
              :created     timestamp
              :updated     timestamp
              :acl         valid-acl
@@ -30,7 +30,7 @@
 
         create-tpl {:name         "my-create"
                     :description  "my create description"
-                    :properties   {"c" "3", "d" "4"}
+                    :properties   {:c "3", :d "4"}
                     :resourceURI  "http://sixsq.com/slipstream/1/UserTemplateCreate"
                     :userTemplate (dissoc tpl :id)}]
 

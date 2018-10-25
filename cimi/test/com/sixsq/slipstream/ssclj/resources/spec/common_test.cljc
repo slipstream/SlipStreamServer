@@ -49,10 +49,10 @@
 
 
 (deftest check-properties
-  (doseq [v #{{:a "ok"}, {:a "ok" :b "ok"}, {"a" "ok"}, {"a" "ok" "b" "ok"}}]
+  (doseq [v #{{:a "ok"}, {:a "ok" :b "ok"}}]
     (stu/is-valid ::cimi-common/properties v))
 
-  (doseq [v #{{}, {1 "bad"}, {"bad" 1}, [:bad "bad"]}]
+  (doseq [v #{{}, {1 "bad"}, {"bad" 1}, [:bad "bad"], {"a" "ok"}, {"a" "ok" "b" "ok"}}]
     (stu/is-invalid ::cimi-common/properties v)))
 
 
@@ -85,7 +85,7 @@
                {:principal "ALPHA", :type "USER", :right "ALL"}]]
 
     (stu/is-valid ::cimi-acl/rules rules)
-    (stu/is-valid ::cimi-acl/rules (next rules))
+    (stu/is-valid ::cimi-acl/rules (vec (next rules)))
 
     (stu/is-invalid ::cimi-acl/rules (nnext rules))
     (stu/is-invalid ::cimi-acl/rules (cons 1 rules))))
@@ -128,7 +128,7 @@
         maximal (assoc minimal
                   :name "name"
                   :description "description"
-                  :properties {"a" "b"}
+                  :properties {:a "b"}
                   :operations [{:rel "add" :href "/add"}]
                   :acl acl)]
 
