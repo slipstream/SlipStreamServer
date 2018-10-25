@@ -7,7 +7,6 @@
     [spec-tools.core :as st]
     [spec-tools.parse :as st-parse]
     [spec-tools.visitor :as visitor]
-    [spec-tools.json-schema :as jsc]
     [com.sixsq.slipstream.db.es.common.es-mapping :as es-mapping]))
 
 (def ^:private all-ascii-chars (map str (map char (range 0 256))))
@@ -133,16 +132,3 @@
 
 (defmethod es-mapping/accept-spec 'com.sixsq.slipstream.ssclj.util.spec/constrained-map [dispatch spec children arg]
   (es-mapping/accept-spec 'clojure.spec.alpha/keys spec children arg))
-
-
-;;
-;; provide alternate entry points to ensure monkey patches have been applied
-;;
-
-(def es-mapping es-mapping/transform)
-
-
-(def visit visitor/visit)
-
-
-(def json-schema jsc/transform)
