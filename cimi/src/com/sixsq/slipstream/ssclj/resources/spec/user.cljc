@@ -2,10 +2,10 @@
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as cimi-common]
+    [com.sixsq.slipstream.ssclj.resources.spec.common-namespaces :as common-ns]
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.util.spec :as su]
-    [spec-tools.core :as st]
-    [com.sixsq.slipstream.ssclj.resources.spec.common-namespaces :as common-ns]))
+    [spec-tools.core :as st]))
 
 
 ;; Less restrictive than standard ::cimi-common/id to accommodate OIDC, etc.

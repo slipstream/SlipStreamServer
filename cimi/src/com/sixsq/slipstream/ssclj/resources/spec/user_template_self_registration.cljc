@@ -1,11 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.user-template-self-registration
   (:require
     [clojure.spec.alpha :as s]
+    [com.sixsq.slipstream.ssclj.resources.spec.common-namespaces :as common-ns]
     [com.sixsq.slipstream.ssclj.resources.spec.user :as user]
     [com.sixsq.slipstream.ssclj.resources.spec.user-template :as ps]
     [com.sixsq.slipstream.ssclj.util.spec :as su]
-    [spec-tools.core :as st]
-    [com.sixsq.slipstream.ssclj.resources.spec.common-namespaces :as common-ns]))
+    [spec-tools.core :as st]))
 
 
 (s/def ::password

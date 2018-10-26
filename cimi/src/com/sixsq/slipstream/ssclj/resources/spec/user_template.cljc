@@ -2,11 +2,11 @@
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
+    [com.sixsq.slipstream.ssclj.resources.spec.common-namespaces :as common-ns]
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.resources.spec.ui-hints :as hints]
     [com.sixsq.slipstream.ssclj.util.spec :as su]
-    [spec-tools.core :as st]
-    [com.sixsq.slipstream.ssclj.resources.spec.common-namespaces :as common-ns]))
+    [spec-tools.core :as st]))
 
 
 ;; All user templates must indicate the method used to create the user.
