@@ -24,8 +24,8 @@
 
 (deftest check-correct-metadata
 
-  (expound/expound ::md/resource-metadata (t/generate "https://example.com/type" ::api-key-session/api-key))
-  (clojure.pprint/pprint (t/generate "https://example.com/type" ::api-key-session/api-key))
+  #_(expound/expound ::md/resource-metadata (t/generate "https://example.com/type" ::api-key-session/api-key))
+  #_(clojure.pprint/pprint (t/generate "https://example.com/type" ::api-key-session/api-key))
 
   (are [spec] (stu/is-valid ::md/resource-metadata (t/generate "https://example.com/type" spec))
 
