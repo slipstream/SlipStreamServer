@@ -148,6 +148,52 @@
              :json-schema/sensitive false)))
 
 
+(s/def ::parent
+  (-> (st/spec ::cimi-core/resource-href)
+      (assoc :name "parent"
+             :type :uri
+             :json-schema/name "parent"
+             :json-schema/namespace common-ns/cimi-namespace
+             :json-schema/uri common-ns/cimi-uri
+             :json-schema/type "URI"
+             :json-schema/providerMandatory true
+             :json-schema/consumerMandatory false
+             :json-schema/mutable true
+             :json-schema/consumerWritable true
+
+             :json-schema/displayName "parent"
+             :json-schema/description "reference to parent resource"
+             :json-schema/help "reference to the unique resource identifier of the parent resource"
+             :json-schema/group "metadata"
+             :json-schema/category "CIMI common attributes"
+             :json-schema/order 6
+             :json-schema/hidden false
+             :json-schema/sensitive false)))
+
+
+(s/def ::resourceMetadata
+  (-> (st/spec ::cimi-core/resource-href)
+      (assoc :name "resourceMetadata"
+             :type :uri
+             :json-schema/name "resourceMetadata"
+             :json-schema/namespace common-ns/cimi-namespace
+             :json-schema/uri common-ns/cimi-uri
+             :json-schema/type "URI"
+             :json-schema/providerMandatory false
+             :json-schema/consumerMandatory false
+             :json-schema/mutable true
+             :json-schema/consumerWritable false
+
+             :json-schema/displayName "resource metadata"
+             :json-schema/description "reference to the resource's metadata"
+             :json-schema/help "reference to the resource's metadata"
+             :json-schema/group "metadata"
+             :json-schema/category "CIMI common attributes"
+             :json-schema/order 7
+             :json-schema/hidden false
+             :json-schema/sensitive false)))
+
+
 (s/def ::href
   (-> (st/spec ::cimi-core/resource-href)
       (assoc :name "href"
@@ -281,27 +327,27 @@
 
 
 (s/def ::acl
-    (-> (st/spec (su/only-keys :req-un [::cimi-acl/owner]
-                               :opt-un [::cimi-acl/rules]))
-        (assoc :name "acl"
-               :type :map
-               :json-schema/name "acl"
-               :json-schema/namespace common-ns/cimi-namespace
-               :json-schema/uri common-ns/cimi-uri
-               :json-schema/type "map"
-               :json-schema/providerMandatory true
-               :json-schema/consumerMandatory false
-               :json-schema/mutable true
-               :json-schema/consumerWritable true
+  (-> (st/spec (su/only-keys :req-un [::cimi-acl/owner]
+                             :opt-un [::cimi-acl/rules]))
+      (assoc :name "acl"
+             :type :map
+             :json-schema/name "acl"
+             :json-schema/namespace common-ns/cimi-namespace
+             :json-schema/uri common-ns/cimi-uri
+             :json-schema/type "map"
+             :json-schema/providerMandatory true
+             :json-schema/consumerMandatory false
+             :json-schema/mutable true
+             :json-schema/consumerWritable true
 
-               :json-schema/displayName "ACL"
-               :json-schema/description "Access Control List for the resource"
-               :json-schema/help "Access Control List (ACL) for the resource"
-               :json-schema/group "acl"
-               :json-schema/category "Access Control List"
-               :json-schema/order 0
-               :json-schema/hidden false
-               :json-schema/sensitive false)))
+             :json-schema/displayName "ACL"
+             :json-schema/description "Access Control List for the resource"
+             :json-schema/help "Access Control List (ACL) for the resource"
+             :json-schema/group "acl"
+             :json-schema/category "Access Control List"
+             :json-schema/order 0
+             :json-schema/hidden false
+             :json-schema/sensitive false)))
 
 
 (def ^:const common-attrs
@@ -315,6 +361,8 @@
    :opt-un [::name
             ::description
             ::properties
+            ::parent
+            ::resourceMetadata
             ::operations]})
 
 
@@ -329,6 +377,8 @@
             ::created
             ::updated
             ::properties
+            ::parent
+            ::resourceMetadata
             ::operations
             ::acl]})
 
@@ -344,5 +394,7 @@
             ::created
             ::updated
             ::properties
+            ::parent
+            ::resourceMetadata
             ::operations
             ::acl]})

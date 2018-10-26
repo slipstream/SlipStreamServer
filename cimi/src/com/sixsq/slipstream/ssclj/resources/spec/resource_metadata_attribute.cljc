@@ -35,7 +35,7 @@
 
 (s/def ::help ::cimi-core/nonblank-string)
 
-(s/def ::group #{"metadata" "body" "acl"})
+(s/def ::group #{"metadata" "body" "operations" "acl"})
 
 (s/def ::category ::cimi-core/nonblank-string)
 
