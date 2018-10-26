@@ -1,6 +1,6 @@
-(def +version+ "3.62")
+(def +version+ "3.63-SNAPSHOT")
 
-(defproject com.sixsq.slipstream/SlipStreamDbBinding-jar "3.62"
+(defproject com.sixsq.slipstream/SlipStreamDbBinding-jar "3.63-SNAPSHOT"
 
   :description "bindings for (persistent) database backends"
 

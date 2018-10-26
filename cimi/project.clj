@@ -1,6 +1,6 @@
-(def +version+ "3.62")
+(def +version+ "3.63-SNAPSHOT")
 
-(defproject com.sixsq.slipstream/SlipStreamCljResources-jar "3.62"
+(defproject com.sixsq.slipstream/SlipStreamCljResources-jar "3.63-SNAPSHOT"
 
   :description "core cimi server"
 
