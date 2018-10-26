@@ -6,11 +6,11 @@
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.resource-metadata :as t]
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [com.sixsq.slipstream.ssclj.resources.resource-metadata :as t]
     [com.sixsq.slipstream.ssclj.resources.spec.resource-metadata-test :as resource-metadata]
-    [peridot.core :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as cu]))
+    [peridot.core :refer :all]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 

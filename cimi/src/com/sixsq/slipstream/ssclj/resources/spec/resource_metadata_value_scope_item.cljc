@@ -1,10 +1,10 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.resource-metadata-value-scope-item
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.resources.spec.resource-metadata-value-scope-unit :as unit]
-    [com.sixsq.slipstream.ssclj.resources.spec.resource-metadata-value-scope-single-value :as single-value]
-    [com.sixsq.slipstream.ssclj.resources.spec.resource-metadata-value-scope-range :as range]
     [com.sixsq.slipstream.ssclj.resources.spec.resource-metadata-value-scope-enumeration :as enumeration]
+    [com.sixsq.slipstream.ssclj.resources.spec.resource-metadata-value-scope-range :as range]
+    [com.sixsq.slipstream.ssclj.resources.spec.resource-metadata-value-scope-single-value :as single-value]
+    [com.sixsq.slipstream.ssclj.resources.spec.resource-metadata-value-scope-unit :as unit]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 
