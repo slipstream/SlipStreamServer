@@ -57,7 +57,7 @@
       (assoc :name "timestamp"
              :type :string
              :json-schema/description "UTC timestamp"
-             :json-schema/type "string"
+             :json-schema/type "dateTime"
              :slipstream.es/mapping {:type   "date"
                                      :format "strict_date_optional_time||epoch_millis"})))
 

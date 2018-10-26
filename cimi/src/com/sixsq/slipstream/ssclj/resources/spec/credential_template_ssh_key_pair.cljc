@@ -1,12 +1,55 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.credential-template-ssh-key-pair
   (:require
     [clojure.spec.alpha :as s]
+    [com.sixsq.slipstream.ssclj.resources.spec.common-namespaces :as common-ns]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template :as ps]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]))
+    [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [spec-tools.core :as st]))
 
-(s/def :cimi.credential-template.ssh-key-pair/size pos-int?)
 
-(s/def :cimi.credential-template.ssh-key-pair/algorithm #{"rsa" "dsa"})
+(s/def :cimi.credential-template.ssh-key-pair/size
+  (-> (st/spec pos-int?)
+      (assoc :name "size"
+             :type :long
+             :json-schema/name "size"
+             :json-schema/namespace common-ns/slipstream-namespace
+             :json-schema/uri common-ns/slipstream-uri
+             :json-schema/type "long"
+             :json-schema/providerMandatory false
+             :json-schema/consumerMandatory false
+             :json-schema/mutable true
+             :json-schema/consumerWritable true
+
+             :json-schema/displayName "size"
+             :json-schema/description "size of SSH key to generate"
+             :json-schema/help "number of bits in the generated SSH key"
+             :json-schema/group "body"
+             :json-schema/order 20
+             :json-schema/hidden false
+             :json-schema/sensitive false)))
+
+
+(s/def :cimi.credential-template.ssh-key-pair/algorithm
+  (-> (st/spec #{"rsa" "dsa"})
+      (assoc :name "algorithm"
+             :type :string
+             :json-schema/name "algorithm"
+             :json-schema/namespace common-ns/slipstream-namespace
+             :json-schema/uri common-ns/slipstream-uri
+             :json-schema/type "string"
+             :json-schema/providerMandatory false
+             :json-schema/consumerMandatory false
+             :json-schema/mutable true
+             :json-schema/consumerWritable true
+
+             :json-schema/displayName "algorithm"
+             :json-schema/description "SSH key generation algorithm"
+             :json-schema/help "SSH key generation algorithm to use, either 'rsa' or 'dsa'"
+             :json-schema/group "body"
+             :json-schema/order 21
+             :json-schema/hidden false
+             :json-schema/sensitive false)))
+
 
 (def credential-template-keys-spec
   {:opt-un [:cimi.credential-template.ssh-key-pair/size

@@ -3,19 +3,168 @@
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.acl :as cimi-acl]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as cimi-common]
-    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]))
+    [com.sixsq.slipstream.ssclj.resources.spec.common-namespaces :as common-ns]
+    [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [spec-tools.core :as st]))
 
-;; FIXME: see https://github.com/slipstream/SlipStreamServer/issues/1309
-(s/def ::key string?)                                       ;; ::cimi-core/nonblank-string
-(s/def ::secret string?)                                    ;; ::cimi-core/nonblank-string
-(s/def ::connector ::cimi-common/resource-link)
-(s/def ::quota nat-int?)
-(s/def ::manager (su/only-keys :req-un [::cimi-acl/principal
-                                        ::cimi-acl/type]))
+;; FIXME: For key and secret see https://github.com/slipstream/SlipStreamServer/issues/1309
+
+(s/def ::key
+  (-> (st/spec string?)                                     ;; ::cimi-core/nonblank-string
+      (assoc :name "key"
+             :type :string
+             :json-schema/name "key"
+             :json-schema/namespace common-ns/slipstream-namespace
+             :json-schema/uri common-ns/slipstream-uri
+             :json-schema/type "string"
+             :json-schema/providerMandatory true
+             :json-schema/consumerMandatory true
+             :json-schema/mutable true
+             :json-schema/consumerWritable true
+
+             :json-schema/displayName "key"
+             :json-schema/description "key for cloud credential"
+             :json-schema/help "key for cloud credential"
+             :json-schema/group "body"
+             :json-schema/order 20
+             :json-schema/hidden false
+             :json-schema/sensitive false)))
+
+
+(s/def ::secret
+  (-> (st/spec string?)                                     ;; ::cimi-core/nonblank-string
+      (assoc :name "secret"
+             :type :string
+             :json-schema/name "secret"
+             :json-schema/namespace common-ns/slipstream-namespace
+             :json-schema/uri common-ns/slipstream-uri
+             :json-schema/type "string"
+             :json-schema/providerMandatory true
+             :json-schema/consumerMandatory true
+             :json-schema/mutable true
+             :json-schema/consumerWritable true
+
+             :json-schema/displayName "secret"
+             :json-schema/description "secret for cloud credential"
+             :json-schema/help "secret for cloud credential"
+             :json-schema/group "body"
+             :json-schema/order 21
+             :json-schema/hidden false
+             :json-schema/sensitive true)))
+
+
+(s/def ::connector
+  (-> (st/spec ::cimi-common/resource-link)
+      (assoc :name "connector"
+             :type :map
+             :json-schema/name "connector"
+             :json-schema/namespace common-ns/slipstream-namespace
+             :json-schema/uri common-ns/slipstream-uri
+             :json-schema/type "map"
+             :json-schema/providerMandatory true
+             :json-schema/consumerMandatory true
+             :json-schema/mutable true
+             :json-schema/consumerWritable true
+
+             :json-schema/displayName "connector"
+             :json-schema/description "cloud connector"
+             :json-schema/help "name of cloud connector for this credential"
+             :json-schema/group "body"
+             :json-schema/order 22
+             :json-schema/hidden false
+             :json-schema/sensitive false)))
+
+
+(s/def ::quota
+  (-> (st/spec nat-int?)
+      (assoc :name "quota"
+             :type :long
+             :json-schema/name "quota"
+             :json-schema/namespace common-ns/slipstream-namespace
+             :json-schema/uri common-ns/slipstream-uri
+             :json-schema/type "long"
+             :json-schema/providerMandatory true
+             :json-schema/consumerMandatory true
+             :json-schema/mutable true
+             :json-schema/consumerWritable true
+
+             :json-schema/displayName "quota"
+             :json-schema/description "virtual machine quota"
+             :json-schema/help "maximum number of allocated virtual machines"
+             :json-schema/group "body"
+             :json-schema/order 23
+             :json-schema/hidden false
+             :json-schema/sensitive false)))
+
+
+(s/def ::manager
+  (-> (st/spec (su/only-keys :req-un [::cimi-acl/principal
+                                      ::cimi-acl/type]))
+      (assoc :name "manager"
+             :type :map
+             :json-schema/name "manager"
+             :json-schema/namespace common-ns/slipstream-namespace
+             :json-schema/uri common-ns/slipstream-uri
+             :json-schema/type "map"
+             :json-schema/providerMandatory false
+             :json-schema/consumerMandatory false
+             :json-schema/mutable true
+             :json-schema/consumerWritable true
+
+             :json-schema/displayName "manager"
+             :json-schema/description "principal and type of manager"
+             :json-schema/help "principal and type of manager"
+             :json-schema/group "body"
+             :json-schema/order 24
+             :json-schema/hidden false
+             :json-schema/sensitive false)))
+
+
 (s/def ::managers (s/coll-of ::manager :min-count 1 :kind vector?))
 
-(s/def ::disabledMonitoring boolean?)
+
+(s/def ::managers
+       (-> (st/spec (s/coll-of ::manager :min-count 1 :kind vector?))
+           (assoc :name "managers"
+                  :type :vector
+                  :json-schema/name "managers"
+                  :json-schema/namespace common-ns/slipstream-namespace
+                  :json-schema/uri common-ns/slipstream-uri
+                  :json-schema/type "Array"
+                  :json-schema/providerMandatory false
+                  :json-schema/consumerMandatory false
+                  :json-schema/mutable true
+                  :json-schema/consumerWritable true
+
+                  :json-schema/displayName "managers"
+                  :json-schema/description "list of credential managers"
+                  :json-schema/help "list of credential managers"
+                  :json-schema/group "body"
+                  :json-schema/order 25
+                  :json-schema/hidden false
+                  :json-schema/sensitive false)))
+
+
+(s/def ::disabledMonitoring
+       (-> (st/spec boolean?)
+           (assoc :name "disabledMonitoring"
+                  :type :vector
+                  :json-schema/name "disabledMonitoring"
+                  :json-schema/namespace common-ns/slipstream-namespace
+                  :json-schema/uri common-ns/slipstream-uri
+                  :json-schema/type "Array"
+                  :json-schema/providerMandatory false
+                  :json-schema/consumerMandatory false
+                  :json-schema/mutable true
+                  :json-schema/consumerWritable true
+
+                  :json-schema/displayName "disabledMonitoring"
+                  :json-schema/description "periodic monitoring disabled for this credential"
+                  :json-schema/help "true to disable periodic monitoring for this credential"
+                  :json-schema/group "body"
+                  :json-schema/order 26
+                  :json-schema/hidden false
+                  :json-schema/sensitive false)))
 
 
 (def credential-template-cloud-keys-spec

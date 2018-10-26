@@ -1,10 +1,33 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.credential-template-api-key
   (:require
     [clojure.spec.alpha :as s]
+    [com.sixsq.slipstream.ssclj.resources.spec.common-namespaces :as common-ns]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template :as ps]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]))
+    [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [spec-tools.core :as st]))
 
-(s/def :cimi.credential-template.api-key/ttl nat-int?)
+
+(s/def :cimi.credential-template.api-key/ttl
+  (-> (st/spec nat-int?)
+      (assoc :name "ttl"
+             :type :long
+             :json-schema/name "ttl"
+             :json-schema/namespace common-ns/slipstream-namespace
+             :json-schema/uri common-ns/slipstream-uri
+             :json-schema/type "long"
+             :json-schema/providerMandatory false
+             :json-schema/consumerMandatory false
+             :json-schema/mutable true
+             :json-schema/consumerWritable true
+
+             :json-schema/displayName "TTL"
+             :json-schema/description "Time to Live (TTL) for API key/secret"
+             :json-schema/help "Time to Live (TTL) for created API key/secret"
+             :json-schema/group "body"
+             :json-schema/order 20
+             :json-schema/hidden false
+             :json-schema/sensitive false)))
+
 
 (def credential-template-keys-spec
   {:opt-un [:cimi.credential-template.api-key/ttl]})

@@ -4,10 +4,10 @@
   (:require
     [clojure.set :as set]
     [clojure.spec.alpha :as s]
-    [spec-tools.parse :as st-parse]
-    [spec-tools.visitor :as visitor]
+    [com.sixsq.slipstream.db.es.common.es-mapping :as es-mapping]
     [spec-tools.impl :as impl]
-    [com.sixsq.slipstream.db.es.common.es-mapping :as es-mapping]))
+    [spec-tools.parse :as st-parse]
+    [spec-tools.visitor :as visitor]))
 
 (def ^:private all-ascii-chars (map str (map char (range 0 256))))
 

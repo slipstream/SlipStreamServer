@@ -5,8 +5,8 @@
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.resources.spec.resource-metadata-action :as action]
     [com.sixsq.slipstream.ssclj.resources.spec.resource-metadata-attribute :as attribute]
-    [com.sixsq.slipstream.ssclj.resources.spec.resource-metadata-value-scope :as value-scope]
     [com.sixsq.slipstream.ssclj.resources.spec.resource-metadata-capability :as capability]
+    [com.sixsq.slipstream.ssclj.resources.spec.resource-metadata-value-scope :as value-scope]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 

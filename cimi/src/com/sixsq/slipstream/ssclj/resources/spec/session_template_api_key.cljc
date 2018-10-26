@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.session-template-api-key
   (:require
     [clojure.spec.alpha :as s]
+    [com.sixsq.slipstream.ssclj.resources.spec.common-namespaces :as common-ns]
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.resources.spec.session-template :as ps]
     [com.sixsq.slipstream.ssclj.util.spec :as su]
@@ -9,24 +10,47 @@
 
 (s/def ::key
   (-> (st/spec ::cimi-core/nonblank-string)
-      (assoc :json-schema/displayName "Key"
-             :json-schema/category "general"
-             :json-schema/description "API key"
+      (assoc :name "key"
+             :type :string
+             :json-schema/name "key"
+             :json-schema/namespace common-ns/slipstream-namespace
+             :json-schema/uri common-ns/slipstream-uri
              :json-schema/type "string"
-             :json-schema/mandatory true
-             :json-schema/readOnly false
-             :json-schema/order 20)))
+             :json-schema/providerMandatory true
+             :json-schema/consumerMandatory true
+             :json-schema/mutable true
+             :json-schema/consumerWritable true
+
+             :json-schema/displayName "key"
+             :json-schema/description "key for API key/secret pair"
+             :json-schema/help "key for API key/secret pair"
+             :json-schema/group "body"
+             :json-schema/order 20
+             :json-schema/hidden false
+             :json-schema/sensitive false)))
 
 
 (s/def ::secret
   (-> (st/spec ::cimi-core/nonblank-string)
-      (assoc :json-schema/displayName "Secret"
-             :json-schema/category "general"
-             :json-schema/description "secret associated with API key"
-             :json-schema/type "password"
-             :json-schema/mandatory true
-             :json-schema/readOnly false
-             :json-schema/order 21)))
+      (assoc :name "secret"
+             :type :string
+             :json-schema/name "secret"
+             :json-schema/namespace common-ns/slipstream-namespace
+             :json-schema/uri common-ns/slipstream-uri
+             :json-schema/type "string"
+             :json-schema/providerMandatory true
+             :json-schema/consumerMandatory true
+             :json-schema/mutable true
+             :json-schema/consumerWritable true
+
+             :json-schema/displayName "secret"
+             :json-schema/description "secret for API key/secret pair"
+             :json-schema/help "secret for API key/secret pair"
+             :json-schema/group "body"
+             :json-schema/order 21
+             :json-schema/hidden false
+             :json-schema/sensitive true)))
+
 
 ;; all parameters must be specified in both the template and the create resource
 (def session-template-keys-spec

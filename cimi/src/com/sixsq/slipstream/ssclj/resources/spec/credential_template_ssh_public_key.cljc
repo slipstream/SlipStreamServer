@@ -1,11 +1,35 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.credential-template-ssh-public-key
   (:require
     [clojure.spec.alpha :as s]
+    [com.sixsq.slipstream.ssclj.resources.spec.common-namespaces :as common-ns]
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template :as ps]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]))
+    [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [spec-tools.core :as st]))
 
-(s/def :cimi.credential-template.ssh-public-key/publicKey ::cimi-core/nonblank-string)
+
+(s/def :cimi.credential-template.ssh-public-key/publicKey
+  (-> (st/spec ::cimi-core/nonblank-string)
+      (assoc :name "publicKey"
+             :type :string
+             :json-schema/name "publicKey"
+             :json-schema/namespace common-ns/slipstream-namespace
+             :json-schema/uri common-ns/slipstream-uri
+             :json-schema/type "string"
+             :json-schema/providerMandatory true
+             :json-schema/consumerMandatory true
+             :json-schema/mutable true
+             :json-schema/consumerWritable true
+
+             :json-schema/displayName "public key"
+             :json-schema/description "SSH public key"
+             :json-schema/help "SSH public key"
+             :json-schema/group "body"
+             :json-schema/order 20
+             :json-schema/hidden false
+             :json-schema/sensitive false
+             :json-schema/lines 3)))
+
 
 (def credential-template-keys-spec
   {:req-un [:cimi.credential-template.ssh-public-key/publicKey]})

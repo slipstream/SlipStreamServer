@@ -2,18 +2,62 @@
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
+    [com.sixsq.slipstream.ssclj.resources.spec.common-namespaces :as common-ns]
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]))
+    [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [spec-tools.core :as st]))
+
 
 ;; All credential templates must indicate the type of credential to create.
-(s/def :cimi.credential-template/type ::cimi-core/identifier)
+(s/def :cimi.credential-template/type
+  (-> (st/spec ::cimi-core/identifier)
+      (assoc :name "type"
+             :type :string
+             :json-schema/name "type"
+             :json-schema/namespace common-ns/slipstream-namespace
+             :json-schema/uri common-ns/slipstream-uri
+             :json-schema/type "string"
+             :json-schema/providerMandatory true
+             :json-schema/consumerMandatory true
+             :json-schema/mutable true
+             :json-schema/consumerWritable true
+
+             :json-schema/displayName "type"
+             :json-schema/description "type of credential"
+             :json-schema/help "type of credential"
+             :json-schema/group "body"
+             :json-schema/order 0
+             :json-schema/hidden true
+             :json-schema/sensitive false)))
+
 
 ;; A given credential may have more than one method for creating it.  All
 ;; credential templates must provide a method name.
-(s/def :cimi.credential-template/method ::cimi-core/identifier)
+(s/def :cimi.credential-template/method
+  (-> (st/spec ::cimi-core/identifier)
+      (assoc :name "method"
+             :type :string
+             :json-schema/name "method"
+             :json-schema/namespace common-ns/slipstream-namespace
+             :json-schema/uri common-ns/slipstream-uri
+             :json-schema/type "string"
+             :json-schema/providerMandatory true
+             :json-schema/consumerMandatory true
+             :json-schema/mutable true
+             :json-schema/consumerWritable true
+
+             :json-schema/displayName "method"
+             :json-schema/description "method for creating credential"
+             :json-schema/help "method for creating credential"
+             :json-schema/group "body"
+             :json-schema/order 1
+             :json-schema/hidden true
+             :json-schema/sensitive false)))
+
 
 (def credential-template-regex #"^credential-template/[a-zA-Z0-9]([a-zA-Z0-9_-]*[a-zA-Z0-9])?$")
 (s/def :cimi.credential-template/href (s/and string? #(re-matches credential-template-regex %)))
+
 
 ;;
 ;; Keys specifications for CredentialTemplate resources.
