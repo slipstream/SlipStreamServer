@@ -361,7 +361,7 @@
    :opt-un [::name
             ::description
             ::properties
-            ::parent
+            ;::parent ;; FIXME: fix conflicts elsewhere
             ::resourceMetadata
             ::operations]})
 
@@ -377,7 +377,7 @@
             ::created
             ::updated
             ::properties
-            ::parent
+            ;::parent ;; FIXME: fix conflicts elsewhere
             ::resourceMetadata
             ::operations
             ::acl]})
@@ -394,7 +394,7 @@
             ::created
             ::updated
             ::properties
-            ::parent
+            ;::parent ;; FIXME: fix conflicts elsewhere
             ::resourceMetadata
             ::operations
             ::acl]})
