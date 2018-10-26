@@ -19,10 +19,13 @@
     [com.sixsq.slipstream.ssclj.resources.spec.user-template-oidc-registration :as oidc-reg]
     [com.sixsq.slipstream.ssclj.resources.spec.user-template-self-registration :as self-reg]
     [com.sixsq.slipstream.ssclj.util.metadata :as t]
-    ))
+    [expound.alpha :as expound]))
 
 
 (deftest check-correct-metadata
+
+  (expound/expound ::md/resource-metadata (t/generate "https://example.com/type" ::api-key-session/api-key))
+  (clojure.pprint/pprint (t/generate "https://example.com/type" ::api-key-session/api-key))
 
   (are [spec] (stu/is-valid ::md/resource-metadata (t/generate "https://example.com/type" spec))
 

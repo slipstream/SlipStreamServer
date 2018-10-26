@@ -27,13 +27,7 @@
              :json-schema/group "body"
              :json-schema/order 60
              :json-schema/hidden false
-             :json-schema/sensitive false
-
-             :json-schema/minumum 3
-             :json-schema/default 3
-
-             :json-schema/value-scope {:minimum 3 :default 3}
-             )))
+             :json-schema/sensitive false)))
 
 
 (s/def ::order
@@ -55,7 +49,10 @@
              :json-schema/group "body"
              :json-schema/order 61
              :json-schema/hidden false
-             :json-schema/sensitive false)))
+             :json-schema/sensitive false
+
+             :json-schema/value-scope {:minimum 0
+                                       :default 0})))
 
 
 (s/def ::hidden
