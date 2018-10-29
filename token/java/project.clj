@@ -1,6 +1,6 @@
-(def +version+ "3.62-SNAPSHOT")
+(def +version+ "3.63-SNAPSHOT")
 
-(defproject com.sixsq.slipstream/token-java "3.62-SNAPSHOT"
+(defproject com.sixsq.slipstream/token-java "3.63-SNAPSHOT"
 
   :description "token management utilities for java"
 
