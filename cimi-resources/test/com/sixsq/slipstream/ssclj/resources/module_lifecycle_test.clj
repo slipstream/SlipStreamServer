@@ -8,7 +8,6 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.module :as module]
-    [com.sixsq.slipstream.ssclj.resources.module-image :as module-image]
     [peridot.core :refer :all]))
 
 

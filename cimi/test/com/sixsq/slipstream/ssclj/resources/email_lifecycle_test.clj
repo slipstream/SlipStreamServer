@@ -76,8 +76,8 @@
     (let [admin-uri (-> session-admin
                         (request base-uri
                                  :request-method :post
-                                 :body (json/write-str {:address    "admin@example.com"
-                                                        :validated? true}))
+                                 :body (json/write-str {:address   "admin@example.com"
+                                                        :validated true}))
                         (ltu/body->edn)
                         (ltu/is-status 201)
                         (ltu/location))
@@ -86,8 +86,8 @@
           user-uri (-> session-user
                        (request base-uri
                                 :request-method :post
-                                :body (json/write-str {:address    "user@example.com"
-                                                       :validated? true}))
+                                :body (json/write-str {:address   "user@example.com"
+                                                       :validated true}))
                        (ltu/body->edn)
                        (ltu/is-status 201)
                        (ltu/location))
@@ -122,7 +122,7 @@
             validate-url (->> (u/get-op email "validate")
                               (str p/service-context))]
         (is (= "admin@example.com" (:address email)))
-        (is (false? (:validated? email)))
+        (is (false? (:validated email)))
         (is validate-url)
 
         (let [validation-link (atom nil)]
@@ -163,7 +163,7 @@
                              (ltu/is-operation-absent (:validate c/action-uri))
                              :response
                              :body
-                             :validated?)))))))
+                             :validated)))))))
 
       ;; verify contents of user email
       (let [email (-> session-user
@@ -178,14 +178,8 @@
             validate-url (->> (u/get-op email "validate")
                               (str p/service-context))]
         (is (= "user@example.com" (:address email)))
-        (is (false? (:validated? email)))
-        (is validate-url)
-
-        #_(-> session-anon
-              (request validate-url)
-              (ltu/body->edn)
-              (ltu/is-status 200)))
-
+        (is (false? (:validated email)))
+        (is validate-url))
 
       ;; admin can delete the email
       (-> session-admin

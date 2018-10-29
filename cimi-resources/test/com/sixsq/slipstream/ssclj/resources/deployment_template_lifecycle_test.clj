@@ -17,11 +17,11 @@
 
 (def collection-uri (str p/service-context (u/de-camelcase dt/resource-name)))
 
-(defn valid-comp [image-id] {:parent           {:href image-id}
+(defn valid-comp [image-id] {:parentModule     {:href image-id}
 
                              :networkType      "public"
 
-                             :disk 200
+                             :disk             200
 
                              :inputParameters  [{:parameter "iparam-1" :description "desc2" :value "100"}
                                                 {:parameter "iparam-2" :description "desc2"}
