@@ -5,7 +5,7 @@
 
    When the address has not been validated, a 'validate' action is provided.
    This will send an email to the user with a callback URL to validate the
-   email address. When the callback is triggered, the validated? flag is set to
+   email address. When the callback is triggered, the `validated` flag is set to
    true."
   (:require
     [com.sixsq.slipstream.auth.acl :as a]
@@ -35,6 +35,13 @@
                      :rules [{:principal "USER"
                               :type      "ROLE"
                               :right     "MODIFY"}]})
+
+(def actions [{:name "validate"
+               :uri (:validate c/action-uri)
+               :description "starts the workflow to validate the email address"
+               :method "POST"
+               :inputMessage "application/json"
+               :outputMessage "application/json"}])
 
 
 ;;
@@ -67,7 +74,7 @@
 
 (defmethod crud/add resource-name
   [request]
-  (add-impl (assoc-in request [:body :validated?] false)))
+  (add-impl (assoc-in request [:body :validated] false)))
 
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
@@ -87,7 +94,7 @@
 ;; available operations; disallows editing of resource, adds validate action for unvalidated emails
 ;;
 (defmethod crud/set-operations resource-uri
-  [{:keys [validated?] :as resource} request]
+  [{:keys [validated] :as resource} request]
   (try
     (a/can-modify? resource request)
     (let [href (:id resource)
@@ -95,7 +102,7 @@
           ops (if (.endsWith resourceURI "Collection")
                 [{:rel (:add c/action-uri) :href href}]
                 (cond-> [{:rel (:delete c/action-uri) :href href}]
-                        (not validated?) (conj {:rel (:validate c/action-uri) :href (str href "/validate")})))]
+                        (not validated) (conj {:rel (:validate c/action-uri) :href (str href "/validate")})))]
       (assoc resource :operations ops))
     (catch Exception _
       (dissoc resource :operations))))
@@ -115,8 +122,8 @@
 (defmethod crud/do-action [resource-url "validate"]
   [{{uuid :uuid} :params baseURI :baseURI}]
   (let [id (str resource-url "/" uuid)]
-    (when-let [{:keys [address validated?]} (crud/retrieve-by-id-as-admin id)]
-      (if-not validated?
+    (when-let [{:keys [address validated]} (crud/retrieve-by-id-as-admin id)]
+      (if-not validated
         (try
           (-> (email-utils/create-callback id baseURI)
               (email-utils/send-validation-email address))

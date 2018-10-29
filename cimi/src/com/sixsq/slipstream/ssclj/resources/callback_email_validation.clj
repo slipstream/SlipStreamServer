@@ -20,7 +20,7 @@
   (try
     (-> (crud/retrieve-by-id-as-admin email-id)
         (u/update-timestamps)
-        (assoc :validated? true)
+        (assoc :validated true)
         (db/edit admin-opts))
     (catch Exception e
       (or (ex-data e) (throw e)))))
@@ -28,8 +28,8 @@
 
 (defmethod callback/execute action-name
   [{{:keys [href]} :targetResource :as callback-resource} request]
-  (let [{:keys [id validated?] :as email} (crud/retrieve-by-id-as-admin href)]
-    (if-not validated?
+  (let [{:keys [id validated] :as email} (crud/retrieve-by-id-as-admin href)]
+    (if-not validated
       (let [msg (str id " successfully validated")]
         (validated-email! id)
         (log/info msg)
