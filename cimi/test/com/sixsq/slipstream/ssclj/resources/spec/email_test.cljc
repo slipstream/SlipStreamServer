@@ -21,11 +21,14 @@
                :updated     timestamp
                :acl         valid-acl
                :address     "user@example.com"
-               :validated?  false}]
+               :validated   false}]
 
     (stu/is-valid ::email/email email)
 
     (stu/is-invalid ::email/email (assoc email :bad "value"))
 
-    (doseq [attr #{:id :resourceURI :created :updated :acl :address :validated?}]
-      (stu/is-invalid ::email/email (dissoc email attr)))))
+    (doseq [attr #{:id :resourceURI :created :updated :acl :address}]
+      (stu/is-invalid ::email/email (dissoc email attr)))
+
+    (doseq [attr #{:validated}]
+      (stu/is-valid ::email/email (dissoc email attr)))))
