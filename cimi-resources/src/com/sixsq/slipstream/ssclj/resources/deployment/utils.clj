@@ -53,7 +53,7 @@
 (defn content-merge
   [{:keys [content] :as module} content-aggregator]
   (-> content
-      (dissoc :parent)
+      (dissoc :parentModule)
       (merge content-aggregator)))
 
 
@@ -116,7 +116,7 @@
                                         (assoc :outputParameters (params->original-format "output" params-aggregator))
                                         (assoc :targets targets-aggregator)
                                         (assoc :imageIDs image-ids-aggregator)))
-        (recur (-> module :content :parent)
+        (recur (-> module :content :parentModule)
                (content-merge module content-aggregator)
                (params-merge module params-aggregator)
                (targets-merge module targets-aggregator)

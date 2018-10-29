@@ -9,7 +9,7 @@
 (s/def ::commit ::cimi-core/nonblank-string)
 (s/def ::author ::cimi-core/nonblank-string)
 
-(s/def ::parent ::module/link)
+(s/def ::parentModule ::module/link)
 
 (s/def ::cpu nat-int?)
 (s/def ::ram nat-int?)
@@ -57,7 +57,7 @@
 
 
 (def module-component-keys-spec (su/merge-keys-specs [c/common-attrs
-                                                      {:req-un [::parent
+                                                      {:req-un [::parentModule
                                                                 ::networkType
                                                                 ::outputParameters
                                                                 ::author]

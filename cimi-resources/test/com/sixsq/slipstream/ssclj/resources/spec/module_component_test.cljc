@@ -22,7 +22,7 @@
               :updated          timestamp
               :acl              valid-acl
 
-              :parent           {:href "module/my-parent-module"}
+              :parentModule     {:href "module/my-parent-module"}
               :cpu              2
               :ram              2048
               :disk             100
@@ -53,7 +53,7 @@
     (stu/is-invalid ::module-component/module-component (assoc root :badKey "badValue"))
 
     ;; required attributes
-    (doseq [k #{:id :resourceURI :created :updated :acl :networkType :outputParameters :author}]
+    (doseq [k #{:id :resourceURI :created :updated :acl :networkType :outputParameters :author :parentModule}]
       (stu/is-invalid ::module-component/module-component (dissoc root k)))
 
     ;; optional attributes

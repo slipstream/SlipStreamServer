@@ -25,24 +25,24 @@
               :name        "image-b"
               :type        "IMAGE"
               :logo        {:href "logo/href"}
-              :content     {:parent      image-a
-                            :loginUser   "ubuntu"
-                            :created     "2018-07-25T10:07:43.309Z"
-                            :updated     "2018-07-25T10:07:43.309Z"
-                            :imageIDs    {:cloud-a 10
-                                          :cloud-b 2
-                                          :cloud-d 4}
-                            :author      "test"
-                            :networkType "public"
-                            :commit      "commit image b"
-                            :os          "Ubuntu"}
+              :content     {:parentModule image-a
+                            :loginUser    "ubuntu"
+                            :created      "2018-07-25T10:07:43.309Z"
+                            :updated      "2018-07-25T10:07:43.309Z"
+                            :imageIDs     {:cloud-a 10
+                                           :cloud-b 2
+                                           :cloud-d 4}
+                            :author       "test"
+                            :networkType  "public"
+                            :commit       "commit image b"
+                            :os           "Ubuntu"}
               :id          "module/image-b",
               :resourceURI "http://sixsq.com/slipstream/1/Module"})
 
 (def comp-a {:description "Apache web server appliance with custom landing page.",
              :path        "examples/tutorials/service-testing/apache",
              ;:logo        {:href "logolink"},
-             :content     {:parent           image-a
+             :content     {:parentModule     image-a
                            :updated          "2018-10-03T13:19:47.310Z",
                            :outputParameters [{:parameter "hostname", :description "hostname/ip of the image"}
                                               {:parameter "port", :description "Port", :value "8080"}
@@ -68,7 +68,7 @@
 
 (def comp-b {:description "Apache web server ++",
              :path        "examples/tutorials/service-testing/apache++",
-             :content     {:parent           comp-a
+             :content     {:parentModule     comp-a
                            :updated          "2018-10-03T13:19:47.310Z",
                            :outputParameters [{:parameter "hostname", :description "hostname/ip of the image"}
                                               {:parameter "port", :value "80"}
@@ -94,7 +94,7 @@
 
 (def comp-c {:description "Apache web server +++",
              :path        "examples/tutorials/service-testing/apache+++",
-             :content     {:parent           (assoc-in comp-b [:content :parent :content :parent] image-b)
+             :content     {:parentModule     (assoc-in comp-b [:content :parentModule :content :parentModule] image-b)
                            :updated          "2018-10-03T13:19:47.310Z",
                            :outputParameters [{:parameter "hostname", :description "hostname/ip of the image"}
                                               {:parameter "port", :value "80"}

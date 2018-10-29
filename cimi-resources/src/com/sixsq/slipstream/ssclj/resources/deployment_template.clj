@@ -78,14 +78,14 @@
                                    :resource-name m/resource-url}
                         :identity idmap}
         {:keys [body status] :as module-response} (crud/retrieve request-module)
-        parent-href (get-in body [:content :parent :href])]
+        parent-href (get-in body [:content :parentModule :href])]
     (if (= status 200)
       (let [module-resolved (-> body
                                 (dissoc :versions :operations)
-                                (update :content #(dissoc % :parent))
+                                (update :content #(dissoc % :parentModule))
                                 (std-crud/resolve-hrefs idmap true))]
         (if parent-href
-          (assoc-in module-resolved [:content :parent] (resolve-module parent-href idmap))
+          (assoc-in module-resolved [:content :parentModule] (resolve-module parent-href idmap))
           (assoc module-resolved :href module-href)))
       (throw (ex-info nil body)))))
 
