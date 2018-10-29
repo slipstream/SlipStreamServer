@@ -52,16 +52,16 @@
 
 
 (defn get-resource-name
-  [resource-ns]
-  (some-> resource-ns
+  [ns]
+  (some-> ns
           (ns-resolve 'resource-name)
           deref))
 
 
 (defn get-type-uri
-  [resource-ns]
-  (some-> resource-ns
-          (ns-resolve 'resource-uri)
+  [ns]
+  (some-> ns
+          (ns-resolve 'resource-url)
           deref))
 
 
@@ -86,46 +86,54 @@
 
 
 (defn get-spec
-  [resource-ns]
-  (some-> resource-ns
+  [parent-ns resource-ns]
+  (some-> (or parent-ns resource-ns)
           (ns-resolve 'resource-url)
           deref
           get-spec-kw))
 
 
-(defn generate-from-ns
+(defn as-namespace
+  [ns]
+  (when ns
+    (if (instance? Namespace ns)
+      ns
+      (find-ns (symbol ns)))))
+
+
+(defn generate-metadata
   "generate the ResourceMetadata from the current (or provided) namespace"
-  ([]
-   (generate-from-ns *ns*))
-  ([resource-ns]
-   (if-let [resource-ns (if (instance? Namespace resource-ns)
-                          resource-ns
-                          (find-ns (symbol resource-ns)))]
-     (let [resource-name (get-resource-name resource-ns)
-           doc (get-doc resource-ns)
-           spec (get-spec resource-ns)
-           type-uri (get-type-uri resource-ns)
+  [resource-ns child-ns spec]
+  (if-let [resource-ns (as-namespace resource-ns)]
+    (let [child-ns (as-namespace child-ns)
 
-           common {:id          "resource-metadata/dummy-id"
-                   :created     "1964-08-25T10:00:00.0Z"
-                   :updated     "1964-08-25T10:00:00.0Z"
-                   :resourceURI resource-metadata/resource-uri
-                   :acl         {:owner {:principal "ADMIN", :type "ROLE"}
-                                 :rules [{:principal "ANON", :type "ROLE", :right "VIEW"}]}
-                   :typeURI     type-uri
-                   :name        resource-name
-                   :description doc}
+          resource-name (cond-> (get-resource-name resource-ns)
+                                child-ns (str " -- " (get-resource-name child-ns)))
 
-           attributes (generate-attributes spec)
+          doc (get-doc (or child-ns resource-ns))
+          type-uri (cond-> (get-type-uri resource-ns)
+                           child-ns (str "-" (get-type-uri child-ns)))
 
-           actions (get-actions resource-ns)
+          common {:id          "resource-metadata/dummy-id"
+                  :created     "1964-08-25T10:00:00.0Z"
+                  :updated     "1964-08-25T10:00:00.0Z"
+                  :resourceURI resource-metadata/resource-uri
+                  :acl         {:owner {:principal "ADMIN", :type "ROLE"}
+                                :rules [{:principal "ANON", :type "ROLE", :right "VIEW"}]}
+                  :typeURI     type-uri
+                  :name        resource-name
+                  :description doc}
 
-           capabilities (get-capabilities resource-ns)]
+          attributes (generate-attributes spec)
 
-       (if (and doc spec type-uri)
-         (cond-> common
-                 attributes (merge attributes)
-                 (seq actions) (assoc :actions actions)
-                 (seq capabilities) (assoc :capabilities capabilities))
-         (log/error "namespace documentation, spec, and resource-uri cannot be null")))
-     (log/error "cannot find namespace for " (str resource-ns)))))
+          actions (get-actions resource-ns)
+
+          capabilities (get-capabilities resource-ns)]
+
+      (if (and doc spec type-uri)
+        (cond-> common
+                attributes (merge attributes)
+                (seq actions) (assoc :actions actions)
+                (seq capabilities) (assoc :capabilities capabilities))
+        (log/error "namespace documentation, spec, and resource-uri cannot be null")))
+    (log/error "cannot find namespace for " (str resource-ns))))
