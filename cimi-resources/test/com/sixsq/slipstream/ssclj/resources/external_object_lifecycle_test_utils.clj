@@ -205,16 +205,53 @@
                 (ltu/body->edn)
                 (ltu/is-status 403))
 
-            ;; update the ACL to allow another user to view the external object
-            (-> session
+            ;; retrieve by another authorized user fails for now
+            (-> session-user-view
                 (request abs-uri)
                 (ltu/body->edn)
-                (ltu/is-operation-present "upload")
-                (ltu/is-operation-present "delete")
-                (ltu/is-operation-absent "ready")
-                (ltu/is-operation-absent "download")
-                (ltu/is-status 200)
-                (ltu/get-op "upload"))
+                (ltu/is-status 403))
+
+            ;; update the ACL to allow another user to view the external object
+            (let [{:keys [acl] :as current-eo} (-> session
+                                                   (request abs-uri)
+                                                   (ltu/body->edn)
+                                                   (ltu/is-operation-present "upload")
+                                                   (ltu/is-operation-present "delete")
+                                                   (ltu/is-operation-present "edit")
+                                                   (ltu/is-operation-absent "ready")
+                                                   (ltu/is-operation-absent "download")
+                                                   (ltu/is-status 200)
+                                                   :response
+                                                   :body)
+                  view-rule {:principal username-view
+                             :type      "USER"
+                             :right     "VIEW"}
+
+                  updated-rules (vec (conj (:rules acl) view-rule))
+
+                  updated-eo (-> current-eo
+                                 (assoc-in [:acl :rules] updated-rules)
+                                 (assoc :name "NEW_VALUE_OK"
+                                        :state "BAD_VALUE_IGNORED"))]
+
+              (-> session
+                  (request abs-uri
+                           :request-method :put
+                           :body (json/write-str updated-eo))
+                  (ltu/body->edn)
+                  (ltu/is-status 200)))
+
+            ;; retrieve by another authorized user MUST NOW SUCCEED
+            ;; verify also that name can be updated, but not state
+            (let [updated (-> session-user-view
+                              (request abs-uri)
+                              (ltu/body->edn)
+                              (ltu/is-status 200)
+                              :response
+                              :body)]
+
+              (is (= "NEW_VALUE_OK" (:name updated)))
+              (is (not= "BAD_VALUE_IGNORED" (:state updated))))
 
             ;; anonymous query fails
             (-> session-anon
@@ -241,6 +278,7 @@
                                   (ltu/body->edn)
                                   (ltu/is-operation-present "upload")
                                   (ltu/is-operation-present "delete")
+                                  (ltu/is-operation-present "edit")
                                   (ltu/is-operation-absent "ready")
                                   (ltu/is-operation-absent "download")
                                   (ltu/is-status 200)
@@ -283,6 +321,7 @@
                     (ltu/is-key-value :state eo/state-uploading)
                     (ltu/is-operation-present "ready")
                     (ltu/is-operation-present "delete")
+                    (ltu/is-operation-present "edit")
                     (ltu/is-operation-present "upload")
                     (ltu/is-operation-absent "download"))
 
@@ -295,6 +334,7 @@
                       (ltu/is-key-value :state eo/state-uploading)
                       (ltu/is-operation-absent "ready")
                       (ltu/is-operation-absent "delete")
+                      (ltu/is-operation-absent "edit")
                       (ltu/is-operation-absent "upload")
                       (ltu/is-operation-absent "download"))
 
@@ -347,6 +387,7 @@
                                      (ltu/is-key-value :state eo/state-ready)
                                      (ltu/is-operation-present "download")
                                      (ltu/is-operation-present "delete")
+                                     (ltu/is-operation-present "edit")
                                      (ltu/is-operation-absent "upload")
                                      (ltu/is-operation-absent "ready")
                                      (ltu/is-status 200))
@@ -359,6 +400,7 @@
                           (ltu/is-key-value :state eo/state-ready)
                           (ltu/is-operation-present "download")
                           (ltu/is-operation-absent "delete")
+                          (ltu/is-operation-absent "edit")
                           (ltu/is-operation-absent "upload")
                           (ltu/is-operation-absent "ready")
                           (ltu/is-status 200))
@@ -389,16 +431,16 @@
                         (ltu/body->edn)
                         (ltu/is-status 200)))))
 
-            ;; owner delete succeeds
-            (-> session
-                (request abs-uri
-                         :request-method :delete
-                         :body (json/write-str {:keep-s3-object true})) ;;no s3 deletion while testing
-                (ltu/body->edn)
-                (ltu/is-status 200))
+              ;; owner delete succeeds
+              (-> session
+                  (request abs-uri
+                           :request-method :delete
+                           :body (json/write-str {:keep-s3-object true})) ;;no s3 deletion while testing
+                  (ltu/body->edn)
+                  (ltu/is-status 200))
 
-            ;; ensure entry is really gone
-            (-> session
-                (request abs-uri)
-                (ltu/body->edn)
-                (ltu/is-status 404)))))))))
+              ;; ensure entry is really gone
+              (-> session
+                  (request abs-uri)
+                  (ltu/body->edn)
+                  (ltu/is-status 404)))))))))

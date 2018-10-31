@@ -252,6 +252,18 @@
   (retrieve-impl request))
 
 
+;; editing is special as only a few attributes can be modified
+(defn select-editable-attributes
+  [body]
+  (select-keys body #{:name :description :properties :acl}))
+
+(def edit-impl (std-crud/edit-fn resource-name))
+
+(defmethod crud/edit resource-name
+  [{:keys [body] :as request}]
+  (edit-impl (assoc request :body (select-editable-attributes body))))
+
+
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
 
 (defmethod crud/query resource-name
