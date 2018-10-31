@@ -51,9 +51,6 @@
                 :objectName      (object-name resource)})
         (dissoc :filename))))
 
-(defmethod eo/identity-for-creds eot/objectType
-  [_ _]
-  request-admin)
 
 ;;
 ;; multimethods for validation

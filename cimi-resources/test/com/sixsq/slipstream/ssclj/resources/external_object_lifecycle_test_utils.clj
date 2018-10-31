@@ -193,12 +193,6 @@
                 (ltu/body->edn)
                 (ltu/is-status 200))
 
-            ;; retrieve by another authorized user succeeds
-            #_(-> session-user-view
-                  (request abs-uri)
-                  (ltu/body->edn)
-                  (ltu/is-status 200))
-
             ;; retrieve by another user fails
             (-> session-user-no-view
                 (request abs-uri)
@@ -327,16 +321,16 @@
 
                 ;; user with view access should see change of state
                 ;; actions should be the same
-                #_(-> session-user-view
-                      (request abs-uri)
-                      (ltu/body->edn)
-                      (ltu/is-status 200)
-                      (ltu/is-key-value :state eo/state-uploading)
-                      (ltu/is-operation-absent "ready")
-                      (ltu/is-operation-absent "delete")
-                      (ltu/is-operation-absent "edit")
-                      (ltu/is-operation-absent "upload")
-                      (ltu/is-operation-absent "download"))
+                (-> session-user-view
+                    (request abs-uri)
+                    (ltu/body->edn)
+                    (ltu/is-status 200)
+                    (ltu/is-key-value :state eo/state-uploading)
+                    (ltu/is-operation-absent "ready")
+                    (ltu/is-operation-absent "delete")
+                    (ltu/is-operation-absent "edit")
+                    (ltu/is-operation-absent "upload")
+                    (ltu/is-operation-absent "download"))
 
                 ;; doing it again should succeed, a new upload URL can be obtained
                 ;; in 'uploading' state
@@ -394,16 +388,16 @@
                         download-url-action (str p/service-context (ltu/get-op ready-eo "download"))]
 
                     ;; check states for user with view access
-                    #_(-> session-user-view
-                          (request abs-uri)
-                          (ltu/body->edn)
-                          (ltu/is-key-value :state eo/state-ready)
-                          (ltu/is-operation-present "download")
-                          (ltu/is-operation-absent "delete")
-                          (ltu/is-operation-absent "edit")
-                          (ltu/is-operation-absent "upload")
-                          (ltu/is-operation-absent "ready")
-                          (ltu/is-status 200))
+                    (-> session-user-view
+                        (request abs-uri)
+                        (ltu/body->edn)
+                        (ltu/is-key-value :state eo/state-ready)
+                        (ltu/is-operation-present "download")
+                        (ltu/is-operation-absent "delete")
+                        (ltu/is-operation-absent "edit")
+                        (ltu/is-operation-absent "upload")
+                        (ltu/is-operation-absent "ready")
+                        (ltu/is-status 200))
 
                     ;; triggering the download url with anonymous or unauthorized user should fail
                     (-> session-anon
@@ -418,13 +412,14 @@
                         (ltu/body->edn)
                         (ltu/is-status 403))
 
-                    ;; triggering download url with owner or user with view access succeeds
-                    #_(-> session-user-view
-                          (request ready-url-action
-                                   :request-method :post)
-                          (ltu/body->edn)
-                          (ltu/is-status 200))
+                    ;; triggering download url as user with view access succeeds
+                    (-> session-user-view
+                        (request download-url-action
+                                 :request-method :post)
+                        (ltu/body->edn)
+                        (ltu/is-status 200))
 
+                    ;; triggering download url as owner succeeds
                     (-> session
                         (request download-url-action
                                  :request-method :post)

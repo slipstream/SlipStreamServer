@@ -43,6 +43,15 @@
 (def ^:const state-uploading "uploading")
 (def ^:const state-ready "ready")
 
+(def request-admin {:identity     {:current "internal"
+                                   :authentications
+                                            {"internal" {:roles #{"ADMIN"}, :identity "internal"}}}
+                    :sixsq.slipstream.authn/claims
+                                  {:username "internal", :roles "ADMIN"}
+                    :params       {:resource-name "user"}
+                    :route-params {:resource-name "user"}
+                    :user-roles   #{"ANON"}})
+
 ;;
 ;; validate subclasses of externalObject
 ;;
@@ -117,7 +126,7 @@
     (let [user-id (:identity (a/current-authentication request))]
       (assoc resource :acl (create-acl user-id)))))
 
-;;;;;;;;
+
 (defn dispatch-conversion
   "Dispatches on the External object type for multimethods
    that take the resource and request as arguments."
@@ -247,7 +256,9 @@
                  (assoc :state state-new))]
     (add-impl (assoc request :body body))))
 
+
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
+
 (defmethod crud/retrieve resource-name
   [request]
   (retrieve-impl request))
@@ -273,13 +284,6 @@
 
 ;; URL request operations utils
 
-(defmulti identity-for-creds
-          (fn [request objectType] objectType))
-
-(defmethod identity-for-creds :default
-  [request _]
-  request)
-
 (defn expand-cred
   "Returns credential document after expanding `href-obj-store-cred` credential href.
 
@@ -288,7 +292,7 @@
   objectType from it. Instead, requiring objectType as parameter. It should be known
   to the callers."
   [href-obj-store-cred request objectType]
-  (std-crud/resolve-hrefs href-obj-store-cred (identity-for-creds request objectType) true))
+  (std-crud/resolve-hrefs href-obj-store-cred request-admin true))
 
 (defn expand-obj-store-creds
   "Need objectType to dispatch on when loading credentials."
@@ -304,8 +308,8 @@
 (defn format-states
   [states]
   (->> states
-      (map #(format "'%s'" %))
-      (str/join ", ")))
+       (map #(format "'%s'" %))
+       (str/join ", ")))
 
 (defn error-msg-bad-state
   [action required-states current-state]
@@ -381,7 +385,6 @@
 (defmethod download-subtype :default
   [resource request]
   (try
-    (a/can-modify? resource request)
     (r/json-response {:uri (download-fn resource request)})
     (catch Exception e
       (or (ex-data e) (throw e)))))
@@ -391,6 +394,7 @@
   (try
     (let [id (str resource-url "/" uuid)]
       (-> (crud/retrieve-by-id-as-admin id)
+          (a/can-view? request)
           (download-subtype request)))
     (catch Exception e
       (or (ex-data e) (throw e)))))
