@@ -43,6 +43,15 @@
 (def ^:const state-uploading "uploading")
 (def ^:const state-ready "ready")
 
+(def request-admin {:identity     {:current "internal"
+                                   :authentications
+                                            {"internal" {:roles #{"ADMIN"}, :identity "internal"}}}
+                    :sixsq.slipstream.authn/claims
+                                  {:username "internal", :roles "ADMIN"}
+                    :params       {:resource-name "user"}
+                    :route-params {:resource-name "user"}
+                    :user-roles   #{"ANON"}})
+
 ;;
 ;; validate subclasses of externalObject
 ;;
@@ -117,7 +126,7 @@
     (let [user-id (:identity (a/current-authentication request))]
       (assoc resource :acl (create-acl user-id)))))
 
-;;;;;;;;
+
 (defn dispatch-conversion
   "Dispatches on the External object type for multimethods
    that take the resource and request as arguments."
@@ -138,6 +147,7 @@
         show-download-op? (and viewable? (#{state-ready} state))
         ops (cond-> []
                     modifiable? (conj {:rel (:delete c/action-uri) :href id})
+                    modifiable? (conj {:rel (:edit c/action-uri) :href id})
                     show-upload-op? (conj {:rel (:upload c/action-uri) :href (str id "/upload")})
                     show-ready-op? (conj {:rel (:ready c/action-uri) :href (str id "/ready")})
                     show-download-op? (conj {:rel (:download c/action-uri) :href (str id "/download")}))]
@@ -234,6 +244,7 @@
 ;; requires a ExternalObjectTemplate to create new ExternalObject
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
+  (a/can-modify? {:acl collection-acl} request)
   (let [idmap {:identity (:identity request)}
         body (-> body
                  (assoc :resourceURI create-uri)
@@ -245,10 +256,24 @@
                  (assoc :state state-new))]
     (add-impl (assoc request :body body))))
 
+
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
+
 (defmethod crud/retrieve resource-name
   [request]
   (retrieve-impl request))
+
+
+;; editing is special as only a few attributes can be modified
+(defn select-editable-attributes
+  [body]
+  (select-keys body #{:name :description :properties :acl}))
+
+(def edit-impl (std-crud/edit-fn resource-name))
+
+(defmethod crud/edit resource-name
+  [{:keys [body] :as request}]
+  (edit-impl (assoc request :body (select-editable-attributes body))))
 
 
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
@@ -259,13 +284,6 @@
 
 ;; URL request operations utils
 
-(defmulti identity-for-creds
-          (fn [request objectType] objectType))
-
-(defmethod identity-for-creds :default
-  [request _]
-  request)
-
 (defn expand-cred
   "Returns credential document after expanding `href-obj-store-cred` credential href.
 
@@ -273,44 +291,50 @@
   action resource. We would need to get resource id, load the resource and get
   objectType from it. Instead, requiring objectType as parameter. It should be known
   to the callers."
-  [href-obj-store-cred request objectType]
-  (std-crud/resolve-hrefs href-obj-store-cred (identity-for-creds request objectType) true))
+  [href-obj-store-cred]
+  (std-crud/resolve-hrefs href-obj-store-cred request-admin true))
 
 (defn expand-obj-store-creds
   "Need objectType to dispatch on when loading credentials."
   [href-obj-store-cred request objectType]
-  (let [{:keys [key secret connector]} (expand-cred href-obj-store-cred request objectType)]
+  (let [{:keys [key secret connector]} (expand-cred href-obj-store-cred)]
     {:key      key
      :secret   secret
      :endpoint (:objectStoreEndpoint connector)}))
 
-
-;;; Upload URL operation
+;;; Generic utilities for actions
 
 (defn format-states
   [states]
   (->> states
-      (map #(format "'%s'" %))
-      (str/join ", ")))
+       (map #(format "'%s'" %))
+       (str/join ", ")))
 
 (defn error-msg-bad-state
   [action required-states current-state]
   (format "Invalid state '%s' for '%s' action. Valid states: %s."
           current-state action (format-states required-states)))
 
+(defn verify-state
+  [{:keys [state] :as resource} accepted-states action]
+  (if (accepted-states state)
+    resource
+    (logu/log-and-throw-400 (error-msg-bad-state action accepted-states state))))
+
+;;; Upload URL operation
+
 (defn upload-fn
   "Provided 'resource' and 'request', returns object storage upload URL."
-  [{:keys [objectType state contentType bucketName objectName objectStoreCred runUUID filename]} {{ttl :ttl} :body :as request}]
-  (if (#{state-new state-uploading} state)
-    (let [object-name (if (not-empty objectName)
-                        objectName
-                        (format "%s/%s" runUUID filename))
-          obj-store-conf (expand-obj-store-creds objectStoreCred request objectType)]
-      (log/info "Requesting upload url:" object-name)
-      (s3/create-bucket! obj-store-conf bucketName)
-      (s3/generate-url obj-store-conf bucketName object-name :put
-                       {:ttl (or ttl s3/default-ttl) :content-type contentType :filename filename}))
-    (logu/log-and-throw-400 (error-msg-bad-state "upload" #{state-new state-uploading} state))))
+  [{:keys [objectType contentType bucketName objectName objectStoreCred runUUID filename] :as resource} {{ttl :ttl} :body :as request}]
+  (verify-state resource #{state-new state-uploading} "upload")
+  (let [object-name (if (not-empty objectName)
+                      objectName
+                      (format "%s/%s" runUUID filename))
+        obj-store-conf (expand-obj-store-creds objectStoreCred request objectType)]
+    (log/info "Requesting upload url:" object-name)
+    (s3/create-bucket! obj-store-conf bucketName)
+    (s3/generate-url obj-store-conf bucketName object-name :put
+                     {:ttl (or ttl s3/default-ttl) :content-type contentType :filename filename})))
 
 (defmulti upload-subtype
           (fn [resource _] (:objectType resource)))
@@ -337,14 +361,12 @@
 (defmethod crud/do-action [resource-url "ready"]
   [{{uuid :uuid} :params :as request}]
   (try
-    (let [resource (crud/retrieve-by-id-as-admin (str resource-url "/" uuid))
-          state (:state resource)]
-      (a/can-modify? resource request)
-      (if (= state state-uploading)
-        (-> resource
-            (assoc :state state-ready)
-            (db/edit request))
-        (logu/log-and-throw-400 (error-msg-bad-state "ready" #{state-uploading} state))))
+    (let [resource (crud/retrieve-by-id-as-admin (str resource-url "/" uuid))]
+      (-> resource
+          (a/can-modify? request)
+          (verify-state #{state-uploading} "ready")
+          (assoc :state state-ready)
+          (db/edit request)))
     (catch Exception e
       (or (ex-data e) (throw e)))))
 
@@ -352,14 +374,12 @@
 
 (defn download-fn
   "Provided 'resource' and 'request', returns object storage download URL."
-  [{:keys [objectType state bucketName objectName objectStoreCred]} {{ttl :ttl} :body :as request}]
-  (if (= state state-ready)
-    (do
-      (log/info "Requesting download url: " objectName)
-      (s3/generate-url (expand-obj-store-creds objectStoreCred request objectType)
-                       bucketName objectName :get
-                       {:ttl (or ttl s3/default-ttl)}))
-    (logu/log-and-throw-400 (error-msg-bad-state "download" #{state-ready} state))))
+  [{:keys [objectType bucketName objectName objectStoreCred] :as resource} {{ttl :ttl} :body :as request}]
+  (verify-state resource #{state-ready} "download")
+  (log/info "Requesting download url: " objectName)
+  (s3/generate-url (expand-obj-store-creds objectStoreCred request objectType)
+                   bucketName objectName :get
+                   {:ttl (or ttl s3/default-ttl)}))
 
 (defmulti download-subtype
           (fn [resource _] (:objectType resource)))
@@ -367,7 +387,6 @@
 (defmethod download-subtype :default
   [resource request]
   (try
-    (a/can-modify? resource request)
     (r/json-response {:uri (download-fn resource request)})
     (catch Exception e
       (or (ex-data e) (throw e)))))
@@ -377,6 +396,7 @@
   (try
     (let [id (str resource-url "/" uuid)]
       (-> (crud/retrieve-by-id-as-admin id)
+          (a/can-view? request)
           (download-subtype request)))
     (catch Exception e
       (or (ex-data e) (throw e)))))
