@@ -291,13 +291,13 @@
   action resource. We would need to get resource id, load the resource and get
   objectType from it. Instead, requiring objectType as parameter. It should be known
   to the callers."
-  [href-obj-store-cred request objectType]
+  [href-obj-store-cred]
   (std-crud/resolve-hrefs href-obj-store-cred request-admin true))
 
 (defn expand-obj-store-creds
   "Need objectType to dispatch on when loading credentials."
   [href-obj-store-cred request objectType]
-  (let [{:keys [key secret connector]} (expand-cred href-obj-store-cred request objectType)]
+  (let [{:keys [key secret connector]} (expand-cred href-obj-store-cred)]
     {:key      key
      :secret   secret
      :endpoint (:objectStoreEndpoint connector)}))
@@ -374,7 +374,7 @@
 
 (defn download-fn
   "Provided 'resource' and 'request', returns object storage download URL."
-  [{:keys [objectType state bucketName objectName objectStoreCred] :as resource} {{ttl :ttl} :body :as request}]
+  [{:keys [objectType bucketName objectName objectStoreCred] :as resource} {{ttl :ttl} :body :as request}]
   (verify-state resource #{state-ready} "download")
   (log/info "Requesting download url: " objectName)
   (s3/generate-url (expand-obj-store-creds objectStoreCred request objectType)

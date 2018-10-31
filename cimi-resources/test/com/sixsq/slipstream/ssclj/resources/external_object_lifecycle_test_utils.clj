@@ -281,23 +281,12 @@
                     abs-upload-uri (str p/service-context (u/de-camelcase upload-op))]
 
                 ;; triggering the upload url with anonymous, authorized or unauthorized viewer should fail
-                (-> session-anon
-                    (request abs-upload-uri
-                             :request-method :post)
-                    (ltu/body->edn)
-                    (ltu/is-status 403))
-
-                (-> session-user-no-view
-                    (request abs-upload-uri
-                             :request-method :post)
-                    (ltu/body->edn)
-                    (ltu/is-status 403))
-
-                (-> session-user-view
-                    (request abs-upload-uri
-                             :request-method :post)
-                    (ltu/body->edn)
-                    (ltu/is-status 403))
+                (doseq [session [session-anon session-user-no-view session-user-view]]
+                  (-> session
+                      (request abs-upload-uri
+                               :request-method :post)
+                      (ltu/body->edn)
+                      (ltu/is-status 403)))
 
                 ;; owner can trigger the upload action
                 (-> session
@@ -350,23 +339,12 @@
 
 
                   ;; triggering the ready url with anonymous, authorized or unauthorized viewer should fail
-                  (-> session-anon
-                      (request ready-url-action
-                               :request-method :post)
-                      (ltu/body->edn)
-                      (ltu/is-status 403))
-
-                  (-> session-user-no-view
-                      (request ready-url-action
-                               :request-method :post)
-                      (ltu/body->edn)
-                      (ltu/is-status 403))
-
-                  (-> session-user-view
-                      (request ready-url-action
-                               :request-method :post)
-                      (ltu/body->edn)
-                      (ltu/is-status 403))
+                  (doseq [session [session-anon session-user-no-view session-user-view]]
+                    (-> session
+                        (request ready-url-action
+                                 :request-method :post)
+                        (ltu/body->edn)
+                        (ltu/is-status 403)))
 
                   ;; owner can trigger the ready action to prevent further changes to object
                   (-> session
@@ -401,13 +379,13 @@
 
                     ;; triggering the download url with anonymous or unauthorized user should fail
                     (-> session-anon
-                        (request ready-url-action
+                        (request download-url-action
                                  :request-method :post)
                         (ltu/body->edn)
                         (ltu/is-status 403))
 
                     (-> session-user-no-view
-                        (request ready-url-action
+                        (request download-url-action
                                  :request-method :post)
                         (ltu/body->edn)
                         (ltu/is-status 403))

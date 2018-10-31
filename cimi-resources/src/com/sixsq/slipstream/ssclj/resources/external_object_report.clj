@@ -19,14 +19,6 @@
 ;;
 (def ^:const desc ExternalObjectReportDescription)
 
-(def request-admin {:identity     {:current "internal"
-                                   :authentications
-                                            {"internal" {:roles #{"ADMIN"}, :identity "internal"}}}
-                    :sixsq.slipstream.authn/claims
-                                  {:username "internal", :roles "ADMIN"}
-                    :params       {:resource-name "user"}
-                    :route-params {:resource-name "user"}
-                    :user-roles   #{"ANON"}})
 
 (defn set-uuid-in-request
   [request uuid]
@@ -35,7 +27,7 @@
 (defn ss-conf
   "Returns SlipStream configuration."
   []
-  (let [request (set-uuid-in-request request-admin conf-ss/service)]
+  (let [request (set-uuid-in-request eo/request-admin conf-ss/service)]
     (:body ((std-crud/retrieve-fn p/resource-url) request))))
 
 (defn object-name
