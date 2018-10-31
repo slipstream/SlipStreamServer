@@ -10,11 +10,14 @@
     [com.sixsq.slipstream.ssclj.resources.email.utils :as email-utils]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [peridot.core :refer :all]
-    [postal.core :as postal]))
+    [postal.core :as postal]
+    [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase t/resource-url)))
+
+(def md-uri (str p/service-context (u/de-camelcase md/resource-url) "/" t/resource-url))
 
 (def valid-acl {:owner {:principal "ADMIN",
                         :type      "ROLE"},
@@ -31,12 +34,24 @@
                          :type      "ROLE",
                          :right     "VIEW"}]})
 
+
 (deftest lifecycle
   (let [session-anon (-> (ltu/ring-app)
                          session
                          (content-type "application/json"))
         session-admin (header session-anon authn-info-header "super ADMIN USER ANON")
         session-user (header session-anon authn-info-header "jane USER ANON")]
+
+    ;; verify resource metadata
+    (-> session-anon
+        (request md-uri))
+    (is (= t/resource-url (-> session-anon
+                              (request md-uri)
+                              (ltu/body->edn)
+                              (ltu/is-status 200)
+                              :response
+                              :body
+                              :typeURI)))
 
     ;; admin query succeeds but is empty
     (-> session-admin

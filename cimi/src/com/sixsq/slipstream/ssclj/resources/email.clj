@@ -16,7 +16,9 @@
     [com.sixsq.slipstream.ssclj.resources.email.utils :as email-utils]
     [com.sixsq.slipstream.ssclj.resources.spec.email :as email]
     [com.sixsq.slipstream.util.response :as r]
-    [superstring.core :as str]))
+    [superstring.core :as str]
+    [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]
+    [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]))
 
 (def ^:const resource-name "Email")
 
@@ -138,4 +140,6 @@
 ;;
 (defn initialize
   []
-  (std-crud/initialize resource-url ::email/email))
+  (std-crud/initialize resource-url ::email/email)
+  (let [{:keys [typeURI] :as metadata} (gen-md/generate-metadata *ns* nil ::email/email)]
+    (md/register metadata)))

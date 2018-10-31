@@ -49,7 +49,9 @@
           full-identifier (str t/resource-url "/" identifier)
           abs-uri (str p/service-context full-identifier)]
 
-      (t/register identifier (dissoc resource-metadata/valid :acl))
+      (t/register (-> resource-metadata/valid
+                      (dissoc :acl)
+                      (assoc :typeURI identifier)))
 
       (doseq [session [session-admin session-user session-anon]]
         (-> session
