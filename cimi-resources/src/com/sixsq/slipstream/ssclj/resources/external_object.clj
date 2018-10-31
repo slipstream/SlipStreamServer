@@ -138,6 +138,7 @@
         show-download-op? (and viewable? (#{state-ready} state))
         ops (cond-> []
                     modifiable? (conj {:rel (:delete c/action-uri) :href id})
+                    modifiable? (conj {:rel (:edit c/action-uri) :href id})
                     show-upload-op? (conj {:rel (:upload c/action-uri) :href (str id "/upload")})
                     show-ready-op? (conj {:rel (:ready c/action-uri) :href (str id "/ready")})
                     show-download-op? (conj {:rel (:download c/action-uri) :href (str id "/download")}))]
