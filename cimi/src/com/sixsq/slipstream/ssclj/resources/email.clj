@@ -141,5 +141,5 @@
 (defn initialize
   []
   (std-crud/initialize resource-url ::email/email)
-  (let [{:keys [typeURI] :as metadata} (gen-md/generate-metadata *ns* nil ::email/email)]
+  (let [{:keys [typeURI] :as metadata} (gen-md/generate-metadata (namespace ::x) nil ::email/email)]
     (md/register metadata)))
