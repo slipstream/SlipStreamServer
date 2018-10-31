@@ -226,7 +226,8 @@
         ;; put back unexpanded connector href
         (update-in [:externalObjectTemplate] merge os-cred-href))))
 
-(def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
+(def add-impl
+  (std-crud/add-fn resource-name collection-acl resource-uri))
 
 (defn merge-into-tmpl
   [body]
@@ -240,6 +241,7 @@
                             (dissoc :href))]
       (assoc-in body [:externalObjectTemplate] (merge tmpl user-resource)))
     body))
+
 
 ;; requires a ExternalObjectTemplate to create new ExternalObject
 (defmethod crud/add resource-name
@@ -284,6 +286,7 @@
 
 ;; URL request operations utils
 
+
 (defn expand-cred
   "Returns credential document after expanding `href-obj-store-cred` credential href.
 
@@ -294,6 +297,7 @@
   [href-obj-store-cred]
   (std-crud/resolve-hrefs href-obj-store-cred request-admin true))
 
+
 (defn expand-obj-store-creds
   "Need objectType to dispatch on when loading credentials."
   [href-obj-store-cred request objectType]
@@ -302,7 +306,49 @@
      :secret   secret
      :endpoint (:objectStoreEndpoint connector)}))
 
+<<<<<<< HEAD
 ;;; Generic utilities for actions
+=======
+
+;; requires a ExternalObjectTemplate to create new ExternalObject
+(defmethod crud/add resource-name
+  [{{:keys [objectStoreCred objectType bucketName] :as body} :body :as request}]
+  (let [idmap {:identity (:identity request)}
+        obj-store-conf (expand-obj-store-creds objectStoreCred request objectType)
+        s3resp (s3/create-bucket! obj-store-conf bucketName)
+
+        body (-> body
+                 (assoc :resourceURI create-uri)
+                 (merge-into-tmpl)
+                 (resolve-hrefs idmap)
+                 (crud/validate)
+                 (:externalObjectTemplate)
+                 (tpl->externalObject)
+                 (assoc :state state-new))]
+
+    (if s3resp
+      (add-impl (assoc request :body body))
+      (logu/log-and-throw 503 "Error while creating S3 bucket")
+    )))
+
+(def retrieve-impl (std-crud/retrieve-fn resource-name))
+(defmethod crud/retrieve resource-name
+  [request]
+  (retrieve-impl request))
+
+
+(def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
+
+(defmethod crud/query resource-name
+  [request]
+  (query-impl request))
+
+
+
+
+
+;;; Upload URL operation
+>>>>>>> WIP move location of bucket creation
 
 (defn format-states
   [states]
@@ -325,6 +371,7 @@
 
 (defn upload-fn
   "Provided 'resource' and 'request', returns object storage upload URL."
+<<<<<<< HEAD
   [{:keys [objectType contentType bucketName objectName objectStoreCred runUUID filename] :as resource} {{ttl :ttl} :body :as request}]
   (verify-state resource #{state-new state-uploading} "upload")
   (let [object-name (if (not-empty objectName)
@@ -335,6 +382,20 @@
     (s3/create-bucket! obj-store-conf bucketName)
     (s3/generate-url obj-store-conf bucketName object-name :put
                      {:ttl (or ttl s3/default-ttl) :content-type contentType :filename filename})))
+=======
+  [{:keys [objectType state contentType bucketName objectName objectStoreCred runUUID filename]} {{ttl :ttl} :body :as request}]
+  (if (#{state-new state-uploading} state)
+    (let [object-name (if (not-empty objectName)
+                        objectName
+                        (format "%s/%s" runUUID filename))
+          obj-store-conf (expand-obj-store-creds objectStoreCred request objectType)]
+      (log/info "Requesting upload url:" object-name)
+      #_(s3/create-bucket! obj-store-conf bucketName)
+
+      (s3/generate-url obj-store-conf bucketName object-name :put
+                       {:ttl (or ttl s3/default-ttl) :content-type contentType :filename filename}))
+    (logu/log-and-throw-400 (error-msg-bad-state "upload" #{state-new state-uploading} state))))
+>>>>>>> WIP move location of bucket creation
 
 (defmulti upload-subtype
           (fn [resource _] (:objectType resource)))

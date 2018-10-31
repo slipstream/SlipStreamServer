@@ -2,14 +2,16 @@
   (:require
     [clj-time.coerce :as tc]
     [clj-time.core :as t]
+    [com.sixsq.slipstream.ssclj.util.log :as logu]
     [clojure.tools.logging :as log])
   (:import
     (com.amazonaws HttpMethod)
     (com.amazonaws.auth AWSStaticCredentialsProvider BasicAWSCredentials)
     (com.amazonaws.client.builder AwsClientBuilder$EndpointConfiguration)
     (com.amazonaws.services.s3 AmazonS3ClientBuilder)
-    (com.amazonaws.services.s3.model CreateBucketRequest DeleteObjectRequest
-                                     GeneratePresignedUrlRequest ResponseHeaderOverrides)))
+    (com.amazonaws.services.s3.model CreateBucketRequest
+                                     DeleteObjectRequest
+                                     GeneratePresignedUrlRequest)))
 
 
 (def ^:const default-ttl 15)
@@ -26,11 +28,12 @@
 (defn create-bucket!
   [obj-store-conf bucket-name]
   (let [s3client (get-s3-client obj-store-conf)]
-    (when-not (.doesBucketExist s3client bucket-name)
+    (when-not (.doesBucketExistV2 s3client bucket-name)
       (try
         (.createBucket s3client (CreateBucketRequest. bucket-name))
         (catch Exception e
           (log/error (format "Error when creating bucket %s: %s" bucket-name (.getMessage e))))))))
+
 
 (defn generate-url
   [obj-store-conf bucket obj-name verb & [{:keys [ttl content-type]}]]
