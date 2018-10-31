@@ -4,12 +4,14 @@
    capabilities. This information is linked to a resource through the typeURI
    attribute."
   (:require
+    [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.resource-metadata :as resource-metadata]
+    [com.sixsq.slipstream.util.response :as r]
     [superstring.core :as str]))
 
 (def ^:const resource-name "ResourceMetadata")
@@ -26,10 +28,7 @@
 
 (def default-resource-acl {:owner {:principal "ADMIN"
                                    :type      "ROLE"}
-                           :rules [{:principal "ADMIN"
-                                    :type      "ROLE"
-                                    :right     "MODIFY"}
-                                   {:principal "ANON"
+                           :rules [{:principal "ANON"
                                     :type      "ROLE"
                                     :right     "VIEW"}]})
 
@@ -45,23 +44,54 @@
 
 
 ;;
-;; resource identifier is the MD5 checksum of the typeURI
+;; atom to keep track of the resource metadata documents for loaded resources
 ;;
-(defmethod crud/new-identifier resource-name
-  [{:keys [typeURI] :as resource} resource-name]
-  (->> typeURI
-       u/md5
-       (str resource-url "/")
-       (assoc resource :id)))
+(def templates (atom {}))
 
 
-;;
-;; normally resource metadata should be accessible to anyone
-;;
-(defmethod crud/add-acl resource-uri
-  [{:keys [acl] :as resource} request]
-  (assoc resource :acl (or acl default-resource-acl)))
+(defn collection-wrapper-fn
+  "Specialized version of this function that removes the adding
+   of operations to the collection and entries.  These are already
+   part of the stored resources."
+  [resource-name collection-acl collection-uri collection-key]
+  (fn [_ entries]
+    (let [skeleton {:acl         collection-acl
+                    :resourceURI collection-uri
+                    :id          (u/de-camelcase resource-name)}]
+      (assoc skeleton collection-key entries))))
 
+
+(defn complete-resource
+  "Completes the given document with server-managed information:
+   resourceURI, timestamps, and ACL."
+  [identifier resource]
+  (when identifier
+    (let [id (str resource-url "/" identifier)]
+      (-> resource
+          (merge {:id          id
+                  :resourceURI resource-uri
+                  :acl         default-resource-acl})
+          u/update-timestamps))))
+
+
+(defn register
+  "Registers a given ConfigurationTemplate resource and its description
+   with the server.  The resource document (resource) and the description
+   (desc) must be valid.  The key will be used to create the id of
+   the resource as 'configuration-template/key'."
+  [identifier resource]
+  (when-let [full-resource (complete-resource identifier resource)]
+    (let [id (:id full-resource)]
+      (try
+        (crud/validate full-resource)
+        (swap! templates assoc id full-resource)
+        (log/info "registered resource metadata for" id)
+        (catch Exception e
+          (log/error "registration of resource metadata for" id "failed\n" (str e)))))))
+
+;;
+;; validation of documents
+;;
 
 (def validate-fn (u/create-spec-validation-fn ::resource-metadata/resource-metadata))
 (defmethod crud/validate
@@ -70,28 +100,54 @@
   (validate-fn resource))
 
 
-(def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
+;;
+;; only retrieve and query are supported CRUD operations
+;;
+
 (defmethod crud/add resource-name
   [request]
-  (add-impl request))
+  (throw (r/ex-bad-method request)))
 
 
-(def retrieve-impl (std-crud/retrieve-fn resource-name))
 (defmethod crud/retrieve resource-name
+  [{{uuid :uuid} :params :as request}]
+  (try
+    (let [id (str resource-url "/" uuid)]
+      (-> (get @templates id)
+          (a/can-view? request)
+          (r/json-response)))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
+
+
+;; must override the default implementation so that the
+;; data can be pulled from the atom rather than the database
+(defmethod crud/retrieve-by-id resource-url
+  [id]
+  (try
+    (get @templates id)
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
+
+
+(defmethod crud/edit resource-name
   [request]
-  (retrieve-impl request))
+  (throw (r/ex-bad-method request)))
 
 
-(def delete-impl (std-crud/delete-fn resource-name))
 (defmethod crud/delete resource-name
   [request]
-  (delete-impl request))
+  (throw (r/ex-bad-method request)))
 
 
-(def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
 (defmethod crud/query resource-name
   [request]
-  (query-impl request))
+  (a/can-view? {:acl collection-acl} request)
+  (let [wrapper-fn (collection-wrapper-fn resource-name collection-acl collection-uri resource-tag)
+        [count-before-pagination entries] ((juxt count vals) @templates)
+        wrapped-entries (wrapper-fn request entries)
+        entries-and-count (assoc wrapped-entries :count count-before-pagination)]
+    (r/json-response entries-and-count)))
 
 
 ;;

@@ -33,86 +33,51 @@
         session-admin (header session-anon authn-info-header "super ADMIN USER ANON")
         session-user (header session-anon authn-info-header "jane USER ANON")]
 
-    ;; admin query succeeds but is empty
-    ;; admin can add new entries
-    (-> session-admin
-        (request base-uri)
-        (ltu/body->edn)
-        (ltu/is-status 200)
-        (ltu/is-count zero?)
-        (ltu/is-operation-present "add")
-        (ltu/is-operation-absent "delete")
-        (ltu/is-operation-absent "edit"))
-
-    ;; user and anon queries succeed but are empty
-    (doseq [session [session-user session-anon]]
+    ;; anyone can query the metadata
+    ;; because of automatic registration, the list may not be empty
+    (doseq [session [session-admin session-user session-anon]]
       (-> session
           (request base-uri)
           (ltu/body->edn)
           (ltu/is-status 200)
-          (ltu/is-count zero?)
           (ltu/is-operation-absent "add")
           (ltu/is-operation-absent "delete")
           (ltu/is-operation-absent "edit")))
 
-    ;; user and anon create requests must fail
-    (doseq [session [session-user session-anon]]
-      (-> session
-          (request base-uri
-                   :request-method :post
-                   :body (json/write-str (dissoc resource-metadata/valid :acl)))
-          (ltu/body->edn)
-          (ltu/is-status 403)))
+    ;; use the internal register method to create a new entry
+    (let [identifier "unit-test-resource"
+          full-identifier (str t/resource-url "/" identifier)
+          abs-uri (str p/service-context full-identifier)]
 
-    ;; check resource metadata creation
-    (let [admin-uri (-> session-admin
-                        (request base-uri
-                                 :request-method :post
-                                 :body (json/write-str (dissoc resource-metadata/valid :acl)))
-                        (ltu/body->edn)
-                        (ltu/is-status 201)
-                        (ltu/location))
-          admin-abs-uri (str p/service-context (u/de-camelcase admin-uri))]
+      (t/register identifier (dissoc resource-metadata/valid :acl))
 
-      ;; everyone should see the created resource
       (doseq [session [session-admin session-user session-anon]]
         (-> session
             (request base-uri)
             (ltu/body->edn)
             (ltu/is-status 200)
             (ltu/is-resource-uri t/collection-uri)
-            (ltu/is-count 1)))
+            (ltu/is-count pos?))
 
-      ;; verify contents
-      (let [{:keys [id typeURI] :as metadata} (-> session-admin
-                                                  (request admin-abs-uri)
-                                                  (ltu/body->edn)
-                                                  (ltu/is-status 200)
-                                                  (ltu/is-operation-present "edit")
-                                                  (ltu/is-operation-present "delete")
-                                                  :response
-                                                  :body)]
+        (let [{:keys [id] :as metadata} (-> session
+                                            (request abs-uri)
+                                            (ltu/body->edn)
+                                            (ltu/is-status 200)
+                                            (ltu/is-operation-absent "add")
+                                            (ltu/is-operation-absent "edit")
+                                            (ltu/is-operation-absent "delete")
+                                            :response
+                                            :body)]
 
-        (is typeURI)
-        (is (= (cu/document-id id) (cu/md5 typeURI))))
-
-      ;; user and anon cannot delete resource metadata
-      (doseq [session [session-user session-anon]]
-        (-> session
-            (request admin-abs-uri :request-method :delete)
-            (ltu/body->edn)
-            (ltu/is-status 403)))
-
-      ;; admin can delete the resource metadata
-      (-> session-admin
-          (request admin-abs-uri :request-method :delete)
-          (ltu/body->edn)
-          (ltu/is-status 200)))))
+          (is (= (cu/document-id id) identifier)))))))
 
 
 (deftest bad-methods
   (let [resource-uri (str p/service-context (u/new-resource-id t/resource-url))]
     (ltu/verify-405-status [[base-uri :options]
                             [base-uri :delete]
+                            [base-uri :post]
                             [resource-uri :options]
-                            [resource-uri :post]])))
+                            [resource-uri :post]
+                            [resource-uri :put]
+                            [resource-uri :delete]])))
