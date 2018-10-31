@@ -234,6 +234,7 @@
 ;; requires a ExternalObjectTemplate to create new ExternalObject
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
+  (a/can-modify? {:acl collection-acl} request)
   (let [idmap {:identity (:identity request)}
         body (-> body
                  (assoc :resourceURI create-uri)
