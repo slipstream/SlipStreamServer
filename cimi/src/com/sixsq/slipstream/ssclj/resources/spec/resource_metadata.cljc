@@ -13,9 +13,6 @@
 (s/def ::typeURI ::cimi-core/uri)
 
 
-(s/def ::name ::cimi-core/resource-name)
-
-
 (s/def ::resource-metadata
   (su/only-keys-maps cimi-common/common-attrs
                      {:req-un [::typeURI]
