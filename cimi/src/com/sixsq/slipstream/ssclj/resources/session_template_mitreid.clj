@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-template-mitreid
   "
-Resource that is used to create a session using a the standard OIDC worflow
+Resource that is used to create a session using a the standard OIDC workflow
 from a MITREid server.
 "
   (:require
