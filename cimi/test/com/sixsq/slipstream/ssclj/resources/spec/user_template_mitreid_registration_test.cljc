@@ -2,7 +2,7 @@
   (:require
     [clojure.test :refer [deftest is]]
     [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]
-    [com.sixsq.slipstream.ssclj.resources.spec.user-template-mitreid-registration :as user-template-mitreid]
+    [com.sixsq.slipstream.ssclj.resources.spec.user-template-mitreid :as user-template-mitreid]
     [com.sixsq.slipstream.ssclj.resources.user-template :as st]))
 
 

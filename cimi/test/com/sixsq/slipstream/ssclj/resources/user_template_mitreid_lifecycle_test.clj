@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.user-mitreid-registration-lifecycle-test
+(ns com.sixsq.slipstream.ssclj.resources.user-template-mitreid-lifecycle-test
   (:require
     [clojure.data.json :as json]
     [clojure.test :refer [deftest is use-fixtures]]
@@ -14,8 +14,9 @@
     [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as oidc-utils]
     [com.sixsq.slipstream.ssclj.resources.user :as user]
     [com.sixsq.slipstream.ssclj.resources.user-template :as ut]
-    [com.sixsq.slipstream.ssclj.resources.user-template-mitreid-registration :as mitreid]
+    [com.sixsq.slipstream.ssclj.resources.user-template-mitreid :as mitreid]
     [com.sixsq.slipstream.ssclj.resources.user.user-identifier-utils :as uiu]
+    [com.sixsq.slipstream.ssclj.util.metadata-test-utils :as mdtu]
     [peridot.core :refer :all]
     [ring.util.codec :as codec]))
 
@@ -51,6 +52,11 @@
                                                          :tokenURL       "https://token.mitreid.com/token"
                                                          :userProfileURL "https://userinfo.mitreid.com/api/user/me"
                                                          :publicKey      auth-pubkey}})
+
+
+(deftest check-metadata
+  (mdtu/check-metadata-exists (str ut/resource-url "-" mitreid/resource-url)))
+
 
 (deftest lifecycle
 

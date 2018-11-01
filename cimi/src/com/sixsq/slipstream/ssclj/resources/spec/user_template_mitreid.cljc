@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.spec.user-template-mitreid-registration
+(ns com.sixsq.slipstream.ssclj.resources.spec.user-template-mitreid
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.user-template :as ps]
