@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.spec.user-template-oidc-registration
+(ns com.sixsq.slipstream.ssclj.resources.spec.user-template-oidc
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.user-template :as ps]

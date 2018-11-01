@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.user-oidc-registration-lifecycle-test
+(ns com.sixsq.slipstream.ssclj.resources.user-template-oidc-lifecycle-test
   (:require
     [clojure.data.json :as json]
     [clojure.test :refer [deftest is use-fixtures]]
@@ -13,8 +13,9 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.user :as user]
     [com.sixsq.slipstream.ssclj.resources.user-template :as ut]
-    [com.sixsq.slipstream.ssclj.resources.user-template-oidc-registration :as oidc]
+    [com.sixsq.slipstream.ssclj.resources.user-template-oidc :as oidc]
     [com.sixsq.slipstream.ssclj.resources.user.user-identifier-utils :as uiu]
+    [com.sixsq.slipstream.ssclj.util.metadata-test-utils :as mdtu]
     [peridot.core :refer :all]
     [ring.util.codec :as codec]))
 
@@ -49,6 +50,11 @@
                                                       :authorizeURL "https://authorize.oidc.com/authorize"
                                                       :tokenURL     "https://token.oidc.com/token"
                                                       :publicKey    auth-pubkey}})
+
+
+(deftest check-metadata
+  (mdtu/check-metadata-exists (str ut/resource-url "-" oidc/resource-url)))
+
 
 (deftest lifecycle
 

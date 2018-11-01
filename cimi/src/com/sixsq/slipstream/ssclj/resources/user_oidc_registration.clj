@@ -4,9 +4,9 @@
     [com.sixsq.slipstream.ssclj.resources.callback-create-user-oidc :as user-oidc-callback]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as oidc-utils]
-    [com.sixsq.slipstream.ssclj.resources.spec.user-template-oidc-registration :as user-template-spec]
+    [com.sixsq.slipstream.ssclj.resources.spec.user-template-oidc :as user-template-spec]
     [com.sixsq.slipstream.ssclj.resources.user :as p]
-    [com.sixsq.slipstream.ssclj.resources.user-template-oidc-registration :as user-template]))
+    [com.sixsq.slipstream.ssclj.resources.user-template-oidc :as user-template]))
 
 ;;
 ;; multimethods for validation

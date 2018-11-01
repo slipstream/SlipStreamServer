@@ -2,7 +2,7 @@
   (:require
     [clojure.test :refer [deftest is]]
     [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]
-    [com.sixsq.slipstream.ssclj.resources.spec.user-template-oidc-registration :as user-template-oidc]
+    [com.sixsq.slipstream.ssclj.resources.spec.user-template-oidc :as user-template-oidc]
     [com.sixsq.slipstream.ssclj.resources.user-template :as st]))
 
 
