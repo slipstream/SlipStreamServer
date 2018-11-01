@@ -1,10 +1,19 @@
 (ns com.sixsq.slipstream.ssclj.resources.user-identifier
+  "
+This resource represents the relationship between a unique identifier and a
+SlipStream user. This is used by the SlipStream authentication mechanisms to
+allow multiple authentication mechanisms to be mapped to the same account.
+These resources are managed by the server; normally, administrators and users
+will not interact with these resources directly.
+"
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]
     [com.sixsq.slipstream.ssclj.resources.spec.user-identifier :as ui-spec]
+    [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]
     [superstring.core :as str]))
 
 (def ^:const resource-name "UserIdentifier")
@@ -112,4 +121,5 @@
 ;;
 (defn initialize
   []
-  (std-crud/initialize resource-url ::ui-spec/user-identifier))
+  (std-crud/initialize resource-url ::ui-spec/user-identifier)
+  (md/register (gen-md/generate-metadata ::ns ::ui-spec/user-identifier)))
