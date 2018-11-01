@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.user-github-registration-lifecycle-test
+(ns com.sixsq.slipstream.ssclj.resources.user-template-github-lifecycle-test
   (:require
     [clojure.data.json :as json]
     [clojure.test :refer [are deftest is use-fixtures]]
@@ -13,8 +13,9 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.user :as user]
     [com.sixsq.slipstream.ssclj.resources.user-template :as ut]
-    [com.sixsq.slipstream.ssclj.resources.user-template-github-registration :as github]
+    [com.sixsq.slipstream.ssclj.resources.user-template-github :as github]
     [com.sixsq.slipstream.ssclj.resources.user.user-identifier-utils :as uiu]
+    [com.sixsq.slipstream.ssclj.util.metadata-test-utils :as mdtu]
     [peridot.core :refer :all]
     [ring.util.codec :as codec]))
 
@@ -37,6 +38,11 @@
                                                         :instance     github/registration-method
                                                         :clientID     "FAKE_CLIENT_ID"
                                                         :clientSecret "ABCDEF..."}})
+
+
+(deftest check-metadata
+  (mdtu/check-metadata-exists (str ut/resource-url "-" github/resource-url)))
+
 
 (deftest lifecycle
 
