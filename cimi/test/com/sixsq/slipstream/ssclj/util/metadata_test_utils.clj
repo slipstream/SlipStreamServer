@@ -6,7 +6,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]
-    [peridot.core :refer [content-type header request session]]))
+    [peridot.core :refer [content-type header request session]]
+    [clojure.tools.logging :as log]))
 
 
 (def base-uri (str p/service-context (u/de-camelcase md/resource-name)))
@@ -35,6 +36,9 @@
 
     (is (set? typeURIs))
     (is (set? ids))
+
+    (log/error typeURIs)
+    (log/error ids)
 
     (when (and typeURIs ids)
       (is (typeURIs typeURI))
