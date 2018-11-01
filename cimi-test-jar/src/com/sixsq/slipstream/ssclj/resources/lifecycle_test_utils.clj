@@ -21,13 +21,13 @@
     [com.sixsq.slipstream.ssclj.util.zookeeper :as uzk]
     [compojure.core :as cc]
     [peridot.core :refer [request session]]
+    [qbits.spandex :as spandex]
     [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
     [ring.middleware.keyword-params :refer [wrap-keyword-params]]
     [ring.middleware.nested-params :refer [wrap-nested-params]]
     [ring.middleware.params :refer [wrap-params]]
     [ring.util.codec :as codec]
-    [zookeeper :as zk]
-    [qbits.spandex :as spandex])
+    [zookeeper :as zk])
   (:import [org.apache.curator.test TestingServer]))
 
 
