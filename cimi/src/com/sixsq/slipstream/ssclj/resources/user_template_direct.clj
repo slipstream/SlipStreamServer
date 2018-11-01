@@ -1,11 +1,22 @@
 (ns com.sixsq.slipstream.ssclj.resources.user-template-direct
+  "
+Resource that is used to create a user account directly with the provided user
+information. Typically this method is available only to service administrators.
+"
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]
     [com.sixsq.slipstream.ssclj.resources.spec.user-template-direct :as user-tpl]
-    [com.sixsq.slipstream.ssclj.resources.user-template :as p]))
+    [com.sixsq.slipstream.ssclj.resources.user-template :as p]
+    [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]))
+
 
 (def ^:const registration-method "direct")
+
+
+(def ^:const resource-url registration-method)
+
 
 (def resource-acl {:owner {:principal "ADMIN"
                            :type      "ROLE"}
@@ -86,7 +97,8 @@
   []
   (p/register registration-method desc)
   (std-crud/initialize p/resource-url ::user-tpl/direct)
-  (std-crud/add-if-absent (str p/resource-url "/" registration-method) p/resource-url resource))
+  (std-crud/add-if-absent (str p/resource-url "/" registration-method) p/resource-url resource)
+  (md/register (gen-md/generate-metadata ::ns ::p/ns ::user-tpl/direct)))
 
 
 ;;
