@@ -1,11 +1,17 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential-template
+  "
+A collection of templates that are used to create a various types of
+credentials.
+"
   (:require
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.spec.credential-template]
+    [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]
+    [com.sixsq.slipstream.ssclj.resources.spec.credential-template :as ct]
+    [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]
     [com.sixsq.slipstream.util.response :as r]))
 
 (def ^:const resource-tag :credentialTemplates)
@@ -186,4 +192,11 @@
     (catch Exception e
       (or (ex-data e) (throw e)))))
 
+
+;;
+;; initialization: create metadata for this collection
+;;
+(defn initialize
+  []
+  (md/register (gen-md/generate-metadata ::ns ::ct/schema)))
 

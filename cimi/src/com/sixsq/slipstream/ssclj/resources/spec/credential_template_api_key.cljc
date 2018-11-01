@@ -14,7 +14,7 @@
              :json-schema/name "ttl"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
-             :json-schema/type "long"
+             :json-schema/type "integer"
              :json-schema/providerMandatory false
              :json-schema/consumerMandatory false
              :json-schema/mutable true
