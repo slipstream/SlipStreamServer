@@ -26,7 +26,6 @@
                     (ltu/body->edn)
                     (ltu/is-status 200)
                     (ltu/is-count pos?)
-                    (ltu/dump)
                     :response
                     :body
                     :resourceMetadatas)

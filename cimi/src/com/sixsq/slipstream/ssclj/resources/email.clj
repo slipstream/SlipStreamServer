@@ -1,12 +1,13 @@
 (ns com.sixsq.slipstream.ssclj.resources.email
-  "This resource corresponds to an email address. The resource contains only
-   the common attributes, a syntactically valid email address, and a boolean
-   flag that indicates if the email address has been validated.
+  "
+This resource corresponds to an email address. The resource contains only the
+common attributes, a syntactically valid email address, and a boolean flag that
+indicates if the email address has been validated.
 
-   When the address has not been validated, a 'validate' action is provided.
-   This will send an email to the user with a callback URL to validate the
-   email address. When the callback is triggered, the `validated` flag is set to
-   true."
+When the address has not been validated, a 'validate' action is provided. This
+will send an email to the user with a callback URL to validate the email
+address. When the callback is triggered, the `validated` flag is set to true.
+"
   (:require
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
@@ -65,7 +66,7 @@
     (assoc resource :id (str (u/de-camelcase resource-name) "/" new-id))))
 
 
-(def validate-fn (u/create-spec-validation-fn ::email/email))
+(def validate-fn (u/create-spec-validation-fn ::email/schema))
 (defmethod crud/validate
   resource-uri
   [resource]
@@ -140,5 +141,5 @@
 ;;
 (defn initialize
   []
-  (std-crud/initialize resource-url ::email/email)
-  (md/register (gen-md/generate-metadata ::ns ::email/email)))
+  (std-crud/initialize resource-url ::email/schema)
+  (md/register (gen-md/generate-metadata ::ns ::email/schema)))

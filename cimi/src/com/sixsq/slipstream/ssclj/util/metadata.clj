@@ -106,8 +106,8 @@
 (defn generate-metadata
   "Generate the ResourceMetadata from the provided namespace"
   ([parent-ns spec]
-    (generate-metadata parent-ns nil spec))
-  ([parent-ns child-ns spec]
+    (generate-metadata nil parent-ns spec))
+  ([child-ns parent-ns spec]
    (if-let [parent-ns (as-namespace parent-ns)]
      (let [child-ns (as-namespace child-ns)
 
