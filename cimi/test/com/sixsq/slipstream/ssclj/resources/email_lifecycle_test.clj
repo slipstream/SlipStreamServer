@@ -9,6 +9,7 @@
     [com.sixsq.slipstream.ssclj.resources.email :as t]
     [com.sixsq.slipstream.ssclj.resources.email.utils :as email-utils]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [com.sixsq.slipstream.ssclj.util.metadata-test-utils :as mdtu]
     [peridot.core :refer :all]
     [postal.core :as postal]
     [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]))
@@ -33,6 +34,10 @@
                         {:principal "cern:my-accounting-group",
                          :type      "ROLE",
                          :right     "VIEW"}]})
+
+
+(deftest check-metadata
+  (mdtu/check-metadata-exists t/resource-url))
 
 
 (deftest lifecycle
