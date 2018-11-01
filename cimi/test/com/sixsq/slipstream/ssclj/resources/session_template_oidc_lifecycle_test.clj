@@ -6,7 +6,8 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.session-template :as st]
     [com.sixsq.slipstream.ssclj.resources.session-template-lifecycle-test-utils :as stu]
-    [com.sixsq.slipstream.ssclj.resources.session-template-oidc :as oidc]))
+    [com.sixsq.slipstream.ssclj.resources.session-template-oidc :as oidc]
+    [com.sixsq.slipstream.ssclj.util.metadata-test-utils :as mdtu]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 
@@ -18,6 +19,11 @@
                      :name        "OpenID Connect"
                      :description "External Authentication via OpenID Connect Protocol"
                      :acl         st/resource-acl})
+
+
+(deftest check-metadata
+  (mdtu/check-metadata-exists (str st/resource-url "-" oidc/resource-url)))
+
 
 (deftest lifecycle
   (stu/session-template-lifecycle base-uri valid-template))
