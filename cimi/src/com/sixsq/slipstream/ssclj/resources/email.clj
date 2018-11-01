@@ -15,11 +15,11 @@ address. When the callback is triggered, the `validated` flag is set to true.
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.email.utils :as email-utils]
-    [com.sixsq.slipstream.ssclj.resources.spec.email :as email]
-    [com.sixsq.slipstream.util.response :as r]
-    [superstring.core :as str]
     [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]
-    [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]))
+    [com.sixsq.slipstream.ssclj.resources.spec.email :as email]
+    [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]
+    [com.sixsq.slipstream.util.response :as r]
+    [superstring.core :as str]))
 
 (def ^:const resource-name "Email")
 

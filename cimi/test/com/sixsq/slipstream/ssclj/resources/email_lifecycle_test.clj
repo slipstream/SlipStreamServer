@@ -9,10 +9,10 @@
     [com.sixsq.slipstream.ssclj.resources.email :as t]
     [com.sixsq.slipstream.ssclj.resources.email.utils :as email-utils]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]
     [com.sixsq.slipstream.ssclj.util.metadata-test-utils :as mdtu]
     [peridot.core :refer :all]
-    [postal.core :as postal]
-    [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]))
+    [postal.core :as postal]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 

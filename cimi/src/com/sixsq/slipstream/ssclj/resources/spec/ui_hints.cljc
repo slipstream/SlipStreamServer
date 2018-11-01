@@ -3,38 +3,122 @@
    other visual) user interfaces."
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
+    [com.sixsq.slipstream.ssclj.resources.spec.common-namespaces :as common-ns]
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]))
+    [spec-tools.core :as st]))
 
 
-;; Provides a group label that can be used to describe a group of related
-;; templates/forms. This will be used to identify members of the group in
-;; addition to providing the description.
-(s/def ::group ::cimi-core/nonblank-string)
+(s/def ::group
+  (-> (st/spec ::cimi-core/nonblank-string)
+      (assoc :name "group"
+             :type :string
+             :json-schema/name "group"
+             :json-schema/namespace common-ns/slipstream-namespace
+             :json-schema/uri common-ns/slipstream-uri
+             :json-schema/type "string"
+             :json-schema/providerMandatory true
+             :json-schema/consumerMandatory false
+             :json-schema/mutable true
+             :json-schema/consumerWritable true
+
+             :json-schema/displayName "group"
+             :json-schema/description "label for grouping related templates/forms"
+             :json-schema/help "label for grouping related templates/forms"
+             :json-schema/group "body"
+             :json-schema/order 60
+             :json-schema/hidden false
+             :json-schema/sensitive false)))
 
 
-;; Provides a hint for the visualization order of different templates/forms.
-(s/def ::order nat-int?)
+(s/def ::order
+  (-> (st/spec nat-int?)
+      (assoc :name "order"
+             :type :long
+             :json-schema/name "order"
+             :json-schema/namespace common-ns/slipstream-namespace
+             :json-schema/uri common-ns/slipstream-uri
+             :json-schema/type "integer"
+             :json-schema/providerMandatory true
+             :json-schema/consumerMandatory false
+             :json-schema/mutable true
+             :json-schema/consumerWritable true
+
+             :json-schema/displayName "order"
+             :json-schema/description "hint for visualization order for field"
+             :json-schema/help "hint for visualization order for field, larger is later"
+             :json-schema/group "body"
+             :json-schema/order 61
+             :json-schema/hidden false
+             :json-schema/sensitive false
+
+             :json-schema/value-scope {:minimum 0
+                                       :default 0})))
 
 
-;; Indicates whether the form associated with the template should be hidden
-;; on browser UIs.  When this is false or not specified, the UI should
-;; render the associated form.
-(s/def ::hidden boolean?)
+(s/def ::hidden
+  (-> (st/spec boolean?)
+      (assoc :name "hidden"
+             :type :boolean
+             :json-schema/name "hidden"
+             :json-schema/namespace common-ns/slipstream-namespace
+             :json-schema/uri common-ns/slipstream-uri
+             :json-schema/type "boolean"
+             :json-schema/providerMandatory true
+             :json-schema/consumerMandatory false
+             :json-schema/mutable true
+             :json-schema/consumerWritable true
+
+             :json-schema/displayName "hidden"
+             :json-schema/description "should template be hidden on browser UIs"
+             :json-schema/help "hint for whether the template should be hidden on browser UIs"
+             :json-schema/group "body"
+             :json-schema/order 62
+             :json-schema/hidden false
+             :json-schema/sensitive false)))
 
 
-;; Associates an icon with the template/form.  The names are those from
-;; the FontAwesome 5 icon collection.  The full list of supported icons
-;; is available from the React Semantic UI documentation:
-;; https://react.semantic-ui.com/elements/icon
-(s/def ::icon ::cimi-core/nonblank-string)
+(s/def ::icon
+  (-> (st/spec ::cimi-core/nonblank-string)
+      (assoc :name "icon"
+             :type :string
+             :json-schema/name "icon"
+             :json-schema/namespace common-ns/slipstream-namespace
+             :json-schema/uri common-ns/slipstream-uri
+             :json-schema/type "string"
+             :json-schema/providerMandatory true
+             :json-schema/consumerMandatory false
+             :json-schema/mutable true
+             :json-schema/consumerWritable true
+
+             :json-schema/displayName "icon"
+             :json-schema/description "name for icon to associate to template"
+             :json-schema/help "name for FontAwesome 5 icon to associate to template"
+             :json-schema/group "body"
+             :json-schema/order 63
+             :json-schema/hidden false
+             :json-schema/sensitive false)))
 
 
-;; Provides a redirect URI to be used on success. Browser UIs can use
-;; this to provide a smoother workflow. If this is specified, the
-;; underlying template processing will return a redirect in all cases.
-(s/def ::redirectURI ::cimi-core/nonblank-string)
+(s/def ::redirectURI
+  (-> (st/spec ::cimi-core/nonblank-string)
+      (assoc :name "redirectURI"
+             :type :string
+             :json-schema/name "redirectURI"
+             :json-schema/namespace common-ns/slipstream-namespace
+             :json-schema/uri common-ns/slipstream-uri
+             :json-schema/type "string"
+             :json-schema/providerMandatory true
+             :json-schema/consumerMandatory false
+             :json-schema/mutable true
+             :json-schema/consumerWritable true
+
+             :json-schema/displayName "redirectURI"
+             :json-schema/description "redirect URI to be used on success"
+             :json-schema/help "redirect URI to be used on success to provide smoother workflow on browser UIs"
+             :json-schema/group "body"
+             :json-schema/order 64
+             :json-schema/hidden false
+             :json-schema/sensitive false)))
 
 
 (def ui-hints-spec {:opt-un [::group ::order ::hidden ::icon ::redirectURI]})
