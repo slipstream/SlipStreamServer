@@ -1,12 +1,21 @@
 (ns com.sixsq.slipstream.ssclj.resources.user-template-self-registration
-  "This template allows someone to create a new account (user) from the
-   minimal information: username, password, and email address."
+  "
+Resource that is used to auto-create a user account given the minimal
+information (username, password, and email address) from the user.
+"
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]
     [com.sixsq.slipstream.ssclj.resources.spec.user-template-self-registration :as user-template]
-    [com.sixsq.slipstream.ssclj.resources.user-template :as p]))
+    [com.sixsq.slipstream.ssclj.resources.user-template :as p]
+    [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]))
+
 
 (def ^:const registration-method "self-registration")
+
+
+(def ^:const resource-url registration-method)
+
 
 (def resource-acl {:owner {:principal "ADMIN"
                            :type      "ROLE"}
@@ -76,7 +85,8 @@
 
 (defn initialize
   []
-  (p/register registration-method desc))
+  (p/register registration-method desc)
+  (md/register (gen-md/generate-metadata ::ns ::p/ns ::user-template/self-registration)))
 
 
 ;;
