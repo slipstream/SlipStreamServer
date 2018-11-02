@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.user-self-registration-lifecycle-test
+(ns com.sixsq.slipstream.ssclj.resources.user-template-self-registration-lifecycle-test
   (:require
     [clojure.data.json :as json]
     [clojure.test :refer [deftest is use-fixtures]]
@@ -10,6 +10,7 @@
     [com.sixsq.slipstream.ssclj.resources.user :as user]
     [com.sixsq.slipstream.ssclj.resources.user-template :as ut]
     [com.sixsq.slipstream.ssclj.resources.user-template-self-registration :as self]
+    [com.sixsq.slipstream.ssclj.util.metadata-test-utils :as mdtu]
     [peridot.core :refer :all]
     [postal.core :as postal]
     [ring.util.codec :as codec]))
@@ -19,6 +20,11 @@
 (def base-uri (str p/service-context (u/de-camelcase user/resource-name)))
 
 (def user-template-base-uri (str p/service-context (u/de-camelcase ut/resource-name)))
+
+
+(deftest check-metadata
+  (mdtu/check-metadata-exists (str ut/resource-url "-" self/resource-url)))
+
 
 (deftest lifecycle
   (let [validation-link (atom nil)]

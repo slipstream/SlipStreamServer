@@ -1,4 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-template
+  "
+A collection of templates that are used to create a session (login) using
+various types of credentials and authentication processes.
+"
   (:require
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.acl :as a]
@@ -7,7 +11,9 @@
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.ui-hints :as hints]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template]
+    [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template :as session-tpl]
+    [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]
     [com.sixsq.slipstream.util.response :as r]))
 
 (def ^:const resource-tag :sessionTemplates)
@@ -186,3 +192,12 @@
         (r/ex-not-found id)))
     (catch Exception e
       (or (ex-data e) (throw e)))))
+
+
+;;
+;; initialization: create metadata for this collection
+;;
+(defn initialize
+  []
+  (md/register (gen-md/generate-metadata ::ns ::session-tpl/schema)))
+

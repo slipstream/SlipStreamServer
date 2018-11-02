@@ -1,11 +1,19 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-template-api-key
+  "
+Resource that is used to create a session from the provided API key-secret
+pair.
+"
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]
     [com.sixsq.slipstream.ssclj.resources.session-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-api-key :as session-tpl]))
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-api-key :as session-tpl]
+    [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]))
 
 (def ^:const authn-method "api-key")
+
+(def ^:const resource-url authn-method)
 
 (def default-template {:method      authn-method
                        :instance    authn-method
@@ -41,7 +49,8 @@
 (defn initialize
   []
   (p/register authn-method desc)
-  (std-crud/initialize p/resource-url ::session-tpl/api-key))
+  (std-crud/initialize p/resource-url ::session-tpl/api-key)
+  (md/register (gen-md/generate-metadata ::ns ::p/ns ::session-tpl/api-key)))
 
 ;;
 ;; multimethods for validation

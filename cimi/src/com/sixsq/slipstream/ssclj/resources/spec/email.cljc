@@ -52,7 +52,7 @@
              :json-schema/sensitive false)))
 
 
-(s/def ::email
+(s/def ::schema
   (su/only-keys-maps c/common-attrs
                      {:req-un [::address]
                       :opt-un [::validated]}))

@@ -5,9 +5,9 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as oidc-utils]
     [com.sixsq.slipstream.ssclj.resources.spec.user]
-    [com.sixsq.slipstream.ssclj.resources.spec.user-template-mitreid-registration :as user-template-spec]
+    [com.sixsq.slipstream.ssclj.resources.spec.user-template-mitreid :as user-template-spec]
     [com.sixsq.slipstream.ssclj.resources.user :as p]
-    [com.sixsq.slipstream.ssclj.resources.user-template-mitreid-registration :as user-template]))
+    [com.sixsq.slipstream.ssclj.resources.user-template-mitreid :as user-template]))
 
 ;;
 ;; multimethods for validation

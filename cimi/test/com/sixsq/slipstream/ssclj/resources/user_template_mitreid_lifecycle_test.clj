@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.user-oidc-registration-lifecycle-test
+(ns com.sixsq.slipstream.ssclj.resources.user-template-mitreid-lifecycle-test
   (:require
     [clojure.data.json :as json]
     [clojure.test :refer [deftest is use-fixtures]]
@@ -11,10 +11,12 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration :as configuration]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as oidc-utils]
     [com.sixsq.slipstream.ssclj.resources.user :as user]
     [com.sixsq.slipstream.ssclj.resources.user-template :as ut]
-    [com.sixsq.slipstream.ssclj.resources.user-template-oidc-registration :as oidc]
+    [com.sixsq.slipstream.ssclj.resources.user-template-mitreid :as mitreid]
     [com.sixsq.slipstream.ssclj.resources.user.user-identifier-utils :as uiu]
+    [com.sixsq.slipstream.ssclj.util.metadata-test-utils :as mdtu]
     [peridot.core :refer :all]
     [ring.util.codec :as codec]))
 
@@ -42,18 +44,24 @@
     "jVunw8YkO7dsBhVP/8bqLDLw/8NsSAKwlzsoNKbrjVQ/NmHMJ88QkiKwv+E6lidy"
     "3wIDAQAB"))
 
-(def configuration-user-oidc {:configurationTemplate {:service      "session-oidc" ;;reusing configuration from session
-                                                      :instance     oidc/registration-method
-                                                      :clientID     "FAKE_CLIENT_ID"
-                                                      :clientSecret "MyClientSecret"
-                                                      :authorizeURL "https://authorize.oidc.com/authorize"
-                                                      :tokenURL     "https://token.oidc.com/token"
-                                                      :publicKey    auth-pubkey}})
+(def configuration-user-mitreid {:configurationTemplate {:service        "session-mitreid" ;;reusing configuration from session MITREid
+                                                         :instance       mitreid/registration-method
+                                                         :clientID       "FAKE_CLIENT_ID"
+                                                         :clientSecret   "MyMITREidClientSecret"
+                                                         :authorizeURL   "https://authorize.mitreid.com/authorize"
+                                                         :tokenURL       "https://token.mitreid.com/token"
+                                                         :userProfileURL "https://userinfo.mitreid.com/api/user/me"
+                                                         :publicKey      auth-pubkey}})
+
+
+(deftest check-metadata
+  (mdtu/check-metadata-exists (str ut/resource-url "-" mitreid/resource-url)))
+
 
 (deftest lifecycle
 
-  (let [href (str ut/resource-url "/" oidc/registration-method)
-        template-url (str p/service-context ut/resource-url "/" oidc/registration-method)
+  (let [href (str ut/resource-url "/" mitreid/registration-method)
+        template-url (str p/service-context ut/resource-url "/" mitreid/registration-method)
 
         session-anon (-> (ltu/ring-app)
                          session
@@ -66,12 +74,12 @@
 
         redirect-uri "https://example.com/webui"]
 
-    ;; must create the oidc user template; this is not created automatically
+    ;; must create the MITREid user template; this is not created automatically
     (let [user-template (->> {:group  "my-group"
                               :icon   "some-icon"
                               :order  10
                               :hidden false}
-                             (merge oidc/resource)
+                             (merge mitreid/resource)
                              json/write-str)]
 
       (-> session-admin
@@ -112,7 +120,7 @@
           (ltu/is-status 200)
           (ltu/is-count zero?))
 
-      ;; configuration must have OIDC client id and base URL, if not should get 500
+      ;; configuration must have MITREid client id and base URL, if not should get 500
       (-> session-anon
           (request base-uri
                    :request-method :post
@@ -121,28 +129,21 @@
           (ltu/message-matches #".*missing or incorrect configuration.*")
           (ltu/is-status 500))
 
-      ;; anonymous create must succeed (normal create and href create)
-      (let [;;
-            ;; create the session-oidc configuration to use for these tests
-            ;;
-            cfg-href (-> session-admin
+      ;;
+      ;; create the session-mitreid configuration to use for these tests
+      ;;
+      (let [cfg-href (-> session-admin
                          (request configuration-base-uri
                                   :request-method :post
-                                  :body (json/write-str configuration-user-oidc))
+                                  :body (json/write-str configuration-user-mitreid))
                          (ltu/body->edn)
                          (ltu/is-status 201)
-                         (ltu/location))
-            _ (-> session-admin
-                  (request configuration-base-uri
-                           :request-method :post
-                           :body (json/write-str configuration-user-oidc))
-                  (ltu/body->edn)
-                  (ltu/is-status 409))]
+                         (ltu/location))]
 
 
+        (is (= cfg-href (str "configuration/session-mitreid-" mitreid/registration-method)))
 
-        (is (= cfg-href (str "configuration/session-oidc-" oidc/registration-method)))
-
+        ;; anonymous create must succeed (normal create and href create)
         (let [uri (-> session-anon
                       (request base-uri
                                :request-method :post
@@ -233,11 +234,11 @@
             (-> session-admin
                 (request configuration-base-uri
                          :request-method :post
-                         :body (json/write-str configuration-user-oidc))
+                         :body (json/write-str configuration-user-mitreid))
                 (ltu/body->edn)
                 (ltu/is-status 201))
 
-            ;; try hitting the callback without the OIDC code parameter
+            ;; try hitting the callback without the MITREid code parameter
             (reset-callback! callback-id)
             (-> session-anon
                 (request validate-url
@@ -271,9 +272,9 @@
                                                                                [callback-id callback-id2 callback-id3]
                                                                                [validate-url validate-url2 validate-url3])]
 
-              (let [username (str "OIDC_USER_" user-number)
+              (let [username (str "MITREid_USER_" user-number)
                     email (format "user-%s@example.com" user-number)
-                    good-claims {:sub         username
+                    good-claims {:sub         user-number
                                  :email       email
                                  :given_name  "John"
                                  :family_name "Smith"
@@ -289,6 +290,18 @@
                                                              "GOOD" good-token
                                                              "BAD" bad-token
                                                              nil))
+
+                              oidc-utils/get-mitreid-userinfo (fn [userInfoURL access_token]
+                                                                {:id          42
+                                                                 :updatedAt   "2018-06-13T11:48:48"
+                                                                 :username    username
+                                                                 :givenName   "John",
+                                                                 :familyName  "Doe",
+                                                                 :displayName "John Doe",
+                                                                 :emails      [{:value    email
+                                                                                :primary  true
+                                                                                :verified true}]})
+
                               db/find-roles-for-username (fn [username]
                                                            "USER ANON alpha")]
 
@@ -313,7 +326,7 @@
                       (request (str val-url "?code=BAD")
                                :request-method :get)
                       (ltu/body->edn)
-                      (ltu/message-matches #".*OIDC/MITREid token is missing subject.*")
+                      (ltu/message-matches #".*MITREid token is missing subject.*")
                       (ltu/is-status return-code))
 
                   (is (= "FAILED" (-> session-admin
@@ -341,14 +354,12 @@
                                          :state)))
 
 
-                  (let [instance oidc/registration-method
-                        ss-username (uiu/find-username-by-identifier :oidc nil username)
-                        user-record (->> username
-                                         (uiu/find-username-by-identifier :oidc instance)
-                                         (db/get-user))]
+                  (let [instance mitreid/registration-method
+                        ss-username (uiu/find-username-by-identifier :mitreid instance user-number)
+                        user-record (db/get-user ss-username)]
                     (is (not (nil? ss-username)))
                     (is (= email (:name user-record)))
-                    (is (= oidc/registration-method (:method user-record))))
+                    (is (= mitreid/registration-method (:method user-record))))
 
                   ;; try creating the same user again, should fail
                   (reset-callback! cb-id)

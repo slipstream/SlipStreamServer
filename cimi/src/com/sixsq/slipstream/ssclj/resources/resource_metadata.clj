@@ -79,8 +79,8 @@
    with the server.  The resource document (resource) and the description
    (desc) must be valid.  The key will be used to create the id of
    the resource as 'configuration-template/key'."
-  [identifier resource]
-  (when-let [full-resource (complete-resource identifier resource)]
+  [{:keys [typeURI] :as resource}]
+  (when-let [full-resource (complete-resource typeURI resource)]
     (let [id (:id full-resource)]
       (try
         (crud/validate full-resource)

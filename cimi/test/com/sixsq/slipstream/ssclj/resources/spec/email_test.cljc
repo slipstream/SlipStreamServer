@@ -23,12 +23,12 @@
                :address     "user@example.com"
                :validated   false}]
 
-    (stu/is-valid ::email/email email)
+    (stu/is-valid ::email/schema email)
 
-    (stu/is-invalid ::email/email (assoc email :bad "value"))
+    (stu/is-invalid ::email/schema (assoc email :bad "value"))
 
     (doseq [attr #{:id :resourceURI :created :updated :acl :address}]
-      (stu/is-invalid ::email/email (dissoc email attr)))
+      (stu/is-invalid ::email/schema (dissoc email attr)))
 
     (doseq [attr #{:validated}]
-      (stu/is-valid ::email/email (dissoc email attr)))))
+      (stu/is-valid ::email/schema (dissoc email attr)))))

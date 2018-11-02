@@ -1,12 +1,24 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential-template-api-key
-  "This creates an API key that can be used to log into the server."
+  "
+Allows an API key-secret pair to be created that allows the holder of the
+secret to access the server. The credential can optionally be limited in time.
+"
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.credential-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.spec.credential-template-api-key]))
+    [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]
+    [com.sixsq.slipstream.ssclj.resources.spec.credential-template-api-key]
+    [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]))
+
 
 (def ^:const credential-type "api-key")
+
+
+(def ^:const resource-url credential-type)
+
+
 (def ^:const method "generate-api-key")
+
 
 (def resource-acl {:owner {:principal "ADMIN"
                            :type      "ROLE"}
@@ -17,6 +29,7 @@
 ;;
 ;; resource
 ;;
+
 (def ^:const resource
   {:type        credential-type
    :method      method
@@ -24,6 +37,7 @@
    :description "generates an API key and stores hash"
    :ttl         0
    :acl         resource-acl})
+
 
 ;;
 ;; description
@@ -38,12 +52,16 @@
                 :readOnly    false
                 :order       20}}))
 
+
 ;;
 ;; initialization: register this Credential template
 ;;
+
 (defn initialize
   []
-  (p/register resource desc))
+  (p/register resource desc)
+  (md/register (gen-md/generate-metadata ::ns ::p/ns :cimi/credential-template.api-key)))
+
 
 ;;
 ;; multimethods for validation

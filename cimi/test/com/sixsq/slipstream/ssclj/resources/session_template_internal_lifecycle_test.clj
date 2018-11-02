@@ -9,6 +9,7 @@
     [com.sixsq.slipstream.ssclj.resources.session-template :as st]
     [com.sixsq.slipstream.ssclj.resources.session-template-internal :as internal]
     [com.sixsq.slipstream.ssclj.resources.session-template-lifecycle-test-utils :as stu]
+    [com.sixsq.slipstream.ssclj.util.metadata-test-utils :as mdtu]
     [peridot.core :refer :all]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
@@ -78,6 +79,10 @@
                         (ltu/is-resource-uri st/collection-uri)
                         (ltu/entries :sessionTemplates))]
         (is (zero? (count (filter #(= method (:method %)) entries))))))))
+
+
+(deftest check-metadata
+  (mdtu/check-metadata-exists (str st/resource-url "-" internal/resource-url)))
 
 
 (deftest lifecycle

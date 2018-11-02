@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.user-direct-lifecycle-test
+(ns com.sixsq.slipstream.ssclj.resources.user-template-direct-lifecycle-test
   (:require
     [clojure.data.json :as json]
     [clojure.test :refer :all]
@@ -9,12 +9,18 @@
     [com.sixsq.slipstream.ssclj.resources.user :as user]
     [com.sixsq.slipstream.ssclj.resources.user-template :as ct]
     [com.sixsq.slipstream.ssclj.resources.user-template-direct :as direct]
+    [com.sixsq.slipstream.ssclj.util.metadata-test-utils :as mdtu]
     [peridot.core :refer :all]
     [ring.util.codec :as codec]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 
 (def base-uri (str p/service-context (u/de-camelcase user/resource-name)))
+
+
+(deftest check-metadata
+  (mdtu/check-metadata-exists (str ct/resource-url "-" direct/resource-url)))
+
 
 (deftest lifecycle
   (let [uname "120720737412@eduid.chhttps://eduid.ch/idp/shibboleth!https://fed-id.nuv.la/samlbridge/module.php/saml/sp/metadata.php/sixsq-saml-bridge!iqqrh4oiyshzcw9o40cvo0+pgka="

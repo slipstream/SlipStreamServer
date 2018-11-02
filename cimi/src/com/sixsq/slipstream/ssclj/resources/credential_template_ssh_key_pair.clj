@@ -1,13 +1,25 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential-template-ssh-key-pair
-  "This CredentialTemplate allows creating a Credential containing the SSH
-   public key from a generated SSH key pair."
+  "
+Allows a Credential to be created that contains the SSH public key from a
+generated SSH key pair. The generated private key is returned in the response
+and not stored on, and cannot be recovered from the server.
+"
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.credential-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.spec.credential-template-ssh-key-pair]))
+    [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]
+    [com.sixsq.slipstream.ssclj.resources.spec.credential-template-ssh-key-pair]
+    [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]))
+
 
 (def ^:const credential-type "ssh-public-key")
+
+
+(def ^:const resource-url credential-type)
+
+
 (def ^:const method "generate-ssh-key-pair")
+
 
 (def resource-acl {:owner {:principal "ADMIN"
                            :type      "ROLE"}
@@ -18,6 +30,7 @@
 ;;
 ;; resource
 ;;
+
 (def ^:const resource
   {:type        credential-type
    :method      method
@@ -30,6 +43,7 @@
 ;;
 ;; description
 ;;
+
 (def ^:const desc
   (merge p/CredentialTemplateDescription
          {:size      {:displayName "Size of SSH Key"
@@ -47,12 +61,16 @@
                       :readOnly    false
                       :order       21}}))
 
+
 ;;
 ;; initialization: register this Credential template
 ;;
+
 (defn initialize
   []
-  (p/register resource desc))
+  (p/register resource desc)
+  (md/register (gen-md/generate-metadata ::ns ::p/ns :cimi/credential-template.ssh-key-pair)))
+
 
 ;;
 ;; multimethods for validation

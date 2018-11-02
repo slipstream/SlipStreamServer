@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.spec.user-template-github-registration
+(ns com.sixsq.slipstream.ssclj.resources.spec.user-template-github
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.user-template :as ps]

@@ -11,6 +11,7 @@
     [com.sixsq.slipstream.ssclj.resources.credential-template-ssh-key-pair :as skp]
     [com.sixsq.slipstream.ssclj.resources.credential-template-ssh-public-key :as spk]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
+    [com.sixsq.slipstream.ssclj.util.metadata-test-utils :as mdtu]
     [peridot.core :refer :all]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
@@ -23,6 +24,14 @@
     (let [id (str ct/resource-url "/" registration-method)
           doc (crud/retrieve-by-id id)]
       (is (= id (:id doc))))))
+
+
+(deftest check-metadata
+  (mdtu/check-metadata-exists ct/resource-url)
+  (mdtu/check-metadata-exists (str ct/resource-url "-" akey/resource-url))
+  (mdtu/check-metadata-exists (str ct/resource-url "-" skp/resource-url))
+  (mdtu/check-metadata-exists (str ct/resource-url "-" spk/resource-url)))
+
 
 ;; check that all templates are visible as normal user
 (deftest lifecycle-admin

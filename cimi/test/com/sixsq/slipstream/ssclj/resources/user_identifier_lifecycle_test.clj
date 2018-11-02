@@ -8,6 +8,7 @@
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.user-identifier :as user-identifier]
+    [com.sixsq.slipstream.ssclj.util.metadata-test-utils :as mdtu]
     [peridot.core :refer :all]))
 
 
@@ -39,6 +40,10 @@
                   :identifier  test-identifier
 
                   :user        {:href "user/jane"}})
+
+
+(deftest check-metadata
+  (mdtu/check-metadata-exists user-identifier/resource-url))
 
 
 (deftest lifecycle

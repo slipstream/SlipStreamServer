@@ -95,6 +95,12 @@
                         hints/ui-hints-spec
                         user-template-keys-spec]))
 
+
+;; Used only to provide metadata resource for collection.
+(s/def ::schema
+  (su/only-keys-maps resource-keys-spec))
+
+
 (def create-keys-spec
   (su/merge-keys-specs [c/create-attrs]))
 
