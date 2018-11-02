@@ -14,7 +14,9 @@
     [com.sixsq.slipstream.ssclj.resources.spec.cloud-entry-point :as cep]
     [com.sixsq.slipstream.util.response :as sr]
     [compojure.core :refer [ANY defroutes DELETE GET POST PUT]]
-    [ring.util.response :as r]))
+    [ring.util.response :as r]
+    [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]
+    [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]))
 
 ;;
 ;; utilities
@@ -110,6 +112,7 @@
 (defn initialize
   []
   (std-crud/initialize resource-url ::cep/cloud-entry-point)
+  (md/register (gen-md/generate-metadata ::ns ::cep/cloud-entry-point))
 
   (try
     (add)
