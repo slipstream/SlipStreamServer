@@ -7,6 +7,7 @@
     [com.sixsq.slipstream.ssclj.resources.configuration-slipstream :as conf-ss]
     [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
     [com.sixsq.slipstream.ssclj.resources.external-object-template-report :as eot]
+    [com.sixsq.slipstream.ssclj.resources.external-object.utils :as utils]
     [com.sixsq.slipstream.ssclj.resources.spec.external-object-report :as eo-report]
     [com.sixsq.slipstream.ssclj.resources.spec.external-object-template-report]))
 
@@ -27,7 +28,7 @@
 (defn ss-conf
   "Returns SlipStream configuration."
   []
-  (let [request (set-uuid-in-request eo/request-admin conf-ss/service)]
+  (let [request (set-uuid-in-request utils/request-admin conf-ss/service)]
     (:body ((std-crud/retrieve-fn p/resource-url) request))))
 
 (defn object-name
