@@ -3,6 +3,8 @@
     [clj-time.coerce :as tc]
     [clj-time.core :as t]
     [clojure.tools.logging :as log]
+    [com.sixsq.slipstream.auth.acl :as a]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.util.log :as logu]
     [com.sixsq.slipstream.util.response :as ru])
@@ -66,48 +68,6 @@
   (.createBucket s3client (CreateBucketRequest. bucket-name)))
 
 
-
-
-;;Pre-conditions for adding external-object
-
-(defn cannot-create-bucket?
-  "When the requested bucket doesn't exist and can't be created.
-  The external object resource must not be created."
-  [{:keys [bucketName] :as resource} s3client]
-  (if (bucket-exists? s3client bucketName)
-    false
-    (try
-      (create-bucket! s3client bucketName)
-      false
-      (catch Exception e
-        (log/error (format "Error when creating bucket %s: %s" bucketName (.getMessage e)))
-        true))))
-
-(defn cond2?
-  "When the requested bucket exists, but the user doesn't have access to it. The external object resource must not be created."
-  [resource request]
-  false
-  )
-(defn cond3?
-  "When the bucket exists, but the user can't create the object. The external object resource must not be created."
-  [resource request]
-  false
-  )
-
-
-;;Pre-conditions for deleting eo
-(defn cond4?
-  "When the user requests to delete an object, but it no longer exists. The external object resource should be deleted normally."
-  [resource request]
-  false
-  )
-(defn cond5?
-  "When the user cannot access the bucket/object to delete it. The external object resource should not be deleted."
-  [resource request]
-  false
-  )
-
-
 (defn expand-cred
   "Returns credential document after expanding `href-obj-store-cred` credential href.
 
@@ -118,28 +78,72 @@
   [href-obj-store-cred]
   (std-crud/resolve-hrefs href-obj-store-cred request-admin true))
 
-(defn expand-obj-store-creds
-  "Need objectType to dispatch on when loading credentials."
-  [href-obj-store-cred request objectType]
-  (let [{:keys [key secret connector]} (expand-cred href-obj-store-cred)]
-    {:key      key
-     :secret   secret
-     :endpoint (:objectStoreEndpoint connector)}))
+;;Pre-conditions for adding external-object
 
-(defn ok-to-add-external-resource?
-  "Determines if S3 conditions are met on S3 for the user to safely
-  add an external object resource. If everything is OK, then the resource
-  itself is returned. Otherwise an 'unauthorized' response map is thrown"
-  [{:keys [objectStoreCred objectType] :as resource} request]
-  (let [
-        obj-store-conf (expand-obj-store-creds objectStoreCred request objectType)
-        s3client (get-s3-client obj-store-conf)]
-    (cond
-      (cannot-create-bucket? resource s3client) (logu/log-and-throw 503 (format "Unable to create the bucket %s" (:bucketName resource)))
-      (cond2? resource request) (throw (ru/ex-unauthorized (:resource-id resource)))
-      (cond3? resource request) (throw (ru/ex-unauthorized (:resource-id resource)))
-      :all-ok resource
-      )))
+(defn bucket-creation-ok?
+  "When the requested bucket doesn't exist and can't be created.
+  The external object resource must not be created."
+  [s3client bucketName]
+  (if (bucket-exists? s3client bucketName)
+    true
+    (try
+      (create-bucket! s3client bucketName)
+      true
+      (catch Exception e
+        (log/error (format "Error when creating bucket %s: %s" bucketName (.getMessage e)))
+        false))))
+
+(defn viewable-bucket?
+  "When the requested bucket exists, but the user doesn't have access to it. The external object resource must not be created."
+  [{:keys [objectStoreCred] :as resource} request]
+  (-> objectStoreCred
+      (expand-cred)
+      (a/can-view? request)))
+
+
+  (defn cond3?
+    "When the bucket exists, but the user can't create the object. The external object resource must not be created."
+    [resource request]
+    false
+    )
+
+
+  ;;Pre-conditions for deleting eo
+  (defn cond4?
+    "When the user requests to delete an object, but it no longer exists. The external object resource should be deleted normally."
+    [resource request]
+    false
+    )
+  (defn cond5?
+    "When the user cannot access the bucket/object to delete it. The external object resource should not be deleted."
+    [{:keys []} request]
+    false
+    )
+
+
+
+
+  (defn expand-obj-store-creds
+    "Need objectType to dispatch on when loading credentials."
+    [href-obj-store-cred request objectType]
+    (let [{:keys [key secret connector]} (expand-cred href-obj-store-cred)]
+      {:key      key
+       :secret   secret
+       :endpoint (:objectStoreEndpoint connector)}))
+
+  (defn ok-to-add-external-resource?
+    "Determines if S3 conditions are met on S3 for the user to safely
+    add an external object resource. If everything is OK, then the resource
+    itself is returned. Otherwise an 'unauthorized' response map is thrown"
+    [{:keys [bucketName objectStoreCred objectType] :as resource} request]
+    (let [
+          obj-store-conf (expand-obj-store-creds objectStoreCred request objectType)
+          s3client (get-s3-client obj-store-conf)]
+      (cond
+        (not (bucket-creation-ok? s3client bucketName)) (logu/log-and-throw 503 (format "Unable to create the bucket %s" bucketName))
+        (not (viewable-bucket? resource request)) (logu/log-and-throw 403 (format "Access to bucket %s is not allowed" bucketName))
+        (cond3? resource request) (throw (ru/ex-unauthorized (:resource-id resource)))
+        :all-ok resource)))
 
 
 

@@ -101,6 +101,7 @@
   [f]
   (with-redefs [s3/bucket-exists? (fn [_ _] true)           ;;by default assume the S3 bucket exists
                 s3/create-bucket! (fn [_ _] :not-nil)       ;;by default, a bucket creation succeeds
+                s3/viewable-bucket? (fn [_ _] true)         ;;by default, the user can viee the credential
                 s3/delete-s3-object delete-s3-object]
     (f)))
 
@@ -185,6 +186,15 @@
                            :request-method :delete)
                   (ltu/body->edn)
                   (ltu/is-status 200))))
+
+          ;;Creation for user who can not view the credential should fail
+          (with-redefs [s3/viewable-bucket? (fn [_ _]) false]
+            (-> session
+                (request base-uri
+                         :request-method :post
+                         :body (json/write-str valid-create))
+                (ltu/body->edn)
+                (ltu/is-status 403)))
 
 
           ;; creating the same object twice is not allowed
