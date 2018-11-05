@@ -32,22 +32,23 @@ information. Typically this method is available only to service administrators.
 ;;
 
 (def ^:const resource
-  {:method       registration-method
-   :instance     registration-method
-   :name         "Direct"
-   :description  "Direct creation of user by the administrator"
-   :username     "username"
-   :password     "password"
-   :firstName    "John"
-   :lastName     "Doe"
-   :emailAddress "user@example.com"
-   :organization ""
-   :roles        ""
-   :group        "administrator"
-   :icon         "key"
-   :hidden       true
-   :order        0
-   :acl          resource-acl})
+  {:method           registration-method
+   :instance         registration-method
+   :name             "Direct"
+   :description      "Direct creation of user by the administrator"
+   :resourceMetadata (str p/resource-url "-" registration-method)
+   :username         "username"
+   :password         "password"
+   :firstName        "John"
+   :lastName         "Doe"
+   :emailAddress     "user@example.com"
+   :organization     ""
+   :roles            ""
+   :group            "administrator"
+   :icon             "key"
+   :hidden           true
+   :order            0
+   :acl              resource-acl})
 
 ;;
 ;; description
