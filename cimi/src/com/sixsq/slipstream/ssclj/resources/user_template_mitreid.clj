@@ -14,6 +14,9 @@ authentication workflow as implemented by a MITREid server.
 (def ^:const registration-method "mitreid")
 
 
+(def ^:const resource-name "MITREid")
+
+
 (def ^:const resource-url registration-method)
 
 

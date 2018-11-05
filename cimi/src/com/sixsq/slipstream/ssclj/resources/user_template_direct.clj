@@ -15,6 +15,9 @@ information. Typically this method is available only to service administrators.
 (def ^:const registration-method "direct")
 
 
+(def ^:const resource-name "Direct")
+
+
 (def ^:const resource-url registration-method)
 
 

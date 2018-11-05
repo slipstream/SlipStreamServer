@@ -16,6 +16,9 @@ portals in front of a SlipStream instance.
 (def ^:const authn-method "mitreid-token")
 
 
+(def ^:const resource-name "MITREid Token")
+
+
 (def ^:const resource-url authn-method)
 
 

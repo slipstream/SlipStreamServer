@@ -14,6 +14,9 @@ Resource that is used to create a session with GitHub authentication.
 (def ^:const authn-method "github")
 
 
+(def ^:const resource-name "GitHub")
+
+
 (def ^:const resource-url authn-method)
 
 ;;

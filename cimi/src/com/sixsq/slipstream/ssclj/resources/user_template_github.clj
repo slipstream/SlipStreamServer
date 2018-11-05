@@ -14,6 +14,9 @@ workflow.
 (def ^:const registration-method "github")
 
 
+(def ^:const resource-name "GitHub")
+
+
 (def ^:const resource-url registration-method)
 
 

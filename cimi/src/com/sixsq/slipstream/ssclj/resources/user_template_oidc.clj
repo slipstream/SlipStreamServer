@@ -14,6 +14,9 @@ authentication workflow as implemented by a Keycloak server.
 (def ^:const registration-method "oidc")
 
 
+(def ^:const resource-name "OIDC")
+
+
 (def ^:const resource-url registration-method)
 
 

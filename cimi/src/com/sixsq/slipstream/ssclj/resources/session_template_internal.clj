@@ -15,6 +15,9 @@ credentials. This template is guaranteed to be present on all server instances.
 (def ^:const authn-method "internal")
 
 
+(def ^:const resource-name "Internal")
+
+
 (def ^:const resource-url authn-method)
 
 

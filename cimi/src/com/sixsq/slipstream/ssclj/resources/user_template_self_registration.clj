@@ -14,6 +14,9 @@ information (username, password, and email address) from the user.
 (def ^:const registration-method "self-registration")
 
 
+(def ^:const resource-name "Self Registration")
+
+
 (def ^:const resource-url registration-method)
 
 

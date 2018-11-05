@@ -15,6 +15,9 @@ Intended for OIDC servers implemented with Keycloak.
 (def ^:const authn-method "oidc")
 
 
+(def ^:const resource-name "OIDC")
+
+
 (def ^:const resource-url authn-method)
 
 
