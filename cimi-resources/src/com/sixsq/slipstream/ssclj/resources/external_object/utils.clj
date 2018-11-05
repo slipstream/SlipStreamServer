@@ -2,12 +2,14 @@
   (:require
     [clj-time.coerce :as tc]
     [clj-time.core :as t]
+    [clojure.data.json :as json]
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.util.log :as logu]
-    [com.sixsq.slipstream.util.response :as ru])
+    [com.sixsq.slipstream.util.response :as ru]
+    [sixsq.slipstream.client.impl.utils.http-sync :as http])
   (:import
     (com.amazonaws HttpMethod)
     (com.amazonaws.auth AWSStaticCredentialsProvider BasicAWSCredentials)
@@ -100,50 +102,49 @@
       (expand-cred)
       (a/can-view? request)))
 
+(defn uploadable-bucket?
+  "When the bucket exists, but the user can't create the object. The external object resource must not be created."
+  [obj-store-conf bucketName]
+  (let [upload-url (generate-url obj-store-conf bucketName "test-probe" :put {:ttl 3 :content-type "text/plain" :filename "test.txt"})]
+    (= 200 (http/put upload-url))))
 
-  (defn cond3?
-    "When the bucket exists, but the user can't create the object. The external object resource must not be created."
-    [resource request]
-    false
-    )
 
-
-  ;;Pre-conditions for deleting eo
-  (defn cond4?
-    "When the user requests to delete an object, but it no longer exists. The external object resource should be deleted normally."
-    [resource request]
-    false
-    )
-  (defn cond5?
-    "When the user cannot access the bucket/object to delete it. The external object resource should not be deleted."
-    [{:keys []} request]
-    false
-    )
-
+;;Pre-conditions for deleting eo
+(defn cond4?
+  "When the user requests to delete an object, but it no longer exists. The external object resource should be deleted normally."
+  [resource request]
+  false
+  )
+(defn cond5?
+  "When the user cannot access the bucket/object to delete it. The external object resource should not be deleted."
+  [{:keys []} request]
+  false
+  )
 
 
 
-  (defn expand-obj-store-creds
-    "Need objectType to dispatch on when loading credentials."
-    [href-obj-store-cred request objectType]
-    (let [{:keys [key secret connector]} (expand-cred href-obj-store-cred)]
-      {:key      key
-       :secret   secret
-       :endpoint (:objectStoreEndpoint connector)}))
 
-  (defn ok-to-add-external-resource?
-    "Determines if S3 conditions are met on S3 for the user to safely
-    add an external object resource. If everything is OK, then the resource
-    itself is returned. Otherwise an 'unauthorized' response map is thrown"
-    [{:keys [bucketName objectStoreCred objectType] :as resource} request]
-    (let [
-          obj-store-conf (expand-obj-store-creds objectStoreCred request objectType)
-          s3client (get-s3-client obj-store-conf)]
-      (cond
-        (not (bucket-creation-ok? s3client bucketName)) (logu/log-and-throw 503 (format "Unable to create the bucket %s" bucketName))
-        (not (viewable-bucket? resource request)) (logu/log-and-throw 403 (format "Access to bucket %s is not allowed" bucketName))
-        (cond3? resource request) (throw (ru/ex-unauthorized (:resource-id resource)))
-        :all-ok resource)))
+(defn expand-obj-store-creds
+  "Need objectType to dispatch on when loading credentials."
+  [href-obj-store-cred request objectType]
+  (let [{:keys [key secret connector]} (expand-cred href-obj-store-cred)]
+    {:key      key
+     :secret   secret
+     :endpoint (:objectStoreEndpoint connector)}))
+
+(defn ok-to-add-external-resource?
+  "Determines if S3 conditions are met on S3 for the user to safely
+  add an external object resource. If everything is OK, then the resource
+  itself is returned. Otherwise an 'unauthorized' response map is thrown"
+  [{:keys [bucketName objectStoreCred objectType] :as resource} request]
+  (let [
+        obj-store-conf (expand-obj-store-creds objectStoreCred request objectType)
+        s3client (get-s3-client obj-store-conf)]
+    (cond
+      (not (bucket-creation-ok? s3client bucketName)) (logu/log-and-throw 503 (format "Unable to create the bucket %s" bucketName))
+      (not (viewable-bucket? resource request)) (logu/log-and-throw 403 (format "Access to bucket %s is not allowed" bucketName))
+      (not (uploadable-bucket? obj-store-conf bucketName)) (logu/log-and-throw 503 (format "Unable to create objects in the bucket %s" bucketName))
+      :all-ok resource)))
 
 
 

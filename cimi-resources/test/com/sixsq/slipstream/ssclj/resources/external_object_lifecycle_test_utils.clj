@@ -101,7 +101,8 @@
   [f]
   (with-redefs [s3/bucket-exists? (fn [_ _] true)           ;;by default assume the S3 bucket exists
                 s3/create-bucket! (fn [_ _] :not-nil)       ;;by default, a bucket creation succeeds
-                s3/viewable-bucket? (fn [_ _] true)         ;;by default, the user can viee the credential
+                s3/viewable-bucket? (fn [_ _] true)         ;;by default, the user can view the credential
+                s3/uploadable-bucket? (fn [_ _] true)       ;;by default, it is Ok to create objects in bucket
                 s3/delete-s3-object delete-s3-object]
     (f)))
 
@@ -171,7 +172,7 @@
 
           ;;Assume that bucket does not exist and can be successfully  created
           (with-redefs [s3/bucket-exists? (fn [_ _] false)
-                        s3/create-bucket! (fn [_ _] :no-exception)]
+                        s3/create-bucket! (fn [_ _] nil)]
             (let [uri (-> session
                           (request base-uri
                                    :request-method :post
@@ -195,6 +196,15 @@
                          :body (json/write-str valid-create))
                 (ltu/body->edn)
                 (ltu/is-status 403)))
+
+          ;;Creation of resource when the bucket exists but no object can be created
+          #_(with-redefs [s3/uploadable-bucket? (fn [_ _]) false]
+            (-> session
+                (request base-uri
+                         :request-method :post
+                         :body (json/write-str valid-create))
+                (ltu/body->edn)
+                (ltu/is-status 503)))
 
 
           ;; creating the same object twice is not allowed
