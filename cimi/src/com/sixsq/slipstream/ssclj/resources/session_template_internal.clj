@@ -15,17 +15,21 @@ credentials. This template is guaranteed to be present on all server instances.
 (def ^:const authn-method "internal")
 
 
+(def ^:const resource-name "Internal")
+
+
 (def ^:const resource-url authn-method)
 
 
-(def default-template {:method      authn-method
-                       :instance    authn-method
-                       :name        "Internal"
-                       :description "Internal Authentication via Username/Password"
-                       :group       "Login with Username/Password"
-                       :username    "username"
-                       :password    "password"
-                       :acl         p/resource-acl})
+(def default-template {:method           authn-method
+                       :instance         authn-method
+                       :name             "Internal"
+                       :description      "Internal Authentication via Username/Password"
+                       :resourceMetadata (str p/resource-url "-" authn-method)
+                       :group            "Login with Username/Password"
+                       :username         "username"
+                       :password         "password"
+                       :acl              p/resource-acl})
 
 
 ;;

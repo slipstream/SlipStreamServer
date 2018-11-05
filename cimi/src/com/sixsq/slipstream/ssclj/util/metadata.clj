@@ -51,11 +51,19 @@
   (-> resource-ns meta :doc))
 
 
-(defn get-resource-name
+(defn get-type-uri
   [ns]
   (some-> ns
-          (ns-resolve 'resource-name)
+          (ns-resolve 'resource-url)
           deref))
+
+
+(defn get-resource-name
+  [ns]
+  (or (some-> ns
+              (ns-resolve 'resource-name)
+              deref)
+      (get-type-uri ns)))
 
 
 (defn get-type-uri

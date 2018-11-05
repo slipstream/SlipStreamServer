@@ -14,6 +14,9 @@ workflow.
 (def ^:const registration-method "github")
 
 
+(def ^:const resource-name "GitHub")
+
+
 (def ^:const resource-url registration-method)
 
 
@@ -28,11 +31,12 @@ workflow.
 ;;
 
 (def ^:const resource
-  {:method      registration-method
-   :instance    registration-method
-   :name        "Guthub Registration"
-   :description "Creates a new user through github-registration"
-   :acl         resource-acl})
+  {:method           registration-method
+   :instance         registration-method
+   :name             "GitHub Registration"
+   :description      "Creates a new user through github-registration"
+   :resourceMetadata (str p/resource-url "-" registration-method)
+   :acl              resource-acl})
 
 
 ;;

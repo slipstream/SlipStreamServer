@@ -14,6 +14,9 @@ information (username, password, and email address) from the user.
 (def ^:const registration-method "self-registration")
 
 
+(def ^:const resource-name "Self Registration")
+
+
 (def ^:const resource-url registration-method)
 
 
@@ -28,15 +31,16 @@ information (username, password, and email address) from the user.
 ;;
 
 (def ^:const resource
-  {:method         registration-method
-   :instance       registration-method
-   :name           "Self Registration"
-   :description    "Creates a new user through self-registration"
-   :username       "username"
-   :password       "password"
-   :passwordRepeat "password"
-   :emailAddress   "user@example.com"
-   :acl            resource-acl})
+  {:method           registration-method
+   :instance         registration-method
+   :name             "Self Registration"
+   :description      "Creates a new user through self-registration"
+   :resourceMetadata (str p/resource-url "-" registration-method)
+   :username         "username"
+   :password         "password"
+   :passwordRepeat   "password"
+   :emailAddress     "user@example.com"
+   :acl              resource-acl})
 
 
 ;;

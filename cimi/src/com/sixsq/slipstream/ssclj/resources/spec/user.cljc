@@ -464,6 +464,8 @@
    :opt-un [::cimi-common/name
             ::cimi-common/description
             ::cimi-common/properties
+            ::cimi-common/parent
+            ::cimi-common/resourceMetadata
             ::cimi-common/operations]})
 
 

@@ -11,7 +11,12 @@ pair.
     [com.sixsq.slipstream.ssclj.resources.spec.session-template-api-key :as session-tpl]
     [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]))
 
+
 (def ^:const authn-method "api-key")
+
+
+(def ^:const resource-name "API Key")
+
 
 (def ^:const resource-url authn-method)
 

@@ -14,6 +14,9 @@ format.
 (def ^:const credential-type "ssh-public-key")
 
 
+(def ^:const resource-name "SSH Public Key")
+
+
 (def ^:const resource-url credential-type)
 
 

@@ -15,6 +15,9 @@ from a MITREid server.
 (def ^:const authn-method "mitreid")
 
 
+(def ^:const resource-name "MITREid")
+
+
 (def ^:const resource-url authn-method)
 
 

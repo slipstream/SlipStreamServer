@@ -68,6 +68,7 @@
   (when identifier
     (let [id (str resource-url "/" identifier)]
       (-> resource
+          (dissoc :created :updated)
           (merge {:id          id
                   :resourceURI resource-uri
                   :acl         default-resource-acl})

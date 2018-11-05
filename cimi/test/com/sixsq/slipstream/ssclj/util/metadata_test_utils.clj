@@ -1,7 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.util.metadata-test-utils
   (:require
     [clojure.test :refer [is]]
-    [clojure.tools.logging :as log]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
@@ -11,6 +10,27 @@
 
 
 (def base-uri (str p/service-context (u/de-camelcase md/resource-name)))
+
+
+(defn get-generated-metadata
+  [typeURI]
+
+  (let [session (-> (ltu/ring-app)
+                    session
+                    (header authn-info-header "ANON")
+                    (content-type "application/json"))
+
+        md-docs (-> session
+                    (request base-uri
+                             :method :put)
+                    (ltu/body->edn)
+                    (ltu/is-status 200)
+                    (ltu/is-count pos?)
+                    :response
+                    :body
+                    :resourceMetadatas)]
+
+    (first (filter #(-> % :typeURI (= typeURI)) md-docs))))
 
 
 (defn check-metadata-exists
@@ -36,9 +56,6 @@
 
     (is (set? typeURIs))
     (is (set? ids))
-
-    (log/error typeURIs)
-    (log/error ids)
 
     (when (and typeURIs ids)
       (is (typeURIs typeURI))

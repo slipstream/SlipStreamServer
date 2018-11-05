@@ -16,15 +16,11 @@ portals in front of a SlipStream instance.
 (def ^:const authn-method "mitreid-token")
 
 
+(def ^:const resource-name "MITREid Token")
+
+
 (def ^:const resource-url authn-method)
 
-
-(def default-template {:method      authn-method
-                       :instance    authn-method
-                       :name        "OIDC Token"
-                       :description "Direct Authentication with OIDC Token"
-                       :token       "token"
-                       :acl         p/resource-acl})
 
 ;;
 ;; description

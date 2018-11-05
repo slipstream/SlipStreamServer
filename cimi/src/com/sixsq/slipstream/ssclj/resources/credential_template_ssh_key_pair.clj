@@ -15,6 +15,9 @@ and not stored on, and cannot be recovered from the server.
 (def ^:const credential-type "ssh-public-key")
 
 
+(def ^:const resource-name "SSH Public/Private Keys")
+
+
 (def ^:const resource-url credential-type)
 
 

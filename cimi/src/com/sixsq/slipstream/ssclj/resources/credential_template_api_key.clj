@@ -14,6 +14,9 @@ secret to access the server. The credential can optionally be limited in time.
 (def ^:const credential-type "api-key")
 
 
+(def ^:const resource-name "API Key")
+
+
 (def ^:const resource-url credential-type)
 
 

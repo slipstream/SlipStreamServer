@@ -14,6 +14,9 @@ authentication workflow as implemented by a MITREid server.
 (def ^:const registration-method "mitreid")
 
 
+(def ^:const resource-name "MITREid")
+
+
 (def ^:const resource-url registration-method)
 
 
@@ -28,11 +31,12 @@ authentication workflow as implemented by a MITREid server.
 ;;
 
 (def ^:const resource
-  {:method         registration-method
-   :instance       registration-method
-   :name           "MITREid Registration"
-   :description    "Creates a new user through mitreid-registration"
-   :acl            resource-acl})
+  {:method           registration-method
+   :instance         registration-method
+   :name             "MITREid Registration"
+   :description      "Creates a new user through mitreid-registration"
+   :resourceMetadata (str p/resource-url "-" registration-method)
+   :acl              resource-acl})
 
 
 ;;
