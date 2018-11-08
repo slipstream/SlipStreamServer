@@ -1,6 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.module-test
   (:require
-    [clojure.spec.alpha :as s]
     [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.ssclj.resources.module :as t]
     [com.sixsq.slipstream.ssclj.resources.spec.module :as module]
@@ -29,7 +28,10 @@
                              :commit "wip"}
                             nil
                             {:href "module-image/abc"}]
-              :logo        {:href "external-object/xyz"}}]
+              :logo        {:href "external-object/xyz"}
+
+              :acceptContentTypes ["application/json" "application/x-something"]
+              :acceptProtocols    ["http+s3" "posix+nfs"]}]
 
     (stu/is-valid ::module/module root)
     (stu/is-invalid ::module/module (assoc root :badKey "badValue"))
@@ -40,5 +42,5 @@
       (stu/is-invalid ::module/module (dissoc root k)))
 
     ;; optional attributes
-    (doseq [k #{:logo :versions}]
+    (doseq [k #{:logo :versions :acceptContentTypes :acceptProtocols}]
       (stu/is-valid ::module/module (dissoc root k)))))

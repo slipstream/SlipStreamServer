@@ -31,8 +31,18 @@
 (s/def ::href ::cimi-core/nonblank-string)
 (s/def ::logo (su/only-keys :req-un [::href]))
 
+;;
+;; data management attributes
+;;
+
+(s/def ::acceptContentTypes (s/nilable (s/coll-of ::cimi-core/mimetype :min-count 1 :kind vector?)))
+
+(s/def ::acceptProtocols (s/nilable (s/coll-of ::cimi-core/token :min-count 1 :kind vector?)))
+
 (def module-keys-spec (su/merge-keys-specs [c/common-attrs
                                             {:req-un [::path ::parentPath ::type]
-                                             :opt-un [::logo ::versions]}]))
+                                             :opt-un [::logo ::versions
+                                                      ::acceptContentTypes
+                                                      ::acceptProtocols]}]))
 
 (s/def ::module (su/only-keys-maps module-keys-spec))
