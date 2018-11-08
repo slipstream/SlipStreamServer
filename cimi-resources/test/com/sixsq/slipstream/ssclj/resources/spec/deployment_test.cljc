@@ -1,6 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.deployment-test
   (:require
-    [clojure.spec.alpha :as s]
     [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.ssclj.resources.deployment :as d]
     [com.sixsq.slipstream.ssclj.resources.spec.deployment :as ds]
