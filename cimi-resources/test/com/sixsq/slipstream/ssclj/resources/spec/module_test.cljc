@@ -15,23 +15,23 @@
 
 (deftest test-schema-check
   (let [timestamp "1964-08-25T10:00:00.0Z"
-        root {:id          (str t/resource-url "/connector-uuid")
-              :resourceURI t/resource-uri
-              :created     timestamp
-              :updated     timestamp
-              :acl         valid-acl
-              :parentPath  "a/b"
-              :path        "a/b/c"
-              :type        "IMAGE"
-              :versions    [{:href   "module-image/xyz"
-                             :author "someone"
-                             :commit "wip"}
-                            nil
-                            {:href "module-image/abc"}]
-              :logo        {:href "external-object/xyz"}
+        root {:id                     (str t/resource-url "/connector-uuid")
+              :resourceURI            t/resource-uri
+              :created                timestamp
+              :updated                timestamp
+              :acl                    valid-acl
+              :parentPath             "a/b"
+              :path                   "a/b/c"
+              :type                   "IMAGE"
+              :versions               [{:href   "module-image/xyz"
+                                        :author "someone"
+                                        :commit "wip"}
+                                       nil
+                                       {:href "module-image/abc"}]
+              :logo                   {:href "external-object/xyz"}
 
-              :acceptContentTypes ["application/json" "application/x-something"]
-              :acceptProtocols    ["http+s3" "posix+nfs"]}]
+              :dataAcceptContentTypes ["application/json" "application/x-something"]
+              :dataAccessProtocols    ["http+s3" "posix+nfs"]}]
 
     (stu/is-valid ::module/module root)
     (stu/is-invalid ::module/module (assoc root :badKey "badValue"))
@@ -42,5 +42,5 @@
       (stu/is-invalid ::module/module (dissoc root k)))
 
     ;; optional attributes
-    (doseq [k #{:logo :versions :acceptContentTypes :acceptProtocols}]
+    (doseq [k #{:logo :versions :dataAcceptContentTypes :dataAccessProtocols}]
       (stu/is-valid ::module/module (dissoc root k)))))

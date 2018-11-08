@@ -35,14 +35,14 @@
 ;; data management attributes
 ;;
 
-(s/def ::acceptContentTypes (s/nilable (s/coll-of ::cimi-core/mimetype :min-count 1 :kind vector?)))
+(s/def ::dataAcceptContentTypes (s/nilable (s/coll-of ::cimi-core/mimetype :min-count 1 :kind vector?)))
 
-(s/def ::acceptProtocols (s/nilable (s/coll-of ::cimi-core/token :min-count 1 :kind vector?)))
+(s/def ::dataAccessProtocols (s/nilable (s/coll-of ::cimi-core/token :min-count 1 :kind vector?)))
 
 (def module-keys-spec (su/merge-keys-specs [c/common-attrs
                                             {:req-un [::path ::parentPath ::type]
                                              :opt-un [::logo ::versions
-                                                      ::acceptContentTypes
-                                                      ::acceptProtocols]}]))
+                                                      ::dataAcceptContentTypes
+                                                      ::dataAccessProtocols]}]))
 
 (s/def ::module (su/only-keys-maps module-keys-spec))
