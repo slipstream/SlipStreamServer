@@ -36,28 +36,35 @@
                                   :disk       300}]})
 
 
-(def valid-deployment {:id               (str d/resource-url "/connector-uuid")
-                       :resourceURI      d/resource-uri
-                       :created          timestamp
-                       :updated          timestamp
-                       :acl              valid-acl
+(def valid-deployment {:id                 (str d/resource-url "/connector-uuid")
+                       :resourceURI        d/resource-uri
+                       :created            timestamp
+                       :updated            timestamp
+                       :acl                valid-acl
 
-                       :state            "STARTED"
+                       :state              "STARTED"
 
-                       :clientAPIKey     {:href   "credential/uuid"
-                                          :secret "api secret"}
+                       :deploymentTemplate {:href "deployment-template/uuid-1"}
 
-                       :sshPublicKeys   "ssh-rsa publickeys ssh-rsa ..."
+                       :clientAPIKey       {:href   "credential/uuid"
+                                            :secret "api secret"}
 
-                       :outputParameters [{:parameter "param-1"}]
-                       :module           (merge {:href "my-module-uuid"} valid-module)})
+                       :sshPublicKeys      ["ssh-rsa key1..." "ssh-rsa key2..."]
+
+                       :outputParameters   [{:parameter "param-1"}]
+                       :module             (merge {:href "my-module-uuid"} valid-module)})
 
 
 (deftest test-schema-check
   (stu/is-valid ::ds/deployment valid-deployment)
   (stu/is-invalid ::ds/deployment (assoc valid-deployment :badKey "badValue"))
   (stu/is-invalid ::ds/deployment (assoc valid-deployment :module "must-be-href"))
+  (stu/is-invalid ::ds/deployment (assoc valid-deployment :sshPublicKeys "must-be-vector"))
 
   ;; required attributes
   (doseq [k #{:id :resourceURI :created :updated :acl :state :module}]
-    (stu/is-invalid ::ds/deployment (dissoc valid-deployment k))))
+    (stu/is-invalid ::ds/deployment (dissoc valid-deployment k)))
+
+  ;; optional attributes
+  (doseq [k #{:sshPublicKeys :deploymentTemplate}]
+    (stu/is-valid ::ds/deployment (dissoc valid-deployment k))))

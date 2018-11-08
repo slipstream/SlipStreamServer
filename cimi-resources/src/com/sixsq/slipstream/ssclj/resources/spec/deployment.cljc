@@ -2,6 +2,7 @@
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as cimi-common]
+    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.resources.spec.deployment-template :as deployment-template]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
@@ -21,7 +22,7 @@
 (s/def ::clientAPIKey (su/only-keys :req-un [::href
                                              ::secret]))
 
-(s/def ::sshPublicKeys string?)
+(s/def ::sshPublicKeys (s/coll-of ::cimi-core/nonblank-string :min-count 1 :kind vector?))
 
 (s/def ::deploymentTemplate ::cimi-common/resource-link)
 
