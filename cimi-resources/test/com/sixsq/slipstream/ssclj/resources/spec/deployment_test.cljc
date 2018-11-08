@@ -44,7 +44,7 @@
 
                        :state            "STARTED"
 
-                       :clientApiKey     {:href   "credential/uuid"
+                       :clientAPIKey     {:href   "credential/uuid"
                                           :secret "api secret"}
 
                        :sshPublicKeys   "ssh-rsa publickeys ssh-rsa ..."

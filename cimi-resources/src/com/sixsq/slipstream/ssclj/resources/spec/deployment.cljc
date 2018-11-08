@@ -18,7 +18,7 @@
 (def ^:const credential-href-regex #"^credential/[a-z0-9]+(-[a-z0-9]+)*(_\d+)?$")
 (s/def ::href (s/and string? #(re-matches credential-href-regex %)))
 (s/def ::secret string?)
-(s/def ::clientApiKey (su/only-keys :req-un [::href
+(s/def ::clientAPIKey (su/only-keys :req-un [::href
                                              ::secret]))
 
 (s/def ::sshPublicKeys string?)
@@ -29,7 +29,7 @@
   (su/merge-keys-specs [cimi-common/common-attrs
                         deployment-template/deployment-template-keys-spec
                         {:req-un [::state
-                                  ::clientApiKey]
+                                  ::clientAPIKey]
                          :opt-un [::deploymentTemplate
                                   ::sshPublicKeys]}]))
 

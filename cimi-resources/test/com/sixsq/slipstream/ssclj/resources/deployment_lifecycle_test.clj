@@ -72,12 +72,12 @@
                          (request (str abs-uri "?$select=description")
                                   :request-method :put
                                   :body (json/write-str {:name "dep 1 new name"
-                                                         :clientApiKey "this field should be ignored, not editable"}))
+                                                         :clientAPIKey "this field should be ignored, not editable"}))
                          (ltu/body->edn)
                          (ltu/is-status 200))
           cred-uri (str p/service-context
                         (u/de-camelcase
-                          (get-in deployment [:response :body :clientApiKey :href])))]
+                          (get-in deployment [:response :body :clientAPIKey :href])))]
 
       ;; user query: ok
       (-> session-user
@@ -89,7 +89,7 @@
           (ltu/entries deployment/resource-tag))
 
       ;; user is able to change name and remove existing description attribute
-      ;; but should not able to edit clientApiKey
+      ;; but should not able to edit clientAPIKey
       (-> deployment
           (ltu/is-key-value :name "dep 1 new name")
           (#(is (not (contains? % :description)))))
@@ -99,7 +99,7 @@
           (ltu/body->edn)
           (ltu/is-status 200)
           (ltu/is-key-value :name "dep 1 new name")
-          (ltu/is-key-value map? :clientApiKey true)
+          (ltu/is-key-value map? :clientAPIKey true)
           (#(is (not (contains? (-> % :response :body) :description)))))
 
       ;; generated api key secret are with user identity claims
