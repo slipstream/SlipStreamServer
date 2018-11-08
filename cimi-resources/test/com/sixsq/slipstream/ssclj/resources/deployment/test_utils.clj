@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.deployment.test-utils
-  (:require [com.sixsq.slipstream.ssclj.resources.deployment.utils :as utils]
-            [clojure.test :refer [deftest is]]))
+  (:require [clojure.test :refer [deftest is]]
+            [com.sixsq.slipstream.ssclj.resources.deployment.utils :as utils]))
 
 (def image-a {:description "descr image-a"
               :path        "root/image-a"
