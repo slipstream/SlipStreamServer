@@ -1,6 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.deployment-test
   (:require
-    [clojure.spec.alpha :as s]
     [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.ssclj.resources.deployment :as d]
     [com.sixsq.slipstream.ssclj.resources.spec.deployment :as ds]
@@ -36,18 +35,17 @@
                                   :disk       300}]})
 
 
-(def valid-deployment {:id               (str d/resource-url "/connector-uuid")
-                       :resourceURI      d/resource-uri
-                       :created          timestamp
-                       :updated          timestamp
-                       :acl              valid-acl
+(def valid-deployment {:id                 (str d/resource-url "/connector-uuid")
+                       :resourceURI        d/resource-uri
+                       :created            timestamp
+                       :updated            timestamp
+                       :acl                valid-acl
 
-                       :state            "STARTED"
+                       :state              "STARTED"
 
-                       :clientApiKey     {:href   "credential/uuid"
-                                          :secret "api secret"}
+                       :deploymentTemplate {:href "deployment-template/uuid-1"}
 
-                       :sshPublicKeys    "ssh-rsa publickeys ssh-rsa ..."
+                       :sshPublicKeys      ["ssh-rsa key1..." "ssh-rsa key2..."]
 
                        :outputParameters [{:parameter "param-1"}]
                        :module           (merge {:href "my-module-uuid"} valid-module)
@@ -60,6 +58,7 @@
   (stu/is-valid ::ds/deployment valid-deployment)
   (stu/is-invalid ::ds/deployment (assoc valid-deployment :badKey "badValue"))
   (stu/is-invalid ::ds/deployment (assoc valid-deployment :module "must-be-href"))
+  (stu/is-invalid ::ds/deployment (assoc valid-deployment :sshPublicKeys "must-be-vector"))
 
   (stu/is-invalid ::ds/deployment (assoc valid-deployment :externalObjects ["BAD_ID"]))
   (stu/is-invalid ::ds/deployment (assoc valid-deployment :serviceOffers ["BAD_ID"]))

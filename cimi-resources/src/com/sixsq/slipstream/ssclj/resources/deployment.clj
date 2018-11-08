@@ -107,7 +107,7 @@
                          crud/validate
                          :deploymentTemplate
                          (assoc :deploymentTemplate {:href deployment-tmpl-href})
-                         (assoc :clientApiKey {:href api-key,
+                         (assoc :clientAPIKey {:href api-key,
                                                :secret secret})
                          (assoc :state "CREATED"))]
       (add-impl (assoc request :body deployment)))
@@ -125,7 +125,7 @@
 
 (defmethod crud/edit resource-name
   [request]
-  (edit-impl (update request :body dissoc :clientApiKey)))
+  (edit-impl (update request :body dissoc :clientAPIKey)))
 
 
 (defn can-delete?
