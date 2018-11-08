@@ -45,13 +45,13 @@
 
                        :deploymentTemplate {:href "deployment-template/uuid-1"}
 
-                       :clientAPIKey       {:href   "credential/uuid"
-                                            :secret "api secret"}
-
                        :sshPublicKeys      ["ssh-rsa key1..." "ssh-rsa key2..."]
 
-                       :outputParameters   [{:parameter "param-1"}]
-                       :module             (merge {:href "my-module-uuid"} valid-module)})
+                       :outputParameters [{:parameter "param-1"}]
+                       :module           (merge {:href "my-module-uuid"} valid-module)
+
+                       :externalObjects  ["external-object/uuid1" "external-object/uuid2"]
+                       :serviceOffers    ["service-offer/uuid1" "service-offer/uuid2"]})
 
 
 (deftest test-schema-check
@@ -60,10 +60,13 @@
   (stu/is-invalid ::ds/deployment (assoc valid-deployment :module "must-be-href"))
   (stu/is-invalid ::ds/deployment (assoc valid-deployment :sshPublicKeys "must-be-vector"))
 
+  (stu/is-invalid ::ds/deployment (assoc valid-deployment :externalObjects ["BAD_ID"]))
+  (stu/is-invalid ::ds/deployment (assoc valid-deployment :serviceOffers ["BAD_ID"]))
+
   ;; required attributes
   (doseq [k #{:id :resourceURI :created :updated :acl :state :module}]
     (stu/is-invalid ::ds/deployment (dissoc valid-deployment k)))
 
   ;; optional attributes
-  (doseq [k #{:sshPublicKeys :deploymentTemplate}]
+  (doseq [k #{:deploymentTemplate :sshPublicKeys :externalObjects :serviceOffers}]
     (stu/is-valid ::ds/deployment (dissoc valid-deployment k))))

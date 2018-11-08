@@ -7,10 +7,10 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.deployment.utils :as du]
     [com.sixsq.slipstream.ssclj.resources.module :as m]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template]
     [com.sixsq.slipstream.ssclj.resources.spec.deployment-template :as dt]
-    [com.sixsq.slipstream.ssclj.resources.deployment.utils :as du]
     [com.sixsq.slipstream.util.response :as r]))
 
 (def ^:const resource-tag :deploymentTemplates)

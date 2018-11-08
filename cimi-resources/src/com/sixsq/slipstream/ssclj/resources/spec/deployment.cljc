@@ -26,12 +26,29 @@
 
 (s/def ::deploymentTemplate ::cimi-common/resource-link)
 
+
+(def ^:const external-object-id-regex #"^external-object/[a-z0-9]+(-[a-z0-9]+)*(_\d+)?$")
+(defn external-object-id? [s] (re-matches external-object-id-regex s))
+
+(s/def ::external-object-id (s/and string? external-object-id?))
+(s/def ::externalObjects (s/coll-of ::external-object-id :min-count 1 :kind vector?))
+
+
+(def ^:const service-offer-id-regex #"^service-offer/[a-z0-9]+(-[a-z0-9]+)*(_\d+)?$")
+(defn service-offer-id? [s] (re-matches service-offer-id-regex s))
+
+(s/def ::service-offer-id (s/and string? service-offer-id?))
+(s/def ::serviceOffers (s/coll-of ::service-offer-id :min-count 1 :kind vector?))
+
+
 (def deployment-keys-spec
   (su/merge-keys-specs [cimi-common/common-attrs
                         deployment-template/deployment-template-keys-spec
                         {:req-un [::state
                                   ::clientAPIKey]
                          :opt-un [::deploymentTemplate
-                                  ::sshPublicKeys]}]))
+                                  ::sshPublicKeys
+                                  ::externalObjects
+                                  ::serviceOffers]}]))
 
 (s/def ::deployment (su/only-keys-maps deployment-keys-spec))
