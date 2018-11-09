@@ -135,7 +135,7 @@
   (-> (st/spec (s/and string? mimetype?))
       (assoc :name "mimetype"
              :type :string
-             :json-schema/description "document mimetype"
+             :json-schema/description "Multipurpose Internet Mail Extensions (MIME) type"
              :json-schema/type "string")))
 
 ;;

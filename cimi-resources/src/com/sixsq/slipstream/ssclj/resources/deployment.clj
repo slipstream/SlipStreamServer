@@ -7,12 +7,12 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.credential :as credential]
+    [com.sixsq.slipstream.ssclj.resources.credential-template-api-key :as cred-api-key]
     [com.sixsq.slipstream.ssclj.resources.deployment-template :as deployment-template]
     [com.sixsq.slipstream.ssclj.resources.job :as job]
     [com.sixsq.slipstream.ssclj.resources.spec.deployment :as deployment-spec]
     [com.sixsq.slipstream.ssclj.resources.spec.deployment-template :as deployment-template-spec]
-    [com.sixsq.slipstream.ssclj.resources.credential :as credential]
-    [com.sixsq.slipstream.ssclj.resources.credential-template-api-key :as cred-api-key]
     [com.sixsq.slipstream.util.response :as r]
     [taoensso.timbre :as log]))
 
@@ -107,7 +107,7 @@
                          crud/validate
                          :deploymentTemplate
                          (assoc :deploymentTemplate {:href deployment-tmpl-href})
-                         (assoc :clientApiKey {:href api-key,
+                         (assoc :clientAPIKey {:href api-key,
                                                :secret secret})
                          (assoc :state "CREATED"))]
       (add-impl (assoc request :body deployment)))
@@ -125,7 +125,7 @@
 
 (defmethod crud/edit resource-name
   [request]
-  (edit-impl (update request :body dissoc :clientApiKey)))
+  (edit-impl (update request :body dissoc :clientAPIKey)))
 
 
 (defn can-delete?

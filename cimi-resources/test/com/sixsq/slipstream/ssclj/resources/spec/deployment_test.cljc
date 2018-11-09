@@ -1,6 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.deployment-test
   (:require
-    [clojure.spec.alpha :as s]
     [clojure.test :refer [are deftest is]]
     [com.sixsq.slipstream.ssclj.resources.deployment :as d]
     [com.sixsq.slipstream.ssclj.resources.spec.deployment :as ds]
@@ -36,28 +35,41 @@
                                   :disk       300}]})
 
 
-(def valid-deployment {:id               (str d/resource-url "/connector-uuid")
-                       :resourceURI      d/resource-uri
-                       :created          timestamp
-                       :updated          timestamp
-                       :acl              valid-acl
+(def valid-deployment {:id                 (str d/resource-url "/connector-uuid")
+                       :resourceURI        d/resource-uri
+                       :created            timestamp
+                       :updated            timestamp
+                       :acl                valid-acl
 
-                       :state            "STARTED"
+                       :state              "STARTED"
 
-                       :clientApiKey     {:href   "credential/uuid"
-                                          :secret "api secret"}
+                       :clientAPIKey       {:href   "credential/uuid"
+                                            :secret "api secret"}
 
-                       :sshPublicKeys   "ssh-rsa publickeys ssh-rsa ..."
+                       :deploymentTemplate {:href "deployment-template/uuid-1"}
 
-                       :outputParameters [{:parameter "param-1"}]
-                       :module           (merge {:href "my-module-uuid"} valid-module)})
+                       :sshPublicKeys      ["ssh-rsa key1..." "ssh-rsa key2..."]
+
+                       :outputParameters   [{:parameter "param-1"}]
+                       :module             (merge {:href "my-module-uuid"} valid-module)
+
+                       :externalObjects    ["external-object/uuid1" "external-object/uuid2"]
+                       :serviceOffers      ["service-offer/uuid1" "service-offer/uuid2"]})
 
 
 (deftest test-schema-check
   (stu/is-valid ::ds/deployment valid-deployment)
   (stu/is-invalid ::ds/deployment (assoc valid-deployment :badKey "badValue"))
   (stu/is-invalid ::ds/deployment (assoc valid-deployment :module "must-be-href"))
+  (stu/is-invalid ::ds/deployment (assoc valid-deployment :sshPublicKeys "must-be-vector"))
+
+  (stu/is-invalid ::ds/deployment (assoc valid-deployment :externalObjects ["BAD_ID"]))
+  (stu/is-invalid ::ds/deployment (assoc valid-deployment :serviceOffers ["BAD_ID"]))
 
   ;; required attributes
   (doseq [k #{:id :resourceURI :created :updated :acl :state :module}]
-    (stu/is-invalid ::ds/deployment (dissoc valid-deployment k))))
+    (stu/is-invalid ::ds/deployment (dissoc valid-deployment k)))
+
+  ;; optional attributes
+  (doseq [k #{:deploymentTemplate :sshPublicKeys :externalObjects :serviceOffers}]
+    (stu/is-valid ::ds/deployment (dissoc valid-deployment k))))
