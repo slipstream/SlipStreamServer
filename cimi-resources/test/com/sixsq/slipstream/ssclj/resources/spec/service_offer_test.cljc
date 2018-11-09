@@ -25,6 +25,8 @@
 
     (stu/is-valid ::so/service-offer service-offer)
 
+    (stu/is-valid ::so/service-offer (assoc-in service-offer [:connector :href] "connector/my-full-id"))
+
     ;; mandatory keywords
     (doseq [k #{:created :updated :acl :connector}]
       (stu/is-invalid ::so/service-offer (dissoc service-offer k)))
