@@ -43,15 +43,18 @@
 
                        :state              "STARTED"
 
+                       :clientAPIKey       {:href   "credential/uuid"
+                                            :secret "api secret"}
+
                        :deploymentTemplate {:href "deployment-template/uuid-1"}
 
                        :sshPublicKeys      ["ssh-rsa key1..." "ssh-rsa key2..."]
 
-                       :outputParameters [{:parameter "param-1"}]
-                       :module           (merge {:href "my-module-uuid"} valid-module)
+                       :outputParameters   [{:parameter "param-1"}]
+                       :module             (merge {:href "my-module-uuid"} valid-module)
 
-                       :externalObjects  ["external-object/uuid1" "external-object/uuid2"]
-                       :serviceOffers    ["service-offer/uuid1" "service-offer/uuid2"]})
+                       :externalObjects    ["external-object/uuid1" "external-object/uuid2"]
+                       :serviceOffers      ["service-offer/uuid1" "service-offer/uuid2"]})
 
 
 (deftest test-schema-check
