@@ -1,5 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.deployment.utils
-  (:require [taoensso.timbre :as log]))
+  (:require
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
+    [com.sixsq.slipstream.ssclj.resources.module :as m]
+    [clojure.string :as str]))
 
 
 (def node-output-params [{:parameter   "abort"
@@ -123,7 +127,7 @@
                (image-ids-merge module image-ids-aggregator))))))
 
 
-(defn create-deployment-template
+(defn resolve-deployment-template
   [{{:keys [type]} :module :as resolved-body}]
   (if (#{"COMPONENT" "IMAGE"} type)
     (let [combined-modules (-> resolved-body
@@ -138,3 +142,37 @@
                                                                   combine-modules-comp-img)]
                                           (assoc node :component combined-module))) nodes)]
       (assoc-in resolved-body [:module :content :nodes] nodes-combined-modules))))
+
+
+(defn resolve-module [module-href idmap]
+  (let [request-module {:params   {:uuid          (some-> module-href (str/split #"/") second)
+                                   :resource-name m/resource-url}
+                        :identity idmap}
+        {:keys [body status] :as module-response} (crud/retrieve request-module)
+        parent-href (get-in body [:content :parentModule :href])]
+    (if (= status 200)
+      (let [module-resolved (-> body
+                                (dissoc :versions :operations)
+                                (update :content #(dissoc % :parentModule))
+                                (std-crud/resolve-hrefs idmap true))]
+        (if parent-href
+          (assoc-in module-resolved [:content :parentModule] (resolve-module parent-href idmap))
+          (assoc module-resolved :href module-href)))
+      (throw (ex-info nil body)))))
+
+
+(defn resolve-hrefs
+  [deployment-template idmap]
+  (let [module-href (get-in deployment-template [:module :href])]
+    (let [module (-> (resolve-module module-href idmap)
+                     (assoc :href module-href))]
+      (assoc deployment-template :module module))))
+
+
+(defn create-deployment-template
+  [body idmap]
+  (let [resolved-body (-> body
+                          (resolve-hrefs idmap)
+                          (add-global-params))]
+    (resolve-deployment-template resolved-body)))
+

@@ -139,10 +139,10 @@
             :resourceURI "http://sixsq.com/slipstream/1/Module"})
 
 
-(deftest test-create-template-from-simple-image
+(deftest test-resolve-template-from-simple-image
   (is
     (=
-      (utils/create-deployment-template {:module image-a})
+      (utils/resolve-deployment-template {:module image-a})
       {:module
        {:content
                      {:author           "test"
@@ -187,8 +187,8 @@
         :resourceURI "http://sixsq.com/slipstream/1/Module"
         :type        "IMAGE"}})))
 
-(deftest test-create-template-from-image-with-parent
-  (is (= (utils/create-deployment-template {:module image-b})
+(deftest test-resolve-template-from-image-with-parent
+  (is (= (utils/resolve-deployment-template {:module image-b})
          {:module
           {:content     {:author           "test"
                          :commit           "commit image b"
@@ -232,8 +232,8 @@
            :id          "module/image-b"
            :type        "IMAGE"}})))
 
-(deftest test-create-template-from-component
-  (is (= (utils/create-deployment-template {:module comp-a})
+(deftest test-resolve-template-from-component
+  (is (= (utils/resolve-deployment-template {:module comp-a})
          {:module
           {:content     {:author           "super"
                          :commit           "update ifb-core-cloud flavor"
@@ -288,8 +288,8 @@
            :type        "COMPONENT"
            :updated     "2018-10-03T13:19:47.347Z"}})))
 
-(deftest test-create-template-from-component-with-heritage
-  (is (= (utils/create-deployment-template {:module comp-b})
+(deftest test-resolve-template-from-component-with-heritage
+  (is (= (utils/resolve-deployment-template {:module comp-b})
          {:module
           {:content     {:author           "super"
                          :commit           "update ifb-core-cloud flavor"
@@ -349,8 +349,8 @@
            :type        "COMPONENT"
            :updated     "2018-10-03T13:19:47.347Z"}})))
 
-(deftest test-create-template-from-component-with-heritage-and-image-with-parent
-  (is (= (utils/create-deployment-template {:module comp-c})
+(deftest test-resolve-template-from-component-with-heritage-and-image-with-parent
+  (is (= (utils/resolve-deployment-template {:module comp-c})
          {:module
           {:content     {:author          "super"
                          :commit          "update ifb-core-cloud flavor"

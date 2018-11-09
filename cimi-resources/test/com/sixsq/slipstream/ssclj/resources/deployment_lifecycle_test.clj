@@ -10,8 +10,7 @@
     [com.sixsq.slipstream.ssclj.resources.deployment-template :as deployment-template]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
     [com.sixsq.slipstream.ssclj.resources.module-lifecycle-test :as module-test]
-    [peridot.core :refer :all]
-    [taoensso.timbre :as log]))
+    [peridot.core :refer :all]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 
@@ -34,8 +33,7 @@
                        (ltu/body->edn)
                        (ltu/is-status 201)
                        (ltu/location))
-        valid-deployment-template-create {:module {:href module-uri}
-                                          :outputParameters [{:parameter "ss:state"}]}
+        valid-deployment-template-create {:module           {:href module-uri}}
         deployment-template-uri (-> session-user
                                     (request deployment-template-collection-uri
                                              :request-method :post
@@ -43,7 +41,8 @@
                                     (ltu/body->edn)
                                     (ltu/is-status 201)
                                     (ltu/location))
-        valid-deployment {:deploymentTemplate {:href deployment-template-uri} :name "dep1" :description "dep1 desc"}]
+        valid-deployment {:deploymentTemplate {:href deployment-template-uri} :name "dep1" :description "dep1 desc"}
+        valid-deployment-from-module {:deploymentTemplate {:module {:href module-uri}}}]
 
     ;; anonymous create should fail
     (-> session-anon
@@ -67,11 +66,18 @@
                   (ltu/body->edn)
                   (ltu/is-status 201)
                   (ltu/location))
+          uri-deployment-fron-module (-> session-user
+                                         (request base-uri
+                                                  :request-method :post
+                                                  :body (json/write-str valid-deployment-from-module))
+                                         (ltu/body->edn)
+                                         (ltu/is-status 201)
+                                         (ltu/location))
           abs-uri (str p/service-context (u/de-camelcase uri))
           deployment (-> session-user
                          (request (str abs-uri "?$select=description")
                                   :request-method :put
-                                  :body (json/write-str {:name "dep 1 new name"
+                                  :body (json/write-str {:name         "dep 1 new name"
                                                          :clientAPIKey "this field should be ignored, not editable"}))
                          (ltu/body->edn)
                          (ltu/is-status 200))
@@ -85,7 +91,7 @@
           (ltu/body->edn)
           (ltu/is-status 200)
           (ltu/is-resource-uri deployment/collection-uri)
-          (ltu/is-count #(= 1 %))
+          (ltu/is-count #(= 2 %))
           (ltu/entries deployment/resource-tag))
 
       ;; user is able to change name and remove existing description attribute
@@ -115,7 +121,7 @@
           (ltu/body->edn)
           (ltu/is-status 200)
           (ltu/is-resource-uri deployment/collection-uri)
-          (ltu/is-count #(= 1 %))
+          (ltu/is-count #(= 2 %))
           (ltu/entries deployment/resource-tag))
 
       ;; user view: OK

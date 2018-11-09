@@ -1,14 +1,11 @@
 (ns com.sixsq.slipstream.ssclj.resources.deployment-template
   (:require
-    [clojure.string :as str]
-    [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.deployment.utils :as du]
-    [com.sixsq.slipstream.ssclj.resources.module :as m]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template]
     [com.sixsq.slipstream.ssclj.resources.spec.deployment-template :as dt]
     [com.sixsq.slipstream.util.response :as r]))
@@ -24,6 +21,8 @@
 (def ^:const resource-uri (str c/slipstream-schema-uri resource-name))
 
 (def ^:const collection-uri (str c/slipstream-schema-uri collection-name))
+
+(def ^:const generated-url (str resource-url "/generated"))
 
 ;; the templates are managed as in-memory resources, so modification
 ;; of the collection is not permitted, but users must be able to list
@@ -73,40 +72,13 @@
 ;;
 
 
-(defn resolve-module [module-href idmap]
-  (let [request-module {:params   {:uuid          (some-> module-href (str/split #"/") second)
-                                   :resource-name m/resource-url}
-                        :identity idmap}
-        {:keys [body status] :as module-response} (crud/retrieve request-module)
-        parent-href (get-in body [:content :parentModule :href])]
-    (if (= status 200)
-      (let [module-resolved (-> body
-                                (dissoc :versions :operations)
-                                (update :content #(dissoc % :parentModule))
-                                (std-crud/resolve-hrefs idmap true))]
-        (if parent-href
-          (assoc-in module-resolved [:content :parentModule] (resolve-module parent-href idmap))
-          (assoc module-resolved :href module-href)))
-      (throw (ex-info nil body)))))
-
-(defn resolve-hrefs
-  [deployment-template idmap]
-  (let [module-href (get-in deployment-template [:module :href])]
-    (let [module (-> (resolve-module module-href idmap)
-                     (assoc :href module-href))]
-      (assoc deployment-template :module module))))
-
-
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
   (try
     (let [idmap (:identity request)
-          resolved-body (-> body
-                            (resolve-hrefs idmap)
-                            (du/add-global-params))
-          deployment-template (du/create-deployment-template resolved-body)]
+          deployment-template (du/create-deployment-template body idmap)]
       (add-impl (assoc request :body deployment-template)))
     (catch Exception e
       (or (ex-data e) (throw e)))))

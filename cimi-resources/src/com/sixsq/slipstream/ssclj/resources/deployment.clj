@@ -1,6 +1,5 @@
 (ns com.sixsq.slipstream.ssclj.resources.deployment
   (:require
-    [clojure.string :as str]
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
@@ -14,7 +13,7 @@
     [com.sixsq.slipstream.ssclj.resources.spec.deployment :as deployment-spec]
     [com.sixsq.slipstream.ssclj.resources.spec.deployment-template :as deployment-template-spec]
     [com.sixsq.slipstream.util.response :as r]
-    [taoensso.timbre :as log]))
+    [com.sixsq.slipstream.ssclj.resources.deployment.utils :as du]))
 
 (def ^:const resource-tag :deployments)
 
@@ -68,15 +67,17 @@
 ;; CRUD operations
 ;;
 
-(defn resolve-hrefs
+(defn retrieve-deployment-template
   [deployment idmap]
   (let [deployment-tmpl-href (get-in deployment [:deploymentTemplate :href])
-        request-deployment-tmpl {:params   {:uuid          (some-> deployment-tmpl-href (str/split #"/") second)
-                                            :resource-name deployment-template/resource-url}
-                                 :identity idmap}
-        {:keys [body status] :as deployment-tmpl-resp} (crud/retrieve request-deployment-tmpl)]
+        {:keys [body status]} (if (= deployment-tmpl-href deployment-template/generated-url)
+                                {:status 200
+                                 :body   (du/create-deployment-template (:deploymentTemplate deployment) idmap)}
+                                (crud/retrieve {:params   {:uuid          (u/document-id deployment-tmpl-href)
+                                                           :resource-name deployment-template/resource-url}
+                                                :identity idmap}))]
     (if (= status 200)
-      (assoc deployment :deploymentTemplate (dissoc body :operations :acl :id))
+      (assoc deployment :deploymentTemplate (dissoc body :operations :acl :id :href))
       (throw (ex-info "" body)))))
 
 
@@ -92,23 +93,24 @@
       [resource-id secretKey]
       (throw (ex-info "" body)))))
 
+
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
   (try
     (a/can-modify? {:acl collection-acl} request)
     (let [idmap (:identity request)
           desc-attrs (u/select-desc-keys body)
-          deployment-tmpl-href (get-in body [:deploymentTemplate :href])
+          deployment-tmpl-href (get-in body [:deploymentTemplate :href] deployment-template/generated-url)
           [api-key secret] (generate-api-key-secret request)
           deployment (-> body
+                         (assoc-in [:deploymentTemplate :href] deployment-tmpl-href)
                          (assoc :resourceURI create-uri)
-                         (resolve-hrefs idmap)
+                         (retrieve-deployment-template idmap)
                          (update-in [:deploymentTemplate] merge desc-attrs) ;; ensure desc attrs are validated
                          crud/validate
                          :deploymentTemplate
-                         (assoc :deploymentTemplate {:href deployment-tmpl-href})
-                         (assoc :clientAPIKey {:href api-key,
-                                               :secret secret})
+                         (assoc-in [:deploymentTemplate :href] deployment-tmpl-href)
+                         (assoc :clientAPIKey {:href api-key, :secret secret})
                          (assoc :state "CREATED"))]
       (add-impl (assoc request :body deployment)))
     (catch Exception e
