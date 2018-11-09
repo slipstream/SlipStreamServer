@@ -13,7 +13,7 @@
   {:service      service
    :name         "NuvlaBox Unique Identifiers"
    :description  "NuvlaBox Unique Identifiers"
-   :instance     "CommonNames"
+   :instance     "names"
    :identifiers  [{:name "John Doe"} {:name "Jane Dow"}] })
 
 

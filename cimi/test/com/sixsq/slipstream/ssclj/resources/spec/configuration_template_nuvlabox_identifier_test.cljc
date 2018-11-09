@@ -23,9 +23,9 @@
               :acl         valid-acl
 
               :service     "nuvlabox-identifier"
-              :instance    "CommonNames"
+              :instance    "names"
 
-              :identifier  [{:name "John Doe"} {:name "Jane Dow"}] }]
+              :identifiers  [{:name "John Doe"} {:name "Jane Dow"}] }]
 
     (stu/is-valid ::cfg-tpl/nuvlabox-identifier root)
 
