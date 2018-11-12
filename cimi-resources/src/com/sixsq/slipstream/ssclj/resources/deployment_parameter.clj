@@ -11,7 +11,8 @@
     [com.sixsq.slipstream.ssclj.resources.spec.deployment-parameter :as deployment-parameter]
     [com.sixsq.slipstream.util.response :as r]
     [superstring.core :as str]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [com.sixsq.slipstream.ssclj.resources.event.utils :as event-utils]))
 
 (def ^:const resource-name "DeploymentParameter")
 
@@ -70,10 +71,15 @@
                                     :uuid          uuid}
                          :identity std-crud/internal-identity
                          :body     {:value new-state}}
-        {:keys [status] :as response} (-> content-request crud/edit)]
+        {:keys [status body] :as response} (-> content-request crud/edit)
+        event-msg (str deployment-href " is in state => " new-state)
+        event-severity (if (= new-state "Aborted") event-utils/severity-critical event-utils/severity-medium)]
     (when (not= status 200)
       (log/error response)
-      (throw (r/ex-response (str "A failure happened during update of deployment state." response) 500)))))
+      (throw (r/ex-response (str "A failure happened during update of deployment state." response) 500)))
+    (event-utils/create-event deployment-href event-msg (:acl body)
+                              :severity event-severity
+                              :type event-utils/type-state)))
 
 
 ;;

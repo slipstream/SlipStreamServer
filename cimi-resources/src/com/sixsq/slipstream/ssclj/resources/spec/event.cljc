@@ -3,10 +3,18 @@
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as cimi-common]
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]))
+    [com.sixsq.slipstream.ssclj.util.spec :as su]
+    [com.sixsq.slipstream.ssclj.resources.event.utils :as event-utils]))
 
-(s/def ::severity #{"critical" "high" "medium" "low"})
-(s/def ::type #{"state" "alarm" "action" "system"})
+(s/def ::severity (s/and string? #{event-utils/severity-critical
+                                   event-utils/severity-high
+                                   event-utils/severity-medium
+                                   event-utils/severity-low}))
+
+(s/def ::type (s/and string? #{event-utils/type-state
+                               event-utils/type-alarm
+                               event-utils/type-action
+                               event-utils/type-system}))
 
 ;; Events may need to reference resources that do not follow the CIMI.
 ;; conventions.  Allow for a more flexible schema to be used here.

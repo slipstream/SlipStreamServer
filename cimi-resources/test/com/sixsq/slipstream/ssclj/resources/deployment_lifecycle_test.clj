@@ -33,7 +33,7 @@
                        (ltu/body->edn)
                        (ltu/is-status 201)
                        (ltu/location))
-        valid-deployment-template-create {:module           {:href module-uri}}
+        valid-deployment-template-create {:module {:href module-uri}}
         deployment-template-uri (-> session-user
                                     (request deployment-template-collection-uri
                                              :request-method :post
@@ -192,7 +192,15 @@
         (-> session-user
             (request abs-uri :request-method :delete)
             (ltu/body->edn)
-            (ltu/is-status 409))))))
+            (ltu/is-status 409))
+
+        ;; user should see events created
+        (-> session-user
+            (request (str p/service-context "event"))
+            (ltu/body->edn)
+            (ltu/is-count 3))
+
+        ))))
 
 (deftest bad-methods
   (let [resource-uri (str p/service-context (u/new-resource-id deployment/resource-name))]
