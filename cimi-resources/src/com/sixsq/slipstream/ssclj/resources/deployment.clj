@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.deployment
   (:require
     [com.sixsq.slipstream.auth.acl :as a]
+    [com.sixsq.slipstream.auth.acl :as acl]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
@@ -9,11 +10,12 @@
     [com.sixsq.slipstream.ssclj.resources.credential :as credential]
     [com.sixsq.slipstream.ssclj.resources.credential-template-api-key :as cred-api-key]
     [com.sixsq.slipstream.ssclj.resources.deployment-template :as deployment-template]
+    [com.sixsq.slipstream.ssclj.resources.deployment.utils :as du]
+    [com.sixsq.slipstream.ssclj.resources.event.utils :as event-utils]
     [com.sixsq.slipstream.ssclj.resources.job :as job]
     [com.sixsq.slipstream.ssclj.resources.spec.deployment :as deployment-spec]
     [com.sixsq.slipstream.ssclj.resources.spec.deployment-template :as deployment-template-spec]
-    [com.sixsq.slipstream.util.response :as r]
-    [com.sixsq.slipstream.ssclj.resources.deployment.utils :as du]))
+    [com.sixsq.slipstream.util.response :as r]))
 
 (def ^:const resource-tag :deployments)
 
@@ -111,8 +113,12 @@
                          :deploymentTemplate
                          (assoc-in [:deploymentTemplate :href] deployment-tmpl-href)
                          (assoc :clientAPIKey {:href api-key, :secret secret})
-                         (assoc :state "CREATED"))]
-      (add-impl (assoc request :body deployment)))
+                         (assoc :state "CREATED"))
+          create-response (add-impl (assoc request :body deployment))
+          href (get-in create-response [:body :resource-id])
+          msg (get-in create-response [:body :message])]
+      (event-utils/create-event href msg (acl/default-acl (acl/current-authentication request)))
+      create-response)
     (catch Exception e
       (or (ex-data e) (throw e)))))
 
@@ -201,7 +207,8 @@
                                                                      :type      "USER"}]}}
                                 :params   {:resource-name job/resource-url}}
 
-          {{job-id :resource-id job-status :status} :body :as job-start-response} (crud/add request-job-creation)]
+          {{job-id :resource-id job-status :status} :body :as job-start-response} (crud/add request-job-creation)
+          job-msg (str "starting " id " with async " job-id)]
       (when (not= job-status 201)
         (throw (r/ex-response "unable to create async job to start deployment" 500 id)))
       (-> id
@@ -209,8 +216,8 @@
           (a/can-modify? request)
           (assoc :state "STARTING")
           (db/edit request))
-
-      (r/map-response (str "starting " id " with async " job-id) 202 id job-id))
+      (event-utils/create-event id job-msg (acl/default-acl (acl/current-authentication request)))
+      (r/map-response job-msg 202 id job-id))
     (catch Exception e
       (or (ex-data e) (throw e)))))
 
@@ -232,7 +239,8 @@
                                            }
                                 :params   {:resource-name job/resource-url}}
 
-          {{job-id :resource-id job-status :status} :body :as job-stop-response} (crud/add request-job-creation)]
+          {{job-id :resource-id job-status :status} :body :as job-stop-response} (crud/add request-job-creation)
+          job-msg (str "stopping " id " with async " job-id)]
       (when (not= job-status 201)
         (throw (r/ex-response "unable to create async job to stop deployment" 500 id)))
       (-> id
@@ -240,7 +248,7 @@
           (a/can-modify? request)
           (assoc :state "STOPPING")
           (db/edit request))
-      (r/map-response (str "stopping " id " with async " job-id) 202 id job-id))
+      (r/map-response job-msg 202 id job-id))
     (catch Exception e
       (or (ex-data e) (throw e)))))
 

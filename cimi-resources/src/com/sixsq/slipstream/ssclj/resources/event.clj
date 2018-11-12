@@ -6,21 +6,18 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.event.utils :as event-utils]
     [com.sixsq.slipstream.ssclj.resources.spec.event :as event]))
 
 (def ^:const resource-tag :events)
-(def ^:const resource-name "Event")
-(def ^:const resource-url (u/de-camelcase resource-name))
+(def ^:const resource-name event-utils/resource-name)
+(def ^:const resource-url event-utils/resource-url)
 (def ^:const collection-name "EventCollection")
 
-(def ^:const resource-uri (str c/cimi-schema-uri resource-name))
+(def ^:const resource-uri event-utils/resource-uri)
 (def ^:const collection-uri (str c/cimi-schema-uri collection-name))
 
-(def collection-acl {:owner {:principal "ADMIN"
-                             :type      "ROLE"}
-                     :rules [{:principal "ANON"
-                              :type      "ROLE"
-                              :right     "ALL"}]})
+(def collection-acl event-utils/collection-acl)
 
 ;;
 ;; "Implementations" of multimethod declared in crud namespace
@@ -32,11 +29,11 @@
   [resource]
   (validate-fn resource))
 
-(def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
 (defmethod crud/add resource-name
   [request]
-  (add-impl request))
+  (event-utils/add-impl request))
+
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 

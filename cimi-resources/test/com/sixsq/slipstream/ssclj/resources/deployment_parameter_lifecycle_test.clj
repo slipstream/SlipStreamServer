@@ -7,8 +7,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.deployment-parameter :as dp]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [peridot.core :refer :all]
-    [taoensso.timbre :as log]))
+    [peridot.core :refer :all]))
 
 
 (use-fixtures :each ltu/with-test-server-fixture)
@@ -222,6 +221,12 @@
             (ltu/body->edn)
             (ltu/is-status 200)
             (ltu/is-key-value :value "Ready"))
+
+        ;; user should see events created
+        (-> session-jane
+            (request (str p/service-context "event"))
+            (ltu/body->edn)
+            (ltu/is-count 4))
 
         ))))
 
