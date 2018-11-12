@@ -8,11 +8,11 @@
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.deployment :as d]
+    [com.sixsq.slipstream.ssclj.resources.event.utils :as event-utils]
     [com.sixsq.slipstream.ssclj.resources.spec.deployment-parameter :as deployment-parameter]
     [com.sixsq.slipstream.util.response :as r]
     [superstring.core :as str]
-    [taoensso.timbre :as log]
-    [com.sixsq.slipstream.ssclj.resources.event.utils :as event-utils]))
+    [taoensso.timbre :as log]))
 
 (def ^:const resource-name "DeploymentParameter")
 

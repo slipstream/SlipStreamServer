@@ -1,8 +1,8 @@
 (ns com.sixsq.slipstream.ssclj.resources.event.utils
-  (:require [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
-            [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-            [clj-time.core :as time]
-            [com.sixsq.slipstream.ssclj.resources.common.schema :as c]))
+  (:require [clj-time.core :as time]
+            [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
+            [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
+            [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 
 (def resource-name "Event")

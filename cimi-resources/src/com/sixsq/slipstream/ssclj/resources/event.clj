@@ -6,8 +6,8 @@
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.spec.event :as event]
-    [com.sixsq.slipstream.ssclj.resources.event.utils :as event-utils]))
+    [com.sixsq.slipstream.ssclj.resources.event.utils :as event-utils]
+    [com.sixsq.slipstream.ssclj.resources.spec.event :as event]))
 
 (def ^:const resource-tag :events)
 (def ^:const resource-name event-utils/resource-name)

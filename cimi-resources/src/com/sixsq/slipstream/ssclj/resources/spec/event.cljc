@@ -1,10 +1,10 @@
 (ns com.sixsq.slipstream.ssclj.resources.spec.event
   (:require
     [clojure.spec.alpha :as s]
+    [com.sixsq.slipstream.ssclj.resources.event.utils :as event-utils]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as cimi-common]
     [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
-    [com.sixsq.slipstream.ssclj.util.spec :as su]
-    [com.sixsq.slipstream.ssclj.resources.event.utils :as event-utils]))
+    [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 (s/def ::severity (s/and string? #{event-utils/severity-critical
                                    event-utils/severity-high

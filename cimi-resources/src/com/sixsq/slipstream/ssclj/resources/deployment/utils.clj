@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.deployment.utils
   (:require
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
+    [clojure.string :as str]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
-    [com.sixsq.slipstream.ssclj.resources.module :as m]
-    [clojure.string :as str]))
+    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
+    [com.sixsq.slipstream.ssclj.resources.module :as m]))
 
 
 (def node-output-params [{:parameter   "abort"
