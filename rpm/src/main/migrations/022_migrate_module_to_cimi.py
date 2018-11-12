@@ -35,9 +35,6 @@ logging.basicConfig(level=logging.WARNING,
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
 
-api_kb = Api('https://159.100.243.182', insecure=True)
-logger.info(api_kb.login_internal('super', '5357442b1f20'))
-
 mapping_old_version = {}
 
 default_endpoint = os.environ.get('SLIPSTREAM_ENDPOINT') or 'https://nuv.la'
@@ -51,15 +48,30 @@ def parse_arguments():
                         default=default_endpoint)
 
     parser.add_argument('--ss-username', dest='username',
-                        help='Cloud username', metavar='USERNAME',
+                        help='SlipStream username', metavar='USERNAME',
                         default=os.environ.get('SLIPSTREAM_USERNAME', ''))
 
     parser.add_argument('--ss-password', dest='password',
-                        help='Cloud password', metavar='PASSWORD',
+                        help='SlipStream password', metavar='PASSWORD',
                         default=os.environ.get('__SLIPSTREAM_PASSWORD', ''))
 
     parser.add_argument('--ss-insecure', dest='insecure', action='store_true', default=False,
                         help='Do not check server certificate')
+
+    parser.add_argument('--dest-ss-endpoint', dest='dest_endpoint', metavar='URL',
+                        help='Destination SlipStream server endpoint. Default: {}'.format(default_endpoint),
+                        default=default_endpoint)
+
+    parser.add_argument('--dest-ss-username', dest='dest_username',
+                        help='Destination SlipStream username', metavar='USERNAME',
+                        default=os.environ.get('DEST_SLIPSTREAM_USERNAME', ''))
+
+    parser.add_argument('--dest-ss-password', dest='dest_password',
+                        help='Destination SlipStream password', metavar='PASSWORD',
+                        default=os.environ.get('__DEST_SLIPSTREAM_PASSWORD', ''))
+
+    parser.add_argument('--dest-ss-insecure', dest='dest_insecure', action='store_true', default=False,
+                        help='Do not check destination server certificate')
 
     parser.add_argument('--recurse', dest='recurse', action='store_true', default=False,
                         help='Recurse into sub-modules (only with source slipstream)')
@@ -107,6 +119,18 @@ def get_api(config):
 
     api = Api(endpoint=config.endpoint, insecure=config.insecure)
     api.login_internal(config.username, config.password)
+
+    return api
+
+
+def get_dest_api(config):
+    patch_api()
+
+    args = vars(config)
+    api = Api(endpoint=args.get("dest_endpoint", config.endpoint),
+              insecure=args.get("dest_insecure", config.insecure))
+    api.login_internal(args.get("dest_username", config.username),
+                       args.get("dest_password", config.password))
 
     return api
 
@@ -237,14 +261,14 @@ def get_module_path(module):
     return '{}/{}'.format(module.get('parentUri', ''), module['shortName'])
 
 
-def convert_module(api, module_type, module):
+def convert_module(api, dest_api, module_type, module):
     cimi_module = get_cimi_module_common_attributes(module, module_type)
     if module_type == 'IMAGE':
         cimi_module['content'] = image_attributes(module)
     elif module_type == 'COMPONENT':
         cimi_module['content'] = component_attributes(module)
     elif module_type == 'APPLICATION':
-        cimi_module['content'] = application_attributes(api, module)
+        cimi_module['content'] = application_attributes(api, dest_api, module)
     return cimi_module
 
 
@@ -319,7 +343,7 @@ def component_attributes(module):
         component['author'] = 'super'
 
     if module.get('moduleReferenceUri'):
-        component['parent'] = {'href': mapping_old_version[module.get('moduleReferenceUri')]}
+        component['parentModule'] = {'href': mapping_old_version[module.get('moduleReferenceUri')]}
     if _to_int(res_req.get('cpu.nb')):
         component['cpu'] = _to_int(res_req.get('cpu.nb'))
     if _to_float(res_req.get('ram.GB')):
@@ -352,7 +376,7 @@ def component_attributes(module):
     return component
 
 
-def application_attributes(api, module):
+def application_attributes(api, dest_api, module):
     application = {}
     if use_default_when_blank(module['commit'].get('comment'), None):
         application['commit'] = module['commit'].get('comment')
@@ -363,7 +387,7 @@ def application_attributes(api, module):
         node_component = n['node']['imageUri']
         if not mapping_old_version.get(node_component):
             component_module = api.get_module(node_component)
-            upload_module(api, component_module, category_to_type(component_module))
+            upload_module(api, dest_api, component_module, category_to_type(component_module))
         component_href = mapping_old_version[node_component]
         if component_href == "None":
             logger.error('mapped reference was "None": {}, {}'.format(node_component, component_href))
@@ -544,7 +568,7 @@ def get_mappings(node):
     return cimi_mappings
 
 
-def upload_module(api, module, module_type):
+def upload_module(api, dest_api, module, module_type):
     path = get_path(module)
     if mapping_old_version.get(path):
         return None
@@ -579,7 +603,7 @@ def upload_module(api, module, module_type):
                     try:
                         logger.info('fetch parent {}'.format(parent))
                         parent_module = api.get_module(parent)
-                        upload_module(api, parent_module, category_to_type(parent_module))
+                        upload_module(api, dest_api, parent_module, category_to_type(parent_module))
                     except Exception as e:
                         logger.error(
                             'referenced parent does not exist.  Using invalid module reference... {}, {}, {}'.format(
@@ -590,14 +614,14 @@ def upload_module(api, module, module_type):
                         continue
 
         try:
-            cimi_module = convert_module(api, module_type, module_version)
+            cimi_module = convert_module(api, dest_api, module_type, module_version)
 
             if first:
-                cimi_resp = cimi_add(api_kb, 'modules', cimi_module)
+                cimi_resp = cimi_add(dest_api, 'modules', cimi_module)
                 id = cimi_resp.json['resource-id']
                 first = False
             else:
-                cimi_edit(api_kb, id, cimi_module)
+                cimi_edit(dest_api, id, cimi_module)
             mapping_old_version["module/{}/{}".format(path, module_version['version'])] \
                 = "{}_{}".format(id, version_index)
         except Exception as e:
@@ -614,7 +638,7 @@ def upload_module(api, module, module_type):
         logger.warning('No version for module "{}". Skipping'.format(get_path(module)))
 
 
-def convert_and_upload_modules(api, modules):
+def convert_and_upload_modules(api, dest_api, modules):
     for module in modules:
         module_type = category_to_type(module)
         logger.info('{} of type {} with {} versions'.format(get_module_path(module),
@@ -623,7 +647,7 @@ def convert_and_upload_modules(api, modules):
         if not module_type:
             continue
 
-        upload_module(api, module, module_type)
+        upload_module(api, dest_api, module, module_type)
 
 
 def main():
@@ -635,8 +659,9 @@ def main():
 
     config = parse_arguments()
     api = get_api(config)
+    dest_api = get_dest_api(config)
     modules = get_modules_from_slipstream(api, config)
-    convert_and_upload_modules(api, modules)
+    convert_and_upload_modules(api, dest_api, modules)
 
 
 if __name__ == '__main__':
