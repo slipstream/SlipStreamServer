@@ -2,13 +2,10 @@
   (:require
     [clj-time.coerce :as tc]
     [clj-time.core :as t]
-    [clojure.data.json :as json]
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.acl :as a]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.util.log :as logu]
-    [com.sixsq.slipstream.util.response :as ru]
     [sixsq.slipstream.client.impl.utils.http-sync :as http])
   (:import
     (com.amazonaws HttpMethod)
@@ -16,7 +13,7 @@
     (com.amazonaws.client.builder AwsClientBuilder$EndpointConfiguration)
     (com.amazonaws.services.s3 AmazonS3ClientBuilder)
     (com.amazonaws.services.s3.model CreateBucketRequest DeleteObjectRequest
-                                     GeneratePresignedUrlRequest ResponseHeaderOverrides)))
+                                     GeneratePresignedUrlRequest)))
 
 
 (def ^:const default-ttl 15)
@@ -110,7 +107,7 @@
 
 (defn expand-obj-store-creds
   "Need objectType to dispatch on when loading credentials."
-  [href-obj-store-cred request objectType]
+  [href-obj-store-cred]
   (let [{:keys [key secret connector]} (expand-cred href-obj-store-cred)]
     {:key      key
      :secret   secret
@@ -120,9 +117,9 @@
   "Determines if S3 conditions are met on S3 for the user to safely
   add an external object resource. If everything is OK, then the resource
   itself is returned. Otherwise an error response map is thrown"
-  [{:keys [bucketName objectStoreCred objectType] :as resource} request]
+  [{:keys [bucketName objectStoreCred] :as resource} request]
   (let [
-        obj-store-conf (expand-obj-store-creds objectStoreCred request objectType)
+        obj-store-conf (expand-obj-store-creds objectStoreCred)
         s3client (get-s3-client obj-store-conf)]
     (cond
       (not (bucket-creation-ok? s3client bucketName)) (logu/log-and-throw 503 (format "Unable to create the bucket %s" bucketName))
@@ -136,9 +133,9 @@
   "Determines if S3 conditions are met on S3 for the user to safely
   delete an external object resource. If everything is OK, then the resource
   itself is returned. Otherwise an 'unauthorized' response map is thrown"
-  [{:keys [bucketName objectStoreCred objectType] :as resource} request]
+  [{:keys [bucketName objectStoreCred] :as resource} request]
   (let [
-        obj-store-conf (expand-obj-store-creds objectStoreCred request objectType)
+        obj-store-conf (expand-obj-store-creds objectStoreCred)
         s3client (get-s3-client obj-store-conf)]
     (cond
       ;; When the user requests to delete an object, but it no longer exists :

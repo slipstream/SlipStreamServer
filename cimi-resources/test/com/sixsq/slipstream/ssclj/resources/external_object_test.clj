@@ -19,8 +19,7 @@
 (def objectname "object/name")
 
 (deftest test-upload-fn
-  (with-redefs [;;s3/create-bucket! (fn [_ _] nil)
-                s3/expand-cred (fn [cred-href] (get my-cloud-creds (:href cred-href)))]
+  (with-redefs [s3/expand-cred (fn [cred-href] (get my-cloud-creds (:href cred-href)))]
 
     (let [expected-msg (eo/error-msg-bad-state "upload" #{eo/state-new eo/state-uploading} eo/state-ready)]
       (is (thrown-with-msg? ExceptionInfo (re-pattern expected-msg)

@@ -89,10 +89,6 @@
         (ltu/location))
     (f)))
 
-#_(defn create-bucket!
-    [obj-store-conf bucket]
-    (log/debug (format "TEST. Creating bucket: %s %s" obj-store-conf bucket)))
-
 (defn delete-s3-object
   [obj-store-conf bucket obj-name]
   (log/debug (format "TEST. Deleting s3 object: %s %s %s" obj-store-conf bucket obj-name)))
@@ -127,7 +123,6 @@
 
 (defn full-eo-lifecycle
   [template-url template-obj]
-
   (let [template (get-template template-url)
         create-href {:externalObjectTemplate (-> template-obj
                                                  (assoc :href (:id template))
@@ -157,8 +152,6 @@
                        :body (json/write-str invalid-create))
               (ltu/body->edn)
               (ltu/is-status 400))
-
-
 
           ;;Assume that bucket does not exist and cannot be created
           (with-redefs [s3/bucket-exists? (fn [_ _] false)

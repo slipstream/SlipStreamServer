@@ -305,7 +305,7 @@
   (let [object-name (if (not-empty objectName)
                       objectName
                       (format "%s/%s" runUUID filename))
-        obj-store-conf (s3/expand-obj-store-creds objectStoreCred request objectType)]
+        obj-store-conf (s3/expand-obj-store-creds objectStoreCred)]
     (log/info "Requesting upload url:" object-name)
     (s3/generate-url obj-store-conf bucketName object-name :put
                      {:ttl (or ttl s3/default-ttl) :content-type contentType :filename filename})))
@@ -351,7 +351,7 @@
   [{:keys [objectType bucketName objectName objectStoreCred] :as resource} {{ttl :ttl} :body :as request}]
   (verify-state resource #{state-ready} "download")
   (log/info "Requesting download url: " objectName)
-  (s3/generate-url (s3/expand-obj-store-creds objectStoreCred request objectType)
+  (s3/generate-url (s3/expand-obj-store-creds objectStoreCred)
                    bucketName objectName :get
                    {:ttl (or ttl s3/default-ttl)}))
 
@@ -385,7 +385,7 @@
 (defmethod delete-subtype :default
   [{:keys [objectType objectName bucketName objectStoreCred] :as resource} {{keep? :keep-s3-object} :body :as request}]
   (when (and (not keep?) (s3/ok-to-delete-external-resource? resource request))
-    (s3/delete-s3-object (s3/expand-obj-store-creds objectStoreCred request objectType) bucketName objectName))
+    (s3/delete-s3-object (s3/expand-obj-store-creds objectStoreCred) bucketName objectName))
   (delete-impl request))
 
 (defmethod crud/delete resource-name
