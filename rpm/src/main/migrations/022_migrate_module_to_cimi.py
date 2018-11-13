@@ -464,7 +464,7 @@ def get_cimi_module_common_attributes(module, module_type):
 
     logo_link = use_default_when_blank(module.get('logoLink'))
     if logo_link is not None:
-        meta['logo'] = {'href': logo_link}
+        meta['logoURL'] = logo_link
 
     return meta
 
