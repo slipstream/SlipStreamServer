@@ -28,7 +28,7 @@
                                         :commit "wip"}
                                        nil
                                        {:href "module-image/abc"}]
-              :logoURL                "https://example.org/my-logo"
+              :logoURL                "https://example.org/logo"
 
               :dataAcceptContentTypes ["application/json" "application/x-something"]
               :dataAccessProtocols    ["http+s3" "posix+nfs"]}]
