@@ -27,9 +27,7 @@
 
 (s/def ::versions (s/coll-of (s/nilable ::cimi-common/resource-link) :min-count 1))
 
-;; relax the href schema to allow any URL to be used for logo
-(s/def ::href ::cimi-core/nonblank-string)
-(s/def ::logo (su/only-keys :req-un [::href]))
+(s/def ::logoURL ::cimi-core/nonblank-string)
 
 ;;
 ;; data management attributes
@@ -41,7 +39,7 @@
 
 (def module-keys-spec (su/merge-keys-specs [c/common-attrs
                                             {:req-un [::path ::parentPath ::type]
-                                             :opt-un [::logo ::versions
+                                             :opt-un [::logoURL ::versions
                                                       ::dataAcceptContentTypes
                                                       ::dataAccessProtocols]}]))
 

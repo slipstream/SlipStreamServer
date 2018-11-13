@@ -6,7 +6,7 @@
               :path        "root/image-a"
               :name        "image-a"
               :type        "IMAGE"
-              :logo        {:href "logo/href"}
+              :logoURL     {:href "logo/href"}
               :content     {:loginUser   "root"
                             :created     "2018-07-25T10:07:43.309Z"
                             :updated     "2018-07-25T10:07:43.309Z"
@@ -24,7 +24,7 @@
               :path        "root/image-b"
               :name        "image-b"
               :type        "IMAGE"
-              :logo        {:href "logo/href"}
+              :logoURL     {:href "logo/href"}
               :content     {:parentModule image-a
                             :loginUser    "ubuntu"
                             :created      "2018-07-25T10:07:43.309Z"
@@ -180,7 +180,7 @@
                       :targets          {}
                       :updated          "2018-07-25T10:07:43.309Z"}
         :description "descr image-a"
-        :logo        {:href "logo/href"}
+        :logoURL     {:href "logo/href"}
         :name        "image-a"
         :path        "root/image-a"
         :id          "module/image-a"
@@ -225,7 +225,7 @@
                          :targets          {}
                          :updated          "2018-07-25T10:07:43.309Z"}
            :description "descr image-b"
-           :logo        {:href "logo/href"}
+           :logoURL     {:href "logo/href"}
            :name        "image-b"
            :path        "root/image-b"
            :resourceURI "http://sixsq.com/slipstream/1/Module"

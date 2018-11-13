@@ -28,7 +28,7 @@
                                         :commit "wip"}
                                        nil
                                        {:href "module-image/abc"}]
-              :logo                   {:href "external-object/xyz"}
+              :logoURL                "https://example.org/my-logo"
 
               :dataAcceptContentTypes ["application/json" "application/x-something"]
               :dataAccessProtocols    ["http+s3" "posix+nfs"]}]
@@ -42,5 +42,5 @@
       (stu/is-invalid ::module/module (dissoc root k)))
 
     ;; optional attributes
-    (doseq [k #{:logo :versions :dataAcceptContentTypes :dataAccessProtocols}]
+    (doseq [k #{:logoURL :versions :dataAcceptContentTypes :dataAccessProtocols}]
       (stu/is-valid ::module/module (dissoc root k)))))
