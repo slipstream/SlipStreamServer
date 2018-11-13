@@ -101,7 +101,7 @@
   [f]
   (with-redefs [s3/bucket-exists? (fn [_ _] true)           ;;by default assume the S3 bucket exists
                 s3/create-bucket! (fn [_ _] :not-nil)       ;;by default, a bucket creation succeeds
-                s3/viewable-bucket? (fn [_ _] true)         ;;by default, the user can view the credential
+                s3/authorized-bucket-operation? (fn [_ _ _] true)         ;;by default, the user has permission to operate
                 s3/uploadable-bucket? (fn [_ _] true)       ;;by default, it is Ok to create objects in bucket
                 s3/delete-s3-object delete-s3-object]
     (f)))
@@ -182,14 +182,15 @@
                           (ltu/location))
                   abs-uri (str p/service-context (u/de-camelcase uri))]
 
+              (with-redefs [s3/bucket-exists? (fn [_ _] true)]
               (-> session
                   (request abs-uri
                            :request-method :delete)
                   (ltu/body->edn)
-                  (ltu/is-status 200))))
+                  (ltu/is-status 200)))))
 
           ;;Creation for user who can not view the credential should fail
-          (with-redefs [s3/viewable-bucket? (fn [_ _]) false]
+          (with-redefs [s3/authorized-bucket-operation? (fn [_ _ _]) false]
             (-> session
                 (request base-uri
                          :request-method :post
@@ -198,7 +199,7 @@
                 (ltu/is-status 403)))
 
           ;;Creation of resource when the bucket exists but no object can be created
-          #_(with-redefs [s3/uploadable-bucket? (fn [_ _]) false]
+          (with-redefs [s3/uploadable-bucket? (fn [_ _]) false]
             (-> session
                 (request base-uri
                          :request-method :post
@@ -457,13 +458,24 @@
                         (ltu/body->edn)
                         (ltu/is-status 200)))))
 
-              ;; owner delete succeeds
+
+              ;;Deletion should fail if user has no modify acccess
+              (with-redefs [s3/authorized-bucket-operation? (fn [_ _ _] false)]
+                (-> session
+                    (request abs-uri
+                             :request-method :delete
+                             :body (json/write-str {:keep-s3-object false})) ;;attempt s3 deletion while testing
+                    (ltu/body->edn)
+                    (ltu/is-status 403)))
+
+              ;;Deletion by owner should succeed , even in case the S3 bucket does not exist (anymore)
+              (with-redefs [s3/bucket-exists? (fn [_ _] false)]
               (-> session
                   (request abs-uri
                            :request-method :delete
-                           :body (json/write-str {:keep-s3-object true})) ;;no s3 deletion while testing
+                           :body (json/write-str {:keep-s3-object false})) ;;attempt s3 deletion while testing
                   (ltu/body->edn)
-                  (ltu/is-status 200))
+                  (ltu/is-status 200)))
 
               ;; ensure entry is really gone
               (-> session

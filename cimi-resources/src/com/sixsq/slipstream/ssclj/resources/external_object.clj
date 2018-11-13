@@ -384,7 +384,7 @@
 
 (defmethod delete-subtype :default
   [{:keys [objectType objectName bucketName objectStoreCred] :as resource} {{keep? :keep-s3-object} :body :as request}]
-  (when-not keep?
+  (when (and (not keep?) (s3/ok-to-delete-external-resource? resource request))
     (s3/delete-s3-object (s3/expand-obj-store-creds objectStoreCred request objectType) bucketName objectName))
   (delete-impl request))
 
