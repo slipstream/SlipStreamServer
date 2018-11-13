@@ -254,8 +254,8 @@
 
 
 ;;
-;; initialization: no schema for this parent resource
+;; initialization
 ;;
 (defn initialize
   []
-  (std-crud/initialize resource-url nil))
+  (std-crud/initialize resource-url ::deployment-spec/deployment))
