@@ -441,6 +441,10 @@ def get_cimi_acl(module):
                 'principal': 'ADMIN'
             }, {
                 'right': 'VIEW',
+                'type': 'ROLE',
+                'principal': 'USER'
+            }, {
+                'right': 'VIEW',
                 'type': type,
                 'principal': principal
             }]
