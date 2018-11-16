@@ -19,14 +19,14 @@
 (def ^:const default-ttl 15)
 
 
-(def request-admin {:identity     {:current "internal"
-                                   :authentications
-                                            {"internal" {:roles #{"ADMIN"}, :identity "internal"}}}
-                    :sixsq.slipstream.authn/claims
-                                  {:username "internal", :roles "ADMIN"}
-                    :params       {:resource-name "user"}
-                    :route-params {:resource-name "user"}
-                    :user-roles   #{"ANON"}})
+(def request-admin {:identity                      {:current         "internal"
+                                                    :authentications {"internal" {:roles    #{"ADMIN"}
+                                                                                  :identity "internal"}}}
+                    :sixsq.slipstream.authn/claims {:username "internal"
+                                                    :roles    "ADMIN"}
+                    :params                        {:resource-name "user"}
+                    :route-params                  {:resource-name "user"}
+                    :user-roles                    #{"ANON"}})
 
 (defn get-s3-client
   [{:keys [key secret endpoint]}]
