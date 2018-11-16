@@ -170,7 +170,7 @@
     (cond-> (dissoc resource :operations)
             (seq ops) (assoc :operations ops))))
 
-;; Just triggers the Session-level multimethod for adding operations
+;; Just triggers the resource-level multimethod for adding operations
 ;; to the Session resource.
 (defmethod crud/set-operations resource-uri
   [resource request]

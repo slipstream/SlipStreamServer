@@ -18,6 +18,7 @@
 
 (def ^:const default-ttl 15)
 
+
 (def request-admin {:identity     {:current "internal"
                                    :authentications
                                             {"internal" {:roles #{"ADMIN"}, :identity "internal"}}}
@@ -50,21 +51,25 @@
       content-type (.setContentType req content-type))
     (str (.generatePresignedUrl (get-s3-client obj-store-conf) req))))
 
+
 (defn delete-s3-object [obj-store-conf bucket obj-name]
   (let [deleteRequest (DeleteObjectRequest. bucket obj-name)]
     (.deleteObject (get-s3-client obj-store-conf) deleteRequest)))
+
 
 (defn bucket-exists?
   "Function mocked in unit tests"
   [s3client bucketName]
   (.doesBucketExist s3client bucketName))
 
+
 (defn create-bucket!
-  "Caller should have checked that bucket does not exist yet.
-  If creation fails, an Exception is thrown
-  Mocked in unit tests"
+  "Caller should have checked that bucket does not exist yet. If creation
+  fails, an Exception is thrown; otherwise true is returned. Mocked in unit
+  tests."
   [s3client bucket-name]
-  (.createBucket s3client (CreateBucketRequest. bucket-name)))
+  (.createBucket s3client (CreateBucketRequest. bucket-name))
+  true)
 
 
 (defn expand-cred
@@ -79,24 +84,25 @@
 
 ;;Pre-conditions for adding external-object
 
+
 (defn bucket-creation-ok?
   "When the requested bucket doesn't exist and can't be created.
   The external object resource must not be created."
   [s3client bucketName]
-  (if (bucket-exists? s3client bucketName)
-    true
-    (try
-      (create-bucket! s3client bucketName)
-      true
-      (catch Exception e
-        (log/error (format "Error when creating bucket %s: %s" bucketName (.getMessage e)))
-        false))))
+  (try
+    (or (bucket-exists? s3client bucketName)
+        (create-bucket! s3client bucketName))
+    (catch Exception e
+      (log/error (format "Error when creating bucket %s: %s" bucketName (.getMessage e)))
+      false)))
+
 
 (defn authorized-bucket-operation?
   [{:keys [objectStoreCred] :as resource} request check-authn-fn]
   (-> objectStoreCred
       (expand-cred)
       (check-authn-fn request)))
+
 
 (defn uploadable-bucket?
   "When the bucket exists, but the user can't create the object.
@@ -105,6 +111,7 @@
   (let [upload-url (generate-url obj-store-conf bucketName "test-probe" :put {:ttl 3 :content-type "text/plain" :filename "test.txt"})]
     (= 200 (http/put upload-url))))
 
+
 (defn expand-obj-store-creds
   "Need objectType to dispatch on when loading credentials."
   [href-obj-store-cred]
@@ -112,6 +119,7 @@
     {:key      key
      :secret   secret
      :endpoint (:objectStoreEndpoint connector)}))
+
 
 (defn ok-to-add-external-resource?
   "Determines if S3 conditions are met on S3 for the user to safely
@@ -128,6 +136,7 @@
       (not (authorized-bucket-operation? resource request a/can-view?)) (logu/log-and-throw 403 (format "Access to bucket %s is not allowed" bucketName))
       (not (uploadable-bucket? obj-store-conf bucketName)) (logu/log-and-throw 503 (format "Unable to create objects in the bucket %s" bucketName))
       :all-ok resource)))
+
 
 (defn ok-to-delete-external-resource?
   "Determines if S3 conditions are met on S3 for the user to safely
