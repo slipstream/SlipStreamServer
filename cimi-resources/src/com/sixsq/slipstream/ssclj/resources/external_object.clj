@@ -156,25 +156,12 @@
     (standard-external-object-collection-operations resource request)
     (standard-external-object-resource-operations resource request)))
 
-;; Sets the operations for the given resources.  This is a
-;; multi-method because different types of external object resources
-;; may require different operations
-(defmulti set-external-object-operations dispatch-conversion)
 
-;; Default implementation adds the standard external object operations
-;; by ALWAYS replacing the :operations value.  If there are no
-;; operations, the key is removed from the resource.
-(defmethod set-external-object-operations :default
+(defmethod crud/set-operations resource-uri
   [resource request]
   (let [ops (standard-external-object-operations resource request)]
     (cond-> (dissoc resource :operations)
             (seq ops) (assoc :operations ops))))
-
-;; Just triggers the resource-level multimethod for adding operations
-;; to the Session resource.
-(defmethod crud/set-operations resource-uri
-  [resource request]
-  (set-external-object-operations resource request))
 
 
 ;;
@@ -310,10 +297,7 @@
     (s3/generate-url obj-store-conf bucketName object-name :put
                      {:ttl (or ttl s3/default-ttl) :content-type contentType :filename filename})))
 
-(defmulti upload-subtype
-          (fn [resource _] (:objectType resource)))
-
-(defmethod upload-subtype :default
+(defn upload-subtype
   [resource request]
   (try
     (a/can-modify? resource request)
@@ -355,10 +339,7 @@
                    bucketName objectName :get
                    {:ttl (or ttl s3/default-ttl)}))
 
-(defmulti download-subtype
-          (fn [resource _] (:objectType resource)))
-
-(defmethod download-subtype :default
+(defn download-subtype
   [resource request]
   (try
     (r/json-response {:uri (download-fn resource request)})
@@ -379,10 +360,8 @@
 
 (def delete-impl (std-crud/delete-fn resource-name))
 
-(defmulti delete-subtype
-          (fn [resource _] (:objectType resource)))
 
-(defmethod delete-subtype :default
+(defn delete-subtype
   [{:keys [objectName bucketName objectStoreCred] :as resource} {{keep? :keep-s3-object} :body :as request}]
   (when (and (not keep?) (s3/ok-to-delete-external-resource? resource request))
     (s3/delete-s3-object (s3/expand-obj-store-creds objectStoreCred) bucketName objectName))
