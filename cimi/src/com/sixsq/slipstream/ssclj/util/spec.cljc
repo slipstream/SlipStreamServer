@@ -7,7 +7,8 @@
     [com.sixsq.slipstream.db.es.common.es-mapping :as es-mapping]
     [spec-tools.impl :as impl]
     [spec-tools.parse :as st-parse]
-    [spec-tools.visitor :as visitor]))
+    [spec-tools.visitor :as visitor]
+    [clojure.tools.logging :as log]))
 
 (def ^:private all-ascii-chars (map str (map char (range 0 256))))
 
@@ -78,11 +79,24 @@
 ;;
 
 (defmethod st-parse/parse-form 'com.sixsq.slipstream.ssclj.util.spec/only-keys [dispatch form]
+  (log/error "FORM PARSE" form)
+
   (st-parse/parse-form 'clojure.spec.alpha/keys form))
+
+
+(defn transform-form
+  [[_ & keys-specs]]
+  (concat ['clojure.spec.alpha/keys] (merge-keys-specs keys-specs)))
 
 
 (defmethod st-parse/parse-form 'com.sixsq.slipstream.ssclj.util.spec/only-keys-maps [dispatch form]
-  (st-parse/parse-form 'clojure.spec.alpha/keys form))
+  (log/error "FORM PARSE" form)
+  (log/error "XFORM" (transform-form form))
+  (let [spec-name (first form)
+        xformed-form (transform-form form)
+        arg (concat ['clojure.spec.alpha/keys] [spec-name] xformed-form)]
+    (log/error "ARG" arg)
+    (apply st-parse/parse-form arg)))
 
 
 (defmethod st-parse/parse-form 'com.sixsq.slipstream.ssclj.util.spec/constrained-map [dispatch form]
@@ -94,11 +108,17 @@
 
 (defmethod visitor/visit-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys [spec accept options]
   (let [keys (impl/extract-keys (impl/extract-form spec))]
-    (accept 'com.sixsq.slipstream.ssclj.util.spec/only-keys spec (mapv #(visitor/visit % accept options) keys) options)))
+    (accept 'clojure.spec.alpha/keys spec (mapv #(visitor/visit % accept options) keys) options)))
 
 
 (defmethod visitor/visit-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys-maps [spec accept options]
-  (let [keys (impl/extract-keys (impl/extract-form spec))]
+  (log/error spec)
+  (log/error (impl/extract-form spec))
+  #_(log/error (impl/extract-keys (impl/extract-form spec)))
+  #_(let [keys (impl/extract-keys (impl/extract-form spec))]
+    (log/error spec)
+    (log/error (impl/extract-form spec))
+    (log/error (impl/extract-keys (impl/extract-form spec)))
     (accept 'com.sixsq.slipstream.ssclj.util.spec/only-keys-maps spec (mapv #(visitor/visit % accept options) keys) options)))
 
 
