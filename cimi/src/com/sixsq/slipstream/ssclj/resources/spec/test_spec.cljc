@@ -22,7 +22,10 @@
       (assoc :name "user")))
 
 (s/def ::c
-  (-> (st/spec (su/only-keys-maps {:req-un [::a]} {:opt-un [::b]}))))
+  (-> (st/spec (su/only-keys :req-un [::a] :opt-un [::b]))))
+
+(s/def ::d
+  (-> (st/spec (su/only-keys-maps {:req-un [::a] :opt-un [::b]}))))
 
 (s/def ::resource
   (s/keys :req-un [::a ::c]

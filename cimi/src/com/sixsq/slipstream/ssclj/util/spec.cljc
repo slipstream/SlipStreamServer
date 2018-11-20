@@ -79,24 +79,19 @@
 ;;
 
 (defmethod st-parse/parse-form 'com.sixsq.slipstream.ssclj.util.spec/only-keys [dispatch form]
-  (log/error "FORM PARSE" form)
-
   (st-parse/parse-form 'clojure.spec.alpha/keys form))
 
 
 (defn transform-form
-  [[_ & keys-specs]]
-  (concat ['clojure.spec.alpha/keys] (merge-keys-specs keys-specs)))
+  [[spec-name & keys-specs]]
+  (->> keys-specs
+       (merge-keys-specs)
+       (apply concat)
+       (cons spec-name)))
 
 
 (defmethod st-parse/parse-form 'com.sixsq.slipstream.ssclj.util.spec/only-keys-maps [dispatch form]
-  (log/error "FORM PARSE" form)
-  (log/error "XFORM" (transform-form form))
-  (let [spec-name (first form)
-        xformed-form (transform-form form)
-        arg (concat ['clojure.spec.alpha/keys] [spec-name] xformed-form)]
-    (log/error "ARG" arg)
-    (apply st-parse/parse-form arg)))
+  (st-parse/parse-form 'clojure.spec.alpha/keys (transform-form form)))
 
 
 (defmethod st-parse/parse-form 'com.sixsq.slipstream.ssclj.util.spec/constrained-map [dispatch form]
