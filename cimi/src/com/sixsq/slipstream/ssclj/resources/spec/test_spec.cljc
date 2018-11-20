@@ -29,4 +29,4 @@
 
 (s/def ::resource
   (s/keys :req-un [::a ::c]
-          :opt-un [::b]))
+          :opt-un [::b ::d]))

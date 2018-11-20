@@ -7,6 +7,7 @@
     [com.sixsq.slipstream.db.es.common.es-mapping :as es-mapping]
     [spec-tools.impl :as impl]
     [spec-tools.parse :as st-parse]
+    [spec-tools.json-schema :as jsc]
     [spec-tools.visitor :as visitor]
     [clojure.tools.logging :as log]))
 
@@ -79,6 +80,7 @@
 ;;
 
 (defmethod st-parse/parse-form 'com.sixsq.slipstream.ssclj.util.spec/only-keys [dispatch form]
+  (log/error "DEBUX X" form)
   (st-parse/parse-form 'clojure.spec.alpha/keys form))
 
 
@@ -95,7 +97,8 @@
 
 
 (defmethod st-parse/parse-form 'com.sixsq.slipstream.ssclj.util.spec/constrained-map [dispatch form]
-  (st-parse/parse-form 'clojure.spec.alpha/keys form))
+  (st-parse/parse-form 'clojure.spec.alpha/keys (transform-form form)))
+
 
 ;;
 ;; patches for spec walking via visitor
@@ -103,23 +106,59 @@
 
 (defmethod visitor/visit-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys [spec accept options]
   (let [keys (impl/extract-keys (impl/extract-form spec))]
-    (accept 'clojure.spec.alpha/keys spec (mapv #(visitor/visit % accept options) keys) options)))
+    (accept 'com.sixsq.slipstream.ssclj.util.spec/only-keys spec (mapv #(visitor/visit % accept options) keys) options)))
 
 
 (defmethod visitor/visit-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys-maps [spec accept options]
-  (log/error spec)
-  (log/error (impl/extract-form spec))
-  #_(log/error (impl/extract-keys (impl/extract-form spec)))
-  #_(let [keys (impl/extract-keys (impl/extract-form spec))]
-    (log/error spec)
-    (log/error (impl/extract-form spec))
-    (log/error (impl/extract-keys (impl/extract-form spec)))
+  (let [keys (impl/extract-keys (transform-form (impl/extract-form spec)))]
     (accept 'com.sixsq.slipstream.ssclj.util.spec/only-keys-maps spec (mapv #(visitor/visit % accept options) keys) options)))
 
 
 (defmethod visitor/visit-spec 'com.sixsq.slipstream.ssclj.util.spec/constrained-map [spec accept options]
-  (let [keys (impl/extract-keys (impl/extract-form spec))]
+  (let [keys (impl/extract-keys (transform-form (impl/extract-form spec)))]
     (accept 'com.sixsq.slipstream.ssclj.util.spec/constrained-map spec (mapv #(visitor/visit % accept options) keys) options)))
+
+
+;; accept-spec monkey patches
+
+(defmethod jsc/accept-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys [dispatch spec children arg]
+  (log/error "monkey only-keys")
+  (jsc/accept-spec 'clojure.spec.alpha/keys spec children arg))
+
+
+(defmethod jsc/accept-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys-maps [_ spec children _]
+  (log/error "monkey only-keys-maps")
+  (let [{:keys [req req-un opt opt-un]} (impl/parse-keys (transform-form (impl/extract-form spec)))
+        names-un (map name (concat req-un opt-un))
+        names (map impl/qualified-name (concat req opt))
+        required (map impl/qualified-name req)
+        required-un (map name req-un)
+        all-required (not-empty (concat required required-un))]
+    (#'jsc/maybe-with-title
+      (merge
+        {:type "object"
+         :properties (zipmap (concat names names-un) children)}
+        (when all-required
+          {:required (vec all-required)}))
+      spec)))
+
+
+(defmethod jsc/accept-spec 'com.sixsq.slipstream.ssclj.util.spec/constrained-map [_ spec children _]
+  (log/error "monkey constrainted-map")
+  (let [{:keys [req req-un opt opt-un]} (impl/parse-keys (transform-form (impl/extract-form spec)))
+        names-un (map name (concat req-un opt-un))
+        names (map impl/qualified-name (concat req opt))
+        required (map impl/qualified-name req)
+        required-un (map name req-un)
+        all-required (not-empty (concat required required-un))]
+    (#'jsc/maybe-with-title
+      (merge
+        {:type "object"
+         :properties (zipmap (concat names names-un) children)}
+        (when all-required
+          {:required (vec all-required)}))
+      spec)))
+
 
 ;;
 ;; patch transform of spec into ES mapping
