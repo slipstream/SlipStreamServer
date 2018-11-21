@@ -1,5 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.external-object-report
   (:require
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration :as p]
@@ -7,8 +8,7 @@
     [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
     [com.sixsq.slipstream.ssclj.resources.external-object-template-report :as eot]
     [com.sixsq.slipstream.ssclj.resources.spec.external-object-report :as eo-report]
-    [com.sixsq.slipstream.ssclj.resources.spec.external-object-template-report]
-    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]))
+    [com.sixsq.slipstream.ssclj.resources.spec.external-object-template-report]))
 
 
 (def ExternalObjectReportDescription

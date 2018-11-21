@@ -15,7 +15,8 @@
     [com.sixsq.slipstream.ssclj.resources.external-object :as eo]
     [com.sixsq.slipstream.ssclj.resources.external-object.utils :as s3]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [peridot.core :refer :all]))
+    [peridot.core :refer :all])
+  (:import (com.amazonaws AmazonServiceException)))
 
 
 (def ^:const user-info-header "jane USER ANON")
@@ -89,9 +90,20 @@
         (ltu/location))
     (f)))
 
-(defn delete-s3-object
-  [obj-store-conf bucket obj-name]
-  (log/debug (format "TEST. Deleting s3 object: %s %s %s" obj-store-conf bucket obj-name)))
+
+
+(defn delete-s3-object-not-authorized [_  _]
+  (let [ex (doto
+             (AmazonServiceException. "Simulated AWS Exception for S3 permission error")
+             (.setStatusCode 403))]
+    (throw ex)))
+
+(defn delete-s3-object-not-found [_  _]
+  (let [ex (doto
+             (AmazonServiceException. "Simulated AWS Exception for object missing on S3")
+             (.setStatusCode 404))]
+    (throw ex)))
+
 
 (defn s3-redefs!
   [f]
@@ -99,7 +111,7 @@
                 s3/create-bucket! (fn [_ _] true)           ;; by default, a bucket creation succeeds
                 s3/authorized-bucket-operation? (fn [_ _ _] true) ;;by default, the user has permission to operate
                 s3/uploadable-bucket? (fn [_ _] true)       ;;by default, it is Ok to create objects in bucket
-                s3/delete-s3-object delete-s3-object]
+                s3/delete-s3-object (fn [_ _] nil)]
     (f)))
 
 (def base-uri (str p/service-context (u/de-camelcase eo/resource-name)))
@@ -175,7 +187,18 @@
                           (ltu/location))
                   abs-uri (str p/service-context (u/de-camelcase uri))]
 
-              (with-redefs [s3/bucket-exists? (fn [_ _] true)]
+
+              (with-redefs [s3/bucket-exists? (fn [_ _] true)
+                            s3/delete-s3-object delete-s3-object-not-authorized]
+                (-> session
+                    (request abs-uri
+                             :request-method :delete)
+                    (ltu/body->edn)
+                    (ltu/is-status 403)))
+
+              ;;Deleting a missing S3 object should succeed
+              (with-redefs [s3/bucket-exists? (fn [_ _] true)
+                            s3/delete-s3-object delete-s3-object-not-found]
                 (-> session
                     (request abs-uri
                              :request-method :delete)

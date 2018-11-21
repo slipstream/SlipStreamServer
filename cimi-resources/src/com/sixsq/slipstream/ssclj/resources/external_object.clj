@@ -297,7 +297,7 @@
     (s3/generate-url obj-store-conf bucketName object-name :put
                      {:ttl (or ttl s3/default-ttl) :content-type contentType :filename filename})))
 
-(defn upload-subtype
+(defn upload
   [resource request]
   (try
     (a/can-modify? resource request)
@@ -312,7 +312,7 @@
   (try
     (let [id (str resource-url "/" uuid)]
       (-> (crud/retrieve-by-id-as-admin id)
-          (upload-subtype request)))
+          (upload request)))
     (catch Exception e
       (or (ex-data e) (throw e)))))
 
@@ -339,7 +339,7 @@
                    bucketName objectName :get
                    {:ttl (or ttl s3/default-ttl)}))
 
-(defn download-subtype
+(defn download
   [resource request]
   (try
     (r/json-response {:uri (download-fn resource request)})
@@ -352,7 +352,7 @@
     (let [id (str resource-url "/" uuid)]
       (-> (crud/retrieve-by-id-as-admin id)
           (a/can-view? request)
-          (download-subtype request)))
+          (download request)))
     (catch Exception e
       (or (ex-data e) (throw e)))))
 
@@ -361,18 +361,24 @@
 (def delete-impl (std-crud/delete-fn resource-name))
 
 
-(defn delete-subtype
+(defn delete
   [{:keys [objectName bucketName objectStoreCred] :as resource} {{keep? :keep-s3-object} :body :as request}]
-  (when (and (not keep?) (s3/ok-to-delete-external-resource? resource request))
-    (s3/delete-s3-object (s3/expand-obj-store-creds objectStoreCred) bucketName objectName))
-  (delete-impl request))
+  (when
+    (and (not keep?) (s3/ok-to-delete-external-resource? resource request))
+    (try
+      (s3/try-delete-s3-object (s3/expand-obj-store-creds objectStoreCred) bucketName objectName)
+      (catch Exception e
+        ;;ignore when exception is caused by missing object
+        (let [ status (:status (ex-data e))]
+          (when-not (= 404 status)(throw e))))))
+    (delete-impl request))
 
 (defmethod crud/delete resource-name
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
       (-> (crud/retrieve-by-id-as-admin id)
-          (delete-subtype request)))
+          (delete request)))
     (catch Exception e
       (or (ex-data e) (throw e)))))
 

@@ -8,7 +8,7 @@
     [com.sixsq.slipstream.ssclj.util.log :as logu]
     [sixsq.slipstream.client.impl.utils.http-sync :as http])
   (:import
-    (com.amazonaws HttpMethod)
+    (com.amazonaws AmazonServiceException HttpMethod SdkClientException)
     (com.amazonaws.auth AWSStaticCredentialsProvider BasicAWSCredentials)
     (com.amazonaws.client.builder AwsClientBuilder$EndpointConfiguration)
     (com.amazonaws.services.s3 AmazonS3ClientBuilder)
@@ -28,6 +28,29 @@
                     :route-params                  {:resource-name "user"}
                     :user-roles                    #{"ANON"}})
 
+(defn log-aws-exception
+  [amazon-exception]
+  (let [status (.getStatusCode amazon-exception)
+        message (.getMessage amazon-exception)]
+    (logu/log-and-throw status message)))
+
+(defn log-sdk-exception
+  [sdk-exception]
+  (logu/log-and-throw-400 (.getMessage sdk-exception)))
+
+
+(defmacro try-catch-aws-fn
+  ([body]
+   `(try ~body
+         (catch AmazonServiceException  ae#
+           (log-aws-exception ae#))
+         (catch SdkClientException  se#
+           (log-aws-exception se#))
+         (catch Exception  e#
+           (logu/log-and-throw-400 (.getMessage e#))))))
+
+
+
 (defn get-s3-client
   [{:keys [key secret endpoint]}]
   (let [endpoint (AwsClientBuilder$EndpointConfiguration. endpoint "us-east-1")
@@ -36,7 +59,6 @@
         (.withEndpointConfiguration endpoint)
         (.withCredentials credentials)
         .build)))
-
 
 (defn generate-url
   [obj-store-conf bucket obj-name verb & [{:keys [ttl content-type]}]]
@@ -52,9 +74,15 @@
     (str (.generatePresignedUrl (get-s3-client obj-store-conf) req))))
 
 
-(defn delete-s3-object [obj-store-conf bucket obj-name]
+(defn delete-s3-object
+  "Mocked in unit tests"
+  [s3client deleteRequest]
+  (.deleteObject s3client deleteRequest))
+
+(defn try-delete-s3-object [obj-store-conf bucket obj-name]
   (let [deleteRequest (DeleteObjectRequest. bucket obj-name)]
-    (.deleteObject (get-s3-client obj-store-conf) deleteRequest)))
+    (try-catch-aws-fn
+    (delete-s3-object (get-s3-client obj-store-conf) deleteRequest))))
 
 
 (defn bucket-exists?
@@ -147,12 +175,12 @@
         obj-store-conf (expand-obj-store-creds objectStoreCred)
         s3client (get-s3-client obj-store-conf)]
     (cond
-      ;; When the user requests to delete an object, but it no longer exists :
-      ;; The external object resource should be deleted normally.
-      (not (bucket-exists? s3client bucketName)) resource
       ;; "When the user cannot access the bucket/object to delete it :
       ;; the external object resource should not be deleted."
       (not (authorized-bucket-operation? resource request a/can-modify?)) (logu/log-and-throw 403 (format "Deleting the bucket %s is not allowed" bucketName))
+      ;; When the user requests to delete an object, but it no longer exists :
+      ;; The external object resource should be deleted normally.
+      (not (bucket-exists? s3client bucketName)) resource
       :all-ok resource)))
 
 
