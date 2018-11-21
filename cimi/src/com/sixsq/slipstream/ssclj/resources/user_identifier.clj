@@ -1,10 +1,24 @@
 (ns com.sixsq.slipstream.ssclj.resources.user-identifier
   "
-This resource represents the relationship between a unique identifier and a
-SlipStream user. This is used by the SlipStream authentication mechanisms to
-allow multiple authentication mechanisms to be mapped to the same account.
-These resources are managed by the server; normally, administrators and users
-will not interact with these resources directly.
+The UserIdentifier resources provide a mapping between an external identity
+(for a given authentication method) and a registered user. Multiple external
+identities can be mapped to the same SlipStream user, allowing that user to
+authenticate in different ways while using the same account.
+
+This resource follows the standard CIMI SCRUD patterns. However, the resource
+`id` is a hashed value of the `identifier`. This guarantees that a single
+external identifier cannot be mapped to more than one user.
+
+Users will normally not be concerned with these resources, although they can
+list them to see what authentication methods are mapped to their accounts.
+
+Administrators may create new UserIdentifier resources to allow a user to have
+more than one authentication method.
+
+> WARNING: Because the resource identifier and the resource id are linked, you
+cannot 'edit' the `identifier` field of a UserIdentifier resource; doing so
+will invalidate resource. If you want to change an external identifier, you
+must delete the old one and create a new one.
 "
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]

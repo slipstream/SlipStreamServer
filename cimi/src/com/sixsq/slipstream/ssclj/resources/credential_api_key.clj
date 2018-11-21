@@ -1,4 +1,51 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential-api-key
+  "
+This represents an API Key and Secret pair that allows users to access the
+SlipStream service independently of their account credentials. These
+credentials can be time-limited.
+
+It is often useful to have credentials to log into the SlipStream server that
+are independent of your account credentials. This allows you, for example, to
+provide time-limited access or to revoke access at any time without affecting
+the access to your account with your main credentials.
+
+For users who authenticate with external authentication mechanisms, an API key
+and secret is mandatory for programmatic access to SlipStream, as the external
+authentication mechanisms usually cannot be used with the API.
+
+This example shows how to create an API key and secret credential.
+
+An example document (named `create.json` below) for creating an API key and
+secret with a lifetime of 1 day (86400 seconds).
+
+```json
+{
+  \"credentialTemplate\" : {
+                           \"href\" : \"credential-template/generate-api-key\",
+                           \"ttl\" : 86400
+                         }
+}
+```
+
+```shell
+# Be sure to get the URL from the cloud entry point!
+# The cookie options allow for automatic management of the
+# SlipStream authentication token (cookie).
+curl https://nuv.la/api/credential \\
+     -X POST \\
+     -H 'content-type: application/json' \\
+     -d @create.json \\
+     --cookie-jar ~/cookies -b ~/cookies -sS
+```
+
+When successful, the above command will return a 201 (created) status, a
+'location' header with the created credential resource, and a JSON document
+containing the plain text secret.
+
+> NOTE: When the server generates a new API key and secret, the server returns
+the plain text secret in the response. The server stores only a digest of the
+secret, so you must capture and save the plain text secret from this response!
+"
   (:require
     [com.sixsq.slipstream.auth.acl :as acl]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]

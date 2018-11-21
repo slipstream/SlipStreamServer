@@ -1,4 +1,22 @@
 (ns com.sixsq.slipstream.ssclj.resources.user-params
+  "
+The UserParams resource contains default values for a number of user-level
+parameters. These include things like the default deployment timeout,
+verbosity, and the default cloud service.
+
+This is a templated resource that follows all the standard CIMI SCRUD
+patterns. Normally, these resources are created during the user registration
+process and not created manually.
+
+A UserParam resource can be matched to the User resource via a `$filter` like
+the following:
+
+```
+acl/owner/principal='83c39a85-1d03-4931-9c82-c015e0452359'
+```
+
+where the value is the `id` of the User resource without the 'user/' prefix.
+"
   (:require
     [clojure.string :as s]
     [com.sixsq.slipstream.auth.acl :as a]

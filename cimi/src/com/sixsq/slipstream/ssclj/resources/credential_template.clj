@@ -1,7 +1,32 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential-template
   "
-A collection of templates that are used to create a various types of
-credentials.
+A collection of templates that are used to create a variety of credentials.
+
+SlipStream must manage a variety of credentials to provide, for example,
+programmatic access to SlipStream or SSH access to virtual machines running on
+a cloud infrastructure. The CredentialTemplate resources correspond to the
+various methods that can be used to create these resources.
+
+The parameters required can be found within each template, using the standard
+CIMI read pattern. Details for each parameter can be found by invoking looking
+at the ResourceMetadata resource for the type..
+
+Template | Credential | Description
+-------- | ---------- | -----------
+import-ssh-public-key | ssh-public-key | imports an SSH public key from an existing key pair
+generate-ssh-key-pair | ssh-public-key | generates a new SSH key pair, storing public key and returning private key
+generate-api-key | api-key | generates API key and secret, storing secret digest and returning secret
+
+Typically, there will also be Credential Template resources that describe the
+credentials for each supported cloud infrastructure.
+
+```shell
+# List all of the credential creation mechanisms
+# NOTE: You must be authenticated.  Add the appropriate
+# cookie options to the curl command.
+#
+curl https://nuv.la/api/credential-template
+```
 "
   (:require
     [clojure.tools.logging :as log]

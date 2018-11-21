@@ -1,4 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.user-params-template
+  "
+The UserParamTemplate resources allow UserParam resources to be created.
+Normally, users and administrators will never create a UserParam resource
+manually and will not need to use these templates.
+"
   (:require
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.acl :as a]

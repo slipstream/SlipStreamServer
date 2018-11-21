@@ -1,4 +1,29 @@
 (ns com.sixsq.slipstream.ssclj.resources.service-attribute
+  "
+A ServiceAttribute resource provides semantic information concerning an
+attribute that appears in ServiceOffer resources. This resource is intended to
+provide information that helps humans understand the information provided in a
+ServiceOffer resource.
+
+Currently, only an administrator can create, update, or delete
+ServiceAttribute resources. These actions follow the standard CIMI patterns.
+Most users will only search these resources and look at the details for a
+particular ServiceAttribute resource.
+
+Parameter | Required  | Description
+--------- | --------  | -----------
+name | true | short human-readable tag
+description | true | longer human-readable description
+prefix | true | namespace prefix
+attributeName | true | name of the attribute itself
+type | true | type of the attribute's value
+
+Show all of the ServiceAttribute resources.
+
+```shell
+curl https://nuv.la/api/service-attribute
+```
+"
   (:require
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
