@@ -300,6 +300,7 @@
              :json-schema/hidden false
              :json-schema/sensitive false
 
+             :json-schema/es-mapping {:type "object", :enabled false}
              :slipstream.es/mapping {:type "object", :enabled false})))
 
 
