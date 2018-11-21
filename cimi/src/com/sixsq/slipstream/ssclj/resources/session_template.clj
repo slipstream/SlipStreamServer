@@ -1,7 +1,39 @@
 (ns com.sixsq.slipstream.ssclj.resources.session-template
   "
-A collection of templates that are used to create a session (login) using
-various types of credentials and authentication processes.
+A collection of templates that allow users to authenticate with the server by
+creating a Session resource. The concrete templates support a variety of
+credentials and protocols.
+
+Most SlipStream resources are only visible to authenticated users. The login
+process consists of creating a Session resource via the standard CIMI templated
+add pattern and then using the returned token with subsequent interactions with
+the SlipStream server.
+
+The supported Python and Clojure(Script) libraries directly use the REST API
+defined here for Session management, but also provide higher-level functions
+that simplify the authentication process.
+
+
+SlipStream supports a wide variety of methods for authenticating with the
+server. The SessionTemplate resources represent the supported authentication
+methods for a given SlipStream server. To list all the configured
+authentication mechanism for the server:
+
+```shell
+curl https://nuv.la/api/session-template
+```
+
+The SlipStream **administrator** defines the available methods by creating
+SessionTemplate resources on the server via the standard CIMI 'add' pattern
+(and in most cases an associated Configuration resource). These can also be
+'edited' and 'deleted' by the SlipStream administrator.
+
+**All users (including anonymous users)** can list the SessionTemplates to
+discover supported authentication methods.
+
+One SessionTemplate that will always exist on the server is the
+'session-template/internal' resource. This allows logging into the server with
+a username and password pair stored in SlipStream's internal database.
 "
   (:require
     [clojure.tools.logging :as log]

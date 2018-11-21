@@ -1,7 +1,47 @@
 (ns com.sixsq.slipstream.ssclj.resources.user-template
   "
-A collection of templates that are used to create user accounts (i.e. user
-registration) via different methods.
+UserTemplate resources define the 'user registration' methods that are
+permitted by the server. The UserTemplate collection follows all of the CIMI
+SCRUD patterns.
+
+The server will always contain the 'direct user template. This template is
+only acceptable to administrators and allows the direct creation of a new user
+without any email verification, etc.
+
+The system administrator may create additional templates to allow other user
+registration methods. If the ACL of the template allows for 'anonymous' access,
+then the server will support self-registration of users. The registration
+processes will typically require additional validation step, such as email
+verification.
+
+Listing of the available UserTemplate resources on Nuvla.
+
+```shell
+curl 'https://nuv.la/api/user-template?$select=name,description'
+```
+
+```json
+{
+  \"count\" : 15,
+  ...
+  \"resourceURI\" : \"http://sixsq.com/slipstream/1/UserTemplateCollection\",
+  \"id\" : \"user-template\",
+  \"userTemplates\" : [ {
+    \"name\" : \"ESRF Realm\",
+    \"description\" : \"Creates a new user through OIDC registration\",
+    ...
+    },
+    \"resourceURI\" : \"http://sixsq.com/slipstream/1/UserTemplate\",
+    \"operations\" : [ {
+      \"rel\" : \"http://sixsq.com/slipstream/1/action/describe\",
+      \"href\" : \"/describe\"
+    } ]
+  }, {
+    \"name\" : \"INFN Realm\",
+    \"description\" : \"Creates a new user through OIDC registration\",
+    ...
+
+```
 "
   (:require
     [clojure.tools.logging :as log]

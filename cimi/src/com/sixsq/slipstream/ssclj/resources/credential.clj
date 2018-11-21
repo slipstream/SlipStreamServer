@@ -1,4 +1,10 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential
+  "
+SlipStream can manage credentials that are needed to access SlipStream or
+other services. Currently, SlipStream manages SSH public keys and API keys and
+secrets. Creating new Credential resources requires referencing a
+CredentialTemplate resource.
+"
   (:require
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.db.impl :as db]

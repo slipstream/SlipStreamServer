@@ -1,4 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.resources.user
+  "
+User resources contain personal information and a few parameters concerning
+the registered users. This is a templated resource, so creating a new user
+requires a template. All the SCRUD actions follow the standard CIMI patterns.
+"
   (:require
     [clj-time.core :as t]
     [com.sixsq.slipstream.auth.acl :as a]

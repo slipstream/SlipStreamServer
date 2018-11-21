@@ -1,4 +1,114 @@
 (ns com.sixsq.slipstream.ssclj.resources.virtual-machine
+  "
+These resources provide information for all active virtual machines on the
+underlying cloud infrastructures. Together they constitute the current global
+state of compute resources managed by SlipStream.
+
+You must be authenticated with the SlipStream server to access the
+VirtualMachine collection and resources.
+
+> WARNING: SlipStream handles the lifecycle of these resources, creating,
+updating, and deleting them as it monitors the associated virtual machines.
+Users typically are only interested in viewing and querying these resources.
+
+## List Virtual Machines
+
+```shell
+curl https://nuv.la/api/virtual-machine -b ~/cookies -D -
+```
+
+```http
+HTTP/2 200
+server: nginx
+date: Wed, 17 Oct 2018 08:36:24 GMT
+content-type: application/json
+content-length: 3254718
+vary: Accept-Encoding
+strict-transport-security: max-age=31536000
+```
+
+```json
+{
+  \"resourceURI\" : \"http://sixsq.com/slipstream/1/VirtualMachineCollection\",
+  \"id\" : \"virtual-machine\",
+  \"count\" : 870,
+
+  ...
+
+  \"virtualMachines\" : [ {
+    \"connector\" : {
+      \"href\" : \"connector/exoscale-de-fra\"
+    },
+    \"ip\" : \"194.182.170.118\",
+    \"credentials\" : [ {
+      \"href\" : \"credential/7353af45-cd25-4bb0-9444-ee1935aa8a81\"
+    } ],
+    \"updated\" : \"2018-10-17T08:28:59.345Z\",
+    \"billable\" : true,
+    \"created\" : \"2018-10-15T13:54:48.539Z\",
+    \"state\" : \"running\",
+    \"currency\" : \"EUR\",
+    \"instanceID\" : \"0781484e-c82a-4522-b339-386e12c9e8ce\",
+    \"id\" : \"virtual-machine/a5d482e1-1fc0-33b7-b3b0-78fc4a5d08b2\",
+    ...
+    }]
+    ...
+```
+
+Listing the VirtualMachine resources follows the standard CIMI pattern, using
+an HTTP GET request on the collection URL.
+
+The example command returns the HTTP headers of the request and then the full
+list of Virtual Machine resources as a JSON document. The returned JSON
+document contains some general information concerning, for example, the total
+number of documents ('count' key), followed by the list of VirtualMachine
+resource under the 'virtualMachines' key.
+
+## Filtering Virtual Machines
+
+The full [CIMI filtering syntax](#resource-selection) (with SlipStream
+extensions) can be used to find a subset of the VirtualMachine resources. For
+example, the filter terms:
+
+ - `connector/href=\"connector/exoscale-de-fra\"`
+ - `state=\"running\"`
+
+would limit the response to only virtual machines in a running state on the
+'exoscale-de-fra' cloud. Other query parameters, can also be used, for example
+`$last=0` to just return the global count information.
+
+```shell
+curl 'https://nuv.la/api/virtual-machine?$filter=connector/href=\"connector/exoscale-de-fra\"%20and%20state=\"running\"&$last=0' -b ~/cookies -D -
+```
+
+```json
+{
+  \"count\" : 351,
+  \"acl\" : {
+    \"owner\" : {
+      \"principal\" : \"ADMIN\",
+      \"type\" : \"ROLE\"
+    },
+    \"rules\" : [ {
+      \"principal\" : \"ADMIN\",
+      \"type\" : \"ROLE\",
+      \"right\" : \"MODIFY\"
+    }, {
+      \"principal\" : \"USER\",
+      \"type\" : \"ROLE\",
+      \"right\" : \"VIEW\"
+    } ]
+  },
+  \"resourceURI\" : \"http://sixsq.com/slipstream/1/VirtualMachineCollection\",
+  \"id\" : \"virtual-machine\",
+  \"operations\" : [ {
+    \"rel\" : \"add\",
+    \"href\" : \"virtual-machine\"
+  } ],
+  \"virtualMachines\" : [ ]
+}
+```
+"
   (:require
     [clojure.string :as str]
     [com.sixsq.slipstream.auth.acl :as a]

@@ -1,4 +1,49 @@
 (ns com.sixsq.slipstream.ssclj.resources.service-attribute-namespace
+  "
+Every attribute in a ServiceOffer resource must be namespaced to avoid
+collisions. The ServiceAttributeNamespace resources maintain the mapping
+between a namespace prefix and the associated, complete URI. The parameters are
+described in the table below.
+
+A ServiceOffer resource cannot be uploaded to the server unless all of the
+namespace prefixes within the document have been defined.
+
+Currently, only an administrator can create, update, or delete
+ServiceAttributeNamespace resources. These actions follow the standard CIMI
+patterns. Most users will only search these resources and look at the details
+for a particular ServiceAttributeNamespace resource.
+
+Parameter | Required  | Description
+--------- | --------  | -----------
+prefix | true | namespace prefix
+uri | true | full URI associated with the prefix
+
+Search for all of the ServiceAttributeNamespace resources.
+
+```shell
+curl https://nuv.la/api/service-attribute-namespace
+```
+
+Show the ServiceAttributeNamespace resource for the 'exoscale' prefix.
+
+```shell
+curl https://nuv.la/api/service-attribute-namespace/exoscale
+```
+
+```json
+{
+  \"id\" : \"service-attribute-namespace/exoscale\",
+  \"resourceURI\" : \"http://sixsq.com/slipstream/1/ServiceAttributeNamespace\",
+  \"created\" : \"2017-04-27T08:41:39.470Z\",
+  \"updated\" : \"2017-04-27T08:41:39.470Z\",
+
+  \"prefix\" : \"exoscale\",
+  \"uri\" : \"http://sixsq.com/slipstream/schema/1/connector/exoscale\",
+
+  \"acl\" : {\"...\" : \"...\"}
+}
+```
+"
   (:require
     [com.sixsq.slipstream.db.filter.parser :as parser]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]

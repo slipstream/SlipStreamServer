@@ -1,4 +1,45 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential-ssh-public-key
+  "
+On a successful authentication, the above command will return a 201 (created)
+status, a 'location' header with the created credential resource, and a JSON
+document containing the SSH private key of the generated key pair.
+
+The 'ssh-public-key' Credential resource stores the public key (in OpenSSH
+format), the algorithm used to create the key ('rsa' or 'dsa'), and the
+fingerprint of the key itself. You can create any number of SSH public key
+credentials on the server.
+
+These resources can be created either by providing the public key of an
+existing SSH key pair or by having the server generate a new SSH key pair. In
+the second case, the server will provide the private key in the 201 (created)
+response.
+
+> NOTE: When the server generates a new SSH key pair, the server returns the
+private key in the response. The server does not store this private key, so you
+must capture and save the key from this response!
+
+An example document (named `create.json` below) for creating a new SSH key
+pair.
+
+```json
+{
+  \"credentialTemplate\" : {
+                           \"href\" : \"credential-template/generate-ssh-key-pair\"
+                         }
+}
+```
+
+```shell
+# Be sure to get the URL from the cloud entry point!
+# The cookie options allow for automatic management of the
+# SlipStream authentication token (cookie).
+curl https://nuv.la/api/credential \\
+     -X POST \\
+     -H 'content-type: application/json' \\
+     -d @create.json \\
+     --cookie-jar ~/cookies -b ~/cookies -sS
+```
+"
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
