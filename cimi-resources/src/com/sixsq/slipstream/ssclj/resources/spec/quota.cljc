@@ -19,8 +19,10 @@
 (s/def ::selection (s/and string? valid-cimi-filter?))
 (s/def ::aggregation ::cimi-core/nonblank-string)
 (s/def ::limit nat-int?)
+(s/def ::organization ::cimi-core/nonblank-string)
 
 
 (s/def ::quota
   (su/only-keys-maps c/common-attrs
-                     {:req-un [::resource ::selection ::aggregation ::limit]}))
+                     {:req-un [::resource ::selection ::aggregation ::limit]
+                      :opt-un [::organization]}))
