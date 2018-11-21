@@ -22,4 +22,5 @@
 
 (s/def ::capabilities
   (st/spec {:spec                  (s/coll-of ::capability :min-count 1 :type vector?)
-            :slipstream.es/mapping {:type "object", :enabled false}}))
+            :slipstream.es/mapping {:type "object", :enabled false}
+            :json-schema/es-mapping {:type "object", :enabled false}}))

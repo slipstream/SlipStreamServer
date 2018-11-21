@@ -148,11 +148,11 @@
 (s/def ::disabledMonitoring
        (-> (st/spec boolean?)
            (assoc :name "disabledMonitoring"
-                  :type :vector
+                  :type :boolean
                   :json-schema/name "disabledMonitoring"
                   :json-schema/namespace common-ns/slipstream-namespace
                   :json-schema/uri common-ns/slipstream-uri
-                  :json-schema/type "Array"
+                  :json-schema/type "boolean"
                   :json-schema/providerMandatory false
                   :json-schema/consumerMandatory false
                   :json-schema/mutable true

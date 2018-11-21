@@ -80,7 +80,7 @@
 ;;
 
 (defmethod st-parse/parse-form 'com.sixsq.slipstream.ssclj.util.spec/only-keys [dispatch form]
-  (log/error "DEBUX X" form)
+  #_(log/error "DEBUX X" form)
   (st-parse/parse-form 'clojure.spec.alpha/keys form))
 
 
@@ -122,12 +122,12 @@
 ;; accept-spec monkey patches
 
 (defmethod jsc/accept-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys [dispatch spec children arg]
-  (log/error "monkey only-keys")
+  #_(log/error "monkey only-keys")
   (jsc/accept-spec 'clojure.spec.alpha/keys spec children arg))
 
 
 (defmethod jsc/accept-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys-maps [_ spec children _]
-  (log/error "monkey only-keys-maps")
+  #_(log/error "monkey only-keys-maps")
   (let [{:keys [req req-un opt opt-un]} (impl/parse-keys (transform-form (impl/extract-form spec)))
         names-un (map name (concat req-un opt-un))
         names (map impl/qualified-name (concat req opt))
@@ -144,7 +144,7 @@
 
 
 (defmethod jsc/accept-spec 'com.sixsq.slipstream.ssclj.util.spec/constrained-map [_ spec children _]
-  (log/error "monkey constrainted-map")
+  #_(log/error "monkey constrainted-map")
   (let [{:keys [req req-un opt opt-un]} (impl/parse-keys (transform-form (impl/extract-form spec)))
         names-un (map name (concat req-un opt-un))
         names (map impl/qualified-name (concat req opt))

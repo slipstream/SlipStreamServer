@@ -4,7 +4,11 @@
     [spec-tools.core :as st]
     [spec-tools.impl :as impl]
     [spec-tools.parse :as parse]
-    [spec-tools.visitor :as visitor]))
+    [spec-tools.visitor :as visitor]
+    [clojure.tools.logging :as log]
+    [spec-tools.json-schema :as jsc]
+    [clojure.data :refer [diff]]
+    [clojure.walk :as w]))
 
 ;;Code borrowed from https://github.com/metosin/spec-tools/blob/master/src/spec_tools/json_schema.cljc
 
@@ -268,7 +272,63 @@
                                  :match_mapping_type "long"
                                  :mapping            {:type "long"}}}])
 
+(defn keep-key?
+  [[k v]]
+  (or (string? k) (#{:type :enabled :properties :format} k)))
+
+
+(defn json-schema->es-mapping
+  "Function to be used with w/postwalk to transform a JSON schema into an
+   Elasticsearch mapping."
+  [m]
+  (if (map? m)
+    (let [{:keys [properties enum type oneOf allOf anyOf es-mapping]} m
+          result (cond
+                   es-mapping es-mapping                    ;; completely replaces the generated mapping
+                   oneOf (first oneOf)
+                   allOf (first allOf)
+                   anyOf (first anyOf)
+                   type (case type
+                          "ref" (assoc m :type "object")
+                          "map" (assoc m :type "object")
+                          "URI" (assoc m :type "keyword")
+                          "string" (assoc m :type "keyword")
+                          "number" (-> m
+                                       (assoc :type "double")
+                                       (dissoc :format))
+                          "integer" (-> m
+                                        (assoc :type "long")
+                                        (dissoc :format))
+                          "long" (-> m
+                                     (assoc :type "long")
+                                     (dissoc :format))
+                          "dateTime" (assoc m :type "date" :format "strict_date_optional_time||epoch_millis")
+                          "array" (:items m)
+                          "Array" (:items m)
+                          m)
+                   enum (-> m
+                            (assoc :type "keyword")
+                            (dissoc :enum))
+                   properties (assoc m :type "object")
+                   :else m)]
+      (into {} (filter keep-key? result)))
+    m))
+
+
 (defn mapping
   [spec]
-  (cond-> {:dynamic_templates dynamic-templates}
-          spec (merge (dissoc (transform spec) :type))))
+
+  (let [reference-transform (transform spec)
+        new-transform (w/postwalk json-schema->es-mapping (jsc/transform spec))
+        old-way (cond-> {:dynamic_templates dynamic-templates}
+                        spec (merge (dissoc reference-transform :type)))
+        good-result? (= reference-transform new-transform)]
+    (when (and (not good-result?) spec (not= (str spec) ":com.sixsq.slipstream.ssclj.resources.spec.event/event"))
+      (log/error "reference-transform: " reference-transform)
+      (log/error "new-transform: " new-transform)
+      (log/error "RESULT: " spec good-result?)
+      (when-not good-result?
+        (log/error "DIFFERENCE: " (diff reference-transform new-transform))))
+
+    old-way
+    ))

@@ -33,11 +33,11 @@
 (s/def ::validated
   (-> (st/spec boolean?)
       (assoc :name "validated"
-             :type :string
+             :type :boolean
              :json-schema/name "validated"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
-             :json-schema/type "string"
+             :json-schema/type "boolean"
              :json-schema/providerMandatory true
              :json-schema/consumerMandatory false
              :json-schema/mutable true

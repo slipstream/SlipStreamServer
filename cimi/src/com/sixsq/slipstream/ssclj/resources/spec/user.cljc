@@ -279,11 +279,11 @@
 (s/def ::isSuperUser
   (-> (st/spec boolean?)
       (assoc :name "isSuperUser"
-             :type :string
+             :type :boolean
              :json-schema/name "isSuperUser"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
-             :json-schema/type "dateTime"
+             :json-schema/type "boolean"
              :json-schema/providerMandatory false
              :json-schema/consumerMandatory false
              :json-schema/mutable true
@@ -301,11 +301,11 @@
 (s/def ::deleted
   (-> (st/spec boolean?)
       (assoc :name "deleted"
-             :type :string
+             :type :boolean
              :json-schema/name "deleted"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
-             :json-schema/type "dateTime"
+             :json-schema/type "boolean"
              :json-schema/providerMandatory false
              :json-schema/consumerMandatory false
              :json-schema/mutable true
@@ -389,7 +389,7 @@
 (s/def ::externalIdentity
   (-> (st/spec (s/nilable (s/coll-of ::identityAttribute :min-count 1)))
       (assoc :name "externalIdentity"
-             :type :vector
+             ;:type :vector
              :json-schema/name "externalIdentity"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri

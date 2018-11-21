@@ -30,4 +30,5 @@
 
 (s/def ::vscope
   (st/spec {:spec                  (s/map-of keyword? valid-value? :min-count 1)
-            :slipstream.es/mapping {:type "object", :enabled false}}))
+            :slipstream.es/mapping {:type "object", :enabled false}
+            :json-schema/es-mapping {:type "object", :enabled false}}))
