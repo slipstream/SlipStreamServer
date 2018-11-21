@@ -17,11 +17,9 @@ SlipStream resource model and simplifies use of the API through
 standard patterns and autodiscovery, the SlipStream developers have
 decided to adopt this standard.
 
-<aside class='notice'>
-All of the resources rooted at '/api' follow the CIMI resource
-management patterns. These are marked with 'CIMI' in the table of
-contents.
-</aside>
+> NOTE: All of the resources rooted at '/api' follow the CIMI resource
+management patterns. These are marked with 'CIMI' in the table of contents.
+
 
 ## Autodiscovery
 
@@ -60,11 +58,9 @@ which contains a list of named resource collections and their URLs (in
 the `href` field) relative to the `baseURI` value.  The CEP also
 contains some other metadata.
 
-<aside class='warning'>
-Although SlipStream maintains consistent naming throughout the API,
-assumptions about the URL naming must not be made by clients. Clients
-must use the CEP to discover the correct URLs for managed resources.
-</aside>
+> WARNING: Although SlipStream maintains consistent naming throughout the API,
+assumptions about the URL naming must not be made by clients. Clients must use
+the CEP to discover the correct URLs for managed resources.
 
 ### Operations
 
@@ -103,13 +99,9 @@ Edit (update) | `PUT` | resource
 Delete | `DELETE` | resource
 Other | `POST` | operation URL
 
-<aside class='notice'>
-
-Specialized actions can appear in the operations section of a
-resource.  Any non-standard operation will use the POST method for the
-request.  The parameters (if any) will depend on the operation.
-
-</aside>
+> NOTE: Specialized actions can appear in the operations section of a
+resource. Any non-standard operation will use the POST method for the request.
+The parameters (if any) will depend on the operation.
 
 
 ### Add Pattern Variations
@@ -140,13 +132,10 @@ type of `application/x-www-form-urlencoded` when using the `PUT`
 method. (Note that use of `PUT` for searches is an SlipStream
 extension to the CIMI standard.)
 
-<aside class='warning'>
-All of the CIMI query parameters are prefixed with a dollar sign
-($). This was an unfortunate choice because it signals variable
-interpolation in most shells.  When using these parameters at the
-command line, be sure to escape the dollar signs or to put the
-parameters within single quotes.
-</aside>
+> WARNING: All of the CIMI query parameters are prefixed with a dollar sign
+($). This was an unfortunate choice because it signals variable interpolation
+in most shells. When using these parameters at the command line, be sure to
+escape the dollar signs or to put the parameters within single quotes.
 
 ### Ordering
 
@@ -168,17 +157,12 @@ A range of resources can be obtained by setting the `$first` and
 and last resources, respectively, in the collection if explicit values
 are not provided.
 
-<aside class='notice'>
-Note that the SlipStream implementation will limit the number of
-returned resources to 10000, independently of the values provided for
-these parameters.  This is to protect both the client and server from
-excessively large responses.
-</aside>
+> NOTE: The SlipStream implementation will limit the number of returned
+resources to 10000, independently of the values provided for these parameters.
+This is to protect both the client and server from excessively large responses.
 
-<aside class='notice'>
-The selection of resources via these parameters is done after any
+> NOTE: The selection of resources via these parameters is done after any
 filtering and ordering.
-</aside>
 
 ### Subsetting
 
@@ -190,13 +174,11 @@ server.
 Multiple attributes may be specified by providing a string with
 comma-separated values or with multiple `$select` parameters.
 
-<aside class='notice'>
-For various reasons, the server may return attributes that you have
-not selected in the responses.  The server should always return the
-selected attributes.
-</aside>
+> NOTE: For various reasons, the server may return attributes that you have
+not selected in the responses. The server should always return the selected
+attributes.
 
-> Example select values
+Example select values:
 
 ```c
 name,description
@@ -204,7 +186,7 @@ name,description
 
 ### Filtering
 
-> Example filters
+Example filters:
 
 ```c
 ((alpha>2) and (beta>='bad value') or (nested/value!=false)
