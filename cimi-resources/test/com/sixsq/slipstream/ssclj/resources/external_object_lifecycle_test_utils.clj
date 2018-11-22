@@ -104,13 +104,19 @@
              (.setStatusCode 404))]
     (throw ex)))
 
+(defn head-bucket-not-authorized [_ _]
+  (let [ex (doto
+             (AmazonServiceException. "Simulated AWS Exception for bucket not authorized")
+             (.setStatusCode 403))]
+    (throw ex)))
+
 
 (defn s3-redefs!
   [f]
   (with-redefs [s3/bucket-exists? (fn [_ _] true)           ;; by default assume the S3 bucket exists
                 s3/create-bucket! (fn [_ _] true)           ;; by default, a bucket creation succeeds
                 s3/authorized-bucket-operation? (fn [_ _ _] true) ;;by default, the user has permission to operate
-                s3/uploadable-bucket? (fn [_ _] true)       ;;by default, it is Ok to create objects in bucket
+                s3/head-bucket (fn [_ _] nil)       ;;by default, it is Ok to create objects in bucket
                 s3/delete-s3-object (fn [_ _] nil)]
     (f)))
 
@@ -215,13 +221,13 @@
                 (ltu/is-status 403)))
 
           ;; Creation of resource when the bucket exists but no object can be created
-          (with-redefs [s3/uploadable-bucket? (fn [_ _]) false]
+          (with-redefs [s3/head-bucket head-bucket-not-authorized]
             (-> session
                 (request base-uri
                          :request-method :post
                          :body (json/write-str valid-create))
                 (ltu/body->edn)
-                (ltu/is-status 503)))
+                (ltu/is-status 403)))
 
 
           ;; creating the same object twice is not allowed
