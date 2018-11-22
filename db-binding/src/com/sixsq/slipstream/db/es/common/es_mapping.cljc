@@ -39,11 +39,11 @@
 
 (defmulti accept-spec spec-dispatch :default ::default)
 
-(defn transform
-  ([spec]
-   (transform spec nil))
-  ([spec options]
-   (visitor/visit spec accept-spec options)))
+#_(defn transform
+    ([spec]
+     (transform spec nil))
+    ([spec options]
+     (visitor/visit spec accept-spec options)))
 
 
 ;;
@@ -267,14 +267,21 @@
 
 (def dynamic-templates [{:strings {:match              "*"
                                    :match_mapping_type "string"
-                                   :mapping            {:type "keyword"}}}
+                                   :mapping            {:type    "keyword"
+                                                        :copy_to "fulltext"}}}
                         {:longs {:match              "*"
                                  :match_mapping_type "long"
                                  :mapping            {:type "long"}}}])
 
 (defn keep-key?
-  [[k v]]
-  (or (string? k) (#{:type :enabled :properties :format} k)))
+  [arg]
+  (let [[k v] (seq arg)]                                    ;; seq avoids corner case where we're passed a map
+    (or (string? k) (#{:type :enabled :properties :format} k))))
+
+
+(defn assoc-date
+  [m]
+  (assoc m :type "date" :format "strict_date_optional_time||epoch_millis"))
 
 
 (defn json-schema->es-mapping
@@ -282,7 +289,7 @@
    Elasticsearch mapping."
   [m]
   (if (map? m)
-    (let [{:keys [properties enum type oneOf allOf anyOf es-mapping]} m
+    (let [{:keys [properties enum type oneOf allOf anyOf es-mapping format]} m
           result (cond
                    es-mapping es-mapping                    ;; completely replaces the generated mapping
                    oneOf (first oneOf)
@@ -292,7 +299,9 @@
                           "ref" (assoc m :type "object")
                           "map" (assoc m :type "object")
                           "URI" (assoc m :type "keyword")
-                          "string" (assoc m :type "keyword")
+                          "string" (if (= format "date-time")
+                                     (assoc-date m)
+                                     (assoc m :type "keyword"))
                           "number" (-> m
                                        (assoc :type "double")
                                        (dissoc :format))
@@ -302,17 +311,24 @@
                           "long" (-> m
                                      (assoc :type "long")
                                      (dissoc :format))
-                          "dateTime" (assoc m :type "date" :format "strict_date_optional_time||epoch_millis")
+                          "dateTime" (assoc-date m)
                           "array" (:items m)
                           "Array" (:items m)
                           m)
-                   enum (-> m
-                            (assoc :type "keyword")
-                            (dissoc :enum))
+                   enum (let [vs (:enum m)
+                              type (set-type-from-first-child vs)]
+                          (merge (dissoc m :enum) type))
                    properties (assoc m :type "object")
                    :else m)]
       (into {} (filter keep-key? result)))
     m))
+
+
+(defn transform
+  ([spec]
+   (transform spec nil))
+  ([spec options]
+   (w/postwalk json-schema->es-mapping (jsc/transform spec options))))
 
 
 (defn mapping
