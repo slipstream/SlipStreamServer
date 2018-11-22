@@ -4,12 +4,10 @@
   (:require
     [clojure.set :as set]
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.db.es.common.es-mapping :as es-mapping]
     [spec-tools.impl :as impl]
     [spec-tools.parse :as st-parse]
     [spec-tools.json-schema :as jsc]
-    [spec-tools.visitor :as visitor]
-    [clojure.tools.logging :as log]))
+    [spec-tools.visitor :as visitor]))
 
 (def ^:private all-ascii-chars (map str (map char (range 0 256))))
 
@@ -164,53 +162,21 @@
 ;; patch transform of spec into ES mapping
 ;;
 
-(defmethod es-mapping/accept-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys [dispatch spec children arg]
-  (es-mapping/accept-spec 'clojure.spec.alpha/keys spec children arg))
+
+(defn- spec-dispatch [dispatch _ _ _] dispatch)
 
 
-(defmethod es-mapping/accept-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys-maps [dispatch spec children arg]
-  (es-mapping/accept-spec 'clojure.spec.alpha/keys spec children arg))
+(defmulti accept-spec spec-dispatch :default ::default)
 
 
-(defmethod es-mapping/accept-spec 'com.sixsq.slipstream.ssclj.util.spec/constrained-map [dispatch spec children arg]
-  (es-mapping/accept-spec 'clojure.spec.alpha/keys spec children arg))
-
-;;
-;; json schema to elasticsearch mapping transformation
-;;
+(defmethod accept-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys [dispatch spec children arg]
+  (accept-spec 'clojure.spec.alpha/keys spec children arg))
 
 
-(defn keep-key?
-  [[k v]]
-  (or (string? k) (#{:type :enabled :properties :format} k)))
+(defmethod accept-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys-maps [dispatch spec children arg]
+  (accept-spec 'clojure.spec.alpha/keys spec children arg))
 
 
-(defn json-schema->es-mapping
-  "Function to be used with w/postwalk to transform a JSON schema into an
-   Elasticsearch mapping."
-  [m]
-  (if (map? m)
-    (let [{:keys [properties enum type es-mapping]} m
-          result (cond
-                   es-mapping (do
-                                (log/error "REPLACING ES MAPPING WITH " es-mapping)
-                                es-mapping)                 ;; completely replaces the generated mapping
-                   type (cond-> (case type
-                                  "ref" (assoc m :type "object")
-                                  "map" (assoc m :type "object")
-                                  "URI" (assoc m :type "keyword")
-                                  "string" (assoc m :type "keyword")
-                                  "dateTime" (assoc m :type "date" :format "strict_date_optional_time||epoch_millis")
-                                  "Array" (:items m) #_(-> m
-                                                           (assoc :type "object")
-                                                           (assoc :properties (:items m))
-                                                           (dissoc :items))
-                                  m)
-                                false #_(and (:properties m) (:type m)) (dissoc :type))
-                   enum (-> m
-                            (assoc :type "keyword")
-                            (dissoc :enum))
-                   properties (assoc m :type "object")      ;; (dissoc m :type)
-                   :else m)]
-      (into {} (filter keep-key? result)))
-    m))
+(defmethod accept-spec 'com.sixsq.slipstream.ssclj.util.spec/constrained-map [dispatch spec children arg]
+  (accept-spec 'clojure.spec.alpha/keys spec children arg))
+

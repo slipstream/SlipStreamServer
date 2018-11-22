@@ -13,7 +13,6 @@
 (s/def ::id
   (-> (st/spec ::cimi-core/resource-href)
       (assoc :name "id"
-             :type :string
              :json-schema/name "id"
              :json-schema/namespace common-ns/cimi-namespace
              :json-schema/uri common-ns/cimi-uri
@@ -36,7 +35,6 @@
 (s/def ::resourceURI
   (-> (st/spec ::cimi-core/uri)
       (assoc :name "resourceURI"
-             :type :uri
              :json-schema/name "resourceURI"
              :json-schema/namespace common-ns/cimi-namespace
              :json-schema/uri common-ns/cimi-uri
@@ -59,7 +57,6 @@
 (s/def ::created
   (-> (st/spec ::cimi-core/timestamp)
       (assoc :name "created"
-             :type :string
              :json-schema/name "created"
              :json-schema/namespace common-ns/cimi-namespace
              :json-schema/uri common-ns/cimi-uri
@@ -82,7 +79,6 @@
 (s/def ::updated
   (-> (st/spec ::cimi-core/timestamp)
       (assoc :name "updated"
-             :type :string
              :json-schema/name "updated"
              :json-schema/namespace common-ns/cimi-namespace
              :json-schema/uri common-ns/cimi-uri
@@ -105,7 +101,6 @@
 (s/def ::name
   (-> (st/spec ::cimi-core/nonblank-string)
       (assoc :name "name"
-             :type :string
              :json-schema/name "name"
              :json-schema/namespace common-ns/cimi-namespace
              :json-schema/uri common-ns/cimi-uri
@@ -114,6 +109,7 @@
              :json-schema/consumerMandatory false
              :json-schema/mutable true
              :json-schema/consumerWritable true
+             :json-schema/searchable true
 
              :json-schema/displayName "name"
              :json-schema/description "short, human-readable name for resource"
@@ -126,9 +122,8 @@
 
 
 (s/def ::description
-  (-> (st/spec ::cimi-core/text)
+  (-> (st/spec ::cimi-core/nonblank-string)
       (assoc :name "description"
-             :type :string
              :json-schema/name "description"
              :json-schema/namespace common-ns/cimi-namespace
              :json-schema/uri common-ns/cimi-uri
@@ -137,6 +132,7 @@
              :json-schema/consumerMandatory false
              :json-schema/mutable true
              :json-schema/consumerWritable true
+             :json-schema/searchable true
 
              :json-schema/displayName "description"
              :json-schema/description "human-readable description of resource"
@@ -151,7 +147,6 @@
 (s/def ::parent
   (-> (st/spec ::cimi-core/resource-href)
       (assoc :name "parent"
-             :type :uri
              :json-schema/name "parent"
              :json-schema/namespace common-ns/cimi-namespace
              :json-schema/uri common-ns/cimi-uri
@@ -174,7 +169,6 @@
 (s/def ::resourceMetadata
   (-> (st/spec ::cimi-core/resource-href)
       (assoc :name "resourceMetadata"
-             :type :uri
              :json-schema/name "resourceMetadata"
              :json-schema/namespace common-ns/cimi-namespace
              :json-schema/uri common-ns/cimi-uri
@@ -197,7 +191,6 @@
 (s/def ::href
   (-> (st/spec ::cimi-core/resource-href)
       (assoc :name "href"
-             :type :uri
              :json-schema/name "href"
              :json-schema/namespace common-ns/cimi-namespace
              :json-schema/uri common-ns/cimi-uri
@@ -217,7 +210,6 @@
 (s/def ::resource-link
   (-> (st/spec (s/keys :req-un [::href]))
       (assoc :name "resourceLink"
-             :type :map
              :json-schema/name "resourceLink"
              :json-schema/namespace common-ns/cimi-namespace
              :json-schema/uri common-ns/cimi-uri
@@ -237,7 +229,6 @@
 (s/def ::resource-links
   (-> (st/spec (s/coll-of ::resource-link :min-count 1))
       (assoc :name "resourceLinks"
-             :type :vector
              :json-schema/name "resourceLinks"
              :json-schema/namespace common-ns/cimi-namespace
              :json-schema/uri common-ns/cimi-uri
@@ -258,7 +249,6 @@
   (-> (st/spec (su/only-keys :req-un [::cimi-common-operation/href
                                       ::cimi-common-operation/rel]))
       (assoc :name "operation"
-             :type :map
              :json-schema/name "operation"
              :json-schema/namespace common-ns/cimi-namespace
              :json-schema/uri common-ns/cimi-uri
@@ -281,7 +271,6 @@
 (s/def ::operations
   (-> (st/spec (s/coll-of ::operation :min-count 1))
       (assoc :name "operations"
-             :type :vector
              :json-schema/name "operations"
              :json-schema/namespace common-ns/cimi-namespace
              :json-schema/uri common-ns/cimi-uri
@@ -290,6 +279,7 @@
              :json-schema/consumerMandatory false
              :json-schema/mutable true
              :json-schema/consumerWritable false
+             :json-schema/indexed false
 
              :json-schema/displayName "operations"
              :json-schema/description "list of resource operations"
@@ -298,16 +288,12 @@
              :json-schema/category "CIMI operations"
              :json-schema/order 0
              :json-schema/hidden false
-             :json-schema/sensitive false
-
-             :json-schema/es-mapping {:type "object", :enabled false}
-             :slipstream.es/mapping {:type "object", :enabled false})))
+             :json-schema/sensitive false)))
 
 
 (s/def ::properties
   (-> (st/spec (s/map-of keyword? string? :min-count 1))
       (assoc :name "properties"
-             :type :map
              :json-schema/name "properties"
              :json-schema/namespace common-ns/cimi-namespace
              :json-schema/uri common-ns/cimi-uri
@@ -331,7 +317,6 @@
   (-> (st/spec (su/only-keys :req-un [::cimi-acl/owner]
                              :opt-un [::cimi-acl/rules]))
       (assoc :name "acl"
-             :type :map
              :json-schema/name "acl"
              :json-schema/namespace common-ns/cimi-namespace
              :json-schema/uri common-ns/cimi-uri

@@ -12,7 +12,6 @@
 (s/def ::key
   (-> (st/spec string?)                                     ;; ::cimi-core/nonblank-string
       (assoc :name "key"
-             :type :string
              :json-schema/name "key"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -34,7 +33,6 @@
 (s/def ::secret
   (-> (st/spec string?)                                     ;; ::cimi-core/nonblank-string
       (assoc :name "secret"
-             :type :string
              :json-schema/name "secret"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -56,7 +54,6 @@
 (s/def ::connector
   (-> (st/spec ::cimi-common/resource-link)
       (assoc :name "connector"
-             :type :map
              :json-schema/name "connector"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -78,7 +75,6 @@
 (s/def ::quota
   (-> (st/spec nat-int?)
       (assoc :name "quota"
-             :type :long
              :json-schema/name "quota"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -101,7 +97,6 @@
   (-> (st/spec (su/only-keys :req-un [::cimi-acl/principal
                                       ::cimi-acl/type]))
       (assoc :name "manager"
-             :type :map
              :json-schema/name "manager"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -126,7 +121,6 @@
 (s/def ::managers
        (-> (st/spec (s/coll-of ::manager :min-count 1 :kind vector?))
            (assoc :name "managers"
-                  :type :vector
                   :json-schema/name "managers"
                   :json-schema/namespace common-ns/slipstream-namespace
                   :json-schema/uri common-ns/slipstream-uri
@@ -148,7 +142,6 @@
 (s/def ::disabledMonitoring
        (-> (st/spec boolean?)
            (assoc :name "disabledMonitoring"
-                  :type :boolean
                   :json-schema/name "disabledMonitoring"
                   :json-schema/namespace common-ns/slipstream-namespace
                   :json-schema/uri common-ns/slipstream-uri

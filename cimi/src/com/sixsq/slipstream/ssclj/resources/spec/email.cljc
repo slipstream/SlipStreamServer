@@ -11,7 +11,6 @@
 (s/def ::address
   (-> (st/spec ::cimi-core/email)
       (assoc :name "address"
-             :type :string
              :json-schema/name "address"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -33,7 +32,6 @@
 (s/def ::validated
   (-> (st/spec boolean?)
       (assoc :name "validated"
-             :type :boolean
              :json-schema/name "validated"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri

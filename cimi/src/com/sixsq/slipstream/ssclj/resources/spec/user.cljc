@@ -15,7 +15,6 @@
 (s/def ::username
   (-> (st/spec ::cimi-core/nonblank-string)
       (assoc :name "username"
-             :type :string
              :json-schema/name "username"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -37,7 +36,6 @@
 (s/def ::emailAddress
   (-> (st/spec ::cimi-core/email)
       (assoc :name "emailAddress"
-             :type :string
              :json-schema/name "emailAddress"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -59,7 +57,6 @@
 (s/def ::password
   (-> (st/spec ::cimi-core/nonblank-string)
       (assoc :name "password"
-             :type :string
              :json-schema/name "password"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -81,7 +78,6 @@
 (s/def ::firstName
   (-> (st/spec ::cimi-core/nonblank-string)
       (assoc :name "firstName"
-             :type :string
              :json-schema/name "firstName"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -103,7 +99,6 @@
 (s/def ::lastName
   (-> (st/spec ::cimi-core/nonblank-string)
       (assoc :name "lastName"
-             :type :string
              :json-schema/name "lastName"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -125,7 +120,6 @@
 (s/def ::organization
   (-> (st/spec string?)
       (assoc :name "organization"
-             :type :string
              :json-schema/name "organization"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -147,7 +141,6 @@
 (s/def ::roles
   (-> (st/spec string?)
       (assoc :name "roles"
-             :type :string
              :json-schema/name "roles"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -169,7 +162,6 @@
 (s/def ::state
   (-> (st/spec #{"NEW" "ACTIVE" "DELETED" "SUSPENDED"})
       (assoc :name "state"
-             :type :string
              :json-schema/name "state"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -191,7 +183,6 @@
 (s/def ::creation
   (-> (st/spec ::cimi-core/timestamp)
       (assoc :name "creation"
-             :type :string
              :json-schema/name "creation"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -213,7 +204,6 @@
 (s/def ::lastOnline
   (-> (st/spec ::cimi-core/timestamp)
       (assoc :name "lastOnline"
-             :type :string
              :json-schema/name "lastOnline"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -235,7 +225,6 @@
 (s/def ::lastExecute
   (-> (st/spec ::cimi-core/timestamp)
       (assoc :name "lastExecute"
-             :type :string
              :json-schema/name "lastExecute"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -257,7 +246,6 @@
 (s/def ::activeSince
   (-> (st/spec ::cimi-core/timestamp)
       (assoc :name "activeSince"
-             :type :string
              :json-schema/name "activeSince"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -279,7 +267,6 @@
 (s/def ::isSuperUser
   (-> (st/spec boolean?)
       (assoc :name "isSuperUser"
-             :type :boolean
              :json-schema/name "isSuperUser"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -301,7 +288,6 @@
 (s/def ::deleted
   (-> (st/spec boolean?)
       (assoc :name "deleted"
-             :type :boolean
              :json-schema/name "deleted"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -323,7 +309,6 @@
 (s/def ::githublogin
   (-> (st/spec string?)
       (assoc :name "githublogin"
-             :type :string
              :json-schema/name "githublogin"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -345,7 +330,6 @@
 (s/def ::cyclonelogin
   (-> (st/spec string?)
       (assoc :name "cyclonelogin"
-             :type :string
              :json-schema/name "cyclonelogin"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -367,7 +351,6 @@
 (s/def ::identityAttribute
   (-> (st/spec (s/and string? #(re-matches #"^[a-z0-9]+(-[a-z0-9]+)*:.+$" %)))
       (assoc :name "identityAttribute"
-             :type :string
              :json-schema/name "identityAttribute"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -389,7 +372,6 @@
 (s/def ::externalIdentity
   (-> (st/spec (s/nilable (s/coll-of ::identityAttribute :min-count 1)))
       (assoc :name "externalIdentity"
-             ;:type :vector
              :json-schema/name "externalIdentity"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -411,7 +393,6 @@
 (s/def ::method
   (-> (st/spec ::cimi-core/identifier)
       (assoc :name "method"
-             :type :string
              :json-schema/name "method"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -433,7 +414,6 @@
 (s/def ::href
   (-> (st/spec string?)
       (assoc :name "href"
-             :type :string
              :json-schema/name "href"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri

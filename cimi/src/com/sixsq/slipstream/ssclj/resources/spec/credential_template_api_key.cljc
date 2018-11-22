@@ -10,7 +10,6 @@
 (s/def :cimi.credential-template.api-key/ttl
   (-> (st/spec nat-int?)
       (assoc :name "ttl"
-             :type :long
              :json-schema/name "ttl"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri

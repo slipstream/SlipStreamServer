@@ -27,6 +27,5 @@
                               :opt-un [::description]))
 
 (s/def ::actions
-  (st/spec {:spec                  (s/coll-of ::action :min-count 1 :type vector?)
-            :slipstream.es/mapping {:type "object", :enabled false}
-            :json-schema/es-mapping {:type "object", :enabled false}}))
+  (st/spec {:spec                (s/coll-of ::action :min-count 1 :type vector?)
+            :json-schema/indexed false}))

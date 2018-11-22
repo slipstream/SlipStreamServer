@@ -12,7 +12,6 @@
 (s/def :cimi.credential-template/type
   (-> (st/spec ::cimi-core/identifier)
       (assoc :name "type"
-             :type :string
              :json-schema/name "type"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -36,7 +35,6 @@
 (s/def :cimi.credential-template/method
   (-> (st/spec ::cimi-core/identifier)
       (assoc :name "method"
-             :type :string
              :json-schema/name "method"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri

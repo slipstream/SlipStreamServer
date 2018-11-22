@@ -11,7 +11,6 @@
 (s/def ::key
   (-> (st/spec ::cimi-core/nonblank-string)
       (assoc :name "key"
-             :type :string
              :json-schema/name "key"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -33,7 +32,6 @@
 (s/def ::secret
   (-> (st/spec ::cimi-core/nonblank-string)
       (assoc :name "secret"
-             :type :string
              :json-schema/name "secret"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri

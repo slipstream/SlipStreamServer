@@ -11,7 +11,6 @@
 (s/def ::username
   (-> (st/spec ::cimi-core/nonblank-string)
       (assoc :name "username"
-             :type :string
              :json-schema/name "username"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -33,7 +32,6 @@
 (s/def ::password
   (-> (st/spec ::cimi-core/nonblank-string)
       (assoc :name "password"
-             :type :string
              :json-schema/name "password"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri

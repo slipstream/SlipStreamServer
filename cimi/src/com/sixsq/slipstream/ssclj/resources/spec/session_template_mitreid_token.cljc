@@ -11,7 +11,6 @@
 (s/def ::token
   (-> (st/spec ::cimi-core/nonblank-string)
       (assoc :name "token"
-             :type :string
              :json-schema/name "token"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri

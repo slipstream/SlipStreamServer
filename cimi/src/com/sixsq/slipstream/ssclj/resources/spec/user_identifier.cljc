@@ -10,7 +10,6 @@
 (s/def ::identifier
   (-> (st/spec string?)
       (assoc :name "identifier"
-             :type :string
              :json-schema/name "identifier"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -37,7 +36,6 @@
 (s/def ::user
   (-> (st/spec ::resource-link)
       (assoc :name "user"
-             :type :map
              :json-schema/name "user"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri

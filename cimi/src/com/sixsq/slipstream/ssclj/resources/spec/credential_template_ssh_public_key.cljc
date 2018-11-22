@@ -11,7 +11,6 @@
 (s/def :cimi.credential-template.ssh-public-key/publicKey
   (-> (st/spec ::cimi-core/nonblank-string)
       (assoc :name "publicKey"
-             :type :string
              :json-schema/name "publicKey"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
