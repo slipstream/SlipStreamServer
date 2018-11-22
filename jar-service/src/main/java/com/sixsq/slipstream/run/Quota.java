@@ -142,7 +142,10 @@ public class Quota {
 
 
 		String resource = SscljProxy.QUOTA_RESOURCE;
-		Response response = SscljProxy.get(resource, nameRoles);
+		Form queryParameters = new Form();
+		String filter = "resource='VirtualMachine'";
+		queryParameters.add("$filter", filter);
+		Response response = SscljProxy.get(resource, nameRoles, queryParameters);
 		Integer statusCode = response.getStatus().getCode();
 
 		if (statusCode < 200 || statusCode >= 300) {
