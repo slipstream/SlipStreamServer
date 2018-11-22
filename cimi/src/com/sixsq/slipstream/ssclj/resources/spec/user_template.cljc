@@ -13,7 +13,6 @@
 (s/def ::method
   (-> (st/spec ::cimi-core/identifier)
       (assoc :name "method"
-             :type :string
              :json-schema/name "method"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -37,7 +36,6 @@
 (s/def ::instance
   (-> (st/spec ::cimi-core/identifier)
       (assoc :name "instance"
-             :type :string
              :json-schema/name "instance"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -61,7 +59,6 @@
 (s/def ::href
   (-> (st/spec (s/and string? #(re-matches user-template-regex %)))
       (assoc :name "href"
-             :type :map
              :json-schema/name "href"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri

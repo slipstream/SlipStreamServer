@@ -27,7 +27,6 @@
 (s/def ::owner
   (-> (st/spec (su/only-keys :req-un [::principal ::type]))
       (assoc :name "owner"
-             :type :map
              :json-schema/name "owner"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -52,7 +51,6 @@
                                       ::type
                                       ::right]))
       (assoc :name "rule"
-             :type :map
              :json-schema/name "rule"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -75,7 +73,6 @@
 (s/def ::rules
   (-> (st/spec (s/coll-of ::rule :min-count 1 :kind vector?))
       (assoc :name "rules"
-             :type :vector
              :json-schema/name "rules"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri

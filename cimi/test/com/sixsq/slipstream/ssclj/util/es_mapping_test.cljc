@@ -14,7 +14,8 @@
 
                        ::common/acl {:type       "object",
                                      :properties {"owner" {:type       "object",
-                                                           :properties {"principal" {:type "keyword"}, "type" {:type "keyword"}}},
+                                                           :properties {"principal" {:type "keyword"},
+                                                                        "type" {:type "keyword"}}},
                                                   "rules" {:type       "object",
                                                            :properties {"principal" {:type "keyword"},
                                                                         "type"      {:type "keyword"},
@@ -29,9 +30,10 @@
                        ::common/resourceURI {:type "keyword"}
                        ::common/created {:type "date", :format "strict_date_optional_time||epoch_millis"}
                        ::common/updated {:type "date", :format "strict_date_optional_time||epoch_millis"}
-                       ::common/name {:type "keyword"}
-                       ::common/description {:type "text"}
+                       ::common/name {:type "keyword", :copy_to "fulltext"}
+                       ::common/description {:type "keyword", :copy_to "fulltext"}
                        ::common/href {:type "keyword"}
                        ::common/resource-link {:type "object", :properties {"href" {:type "keyword"}}}
                        ::common/resource-links {:type "object", :properties {"href" {:type "keyword"}}}
-                       ::common/operation {:type "object", :properties {"href" {:type "keyword"}, "rel" {:type "keyword"}}}))
+                       ::common/operation {:type "object", :properties {"href" {:type "keyword"},
+                                                                        "rel" {:type "keyword"}}}))

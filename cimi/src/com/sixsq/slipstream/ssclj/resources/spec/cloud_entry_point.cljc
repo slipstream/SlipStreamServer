@@ -11,7 +11,6 @@
 (s/def ::baseURI
   (-> (st/spec ::cimi-core/nonblank-string)
       (assoc :name "baseURI"
-             :type :uri
              :json-schema/name "baseURI"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri

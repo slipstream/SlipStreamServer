@@ -13,7 +13,9 @@
 
 (s/def ::integer integer?)
 (s/def ::string string?)
-(s/def ::set #{1 2 3})
+(s/def ::set-long #{1 2 3})
+(s/def ::set-number #{1.0 2.0 3.0})                         ;; all non-integer numbers are promoted to doubles
+(s/def ::set-string #{"a" "b" "c"})
 
 (s/def ::a string?)
 (s/def ::b string?)
@@ -31,11 +33,11 @@
 
 (deftest simple-spec-test
   (testing "primitive predicates"
-    ;; You're intented to call jsc/to-json with a registered spec, but to avoid
-    ;; boilerplate, we do inline specization here.
+    ;; You're intended to call jsc/to-json with a registered spec, but to avoid
+    ;; boilerplate, we do inline spec-ization here.
     (is (= (t/transform (s/spec int?)) {:type "long"}))
     (is (= (t/transform (s/spec integer?)) {:type "long"}))
-    (is (= (t/transform (s/spec float?)) {:type "float"}))
+    (is (= (t/transform (s/spec float?)) {:type "double"})) ;; json schema uses number which we map to double
     (is (= (t/transform (s/spec double?)) {:type "double"}))
     (is (= (t/transform (s/spec string?)) {:type "keyword"}))
     (is (= (t/transform (s/spec boolean?)) {:type "boolean"}))
@@ -52,7 +54,9 @@
     (is (= (t/transform (s/int-in 1 10)) {:type "long"})))
   (testing "simple specs"
     (is (= (t/transform ::integer) {:type "long"}))
-    (is (= (t/transform ::set) {:type "long"})))
+    (is (= (t/transform ::set-long) {:type "long"}))
+    (is (= (t/transform ::set-number) {:type "double"}))
+    (is (= (t/transform ::set-string) {:type "keyword"})))
 
   (testing "clojure.specs"
     (is (= (t/transform (s/keys :req-un [::integer] :opt-un [::string]))
@@ -74,8 +78,10 @@
            {:type       "object"
             :properties {"com.sixsq.slipstream.db.es.common.es-mapping-test/e" {:type "keyword"}
                          "e"                                                   {:type "keyword"}}}))
-    #_(is (= (t/transform (s/or :int integer? :string string?))
-             {:anyOf [{:type "long"} {:type "keyword"}]}))
+    ;; NOTE: ES mappings cannot have more than one type.  Ensure type matches one of the defined values.
+    (let [multiple-types (t/transform (s/or :int integer? :string string?))]
+      (is (or (= multiple-types {:type "long"})
+              (= multiple-types {:type "keyword"}))))
     (is (= (t/transform (s/and integer? pos?))
            {:type "long"}))
     (is (= (t/transform (s/and spec/integer? pos?))
@@ -86,8 +92,8 @@
             :properties {"com.sixsq.slipstream.db.es.common.es-mapping-test/integer" {:type "long"}
                          "com.sixsq.slipstream.db.es.common.es-mapping-test/string"  {:type "keyword"}}}))
     (is (= (t/transform (s/every integer?)) {:type "long"}))
-    (is (= (t/transform (s/every-kv string? integer?))
-           {:type "object" :properties {:type "long"}}))
+    ;; NOTE: Cannot represent details with ES mapping. Just mark as object.
+    (is (= (t/transform (s/every-kv string? integer?)) {:type "object"}))
     (is (= (t/transform (s/coll-of string?)) {:type "keyword"}))
     (is (= (t/transform (s/coll-of string? :into '())) {:type "keyword"}))
     (is (= (t/transform (s/coll-of string? :into [])) {:type "keyword"}))
@@ -99,7 +105,8 @@
     (is (= (t/transform (s/alt :int integer? :string string?)) {:type "long"}))
     (is (= (t/transform (s/cat :int integer? :string string?)) {:type "long"}))
     ;; & is broken (http://dev.clojure.org/jira/browse/CLJ-2152)
-    (is (= (t/transform (s/tuple integer? string?)) {:type "long"}))
+    ;; NOTE: This cannot be handled with ES mappings.  Just ensure no exception is thrown.
+    (is (t/transform (s/tuple integer? string?)))
     ;; keys* is broken (http://dev.clojure.org/jira/browse/CLJ-2152)
     (is (= (t/transform (s/map-of string? clojure.core/integer?)) {:type "object"}))
     (is (= (t/transform (s/nilable string?)) {:type "keyword"})))

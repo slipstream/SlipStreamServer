@@ -11,7 +11,6 @@
 (s/def ::group
   (-> (st/spec ::cimi-core/nonblank-string)
       (assoc :name "group"
-             :type :string
              :json-schema/name "group"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -33,7 +32,6 @@
 (s/def ::order
   (-> (st/spec nat-int?)
       (assoc :name "order"
-             :type :long
              :json-schema/name "order"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -58,7 +56,6 @@
 (s/def ::hidden
   (-> (st/spec boolean?)
       (assoc :name "hidden"
-             :type :boolean
              :json-schema/name "hidden"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -80,7 +77,6 @@
 (s/def ::icon
   (-> (st/spec ::cimi-core/nonblank-string)
       (assoc :name "icon"
-             :type :string
              :json-schema/name "icon"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -102,7 +98,6 @@
 (s/def ::redirectURI
   (-> (st/spec ::cimi-core/nonblank-string)
       (assoc :name "redirectURI"
-             :type :string
              :json-schema/name "redirectURI"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri

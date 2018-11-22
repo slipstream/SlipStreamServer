@@ -10,7 +10,6 @@
 (s/def :cimi.credential-template.ssh-key-pair/size
   (-> (st/spec pos-int?)
       (assoc :name "size"
-             :type :long
              :json-schema/name "size"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -32,7 +31,6 @@
 (s/def :cimi.credential-template.ssh-key-pair/algorithm
   (-> (st/spec #{"rsa" "dsa"})
       (assoc :name "algorithm"
-             :type :string
              :json-schema/name "algorithm"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri

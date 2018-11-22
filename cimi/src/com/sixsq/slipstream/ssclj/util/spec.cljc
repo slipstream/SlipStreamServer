@@ -4,9 +4,9 @@
   (:require
     [clojure.set :as set]
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.db.es.common.es-mapping :as es-mapping]
     [spec-tools.impl :as impl]
     [spec-tools.parse :as st-parse]
+    [spec-tools.json-schema :as jsc]
     [spec-tools.visitor :as visitor]))
 
 (def ^:private all-ascii-chars (map str (map char (range 0 256))))
@@ -78,15 +78,25 @@
 ;;
 
 (defmethod st-parse/parse-form 'com.sixsq.slipstream.ssclj.util.spec/only-keys [dispatch form]
+  #_(log/error "DEBUX X" form)
   (st-parse/parse-form 'clojure.spec.alpha/keys form))
+
+
+(defn transform-form
+  [[spec-name & keys-specs]]
+  (->> keys-specs
+       (merge-keys-specs)
+       (apply concat)
+       (cons spec-name)))
 
 
 (defmethod st-parse/parse-form 'com.sixsq.slipstream.ssclj.util.spec/only-keys-maps [dispatch form]
-  (st-parse/parse-form 'clojure.spec.alpha/keys form))
+  (st-parse/parse-form 'clojure.spec.alpha/keys (transform-form form)))
 
 
 (defmethod st-parse/parse-form 'com.sixsq.slipstream.ssclj.util.spec/constrained-map [dispatch form]
-  (st-parse/parse-form 'clojure.spec.alpha/keys form))
+  (st-parse/parse-form 'clojure.spec.alpha/keys (transform-form form)))
+
 
 ;;
 ;; patches for spec walking via visitor
@@ -98,25 +108,75 @@
 
 
 (defmethod visitor/visit-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys-maps [spec accept options]
-  (let [keys (impl/extract-keys (impl/extract-form spec))]
+  (let [keys (impl/extract-keys (transform-form (impl/extract-form spec)))]
     (accept 'com.sixsq.slipstream.ssclj.util.spec/only-keys-maps spec (mapv #(visitor/visit % accept options) keys) options)))
 
 
 (defmethod visitor/visit-spec 'com.sixsq.slipstream.ssclj.util.spec/constrained-map [spec accept options]
-  (let [keys (impl/extract-keys (impl/extract-form spec))]
+  (let [keys (impl/extract-keys (transform-form (impl/extract-form spec)))]
     (accept 'com.sixsq.slipstream.ssclj.util.spec/constrained-map spec (mapv #(visitor/visit % accept options) keys) options)))
+
+
+;; accept-spec monkey patches
+
+(defmethod jsc/accept-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys [dispatch spec children arg]
+  #_(log/error "monkey only-keys")
+  (jsc/accept-spec 'clojure.spec.alpha/keys spec children arg))
+
+
+(defmethod jsc/accept-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys-maps [_ spec children _]
+  #_(log/error "monkey only-keys-maps")
+  (let [{:keys [req req-un opt opt-un]} (impl/parse-keys (transform-form (impl/extract-form spec)))
+        names-un (map name (concat req-un opt-un))
+        names (map impl/qualified-name (concat req opt))
+        required (map impl/qualified-name req)
+        required-un (map name req-un)
+        all-required (not-empty (concat required required-un))]
+    (#'jsc/maybe-with-title
+      (merge
+        {:type       "object"
+         :properties (zipmap (concat names names-un) children)}
+        (when all-required
+          {:required (vec all-required)}))
+      spec)))
+
+
+(defmethod jsc/accept-spec 'com.sixsq.slipstream.ssclj.util.spec/constrained-map [_ spec children _]
+  #_(log/error "monkey constrainted-map")
+  (let [{:keys [req req-un opt opt-un]} (impl/parse-keys (transform-form (impl/extract-form spec)))
+        names-un (map name (concat req-un opt-un))
+        names (map impl/qualified-name (concat req opt))
+        required (map impl/qualified-name req)
+        required-un (map name req-un)
+        all-required (not-empty (concat required required-un))]
+    (#'jsc/maybe-with-title
+      (merge
+        {:type       "object"
+         :properties (zipmap (concat names names-un) children)}
+        (when all-required
+          {:required (vec all-required)}))
+      spec)))
+
 
 ;;
 ;; patch transform of spec into ES mapping
 ;;
 
-(defmethod es-mapping/accept-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys [dispatch spec children arg]
-  (es-mapping/accept-spec 'clojure.spec.alpha/keys spec children arg))
+
+(defn- spec-dispatch [dispatch _ _ _] dispatch)
 
 
-(defmethod es-mapping/accept-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys-maps [dispatch spec children arg]
-  (es-mapping/accept-spec 'clojure.spec.alpha/keys spec children arg))
+(defmulti accept-spec spec-dispatch :default ::default)
 
 
-(defmethod es-mapping/accept-spec 'com.sixsq.slipstream.ssclj.util.spec/constrained-map [dispatch spec children arg]
-  (es-mapping/accept-spec 'clojure.spec.alpha/keys spec children arg))
+(defmethod accept-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys [dispatch spec children arg]
+  (accept-spec 'clojure.spec.alpha/keys spec children arg))
+
+
+(defmethod accept-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys-maps [dispatch spec children arg]
+  (accept-spec 'clojure.spec.alpha/keys spec children arg))
+
+
+(defmethod accept-spec 'com.sixsq.slipstream.ssclj.util.spec/constrained-map [dispatch spec children arg]
+  (accept-spec 'clojure.spec.alpha/keys spec children arg))
+

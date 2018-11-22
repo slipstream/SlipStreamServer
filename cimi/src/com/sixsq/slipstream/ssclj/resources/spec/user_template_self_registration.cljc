@@ -11,7 +11,6 @@
 (s/def ::password
   (-> (st/spec string?)
       (assoc :name "password"
-             :type :string
              :json-schema/name "password"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
@@ -33,7 +32,6 @@
 (s/def ::passwordRepeat
   (-> (st/spec string?)
       (assoc :name "passwordRepeat"
-             :type :string
              :json-schema/name "passwordRepeat"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
