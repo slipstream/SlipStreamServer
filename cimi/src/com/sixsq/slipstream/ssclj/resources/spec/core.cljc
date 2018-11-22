@@ -23,17 +23,6 @@
              :json-schema/type "string")))
 
 
-(s/def ::text
-  (-> (st/spec cu/as-text)
-      (assoc :name "text"
-             :json-schema/description "text containing something other than only whitespace"
-             :json-schema/type "string"
-
-             :slipstream.es/mapping {:type "text"}
-             :json-schema/es-mapping {:type "text"}
-             )))
-
-
 (defn token? [s] (re-matches #"^\S+$" s))
 (s/def ::token
   (-> (st/spec (s/and string? token?))
@@ -54,12 +43,7 @@
   (-> (st/spec cu/as-datetime)
       (assoc :name "timestamp"
              :json-schema/description "UTC timestamp"
-             :json-schema/type "dateTime"
-             :slipstream.es/mapping {:type   "date"
-                                     :format "strict_date_optional_time||epoch_millis"}
-             :json-schema/es-mapping {:type   "date"
-                                      :format "strict_date_optional_time||epoch_millis"}
-             )))
+             :json-schema/type "dateTime")))
 
 
 ;; FIXME: Replace this spec with one that enforces the URI grammar.
