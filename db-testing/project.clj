@@ -1,6 +1,6 @@
-(def +version+ "3.64")
+(def +version+ "3.65-SNAPSHOT")
 
-(defproject com.sixsq.slipstream/SlipStreamDbTesting-jar "3.64"
+(defproject com.sixsq.slipstream/SlipStreamDbTesting-jar "3.65-SNAPSHOT"
 
   :description "db testing utilities"
 

@@ -1,6 +1,6 @@
-(def +version+ "3.64")
+(def +version+ "3.65-SNAPSHOT")
 
-(defproject com.sixsq.slipstream/SlipStreamCljResourcesTests-jar "3.64"
+(defproject com.sixsq.slipstream/SlipStreamCljResourcesTests-jar "3.65-SNAPSHOT"
 
   :description "cimi server testing utilities"
 
