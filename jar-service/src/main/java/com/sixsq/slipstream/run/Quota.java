@@ -20,42 +20,40 @@ package com.sixsq.slipstream.run;
  * -=================================================================-
  */
 
-import java.util.*;
-import java.util.logging.Logger;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.sixsq.slipstream.configuration.Configuration;
-import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.exceptions.QuotaException;
+import com.sixsq.slipstream.exceptions.ValidationException;
 import com.sixsq.slipstream.persistence.*;
 import com.sixsq.slipstream.util.ServiceOffersUtil;
 import com.sixsq.slipstream.util.SscljProxy;
 import org.restlet.Response;
+import org.restlet.data.Form;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
+
+import static com.sixsq.slipstream.util.ServiceOffersUtil.*;
 import static com.sixsq.slipstream.util.SscljProxy.parseJson;
-import static com.sixsq.slipstream.util.ServiceOffersUtil.getServiceOfferAttributeAsIntegerOrNull;
-import static com.sixsq.slipstream.util.ServiceOffersUtil.cpuAttributeName;
-import static com.sixsq.slipstream.util.ServiceOffersUtil.ramAttributeName;
-import static com.sixsq.slipstream.util.ServiceOffersUtil.diskAttributeName;
 
 public class Quota {
-
 	private static java.util.logging.Logger logger = Logger.getLogger(ServiceOffersUtil.class.getName());
 
 	public static boolean deploymentLimitsEnabled() {
-		return ! "true".equals(System.getProperty("ignore.deployment.limits", "").toLowerCase());
+		return !"true".equals(System.getProperty("ignore.deployment.limits", "").toLowerCase());
 	}
 
-	public static void validate(User user, Run run, String roles)
-			throws ValidationException, QuotaException {
+	public static void validate(User user, Run run, String roles) throws ValidationException, QuotaException {
 		Map<String, Integer> request = run.getCloudServiceUsage();
 		validate(user, roles, run);
 	}
 
-	public static void validate(User user, Run run)
-			throws ValidationException, QuotaException {
-		validate(user, run,"");
+	public static void validate(User user, Run run) throws ValidationException, QuotaException {
+		validate(user, run, "");
 	}
 
 	private static void validate(User user, String roles, Run run) throws QuotaException {
@@ -81,12 +79,12 @@ public class Quota {
 		Map<String, String> serviceOffersIdsByNode = new HashMap<>();
 		Map<String, Integer> multiplicityByNode = new HashMap<>();
 
-		switch (module.getCategory() ) {
+		switch (module.getCategory()) {
 			case Deployment:
 				DeploymentModule deployment = (DeploymentModule) module;
 				Map<String, Node> nodes = deployment.getNodes();
 
-				for (String nodeName: nodes.keySet()) {
+				for (String nodeName : nodes.keySet()) {
 					String key = RuntimeParameter.constructParamName(nodeName, 1, RuntimeParameter.SERVICE_OFFER);
 					String serviceOfferId = run.getRuntimeParameterValueOrDefaultIgnoreAbort(key, null);
 					if (serviceOfferId != null) {
@@ -100,7 +98,7 @@ public class Quota {
 					nbVms += multiplicity;
 				}
 
-				nbVms ++;
+				nbVms++;
 				break;
 
 			case Image:
@@ -111,20 +109,20 @@ public class Quota {
 					serviceOffersIdsByNode.put(Run.MACHINE_NAME, serviceOfferId);
 				}
 				multiplicityByNode.put(Run.MACHINE_NAME, 1);
-				nbVms ++;
+				nbVms++;
 				break;
 		}
 
 		Set<String> serviceOffersIds = new HashSet<>(serviceOffersIdsByNode.values());
 
-		for (String serviceOfferId: serviceOffersIds) {
+		for (String serviceOfferId : serviceOffersIds) {
 			JsonObject serviceOffer = ServiceOffersUtil.getServiceOffer(serviceOfferId, false);
 			if (serviceOffer != null) {
 				serviceOffersById.put(serviceOfferId, serviceOffer);
 			}
 		}
 
-		for (Map.Entry<String, Integer> entry: multiplicityByNode.entrySet()) {
+		for (Map.Entry<String, Integer> entry : multiplicityByNode.entrySet()) {
 			String nodename = entry.getKey();
 			Integer multiplicity = entry.getValue();
 			String serviceOfferId = serviceOffersIdsByNode.get(nodename);
@@ -139,7 +137,6 @@ public class Quota {
 			Integer disk = getServiceOfferAttributeAsIntegerOrNull(serviceOffer, diskAttributeName);
 			if (disk != null) nbDisk += disk * multiplicity;
 		}
-
 
 		String resource = SscljProxy.QUOTA_RESOURCE;
 		Form queryParameters = new Form();
@@ -183,8 +180,7 @@ public class Quota {
 
 						if ((quotaLeft - requested) < 0) {
 							String name = quotaCollect.get("name").getAsString();
-							String msg = String.format("Quota '%s' exceeded (quota=%d, current=%d, requested=%d)",
-									name, limit, currentAll, requested);
+							String msg = String.format("Quota '%s' exceeded (quota=%d, current=%d, requested=%d)", name, limit, currentAll, requested);
 							throw new QuotaException(msg);
 						}
 					}
@@ -193,10 +189,8 @@ public class Quota {
 		}
 	}
 
-	public static String getValue(User user,
-			String cloud) throws ValidationException {
-		String key = cloud + RuntimeParameter.PARAM_WORD_SEPARATOR
-				+ QuotaParameter.QUOTA_VM_PARAMETER_NAME;
+	public static String getValue(User user, String cloud) throws ValidationException {
+		String key = cloud + RuntimeParameter.PARAM_WORD_SEPARATOR + QuotaParameter.QUOTA_VM_PARAMETER_NAME;
 
 		Parameter<?> parameter = user.getParameter(key, cloud);
 		if (parameter != null && Parameter.hasValueSet(parameter.getValue())) {
