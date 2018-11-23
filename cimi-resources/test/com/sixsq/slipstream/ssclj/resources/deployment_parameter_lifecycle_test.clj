@@ -226,7 +226,7 @@
         (-> session-jane
             (request (str p/service-context "event"))
             (ltu/body->edn)
-            (ltu/is-count 4))
+            (ltu/is-count 3))
 
         ))))
 
