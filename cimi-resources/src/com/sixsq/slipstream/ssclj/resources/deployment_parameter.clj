@@ -43,7 +43,8 @@
     (u/from-data-uuid id)))
 
 
-(def next-state-machine-transition-map {"Executing"      "SendingReports"
+(def next-state-machine-transition-map {"Provisioning"   "Executing"
+                                        "Executing"      "SendingReports"
                                         "SendingReports" "Ready"
                                         "Ready"          "Ready"
                                         "Done"           "Done"
@@ -65,21 +66,24 @@
 
 
 (defn update-state
-  [new-state deployment-href]
-  (let [uuid (parameter->uiid deployment-href nil "ss:state")
+  [current-state deployment-href]
+  (let [new-state (next-state current-state)
+        uuid (parameter->uiid deployment-href nil "ss:state")
         content-request {:params   {:resource-name resource-url
                                     :uuid          uuid}
                          :identity std-crud/internal-identity
                          :body     {:value new-state}}
-        {:keys [status body] :as response} (-> content-request crud/edit)
-        event-msg (str deployment-href " is in state => " new-state)
-        event-severity (if (= new-state "Aborted") event-utils/severity-critical event-utils/severity-medium)]
+        {:keys [status body] :as response} (-> content-request crud/edit)]
     (when (not= status 200)
       (log/error response)
       (throw (r/ex-response (str "A failure happened during update of deployment state." response) 500)))
-    (event-utils/create-event deployment-href event-msg (:acl body)
-                              :severity event-severity
-                              :type event-utils/type-state)))
+
+    (when (not= current-state new-state)
+      (event-utils/create-event deployment-href new-state (:acl body)
+                                :severity (if (= new-state "Aborted")
+                                            event-utils/severity-critical
+                                            event-utils/severity-medium)
+                                :type event-utils/type-state))))
 
 
 ;;
@@ -97,7 +101,6 @@
   (let [deployment-href (:href deployment)]
     (case name
       "complete" (some-> value
-                         (next-state)
                          (update-state deployment-href))
       "ss:abort" (when value (update-state "Aborted" deployment-href))
       "ss:state" (let [deployment-request {:params      {:resource-name d/resource-url

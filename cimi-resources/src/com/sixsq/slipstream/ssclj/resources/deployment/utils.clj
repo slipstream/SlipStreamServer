@@ -35,7 +35,7 @@
                          :description "Global complete flag, set when run completed"},
                         {:parameter   "ss:state"
                          :description "Global execution state"
-                         :value       "Executing"},
+                         :value       "Provisioning"},
                         {:parameter   "ss:abort"
                          :description "Run abort flag, set when aborting"},
                         {:parameter   "ss:url.service"
