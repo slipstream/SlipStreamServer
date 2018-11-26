@@ -2,7 +2,6 @@
   (:require
     [clojure.data.json :as json]
     [clojure.test :refer [is]]
-    [clojure.tools.logging :as log]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
