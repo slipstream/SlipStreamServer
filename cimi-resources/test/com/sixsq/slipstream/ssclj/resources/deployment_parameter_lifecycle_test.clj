@@ -27,7 +27,7 @@
 
 (def valid-state-entry
   {:name       "ss:state"
-   :value      "initializing"
+   :value      "Provisioning"
    :deployment {:href "deployment/uuid"}
    :acl        {:owner {:principal "ADMIN"
                         :type      "ROLE"}
@@ -172,9 +172,23 @@
         (-> session-jane
             (request abs-complete-uri
                      :request-method :put
+                     :body (json/write-str {:value "Provisioning"}))
+            (ltu/body->edn)
+            (ltu/is-status 200))
+
+        (-> session-jane
+            (request state-abs-uri)
+            (ltu/body->edn)
+            (ltu/is-status 200)
+            (ltu/is-key-value :value "Executing"))
+
+        (-> session-jane
+            (request abs-complete-uri
+                     :request-method :put
                      :body (json/write-str {:value "Executing"}))
             (ltu/body->edn)
             (ltu/is-status 200))
+
 
         (-> session-jane
             (request state-abs-uri)
@@ -209,24 +223,11 @@
             (ltu/is-status 200)
             (ltu/is-key-value :value "Ready"))
 
-        (-> session-jane
-            (request abs-complete-uri
-                     :request-method :put
-                     :body (json/write-str {:value "Ready"}))
-            (ltu/body->edn)
-            (ltu/is-status 200))
-
-        (-> session-jane
-            (request state-abs-uri)
-            (ltu/body->edn)
-            (ltu/is-status 200)
-            (ltu/is-key-value :value "Ready"))
-
         ;; user should see events created
         (-> session-jane
             (request (str p/service-context "event"))
             (ltu/body->edn)
-            (ltu/is-count 3))
+            (ltu/is-count 5))
 
         ))))
 

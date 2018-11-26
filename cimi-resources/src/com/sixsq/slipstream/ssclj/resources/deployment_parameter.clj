@@ -132,27 +132,39 @@
 ;;
 ;; CRUD operations
 ;;
+
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
+
 (defmethod crud/add resource-name
-  [request]
+  [{{:keys [name value deployment acl]} :body :as request}]
+  (when (= name "ss:state")
+    (event-utils/create-event (:href deployment) value acl
+                              :severity event-utils/severity-medium
+                              :type event-utils/type-state))
   (add-impl request))
+
 
 (def edit-impl (std-crud/edit-fn resource-name))
 (defmethod crud/edit resource-name
   [request]
   (edit-impl request))
 
+
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 (defmethod crud/retrieve resource-name
   [request]
   (retrieve-impl request))
 
+
 (def delete-impl (std-crud/delete-fn resource-name))
+
 (defmethod crud/delete resource-name
   [request]
   (delete-impl request))
 
+
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
+
 (defmethod crud/query resource-name
   [request]
   (query-impl request))
@@ -161,6 +173,7 @@
 ;;
 ;; initialization
 ;;
+
 (defn initialize
   []
   (std-crud/initialize resource-url ::deployment-parameter/deployment-parameter))
