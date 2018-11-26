@@ -110,6 +110,19 @@
              (.setStatusCode 403))]
     (throw ex)))
 
+(defn head-bucket-not-exists [_ _]
+  (let [ex (doto
+             (AmazonServiceException. "Simulated AWS Exception for missing bucket")
+             (.setStatusCode 404))]
+    (throw ex)))
+
+(defn head-bucket-wrong-region [_ _]
+  (let [ex (doto
+             (AmazonServiceException. "Simulated AWS Exception for bucket in other region")
+             (.setStatusCode 301))]
+    (throw ex)))
+
+
 
 (defn s3-redefs!
   [f]
@@ -228,6 +241,24 @@
                          :body (json/write-str valid-create))
                 (ltu/body->edn)
                 (ltu/is-status 403)))
+
+          ;; Creation of resource when the bucket is missing
+          (with-redefs [s3/head-bucket head-bucket-not-exists]
+            (-> session
+                (request base-uri
+                         :request-method :post
+                         :body (json/write-str valid-create))
+                (ltu/body->edn)
+                (ltu/is-status 404)))
+
+          ;; Creation of resource when the bucket is missing
+          (with-redefs [s3/head-bucket head-bucket-wrong-region]
+            (-> session
+                (request base-uri
+                         :request-method :post
+                         :body (json/write-str valid-create))
+                (ltu/body->edn)
+                (ltu/is-status 301)))
 
 
           ;; creating the same object twice is not allowed
