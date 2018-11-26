@@ -52,9 +52,11 @@
 (defmulti validate-subtype
           :objectType)
 
+
 (defmethod validate-subtype :default
   [resource]
   (throw (ex-info (str "unknown External object type: '" (:objectType resource) "'") resource)))
+
 
 (defmethod crud/validate resource-uri
   [resource]
@@ -67,11 +69,14 @@
 (defn dispatch-on-object-type [resource]
   (get-in resource [:externalObjectTemplate :objectType]))
 
+
 (defmulti create-validate-subtype dispatch-on-object-type)
+
 
 (defmethod create-validate-subtype :default
   [resource]
   (throw (ex-info (str "unknown External Object create type: " (dispatch-on-object-type resource) resource) resource)))
+
 
 (defmethod crud/validate create-uri
   [resource]
@@ -108,9 +113,11 @@
             :type      "USER"
             :right     "MODIFY"}]})
 
+
 (defmethod crud/add-acl resource-uri
   [resource request]
   (a/add-acl resource request))
+
 
 (defmethod crud/add-acl resource-uri
   [{:keys [acl] :as resource} request]
@@ -120,16 +127,11 @@
       (assoc resource :acl (create-acl user-id)))))
 
 
-(defn dispatch-conversion
-  "Dispatches on the External object type for multimethods
-   that take the resource and request as arguments."
-  [resource _]
-  (:objectType resource))
-
 (defn standard-external-object-collection-operations
   [{:keys [id] :as resource} request]
   (when (a/authorized-modify? resource request)
     [{:rel (:add c/action-uri) :href id}]))
+
 
 (defn standard-external-object-resource-operations
   [{:keys [id state] :as resource} request]
@@ -146,6 +148,7 @@
                     show-download-op? (conj {:rel (:download c/action-uri) :href (str id "/download")}))]
     (when (seq ops)
       (vec ops))))
+
 
 (defn standard-external-object-operations
   "Provides a list of the standard external object operations, depending
@@ -166,6 +169,8 @@
 
 ;;
 ;; Generate ID.
+;;
+
 (defmethod crud/new-identifier resource-name
   [{:keys [objectName bucketName] :as resource} resource-name]
   (if-let [new-id (co/bytes->hex (ha/md5 (str objectName bucketName)))]
@@ -180,6 +185,7 @@
           :objectType)
 
 ;; default implementation just updates the resourceURI
+
 (defmethod tpl->externalObject :default
   [resource]
   (assoc resource :resourceURI resource-uri))
@@ -187,6 +193,7 @@
 ;;
 ;; CRUD operations
 ;;
+
 (defn check-cred-exists
   [body idmap]
   (let [href (get-in body [:externalObjectTemplate :objectStoreCred])]
@@ -206,7 +213,9 @@
         ;; put back unexpanded connector href
         (update-in [:externalObjectTemplate] merge os-cred-href))))
 
+
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
+
 
 (defn merge-into-tmpl
   [body]
@@ -222,6 +231,7 @@
     body))
 
 ;; requires a ExternalObjectTemplate to create new ExternalObject
+
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
   (a/can-modify? {:acl collection-acl} request)
@@ -240,17 +250,20 @@
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 
+
 (defmethod crud/retrieve resource-name
   [request]
   (retrieve-impl request))
 
 
 ;; editing is special as only a few attributes can be modified
+
 (defn select-editable-attributes
   [body]
   (select-keys body #{:name :description :properties :acl}))
 
 (def edit-impl (std-crud/edit-fn resource-name))
+
 
 (defmethod crud/edit resource-name
   [{:keys [body] :as request}]
@@ -258,6 +271,7 @@
 
 
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
+
 
 (defmethod crud/query resource-name
   [request]
@@ -271,16 +285,19 @@
        (map #(format "'%s'" %))
        (str/join ", ")))
 
+
 (defn error-msg-bad-state
   [action required-states current-state]
   (format "Invalid state '%s' for '%s' action. Valid states: %s."
           current-state action (format-states required-states)))
+
 
 (defn verify-state
   [{:keys [state] :as resource} accepted-states action]
   (if (accepted-states state)
     resource
     (logu/log-and-throw-400 (error-msg-bad-state action accepted-states state))))
+
 
 ;;; Upload URL operation
 
@@ -297,6 +314,7 @@
     (s3/generate-url obj-store-conf bucketName object-name :put
                      {:ttl (or ttl s3/default-ttl) :content-type contentType :filename filename})))
 
+
 (defn upload
   [resource request]
   (try
@@ -307,6 +325,7 @@
     (catch Exception e
       (or (ex-data e) (throw e)))))
 
+
 (defmethod crud/do-action [resource-url "upload"]
   [{{uuid :uuid} :params :as request}]
   (try
@@ -315,6 +334,7 @@
           (upload request)))
     (catch Exception e
       (or (ex-data e) (throw e)))))
+
 
 (defmethod crud/do-action [resource-url "ready"]
   [{{uuid :uuid} :params :as request}]
@@ -339,12 +359,14 @@
                    bucketName objectName :get
                    {:ttl (or ttl s3/default-ttl)}))
 
+
 (defn download
   [resource request]
   (try
     (r/json-response {:uri (download-fn resource request)})
     (catch Exception e
       (or (ex-data e) (throw e)))))
+
 
 (defmethod crud/do-action [resource-url "download"]
   [{{uuid :uuid} :params :as request}]
@@ -363,15 +385,18 @@
 
 (defn delete
   [{:keys [objectName bucketName objectStoreCred] :as resource} {{keep? :keep-s3-object} :body :as request}]
-  (when
-    (and (not keep?) (s3/ok-to-delete-external-resource? resource request))
+  (when (and (not keep?) (s3/ok-to-delete-external-resource? resource request))
     (try
       (s3/try-delete-s3-object (s3/expand-obj-store-creds objectStoreCred) bucketName objectName)
       (catch Exception e
-        ;;ignore when exception is caused by missing object
-        (let [ status (:status (ex-data e))]
-          (when-not (= 404 status)(throw e))))))
+        ;; When the user requests to delete an S3 object that no longer exists,
+        ;; the external object resource should be deleted normally.
+        ;; Ignore 404 exceptions.
+        (let [status (:status (ex-data e))]
+          (when-not (= 404 status)
+            (throw e))))))
     (delete-impl request))
+
 
 (defmethod crud/delete resource-name
   [{{uuid :uuid} :params :as request}]
@@ -386,6 +411,7 @@
 ;;
 ;; initialization: no schema for the parent
 ;;
+
 (defn initialize
   []
   (std-crud/initialize resource-url nil))
