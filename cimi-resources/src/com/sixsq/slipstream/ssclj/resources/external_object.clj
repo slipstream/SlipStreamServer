@@ -309,7 +309,7 @@
   (let [object-name (if (not-empty objectName)
                       objectName
                       (format "%s/%s" runUUID filename))
-        obj-store-conf (s3/expand-obj-store-creds objectStoreCred)]
+        obj-store-conf (s3/format-creds-for-s3-api objectStoreCred)]
     (log/info "Requesting upload url:" object-name)
     (s3/generate-url obj-store-conf bucketName object-name :put
                      {:ttl (or ttl s3/default-ttl) :content-type contentType :filename filename})))
@@ -355,7 +355,7 @@
   [{:keys [objectType bucketName objectName objectStoreCred] :as resource} {{ttl :ttl} :body :as request}]
   (verify-state resource #{state-ready} "download")
   (log/info "Requesting download url: " objectName)
-  (s3/generate-url (s3/expand-obj-store-creds objectStoreCred)
+  (s3/generate-url (s3/format-creds-for-s3-api objectStoreCred)
                    bucketName objectName :get
                    {:ttl (or ttl s3/default-ttl)}))
 
@@ -387,7 +387,7 @@
   [{:keys [objectName bucketName objectStoreCred] :as resource} {{keep? :keep-s3-object} :body :as request}]
   (when-not keep?
     (try
-      (s3/try-delete-s3-object (s3/expand-obj-store-creds objectStoreCred) bucketName objectName)
+      (s3/try-delete-s3-object (s3/format-creds-for-s3-api objectStoreCred) bucketName objectName)
       (catch Exception e
         ;; When the user requests to delete an S3 object that no longer exists,
         ;; the external object resource should be deleted normally.
@@ -395,7 +395,7 @@
         (let [status (:status (ex-data e))]
           (when-not (= 404 status)
             (throw e))))))
-    (delete-impl request))
+  (delete-impl request))
 
 
 (defmethod crud/delete resource-name
@@ -403,7 +403,7 @@
   (try
     (let [id (str resource-url "/" uuid)]
       (-> (crud/retrieve-by-id-as-admin id)
-          (a/can-modify? request)                           ;; FIXME: Is this necessary?
+          (a/can-modify? request)
           (delete request)))
     (catch Exception e
       (or (ex-data e) (throw e)))))

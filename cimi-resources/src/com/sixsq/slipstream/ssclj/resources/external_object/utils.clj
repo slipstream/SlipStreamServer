@@ -82,10 +82,10 @@
   (.deleteObject s3client deleteRequest))
 
 
-(defn try-delete-s3-object [obj-store-conf bucket obj-name]
-  (let [deleteRequest (DeleteObjectRequest. bucket obj-name)]
+(defn try-delete-s3-object [s3-creds bucket object]
+  (let [deleteRequest (DeleteObjectRequest. bucket object)]
     (try-catch-aws-fn
-      (delete-s3-object (get-s3-client obj-store-conf) deleteRequest))))
+      (delete-s3-object (get-s3-client s3-creds) deleteRequest))))
 
 
 (defn bucket-exists?
@@ -151,7 +151,7 @@
     true))
 
 
-(defn expand-obj-store-creds
+(defn format-creds-for-s3-api
   "Need objectType to dispatch on when loading credentials."
   [href-obj-store-cred]
   (let [{:keys [key secret connector]} (expand-cred href-obj-store-cred)]
@@ -165,7 +165,7 @@
   external object resource. If everything is OK, then the resource itself is
   returned. Otherwise an error response map is thrown"
   [{:keys [bucketName objectStoreCred] :as resource} request]
-  (let [obj-store-conf (expand-obj-store-creds objectStoreCred)
+  (let [obj-store-conf (format-creds-for-s3-api objectStoreCred)
         s3client (get-s3-client obj-store-conf)]
 
     ;; When the requested bucket exists, but the user doesn't have permission to it :
