@@ -385,7 +385,7 @@
 
 (defn delete
   [{:keys [objectName bucketName objectStoreCred] :as resource} {{keep? :keep-s3-object} :body :as request}]
-  (when (and (not keep?) (s3/ok-to-delete-external-resource? resource request))
+  (when-not keep?
     (try
       (s3/try-delete-s3-object (s3/expand-obj-store-creds objectStoreCred) bucketName objectName)
       (catch Exception e
@@ -403,6 +403,7 @@
   (try
     (let [id (str resource-url "/" uuid)]
       (-> (crud/retrieve-by-id-as-admin id)
+          (a/can-modify? request)                           ;; FIXME: Is this necessary?
           (delete request)))
     (catch Exception e
       (or (ex-data e) (throw e)))))

@@ -24,6 +24,7 @@
 
 (def ^:const username-view "tarzan")
 (def ^:const user-view-info-header (str username-view " USER ANON"))
+(def ^:const tarzan-info-header (str username-view " USER ANON"))
 
 (def ^:const username-no-view "other")
 (def ^:const user-no-view-info-header (str username-no-view " USER ANON"))
@@ -91,13 +92,13 @@
 
 
 
-(defn delete-s3-object-not-authorized [_  _]
+(defn delete-s3-object-not-authorized [_ _]
   (let [ex (doto
              (AmazonServiceException. "Simulated AWS Exception for S3 permission error")
              (.setStatusCode 403))]
     (throw ex)))
 
-(defn delete-s3-object-not-found [_  _]
+(defn delete-s3-object-not-found [_ _]
   (let [ex (doto
              (AmazonServiceException. "Simulated AWS Exception for object missing on S3")
              (.setStatusCode 404))]
@@ -127,8 +128,7 @@
   [f]
   (with-redefs [s3/bucket-exists? (fn [_ _] true)           ;; by default assume the S3 bucket exists
                 s3/create-bucket! (fn [_ _] true)           ;; by default, a bucket creation succeeds
-                s3/authorized-bucket-operation? (fn [_ _ _] true) ;;by default, the user has permission to operate
-                s3/head-bucket (fn [_ _] nil)       ;;by default, it is Ok to create objects in bucket
+                s3/head-bucket (fn [_ _] nil)               ;;by default, it is Ok to create objects in bucket
                 s3/delete-s3-object (fn [_ _] nil)]
     (f)))
 
@@ -139,6 +139,7 @@
                       session
                       (content-type "application/json")))
 (def session-user (header session-anon authn-info-header user-info-header))
+(def session-other (header session-anon authn-info-header tarzan-info-header))
 (def session-admin (header session-anon authn-info-header admin-info-header))
 
 (defn get-template
@@ -214,6 +215,15 @@
                     (ltu/body->edn)
                     (ltu/is-status 403)))
 
+              ;; another user should not be able to delete external object
+              (with-redefs [s3/bucket-exists? (fn [_ _] true)
+                            s3/delete-s3-object delete-s3-object-not-found]
+                (-> session-other
+                    (request abs-uri
+                             :request-method :delete)
+                    (ltu/body->edn)
+                    (ltu/is-status 403)))
+
               ;;Deleting a missing S3 object should succeed
               (with-redefs [s3/bucket-exists? (fn [_ _] true)
                             s3/delete-s3-object delete-s3-object-not-found]
@@ -222,15 +232,6 @@
                              :request-method :delete)
                     (ltu/body->edn)
                     (ltu/is-status 200)))))
-
-          ;; Creation for user who can not view the credential should fail
-          (with-redefs [s3/authorized-bucket-operation? (fn [_ _ _]) false]
-            (-> session
-                (request base-uri
-                         :request-method :post
-                         :body (json/write-str valid-create))
-                (ltu/body->edn)
-                (ltu/is-status 403)))
 
           ;; Creation of resource when the bucket exists but no object can be created
           (with-redefs [s3/head-bucket head-bucket-not-authorized]
@@ -510,15 +511,6 @@
                         (ltu/body->edn)
                         (ltu/is-status 200)))))
 
-
-              ;;Deletion should fail if user has no modify acccess
-              (with-redefs [s3/authorized-bucket-operation? (fn [_ _ _] false)]
-                (-> session
-                    (request abs-uri
-                             :request-method :delete
-                             :body (json/write-str {:keep-s3-object false})) ;;attempt s3 deletion while testing
-                    (ltu/body->edn)
-                    (ltu/is-status 403)))
 
               ;;Deletion by owner should succeed , even in case the S3 bucket does not exist (anymore)
               (with-redefs [s3/bucket-exists? (fn [_ _] false)]
