@@ -43,14 +43,7 @@
 (def ^:const state-uploading "uploading")
 (def ^:const state-ready "ready")
 
-(def request-admin {:identity     {:current "internal"
-                                   :authentications
-                                            {"internal" {:roles #{"ADMIN"}, :identity "internal"}}}
-                    :sixsq.slipstream.authn/claims
-                                  {:username "internal", :roles "ADMIN"}
-                    :params       {:resource-name "user"}
-                    :route-params {:resource-name "user"}
-                    :user-roles   #{"ANON"}})
+
 
 ;;
 ;; validate subclasses of externalObject
@@ -59,9 +52,11 @@
 (defmulti validate-subtype
           :objectType)
 
+
 (defmethod validate-subtype :default
   [resource]
   (throw (ex-info (str "unknown External object type: '" (:objectType resource) "'") resource)))
+
 
 (defmethod crud/validate resource-uri
   [resource]
@@ -74,11 +69,14 @@
 (defn dispatch-on-object-type [resource]
   (get-in resource [:externalObjectTemplate :objectType]))
 
+
 (defmulti create-validate-subtype dispatch-on-object-type)
+
 
 (defmethod create-validate-subtype :default
   [resource]
   (throw (ex-info (str "unknown External Object create type: " (dispatch-on-object-type resource) resource) resource)))
+
 
 (defmethod crud/validate create-uri
   [resource]
@@ -115,9 +113,11 @@
             :type      "USER"
             :right     "MODIFY"}]})
 
+
 (defmethod crud/add-acl resource-uri
   [resource request]
   (a/add-acl resource request))
+
 
 (defmethod crud/add-acl resource-uri
   [{:keys [acl] :as resource} request]
@@ -127,16 +127,11 @@
       (assoc resource :acl (create-acl user-id)))))
 
 
-(defn dispatch-conversion
-  "Dispatches on the External object type for multimethods
-   that take the resource and request as arguments."
-  [resource _]
-  (:objectType resource))
-
 (defn standard-external-object-collection-operations
   [{:keys [id] :as resource} request]
   (when (a/authorized-modify? resource request)
     [{:rel (:add c/action-uri) :href id}]))
+
 
 (defn standard-external-object-resource-operations
   [{:keys [id state] :as resource} request]
@@ -154,6 +149,7 @@
     (when (seq ops)
       (vec ops))))
 
+
 (defn standard-external-object-operations
   "Provides a list of the standard external object operations, depending
    on the user's authentication and whether this is a ExternalObject or
@@ -163,29 +159,18 @@
     (standard-external-object-collection-operations resource request)
     (standard-external-object-resource-operations resource request)))
 
-;; Sets the operations for the given resources.  This is a
-;; multi-method because different types of external object resources
-;; may require different operations
-(defmulti set-external-object-operations dispatch-conversion)
 
-;; Default implementation adds the standard external object operations
-;; by ALWAYS replacing the :operations value.  If there are no
-;; operations, the key is removed from the resource.
-(defmethod set-external-object-operations :default
+(defmethod crud/set-operations resource-uri
   [resource request]
   (let [ops (standard-external-object-operations resource request)]
     (cond-> (dissoc resource :operations)
             (seq ops) (assoc :operations ops))))
 
-;; Just triggers the Session-level multimethod for adding operations
-;; to the Session resource.
-(defmethod crud/set-operations resource-uri
-  [resource request]
-  (set-external-object-operations resource request))
-
 
 ;;
 ;; Generate ID.
+;;
+
 (defmethod crud/new-identifier resource-name
   [{:keys [objectName bucketName] :as resource} resource-name]
   (if-let [new-id (co/bytes->hex (ha/md5 (str objectName bucketName)))]
@@ -200,6 +185,7 @@
           :objectType)
 
 ;; default implementation just updates the resourceURI
+
 (defmethod tpl->externalObject :default
   [resource]
   (assoc resource :resourceURI resource-uri))
@@ -207,6 +193,7 @@
 ;;
 ;; CRUD operations
 ;;
+
 (defn check-cred-exists
   [body idmap]
   (let [href (get-in body [:externalObjectTemplate :objectStoreCred])]
@@ -226,7 +213,9 @@
         ;; put back unexpanded connector href
         (update-in [:externalObjectTemplate] merge os-cred-href))))
 
+
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
+
 
 (defn merge-into-tmpl
   [body]
@@ -242,6 +231,7 @@
     body))
 
 ;; requires a ExternalObjectTemplate to create new ExternalObject
+
 (defmethod crud/add resource-name
   [{:keys [body] :as request}]
   (a/can-modify? {:acl collection-acl} request)
@@ -254,10 +244,12 @@
                  (:externalObjectTemplate)
                  (tpl->externalObject)
                  (assoc :state state-new))]
+    (s3/ok-to-add-external-resource? body request)
     (add-impl (assoc request :body body))))
 
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
+
 
 (defmethod crud/retrieve resource-name
   [request]
@@ -265,11 +257,13 @@
 
 
 ;; editing is special as only a few attributes can be modified
+
 (defn select-editable-attributes
   [body]
   (select-keys body #{:name :description :properties :acl}))
 
 (def edit-impl (std-crud/edit-fn resource-name))
+
 
 (defmethod crud/edit resource-name
   [{:keys [body] :as request}]
@@ -278,29 +272,10 @@
 
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
 
+
 (defmethod crud/query resource-name
   [request]
   (query-impl request))
-
-;; URL request operations utils
-
-(defn expand-cred
-  "Returns credential document after expanding `href-obj-store-cred` credential href.
-
-  Deriving objectType from request is not directly possible as this is a request on
-  action resource. We would need to get resource id, load the resource and get
-  objectType from it. Instead, requiring objectType as parameter. It should be known
-  to the callers."
-  [href-obj-store-cred]
-  (std-crud/resolve-hrefs href-obj-store-cred request-admin true))
-
-(defn expand-obj-store-creds
-  "Need objectType to dispatch on when loading credentials."
-  [href-obj-store-cred request objectType]
-  (let [{:keys [key secret connector]} (expand-cred href-obj-store-cred)]
-    {:key      key
-     :secret   secret
-     :endpoint (:objectStoreEndpoint connector)}))
 
 ;;; Generic utilities for actions
 
@@ -310,10 +285,12 @@
        (map #(format "'%s'" %))
        (str/join ", ")))
 
+
 (defn error-msg-bad-state
   [action required-states current-state]
   (format "Invalid state '%s' for '%s' action. Valid states: %s."
           current-state action (format-states required-states)))
+
 
 (defn verify-state
   [{:keys [state] :as resource} accepted-states action]
@@ -321,25 +298,24 @@
     resource
     (logu/log-and-throw-400 (error-msg-bad-state action accepted-states state))))
 
+
 ;;; Upload URL operation
 
 (defn upload-fn
-  "Provided 'resource' and 'request', returns object storage upload URL."
+  "Provided 'resource' and 'request', returns object storage upload URL.
+  It is assumed that the bucket already exists and the user has access to it."
   [{:keys [objectType contentType bucketName objectName objectStoreCred runUUID filename] :as resource} {{ttl :ttl} :body :as request}]
   (verify-state resource #{state-new state-uploading} "upload")
   (let [object-name (if (not-empty objectName)
                       objectName
                       (format "%s/%s" runUUID filename))
-        obj-store-conf (expand-obj-store-creds objectStoreCred request objectType)]
+        obj-store-conf (s3/format-creds-for-s3-api objectStoreCred)]
     (log/info "Requesting upload url:" object-name)
-    (s3/create-bucket! obj-store-conf bucketName)
     (s3/generate-url obj-store-conf bucketName object-name :put
                      {:ttl (or ttl s3/default-ttl) :content-type contentType :filename filename})))
 
-(defmulti upload-subtype
-          (fn [resource _] (:objectType resource)))
 
-(defmethod upload-subtype :default
+(defn upload
   [resource request]
   (try
     (a/can-modify? resource request)
@@ -349,14 +325,16 @@
     (catch Exception e
       (or (ex-data e) (throw e)))))
 
+
 (defmethod crud/do-action [resource-url "upload"]
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
       (-> (crud/retrieve-by-id-as-admin id)
-          (upload-subtype request)))
+          (upload request)))
     (catch Exception e
       (or (ex-data e) (throw e)))))
+
 
 (defmethod crud/do-action [resource-url "ready"]
   [{{uuid :uuid} :params :as request}]
@@ -377,19 +355,18 @@
   [{:keys [objectType bucketName objectName objectStoreCred] :as resource} {{ttl :ttl} :body :as request}]
   (verify-state resource #{state-ready} "download")
   (log/info "Requesting download url: " objectName)
-  (s3/generate-url (expand-obj-store-creds objectStoreCred request objectType)
+  (s3/generate-url (s3/format-creds-for-s3-api objectStoreCred)
                    bucketName objectName :get
                    {:ttl (or ttl s3/default-ttl)}))
 
-(defmulti download-subtype
-          (fn [resource _] (:objectType resource)))
 
-(defmethod download-subtype :default
+(defn download
   [resource request]
   (try
     (r/json-response {:uri (download-fn resource request)})
     (catch Exception e
       (or (ex-data e) (throw e)))))
+
 
 (defmethod crud/do-action [resource-url "download"]
   [{{uuid :uuid} :params :as request}]
@@ -397,7 +374,7 @@
     (let [id (str resource-url "/" uuid)]
       (-> (crud/retrieve-by-id-as-admin id)
           (a/can-view? request)
-          (download-subtype request)))
+          (download request)))
     (catch Exception e
       (or (ex-data e) (throw e)))))
 
@@ -405,21 +382,29 @@
 
 (def delete-impl (std-crud/delete-fn resource-name))
 
-(defmulti delete-subtype
-          (fn [resource _] (:objectType resource)))
 
-(defmethod delete-subtype :default
-  [{:keys [objectType objectName bucketName objectStoreCred] :as resource} {{keep? :keep-s3-object} :body :as request}]
+(defn delete
+  [{:keys [objectName bucketName objectStoreCred] :as resource} {{keep? :keep-s3-object} :body :as request}]
   (when-not keep?
-    (s3/delete-s3-object (expand-obj-store-creds objectStoreCred request objectType) bucketName objectName))
+    (try
+      (s3/try-delete-s3-object (s3/format-creds-for-s3-api objectStoreCred) bucketName objectName)
+      (catch Exception e
+        ;; When the user requests to delete an S3 object that no longer exists,
+        ;; the external object resource should be deleted normally.
+        ;; Ignore 404 exceptions.
+        (let [status (:status (ex-data e))]
+          (when-not (= 404 status)
+            (throw e))))))
   (delete-impl request))
+
 
 (defmethod crud/delete resource-name
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
       (-> (crud/retrieve-by-id-as-admin id)
-          (delete-subtype request)))
+          (a/can-modify? request)
+          (delete request)))
     (catch Exception e
       (or (ex-data e) (throw e)))))
 
@@ -427,6 +412,7 @@
 ;;
 ;; initialization: no schema for the parent
 ;;
+
 (defn initialize
   []
   (std-crud/initialize resource-url nil))

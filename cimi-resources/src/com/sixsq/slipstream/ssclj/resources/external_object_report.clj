@@ -1,6 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.external-object-report
   (:require
-    [clj-time.core :as t]
+    [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration :as p]
@@ -20,19 +20,16 @@
 (def ^:const desc ExternalObjectReportDescription)
 
 
-(defn set-uuid-in-request
-  [request uuid]
-  (update-in request [:params] #(merge % {:uuid uuid})))
-
 (defn ss-conf
   "Returns SlipStream configuration."
   []
-  (let [request (set-uuid-in-request eo/request-admin conf-ss/service)]
-    (:body ((std-crud/retrieve-fn p/resource-url) request))))
+  (crud/retrieve-by-id-as-admin (str p/resource-url "/" conf-ss/service)))
+
 
 (defn object-name
   [{:keys [runUUID filename]}]
   (format "%s/%s" runUUID filename))
+
 
 (defmethod eo/tpl->externalObject eot/objectType
   [resource]
