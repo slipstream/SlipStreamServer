@@ -26,10 +26,7 @@
                           :description "Hostname or IP address of the image"}])
 
 (def node-input-params [{:parameter   "credential.id"
-                         :description "Cloud credential ID for managing node deployment"}
-                        {:parameter   "cloud.node.publish.ports"
-                         :description (str "Publish ports [<PROTOCOL>:<PUBLISHED_PORT>:<TARGET_PORT> ...] "
-                                           "(e.g. 'tcp:20000:22 udp::69')")}])
+                         :description "Cloud credential ID for managing node deployment"}])
 
 (def global-parameters [{:parameter   "ss:complete"
                          :description "Global complete flag, set when run completed"},

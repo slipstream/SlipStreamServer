@@ -153,9 +153,7 @@
                                          :cloud-c 3}
                       :inputParameters
                                         '({:description "Cloud credential ID for managing node deployment"
-                                           :parameter   "credential.id"}
-                                           {:description "Publish ports [<PROTOCOL>:<PUBLISHED_PORT>:<TARGET_PORT> ...] (e.g. 'tcp:20000:22 udp::69')"
-                                            :parameter   "cloud.node.publish.ports"})
+                                           :parameter   "credential.id"})
                       :loginUser        "root"
                       :networkType      "public"
                       :os               "Ubuntu"
@@ -198,9 +196,7 @@
                                             :cloud-c 3
                                             :cloud-d 4}
                          :inputParameters  '({:description "Cloud credential ID for managing node deployment"
-                                              :parameter   "credential.id"}
-                                              {:description "Publish ports [<PROTOCOL>:<PUBLISHED_PORT>:<TARGET_PORT> ...] (e.g. 'tcp:20000:22 udp::69')"
-                                               :parameter   "cloud.node.publish.ports"})
+                                              :parameter   "credential.id"})
                          :loginUser        "ubuntu"
                          :networkType      "public"
                          :os               "Ubuntu"
@@ -242,9 +238,7 @@
                                             :cloud-b 2
                                             :cloud-c 3}
                          :inputParameters  '({:description "Cloud credential ID for managing node deployment"
-                                              :parameter   "credential.id"}
-                                              {:description "Publish ports [<PROTOCOL>:<PUBLISHED_PORT>:<TARGET_PORT> ...] (e.g. 'tcp:20000:22 udp::69')"
-                                               :parameter   "cloud.node.publish.ports"})
+                                              :parameter   "credential.id"})
                          :loginUser        "root"
                          :networkType      "public"
                          :os               "Ubuntu"
@@ -298,9 +292,7 @@
                                             :cloud-b 2
                                             :cloud-c 3}
                          :inputParameters  '({:description "Cloud credential ID for managing node deployment"
-                                              :parameter   "credential.id"}
-                                              {:description "Publish ports [<PROTOCOL>:<PUBLISHED_PORT>:<TARGET_PORT> ...] (e.g. 'tcp:20000:22 udp::69')"
-                                               :parameter   "cloud.node.publish.ports"})
+                                              :parameter   "credential.id"})
                          :loginUser        "root"
                          :networkType      "public"
                          :os               "Ubuntu"
@@ -360,9 +352,7 @@
                                            :cloud-c 3
                                            :cloud-d 4}
                          :inputParameters '({:description "Cloud credential ID for managing node deployment"
-                                             :parameter   "credential.id"}
-                                             {:description "Publish ports [<PROTOCOL>:<PUBLISHED_PORT>:<TARGET_PORT> ...] (e.g. 'tcp:20000:22 udp::69')"
-                                              :parameter   "cloud.node.publish.ports"})
+                                             :parameter   "credential.id"})
                          :loginUser       "ubuntu"
                          :networkType     "public"
                          :os              "Ubuntu"
