@@ -16,6 +16,7 @@
 (s/def ::disk nat-int?)
 (s/def ::volatileDisk nat-int?)
 (s/def ::networkType #{"public" "private"})
+(s/def ::ports string?)
 
 ;; parameter keywords are used in components and application parameter mappings
 (def ^:const parameter-name-regex #"^[a-zA-Z0-9]+([-_\.:][a-zA-Z0-9]*)*$")
@@ -66,6 +67,7 @@
                                                                 ::ram
                                                                 ::disk
                                                                 ::volatileDisk
+                                                                ::ports
                                                                 ::targets
                                                                 ::commit]}]))
 
