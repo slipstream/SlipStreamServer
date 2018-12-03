@@ -16,7 +16,8 @@
 (s/def ::disk nat-int?)
 (s/def ::volatileDisk nat-int?)
 (s/def ::networkType #{"public" "private"})
-(s/def ::ports string?)
+(s/def ::ports (s/coll-of ::cimi-core/nonblank-string :min-count 1 :kind vector?))
+(s/def ::mounts (s/coll-of ::cimi-core/nonblank-string :min-count 1 :kind vector?))
 
 ;; parameter keywords are used in components and application parameter mappings
 (def ^:const parameter-name-regex #"^[a-zA-Z0-9]+([-_\.:][a-zA-Z0-9]*)*$")
@@ -68,6 +69,7 @@
                                                                 ::disk
                                                                 ::volatileDisk
                                                                 ::ports
+                                                                ::mounts
                                                                 ::targets
                                                                 ::commit]}]))
 
