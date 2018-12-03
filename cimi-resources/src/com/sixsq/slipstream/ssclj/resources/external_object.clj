@@ -339,11 +339,17 @@
 (defmethod crud/do-action [resource-url "ready"]
   [{{uuid :uuid} :params :as request}]
   (try
-    (let [resource (crud/retrieve-by-id-as-admin (str resource-url "/" uuid))]
+    (let [resource (crud/retrieve-by-id-as-admin (str resource-url "/" uuid))
+          {:keys [bucketName objectName objectStoreCred]} resource
+          s3client (-> objectStoreCred
+                       (s3/format-creds-for-s3-api)
+                       (s3/get-s3-client))]
       (-> resource
           (a/can-modify? request)
           (verify-state #{state-uploading} "ready")
           (assoc :state state-ready)
+          (s3/add-s3-size s3client bucketName objectName)
+          (s3/add-s3-md5sum s3client bucketName objectName)
           (db/edit request)))
     (catch Exception e
       (or (ex-data e) (throw e)))))

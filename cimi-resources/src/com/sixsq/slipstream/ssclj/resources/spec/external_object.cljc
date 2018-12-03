@@ -11,6 +11,8 @@
 (s/def ::bucketName ::cimi-core/nonblank-string)
 
 (s/def ::contentType ::cimi-core/nonblank-string)
+(s/def ::size int?)
+(s/def ::md5sum ::cimi-core/token)
 
 (def external-object-template-regex #"^external-object-template/[a-z]+(-[a-z]+)*$")
 (s/def ::href (s/and string? #(re-matches external-object-template-regex %)))
@@ -21,4 +23,6 @@
                                             ::bucketName
                                             ::objectStoreCred]
                                    :opt-un [::contentType
-                                            ::href]})
+                                            ::href
+                                            ::size
+                                            ::md5sum]})

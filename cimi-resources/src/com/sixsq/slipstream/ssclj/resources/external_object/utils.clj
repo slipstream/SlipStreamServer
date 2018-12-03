@@ -16,6 +16,8 @@
 
 
 (def ^:const default-ttl 15)
+(def ^:const s3-size-kw :contentLength)
+(def ^:const s3-md5-kw :contentMD5)
 
 
 (def request-admin {:identity                      {:current         "internal"
@@ -189,33 +191,45 @@
       (logu/log-and-throw 503 (format "Unable to create the bucket %s" bucketName)))))
 
 (defn s3-object-metadata
-  "See https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/s3/model/ObjectMetadata.html"
+  "See https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/s3/model/ObjectMetadata.html
+  Although most of metadata keys are yet unused, they are provided for documentation purpose"
   [s3client bucket object]
   (let [meta (try-catch-aws-fn (.getObjectMetadata s3client bucket object))]
-    {:cacheControl (.getCacheControl meta)
+    {:cacheControl       (.getCacheControl meta)
      :contentDisposition (.getContentDisposition meta)
-     :contentEncoding (.getContentEncoding meta)
-     :contentLanguage (.getContentLanguage meta)
-     :contentLength (.getContentLength meta)
-     :contentMD5   (.getContentMD5 meta)
-     :contentRange (.getContentRange meta)
-     :contentType (.getContentType meta)
-     :eTag (.getETag meta)
-     :expirationTime (.getExpirationTime meta)
-     :httpExpiresDate (.getHttpExpiresDate meta)
-     :instanceLength (.getInstanceLength meta)
-     :lastModified   (.getLastModified meta)
-     :ongoingRestore (.getOngoingRestore meta)
-     :partCount (.getPartCount meta)
-     :rawMetadata (.getRawMetadata meta)
-     :SSEAlgorithm (.getSSEAlgorithm meta)
-     :userMetadata (.getUserMetadata meta)
-     :versionId (.getVersionId meta)}))
+     :contentEncoding    (.getContentEncoding meta)
+     :contentLanguage    (.getContentLanguage meta)
+     s3-size-kw          (.getContentLength meta)
+     s3-md5-kw           (.getContentMD5 meta)
+     :contentRange       (.getContentRange meta)
+     :contentType        (.getContentType meta)
+     :eTag               (.getETag meta)
+     :expirationTime     (.getExpirationTime meta)
+     :httpExpiresDate    (.getHttpExpiresDate meta)
+     :instanceLength     (.getInstanceLength meta)
+     :lastModified       (.getLastModified meta)
+     :ongoingRestore     (.getOngoingRestore meta)
+     :partCount          (.getPartCount meta)
+     :rawMetadata        (.getRawMetadata meta)
+     :SSEAlgorithm       (.getSSEAlgorithm meta)
+     :userMetadata       (.getUserMetadata meta)
+     :versionId          (.getVersionId meta)}))
 
-(defn s3-object-size
-  "Returns the physical length of the entire object stored in S3."
-  [s3client bucket object]
-  (:instanceLength (s3-object-metadata s3client bucket object)))
+(defn s3-object-meta-prop
+  "Returns the s3 metadata identified by the keyword kw"
+  [s3client bucket object kw]
+  (kw (s3-object-metadata s3client bucket object)))
 
+(defn add-s3-size
+  "Adds a size attribute to external object if present in metadata
+  or returns untouched external object"
+  [eo s3client bucket object]
+  (let [size (s3-object-meta-prop s3client bucket object s3-size-kw)]
+    (if size (assoc eo :size size) eo)))
 
-
+(defn add-s3-md5sum
+  "Adds a md5sum attribute to external object if present in metadata
+  or returns untouched external object"
+  [eo s3client bucket object]
+  (let [md5 (s3-object-meta-prop s3client bucket object s3-md5-kw)]
+    (if md5 (assoc eo :md5sum md5) eo)))

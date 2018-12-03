@@ -444,6 +444,7 @@
                     (ltu/body->edn)
                     (ltu/is-status 200))
 
+                (with-redefs [s3/s3-object-metadata (fn [_ _ _] {s3/s3-size-kw 42 s3/s3-md5-kw "md5sum"})]
                 (let [uploading-eo (-> session
                                        (request abs-uri)
                                        (ltu/body->edn)
@@ -472,6 +473,8 @@
                                      (request abs-uri)
                                      (ltu/body->edn)
                                      (ltu/is-key-value :state eo/state-ready)
+                                     (ltu/is-key-value :size 42)
+                                     (ltu/is-key-value :md5sum "md5sum")
                                      (ltu/is-operation-present "download")
                                      (ltu/is-operation-present "delete")
                                      (ltu/is-operation-present "edit")
@@ -517,7 +520,7 @@
                         (request download-url-action
                                  :request-method :post)
                         (ltu/body->edn)
-                        (ltu/is-status 200)))))
+                        (ltu/is-status 200))))))
 
 
               ;;Deletion by owner should succeed , even in case the S3 bucket does not exist (anymore)
