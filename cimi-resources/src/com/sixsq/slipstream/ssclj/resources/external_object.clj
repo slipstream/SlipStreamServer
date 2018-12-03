@@ -384,11 +384,12 @@
 
 
 (defn delete
-  [{:keys [objectName bucketName objectStoreCred] :as resource} {{keep-object? :keep-s3-object keep-bucket? :keep-s3-bucket} :body :as request}]
+  [{:keys [objectName bucketName objectStoreCred] :as resource}
+   {{keep-object? :keep-s3-object, keep-bucket? :keep-s3-bucket} :body :as request}]
   (when-not keep-object?
     (try
       (s3/try-delete-s3-object (s3/format-creds-for-s3-api objectStoreCred) bucketName objectName)
-      (log/info (format "object % from bucket %s is deleted") objectName bucketName)
+      (log/info (format "object % from bucket %s has been deleted") objectName bucketName)
       (catch Exception e
         ;; When the user requests to delete an S3 object that no longer exists,
         ;; the external object resource should be deleted normally.
@@ -396,11 +397,13 @@
         (let [status (:status (ex-data e))]
           (when-not (= 404 status)
             (throw e))))))
+  ;; Always try to remove the bucket to avoid having unused empty buckets.
+  ;; Request will fail when the bucket isn't empty.  These errors are ignored.
   (when-not keep-bucket?
     (try
       (s3/try-delete-s3-bucket (s3/format-creds-for-s3-api objectStoreCred) bucketName)
       (log/debug (format "bucket %s became empty and was deleted") bucketName)
-      (catch Exception _ ))) ;;ignore exceptions which likely be caused by non empty buckets
+      (catch Exception _)))
   (delete-impl request))
 
 
