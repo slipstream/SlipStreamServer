@@ -104,6 +104,12 @@
              (.setStatusCode 404))]
     (throw ex)))
 
+(defn delete-s3-bucket-not-empty [_ _]
+  (let [ex (doto
+             (AmazonServiceException. "Simulated AWS Exception for deletion of not empty S3 bucket")
+             (.setStatusCode 409))]
+    (throw ex)))
+
 (defn head-bucket-not-authorized [_ _]
   (let [ex (doto
              (AmazonServiceException. "Simulated AWS Exception for bucket not authorized")
@@ -128,8 +134,9 @@
   [f]
   (with-redefs [s3/bucket-exists? (fn [_ _] true)           ;; by default assume the S3 bucket exists
                 s3/create-bucket! (fn [_ _] true)           ;; by default, a bucket creation succeeds
-                s3/head-bucket (fn [_ _] nil)               ;;by default, it is Ok to create objects in bucket
-                s3/delete-s3-object (fn [_ _] nil)]
+                s3/head-bucket (fn [_ _] nil)               ;; by default, it is Ok to create objects in bucket
+                s3/delete-s3-object (fn [_ _] nil)
+                s3/delete-s3-bucket (fn [_ _] nil)]
     (f)))
 
 (def base-uri (str p/service-context (u/de-camelcase eo/resource-name)))
@@ -226,7 +233,8 @@
 
               ;;Deleting a missing S3 object should succeed
               (with-redefs [s3/bucket-exists? (fn [_ _] true)
-                            s3/delete-s3-object delete-s3-object-not-found]
+                            s3/delete-s3-object delete-s3-object-not-found
+                            s3/delete-s3-bucket delete-s3-bucket-not-empty]
                 (-> session
                     (request abs-uri
                              :request-method :delete)
@@ -517,7 +525,7 @@
                 (-> session
                     (request abs-uri
                              :request-method :delete
-                             :body (json/write-str {:keep-s3-object false})) ;;attempt s3 deletion while testing
+                             :body (json/write-str {:keep-s3-object false :keep-s3-bucket false})) ;;attempt s3 deletion while testing
                     (ltu/body->edn)
                     (ltu/is-status 200)))
 

@@ -12,7 +12,7 @@
     (com.amazonaws.client.builder AwsClientBuilder$EndpointConfiguration)
     (com.amazonaws.services.s3 AmazonS3ClientBuilder)
     (com.amazonaws.services.s3.model CreateBucketRequest DeleteObjectRequest
-                                     GeneratePresignedUrlRequest HeadBucketRequest)))
+                                     GeneratePresignedUrlRequest HeadBucketRequest DeleteBucketRequest)))
 
 
 (def ^:const default-ttl 15)
@@ -86,6 +86,18 @@
   (let [deleteRequest (DeleteObjectRequest. bucket object)]
     (try-catch-aws-fn
       (delete-s3-object (get-s3-client s3-creds) deleteRequest))))
+
+(defn delete-s3-bucket
+  "Mocked in unit tests. Externalized from function below to allow for
+   exceptions to be caught."
+  [s3client deleteRequest]
+  (.deleteBucket s3client deleteRequest))
+
+
+(defn try-delete-s3-bucket [s3-creds bucket]
+  (let [deleteRequest (DeleteBucketRequest. bucket)]
+    (try-catch-aws-fn
+      (delete-s3-bucket (get-s3-client s3-creds) deleteRequest))))
 
 
 (defn bucket-exists?
