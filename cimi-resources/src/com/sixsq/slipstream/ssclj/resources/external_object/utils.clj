@@ -11,8 +11,8 @@
     (com.amazonaws.auth AWSStaticCredentialsProvider BasicAWSCredentials)
     (com.amazonaws.client.builder AwsClientBuilder$EndpointConfiguration)
     (com.amazonaws.services.s3 AmazonS3ClientBuilder)
-    (com.amazonaws.services.s3.model CreateBucketRequest DeleteObjectRequest
-                                     GeneratePresignedUrlRequest HeadBucketRequest DeleteBucketRequest)))
+    (com.amazonaws.services.s3.model CreateBucketRequest DeleteBucketRequest
+                                     DeleteObjectRequest GeneratePresignedUrlRequest HeadBucketRequest)))
 
 
 (def ^:const default-ttl 15)
@@ -192,7 +192,7 @@
 
 (defn s3-object-metadata
   "See https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/s3/model/ObjectMetadata.html
-  Although most of metadata keys are yet unused, they are provided for documentation purpose"
+  Although most of metadata keys are yet unused, they are provided for documentation purpose."
   [s3client bucket object]
   (let [meta (try-catch-aws-fn (.getObjectMetadata s3client bucket object))]
     {:cacheControl       (.getCacheControl meta)
@@ -222,14 +222,20 @@
 
 (defn add-s3-size
   "Adds a size attribute to external object if present in metadata
-  or returns untouched external object"
+  or returns untouched external object. Ignore any S3 exception "
   [eo s3client bucket object]
-  (let [size (s3-object-meta-prop s3client bucket object s3-size-kw)]
+  (let [size (try
+               (s3-object-meta-prop s3client bucket object s3-size-kw)
+               (catch Exception _
+                 (log/warn (str "Could not access the metadata for S3 object " object))))]
     (if size (assoc eo :size size) eo)))
 
 (defn add-s3-md5sum
   "Adds a md5sum attribute to external object if present in metadata
-  or returns untouched external object"
+  or returns untouched external object. Ignore any S3 exception"
   [eo s3client bucket object]
-  (let [md5 (s3-object-meta-prop s3client bucket object s3-md5-kw)]
+  (let [md5 (try
+              (s3-object-meta-prop s3client bucket object s3-md5-kw)
+              (catch Exception _
+                (log/warn (str "Could not access the metadata for S3 object " object))))]
     (if md5 (assoc eo :md5sum md5) eo)))
