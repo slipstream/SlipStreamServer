@@ -2,7 +2,8 @@
   (:require
     [clojure.string :as s]
     [clojure.test :refer :all]
-    [com.sixsq.slipstream.ssclj.resources.external-object.utils :as u]))
+    [com.sixsq.slipstream.ssclj.resources.external-object.utils :as u])
+  (:import (com.amazonaws AmazonServiceException)))
 
 
 (deftest test-generate-url
@@ -43,10 +44,23 @@
     (is (= {:size 99} (u/add-s3-size {:size 99} nil nil nil)))
     (is (= {} (u/add-s3-md5sum {} nil nil nil)))
     (is (= {:mykey "myvalue"}) (-> {:myKey "myvalue"}
-                                           (u/add-s3-size nil nil nil)
-                                           (u/add-s3-md5sum nil nil nil))))
+                                   (u/add-s3-size nil nil nil)
+                                   (u/add-s3-md5sum nil nil nil))))
 
   (with-redefs [u/s3-object-metadata (fn [_ _ _] nil)]
+    (is (= {} (u/add-s3-size {} nil nil nil)))
+    (is (= nil (u/add-s3-size nil nil nil nil)))
+    (is (= {:size 99} (u/add-s3-size {:size 99} nil nil nil)))
+    (is (= {} (u/add-s3-md5sum {} nil nil nil)))
+    (is (= {:mykey "myvalue"}) (-> {:myKey "myvalue"}
+                                   (u/add-s3-size nil nil nil)
+                                   (u/add-s3-md5sum nil nil nil))))
+
+
+  (with-redefs [u/s3-object-metadata (fn [_ _ _] (let [ex (doto
+                                                            (AmazonServiceException. "Simulated AWS Exception for S3 permission error")
+                                                            (.setStatusCode 403))]
+                                                   (throw ex)))]
     (is (= {} (u/add-s3-size {} nil nil nil)))
     (is (= nil (u/add-s3-size nil nil nil nil)))
     (is (= {:size 99} (u/add-s3-size {:size 99} nil nil nil)))
