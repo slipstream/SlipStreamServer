@@ -10,8 +10,8 @@
     (com.amazonaws.auth AWSStaticCredentialsProvider BasicAWSCredentials)
     (com.amazonaws.client.builder AwsClientBuilder$EndpointConfiguration)
     (com.amazonaws.services.s3 AmazonS3ClientBuilder)
-    (com.amazonaws.services.s3.model CreateBucketRequest DeleteBucketRequest
-                                     DeleteObjectRequest GeneratePresignedUrlRequest HeadBucketRequest)))
+    (com.amazonaws.services.s3.model CannedAccessControlList CreateBucketRequest
+                                     DeleteBucketRequest DeleteObjectRequest GeneratePresignedUrlRequest HeadBucketRequest)))
 
 
 (def ^:const default-ttl 15)
@@ -234,3 +234,21 @@
               (catch Exception _
                 (log/warn (str "Could not access the metadata for S3 object " object))))]
     (if md5 (assoc eo :md5sum md5) eo)))
+
+(defn set-object-acl
+  [s3client bucket object]
+  (.setObjectAcl s3client bucket object CannedAccessControlList/PublicRead))
+
+(defn try-set-public-read-object
+  [s3client bucket object]
+  (try-catch-aws-fn (set-object-acl s3client bucket object)))
+
+(defn set-public-read-object
+  "Returns the untouched resource. Side effect is only on S3 permissions"
+  [{:keys [objectStoreCred bucketName objectName] :as resource}]
+  (let [s3client (-> objectStoreCred
+                     (format-creds-for-s3-api)
+                     (get-s3-client))]
+    (try-set-public-read-object s3client bucketName objectName)
+    resource))
+

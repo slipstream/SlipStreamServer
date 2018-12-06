@@ -330,82 +330,94 @@
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
-      (-> (crud/retrieve-by-id-as-admin id)
-          (upload request)))
+      (upload (crud/retrieve-by-id-as-admin id) request))
     (catch Exception e
       (or (ex-data e) (throw e)))))
 
 
-(defmethod crud/do-action [resource-url "ready"]
-  [{{uuid :uuid} :params :as request}]
-  (try
-    (let [resource (crud/retrieve-by-id-as-admin (str resource-url "/" uuid))
-          {:keys [bucketName objectName objectStoreCred]} resource
-          s3client (-> objectStoreCred
-                       (s3/format-creds-for-s3-api)
-                       (s3/get-s3-client))]
-      (-> resource
-          (a/can-modify? request)
-          (verify-state #{state-uploading} "ready")
-          (assoc :state state-ready)
-          (s3/add-s3-size s3client bucketName objectName)
-          (s3/add-s3-md5sum s3client bucketName objectName)
-          (db/edit request)))
-    (catch Exception e
-      (or (ex-data e) (throw e)))))
 
-;;; Download URL operation
+  (defmulti ready-subtype
+            (fn [resource _] (:objectType resource)))
 
-(defn download-fn
-  "Provided 'resource' and 'request', returns object storage download URL."
-  [{:keys [objectType bucketName objectName objectStoreCred] :as resource} {{ttl :ttl} :body :as request}]
-  (verify-state resource #{state-ready} "download")
-  (log/info "Requesting download url: " objectName)
-  (s3/generate-url (s3/format-creds-for-s3-api objectStoreCred)
-                   bucketName objectName :get
-                   {:ttl (or ttl s3/default-ttl)}))
+  (defmethod ready-subtype :default
+    [resource request]
+    (-> resource
+        (a/can-modify? request)
+        (verify-state #{state-uploading} "ready")
+        (assoc :state state-ready)
+        (s3/add-s3-size s3client bucketName objectName)
+        (s3/add-s3-md5sum s3client bucketName objectName)
+        (db/edit request)))
 
-
-(defn download
-  [resource request]
-  (try
-    (r/json-response {:uri (download-fn resource request)})
-    (catch Exception e
-      (or (ex-data e) (throw e)))))
-
-
-(defmethod crud/do-action [resource-url "download"]
-  [{{uuid :uuid} :params :as request}]
-  (try
-    (let [id (str resource-url "/" uuid)]
-      (-> (crud/retrieve-by-id-as-admin id)
-          (a/can-view? request)
-          (download request)))
-    (catch Exception e
-      (or (ex-data e) (throw e)))))
-
-;;; Delete resource.
-
-(def delete-impl (std-crud/delete-fn resource-name))
-
-
-(defn delete
-  [{:keys [objectName bucketName objectStoreCred] :as resource}
-   {{keep-object? :keep-s3-object, keep-bucket? :keep-s3-bucket} :body :as request}]
-  (when-not keep-object?
+  (defmethod crud/do-action [resource-url "ready"]
+    [{{uuid :uuid} :params :as request}]
     (try
-      (s3/try-delete-s3-object (s3/format-creds-for-s3-api objectStoreCred) bucketName objectName)
-      (log/infof "object %s from bucket %s has been deleted" objectName bucketName)
+      (let [resource (crud/retrieve-by-id-as-admin (str resource-url "/" uuid))]
+        (ready-subtype resource request))
       (catch Exception e
-        ;; When the user requests to delete an S3 object that no longer exists,
-        ;; the external object resource should be deleted normally.
-        ;; Ignore 404 exceptions.
-        (let [status (:status (ex-data e))]
-          (when-not (= 404 status)
-            (throw e))))))
-  ;; Always try to remove the bucket to avoid having unused empty buckets.
-  ;; Request will fail when the bucket isn't empty.  These errors are ignored.
-  (when-not keep-bucket?
+        (or (ex-data e) (throw e)))))
+
+  ;;; Download URL operation
+
+  (defn download-fn
+    "Provided 'resource' and 'request', returns object storage download URL."
+    [{:keys [objectType bucketName objectName objectStoreCred] :as resource} {{ttl :ttl} :body :as request}]
+    (verify-state resource #{state-ready} "download")
+    (log/info "Requesting download url: " objectName)
+    (s3/generate-url (s3/format-creds-for-s3-api objectStoreCred)
+                     bucketName objectName :get
+                     {:ttl (or ttl s3/default-ttl)}))
+
+
+  (defn download
+    [resource request]
+    (try
+      (r/json-response {:uri (download-fn resource request)})
+      (catch Exception e
+        (or (ex-data e) (throw e)))))
+
+
+  (defmethod crud/do-action [resource-url "download"]
+    [{{uuid :uuid} :params :as request}]
+    (try
+      (let [id (str resource-url "/" uuid)]
+        (-> (crud/retrieve-by-id-as-admin id)
+            (a/can-view? request)
+            (download request)))
+      (catch Exception e
+        (or (ex-data e) (throw e)))))
+
+  ;;; Delete resource.
+
+  (def delete-impl (std-crud/delete-fn resource-name))
+
+
+  (defn delete
+    [{:keys [objectName bucketName objectStoreCred] :as resource}
+     {{keep-object? :keep-s3-object, keep-bucket? :keep-s3-bucket} :body :as request}]
+    (when-not keep-object?
+      (try
+        (s3/try-delete-s3-object (s3/format-creds-for-s3-api objectStoreCred) bucketName objectName)
+        (log/info (format "object % from bucket %s has been deleted" objectName bucketName))
+        (catch Exception e
+          ;; When the user requests to delete an S3 object that no longer exists,
+          ;; the external object resource should be deleted normally.
+          ;; Ignore 404 exceptions.
+          (let [status (:status (ex-data e))]
+            (when-not (= 404 status)
+              (throw e))))))
+    ;; Always try to remove the bucket to avoid having unused empty buckets.
+    ;; Request will fail when the bucket isn't empty.  These errors are ignored.
+    (when-not keep-bucket?
+      (try
+        (s3/try-delete-s3-bucket (s3/format-creds-for-s3-api objectStoreCred) bucketName)
+        (log/debug (format "bucket %s became empty and was deleted") bucketName)
+        (catch Exception _)))
+    (delete-impl request))
+
+
+  (defmethod crud/delete resource-name
+    [{{uuid :uuid} :params :as request}]
     (try
       (s3/try-delete-s3-bucket (s3/format-creds-for-s3-api objectStoreCred) bucketName)
       (log/debugf "bucket %s became empty and was deleted" bucketName)
@@ -424,10 +436,11 @@
       (or (ex-data e) (throw e)))))
 
 
-;;
-;; initialization: no schema for the parent
-;;
 
-(defn initialize
-  []
-  (std-crud/initialize resource-url nil))
+  ;;
+  ;; initialization: no schema for the parent
+  ;;
+
+  (defn initialize
+    []
+    (std-crud/initialize resource-url nil))

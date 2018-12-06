@@ -128,6 +128,12 @@
              (.setStatusCode 301))]
     (throw ex)))
 
+(defn object-acl-not-exists [_ _ _]
+  (let [ex (doto
+             (AmazonServiceException. "Simulated AWS Exception for missing bucket")
+             (.setStatusCode 404))]
+    (throw ex)))
+
 
 
 (defn s3-redefs!
@@ -136,7 +142,8 @@
                 s3/create-bucket! (fn [_ _] true)           ;; by default, a bucket creation succeeds
                 s3/head-bucket (fn [_ _] nil)               ;; by default, it is Ok to create objects in bucket
                 s3/delete-s3-object (fn [_ _] nil)
-                s3/delete-s3-bucket (fn [_ _] nil)]
+                s3/delete-s3-bucket (fn [_ _] nil)
+                s3/set-object-acl (fn [_ _ _] nil)]
     (f)))
 
 (def base-uri (str p/service-context (u/de-camelcase eo/resource-name)))
@@ -467,6 +474,39 @@
                         (request ready-url-action
                                  :request-method :post)
                         (ltu/body->edn)
+                        (ltu/is-status 403)))
+
+                 
+
+                  ;; owner can trigger the ready action to prevent further changes to object
+                  (-> session
+                      (request ready-url-action
+                               :request-method :post)
+                      (ltu/body->edn)
+                      (ltu/is-status 200))
+
+                  (let [ready-eo (-> session
+                                     (request abs-uri)
+                                     (ltu/body->edn)
+                                     (ltu/is-key-value :state eo/state-ready)
+                                     (ltu/is-operation-present "download")
+                                     (ltu/is-operation-present "delete")
+                                     (ltu/is-operation-present "edit")
+                                     (ltu/is-operation-absent "upload")
+                                     (ltu/is-operation-absent "ready")
+                                     (ltu/is-status 200))
+                        download-url-action (str p/service-context (ltu/get-op ready-eo "download"))]
+
+                    ;; check states for user with view access
+                    (-> session-user-view
+                        (request abs-uri)
+                        (ltu/body->edn)
+                        (ltu/is-key-value :state eo/state-ready)
+                        (ltu/is-operation-present "download")
+                        (ltu/is-operation-absent "delete")
+                        (ltu/is-operation-absent "edit")
+                        (ltu/is-operation-absent "upload")
+                        (ltu/is-operation-absent "ready")
                         (ltu/is-status 200))
 
                     (let [ready-eo (-> session
