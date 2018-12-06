@@ -11,7 +11,7 @@
 (s/def ::bucketName ::cimi-core/nonblank-string)
 
 (s/def ::contentType ::cimi-core/nonblank-string)
-(s/def ::size int?)
+(s/def ::size nat-int?)
 (s/def ::md5sum ::cimi-core/token)
 
 (def external-object-template-regex #"^external-object-template/[a-z]+(-[a-z]+)*$")

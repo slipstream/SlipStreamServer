@@ -20,7 +20,7 @@
 
 (deftest add-size-or-md5sum
 
-  (with-redefs [u/s3-object-metadata (fn [_ _ _] {u/s3-size-kw 1 u/s3-md5-kw "aaa"})]
+  (with-redefs [u/s3-object-metadata (fn [_ _ _] {:contentLength 1, :contentMD5 "aaa"})]
     (is (= {:size 1} (u/add-s3-size {} nil nil nil)))
     (is (= {:size 1} (u/add-s3-size nil nil nil nil)))
     (is (= {:size 1} (u/add-s3-size {:size 99} nil nil nil)))
@@ -29,7 +29,7 @@
                                                         (u/add-s3-size nil nil nil)
                                                         (u/add-s3-md5sum nil nil nil))))
 
-  (with-redefs [u/s3-object-metadata (fn [_ _ _] {u/s3-size-kw 2 u/s3-md5-kw nil})]
+  (with-redefs [u/s3-object-metadata (fn [_ _ _] {:contentLength 2, :contentMD5 nil})]
     (is (= {:size 2} (u/add-s3-size {} nil nil nil)))
     (is (= {:size 2} (u/add-s3-size nil nil nil nil)))
     (is (= {:size 2} (u/add-s3-size {:size 99} nil nil nil)))
@@ -38,7 +38,7 @@
                                            (u/add-s3-size nil nil nil)
                                            (u/add-s3-md5sum nil nil nil))))
 
-  (with-redefs [u/s3-object-metadata (fn [_ _ _] {u/s3-size-kw nil u/s3-md5-kw nil})]
+  (with-redefs [u/s3-object-metadata (fn [_ _ _] {:contentLength nil, :contentMD5 nil})]
     (is (= {} (u/add-s3-size {} nil nil nil)))
     (is (= nil (u/add-s3-size nil nil nil nil)))
     (is (= {:size 99} (u/add-s3-size {:size 99} nil nil nil)))

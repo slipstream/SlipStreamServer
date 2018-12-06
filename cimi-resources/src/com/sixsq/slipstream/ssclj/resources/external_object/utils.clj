@@ -3,7 +3,6 @@
     [clj-time.coerce :as tc]
     [clj-time.core :as t]
     [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.util.log :as logu])
   (:import
@@ -16,8 +15,6 @@
 
 
 (def ^:const default-ttl 15)
-(def ^:const s3-size-kw :contentLength)
-(def ^:const s3-md5-kw :contentMD5)
 
 
 (def request-admin {:identity                      {:current         "internal"
@@ -190,6 +187,7 @@
       resource
       (logu/log-and-throw 503 (format "Unable to create the bucket %s" bucketName)))))
 
+
 (defn s3-object-metadata
   "See https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/s3/model/ObjectMetadata.html
   Although most of metadata keys are yet unused, they are provided for documentation purpose."
@@ -199,8 +197,8 @@
      :contentDisposition (.getContentDisposition meta)
      :contentEncoding    (.getContentEncoding meta)
      :contentLanguage    (.getContentLanguage meta)
-     s3-size-kw          (.getContentLength meta)
-     s3-md5-kw           (.getContentMD5 meta)
+     :contentLength      (.getContentLength meta)
+     :contentMD5         (.getContentMD5 meta)
      :contentRange       (.getContentRange meta)
      :contentType        (.getContentType meta)
      :eTag               (.getETag meta)
@@ -215,27 +213,24 @@
      :userMetadata       (.getUserMetadata meta)
      :versionId          (.getVersionId meta)}))
 
-(defn s3-object-meta-prop
-  "Returns the s3 metadata identified by the keyword kw"
-  [s3client bucket object kw]
-  (kw (s3-object-metadata s3client bucket object)))
 
 (defn add-s3-size
   "Adds a size attribute to external object if present in metadata
   or returns untouched external object. Ignore any S3 exception "
   [eo s3client bucket object]
   (let [size (try
-               (s3-object-meta-prop s3client bucket object s3-size-kw)
+               (:contentLength (s3-object-metadata s3client bucket object))
                (catch Exception _
                  (log/warn (str "Could not access the metadata for S3 object " object))))]
     (if size (assoc eo :size size) eo)))
+
 
 (defn add-s3-md5sum
   "Adds a md5sum attribute to external object if present in metadata
   or returns untouched external object. Ignore any S3 exception"
   [eo s3client bucket object]
   (let [md5 (try
-              (s3-object-meta-prop s3client bucket object s3-md5-kw)
+              (:contentMD5 (s3-object-metadata s3client bucket object))
               (catch Exception _
                 (log/warn (str "Could not access the metadata for S3 object " object))))]
     (if md5 (assoc eo :md5sum md5) eo)))
