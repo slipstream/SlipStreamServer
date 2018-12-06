@@ -416,13 +416,6 @@
     (delete-impl request))
 
 
-  (defmethod crud/delete resource-name
-    [{{uuid :uuid} :params :as request}]
-    (try
-      (s3/try-delete-s3-bucket (s3/format-creds-for-s3-api objectStoreCred) bucketName)
-      (log/debugf "bucket %s became empty and was deleted" bucketName)
-      (catch Exception _)))
-  (delete-impl request))
 
 
 (defmethod crud/delete resource-name
