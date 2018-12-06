@@ -27,7 +27,9 @@
               :ram              2048
               :disk             100
               :volatileDisk     500
-              :ports            "udp:4000:4000 tcp::22 tcp:15000-15005:5000-5005 tcp::6500-6503"
+              :ports            ["udp:4000:4000" "tcp::22" "tcp:15000-15005:5000-5005" "tcp::6500-6503"]
+              :mounts           ["src=abc,dst=/var/tmp/abc,readonly" "type=bind,src=,dst=/var/tmp/abc"]
+
               :networkType      "public"
 
               :inputParameters  [{:parameter "iparam-1" :description "desc2" :value "100"}
@@ -58,5 +60,5 @@
       (stu/is-invalid ::module-component/module-component (dissoc root k)))
 
     ;; optional attributes
-    (doseq [k #{:cpu :ram :disk :volatileDisk ::ports :targets :inputParameters :commit}]
+    (doseq [k #{:cpu :ram :disk :volatileDisk :ports :mounts :targets :inputParameters :commit}]
       (stu/is-valid ::module-component/module-component (dissoc root k)))))
