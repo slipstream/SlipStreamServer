@@ -128,11 +128,7 @@
              (.setStatusCode 301))]
     (throw ex)))
 
-(defn object-acl-not-exists [_ _ _]
-  (let [ex (doto
-             (AmazonServiceException. "Simulated AWS Exception for missing bucket")
-             (.setStatusCode 404))]
-    (throw ex)))
+
 
 
 
@@ -476,7 +472,7 @@
                         (ltu/body->edn)
                         (ltu/is-status 403)))
 
-                 
+
 
                   ;; owner can trigger the ready action to prevent further changes to object
                   (-> session
