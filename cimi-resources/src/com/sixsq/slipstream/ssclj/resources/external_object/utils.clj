@@ -252,3 +252,16 @@
     (try-set-public-read-object s3client bucketName objectName)
     resource))
 
+(defn public-url
+  [s3client bucket object]
+  (.toString (.getUrl s3client bucket object)))
+
+(defn add-public-url
+  "Add a publicUrl attribute to the ressource if present
+  otherwise return untouched external-object"
+  [{:keys [objectStoreCred bucketName objectName] :as resource}]
+  (let [s3client (-> objectStoreCred
+                     (format-creds-for-s3-api)
+                     (get-s3-client))
+        url  (public-url s3client bucketName objectName)]
+    (if url (assoc resource :publicUrl url) resource)))

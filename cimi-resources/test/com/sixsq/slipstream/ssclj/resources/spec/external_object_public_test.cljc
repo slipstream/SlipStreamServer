@@ -21,7 +21,8 @@
                      :created         timestamp
                      :updated         timestamp
                      :acl             valid-acl
-                     :state           eo/state-new})]
+                     :state           eo/state-new
+                     :publicUrl       "http://bucket.s3.com"})]
 
     (stu/is-valid ::eo-public/external-object root)
 
@@ -31,5 +32,5 @@
       (stu/is-invalid ::eo-public/external-object (dissoc root k)))
 
     ;; optional keywords
-    (doseq [k #{:contentType}]
+    (doseq [k #{ :publicUrl} ]
       (stu/is-valid ::eo-public/external-object (dissoc root k)))))

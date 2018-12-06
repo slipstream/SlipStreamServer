@@ -2,10 +2,16 @@
   (:require
     [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.ssclj.resources.spec.common :as c]
+    [com.sixsq.slipstream.ssclj.resources.spec.core :as cimi-core]
     [com.sixsq.slipstream.ssclj.resources.spec.external-object :as eo]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
-(def external-object-public-keys-spec eo/common-external-object-attrs)
+
+(s/def ::publicUrl ::cimi-core/nonblank-string)
+
+(def external-object-public-keys-spec
+  (su/merge-keys-specs [eo/common-external-object-attrs
+                        {:opt-un [::publicUrl]}]))
 
 (def resource-keys-spec
   (su/merge-keys-specs [c/common-attrs

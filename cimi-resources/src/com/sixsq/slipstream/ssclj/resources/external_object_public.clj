@@ -32,5 +32,6 @@
       (a/can-modify? request)
       (eo/verify-state #{eo/state-uploading} "ready")
       (s3/set-public-read-object)
+      (s3/add-public-url)
       (assoc :state eo/state-ready)
       (db/edit request))))

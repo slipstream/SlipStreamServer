@@ -40,7 +40,7 @@
              (.setStatusCode 404))]
     (throw ex)))
 
-(deftest public-access
+(deftest check-public-access
   (let [session-anon (-> (ltu/ring-app)
                          session
                          (content-type "application/json"))
@@ -51,12 +51,12 @@
                                                  (assoc :href (:id template))
                                                  (dissoc :objectType))}
         _ (-> session-user
-                (request base-uri
-                         :request-method :post
-                         :body (json/write-str create-href))
-                (ltu/body->edn)
-                (ltu/is-status 201)
-                (ltu/location))
+              (request base-uri
+                       :request-method :post
+                       :body (json/write-str create-href))
+              (ltu/body->edn)
+              (ltu/is-status 201)
+              (ltu/location))
         entry (-> session-user
                   (request base-uri)
                   (ltu/body->edn)
@@ -104,11 +104,14 @@
           (ltu/is-status 404)))
 
 
-    (with-redefs [s3/set-object-acl (fn [_ _ _] nil)]
+    ;;With public ACL the public URL should be set on ready action
+    (with-redefs [s3/set-object-acl (fn [_ _ _] nil)
+                  s3/public-url (fn [_ _ _] "https://my-object.s3.com")]
       (-> session-user
           (request ready-url-action
                    :request-method :post)
           (ltu/body->edn)
+          (ltu/is-key-value :publicUrl "https://my-object.s3.com")
           (ltu/is-status 200)))))
 
 
