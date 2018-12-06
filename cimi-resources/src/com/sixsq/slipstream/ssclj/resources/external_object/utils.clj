@@ -150,7 +150,7 @@
     (or (bucket-exists? s3client bucketName)
         (create-bucket! s3client bucketName))
     (catch Exception e
-      (log/error (format "Error when creating bucket %s: %s" bucketName (.getMessage e)))
+      (log/errorf "Error when creating bucket %s: %s" bucketName (.getMessage e))
       false)))
 
 
