@@ -389,7 +389,7 @@
   (when-not keep-object?
     (try
       (s3/try-delete-s3-object (s3/format-creds-for-s3-api objectStoreCred) bucketName objectName)
-      (log/info (format "object %s from bucket %s has been deleted") objectName bucketName)
+      (log/infof "object %s from bucket %s has been deleted" objectName bucketName)
       (catch Exception e
         ;; When the user requests to delete an S3 object that no longer exists,
         ;; the external object resource should be deleted normally.
@@ -402,7 +402,7 @@
   (when-not keep-bucket?
     (try
       (s3/try-delete-s3-bucket (s3/format-creds-for-s3-api objectStoreCred) bucketName)
-      (log/debug (format "bucket %s became empty and was deleted") bucketName)
+      (log/debugf "bucket %s became empty and was deleted" bucketName)
       (catch Exception _)))
   (delete-impl request))
 
