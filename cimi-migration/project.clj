@@ -1,6 +1,6 @@
-(def +version+ "3.65-SNAPSHOT")
+(def +version+ "3.65")
 
-(defproject com.sixsq.slipstream/SlipStreamMigration-jar "3.65-SNAPSHOT"
+(defproject com.sixsq.slipstream/SlipStreamMigration-jar "3.65"
 
   :distribution "utilities to manage with migrations"
   :url "https://github.com/slipstream/SlipStreamServer"
