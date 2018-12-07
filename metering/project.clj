@@ -1,6 +1,6 @@
-(def +version+ "3.65")
+(def +version+ "3.66-SNAPSHOT")
 
-(defproject com.sixsq.slipstream/metering "3.65"
+(defproject com.sixsq.slipstream/metering "3.66-SNAPSHOT"
 
   :description "metering server"
 
