@@ -27,11 +27,15 @@
 
 (defmethod eo/ready-subtype eot/objectType
   [{:keys [objectStoreCred bucketName objectName] :as resource} request]
-  (let []
+  (let [s3client (-> objectStoreCred
+                     (s3/format-creds-for-s3-api)
+                     (s3/get-s3-client))]
   (-> resource
       (a/can-modify? request)
       (eo/verify-state #{eo/state-uploading} "ready")
       (s3/set-public-read-object)
       (s3/add-public-url)
       (assoc :state eo/state-ready)
+      (s3/add-s3-size s3client bucketName objectName)
+      (s3/add-s3-md5sum s3client bucketName objectName)
       (db/edit request))))
