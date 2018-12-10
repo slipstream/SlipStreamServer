@@ -130,8 +130,6 @@
 
 
 
-
-
 (defn s3-redefs!
   [f]
   (with-redefs [s3/bucket-exists? (fn [_ _] true)           ;; by default assume the S3 bucket exists
@@ -459,15 +457,11 @@
 
                     ;; triggering the ready url with anonymous, authorized or unauthorized viewer should fail
                     (doseq [session [session-anon session-user-no-view session-user-view]]
-
-
-                      ;; owner can trigger the ready action to prevent further changes to object
                       (-> session
                           (request ready-url-action
                                    :request-method :post)
                           (ltu/body->edn)
                           (ltu/is-status 403)))
-
 
                     ;; owner can trigger the ready action to prevent further changes to object
                     (-> session
@@ -476,14 +470,12 @@
                         (ltu/body->edn)
                         (ltu/is-status 200))
 
-
-
-
-
                     (let [ready-eo (-> session
                                        (request abs-uri)
                                        (ltu/body->edn)
                                        (ltu/is-key-value :state eo/state-ready)
+                                       (ltu/is-key-value :size 42)
+                                       (ltu/is-key-value :md5sum "md5sum")
                                        (ltu/is-operation-present "download")
                                        (ltu/is-operation-present "delete")
                                        (ltu/is-operation-present "edit")
@@ -504,71 +496,45 @@
                           (ltu/is-operation-absent "ready")
                           (ltu/is-status 200))
 
-                      (let [ready-eo (-> session
-                                         (request abs-uri)
-                                         (ltu/body->edn)
-                                         (ltu/is-key-value :state eo/state-ready)
-                                         (ltu/is-key-value :size 42)
-                                         (ltu/is-key-value :md5sum "md5sum")
-                                         (ltu/is-operation-present "download")
-                                         (ltu/is-operation-present "delete")
-                                         (ltu/is-operation-present "edit")
-                                         (ltu/is-operation-absent "upload")
-                                         (ltu/is-operation-absent "ready")
-                                         (ltu/is-status 200))
-                            download-url-action (str p/service-context (ltu/get-op ready-eo "download"))]
+                      ;; triggering the download url with anonymous or unauthorized user should fail
+                      (-> session-anon
+                          (request download-url-action
+                                   :request-method :post)
+                          (ltu/body->edn)
+                          (ltu/is-status 403))
 
-                        ;; check states for user with view access
-                        (-> session-user-view
-                            (request abs-uri)
-                            (ltu/body->edn)
-                            (ltu/is-key-value :state eo/state-ready)
-                            (ltu/is-operation-present "download")
-                            (ltu/is-operation-absent "delete")
-                            (ltu/is-operation-absent "edit")
-                            (ltu/is-operation-absent "upload")
-                            (ltu/is-operation-absent "ready")
-                            (ltu/is-status 200))
+                      (-> session-user-no-view
+                          (request download-url-action
+                                   :request-method :post)
+                          (ltu/body->edn)
+                          (ltu/is-status 403))
 
-                        ;; triggering the download url with anonymous or unauthorized user should fail
-                        (-> session-anon
-                            (request download-url-action
-                                     :request-method :post)
-                            (ltu/body->edn)
-                            (ltu/is-status 403))
+                      ;; triggering download url as user with view access succeeds
+                      (-> session-user-view
+                          (request download-url-action
+                                   :request-method :post)
+                          (ltu/body->edn)
+                          (ltu/is-status 200))
 
-                        (-> session-user-no-view
-                            (request download-url-action
-                                     :request-method :post)
-                            (ltu/body->edn)
-                            (ltu/is-status 403))
-
-                        ;; triggering download url as user with view access succeeds
-                        (-> session-user-view
-                            (request download-url-action
-                                     :request-method :post)
-                            (ltu/body->edn)
-                            (ltu/is-status 200))
-
-                        ;; triggering download url as owner succeeds
-                        (-> session
-                            (request download-url-action
-                                     :request-method :post)
-                            (ltu/body->edn)
-                            (ltu/is-status 200))))))
+                      ;; triggering download url as owner succeeds
+                      (-> session
+                          (request download-url-action
+                                   :request-method :post)
+                          (ltu/body->edn)
+                          (ltu/is-status 200))))))
 
 
-                ;;Deletion by owner should succeed , even in case the S3 bucket does not exist (anymore)
-                (with-redefs [s3/bucket-exists? (fn [_ _] false)]
-                  (-> session
-                      (request abs-uri
-                               :request-method :delete
-                               :body (json/write-str {:keep-s3-object false :keep-s3-bucket false})) ;;attempt s3 deletion while testing
-                      (ltu/body->edn)
-                      (ltu/is-status 200)))
-
-                ;; ensure entry is really gone
+              ;;Deletion by owner should succeed , even in case the S3 bucket does not exist (anymore)
+              (with-redefs [s3/bucket-exists? (fn [_ _] false)]
                 (-> session
-                    (request abs-uri)
+                    (request abs-uri
+                             :request-method :delete
+                             :body (json/write-str {:keep-s3-object false :keep-s3-bucket false})) ;;attempt s3 deletion while testing
                     (ltu/body->edn)
-                    (ltu/is-status 404))))))))))
+                    (ltu/is-status 200)))
+
+              ;; ensure entry is really gone
+              (-> session
+                  (request abs-uri)
+                  (ltu/body->edn)
+                  (ltu/is-status 404)))))))))
