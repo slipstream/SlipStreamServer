@@ -217,24 +217,30 @@
 (defn add-s3-size
   "Adds a size attribute to external object if present in metadata
   or returns untouched external object. Ignore any S3 exception "
-  [eo s3client bucket object]
-  (let [size (try
-               (:contentLength (s3-object-metadata s3client bucket object))
+  [{:keys [objectStoreCred bucketName objectName] :as resource}]
+  (let [s3client (-> objectStoreCred
+                     (format-creds-for-s3-api)
+                     (get-s3-client))
+        size (try
+               (:contentLength (s3-object-metadata s3client bucketName objectName))
                (catch Exception _
-                 (log/warn (str "Could not access the metadata for S3 object " object))))]
-    (cond-> eo
+                 (log/warn (str "Could not access the metadata for S3 object " objectName))))]
+    (cond-> resource
             size (assoc :size size))))
 
 
 (defn add-s3-md5sum
   "Adds a md5sum attribute to external object if present in metadata
   or returns untouched external object. Ignore any S3 exception"
-  [eo s3client bucket object]
-  (let [md5 (try
-              (:contentMD5 (s3-object-metadata s3client bucket object))
+  [{:keys [objectStoreCred bucketName objectName] :as resource}]
+  (let [s3client (-> objectStoreCred
+                     (format-creds-for-s3-api)
+                     (get-s3-client))
+        md5 (try
+              (:contentMD5 (s3-object-metadata s3client bucketName objectName))
               (catch Exception _
-                (log/warn (str "Could not access the metadata for S3 object " object))))]
-    (cond-> eo
+                (log/warn (str "Could not access the metadata for S3 object " objectName))))]
+    (cond-> resource
             md5 (assoc :md5sum md5))))
 
 

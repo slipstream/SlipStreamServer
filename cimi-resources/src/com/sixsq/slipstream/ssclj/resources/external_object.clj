@@ -340,17 +340,14 @@
           (fn [resource _] (:objectType resource)))
 
 (defmethod ready-subtype :default
-  [{:keys [bucketName objectName objectStoreCred] :as resource} request]
-  (let [s3client (-> objectStoreCred
-                     (s3/format-creds-for-s3-api)
-                     (s3/get-s3-client))]
+  [resource request]
     (-> resource
         (a/can-modify? request)
         (verify-state #{state-uploading} "ready")
         (assoc :state state-ready)
-        (s3/add-s3-size s3client bucketName objectName)
-        (s3/add-s3-md5sum s3client bucketName objectName)
-        (db/edit request))))
+        (s3/add-s3-size )
+        (s3/add-s3-md5sum)
+        (db/edit request)))
 
 (defmethod crud/do-action [resource-url "ready"]
   [{{uuid :uuid} :params :as request}]
