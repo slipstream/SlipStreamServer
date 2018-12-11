@@ -49,70 +49,74 @@
         template (eoltu/get-template (str p/service-context eot/resource-url "/" public/objectType))
         create-href {:externalObjectTemplate (-> (external-object)
                                                  (assoc :href (:id template))
-                                                 (dissoc :objectType))}
-        _ (-> session-user
-              (request base-uri
-                       :request-method :post
-                       :body (json/write-str create-href))
-              (ltu/body->edn)
-              (ltu/is-status 201)
-              (ltu/location))
-        entry (-> session-user
-                  (request base-uri)
-                  (ltu/body->edn)
-                  (ltu/is-status 200)
-                  (ltu/is-resource-uri eo/collection-uri)
-                  (ltu/is-count 1)
-                  (ltu/entries eo/resource-tag)
-                  first)
-        id (:id entry)
-        abs-uri (str p/service-context id)
-        upload-op (-> session-user
-                      (request abs-uri)
-                      (ltu/body->edn)
-                      (ltu/is-operation-present "upload")
-                      (ltu/is-operation-present "delete")
-                      (ltu/is-operation-present "edit")
-                      (ltu/is-operation-absent "ready")
-                      (ltu/is-operation-absent "download")
-                      (ltu/is-status 200)
-                      (ltu/get-op "upload"))
+                                                 (dissoc :objectType))}]
 
-        abs-upload-uri (str p/service-context (u/de-camelcase upload-op))
+    ;; Create the test object.
+    (-> session-user
+        (request base-uri
+                 :request-method :post
+                 :body (json/write-str create-href))
+        (ltu/body->edn)
+        (ltu/is-status 201)
+        (ltu/location))
 
-        _ (-> session-user
-              (request abs-upload-uri
+    (let [entry (-> session-user
+                    (request base-uri)
+                    (ltu/body->edn)
+                    (ltu/is-status 200)
+                    (ltu/is-resource-uri eo/collection-uri)
+                    (ltu/is-count 1)
+                    (ltu/entries eo/resource-tag)
+                    first)
+          id (:id entry)
+          abs-uri (str p/service-context id)
+          upload-op (-> session-user
+                        (request abs-uri)
+                        (ltu/body->edn)
+                        (ltu/is-operation-present "upload")
+                        (ltu/is-operation-present "delete")
+                        (ltu/is-operation-present "edit")
+                        (ltu/is-operation-absent "ready")
+                        (ltu/is-operation-absent "download")
+                        (ltu/is-status 200)
+                        (ltu/get-op "upload"))
+
+          abs-upload-uri (str p/service-context (u/de-camelcase upload-op))]
+
+      ;; Upload object's content.
+      (-> session-user
+          (request abs-upload-uri
+                   :request-method :post)
+          (ltu/body->edn)
+          (ltu/is-status 200))
+
+      (let [uploading-eo (-> session-user
+                             (request abs-uri)
+                             (ltu/body->edn)
+                             (ltu/is-operation-present "ready")
+                             (ltu/is-status 200))
+
+            ready-url-action (str p/service-context (ltu/get-op uploading-eo "ready"))]
+
+
+        ;; Missing ACL should fail the action
+        (with-redefs [s3/set-object-acl object-acl-not-exists]
+          (-> session-user
+              (request ready-url-action
                        :request-method :post)
               (ltu/body->edn)
-              (ltu/is-status 200))
-
-        uploading-eo (-> session-user
-                         (request abs-uri)
-                         (ltu/body->edn)
-                         (ltu/is-operation-present "ready")
-                         (ltu/is-status 200))
-
-        ready-url-action (str p/service-context (ltu/get-op uploading-eo "ready"))]
+              (ltu/is-status 404)))
 
 
-    ;;Missing ACL should fail the action
-    (with-redefs [s3/set-object-acl object-acl-not-exists]
-      (-> session-user
-          (request ready-url-action
-                   :request-method :post)
-          (ltu/body->edn)
-          (ltu/is-status 404)))
-
-
-    ;;With public ACL the public URL should be set on ready action
-    (with-redefs [s3/set-object-acl (fn [_ _ _] nil)
-                  s3/public-url (fn [_ _ _] "https://my-object.s3.com")]
-      (-> session-user
-          (request ready-url-action
-                   :request-method :post)
-          (ltu/body->edn)
-          (ltu/is-key-value :publicUrl "https://my-object.s3.com")
-          (ltu/is-status 200)))))
+        ;; With public ACL the public URL should be set on ready action
+        (with-redefs [s3/set-object-acl (fn [_ _ _] nil)
+                      s3/public-url (fn [_ _ _] "https://my-object.s3.com")]
+          (-> session-user
+              (request ready-url-action
+                       :request-method :post)
+              (ltu/body->edn)
+              (ltu/is-key-value :publicURL "https://my-object.s3.com")
+              (ltu/is-status 200)))))))
 
 
 (deftest bad-methods

@@ -7,11 +7,11 @@
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
 
-(s/def ::publicUrl ::cimi-core/nonblank-string)
+(s/def ::publicURL ::cimi-core/nonblank-string)
 
 (def external-object-public-keys-spec
   (su/merge-keys-specs [eo/common-external-object-attrs
-                        {:opt-un [::publicUrl]}]))
+                        {:opt-un [::publicURL]}]))
 
 (def resource-keys-spec
   (su/merge-keys-specs [c/common-attrs

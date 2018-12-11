@@ -264,4 +264,4 @@
                      (format-creds-for-s3-api)
                      (get-s3-client))
         url  (public-url s3client bucketName objectName)]
-    (if url (assoc resource :publicUrl url) resource)))
+    (if url (assoc resource :publicURL url) resource)))
