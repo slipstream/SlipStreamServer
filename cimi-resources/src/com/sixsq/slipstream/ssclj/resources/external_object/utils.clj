@@ -235,13 +235,17 @@
                 (log/warn (str "Could not access the metadata for S3 object " object))))]
     (if md5 (assoc eo :md5sum md5) eo)))
 
-(defn set-object-acl
+
+;; Function separated to allow for mocking in unit tests.
+(defn set-acl-public-read
   [s3client bucket object]
   (.setObjectAcl s3client bucket object CannedAccessControlList/PublicRead))
 
+
 (defn try-set-public-read-object
   [s3client bucket object]
-  (try-catch-aws-fn (set-object-acl s3client bucket object)))
+  (try-catch-aws-fn (set-acl-public-read s3client bucket object)))
+
 
 (defn set-public-read-object
   "Returns the untouched resource. Side effect is only on S3 permissions"
@@ -252,16 +256,19 @@
     (try-set-public-read-object s3client bucketName objectName)
     resource))
 
+
 (defn public-url
   [s3client bucket object]
   (.toString (.getUrl s3client bucket object)))
 
+
 (defn add-public-url
-  "Add a publicUrl attribute to the ressource if present
+  "Add a publicURL attribute to the resource if present
   otherwise return untouched external-object"
   [{:keys [objectStoreCred bucketName objectName] :as resource}]
   (let [s3client (-> objectStoreCred
                      (format-creds-for-s3-api)
                      (get-s3-client))
         url  (public-url s3client bucketName objectName)]
-    (if url (assoc resource :publicURL url) resource)))
+    (cond-> resource
+            url (assoc :publicURL url))))

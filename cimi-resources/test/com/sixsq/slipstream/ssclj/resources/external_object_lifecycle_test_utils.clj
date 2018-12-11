@@ -137,7 +137,7 @@
                 s3/head-bucket (fn [_ _] nil)               ;; by default, it is Ok to create objects in bucket
                 s3/delete-s3-object (fn [_ _] nil)
                 s3/delete-s3-bucket (fn [_ _] nil)
-                s3/set-object-acl (fn [_ _ _] nil)]
+                s3/set-acl-public-read (fn [_ _ _] nil)]
     (f)))
 
 (def base-uri (str p/service-context (u/de-camelcase eo/resource-name)))
