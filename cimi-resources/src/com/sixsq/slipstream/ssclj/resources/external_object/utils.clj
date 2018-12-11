@@ -222,7 +222,8 @@
                (:contentLength (s3-object-metadata s3client bucket object))
                (catch Exception _
                  (log/warn (str "Could not access the metadata for S3 object " object))))]
-    (if size (assoc eo :size size) eo)))
+    (cond-> eo
+            size (assoc :size size))))
 
 
 (defn add-s3-md5sum
@@ -233,7 +234,8 @@
               (:contentMD5 (s3-object-metadata s3client bucket object))
               (catch Exception _
                 (log/warn (str "Could not access the metadata for S3 object " object))))]
-    (if md5 (assoc eo :md5sum md5) eo)))
+    (cond-> eo
+            md5 (assoc :md5sum md5))))
 
 
 ;; Function separated to allow for mocking in unit tests.
