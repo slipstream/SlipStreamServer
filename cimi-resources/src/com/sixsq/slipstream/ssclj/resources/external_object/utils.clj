@@ -259,12 +259,12 @@
 
 (defn public-url
   [s3client bucket object]
-  (.toString (.getUrl s3client bucket object)))
+  (str (.getUrl s3client bucket object)))
 
 
 (defn add-public-url
-  "Add a publicURL attribute to the resource if present
-  otherwise return untouched external-object"
+  "Add a publicURL attribute to the resource if present otherwise return
+  untouched external object."
   [{:keys [objectStoreCred bucketName objectName] :as resource}]
   (let [s3client (-> objectStoreCred
                      (format-creds-for-s3-api)
