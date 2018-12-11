@@ -37,10 +37,10 @@
                            (external-object)))
 
 
-(defn throw-object-acl-does-not-exist [_ _ _]
+(defn throw-any-aws-exception [_ _ _]
   (let [ex (doto
-             (AmazonServiceException. "Simulated AWS Exception for missing public read ACL")
-             (.setStatusCode 404))]
+             (AmazonServiceException. "Simulated AWS Exception")
+             (.setStatusCode 400))]
     (throw ex)))
 
 
@@ -104,22 +104,22 @@
 
 
         ;; Missing ACL should fail the action
-        (with-redefs [s3/set-acl-public-read throw-object-acl-does-not-exist]
+        (with-redefs [s3/set-acl-public-read throw-any-aws-exception]
           (-> session-user
               (request ready-url-action
                        :request-method :post)
               (ltu/body->edn)
-              (ltu/is-status 404)))
+              (ltu/is-status 500)))
 
 
         ;; With public ACL the public URL should be set on ready action
         (with-redefs [s3/set-acl-public-read (fn [_ _ _] nil)
-                      s3/public-url (fn [_ _ _] "https://my-object.s3.com")]
+                      s3/s3-url (fn [_ _ _] "https://my-object.s3.com")]
           (-> session-user
               (request ready-url-action
                        :request-method :post)
               (ltu/body->edn)
-              (ltu/is-key-value :publicURL "https://my-object.s3.com")
+              (ltu/is-key-value :URL "https://my-object.s3.com")
               (ltu/is-status 200)))))))
 
 

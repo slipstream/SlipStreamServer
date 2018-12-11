@@ -246,7 +246,10 @@
 
 (defn try-set-public-read-object
   [s3client bucket object]
-  (try-catch-aws-fn (set-acl-public-read s3client bucket object)))
+  (try
+    (try-catch-aws-fn (set-acl-public-read s3client bucket object))
+    (catch Exception _
+      (logu/log-and-throw 500 (str "Exception while setting S3 ACL on object " object)))))
 
 
 (defn set-public-read-object
@@ -259,18 +262,14 @@
     resource))
 
 
-(defn public-url
+(defn s3-url
   [s3client bucket object]
   (str (.getUrl s3client bucket object)))
 
 
-(defn add-public-url
-  "Add a publicURL attribute to the resource if present otherwise return
-  untouched external object."
+(defn add-s3-url
   [{:keys [objectStoreCred bucketName objectName] :as resource}]
   (let [s3client (-> objectStoreCred
                      (format-creds-for-s3-api)
-                     (get-s3-client))
-        url  (public-url s3client bucketName objectName)]
-    (cond-> resource
-            url (assoc :publicURL url))))
+                     (get-s3-client))]
+    (assoc resource :URL (s3-url s3client bucketName objectName))))
