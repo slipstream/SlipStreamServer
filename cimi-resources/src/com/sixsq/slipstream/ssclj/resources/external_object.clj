@@ -330,35 +330,43 @@
   [{{uuid :uuid} :params :as request}]
   (try
     (let [id (str resource-url "/" uuid)]
-      (-> (crud/retrieve-by-id-as-admin id)
-          (upload request)))
+      (upload (crud/retrieve-by-id-as-admin id) request))
     (catch Exception e
       (or (ex-data e) (throw e)))))
 
 
+
+(defmulti ready-subtype
+          (fn [resource _] (:objectType resource)))
+
+(defmethod ready-subtype :default
+  [resource request]
+  (-> resource
+      (a/can-modify? request)
+      (verify-state #{state-uploading} "ready")
+      (assoc :state state-ready)
+      (s3/add-s3-size)
+      (s3/add-s3-md5sum)
+      (db/edit request)))
+
 (defmethod crud/do-action [resource-url "ready"]
   [{{uuid :uuid} :params :as request}]
   (try
-    (let [resource (crud/retrieve-by-id-as-admin (str resource-url "/" uuid))
-          {:keys [bucketName objectName objectStoreCred]} resource
-          s3client (-> objectStoreCred
-                       (s3/format-creds-for-s3-api)
-                       (s3/get-s3-client))]
-      (-> resource
-          (a/can-modify? request)
-          (verify-state #{state-uploading} "ready")
-          (assoc :state state-ready)
-          (s3/add-s3-size s3client bucketName objectName)
-          (s3/add-s3-md5sum s3client bucketName objectName)
-          (db/edit request)))
+    (let [resource (crud/retrieve-by-id-as-admin (str resource-url "/" uuid))]
+      (ready-subtype resource request))
     (catch Exception e
       (or (ex-data e) (throw e)))))
 
 ;;; Download URL operation
 
-(defn download-fn
-  "Provided 'resource' and 'request', returns object storage download URL."
-  [{:keys [objectType bucketName objectName objectStoreCred] :as resource} {{ttl :ttl} :body :as request}]
+(defmulti download-subtype
+          "Provided 'resource' and 'request', returns object storage download URL."
+          (fn [resource _] (:objectType resource)))
+
+
+
+(defmethod download-subtype :default
+  [{:keys [bucketName objectName objectStoreCred] :as resource} {{ttl :ttl} :body :as request}]
   (verify-state resource #{state-ready} "download")
   (log/info "Requesting download url: " objectName)
   (s3/generate-url (s3/format-creds-for-s3-api objectStoreCred)
@@ -369,7 +377,7 @@
 (defn download
   [resource request]
   (try
-    (r/json-response {:uri (download-fn resource request)})
+    (r/json-response {:uri (download-subtype resource request)})
     (catch Exception e
       (or (ex-data e) (throw e)))))
 

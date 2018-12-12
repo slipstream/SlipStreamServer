@@ -10,8 +10,8 @@
     (com.amazonaws.auth AWSStaticCredentialsProvider BasicAWSCredentials)
     (com.amazonaws.client.builder AwsClientBuilder$EndpointConfiguration)
     (com.amazonaws.services.s3 AmazonS3ClientBuilder)
-    (com.amazonaws.services.s3.model CreateBucketRequest DeleteBucketRequest
-                                     DeleteObjectRequest GeneratePresignedUrlRequest HeadBucketRequest)))
+    (com.amazonaws.services.s3.model CannedAccessControlList CreateBucketRequest
+                                     DeleteBucketRequest DeleteObjectRequest GeneratePresignedUrlRequest HeadBucketRequest)))
 
 
 (def ^:const default-ttl 15)
@@ -217,20 +217,65 @@
 (defn add-s3-size
   "Adds a size attribute to external object if present in metadata
   or returns untouched external object. Ignore any S3 exception "
-  [eo s3client bucket object]
-  (let [size (try
-               (:contentLength (s3-object-metadata s3client bucket object))
+  [{:keys [objectStoreCred bucketName objectName] :as resource}]
+  (let [s3client (-> objectStoreCred
+                     (format-creds-for-s3-api)
+                     (get-s3-client))
+        size (try
+               (:contentLength (s3-object-metadata s3client bucketName objectName))
                (catch Exception _
-                 (log/warn (str "Could not access the metadata for S3 object " object))))]
-    (if size (assoc eo :size size) eo)))
+                 (log/warn (str "Could not access the metadata for S3 object " objectName))))]
+    (cond-> resource
+            size (assoc :size size))))
 
 
 (defn add-s3-md5sum
   "Adds a md5sum attribute to external object if present in metadata
   or returns untouched external object. Ignore any S3 exception"
-  [eo s3client bucket object]
-  (let [md5 (try
-              (:contentMD5 (s3-object-metadata s3client bucket object))
+  [{:keys [objectStoreCred bucketName objectName] :as resource}]
+  (let [s3client (-> objectStoreCred
+                     (format-creds-for-s3-api)
+                     (get-s3-client))
+        md5 (try
+              (:contentMD5 (s3-object-metadata s3client bucketName objectName))
               (catch Exception _
-                (log/warn (str "Could not access the metadata for S3 object " object))))]
-    (if md5 (assoc eo :md5sum md5) eo)))
+                (log/warn (str "Could not access the metadata for S3 object " objectName))))]
+    (cond-> resource
+            md5 (assoc :md5sum md5))))
+
+
+;; Function separated to allow for mocking in unit tests.
+(defn set-acl-public-read
+  [s3client bucket object]
+  (.setObjectAcl s3client bucket object CannedAccessControlList/PublicRead))
+
+
+(defn try-set-public-read-object
+  [s3client bucket object]
+  (try
+    (try-catch-aws-fn (set-acl-public-read s3client bucket object))
+    (catch Exception _
+      (logu/log-and-throw 500 (str "Exception while setting S3 ACL on object " object)))))
+
+
+(defn set-public-read-object
+  "Returns the untouched resource. Side effect is only on S3 permissions"
+  [{:keys [objectStoreCred bucketName objectName] :as resource}]
+  (let [s3client (-> objectStoreCred
+                     (format-creds-for-s3-api)
+                     (get-s3-client))]
+    (try-set-public-read-object s3client bucketName objectName)
+    resource))
+
+
+(defn s3-url
+  [s3client bucket object]
+  (str (.getUrl s3client bucket object)))
+
+
+(defn add-s3-url
+  [{:keys [objectStoreCred bucketName objectName] :as resource}]
+  (let [s3client (-> objectStoreCred
+                     (format-creds-for-s3-api)
+                     (get-s3-client))]
+    (assoc resource :URL (s3-url s3client bucketName objectName))))
