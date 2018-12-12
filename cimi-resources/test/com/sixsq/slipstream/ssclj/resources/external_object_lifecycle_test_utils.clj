@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.external-object-lifecycle-test-utils
   (:require
     [clojure.data.json :as json]
+    [clojure.string :as str]
     [clojure.test :refer [is]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.middleware.authn-info-header :refer [authn-info-header]]
@@ -517,11 +518,16 @@
                           (ltu/is-status 200))
 
                       ;; triggering download url as owner succeeds
-                      (-> session
-                          (request download-url-action
-                                   :request-method :post)
-                          (ltu/body->edn)
-                          (ltu/is-status 200))))))
+                      (let [download-uri (-> session
+                                             (request download-url-action
+                                                      :request-method :post)
+                                             (ltu/body->edn)
+                                             (ltu/is-status 200)
+                                             :response
+                                             :body
+                                             :uri
+                                             )]
+                        (is (str/starts-with? download-uri "http")))))))
 
 
               ;;Deletion by owner should succeed , even in case the S3 bucket does not exist (anymore)

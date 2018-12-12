@@ -341,13 +341,13 @@
 
 (defmethod ready-subtype :default
   [resource request]
-    (-> resource
-        (a/can-modify? request)
-        (verify-state #{state-uploading} "ready")
-        (assoc :state state-ready)
-        (s3/add-s3-size )
-        (s3/add-s3-md5sum)
-        (db/edit request)))
+  (-> resource
+      (a/can-modify? request)
+      (verify-state #{state-uploading} "ready")
+      (assoc :state state-ready)
+      (s3/add-s3-size)
+      (s3/add-s3-md5sum)
+      (db/edit request)))
 
 (defmethod crud/do-action [resource-url "ready"]
   [{{uuid :uuid} :params :as request}]
@@ -359,9 +359,14 @@
 
 ;;; Download URL operation
 
-(defn download-fn
-  "Provided 'resource' and 'request', returns object storage download URL."
-  [{:keys [objectType bucketName objectName objectStoreCred] :as resource} {{ttl :ttl} :body :as request}]
+(defmulti download-subtype
+          "Provided 'resource' and 'request', returns object storage download URL."
+          (fn [resource _] (:objectType resource)))
+
+
+
+(defmethod download-subtype :default
+  [{:keys [bucketName objectName objectStoreCred] :as resource} {{ttl :ttl} :body :as request}]
   (verify-state resource #{state-ready} "download")
   (log/info "Requesting download url: " objectName)
   (s3/generate-url (s3/format-creds-for-s3-api objectStoreCred)
@@ -372,7 +377,7 @@
 (defn download
   [resource request]
   (try
-    (r/json-response {:uri (download-fn resource request)})
+    (r/json-response {:uri (download-subtype resource request)})
     (catch Exception e
       (or (ex-data e) (throw e)))))
 

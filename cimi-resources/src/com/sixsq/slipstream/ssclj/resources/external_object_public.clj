@@ -1,5 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.external-object-public
   (:require
+    [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.db.impl :as db]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
@@ -36,3 +37,9 @@
       (s3/add-s3-size)
       (s3/add-s3-md5sum)
       (db/edit request)))
+
+(defmethod eo/download-subtype eot/objectType
+  [{:keys [URL] :as resource} request]
+  (eo/verify-state resource #{eo/state-ready} "download")
+  (log/info "Public download url: " URL)
+  URL)

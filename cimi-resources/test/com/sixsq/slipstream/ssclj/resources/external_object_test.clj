@@ -49,11 +49,11 @@
 
     (let [expected-msg (eo/error-msg-bad-state "download" #{eo/state-ready} eo/state-new)]
       (is (thrown-with-msg? ExceptionInfo (re-pattern expected-msg)
-                            (eo/download-fn {:state eo/state-new} {}))))
+                            (eo/download-subtype {:state eo/state-new} {}))))
 
-    (is (s/starts-with? (eo/download-fn {:state           eo/state-ready
-                                         :bucketName      bucketname
-                                         :objectName      objectname
-                                         :objectStoreCred {:href "credential/my-cred"}}
-                                        {})
+    (is (s/starts-with? (eo/download-subtype {:state           eo/state-ready
+                                              :bucketName      bucketname
+                                              :objectName      objectname
+                                              :objectStoreCred {:href "credential/my-cred"}}
+                                             {})
                         (format "https://%s.%s/%s?" bucketname s3-host objectname)))))
