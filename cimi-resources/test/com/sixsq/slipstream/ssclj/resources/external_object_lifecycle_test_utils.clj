@@ -515,14 +515,14 @@
                           (request download-url-action
                                    :request-method :post)
                           (ltu/body->edn)
-                          (ltu/is-status 307))
+                          (ltu/is-status 303))
 
                       ;; triggering download url as owner succeeds
                       (let [download-uri (-> session
                                              (request download-url-action
                                                       :request-method :post)
                                              (ltu/body->edn)
-                                             (ltu/is-status 307)
+                                             (ltu/is-status 303)
                                              :response
                                              :body
                                              :uri)]

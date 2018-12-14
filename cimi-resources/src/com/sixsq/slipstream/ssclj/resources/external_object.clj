@@ -376,13 +376,13 @@
 
 
 (defn download
-  [{:keys [contentType] :as resource} request]
+  [resource request]
   (let [dl-uri (download-subtype resource request)]
     (try
-      (-> {:status  307
+      (-> {:status  303
            :body    {:uri dl-uri}}
           (ru/header "Location" dl-uri)
-          (ru/header "Content-Type" contentType))
+          (ru/header "Content-Type" "application/json"))
       (catch Exception e
         (or (ex-data e) (throw e))))))
 
