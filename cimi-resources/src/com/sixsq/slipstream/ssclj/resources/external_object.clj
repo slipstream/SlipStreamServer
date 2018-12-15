@@ -13,7 +13,8 @@
     [com.sixsq.slipstream.ssclj.resources.external-object-template :as eot]
     [com.sixsq.slipstream.ssclj.resources.external-object.utils :as s3]
     [com.sixsq.slipstream.ssclj.util.log :as logu]
-    [com.sixsq.slipstream.util.response :as r]))
+    [com.sixsq.slipstream.util.response :as r]
+    [ring.util.response :as ru]))
 
 (def ^:const resource-tag :externalObjects)
 
@@ -376,10 +377,14 @@
 
 (defn download
   [resource request]
-  (try
-    (r/json-response {:uri (download-subtype resource request)})
-    (catch Exception e
-      (or (ex-data e) (throw e)))))
+  (let [dl-uri (download-subtype resource request)]
+    (try
+      (-> {:status  303
+           :body    {:uri dl-uri}}
+          (ru/header "Location" dl-uri)
+          (ru/header "Content-Type" "application/json"))
+      (catch Exception e
+        (or (ex-data e) (throw e))))))
 
 
 (defmethod crud/do-action [resource-url "download"]
