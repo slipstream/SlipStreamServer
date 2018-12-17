@@ -23,6 +23,8 @@
 
 (s/def ::consumerWritable boolean?)
 
+(s/def ::templateMutable boolean?)
+
 
 ;;
 ;; the following attributes are extensions to the standard that are
@@ -70,7 +72,8 @@
                                           ::order
                                           ::hidden
                                           ::sensitive
-                                          ::lines]))
+                                          ::lines
+                                          ::templateMutable]))
 
 (s/def ::attributes
   (st/spec {:spec                (s/coll-of ::attribute :min-count 1 :type vector?)

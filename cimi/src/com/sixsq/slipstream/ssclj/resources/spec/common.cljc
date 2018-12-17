@@ -153,7 +153,7 @@
              :json-schema/type "URI"
              :json-schema/providerMandatory true
              :json-schema/consumerMandatory false
-             :json-schema/mutable true
+             :json-schema/mutable false
              :json-schema/consumerWritable true
 
              :json-schema/displayName "parent"

@@ -321,12 +321,12 @@ include aggregating values over a collection of resources.
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]
     [com.sixsq.slipstream.ssclj.resources.spec.cloud-entry-point :as cep]
+    [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]
     [com.sixsq.slipstream.util.response :as sr]
     [compojure.core :refer [ANY defroutes DELETE GET POST PUT]]
-    [ring.util.response :as r]
-    [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]
-    [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]))
+    [ring.util.response :as r]))
 
 ;;
 ;; utilities

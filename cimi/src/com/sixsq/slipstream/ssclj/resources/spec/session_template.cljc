@@ -20,7 +20,8 @@
              :json-schema/providerMandatory true
              :json-schema/consumerMandatory true
              :json-schema/mutable true
-             :json-schema/consumerWritable true
+             :json-schema/consumerWritable false
+             :json-schema/templateMutable true
 
              :json-schema/displayName "method"
              :json-schema/description "authentication method"
@@ -43,7 +44,8 @@
              :json-schema/providerMandatory true
              :json-schema/consumerMandatory true
              :json-schema/mutable true
-             :json-schema/consumerWritable true
+             :json-schema/consumerWritable false
+             :json-schema/templateMutable true
 
              :json-schema/displayName "instance"
              :json-schema/description "instance name of authentication method"

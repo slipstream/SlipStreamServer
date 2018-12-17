@@ -18,7 +18,8 @@
              :json-schema/providerMandatory true
              :json-schema/consumerMandatory false
              :json-schema/mutable true
-             :json-schema/consumerWritable true
+             :json-schema/consumerWritable false
+             :json-schema/templateMutable true
 
              :json-schema/displayName "group"
              :json-schema/description "label for grouping related templates/forms"
@@ -39,7 +40,8 @@
              :json-schema/providerMandatory true
              :json-schema/consumerMandatory false
              :json-schema/mutable true
-             :json-schema/consumerWritable true
+             :json-schema/consumerWritable false
+             :json-schema/templateMutable true
 
              :json-schema/displayName "order"
              :json-schema/description "hint for visualization order for field"
@@ -63,7 +65,8 @@
              :json-schema/providerMandatory true
              :json-schema/consumerMandatory false
              :json-schema/mutable true
-             :json-schema/consumerWritable true
+             :json-schema/consumerWritable false
+             :json-schema/templateMutable true
 
              :json-schema/displayName "hidden"
              :json-schema/description "should template be hidden on browser UIs"
@@ -84,7 +87,8 @@
              :json-schema/providerMandatory true
              :json-schema/consumerMandatory false
              :json-schema/mutable true
-             :json-schema/consumerWritable true
+             :json-schema/consumerWritable false
+             :json-schema/templateMutable true
 
              :json-schema/displayName "icon"
              :json-schema/description "name for icon to associate to template"
@@ -105,7 +109,8 @@
              :json-schema/providerMandatory true
              :json-schema/consumerMandatory false
              :json-schema/mutable true
-             :json-schema/consumerWritable true
+             :json-schema/consumerWritable false
+             :json-schema/templateMutable true
 
              :json-schema/displayName "redirectURI"
              :json-schema/description "redirect URI to be used on success"
