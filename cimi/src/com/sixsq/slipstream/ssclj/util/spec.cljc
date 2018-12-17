@@ -5,8 +5,8 @@
     [clojure.set :as set]
     [clojure.spec.alpha :as s]
     [spec-tools.impl :as impl]
-    [spec-tools.parse :as st-parse]
     [spec-tools.json-schema :as jsc]
+    [spec-tools.parse :as st-parse]
     [spec-tools.visitor :as visitor]))
 
 (def ^:private all-ascii-chars (map str (map char (range 0 256))))

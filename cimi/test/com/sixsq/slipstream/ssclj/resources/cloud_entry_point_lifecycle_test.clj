@@ -7,8 +7,8 @@
     [com.sixsq.slipstream.ssclj.resources.cloud-entry-point :as t]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.lifecycle-test-utils :as ltu]
-    [peridot.core :refer :all]
-    [com.sixsq.slipstream.ssclj.util.metadata-test-utils :as mdtu]))
+    [com.sixsq.slipstream.ssclj.util.metadata-test-utils :as mdtu]
+    [peridot.core :refer :all]))
 
 (use-fixtures :each ltu/with-test-server-fixture)
 
