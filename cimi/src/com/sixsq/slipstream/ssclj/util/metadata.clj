@@ -10,7 +10,8 @@
 (defn strip-for-attributes
   [[attribute-name description]]
   (let [{:keys [name] :as desc} (select-keys description #{:name :namespace :uri :type
-                                                           :providerMandatory :consumerMandatory :mutable :consumerWritable
+                                                           :providerMandatory :consumerMandatory :consumerWritable
+                                                           :templateMutable :mutable
                                                            :displayName :description :help
                                                            :group :category :order :hidden :sensitive :lines})]
     (cond-> desc
@@ -114,7 +115,7 @@
 (defn generate-metadata
   "Generate the ResourceMetadata from the provided namespace"
   ([parent-ns spec]
-    (generate-metadata nil parent-ns spec))
+   (generate-metadata nil parent-ns spec))
   ([child-ns parent-ns spec]
    (if-let [parent-ns (as-namespace parent-ns)]
      (let [child-ns (as-namespace child-ns)

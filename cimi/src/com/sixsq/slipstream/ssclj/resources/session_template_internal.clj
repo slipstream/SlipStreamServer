@@ -65,6 +65,7 @@ credentials. This template is guaranteed to be present on all server instances.
   (p/register authn-method desc)
   (std-crud/initialize p/resource-url ::session-tpl/internal)
   (std-crud/add-if-absent (str "session-template/" authn-method) p/resource-url default-template)
+
   (md/register (gen-md/generate-metadata ::ns ::p/ns ::session-tpl/internal)))
 
 
