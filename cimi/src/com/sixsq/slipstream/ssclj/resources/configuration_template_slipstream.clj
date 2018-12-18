@@ -53,7 +53,8 @@
    :metricsGraphiteEnable        false
 
    :reportsObjectStoreBucketName "slipstream-reports"
-   :reportsObjectStoreCreds      "credential/<CHANGE-ME-UUID>"})
+   :reportsObjectStoreCreds      "credential/<CHANGE-ME-UUID>"
+   :logo                         "external-object/<CHANGE-ME-UUID>"})
 
 
 ;;

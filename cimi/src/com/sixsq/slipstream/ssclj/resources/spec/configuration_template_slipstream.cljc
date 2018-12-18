@@ -43,6 +43,8 @@
 (s/def ::reportsObjectStoreBucketName string?)
 (s/def ::reportsObjectStoreCreds string?)
 
+(s/def ::logoURL ::cimi-core/nonblank-string)
+
 (def configuration-template-keys-spec-req
   {:req-un [::slipstreamVersion
             ::serviceURL
@@ -52,30 +54,24 @@
             ::connectorOrchPrivateSSHKey
             ::connectorOrchPublicSSHKey
             ::connectorLibcloudURL
-
             ::mailUsername
             ::mailPassword
             ::mailHost
             ::mailPort
             ::mailSSL
             ::mailDebug
-
             ::quotaEnable
-
             ::registrationEnable
             ::registrationEmail
-
             ::meteringEnable
             ::meteringEndpoint
-
             ::serviceCatalogEnable
-
             ::cloudConnectorClass
-
             ::metricsLoggerEnable
             ::metricsGraphiteEnable
             ::reportsObjectStoreBucketName
-            ::reportsObjectStoreCreds]
+            ::reportsObjectStoreCreds
+            ::logo]
    :opt-un [::reportsLocation ; reportsLocation is deprecated
             ::termsAndConditions]})
 
