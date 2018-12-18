@@ -13,7 +13,7 @@
   :plugins [[lein-parent "0.3.2"]
             [lein-shell "0.5.0"]]
 
-  :parent-project {:coords  [sixsq/slipstream-parent "5.3.15"]
+  :parent-project {:coords  [sixsq/slipstream-parent "5.3.18"]
                    :inherit [:plugins
                              :min-lein-version
                              :managed-dependencies

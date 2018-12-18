@@ -9,8 +9,8 @@
   (let [as-symbol @#'t/as-symbol]
     (are [expected input] (= expected (as-symbol input))
                           'environ.core/env "environ.core/env"
-                          'environ.core/env 'environ.core/env)
-    (is (thrown-with-msg? ExceptionInfo #"invalid symbol" (as-symbol :environ.core/env)))
+                          'environ.core/env 'environ.core/env
+                          'environ.core/env :environ.core/env)
     (is (thrown-with-msg? ExceptionInfo #"invalid symbol" (as-symbol 10)))
     (is (thrown-with-msg? ExceptionInfo #"invalid symbol" (as-symbol nil)))))
 
