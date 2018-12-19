@@ -43,7 +43,7 @@
 (s/def ::reportsObjectStoreBucketName string?)
 (s/def ::reportsObjectStoreCreds string?)
 
-(s/def ::logoURL ::cimi-core/nonblank-string)
+(s/def ::logo ::cimi-core/nonblank-string)
 
 (def configuration-template-keys-spec-req
   {:req-un [::slipstreamVersion
