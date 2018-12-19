@@ -2,8 +2,7 @@
  {:displayName "slipstream.reports.location"
   :type        "string"
   :category    "SlipStream_Advanced"
-  :description
-               "Location where the deployments and build reports are saved"
+  :description "Location where the deployments and build reports are saved"
   :mandatory   false
   :readOnly    false
   :order       20}
@@ -12,8 +11,7 @@
  {:displayName "cloud.connector.orchestrator.privatesshkey"
   :type        "string"
   :category    "SlipStream_Advanced"
-  :description
-               "Path to the SSH private key used to connect to the orchestrator (used only for some Clouds)"
+  :description "Path to the SSH private key used to connect to the orchestrator (used only for some Clouds)"
   :mandatory   true
   :readOnly    false
   :order       21}
@@ -31,8 +29,7 @@
  {:displayName "slipstream.metering.hostname"
   :type        "string"
   :category    "SlipStream_Advanced"
-  :description
-               "Metering server full hostname, including protocol, hostname/ip and port (e.g. http://localhost:2005)."
+  :description "Metering server full hostname, including protocol, hostname/ip and port (e.g. http://localhost:2005)."
   :mandatory   true
   :readOnly    false
   :order       23}
@@ -59,8 +56,7 @@
  {:displayName "slipstream.registration.enable"
   :type        "boolean"
   :category    "SlipStream_Basics"
-  :description
-               "Allow user self registration. If checked, user will be able to create accounts themselves."
+  :description "Allow user self registration. If checked, user will be able to create accounts themselves."
   :mandatory   true
   :readOnly    false
   :order       26}
@@ -158,15 +154,14 @@
   :order       36}
 
  :mailUsername
- {:displayName "slipstream.mail.username"
-  :type        "string"
-  :category    "SlipStream_Support"
-  :description "Username for SMTP server."
-  :mandatory   true
-  :readOnly    false
-  :order       37
-  :instructions
-               "Username of the mail server account you want to use to send registration emails."}
+ {:displayName  "slipstream.mail.username"
+  :type         "string"
+  :category     "SlipStream_Support"
+  :description  "Username for SMTP server."
+  :mandatory    true
+  :readOnly     false
+  :order        37
+  :instructions "Username of the mail server account you want to use to send registration emails."}
 
  :serviceCatalogEnable
  {:displayName "slipstream.service.catalog.enable"
