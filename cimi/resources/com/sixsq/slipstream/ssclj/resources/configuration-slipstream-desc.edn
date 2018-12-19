@@ -256,7 +256,7 @@
   :readOnly    false
   :order       46}
 
-  :logo
+ :logo
  {:displayName  "slipstream.external-object.logo"
   :type         "string"
   :category     "SlipStream_Advanced"
