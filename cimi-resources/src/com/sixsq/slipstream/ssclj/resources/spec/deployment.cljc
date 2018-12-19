@@ -38,7 +38,8 @@
 (defn service-offer-id? [s] (re-matches service-offer-id-regex s))
 
 (s/def ::service-offer-id (s/and string? service-offer-id?))
-(s/def ::serviceOffers (s/coll-of ::service-offer-id :min-count 1 :kind vector?))
+(s/def ::data-set-ids (s/nilable (s/coll-of ::service-offer-id :min-count 1 :kind vector?)))
+(s/def ::serviceOffers (s/map-of ::service-offer-id ::data-set-ids :min-count 1))
 
 
 (def deployment-keys-spec
