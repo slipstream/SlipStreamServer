@@ -13,8 +13,8 @@
 (s/def ::passed boolean?)
 (s/def ::log (s/coll-of string?))
 
-(def evidence-record-spec {:req-un [::endTime ::startTime ::planID ::passed ::class]
-                           :opt-un [::log]})
+(def evidence-record-spec {:req-un [::endTime ::startTime ::planID ::passed]
+                           :opt-un [::log ::class]})
 
 (s/def ::evidence-record
   (su/constrained-map keyword? any?

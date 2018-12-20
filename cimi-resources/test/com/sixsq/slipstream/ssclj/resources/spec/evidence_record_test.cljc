@@ -41,10 +41,10 @@
     (stu/is-valid :cimi.test/evidence-record root)
 
     ;; mandatory keywords
-    (doseq [k #{:endTime :class :passed :planID :startTime}]
+    (doseq [k #{:endTime :passed :planID :startTime}]
       (stu/is-invalid :cimi.test/evidence-record (dissoc root k)))
 
     ;; optional keywords
-    (doseq [k #{:log}]
+    (doseq [k #{:log :class}]
       (stu/is-valid :cimi.test/evidence-record (dissoc root k)))))
 
