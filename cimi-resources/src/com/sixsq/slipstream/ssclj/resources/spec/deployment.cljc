@@ -36,10 +36,12 @@
 
 (def ^:const service-offer-id-regex #"^service-offer/[a-z0-9]+(-[a-z0-9]+)*(_\d+)?$")
 (defn service-offer-id? [s] (re-matches service-offer-id-regex s))
+(defn service-offer-id-keyword? [s] (-> s symbol str service-offer-id?))
 
 (s/def ::service-offer-id (s/and string? service-offer-id?))
+(s/def ::service-offer-id-keyword (s/and keyword? service-offer-id-keyword?))
 (s/def ::data-set-ids (s/nilable (s/coll-of ::service-offer-id :min-count 1 :kind vector?)))
-(s/def ::serviceOffers (s/map-of ::service-offer-id ::data-set-ids :min-count 1))
+(s/def ::serviceOffers (s/map-of ::service-offer-id-keyword ::data-set-ids :min-count 1))
 
 
 (def deployment-keys-spec

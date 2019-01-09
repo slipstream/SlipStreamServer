@@ -54,9 +54,9 @@
                        :module             (merge {:href "my-module-uuid"} valid-module)
 
                        :externalObjects    ["external-object/uuid1" "external-object/uuid2"]
-                       :serviceOffers      {"service-offer/uuid1" ["service-offer/dataset1" "service-offer/dataset2"]
-                                            "service-offer/uuid2" nil
-                                            "service-offer/uuid3" ["service-offer/dataset3"]}})
+                       :serviceOffers      {:service-offer/uuid1 ["service-offer/dataset1" "service-offer/dataset2"]
+                                            :service-offer/uuid2 nil
+                                            :service-offer/uuid3 ["service-offer/dataset3"]}})
 
 
 (deftest test-schema-check
