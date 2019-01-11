@@ -116,6 +116,7 @@
              :json-schema/consumerMandatory false
              :json-schema/mutable true
              :json-schema/consumerWritable true
+             :json-schema/indexed false
 
              :json-schema/displayName "SSH Public Keys"
              :json-schema/description "SSH public keys to add to deployment"
@@ -145,6 +146,7 @@
              :json-schema/consumerMandatory false
              :json-schema/mutable true
              :json-schema/consumerWritable true
+             :json-schema/indexed false
 
              :json-schema/displayName "external objects"
              :json-schema/description "list of external object identifiers"
