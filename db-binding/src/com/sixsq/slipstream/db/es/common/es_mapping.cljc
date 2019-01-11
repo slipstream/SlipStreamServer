@@ -17,7 +17,7 @@
 (defn keep-key?
   [arg]
   (let [[k v] (seq arg)]                                    ;; seq avoids corner case where we're passed a map
-    (or (string? k) (#{:type :enabled :properties :format :copy_to} k))))
+    (or (string? k) (#{:type :enabled :properties :format :copy_to :index} k))))
 
 
 (defn assoc-date
@@ -71,6 +71,16 @@
     :else m)
   )
 
+
+(defn assoc-not-indexed
+  [{:keys [type] :as m}]
+  (if (= type "object")
+    (-> m
+        (assoc :enabled false)
+        (dissoc :properties))
+    (assoc m :index false)))
+
+
 (defn json-schema->es-mapping
   "Function to be used with w/postwalk to transform a JSON schema into an
    Elasticsearch mapping."
@@ -79,8 +89,7 @@
     (let [{:keys [searchable indexed] :or {indexed true, searchable false}} m
           result (cond-> (transform-type->es-type m)
                          searchable (assoc :copy_to "fulltext")
-                         (not indexed) (-> (assoc :enabled false)
-                                           (dissoc :properties))
+                         (not indexed) (assoc-not-indexed)
                          )]
       (into {} (filter keep-key? result)))
     m))
