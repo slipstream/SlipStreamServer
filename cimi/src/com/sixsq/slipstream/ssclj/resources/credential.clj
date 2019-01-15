@@ -42,6 +42,7 @@ CredentialTemplate resource.
 ;; validate the created credential resource
 ;; must dispatch on the type because each credential has a different schema
 ;;
+
 (defmulti validate-subtype :type)
 
 (defmethod validate-subtype :default
@@ -56,6 +57,7 @@ CredentialTemplate resource.
 ;; validate create requests for subclasses of credentials
 ;; different credentials take different inputs
 ;;
+
 (defn dispatch-on-registration-method [resource]
   (get-in resource [:credentialTemplate :type]))
 

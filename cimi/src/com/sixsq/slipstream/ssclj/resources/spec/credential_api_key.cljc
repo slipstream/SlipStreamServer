@@ -33,4 +33,4 @@
 ;; multiple methods to create an ssh public key, so multiple schemas
 (s/def :cimi/credential.api-key.create
   (su/only-keys-maps ps/create-keys-spec
-                     {:req-un [:cimi.credential-template.api-key/credentialTemplate]}))
+                     {:req-un [::ps/credentialTemplate]}))

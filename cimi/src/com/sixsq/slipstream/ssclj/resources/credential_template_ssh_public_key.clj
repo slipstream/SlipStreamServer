@@ -8,7 +8,7 @@ format.
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.credential-template :as p]
     [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]
-    [com.sixsq.slipstream.ssclj.resources.spec.credential-template-ssh-public-key]
+    [com.sixsq.slipstream.ssclj.resources.spec.credential-template-ssh-public-key :as ct-ssh-public-key]
     [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]))
 
 (def ^:const credential-type "ssh-public-key")
@@ -43,18 +43,13 @@ format.
 
 
 ;;
-;; description
+;; multimethods for validation
 ;;
 
-(def ^:const desc
-  (merge p/CredentialTemplateDescription
-         {:publicKey {:displayName "SSH Public Key"
-                      :category    "general"
-                      :description "public RSA or DSA key of an SSH key pair"
-                      :type        "string"
-                      :mandatory   true
-                      :readOnly    false
-                      :order       20}}))
+(def validate-fn (u/create-spec-validation-fn ::ct-ssh-public-key/schema))
+(defmethod p/validate-subtype method
+  [resource]
+  (validate-fn resource))
 
 
 ;;
@@ -63,15 +58,7 @@ format.
 
 (defn initialize
   []
-  (p/register resource desc)
-  (md/register (gen-md/generate-metadata ::ns ::p/ns :cimi/credential-template.ssh-public-key)))
+  (p/register resource)
+  (md/register (gen-md/generate-metadata ::ns ::p/ns ::ct-ssh-public-key/schema)))
 
 
-;;
-;; multimethods for validation
-;;
-
-(def validate-fn (u/create-spec-validation-fn :cimi/credential-template.ssh-public-key))
-(defmethod p/validate-subtype method
-  [resource]
-  (validate-fn resource))

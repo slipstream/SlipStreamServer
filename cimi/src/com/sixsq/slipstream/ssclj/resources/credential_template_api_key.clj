@@ -7,7 +7,7 @@ secret to access the server. The credential can optionally be limited in time.
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.credential-template :as p]
     [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]
-    [com.sixsq.slipstream.ssclj.resources.spec.credential-template-api-key]
+    [com.sixsq.slipstream.ssclj.resources.spec.credential-template-api-key :as ct-api-key]
     [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]))
 
 
@@ -43,17 +43,13 @@ secret to access the server. The credential can optionally be limited in time.
 
 
 ;;
-;; description
+;; multimethods for validation
 ;;
-(def ^:const desc
-  (merge p/CredentialTemplateDescription
-         {:ttl {:displayName "Time to Live (TTL)"
-                :category    "general"
-                :description "number of seconds before the API key expires (0 = forever)"
-                :type        "int"
-                :mandatory   false
-                :readOnly    false
-                :order       20}}))
+
+(def validate-fn (u/create-spec-validation-fn ::ct-api-key/schema))
+(defmethod p/validate-subtype method
+  [resource]
+  (validate-fn resource))
 
 
 ;;
@@ -62,15 +58,7 @@ secret to access the server. The credential can optionally be limited in time.
 
 (defn initialize
   []
-  (p/register resource desc)
-  (md/register (gen-md/generate-metadata ::ns ::p/ns :cimi/credential-template.api-key)))
+  (p/register resource)
+  (md/register (gen-md/generate-metadata ::ns ::p/ns ::ct-api-key/schema)))
 
 
-;;
-;; multimethods for validation
-;;
-
-(def validate-fn (u/create-spec-validation-fn :cimi/credential-template.api-key))
-(defmethod p/validate-subtype method
-  [resource]
-  (validate-fn resource))

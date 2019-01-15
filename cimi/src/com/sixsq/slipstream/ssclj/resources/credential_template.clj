@@ -83,35 +83,29 @@ curl https://nuv.la/api/credential-template
           (crud/set-operations request)
           (assoc collection-key entries)))))
 
+
 (defn complete-resource
   "Completes the given document with server-managed information: resourceURI,
    timestamps, and operations. NOTE: The subtype MUST provide an ACL for the
    template."
   [{:keys [method] :as resource}]
   (when method
-    (let [id (str resource-url "/" method)
-          href (str id "/describe")
-          ops [{:rel (:describe c/action-uri) :href href}]]
+    (let [id (str resource-url "/" method)]
       (-> resource
           (merge {:id          id
-                  :resourceURI resource-uri
-                  :operations  ops})
+                  :resourceURI resource-uri})
           u/update-timestamps))))
+
 
 (defn register
   "Registers a given CredentialTemplate resource and its description with the
    server. The resource document (resource) and the description (desc) must be
    valid. The template-id key must be provided; it will be used to generate the
    id of the form 'credential-template/template-id'."
-  [resource desc]
+  [resource]
   (when-let [{:keys [id] :as full-resource} (complete-resource resource)]
     (swap! templates assoc id full-resource)
-    (log/info "loaded CredentialTemplate" id)
-    (when desc
-      (let [acl (:acl full-resource)
-            full-desc (assoc desc :acl acl)]
-        (swap! descriptions assoc id full-desc))
-      (log/info "loaded CredentialTemplate description" id))))
+    (log/info "loaded CredentialTemplate" id)))
 
 ;;
 ;; schemas
@@ -204,23 +198,11 @@ curl https://nuv.la/api/credential-template
         entries-and-count (assoc wrapped-entries :count count-before-pagination)]
     (r/json-response entries-and-count)))
 
-;;
-;; actions
-;;
-(defmethod crud/do-action [resource-url "describe"]
-  [{{uuid :uuid} :params :as request}]
-  (try
-    (let [id (str resource-url "/" uuid)]
-      (-> (get @descriptions id)
-          (a/can-view? request)
-          (r/json-response)))
-    (catch Exception e
-      (or (ex-data e) (throw e)))))
-
 
 ;;
 ;; initialization: create metadata for this collection
 ;;
+
 (defn initialize
   []
   (md/register (gen-md/generate-metadata ::ns ::ct/schema)))

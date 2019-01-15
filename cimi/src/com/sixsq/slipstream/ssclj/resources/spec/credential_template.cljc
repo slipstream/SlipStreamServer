@@ -9,7 +9,7 @@
 
 
 ;; All credential templates must indicate the type of credential to create.
-(s/def :cimi.credential-template/type
+(s/def ::type
   (-> (st/spec ::cimi-core/identifier)
       (assoc :name "type"
              :json-schema/name "type"
@@ -32,7 +32,7 @@
 
 ;; A given credential may have more than one method for creating it.  All
 ;; credential templates must provide a method name.
-(s/def :cimi.credential-template/method
+(s/def ::method
   (-> (st/spec ::cimi-core/identifier)
       (assoc :name "method"
              :json-schema/name "method"
@@ -63,11 +63,11 @@
 ;; is no sense in defining map resources for the resource itself.
 ;;
 
-(def credential-template-keys-spec {:req-un [:cimi.credential-template/type
-                                             :cimi.credential-template/method]})
+(def credential-template-keys-spec {:req-un [::type
+                                             ::method]})
 
-(def credential-template-keys-spec-opt {:opt-un [:cimi.credential-template/type
-                                                 :cimi.credential-template/method]})
+(def credential-template-keys-spec-opt {:opt-un [::type
+                                                 ::method]})
 
 (def resource-keys-spec
   (su/merge-keys-specs [c/common-attrs

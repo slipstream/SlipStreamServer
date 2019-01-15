@@ -8,7 +8,7 @@ and not stored on, and cannot be recovered from the server.
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.credential-template :as p]
     [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]
-    [com.sixsq.slipstream.ssclj.resources.spec.credential-template-ssh-key-pair]
+    [com.sixsq.slipstream.ssclj.resources.spec.credential-template-ssh-key-pair :as ct-ssh-key-pair]
     [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]))
 
 
@@ -43,26 +43,15 @@ and not stored on, and cannot be recovered from the server.
    :algorithm   "rsa"
    :acl         resource-acl})
 
+
 ;;
-;; description
+;; multimethods for validation
 ;;
 
-(def ^:const desc
-  (merge p/CredentialTemplateDescription
-         {:size      {:displayName "Size of SSH Key"
-                      :category    "general"
-                      :description "size in bits of generated key"
-                      :type        "int"
-                      :mandatory   false
-                      :readOnly    false
-                      :order       20}
-          :algorithm {:displayName "SSH Key Algorithm"
-                      :category    "general"
-                      :description "algorithm ('rsa', 'dsa') to use to generate key pair"
-                      :type        "string"
-                      :mandatory   false
-                      :readOnly    false
-                      :order       21}}))
+(def validate-fn (u/create-spec-validation-fn ::ct-ssh-key-pair/schema))
+(defmethod p/validate-subtype method
+  [resource]
+  (validate-fn resource))
 
 
 ;;
@@ -71,15 +60,7 @@ and not stored on, and cannot be recovered from the server.
 
 (defn initialize
   []
-  (p/register resource desc)
-  (md/register (gen-md/generate-metadata ::ns ::p/ns :cimi/credential-template.ssh-key-pair)))
+  (p/register resource)
+  (md/register (gen-md/generate-metadata ::ns ::p/ns ::ct-ssh-key-pair/schema)))
 
 
-;;
-;; multimethods for validation
-;;
-
-(def validate-fn (u/create-spec-validation-fn :cimi/credential-template.ssh-key-pair))
-(defmethod p/validate-subtype method
-  [resource]
-  (validate-fn resource))
