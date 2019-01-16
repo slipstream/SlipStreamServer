@@ -19,7 +19,7 @@
 
 
 (deftest check-value-scope
-  
+
   (stu/is-valid ::spec/vscope valid)
 
   (stu/is-invalid ::spec/vscope {:badAttribute 1}))
