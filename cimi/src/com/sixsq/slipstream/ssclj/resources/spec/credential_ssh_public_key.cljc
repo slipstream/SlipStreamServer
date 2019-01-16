@@ -10,7 +10,7 @@
 
 (s/def ::fingerprint (s/and string? #(re-matches #"^[0-9a-f]{2}(:[0-9a-f]{2}){15}$" %)))
 
-(s/def ::publicKey :cimi.credential-template.ssh-public-key/publicKey)
+(s/def ::publicKey ::ct-ssh-public-key/publicKey)
 
 (def credential-keys-spec
   {:req-un [::algorithm
