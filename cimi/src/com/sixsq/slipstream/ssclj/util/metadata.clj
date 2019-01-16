@@ -120,7 +120,7 @@
    different for resources with subtypes. The argument can be any value that
    can be converted to a namespace with 'as-namespace'."
   [ns]
-  (-> ns as-namespace str (str/split #"\." last)))
+  (-> ns as-namespace str (str/split #"\.") last))
 
 
 (defn ns->resource-metadata-id
