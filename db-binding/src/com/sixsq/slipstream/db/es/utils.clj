@@ -36,11 +36,32 @@
 
 (def ^:const max-result-window 200000)
 
+;;
+;; FIXME: This is a copy of code in the Clojure API client.  Collect into a utility.
+;;
+
+(defn kw->str
+  "Converts a keyword to the equivalent string without the leading colon and
+   **preserving** any namespace."
+  [kw]
+  (subs (str kw) 1))
+
+(defn key-fn
+  "Converts a keyword to the equivalent string without the leading colon and
+   **preserving** any namespace."
+  [k]
+  (if (keyword? k)
+    (kw->str k)
+    (str k)))
+
+(defn str->json [s]
+  (json/read-str s :key-fn keyword))
+
 (defn json->edn [json]
-  (when json (json/read-str json :key-fn keyword)))
+  (when json (str->json json)))
 
 (defn edn->json [edn]
-  (json/write-str edn))
+  (json/write-str edn :key-fn key-fn))
 
 (def ^:const doc-type "_doc")
 
