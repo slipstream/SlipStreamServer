@@ -78,7 +78,6 @@
 ;;
 
 (defmethod st-parse/parse-form 'com.sixsq.slipstream.ssclj.util.spec/only-keys [dispatch form]
-  #_(log/error "DEBUX X" form)
   (st-parse/parse-form 'clojure.spec.alpha/keys form))
 
 
@@ -94,8 +93,13 @@
   (st-parse/parse-form 'clojure.spec.alpha/keys (transform-form form)))
 
 
+(defn transform-as-every
+  [[spec-name key-spec value-spec & _]]
+  [[spec-name key-spec value-spec]])
+
+
 (defmethod st-parse/parse-form 'com.sixsq.slipstream.ssclj.util.spec/constrained-map [dispatch form]
-  (st-parse/parse-form 'clojure.spec.alpha/keys (transform-form form)))
+  (st-parse/parse-form 'clojure.spec.alpha/every (transform-as-every form)))
 
 
 ;;
@@ -113,19 +117,17 @@
 
 
 (defmethod visitor/visit-spec 'com.sixsq.slipstream.ssclj.util.spec/constrained-map [spec accept options]
-  (let [keys (impl/extract-keys (transform-form (impl/extract-form spec)))]
-    (accept 'com.sixsq.slipstream.ssclj.util.spec/constrained-map spec (mapv #(visitor/visit % accept options) keys) options)))
+  (let [[_ inner-spec] (transform-as-every (impl/extract-form spec))]
+    (accept 'com.sixsq.slipstream.ssclj.util.spec/constrained-map spec [(visitor/visit inner-spec accept options)] options)))
 
 
 ;; accept-spec monkey patches
 
 (defmethod jsc/accept-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys [dispatch spec children arg]
-  #_(log/error "monkey only-keys")
   (jsc/accept-spec 'clojure.spec.alpha/keys spec children arg))
 
 
 (defmethod jsc/accept-spec 'com.sixsq.slipstream.ssclj.util.spec/only-keys-maps [_ spec children _]
-  #_(log/error "monkey only-keys-maps")
   (let [{:keys [req req-un opt opt-un]} (impl/parse-keys (transform-form (impl/extract-form spec)))
         names-un (map name (concat req-un opt-un))
         names (map impl/qualified-name (concat req opt))
@@ -142,20 +144,7 @@
 
 
 (defmethod jsc/accept-spec 'com.sixsq.slipstream.ssclj.util.spec/constrained-map [_ spec children _]
-  #_(log/error "monkey constrainted-map")
-  (let [{:keys [req req-un opt opt-un]} (impl/parse-keys (transform-form (impl/extract-form spec)))
-        names-un (map name (concat req-un opt-un))
-        names (map impl/qualified-name (concat req opt))
-        required (map impl/qualified-name req)
-        required-un (map name req-un)
-        all-required (not-empty (concat required required-un))]
-    (#'jsc/maybe-with-title
-      (merge
-        {:type       "object"
-         :properties (zipmap (concat names names-un) children)}
-        (when all-required
-          {:required (vec all-required)}))
-      spec)))
+  (#'jsc/maybe-with-title {:type "object", :additionalProperties (impl/unwrap children)} spec))
 
 
 ;;
