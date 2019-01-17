@@ -50,7 +50,7 @@ appropriate users.
 ;; validate subclasses of callbacks
 ;;
 
-(def validate-fn (u/create-spec-validation-fn ::callback/callback))
+(def validate-fn (u/create-spec-validation-fn ::callback/schema))
 (defmethod crud/validate
   resource-uri
   [resource]
@@ -187,4 +187,4 @@ appropriate users.
 ;;
 (defn initialize
   []
-  (std-crud/initialize resource-url ::callback/callback))
+  (std-crud/initialize resource-url ::callback/schema))

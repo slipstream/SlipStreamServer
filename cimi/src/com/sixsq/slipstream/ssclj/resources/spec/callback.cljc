@@ -94,8 +94,6 @@
              :json-schema/sensitive false)))
 
 
-
-
 (s/def ::expires
   (-> (st/spec ::cimi-core/timestamp)
       (assoc :name "expires"
@@ -117,7 +115,7 @@
              :json-schema/sensitive false)))
 
 
-(s/def ::callback
+(s/def ::schema
   (su/only-keys-maps cimi-common/common-attrs
                      {:req-un [::action
                                ::state]
