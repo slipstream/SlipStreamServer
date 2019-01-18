@@ -4,9 +4,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
-    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
-    [com.sixsq.slipstream.ssclj.resources.configuration-template :as conf-tmpl]
-    [com.sixsq.slipstream.util.response :as r]))
+    [com.sixsq.slipstream.ssclj.resources.common.utils :as u]))
 
 (def ^:const resource-tag :configurations)
 
@@ -128,28 +126,6 @@
   [request]
   (query-impl request))
 
-;;
-;; actions
-;;
-
-(defmethod crud/set-operations resource-uri
-  [{:keys [id resourceURI username configurationTemplate] :as resource} request]
-  (let [href (str id "/describe")
-        describe-op {:rel (:describe c/action-uri) :href href}]
-    (cond-> (crud/set-standard-operations resource request)
-            (get configurationTemplate :href) (update-in [:operations] conj describe-op))))
-
-(defmethod crud/do-action [resource-url "describe"]
-  [{{uuid :uuid} :params :as request}]
-  (try
-    (let [template-id (-> request
-                          (retrieve-impl)
-                          (get-in [:body :configurationTemplate :href]))]
-      (-> (get @conf-tmpl/descriptions template-id)
-          (a/can-view? request)
-          (r/json-response)))
-    (catch Exception e
-      (or (ex-data e) (throw e)))))
 
 ;;
 ;; use service as the identifier
@@ -165,6 +141,7 @@
 ;;
 ;; initialization: no schema for this parent resource
 ;;
+
 (defn initialize
   []
   (std-crud/initialize resource-url nil))

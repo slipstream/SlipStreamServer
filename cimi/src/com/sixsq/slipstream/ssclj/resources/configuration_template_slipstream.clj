@@ -2,8 +2,7 @@
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-slipstream :as configuration-template]
-    [com.sixsq.slipstream.ssclj.util.config :as uc]))
+    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-slipstream :as configuration-template]))
 
 
 (def ^:const service "slipstream")
@@ -57,19 +56,11 @@
 
 
 ;;
-;; description
-;;
-(def ^:const desc
-  (merge p/ConfigurationTemplateDescription
-         (uc/read-config "com/sixsq/slipstream/ssclj/resources/configuration-slipstream-desc.edn")))
-
-
-;;
 ;; initialization: register this Configuration template
 ;;
 (defn initialize
   []
-  (p/register resource desc))
+  (p/register resource))
 
 
 ;;

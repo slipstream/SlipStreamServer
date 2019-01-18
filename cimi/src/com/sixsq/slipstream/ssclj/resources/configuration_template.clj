@@ -52,34 +52,25 @@
 
 (defn complete-resource
   "Completes the given document with server-managed information:
-   resourceURI, timestamps, operations, and ACL."
+   resourceURI, timestamps, and ACL."
   [{:keys [service] :as resource}]
   (when service
-    (let [id (str resource-url "/" service)
-          href (str id "/describe")
-          ops [{:rel (:describe c/action-uri) :href href}]]
+    (let [id (str resource-url "/" service)]
       (-> resource
           (merge {:id          id
                   :resourceURI resource-uri
-                  :acl         resource-acl
-                  :operations  ops})
+                  :acl         resource-acl})
           u/update-timestamps))))
 
 (defn register
-  "Registers a given ConfigurationTemplate resource and its description
-   with the server.  The resource document (resource) and the description
-   (desc) must be valid.  The key will be used to create the id of
-   the resource as 'configuration-template/key'."
-  [resource desc]
+  "Registers a given ConfigurationTemplate resource a with the server. The
+   resource document (resource) must be valid. The key will be used to create
+   the id of the resource as 'configuration-template/key'."
+  [resource]
   (when-let [full-resource (complete-resource resource)]
     (let [id (:id full-resource)]
       (swap! templates assoc id full-resource)
-      (log/info "loaded ConfigurationTemplate" id)
-      (when desc
-        (let [acl (:acl full-resource)
-              full-desc (assoc desc :acl acl)]
-          (swap! descriptions assoc id full-desc))
-        (log/info "loaded ConfigurationTemplate description" id)))))
+      (log/info "loaded ConfigurationTemplate" id))))
 
 (def ConfigurationTemplateDescription
   (merge c/CommonParameterDescription

@@ -37,7 +37,7 @@
 ;;
 (defn initialize
   []
-  (p/register resource desc))
+  (p/register resource))
 
 
 ;;
