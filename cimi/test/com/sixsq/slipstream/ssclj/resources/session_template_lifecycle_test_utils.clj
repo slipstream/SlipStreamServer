@@ -28,8 +28,7 @@
         (ltu/is-resource-uri collection-uri)
         (ltu/is-operation-absent "add")
         (ltu/is-operation-absent "delete")
-        (ltu/is-operation-absent "edit")
-        (ltu/is-operation-absent "describe"))
+        (ltu/is-operation-absent "edit"))
 
     ;; for admin, should be able to add as well
     (-> session-admin
@@ -39,8 +38,7 @@
         (ltu/is-resource-uri collection-uri)
         (ltu/is-operation-present "add")
         (ltu/is-operation-absent "delete")
-        (ltu/is-operation-absent "edit")
-        (ltu/is-operation-absent "describe"))
+        (ltu/is-operation-absent "edit"))
 
     ;; creating with an unknown authentication method should fail
     (-> session-admin

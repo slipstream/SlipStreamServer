@@ -44,52 +44,11 @@ information (username, password, and email address) from the user.
 
 
 ;;
-;; description
-;;
-
-(def ^:const desc
-  (merge p/UserTemplateDescription
-         {:username       {:displayName  "Username"
-                           :category     "summary"
-                           :description  "username"
-                           :type         "string"
-                           :mandatory    true
-                           :readOnly     false
-                           :order        20
-                           :autocomplete "username"}
-          :password       {:displayName  "Password"
-                           :category     "summary"
-                           :description  "password"
-                           :type         "password"
-                           :mandatory    true
-                           :readOnly     false
-                           :order        21
-                           :autocomplete "new-password"}
-          :passwordRepeat {:displayName  "Password (Again)"
-                           :category     "summary"
-                           :description  "repeated password"
-                           :type         "password"
-                           :mandatory    true
-                           :readOnly     false
-                           :order        22
-                           :autocomplete "new-password"}
-          :emailAddress   {:displayName  "Email Address"
-                           :category     "general"
-                           :description  "email address"
-                           :type         "string"
-                           :mandatory    true
-                           :readOnly     false
-                           :order        23
-                           :autocomplete "email"}}))
-
-
-;;
 ;; initialization: register this User template
 ;;
 
 (defn initialize
   []
-  (p/register registration-method desc)
   (md/register (gen-md/generate-metadata ::ns ::p/ns ::user-template/self-registration)))
 
 
@@ -98,6 +57,7 @@ information (username, password, and email address) from the user.
 ;;
 
 (def validate-fn (u/create-spec-validation-fn ::user-template/self-registration))
+
 (defmethod p/validate-subtype registration-method
   [resource]
   (validate-fn resource))

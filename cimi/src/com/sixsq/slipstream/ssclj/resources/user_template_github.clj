@@ -40,19 +40,11 @@ workflow.
 
 
 ;;
-;; description
-;;
-
-(def ^:const desc p/UserTemplateDescription)
-
-
-;;
 ;; initialization: register this User template
 ;;
 
 (defn initialize
   []
-  (p/register registration-method desc)
   (md/register (gen-md/generate-metadata ::ns ::p/ns ::utc/github-registration)))
 
 
@@ -61,6 +53,7 @@ workflow.
 ;;
 
 (def validate-fn (u/create-spec-validation-fn ::utc/github-registration))
+
 (defmethod p/validate-subtype registration-method
   [resource]
   (validate-fn resource))
