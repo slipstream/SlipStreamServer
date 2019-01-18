@@ -2,9 +2,7 @@
   "This CredentialTemplate allows creating a Cloud Credential instance to hold
   cloud credentials for Dummy cloud."
   (:require
-    [clojure.spec.alpha :as s]
     [com.sixsq.slipstream.connector.dummy-template :as ct]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.credential-template :as p]
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template-cloud-dummy :as dummy-tpl]
@@ -22,6 +20,7 @@
 ;;
 ;; resource
 ;;
+
 (def ^:const resource
   {:type        credential-type
    :method      method
@@ -34,19 +33,15 @@
    :domain-name ""
    :acl         resource-acl})
 
-;;
-;; description
-;;
-(def ^:const desc
-  (merge p/CredentialTemplateDescription
-         (slurp-cloud-cred-desc ct/cloud-service-type)))
 
 ;;
 ;; initialization: register this Credential template
 ;;
+
 (defn initialize
   []
-  (p/register resource desc))
+  (p/register resource))
+
 
 ;;
 ;; multimethods for validation

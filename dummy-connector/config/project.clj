@@ -21,8 +21,6 @@
 
   :source-paths ["src"]
 
-  :resource-paths ["resources"]
-
   :test-paths ["test"]
 
   :pom-location "target/"

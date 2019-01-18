@@ -53,10 +53,7 @@
   (su/only-keys-maps ps/create-keys-spec
                      {:opt-un [:cimi.connector-template.dummy/connectorTemplate]}))
 
-(def ConnectorTemplateDummyDescription
-  (merge ctpl/ConnectorTemplateDescription
-         ctpl/connector-reference-attrs-description
-         (uc/read-config "com/sixsq/slipstream/connector/dummy-desc.edn")))
+
 ;;
 ;; resource
 ;;
@@ -70,17 +67,15 @@
           :orchestratorDisk         "10G"
           :orchestratorImageid      "Linux Ubuntu 14.04 LTS 64-bit"}))
 
-;;
-;; description
-;;
-(def ^:const desc ConnectorTemplateDummyDescription)
 
 ;;
 ;; initialization: register this connector template
 ;;
+
 (defn initialize
   []
-  (ctpl/register resource desc connector-pname->kw))
+  (ctpl/register resource connector-pname->kw))
+
 
 ;;
 ;; multimethods for validation
