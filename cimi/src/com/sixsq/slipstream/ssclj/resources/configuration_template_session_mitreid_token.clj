@@ -11,6 +11,7 @@
 ;;
 ;; resource
 ;;
+
 (def ^:const resource
   {:service     service
    :name        "OIDC Token Authentication Configuration"
@@ -20,21 +21,9 @@
 
 
 ;;
-;; description
-;;
-(def ^:const desc
-  (merge p/ConfigurationTemplateDescription
-         {:clientIPs {:displayName "Authorized Client IPs"
-                      :type        "string"
-                      :description "list of authorized client IP address for OIDC token authentication"
-                      :mandatory   true
-                      :readOnly    false
-                      :order       22}}))
-
-
-;;
 ;; initialization: register this Configuration template
 ;;
+
 (defn initialize
   []
   (p/register resource))

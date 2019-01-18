@@ -4,7 +4,6 @@
     [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
-    [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.configuration-template]
     [com.sixsq.slipstream.util.response :as r]))
@@ -36,8 +35,8 @@
 ;;
 ;; atom to keep track of the loaded ConfigurationTemplate resources
 ;;
+
 (def templates (atom {}))
-(def descriptions (atom {}))
 
 (defn collection-wrapper-fn
   "Specialized version of this function that removes the adding
@@ -72,22 +71,7 @@
       (swap! templates assoc id full-resource)
       (log/info "loaded ConfigurationTemplate" id))))
 
-(def ConfigurationTemplateDescription
-  (merge c/CommonParameterDescription
-         {:service  {:displayName "Service"
-                     :category    "general"
-                     :description "identifies the service to be configured"
-                     :type        "string"
-                     :mandatory   true
-                     :readOnly    true
-                     :order       10}
-          :instance {:displayName "Instance"
-                     :category    "general"
-                     :description "identifies the service instance to be configured"
-                     :type        "string"
-                     :mandatory   false
-                     :readOnly    false
-                     :order       11}}))
+
 ;;
 ;; multimethods for validation
 ;;
@@ -105,6 +89,7 @@
   resource-uri
   [resource]
   (validate-subtype resource))
+
 
 ;;
 ;; CRUD operations
@@ -151,16 +136,3 @@
         wrapped-entries (wrapper-fn request entries)
         entries-and-count (assoc wrapped-entries :count count-before-pagination)]
     (r/json-response entries-and-count)))
-
-;;
-;; actions
-;;
-(defmethod crud/do-action [resource-url "describe"]
-  [{{uuid :uuid} :params :as request}]
-  (try
-    (let [id (str resource-url "/" uuid)]
-      (-> (get @descriptions id)
-          (a/can-view? request)
-          (r/json-response)))
-    (catch Exception e
-      (or (ex-data e) (throw e)))))

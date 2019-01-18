@@ -103,26 +103,7 @@ curl https://nuv.la/api/credential-template
     (swap! templates assoc id full-resource)
     (log/info "loaded CredentialTemplate" id)))
 
-;;
-;; schemas
-;;
 
-(def CredentialTemplateDescription
-  (merge c/CommonParameterDescription
-         {:type   {:displayName "Credential Type"
-                   :category    "general"
-                   :description "type of credential"
-                   :type        "string"
-                   :mandatory   true
-                   :readOnly    true
-                   :order       10}
-          :method {:displayName "Credential Creation Method"
-                   :category    "general"
-                   :description "method for creating credential"
-                   :type        "string"
-                   :mandatory   true
-                   :readOnly    true
-                   :order       11}}))
 ;;
 ;; multimethods for validation
 ;;
@@ -198,6 +179,7 @@ curl https://nuv.la/api/credential-template
 ;;
 ;; initialization: create metadata for this collection
 ;;
+
 (defn initialize
   []
   (md/register (gen-md/generate-metadata ::ns ::ct/schema)))
