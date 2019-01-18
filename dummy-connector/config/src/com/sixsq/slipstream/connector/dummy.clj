@@ -11,10 +11,6 @@
 
 (def ConnectorDummyDescription tpl/ConnectorTemplateDummyDescription)
 
-;;
-;; description
-;;
-(def ^:const desc ConnectorDummyDescription)
 
 ;;
 ;; multimethods for validation

@@ -21,6 +21,7 @@
 ;;
 ;; schemas
 ;;
+
 (s/def :cimi.connector-template.dummy/orchestratorInstanceType ::cimi-core/nonblank-string)
 (s/def :cimi.connector-template.dummy/zone ::cimi-core/nonblank-string)
 (s/def :cimi.connector-template.dummy/orchestratorDisk ::cimi-core/nonblank-string)
@@ -61,6 +62,7 @@
 ;; resource
 ;;
 ;; defaults for the template
+
 (def ^:const resource
   (merge ctpl/connector-reference-attrs-defaults
          {:cloudServiceType         cloud-service-type
@@ -70,17 +72,15 @@
           :orchestratorDisk         "10G"
           :orchestratorImageid      "Linux Ubuntu 14.04 LTS 64-bit"}))
 
-;;
-;; description
-;;
-(def ^:const desc ConnectorTemplateDummyDescription)
 
 ;;
 ;; initialization: register this connector template
 ;;
+
 (defn initialize
   []
-  (ctpl/register resource desc connector-pname->kw))
+  (ctpl/register resource connector-pname->kw))
+
 
 ;;
 ;; multimethods for validation
