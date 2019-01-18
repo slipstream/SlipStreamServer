@@ -116,7 +116,7 @@
                 [{:rel (:edit c/action-uri) :href id}
                  {:rel (:delete c/action-uri) :href id}])]
       (assoc resource :operations ops))
-    (catch Exception e
+    (catch Exception _
       (dissoc resource :operations))))
 
 (defmethod set-operations :default

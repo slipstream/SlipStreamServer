@@ -1,6 +1,7 @@
 (ns com.sixsq.slipstream.ssclj.resources.common.ui-hints)
 
 
+;; FIXME: REMOVE!!!!
 (def UIHintsParameterDescription
   {:group       {:displayName "Group"
                  :category    "general"

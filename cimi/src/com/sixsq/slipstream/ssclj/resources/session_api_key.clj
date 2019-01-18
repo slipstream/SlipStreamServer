@@ -10,25 +10,12 @@
     [com.sixsq.slipstream.ssclj.resources.credential-template-api-key :as api-key-tpl]
     [com.sixsq.slipstream.ssclj.resources.credential.key-utils :as key-utils]
     [com.sixsq.slipstream.ssclj.resources.session :as p]
-    [com.sixsq.slipstream.ssclj.resources.session-template-api-key :as tpl]
     [com.sixsq.slipstream.ssclj.resources.session.utils :as sutils]
     [com.sixsq.slipstream.ssclj.resources.spec.session :as session]
     [com.sixsq.slipstream.ssclj.resources.spec.session-template-api-key :as session-tpl]
     [com.sixsq.slipstream.util.response :as r]))
 
 (def ^:const authn-method "api-key")
-
-;;
-;; schemas
-;;
-
-(def SessionDescription
-  tpl/desc)
-
-;;
-;; description
-;;
-(def ^:const desc SessionDescription)
 
 ;;
 ;; multimethods for validation

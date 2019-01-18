@@ -22,17 +22,11 @@ Intended for OIDC servers implemented with Keycloak.
 
 
 ;;
-;; description
-;;
-(def ^:const desc
-  p/SessionTemplateDescription)
-
-;;
 ;; initialization: register this Session template
 ;;
+
 (defn initialize
   []
-  (p/register authn-method desc)
   (std-crud/initialize p/resource-url ::session-tpl/oidc)
   (md/register (gen-md/generate-metadata ::ns ::p/ns ::session-tpl/oidc)))
 

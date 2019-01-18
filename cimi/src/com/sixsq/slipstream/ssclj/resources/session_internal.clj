@@ -7,25 +7,14 @@
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.session :as p]
-    [com.sixsq.slipstream.ssclj.resources.session-template-internal :as tpl]
     [com.sixsq.slipstream.ssclj.resources.session.utils :as sutils]
     [com.sixsq.slipstream.ssclj.resources.spec.session :as session]
     [com.sixsq.slipstream.ssclj.resources.spec.session-template-internal :as session-tpl]
     [com.sixsq.slipstream.util.response :as r]))
 
+
 (def ^:const authn-method "internal")
 
-;;
-;; schemas
-;;
-
-(def SessionDescription
-  tpl/desc)
-
-;;
-;; description
-;;
-(def ^:const desc SessionDescription)
 
 ;;
 ;; multimethods for validation
@@ -36,10 +25,12 @@
   [resource]
   (validate-fn resource))
 
+
 (def create-validate-fn (u/create-spec-validation-fn ::session-tpl/internal-create))
 (defmethod p/create-validate-subtype authn-method
   [resource]
   (create-validate-fn resource))
+
 
 ;;
 ;; transform template into session resource
@@ -52,6 +43,7 @@
             session-id (assoc :session session-id)
             session-id (update :roles #(str % " " session-id))
             client-ip (assoc :clientIP client-ip))))
+
 
 (defmethod p/tpl->session authn-method
   [{:keys [href redirectURI] :as resource} {:keys [headers base-uri] :as request}]

@@ -22,19 +22,14 @@ from a MITREid server.
 
 
 ;;
-;; description
-;;
-(def ^:const desc
-  p/SessionTemplateDescription)
-
-;;
 ;; initialization: register this Session template
 ;;
+
 (defn initialize
   []
-  (p/register authn-method desc)
   (std-crud/initialize p/resource-url ::session-tpl/mitreid)
   (md/register (gen-md/generate-metadata ::ns ::p/ns ::session-tpl/mitreid)))
+
 
 ;;
 ;; multimethods for validation

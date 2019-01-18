@@ -36,12 +36,9 @@ One SessionTemplate that will always exist on the server is the
 a username and password pair stored in SlipStream's internal database.
 "
   (:require
-    [clojure.tools.logging :as log]
-    [com.sixsq.slipstream.auth.acl :as a]
     [com.sixsq.slipstream.ssclj.resources.common.crud :as crud]
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
-    [com.sixsq.slipstream.ssclj.resources.common.ui-hints :as hints]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]
     [com.sixsq.slipstream.ssclj.resources.spec.session-template :as session-tpl]
@@ -87,42 +84,7 @@ a username and password pair stored in SlipStream's internal database.
                               :type      "ROLE"
                               :right     "VIEW"}]})
 
-;;
-;; atom to keep track of the SessionTemplate descriptions
-;;
-(def descriptions (atom {}))
 
-(defn register
-  "Registers a given SessionTemplate description with the server. The
-   description (desc) must be valid. The authentication method must be used as
-   the id. The description can be looked up via the id, e.g. 'internal'."
-  [id desc]
-  (when (and id desc)
-    (let [full-desc (assoc desc :acl desc-acl)]
-      (swap! descriptions assoc id full-desc))
-    (log/info "loaded SessionTemplate description" id)))
-
-;;
-;; schemas
-;;
-
-(def SessionTemplateDescription
-  (merge c/CommonParameterDescription
-         hints/UIHintsParameterDescription
-         {:method      {:displayName "Authentication Method"
-                        :category    "general"
-                        :description "method to be used to authenticate user"
-                        :type        "string"
-                        :mandatory   true
-                        :readOnly    true
-                        :order       10}
-          :instance    {:displayName "Authentication Method Key (Name)"
-                        :category    "general"
-                        :description "key used to identify this authentication source"
-                        :type        "string"
-                        :mandatory   true
-                        :readOnly    true
-                        :order       11}}))
 ;;
 ;; multimethods for validation
 ;;
@@ -134,7 +96,7 @@ a username and password pair stored in SlipStream's internal database.
 
 (defmethod validate-subtype :default
   [resource]
-  (throw (ex-info (str "unknown SessionTemplate type: " (:method resource)) resource)))
+  (throw (r/ex-bad-request (str "unknown SessionTemplate type: " (:method resource)) resource)))
 
 (defmethod crud/validate
   resource-uri
@@ -159,10 +121,8 @@ a username and password pair stored in SlipStream's internal database.
 (def add-impl (std-crud/add-fn resource-name collection-acl resource-uri))
 
 (defmethod crud/add resource-name
-  [{{:keys [method]} :body :as request}]
-  (if (get @descriptions method)
-    (add-impl request)
-    (throw (r/ex-bad-request (str "invalid authentication method '" method "'")))))
+  [request]
+  (add-impl request))
 
 (def retrieve-impl (std-crud/retrieve-fn resource-name))
 
@@ -187,43 +147,6 @@ a username and password pair stored in SlipStream's internal database.
 (defmethod crud/query resource-name
   [request]
   (query-impl request))
-
-;;
-;; override the operations method to add describe action
-;;
-
-(defmethod crud/set-operations resource-uri
-  [{:keys [id resourceURI] :as resource} request]
-  (let [href (str id "/describe")]
-    (try
-      (a/can-modify? resource request)
-      (let [ops (if (.endsWith resourceURI "Collection")
-                  [{:rel (:add c/action-uri) :href id}]
-                  [{:rel (:edit c/action-uri) :href id}
-                   {:rel (:delete c/action-uri) :href id}
-                   {:rel (:describe c/action-uri) :href href}])]
-        (assoc resource :operations ops))
-      (catch Exception e
-        (if (.endsWith resourceURI "Collection")
-          (dissoc resource :operations)
-          (assoc resource :operations [{:rel (:describe c/action-uri) :href href}]))))))
-
-;;
-;; actions
-;;
-
-(defmethod crud/do-action [resource-url "describe"]
-  [{{uuid :uuid} :params :as request}]
-  (try
-    (let [id (str resource-url "/" uuid)]
-      (if-let [{:keys [method] :as resource} (crud/retrieve-by-id-as-admin id)]
-        (if (a/can-view? resource request)
-          (if-let [desc (get @descriptions method)]
-            (r/json-response desc)
-            (r/ex-not-found id)))
-        (r/ex-not-found id)))
-    (catch Exception e
-      (or (ex-data e) (throw e)))))
 
 
 ;;

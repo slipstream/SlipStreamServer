@@ -33,39 +33,13 @@ credentials. This template is guaranteed to be present on all server instances.
 
 
 ;;
-;; description
-;;
-
-(def ^:const desc
-  (merge p/SessionTemplateDescription
-         {:username {:displayName  "Username"
-                     :category     "general"
-                     :description  "username"
-                     :type         "string"
-                     :mandatory    true
-                     :readOnly     false
-                     :order        20
-                     :autocomplete "username"}
-          :password {:displayName  "Password"
-                     :category     "general"
-                     :description  "password"
-                     :type         "password"
-                     :mandatory    true
-                     :readOnly     false
-                     :order        21
-                     :autocomplete "password"}}))
-
-
-;;
 ;; initialization: register this Session template and create internal authentication template
 ;;
 
 (defn initialize
   []
-  (p/register authn-method desc)
   (std-crud/initialize p/resource-url ::session-tpl/internal)
   (std-crud/add-if-absent (str "session-template/" authn-method) p/resource-url default-template)
-
   (md/register (gen-md/generate-metadata ::ns ::p/ns ::session-tpl/internal)))
 
 
