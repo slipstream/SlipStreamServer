@@ -43,26 +43,12 @@ secret to access the server. The credential can optionally be limited in time.
 
 
 ;;
-;; description
-;;
-(def ^:const desc
-  (merge p/CredentialTemplateDescription
-         {:ttl {:displayName "Time to Live (TTL)"
-                :category    "general"
-                :description "number of seconds before the API key expires (0 = forever)"
-                :type        "int"
-                :mandatory   false
-                :readOnly    false
-                :order       20}}))
-
-
-;;
 ;; initialization: register this Credential template
 ;;
 
 (defn initialize
   []
-  (p/register resource desc)
+  (p/register resource)
   (md/register (gen-md/generate-metadata ::ns ::p/ns :cimi/credential-template.api-key)))
 
 

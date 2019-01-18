@@ -43,27 +43,12 @@ format.
 
 
 ;;
-;; description
-;;
-
-(def ^:const desc
-  (merge p/CredentialTemplateDescription
-         {:publicKey {:displayName "SSH Public Key"
-                      :category    "general"
-                      :description "public RSA or DSA key of an SSH key pair"
-                      :type        "string"
-                      :mandatory   true
-                      :readOnly    false
-                      :order       20}}))
-
-
-;;
 ;; initialization: register this Credential template
 ;;
 
 (defn initialize
   []
-  (p/register resource desc)
+  (p/register resource)
   (md/register (gen-md/generate-metadata ::ns ::p/ns :cimi/credential-template.ssh-public-key)))
 
 
