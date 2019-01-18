@@ -1,6 +1,6 @@
-(def +version+ "3.67")
+(def +version+ "3.68-SNAPSHOT")
 
-(defproject com.sixsq.slipstream/SlipStreamAsync "3.67"
+(defproject com.sixsq.slipstream/SlipStreamAsync "3.68-SNAPSHOT"
 
   :description "utilities for asynchronous actions"
 
