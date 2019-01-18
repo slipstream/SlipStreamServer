@@ -1,7 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.resources.credential-template-cloud-alpha
   (:require
     [clojure.spec.alpha :as s]
-    [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.connector-alpha-example :as ct]
     [com.sixsq.slipstream.ssclj.resources.credential-template :as p]
@@ -48,6 +47,7 @@
 ;;
 ;; resource
 ;;
+
 (def ^:const resource
   {:type        credential-type
    :method      method
@@ -59,17 +59,15 @@
    :secret      ""
    :acl         resource-acl})
 
-;;
-;; description
-;;
-(def ^:const desc p/CredentialTemplateDescription)
 
 ;;
 ;; initialization: register this Credential template
 ;;
+
 (defn initialize
   []
-  (p/register resource desc))
+  (p/register resource))
+
 
 ;;
 ;; multimethods for validation

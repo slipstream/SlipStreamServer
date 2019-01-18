@@ -36,33 +36,24 @@
   (su/only-keys-maps ps/create-keys-spec
                      {:opt-un [:cimi.connector-template.alpha/connectorTemplate]}))
 
-(def ConnectorTemplateAlphaDescription
-  (merge p/ConnectorTemplateDescription
-         {:alphaKey {:displayName "Alpha Key"
-                     :category    "general"
-                     :description "example parameter"
-                     :type        "int"
-                     :mandatory   true
-                     :readOnly    false
-                     :order       1}}))
+
 ;;
 ;; resource
 ;;
+
 (def ^:const resource
   {:cloudServiceType cloud-service-type
    :alphaKey         1001})
 
-;;
-;; description
-;;
-(def ^:const desc ConnectorTemplateAlphaDescription)
 
 ;;
 ;; initialization: register this connector template
 ;;
+
 (defn initialize
   []
-  (p/register resource desc))
+  (p/register resource))
+
 
 ;;
 ;; multimethods for validation

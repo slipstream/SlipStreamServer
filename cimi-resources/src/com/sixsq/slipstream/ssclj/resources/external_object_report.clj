@@ -11,15 +11,6 @@
     [com.sixsq.slipstream.ssclj.resources.spec.external-object-template-report]))
 
 
-(def ExternalObjectReportDescription
-  eot/ExternalObjectTemplateReportDescription)
-
-;;
-;; description
-;;
-(def ^:const desc ExternalObjectReportDescription)
-
-
 (defn ss-conf
   "Returns SlipStream configuration."
   []

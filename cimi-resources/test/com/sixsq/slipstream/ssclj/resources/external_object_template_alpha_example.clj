@@ -8,7 +8,9 @@
     [com.sixsq.slipstream.ssclj.resources.spec.external-object :as eo]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
+
 (def ^:const objectType "alpha")
+
 
 ;;
 ;; schemas
@@ -25,9 +27,11 @@
   (su/merge-keys-specs [external-object-keys-spec
                         {:req-un [:cimi.external-object.alpha/alphaKey]}]))
 
+
 (def resource-keys-spec
   (su/merge-keys-specs [c/common-attrs
                         external-object-alpha-keys-spec]))
+
 
 (s/def :cimi/external-object.alpha
   (su/only-keys-maps resource-keys-spec))
@@ -37,35 +41,29 @@
   (su/only-keys-maps c/template-attrs
                      (u/remove-req external-object-alpha-keys-spec #{::eo/state})))
 
+
 (s/def :cimi/external-object-template.alpha-create
   (su/only-keys-maps c/create-attrs
                      {:req-un [:cimi.external-object-template.alpha/externalObjectTemplate]}))
 
+
 ;;
 ;; template resource
 ;;
+
 (def ^:const resource-template
   {:objectType objectType
    :alphaKey   1001})
 
-;;
-;; description
-;;
-(def ^:const desc (merge eot/ExternalObjectTemplateDescription
-                         {:alphaKey {:displayName "Alpha Key"
-                                     :category    "general"
-                                     :description "example parameter"
-                                     :type        "int"
-                                     :mandatory   true
-                                     :readOnly    false
-                                     :order       1}}))
 
 ;;
 ;; initialization: register this external object template
 ;;
+
 (defn initialize
   []
-  (eot/register resource-template desc))
+  (eot/register resource-template))
+
 
 ;;
 ;; multimethods for validation
@@ -76,10 +74,12 @@
   [resource]
   (validate-fn resource))
 
+
 (def validate-fn (u/create-spec-validation-fn :cimi/external-object-template.alpha-create))
 (defmethod eo-resource/create-validate-subtype objectType
   [resource]
   (validate-fn resource))
+
 
 (def validate-fn (u/create-spec-validation-fn :cimi.external-object-template.alpha/externalObjectTemplate))
 (defmethod eot/validate-subtype-template objectType
