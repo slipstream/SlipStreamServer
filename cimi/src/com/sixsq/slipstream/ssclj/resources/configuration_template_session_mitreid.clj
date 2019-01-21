@@ -2,13 +2,16 @@
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-mitreid :as ct-mitreid]))
+    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-mitreid :as cts-mitreid]))
+
 
 (def ^:const service "session-mitreid")
+
 
 ;;
 ;; resource
 ;;
+
 (def ^:const resource
   {:service        service
    :name           "MITREid Authentication Configuration"
@@ -25,6 +28,7 @@
 ;;
 ;; description
 ;;
+
 (def ^:const desc
   (merge p/ConfigurationTemplateDescription
          {:clientID       {:displayName "Client ID"
@@ -64,18 +68,21 @@
                          :readOnly      false
                          :order         25}}))
 
-;;
-;; initialization: register this Configuration template
-;;
-(defn initialize
-  []
-  (p/register resource desc))
 
 ;;
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn ::ct-mitreid/session-mitreid))
+(def validate-fn (u/create-spec-validation-fn ::cts-mitreid/schema))
 (defmethod p/validate-subtype service
   [resource]
   (validate-fn resource))
+
+
+;;
+;; initialization: register this Configuration template
+;;
+
+(defn initialize
+  []
+  (p/register resource desc))

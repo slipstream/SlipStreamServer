@@ -48,7 +48,10 @@
              :json-schema/group "body"
              :json-schema/order 11
              :json-schema/hidden false
-             :json-schema/sensitive false)))
+             :json-schema/sensitive false
+
+             :json-schema/value-scope {:values  ["WAITING" "FAILED" "SUCCEEDED"]
+                                       :default "WAITING"})))
 
 
 (s/def ::targetResource

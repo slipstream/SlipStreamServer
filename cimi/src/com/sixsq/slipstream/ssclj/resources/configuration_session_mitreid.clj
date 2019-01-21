@@ -4,7 +4,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration :as p]
     [com.sixsq.slipstream.ssclj.resources.configuration-template-session-mitreid :as tpl]
-    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-mitreid :as ct-mitreid]))
+    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-mitreid :as cts-mitreid]))
 
 (def ^:const service "session-mitreid")
 
@@ -20,12 +20,12 @@
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn ::ct-mitreid/session-mitreid))
+(def validate-fn (u/create-spec-validation-fn ::cts-mitreid/schema))
 (defmethod p/validate-subtype service
   [resource]
   (validate-fn resource))
 
-(def create-validate-fn (u/create-spec-validation-fn ::ct-mitreid/session-mitreid-create))
+(def create-validate-fn (u/create-spec-validation-fn ::cts-mitreid/schema-create))
 (defmethod p/create-validate-subtype service
   [resource]
   (create-validate-fn resource))
@@ -36,4 +36,4 @@
 ;;
 (defn initialize
   []
-  (std-crud/initialize p/resource-url ::ct-mitreid/session-mitreid))
+  (std-crud/initialize p/resource-url ::cts-mitreid/schema))

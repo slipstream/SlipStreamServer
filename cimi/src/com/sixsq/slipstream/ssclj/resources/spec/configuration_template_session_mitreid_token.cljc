@@ -20,7 +20,7 @@
 
 
 ;; Defines the contents of the OIDC authentication ConfigurationTemplate resource itself.
-(s/def ::session-mitreid-token
+(s/def ::schema
   (su/only-keys-maps ps/resource-keys-spec
                      configuration-template-keys-spec-req))
 
@@ -32,6 +32,6 @@
                      configuration-template-keys-spec-create))
 
 
-(s/def ::session-mitreid-token-create
+(s/def ::schema-create
   (su/only-keys-maps ps/create-keys-spec
                      {:req-un [::configurationTemplate]}))

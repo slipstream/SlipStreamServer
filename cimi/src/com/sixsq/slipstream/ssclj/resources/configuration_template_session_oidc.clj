@@ -2,13 +2,16 @@
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-oidc :as ct-oidc]))
+    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-oidc :as cts-oidc]))
+
 
 (def ^:const service "session-oidc")
+
 
 ;;
 ;; resource
 ;;
+
 (def ^:const resource
   {:service     service
    :name        "OIDC Authentication Configuration"
@@ -23,6 +26,7 @@
 ;;
 ;; description
 ;;
+
 (def ^:const desc
   (merge p/ConfigurationTemplateDescription
          {:clientID     {:displayName "Client ID"
@@ -56,18 +60,21 @@
                          :readOnly    false
                          :order       24}}))
 
-;;
-;; initialization: register this Configuration template
-;;
-(defn initialize
-  []
-  (p/register resource desc))
 
 ;;
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn ::ct-oidc/session-oidc))
+(def validate-fn (u/create-spec-validation-fn ::cts-oidc/schema))
 (defmethod p/validate-subtype service
   [resource]
   (validate-fn resource))
+
+
+;;
+;; initialization: register this Configuration template
+;;
+
+(defn initialize
+  []
+  (p/register resource desc))

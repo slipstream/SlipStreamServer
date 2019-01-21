@@ -35,7 +35,10 @@
   (-> (st/spec (s/int-in 1 65536))
       (assoc :name "port"
              :json-schema/description "port number in the range 1 to 65535"
-             :json-schema/type "integer")))
+             :json-schema/type "integer"
+
+             :json-schema/value-scope {:minimum 1
+                                       :maximum 65535})))
 
 
 ;; FIXME: Provide an implementation that works with ClojureScript.

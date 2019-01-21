@@ -12,16 +12,25 @@
 
 
 (s/def ::type
-  (st/spec #{"USER" "ROLE"}))
+  (-> (st/spec #{"USER" "ROLE"})
+      (assoc :json-schema/value-scope {:values  ["USER" "ROLE"]
+                                       :default "ROLE"})))
 
 
 (s/def ::right
-  (st/spec #{"VIEW" "MODIFY"                                ;; LEGACY RIGHTS
-             "ALL"
-             "VIEW_ACL" "VIEW_DATA" "VIEW_META"
-             "EDIT_ACL" "EDIT_DATA" "EDIT_META"
-             "DELETE"
-             "MANAGE"}))
+  (-> (st/spec #{"VIEW" "MODIFY"                            ;; LEGACY RIGHTS
+                 "ALL"
+                 "VIEW_ACL" "VIEW_DATA" "VIEW_META"
+                 "EDIT_ACL" "EDIT_DATA" "EDIT_META"
+                 "DELETE"
+                 "MANAGE"})
+      (assoc :json-schema/value-scope {:values  ["VIEW" "MODIFY"
+                                                 "ALL"
+                                                 "VIEW_ACL" "VIEW_DATA" "VIEW_META"
+                                                 "EDIT_ACL" "EDIT_DATA" "EDIT_META"
+                                                 "DELETE"
+                                                 "MANAGE"]
+                                       :default "VIEW_META"})))
 
 
 (s/def ::owner

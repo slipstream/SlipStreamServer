@@ -12,6 +12,7 @@
 ;;
 ;; resource
 ;;
+
 (def ^:const resource
   {
    :service                      service
@@ -59,17 +60,10 @@
 ;;
 ;; description
 ;;
+
 (def ^:const desc
   (merge p/ConfigurationTemplateDescription
          (uc/read-config "com/sixsq/slipstream/ssclj/resources/configuration-slipstream-desc.edn")))
-
-
-;;
-;; initialization: register this Configuration template
-;;
-(defn initialize
-  []
-  (p/register resource desc))
 
 
 ;;
@@ -80,3 +74,12 @@
 (defmethod p/validate-subtype service
   [resource]
   (validate-fn resource))
+
+
+;;
+;; initialization: register this Configuration template
+;;
+
+(defn initialize
+  []
+  (p/register resource desc))

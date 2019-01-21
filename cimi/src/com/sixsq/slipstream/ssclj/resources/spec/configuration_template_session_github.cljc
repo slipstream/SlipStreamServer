@@ -65,7 +65,7 @@
   {:req-un [::instance ::clientID ::clientSecret]})
 
 ;; Defines the contents of the github authentication ConfigurationTemplate resource itself.
-(s/def ::session-github
+(s/def ::schema
   (su/only-keys-maps ps/resource-keys-spec
                      configuration-template-keys-spec-req))
 
@@ -75,6 +75,6 @@
   (su/only-keys-maps ps/template-keys-spec
                      configuration-template-keys-spec-create))
 
-(s/def ::session-github-create
+(s/def ::schema-create
   (su/only-keys-maps ps/create-keys-spec
                      {:req-un [::configurationTemplate]}))
