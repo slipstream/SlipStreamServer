@@ -64,6 +64,7 @@
 ;; atom to keep track of the loaded ConnectorTemplate resources
 ;;
 (def templates (atom {}))
+(def descriptions (atom {}))
 (def name->kw (atom {}))
 
 (defn collection-wrapper-fn
@@ -99,11 +100,16 @@
    with the server.  The resource document (resource) and the description
    (desc) must be valid.  The key will be used to create the id of
    the resource as 'connector-template/key'."
-  [resource & [name-kw-map]]
+  [resource desc & [name-kw-map]]
   (when-let [full-resource (complete-resource resource)]
     (let [id (:id full-resource)]
       (swap! templates assoc id full-resource)
       (log/info "loaded ConnectorTemplate" id)
+      (when desc
+        (let [acl (:acl full-resource)
+              full-desc (assoc desc :acl acl)]
+          (swap! descriptions assoc id full-desc))
+        (log/info "loaded ConnectorTemplate description" id))
       (when name-kw-map
         (swap! name->kw assoc id name-kw-map)
         (log/info "added name->kw mapping from ConnectorTemplate" id)))))

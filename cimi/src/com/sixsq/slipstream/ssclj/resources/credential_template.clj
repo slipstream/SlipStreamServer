@@ -72,6 +72,7 @@ curl https://nuv.la/api/credential-template
 ;; atom to keep track of the loaded CredentialTemplate resources
 ;;
 (def templates (atom {}))
+(def descriptions (atom {}))
 
 
 (defn collection-wrapper-fn
@@ -94,10 +95,13 @@ curl https://nuv.la/api/credential-template
    template."
   [{:keys [method] :as resource}]
   (when method
-    (let [id (str resource-url "/" method)]
+    (let [id (str resource-url "/" method)
+          href (str id "/describe")
+          ops [{:rel (:describe c/action-uri) :href href}]]
       (-> resource
           (merge {:id          id
-                  :resourceURI resource-uri})
+                  :resourceURI resource-uri
+                  :operations  ops})
           u/update-timestamps))))
 
 
@@ -106,10 +110,37 @@ curl https://nuv.la/api/credential-template
    server. The resource document (resource) and the description (desc) must be
    valid. The template-id key must be provided; it will be used to generate the
    id of the form 'credential-template/template-id'."
-  [resource]
+  [resource desc]
   (when-let [{:keys [id] :as full-resource} (complete-resource resource)]
     (swap! templates assoc id full-resource)
-    (log/info "loaded CredentialTemplate" id)))
+    (log/info "loaded CredentialTemplate" id)
+    (when desc
+      (let [acl (:acl full-resource)
+            full-desc (assoc desc :acl acl)]
+        (swap! descriptions assoc id full-desc))
+      (log/info "loaded CredentialTemplate description" id))))
+
+
+;;
+;; schemas
+;;
+
+(def CredentialTemplateDescription
+  (merge c/CommonParameterDescription
+         {:type   {:displayName "Credential Type"
+                   :category    "general"
+                   :description "type of credential"
+                   :type        "string"
+                   :mandatory   true
+                   :readOnly    true
+                   :order       10}
+          :method {:displayName "Credential Creation Method"
+                   :category    "general"
+                   :description "method for creating credential"
+                   :type        "string"
+                   :mandatory   true
+                   :readOnly    true
+                   :order       11}}))
 
 
 ;;
@@ -191,6 +222,21 @@ curl https://nuv.la/api/credential-template
         wrapped-entries (wrapper-fn request entries)
         entries-and-count (assoc wrapped-entries :count count-before-pagination)]
     (r/json-response entries-and-count)))
+
+
+;;
+;; actions
+;;
+
+(defmethod crud/do-action [resource-url "describe"]
+  [{{uuid :uuid} :params :as request}]
+  (try
+    (let [id (str resource-url "/" uuid)]
+      (-> (get @descriptions id)
+          (a/can-view? request)
+          (r/json-response)))
+    (catch Exception e
+      (or (ex-data e) (throw e)))))
 
 
 ;;

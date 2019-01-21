@@ -11,6 +11,7 @@ format.
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template-ssh-public-key :as ct-ssh-public-key]
     [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]))
 
+
 (def ^:const credential-type "ssh-public-key")
 
 
@@ -43,6 +44,21 @@ format.
 
 
 ;;
+;; description
+;;
+
+(def ^:const desc
+  (merge p/CredentialTemplateDescription
+         {:publicKey {:displayName "SSH Public Key"
+                      :category    "general"
+                      :description "public RSA or DSA key of an SSH key pair"
+                      :type        "string"
+                      :mandatory   true
+                      :readOnly    false
+                      :order       20}}))
+
+
+;;
 ;; multimethods for validation
 ;;
 
@@ -58,7 +74,5 @@ format.
 
 (defn initialize
   []
-  (p/register resource)
+  (p/register resource desc)
   (md/register (gen-md/generate-metadata ::ns ::p/ns ::ct-ssh-public-key/schema)))
-
-

@@ -59,14 +59,17 @@
    :secret      ""
    :acl         resource-acl})
 
+;;
+;; description
+;;
+(def ^:const desc p/CredentialTemplateDescription)
 
 ;;
 ;; initialization: register this Credential template
 ;;
 (defn initialize
   []
-  (p/register resource))
-
+  (p/register resource desc))
 
 ;;
 ;; multimethods for validation

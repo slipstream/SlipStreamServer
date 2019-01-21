@@ -58,7 +58,7 @@
              :json-schema/name "href"
              :json-schema/namespace common-ns/slipstream-namespace
              :json-schema/uri common-ns/slipstream-uri
-             :json-schema/type "href"
+             :json-schema/type "string"
              :json-schema/providerMandatory false
              :json-schema/consumerMandatory false
              :json-schema/mutable false
