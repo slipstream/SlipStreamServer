@@ -1,9 +1,9 @@
 (ns com.sixsq.slipstream.ssclj.util.metadata
   (:require
+    [clojure.string :as str]
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.ssclj.resources.resource-metadata :as resource-metadata]
-    [spec-tools.json-schema :as jsc]
-    [clojure.string :as str])
+    [spec-tools.json-schema :as jsc])
   (:import
     (clojure.lang Namespace)))
 
