@@ -35,11 +35,18 @@
    :acl         resource-acl})
 
 ;;
+;; description
+;;
+(def ^:const desc
+  (merge p/CredentialTemplateDescription
+         (slurp-cloud-cred-desc ct/cloud-service-type)))
+
+;;
 ;; initialization: register this Credential template
 ;;
 (defn initialize
   []
-  (p/register resource))
+  (p/register resource desc))
 
 ;;
 ;; multimethods for validation
