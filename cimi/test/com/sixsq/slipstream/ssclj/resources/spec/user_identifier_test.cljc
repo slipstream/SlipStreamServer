@@ -2,7 +2,7 @@
   (:require
     [clojure.test :refer [deftest is]]
     [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]
-    [com.sixsq.slipstream.ssclj.resources.spec.user-identifier :as ui-spec]
+    [com.sixsq.slipstream.ssclj.resources.spec.user-identifier :as user-identifier]
     [com.sixsq.slipstream.ssclj.resources.user-identifier :as ui]))
 
 
@@ -24,11 +24,11 @@
              :identifier  "some-long-identifier"
              :user        {:href "user/35413_univ_lyon1_frurn_mace_cru_fr_federation_univ_lyon1_fr_https___fed_id_nuv_la_samlbridge_module_php_saml_sp_metadata_php_sixsq_saml_bridge_umef2do_i7rkfnhwwkq6fxwhx9u_"}}]
 
-    (stu/is-valid ::ui-spec/user-identifier cfg)
-    (stu/is-invalid ::ui-spec/user-identifier (assoc cfg :bad-attr "BAD_ATTR"))
+    (stu/is-valid ::user-identifier/schema cfg)
+    (stu/is-invalid ::user-identifier/schema (assoc cfg :bad-attr "BAD_ATTR"))
 
     (doseq [attr #{:id :resourceURI :created :updated :acl :identifier :user}]
-      (stu/is-invalid ::ui-spec/user-identifier (dissoc cfg attr)))
+      (stu/is-invalid ::user-identifier/schema (dissoc cfg attr)))
 
     (doseq [attr #{:username :server :clientIP}]
-      (stu/is-valid ::ui-spec/user-identifier (dissoc cfg attr)))))
+      (stu/is-valid ::user-identifier/schema (dissoc cfg attr)))))

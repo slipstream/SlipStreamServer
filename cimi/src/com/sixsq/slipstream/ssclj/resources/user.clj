@@ -59,7 +59,7 @@ requires a template. All the SCRUD actions follow the standard CIMI patterns.
 ;; common validation for created users
 ;;
 
-(def validate-fn (u/create-spec-validation-fn ::userschema))
+(def validate-fn (u/create-spec-validation-fn ::user/schema))
 (defmethod crud/validate resource-uri
   [resource]
   (validate-fn resource))
