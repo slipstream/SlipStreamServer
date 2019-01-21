@@ -27,7 +27,7 @@
 (def user-template-create-keys-spec-req user-template-keys-spec-req)
 
 ;; Defines the contents of the direct UserTemplate resource itself.
-(s/def ::direct
+(s/def ::schema
   (su/only-keys-maps user-template/resource-keys-spec
                      user-template-keys-spec-req))
 
@@ -37,6 +37,6 @@
   (su/only-keys-maps user-template/template-keys-spec
                      user-template-create-keys-spec-req))
 
-(s/def ::direct-create
+(s/def ::schema-create
   (su/only-keys-maps user-template/create-keys-spec
                      {:opt-un [::userTemplate]}))

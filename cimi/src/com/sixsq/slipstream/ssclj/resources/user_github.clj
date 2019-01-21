@@ -1,11 +1,11 @@
-(ns com.sixsq.slipstream.ssclj.resources.user-github-registration
+(ns com.sixsq.slipstream.ssclj.resources.user-github
   (:require
     [com.sixsq.slipstream.ssclj.resources.callback :as callback]
     [com.sixsq.slipstream.ssclj.resources.callback-create-user-github :as user-github-callback]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.github.utils :as gu]
     [com.sixsq.slipstream.ssclj.resources.spec.user]
-    [com.sixsq.slipstream.ssclj.resources.spec.user-template-github :as user-template-spec]
+    [com.sixsq.slipstream.ssclj.resources.spec.user-template-github :as ut-github]
     [com.sixsq.slipstream.ssclj.resources.user :as p]
     [com.sixsq.slipstream.ssclj.resources.user-template-github :as user-template]))
 
@@ -13,7 +13,7 @@
 ;; multimethods for validation
 ;;
 
-(def create-validate-fn (u/create-spec-validation-fn ::user-template-spec/github-registration-create))
+(def create-validate-fn (u/create-spec-validation-fn ::ut-github/schema-create))
 (defmethod p/create-validate-subtype user-template/registration-method
   [create-document]
   (create-validate-fn create-document))

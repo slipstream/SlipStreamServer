@@ -2,7 +2,7 @@
   (:require
     [clojure.test :refer [deftest is]]
     [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]
-    [com.sixsq.slipstream.ssclj.resources.spec.user-template-self-registration :as user-template]
+    [com.sixsq.slipstream.ssclj.resources.spec.user-template-self-registration :as ut-auto]
     [com.sixsq.slipstream.ssclj.resources.user-template :as st]))
 
 (def valid-acl {:owner {:principal "ADMIN"
@@ -38,22 +38,22 @@
                     :userTemplate (dissoc tpl :id)}]
 
     ;; check the registration schema (without href)
-    (stu/is-valid ::user-template/self-registration tpl)
+    (stu/is-valid ::ut-auto/schema tpl)
 
     (doseq [attr #{:id :resourceURI :created :updated :acl
                    :method :username :password :passwordRepeat :emailAddress}]
-      (stu/is-invalid ::user-template/self-registration (dissoc tpl attr)))
+      (stu/is-invalid ::ut-auto/schema (dissoc tpl attr)))
 
     (doseq [attr #{:name :description :properties}]
-      (stu/is-valid ::user-template/self-registration (dissoc tpl attr)))
+      (stu/is-valid ::ut-auto/schema (dissoc tpl attr)))
 
     ;; check the create template schema (with href)
-    (stu/is-valid ::user-template/self-registration-create create-tpl)
-    (stu/is-valid ::user-template/self-registration-create (assoc-in create-tpl [:userTemplate :href] "user-template/abc"))
-    (stu/is-invalid ::user-template/self-registration-create (assoc-in create-tpl [:userTemplate :href] "bad-reference/abc"))
+    (stu/is-valid ::ut-auto/schema-create create-tpl)
+    (stu/is-valid ::ut-auto/schema-create (assoc-in create-tpl [:userTemplate :href] "user-template/abc"))
+    (stu/is-invalid ::ut-auto/schema-create (assoc-in create-tpl [:userTemplate :href] "bad-reference/abc"))
 
     (doseq [attr #{:resourceURI :userTemplate}]
-      (stu/is-invalid ::user-template/self-registration-create (dissoc create-tpl attr)))
+      (stu/is-invalid ::ut-auto/schema-create (dissoc create-tpl attr)))
 
     (doseq [attr #{:name :description :properties}]
-      (stu/is-valid ::user-template/self-registration-create (dissoc create-tpl attr)))))
+      (stu/is-valid ::ut-auto/schema-create (dissoc create-tpl attr)))))

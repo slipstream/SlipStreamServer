@@ -10,7 +10,7 @@
 
 
 ;; Defines the contents of the oidc-registration UserTemplate resource itself.
-(s/def ::oidc-registration
+(s/def ::schema
   (su/only-keys-maps ps/resource-keys-spec))
 
 
@@ -21,6 +21,6 @@
                      user-template-oidc-registration-keys-href))
 
 
-(s/def ::oidc-registration-create
+(s/def ::schema-create
   (su/only-keys-maps ps/create-keys-spec
                      {:req-un [::userTemplate]}))

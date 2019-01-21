@@ -60,7 +60,7 @@
   {:opt-un [::ps/href]})
 
 ;; Defines the contents of the self-registration UserTemplate resource itself.
-(s/def ::self-registration
+(s/def ::schema
   (su/only-keys-maps ps/resource-keys-spec
                      user-template-self-registration-keys))
 
@@ -71,6 +71,6 @@
                      user-template-self-registration-keys
                      user-template-self-registration-keys-href))
 
-(s/def ::self-registration-create
+(s/def ::schema-create
   (su/only-keys-maps ps/create-keys-spec
                      {:req-un [::userTemplate]}))

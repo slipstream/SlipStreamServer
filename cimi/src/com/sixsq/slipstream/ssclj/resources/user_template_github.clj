@@ -6,7 +6,7 @@ workflow.
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]
-    [com.sixsq.slipstream.ssclj.resources.spec.user-template-github :as utc]
+    [com.sixsq.slipstream.ssclj.resources.spec.user-template-github :as ut-github]
     [com.sixsq.slipstream.ssclj.resources.user-template :as p]
     [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]))
 
@@ -53,14 +53,14 @@ workflow.
 (defn initialize
   []
   (p/register registration-method desc)
-  (md/register (gen-md/generate-metadata ::ns ::p/ns ::utc/github-registration)))
+  (md/register (gen-md/generate-metadata ::ns ::p/ns ::ut-github/schema)))
 
 
 ;;
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn ::utc/github-registration))
+(def validate-fn (u/create-spec-validation-fn ::ut-github/schema))
 (defmethod p/validate-subtype registration-method
   [resource]
   (validate-fn resource))
