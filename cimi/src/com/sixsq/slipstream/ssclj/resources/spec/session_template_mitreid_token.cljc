@@ -33,7 +33,7 @@
   {:req-un [::token]})
 
 ;; Defines the contents of the oidc-token SessionTemplate resource itself.
-(s/def ::mitreid-token
+(s/def ::schema
   (su/only-keys-maps ps/resource-keys-spec
                      session-template-keys-spec))
 
@@ -43,6 +43,6 @@
   (su/only-keys-maps ps/template-keys-spec
                      session-template-keys-spec))
 
-(s/def ::mitreid-token-create
+(s/def ::schema-create
   (su/only-keys-maps ps/create-keys-spec
                      {:req-un [::sessionTemplate]}))

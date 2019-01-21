@@ -13,7 +13,7 @@
     [com.sixsq.slipstream.ssclj.resources.session-template-api-key :as tpl]
     [com.sixsq.slipstream.ssclj.resources.session.utils :as sutils]
     [com.sixsq.slipstream.ssclj.resources.spec.session :as session]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-api-key :as session-tpl]
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-api-key :as st-api-key]
     [com.sixsq.slipstream.util.response :as r]))
 
 (def ^:const authn-method "api-key")
@@ -39,7 +39,7 @@
   [resource]
   (validate-fn resource))
 
-(def create-validate-fn (u/create-spec-validation-fn ::session-tpl/api-key-create))
+(def create-validate-fn (u/create-spec-validation-fn ::st-api-key/schema-create))
 (defmethod p/create-validate-subtype authn-method
   [resource]
   (create-validate-fn resource))

@@ -2,7 +2,7 @@
   (:require
     [clojure.test :refer [deftest is]]
     [com.sixsq.slipstream.ssclj.resources.session-template :as st]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-mitreid-token :as session-tpl]
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-mitreid-token :as st-mitreid-token]
     [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]))
 
 
@@ -28,10 +28,10 @@
 
              :token       "some-compressed-mitreid-token-value"}]
 
-    (stu/is-valid ::session-tpl/mitreid-token cfg)
+    (stu/is-valid ::st-mitreid-token/schema cfg)
 
     (doseq [attr #{:id :resourceURI :created :updated :acl :method :instance :token}]
-      (stu/is-invalid ::session-tpl/mitreid-token (dissoc cfg attr)))
+      (stu/is-invalid ::st-mitreid-token/schema (dissoc cfg attr)))
 
     (doseq [attr #{:group :redirectURI}]
-      (stu/is-valid ::session-tpl/mitreid-token (dissoc cfg attr)))))
+      (stu/is-valid ::st-mitreid-token/schema (dissoc cfg attr)))))

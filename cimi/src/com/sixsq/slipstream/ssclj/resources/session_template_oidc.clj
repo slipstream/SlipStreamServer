@@ -8,7 +8,7 @@ Intended for OIDC servers implemented with Keycloak.
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]
     [com.sixsq.slipstream.ssclj.resources.session-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-oidc :as session-tpl]
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-oidc :as st-oidc]
     [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]))
 
 
@@ -33,14 +33,14 @@ Intended for OIDC servers implemented with Keycloak.
 (defn initialize
   []
   (p/register authn-method desc)
-  (std-crud/initialize p/resource-url ::session-tpl/oidc)
-  (md/register (gen-md/generate-metadata ::ns ::p/ns ::session-tpl/oidc)))
+  (std-crud/initialize p/resource-url ::st-oidc/schema)
+  (md/register (gen-md/generate-metadata ::ns ::p/ns ::st-oidc/schema)))
 
 ;;
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn ::session-tpl/oidc))
+(def validate-fn (u/create-spec-validation-fn ::st-oidc/schema))
 (defmethod p/validate-subtype authn-method
   [resource]
   (validate-fn resource))

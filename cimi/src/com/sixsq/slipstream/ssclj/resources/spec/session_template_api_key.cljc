@@ -55,7 +55,7 @@
   {:req-un [::key ::secret]})
 
 ;; Defines the contents of the api-key SessionTemplate resource itself.
-(s/def ::api-key
+(s/def ::schema
   (su/only-keys-maps ps/resource-keys-spec
                      session-template-keys-spec))
 
@@ -65,6 +65,6 @@
   (su/only-keys-maps ps/template-keys-spec
                      session-template-keys-spec))
 
-(s/def ::api-key-create
+(s/def ::schema-create
   (su/only-keys-maps ps/create-keys-spec
                      {:req-un [::sessionTemplate]}))

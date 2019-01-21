@@ -8,7 +8,7 @@ credentials. This template is guaranteed to be present on all server instances.
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]
     [com.sixsq.slipstream.ssclj.resources.session-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-internal :as session-tpl]
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-internal :as st-internal]
     [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]))
 
 
@@ -63,17 +63,17 @@ credentials. This template is guaranteed to be present on all server instances.
 (defn initialize
   []
   (p/register authn-method desc)
-  (std-crud/initialize p/resource-url ::session-tpl/internal)
+  (std-crud/initialize p/resource-url ::st-internal/schema)
   (std-crud/add-if-absent (str "session-template/" authn-method) p/resource-url default-template)
 
-  (md/register (gen-md/generate-metadata ::ns ::p/ns ::session-tpl/internal)))
+  (md/register (gen-md/generate-metadata ::ns ::p/ns ::st-internal/schema)))
 
 
 ;;
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn ::session-tpl/internal))
+(def validate-fn (u/create-spec-validation-fn ::st-internal/schema))
 (defmethod p/validate-subtype authn-method
   [resource]
   (validate-fn resource))

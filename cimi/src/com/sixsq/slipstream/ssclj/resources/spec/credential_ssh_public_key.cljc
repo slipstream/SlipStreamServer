@@ -17,11 +17,11 @@
             ::fingerprint
             ::publicKey]})
 
-(s/def :cimi/credential.ssh-public-key
+(s/def ::schema
   (su/only-keys-maps cred/credential-keys-spec
                      credential-keys-spec))
 
 ;; multiple methods to create an ssh public key, so multiple schemas
-(s/def :cimi/credential.ssh-public-key.create
+(s/def ::schema-create
   (s/or :import ::ct-ssh-public-key/schema-create
         :generate ::ct-ssh-key-pair/schema-create))

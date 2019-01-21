@@ -9,7 +9,7 @@
     [com.sixsq.slipstream.ssclj.resources.session-template-github :as tpl]
     [com.sixsq.slipstream.ssclj.resources.session.utils :as sutils]
     [com.sixsq.slipstream.ssclj.resources.spec.session :as session]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-github :as session-tpl]))
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-github :as st-github]))
 
 (def ^:const authn-method "github")
 
@@ -38,7 +38,7 @@
   (validate-fn resource))
 
 
-(def create-validate-fn (u/create-spec-validation-fn ::session-tpl/github-create))
+(def create-validate-fn (u/create-spec-validation-fn ::st-github/schema-create))
 (defmethod p/create-validate-subtype authn-method
   [resource]
   (create-validate-fn resource))

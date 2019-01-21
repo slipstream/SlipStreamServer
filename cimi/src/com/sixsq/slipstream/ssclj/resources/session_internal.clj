@@ -10,7 +10,7 @@
     [com.sixsq.slipstream.ssclj.resources.session-template-internal :as tpl]
     [com.sixsq.slipstream.ssclj.resources.session.utils :as sutils]
     [com.sixsq.slipstream.ssclj.resources.spec.session :as session]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-internal :as session-tpl]
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-internal :as st-internal]
     [com.sixsq.slipstream.util.response :as r]))
 
 (def ^:const authn-method "internal")
@@ -36,7 +36,7 @@
   [resource]
   (validate-fn resource))
 
-(def create-validate-fn (u/create-spec-validation-fn ::session-tpl/internal-create))
+(def create-validate-fn (u/create-spec-validation-fn ::st-internal/schema-create))
 (defmethod p/create-validate-subtype authn-method
   [resource]
   (create-validate-fn resource))

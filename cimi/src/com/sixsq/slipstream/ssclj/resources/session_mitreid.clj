@@ -9,7 +9,7 @@
     [com.sixsq.slipstream.ssclj.resources.session-template-mitreid :as tpl]
     [com.sixsq.slipstream.ssclj.resources.session.utils :as sutils]
     [com.sixsq.slipstream.ssclj.resources.spec.session :as session]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-mitreid :as session-tpl]))
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-mitreid :as st-mitreid]))
 
 (def ^:const authn-method "mitreid")
 
@@ -37,7 +37,7 @@
   [resource]
   (validate-fn resource))
 
-(def create-validate-fn (u/create-spec-validation-fn ::session-tpl/mitreid-create))
+(def create-validate-fn (u/create-spec-validation-fn ::st-mitreid/schema-create))
 (defmethod p/create-validate-subtype authn-method
   [resource]
   (create-validate-fn resource))
