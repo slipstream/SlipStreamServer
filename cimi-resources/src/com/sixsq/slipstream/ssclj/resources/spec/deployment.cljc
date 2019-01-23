@@ -32,7 +32,15 @@
              :json-schema/group "body"
              :json-schema/order 20
              :json-schema/hidden false
-             :json-schema/sensitive false)))
+             :json-schema/sensitive false
+
+             :json-schema/value-scope {:values  ["CREATED",
+                                                 "STARTING", "STARTED",
+                                                 "STOPPING", "STOPPED",
+                                                 "PAUSING", "PAUSED",
+                                                 "SUSPENDING", "SUSPENDED",
+                                                 "ERROR"]
+                                       :default "CREATED"})))
 
 
 (s/def ::module ::cimi-common/resource-link)
