@@ -6,7 +6,7 @@ authentication workflow as implemented by a Keycloak server.
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]
-    [com.sixsq.slipstream.ssclj.resources.spec.user-template-oidc :as oidc]
+    [com.sixsq.slipstream.ssclj.resources.spec.user-template-oidc :as ut-oidc]
     [com.sixsq.slipstream.ssclj.resources.user-template :as p]
     [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]))
 
@@ -53,14 +53,14 @@ authentication workflow as implemented by a Keycloak server.
 (defn initialize
   []
   (p/register registration-method desc)
-  (md/register (gen-md/generate-metadata ::ns ::p/ns ::oidc/oidc-registration)))
+  (md/register (gen-md/generate-metadata ::ns ::p/ns ::ut-oidc/schema)))
 
 
 ;;
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn ::oidc/oidc-registration))
+(def validate-fn (u/create-spec-validation-fn ::ut-oidc/schema))
 (defmethod p/validate-subtype registration-method
   [resource]
   (validate-fn resource))

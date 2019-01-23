@@ -7,7 +7,7 @@ Resource that is used to create a session with GitHub authentication.
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]
     [com.sixsq.slipstream.ssclj.resources.session-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-github :as session-tpl]
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-github :as st-github]
     [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]))
 
 
@@ -31,14 +31,14 @@ Resource that is used to create a session with GitHub authentication.
 (defn initialize
   []
   (p/register authn-method desc)
-  (std-crud/initialize p/resource-url ::session-tpl/github)
-  (md/register (gen-md/generate-metadata ::ns ::p/ns ::session-tpl/github)))
+  (std-crud/initialize p/resource-url ::st-github/schema)
+  (md/register (gen-md/generate-metadata ::ns ::p/ns ::st-github/schema)))
 
 ;;
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn ::session-tpl/github))
+(def validate-fn (u/create-spec-validation-fn ::st-github/schema))
 (defmethod p/validate-subtype authn-method
   [resource]
   (validate-fn resource))

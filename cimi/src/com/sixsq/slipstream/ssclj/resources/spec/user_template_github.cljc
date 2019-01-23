@@ -10,7 +10,7 @@
 
 
 ;; Defines the contents of the github-registration UserTemplate resource itself.
-(s/def ::github-registration
+(s/def ::schema
   (su/only-keys-maps ps/resource-keys-spec))
 
 
@@ -21,6 +21,6 @@
                      user-template-github-registration-keys-href))
 
 
-(s/def ::github-registration-create
+(s/def ::schema-create
   (su/only-keys-maps ps/create-keys-spec
                      {:req-un [::userTemplate]}))

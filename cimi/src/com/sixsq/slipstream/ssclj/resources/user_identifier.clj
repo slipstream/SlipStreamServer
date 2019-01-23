@@ -26,7 +26,7 @@ must delete the old one and create a new one.
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]
-    [com.sixsq.slipstream.ssclj.resources.spec.user-identifier :as ui-spec]
+    [com.sixsq.slipstream.ssclj.resources.spec.user-identifier :as user-identifier]
     [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]
     [superstring.core :as str]))
 
@@ -55,7 +55,7 @@ must delete the old one and create a new one.
 ;; multimethods for validation and operations
 ;;
 
-(def validate-fn (u/create-spec-validation-fn ::ui-spec/user-identifier))
+(def validate-fn (u/create-spec-validation-fn ::user-identifier/schema))
 (defmethod crud/validate resource-uri
   [resource]
   (validate-fn resource))
@@ -135,5 +135,5 @@ must delete the old one and create a new one.
 ;;
 (defn initialize
   []
-  (std-crud/initialize resource-url ::ui-spec/user-identifier)
-  (md/register (gen-md/generate-metadata ::ns ::ui-spec/user-identifier)))
+  (std-crud/initialize resource-url ::user-identifier/schema)
+  (md/register (gen-md/generate-metadata ::ns ::user-identifier/schema)))

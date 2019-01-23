@@ -8,7 +8,7 @@ and not stored on, and cannot be recovered from the server.
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.credential-template :as p]
     [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]
-    [com.sixsq.slipstream.ssclj.resources.spec.credential-template-ssh-key-pair]
+    [com.sixsq.slipstream.ssclj.resources.spec.credential-template-ssh-key-pair :as ct-ssh-key-pair]
     [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]))
 
 
@@ -43,6 +43,7 @@ and not stored on, and cannot be recovered from the server.
    :algorithm   "rsa"
    :acl         resource-acl})
 
+
 ;;
 ;; description
 ;;
@@ -66,20 +67,20 @@ and not stored on, and cannot be recovered from the server.
 
 
 ;;
+;; multimethods for validation
+;;
+
+(def validate-fn (u/create-spec-validation-fn ::ct-ssh-key-pair/schema))
+(defmethod p/validate-subtype method
+  [resource]
+  (validate-fn resource))
+
+
+;;
 ;; initialization: register this Credential template
 ;;
 
 (defn initialize
   []
   (p/register resource desc)
-  (md/register (gen-md/generate-metadata ::ns ::p/ns :cimi/credential-template.ssh-key-pair)))
-
-
-;;
-;; multimethods for validation
-;;
-
-(def validate-fn (u/create-spec-validation-fn :cimi/credential-template.ssh-key-pair))
-(defmethod p/validate-subtype method
-  [resource]
-  (validate-fn resource))
+  (md/register (gen-md/generate-metadata ::ns ::p/ns ::ct-ssh-key-pair/schema)))

@@ -1,10 +1,10 @@
-(ns com.sixsq.slipstream.ssclj.resources.user-oidc-registration
+(ns com.sixsq.slipstream.ssclj.resources.user-oidc
   (:require
     [com.sixsq.slipstream.ssclj.resources.callback :as callback]
     [com.sixsq.slipstream.ssclj.resources.callback-create-user-oidc :as user-oidc-callback]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.session-oidc.utils :as oidc-utils]
-    [com.sixsq.slipstream.ssclj.resources.spec.user-template-oidc :as user-template-spec]
+    [com.sixsq.slipstream.ssclj.resources.spec.user-template-oidc :as ut-oidc]
     [com.sixsq.slipstream.ssclj.resources.user :as p]
     [com.sixsq.slipstream.ssclj.resources.user-template-oidc :as user-template]))
 
@@ -12,7 +12,7 @@
 ;; multimethods for validation
 ;;
 
-(def create-validate-fn (u/create-spec-validation-fn ::user-template-spec/oidc-registration-create))
+(def create-validate-fn (u/create-spec-validation-fn ::ut-oidc/schema-create))
 (defmethod p/create-validate-subtype user-template/registration-method
   [{resource :userTemplate :as create-document}]
   (create-validate-fn create-document))

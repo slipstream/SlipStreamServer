@@ -8,7 +8,7 @@
     [spec-tools.core :as st]))
 
 
-(s/def :cimi.credential-template.ssh-public-key/publicKey
+(s/def ::publicKey
   (-> (st/spec ::cimi-core/nonblank-string)
       (assoc :name "publicKey"
              :json-schema/name "publicKey"
@@ -31,22 +31,22 @@
 
 
 (def credential-template-keys-spec
-  {:req-un [:cimi.credential-template.ssh-public-key/publicKey]})
+  {:req-un [::publicKey]})
 
 (def credential-template-create-keys-spec
-  {:req-un [:cimi.credential-template.ssh-public-key/publicKey]})
+  {:req-un [::publicKey]})
 
 ;; Defines the contents of the ssh-public-key CredentialTemplate resource itself.
-(s/def :cimi/credential-template.ssh-public-key
+(s/def ::schema
   (su/only-keys-maps ps/resource-keys-spec
                      credential-template-keys-spec))
 
 ;; Defines the contents of the ssh-public-key template used in a create resource.
 ;; NOTE: The name must match the key defined by the resource, :credentialTemplate here.
-(s/def :cimi.credential-template.ssh-public-key/credentialTemplate
+(s/def ::credentialTemplate
   (su/only-keys-maps ps/template-keys-spec
                      credential-template-create-keys-spec))
 
-(s/def :cimi/credential-template.ssh-public-key-create
+(s/def ::schema-create
   (su/only-keys-maps ps/create-keys-spec
-                     {:req-un [:cimi.credential-template.ssh-public-key/credentialTemplate]}))
+                     {:req-un [::credentialTemplate]}))

@@ -8,7 +8,7 @@ pair.
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]
     [com.sixsq.slipstream.ssclj.resources.session-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-api-key :as session-tpl]
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-api-key :as st-api-key]
     [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]))
 
 
@@ -54,14 +54,14 @@ pair.
 (defn initialize
   []
   (p/register authn-method desc)
-  (std-crud/initialize p/resource-url ::session-tpl/api-key)
-  (md/register (gen-md/generate-metadata ::ns ::p/ns ::session-tpl/api-key)))
+  (std-crud/initialize p/resource-url ::st-api-key/schema)
+  (md/register (gen-md/generate-metadata ::ns ::p/ns ::st-api-key/schema)))
 
 ;;
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn ::session-tpl/api-key))
+(def validate-fn (u/create-spec-validation-fn ::st-api-key/schema))
 (defmethod p/validate-subtype authn-method
   [resource]
   (validate-fn resource))

@@ -9,7 +9,7 @@
     [com.sixsq.slipstream.ssclj.resources.session-template-oidc :as tpl]
     [com.sixsq.slipstream.ssclj.resources.session.utils :as sutils]
     [com.sixsq.slipstream.ssclj.resources.spec.session :as session]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-oidc :as session-tpl]))
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-oidc :as st-oidc]))
 
 (def ^:const authn-method "oidc")
 
@@ -38,7 +38,7 @@
   [resource]
   (validate-fn resource))
 
-(def create-validate-fn (u/create-spec-validation-fn ::session-tpl/oidc-create))
+(def create-validate-fn (u/create-spec-validation-fn ::st-oidc/schema-create))
 (defmethod p/create-validate-subtype authn-method
   [resource]
   (create-validate-fn resource))

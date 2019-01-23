@@ -2,7 +2,7 @@
   (:require
     [clojure.test :refer [deftest is]]
     [com.sixsq.slipstream.ssclj.resources.session-template :as st]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-github :as session-tpl]
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-github :as st-github]
     [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]))
 
 
@@ -26,10 +26,10 @@
              :group       "GitHub Authentication"
              :redirectURI "https://nuv.la/webui/profile"}]
 
-    (stu/is-valid ::session-tpl/github cfg)
+    (stu/is-valid ::st-github/schema cfg)
 
     (doseq [attr #{:id :resourceURI :created :updated :acl :method :instance}]
-      (stu/is-invalid ::session-tpl/github (dissoc cfg attr)))
+      (stu/is-invalid ::st-github/schema (dissoc cfg attr)))
 
     (doseq [attr #{:group :redirectURI}]
-      (stu/is-valid ::session-tpl/github (dissoc cfg attr)))))
+      (stu/is-valid ::st-github/schema (dissoc cfg attr)))))

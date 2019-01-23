@@ -471,6 +471,6 @@
             ::externalIdentity]})
 
 
-(s/def :cimi/user
-  (su/only-keys-maps user-common-attrs
-                     user-keys-spec))
+(s/def ::schema
+       (su/only-keys-maps user-common-attrs
+                          user-keys-spec))

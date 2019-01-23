@@ -1,4 +1,4 @@
-(ns com.sixsq.slipstream.ssclj.resources.user-self-registration
+(ns com.sixsq.slipstream.ssclj.resources.user-auto
   (:require
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.auth.internal :as internal]
@@ -7,7 +7,7 @@
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.email.utils :as email-utils]
     [com.sixsq.slipstream.ssclj.resources.spec.user]
-    [com.sixsq.slipstream.ssclj.resources.spec.user-template-self-registration :as user-template-spec]
+    [com.sixsq.slipstream.ssclj.resources.spec.user-template-self-registration :as ut-auto]
     [com.sixsq.slipstream.ssclj.resources.user :as p]
     [com.sixsq.slipstream.ssclj.resources.user-template-self-registration :as user-template]
     [com.sixsq.slipstream.ssclj.resources.user.utils :as user-utils]))
@@ -16,7 +16,7 @@
 ;; multimethods for validation
 ;;
 
-(def create-validate-fn (u/create-spec-validation-fn ::user-template-spec/self-registration-create))
+(def create-validate-fn (u/create-spec-validation-fn ::ut-auto/schema-create))
 (defmethod p/create-validate-subtype user-template/registration-method
   [{resource :userTemplate :as create-document}]
   (user-utils/check-password-constraints resource)

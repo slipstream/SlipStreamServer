@@ -194,7 +194,7 @@
              :json-schema/name "href"
              :json-schema/namespace common-ns/cimi-namespace
              :json-schema/uri common-ns/cimi-uri
-             :json-schema/type "URI"
+             :json-schema/type "string"
              :json-schema/providerMandatory false
              :json-schema/consumerMandatory false
              :json-schema/mutable true

@@ -2,7 +2,7 @@
   (:require
     [clojure.test :refer [deftest is]]
     [com.sixsq.slipstream.ssclj.resources.session-template :as st]
-    [com.sixsq.slipstream.ssclj.resources.spec.session-template-mitreid :as session-tpl]
+    [com.sixsq.slipstream.ssclj.resources.spec.session-template-mitreid :as st-mitreid]
     [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]))
 
 
@@ -26,10 +26,10 @@
              :group       "MITREid Authentication"
              :redirectURI "https://nuv.la/webui/profile"}]
 
-    (stu/is-valid ::session-tpl/mitreid cfg)
+    (stu/is-valid ::st-mitreid/schema cfg)
 
     (doseq [attr #{:id :resourceURI :created :updated :acl :method :instance}]
-      (stu/is-invalid ::session-tpl/mitreid (dissoc cfg attr)))
+      (stu/is-invalid ::st-mitreid/schema (dissoc cfg attr)))
 
     (doseq [attr #{:group :redirectURI}]
-      (stu/is-valid ::session-tpl/mitreid (dissoc cfg attr)))))
+      (stu/is-valid ::st-mitreid/schema (dissoc cfg attr)))))

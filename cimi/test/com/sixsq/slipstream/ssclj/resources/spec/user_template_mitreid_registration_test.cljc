@@ -2,7 +2,7 @@
   (:require
     [clojure.test :refer [deftest is]]
     [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]
-    [com.sixsq.slipstream.ssclj.resources.spec.user-template-mitreid :as user-template-mitreid]
+    [com.sixsq.slipstream.ssclj.resources.spec.user-template-mitreid :as ut-mitreid]
     [com.sixsq.slipstream.ssclj.resources.user-template :as st]))
 
 
@@ -35,21 +35,21 @@
                     :userTemplate (dissoc tpl :id)}]
 
     ;; check the registration schema (without href)
-    (stu/is-valid ::user-template-mitreid/mitreid-registration tpl)
+    (stu/is-valid ::ut-mitreid/schema tpl)
 
     (doseq [attr #{:id :resourceURI :created :updated :acl :method}]
-      (stu/is-invalid ::user-template-mitreid/mitreid-registration (dissoc tpl attr)))
+      (stu/is-invalid ::ut-mitreid/schema (dissoc tpl attr)))
 
     (doseq [attr #{:name :description :group :properties}]
-      (stu/is-valid ::user-template-mitreid/mitreid-registration (dissoc tpl attr)))
+      (stu/is-valid ::ut-mitreid/schema (dissoc tpl attr)))
 
     ;; check the create template schema (with href)
-    (stu/is-valid ::user-template-mitreid/mitreid-registration-create create-tpl)
-    (stu/is-valid ::user-template-mitreid/mitreid-registration-create (assoc-in create-tpl [:userTemplate :href] "user-template/abc"))
-    (stu/is-invalid ::user-template-mitreid/mitreid-registration-create (assoc-in create-tpl [:userTemplate :href] "bad-reference/abc"))
+    (stu/is-valid ::ut-mitreid/schema-create create-tpl)
+    (stu/is-valid ::ut-mitreid/schema-create (assoc-in create-tpl [:userTemplate :href] "user-template/abc"))
+    (stu/is-invalid ::ut-mitreid/schema-create (assoc-in create-tpl [:userTemplate :href] "bad-reference/abc"))
 
     (doseq [attr #{:resourceURI :userTemplate}]
-      (stu/is-invalid ::user-template-mitreid/mitreid-registration-create (dissoc create-tpl attr)))
+      (stu/is-invalid ::ut-mitreid/schema-create (dissoc create-tpl attr)))
 
     (doseq [attr #{:name :description :group :properties}]
-      (stu/is-valid ::user-template-mitreid/mitreid-registration-create (dissoc create-tpl attr)))))
+      (stu/is-valid ::ut-mitreid/schema-create (dissoc create-tpl attr)))))

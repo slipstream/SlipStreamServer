@@ -53,7 +53,7 @@ secret, so you must capture and save the plain text secret from this response!
     [com.sixsq.slipstream.ssclj.resources.credential :as p]
     [com.sixsq.slipstream.ssclj.resources.credential-template-api-key :as tpl]
     [com.sixsq.slipstream.ssclj.resources.credential.key-utils :as key-utils]
-    [com.sixsq.slipstream.ssclj.resources.spec.credential-api-key]))
+    [com.sixsq.slipstream.ssclj.resources.spec.credential-api-key :as api-key]))
 
 (defn strip-session-role
   [roles]
@@ -86,12 +86,12 @@ secret, so you must capture and save the plain text secret from this response!
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi/credential.api-key))
+(def validate-fn (u/create-spec-validation-fn ::api-key/schema))
 (defmethod p/validate-subtype tpl/credential-type
   [resource]
   (validate-fn resource))
 
-(def create-validate-fn (u/create-spec-validation-fn :cimi/credential.api-key.create))
+(def create-validate-fn (u/create-spec-validation-fn ::api-key/schema-create))
 (defmethod p/create-validate-subtype tpl/credential-type
   [resource]
   (create-validate-fn resource))
@@ -111,4 +111,4 @@ secret, so you must capture and save the plain text secret from this response!
 ;;
 (defn initialize
   []
-  (std-crud/initialize p/resource-url :cimi/credential.api-key))
+  (std-crud/initialize p/resource-url ::api-key/schema))

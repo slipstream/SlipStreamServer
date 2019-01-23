@@ -6,7 +6,7 @@
 
 
 ;; Defines the contents of the oidc SessionTemplate resource itself.
-(s/def ::oidc
+(s/def ::schema
   (su/only-keys-maps ps/resource-keys-spec))
 
 ;; Defines the contents of the oidc template used in a create resource.
@@ -14,6 +14,6 @@
 (s/def ::sessionTemplate
   (su/only-keys-maps ps/template-keys-spec))
 
-(s/def ::oidc-create
+(s/def ::schema-create
   (su/only-keys-maps ps/create-keys-spec
                      {:req-un [::sessionTemplate]}))

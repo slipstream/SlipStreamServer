@@ -53,6 +53,6 @@
              :json-schema/hidden false
              :json-schema/sensitive false)))
 
-(s/def ::user-identifier
+(s/def ::schema
   (su/only-keys-maps c/common-attrs
                      {:req-un [::identifier ::user]}))

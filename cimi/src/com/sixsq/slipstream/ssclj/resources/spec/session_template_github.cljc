@@ -8,7 +8,7 @@
 ;; up from the environment.
 
 ;; Defines the contents of the github SessionTemplate resource itself.
-(s/def ::github
+(s/def ::schema
   (su/only-keys-maps ps/resource-keys-spec))
 
 ;; Defines the contents of the github template used in a create resource.
@@ -16,6 +16,6 @@
 (s/def ::sessionTemplate
   (su/only-keys-maps ps/template-keys-spec))
 
-(s/def ::github-create
+(s/def ::schema-create
   (su/only-keys-maps ps/create-keys-spec
                      {:req-un [::sessionTemplate]}))

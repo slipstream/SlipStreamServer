@@ -6,7 +6,7 @@ authentication workflow as implemented by a MITREid server.
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]
-    [com.sixsq.slipstream.ssclj.resources.spec.user-template-mitreid :as mitreid]
+    [com.sixsq.slipstream.ssclj.resources.spec.user-template-mitreid :as ut-mitreid]
     [com.sixsq.slipstream.ssclj.resources.user-template :as p]
     [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]))
 
@@ -53,14 +53,14 @@ authentication workflow as implemented by a MITREid server.
 (defn initialize
   []
   (p/register registration-method desc)
-  (md/register (gen-md/generate-metadata ::ns ::p/ns ::mitreid/mitreid-registration)))
+  (md/register (gen-md/generate-metadata ::ns ::p/ns ::ut-mitreid/schema)))
 
 
 ;;
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn ::mitreid/mitreid-registration))
+(def validate-fn (u/create-spec-validation-fn ::ut-mitreid/schema))
 (defmethod p/validate-subtype registration-method
   [resource]
   (validate-fn resource))

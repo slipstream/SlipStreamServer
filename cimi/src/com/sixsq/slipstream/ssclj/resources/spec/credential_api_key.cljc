@@ -7,30 +7,30 @@
     [com.sixsq.slipstream.ssclj.resources.spec.credential-template-api-key]
     [com.sixsq.slipstream.ssclj.util.spec :as su]))
 
-(s/def :cimi.credential.api-key/expiry ::cimi-core/timestamp)
+(s/def ::expiry ::cimi-core/timestamp)
 
-(s/def :cimi.credential.api-key/digest ::cimi-core/nonblank-string)
+(s/def ::digest ::cimi-core/nonblank-string)
 
-(s/def :cimi.credential.api-key/identity ::cimi-core/nonblank-string)
+(s/def ::identity ::cimi-core/nonblank-string)
 
-(s/def :cimi.credential.api-key/roles (s/coll-of ::cimi-core/nonblank-string
-                                                 :kind vector?
-                                                 :into []
-                                                 :min-count 1))
+(s/def ::roles (s/coll-of ::cimi-core/nonblank-string
+                          :kind vector?
+                          :into []
+                          :min-count 1))
 
-(s/def :cimi.credential.api-key/claims (su/only-keys :req-un [:cimi.credential.api-key/identity]
-                                                     :opt-un [:cimi.credential.api-key/roles]))
+(s/def ::claims (su/only-keys :req-un [::identity]
+                              :opt-un [::roles]))
 
 (def credential-keys-spec
-  {:req-un [:cimi.credential.api-key/digest
-            :cimi.credential.api-key/claims]
-   :opt-un [:cimi.credential.api-key/expiry]})
+  {:req-un [::digest
+            ::claims]
+   :opt-un [::expiry]})
 
-(s/def :cimi/credential.api-key
+(s/def ::schema
   (su/only-keys-maps cred/credential-keys-spec
                      credential-keys-spec))
 
 ;; multiple methods to create an ssh public key, so multiple schemas
-(s/def :cimi/credential.api-key.create
+(s/def ::schema-create
   (su/only-keys-maps ps/create-keys-spec
-                     {:req-un [:cimi.credential-template.api-key/credentialTemplate]}))
+                     {:req-un [::ps/credentialTemplate]}))

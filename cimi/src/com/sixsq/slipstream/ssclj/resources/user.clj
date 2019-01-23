@@ -12,6 +12,7 @@ requires a template. All the SCRUD actions follow the standard CIMI patterns.
     [com.sixsq.slipstream.ssclj.resources.common.schema :as c]
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
+    [com.sixsq.slipstream.ssclj.resources.spec.user :as user]
     [com.sixsq.slipstream.ssclj.resources.user-template-direct :as tpl]
     [com.sixsq.slipstream.ssclj.util.log :as logu]
     [com.sixsq.slipstream.util.response :as r]))
@@ -58,7 +59,7 @@ requires a template. All the SCRUD actions follow the standard CIMI patterns.
 ;; common validation for created users
 ;;
 
-(def validate-fn (u/create-spec-validation-fn :cimi/user))
+(def validate-fn (u/create-spec-validation-fn ::user/schema))
 (defmethod crud/validate resource-uri
   [resource]
   (validate-fn resource))
@@ -286,4 +287,4 @@ requires a template. All the SCRUD actions follow the standard CIMI patterns.
 ;;
 (defn initialize
   []
-  (std-crud/initialize resource-url :cimi/user))
+  (std-crud/initialize resource-url ::user/schema))

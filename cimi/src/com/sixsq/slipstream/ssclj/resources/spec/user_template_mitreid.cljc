@@ -10,7 +10,7 @@
 
 
 ;; Defines the contents of the mitreid-registration UserTemplate resource itself.
-(s/def ::mitreid-registration
+(s/def ::schema
   (su/only-keys-maps ps/resource-keys-spec))
 
 
@@ -21,6 +21,6 @@
                      user-template-mitreid-registration-keys-href))
 
 
-(s/def ::mitreid-registration-create
+(s/def ::schema-create
   (su/only-keys-maps ps/create-keys-spec
                      {:req-un [::userTemplate]}))

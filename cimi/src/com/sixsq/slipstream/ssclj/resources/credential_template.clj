@@ -2,6 +2,9 @@
   "
 A collection of templates that are used to create a variety of credentials.
 
+**NOTE**: CredentialTemplate resources are in-memory resources and
+consequently do **not** support the CIMI filtering parameters.
+
 SlipStream must manage a variety of credentials to provide, for example,
 programmatic access to SlipStream or SSH access to virtual machines running on
 a cloud infrastructure. The CredentialTemplate resources correspond to the
@@ -9,13 +12,14 @@ various methods that can be used to create these resources.
 
 The parameters required can be found within each template, using the standard
 CIMI read pattern. Details for each parameter can be found by invoking looking
-at the ResourceMetadata resource for the type..
+at the ResourceMetadata resource for the type.
 
 Template | Credential | Description
 -------- | ---------- | -----------
 import-ssh-public-key | ssh-public-key | imports an SSH public key from an existing key pair
 generate-ssh-key-pair | ssh-public-key | generates a new SSH key pair, storing public key and returning private key
 generate-api-key | api-key | generates API key and secret, storing secret digest and returning secret
+cloud* | cloud-cred-* | credentials specific to particular cloud infrastructures
 
 Typically, there will also be Credential Template resources that describe the
 credentials for each supported cloud infrastructure.
@@ -70,6 +74,7 @@ curl https://nuv.la/api/credential-template
 (def templates (atom {}))
 (def descriptions (atom {}))
 
+
 (defn collection-wrapper-fn
   "Specialized version of this function that removes the adding
    of operations to the collection and entries.  These are already
@@ -82,6 +87,7 @@ curl https://nuv.la/api/credential-template
       (-> skeleton
           (crud/set-operations request)
           (assoc collection-key entries)))))
+
 
 (defn complete-resource
   "Completes the given document with server-managed information: resourceURI,
@@ -98,6 +104,7 @@ curl https://nuv.la/api/credential-template
                   :operations  ops})
           u/update-timestamps))))
 
+
 (defn register
   "Registers a given CredentialTemplate resource and its description with the
    server. The resource document (resource) and the description (desc) must be
@@ -112,6 +119,7 @@ curl https://nuv.la/api/credential-template
             full-desc (assoc desc :acl acl)]
         (swap! descriptions assoc id full-desc))
       (log/info "loaded CredentialTemplate description" id))))
+
 
 ;;
 ;; schemas
@@ -133,6 +141,8 @@ curl https://nuv.la/api/credential-template
                    :mandatory   true
                    :readOnly    true
                    :order       11}}))
+
+
 ;;
 ;; multimethods for validation
 ;;
@@ -142,14 +152,17 @@ curl https://nuv.la/api/credential-template
            CredentialTemplate method."
           :method)
 
+
 (defmethod validate-subtype :default
   [resource]
   (throw (ex-info (str "unknown CredentialTemplate method: " (:method resource)) resource)))
+
 
 (defmethod crud/validate
   resource-uri
   [resource]
   (validate-subtype resource))
+
 
 ;;
 ;; CRUD operations
@@ -158,6 +171,7 @@ curl https://nuv.la/api/credential-template
 (defmethod crud/add resource-name
   [request]
   (throw (r/ex-bad-method request)))
+
 
 (defmethod crud/retrieve resource-name
   [{{uuid :uuid} :params :as request}]
@@ -169,6 +183,7 @@ curl https://nuv.la/api/credential-template
     (catch Exception e
       (or (ex-data e) (throw e)))))
 
+
 ;; must override the default implementation so that the
 ;; data can be pulled from the atom rather than the database
 (defmethod crud/retrieve-by-id resource-url
@@ -178,19 +193,23 @@ curl https://nuv.la/api/credential-template
     (catch Exception e
       (or (ex-data e) (throw e)))))
 
+
 (defmethod crud/edit resource-name
   [request]
   (throw (r/ex-bad-method request)))
 
+
 (defmethod crud/delete resource-name
   [request]
   (throw (r/ex-bad-method request)))
+
 
 (defn- viewable? [request {:keys [acl] :as entry}]
   (try
     (a/can-view? {:acl acl} request)
     (catch Exception _
       false)))
+
 
 (defmethod crud/query resource-name
   [request]
@@ -204,9 +223,11 @@ curl https://nuv.la/api/credential-template
         entries-and-count (assoc wrapped-entries :count count-before-pagination)]
     (r/json-response entries-and-count)))
 
+
 ;;
 ;; actions
 ;;
+
 (defmethod crud/do-action [resource-url "describe"]
   [{{uuid :uuid} :params :as request}]
   (try
@@ -221,6 +242,7 @@ curl https://nuv.la/api/credential-template
 ;;
 ;; initialization: create metadata for this collection
 ;;
+
 (defn initialize
   []
   (md/register (gen-md/generate-metadata ::ns ::ct/schema)))

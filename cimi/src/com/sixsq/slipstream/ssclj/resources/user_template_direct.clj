@@ -7,7 +7,7 @@ information. Typically this method is available only to service administrators.
     [com.sixsq.slipstream.ssclj.resources.common.std-crud :as std-crud]
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]
-    [com.sixsq.slipstream.ssclj.resources.spec.user-template-direct :as user-tpl]
+    [com.sixsq.slipstream.ssclj.resources.spec.user-template-direct :as ut-direct]
     [com.sixsq.slipstream.ssclj.resources.user-template :as p]
     [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]))
 
@@ -100,16 +100,16 @@ information. Typically this method is available only to service administrators.
 (defn initialize
   []
   (p/register registration-method desc)
-  (std-crud/initialize p/resource-url ::user-tpl/direct)
+  (std-crud/initialize p/resource-url ::ut-direct/schema)
   (std-crud/add-if-absent (str p/resource-url "/" registration-method) p/resource-url resource)
-  (md/register (gen-md/generate-metadata ::ns ::p/ns ::user-tpl/direct)))
+  (md/register (gen-md/generate-metadata ::ns ::p/ns ::ut-direct/schema)))
 
 
 ;;
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn ::user-tpl/direct))
+(def validate-fn (u/create-spec-validation-fn ::ut-direct/schema))
 (defmethod p/validate-subtype registration-method
   [resource]
   (validate-fn resource))

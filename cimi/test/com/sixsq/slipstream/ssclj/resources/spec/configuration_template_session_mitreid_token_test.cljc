@@ -3,7 +3,7 @@
     [clojure.test :refer [deftest]]
     [com.sixsq.slipstream.ssclj.app.params :as p]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as ct]
-    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-mitreid-token :as cfg-tpl]
+    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-mitreid-token :as cts-mitreid-token]
     [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]))
 
 
@@ -26,13 +26,13 @@
               :instance    "test-instance"
               :clientIPs   ["127.0.0.1", "192.168.100.100"]}]
 
-    (stu/is-valid ::cfg-tpl/session-mitreid-token root)
+    (stu/is-valid ::cts-mitreid-token/schema root)
 
-    (stu/is-valid ::cfg-tpl/session-mitreid-token (assoc root :clientIPs ["127.0.0.1"]))
-    (stu/is-invalid ::cfg-tpl/session-mitreid-token (assoc root :clientIPs "127.0.0.1"))
+    (stu/is-valid ::cts-mitreid-token/schema (assoc root :clientIPs ["127.0.0.1"]))
+    (stu/is-invalid ::cts-mitreid-token/schema (assoc root :clientIPs "127.0.0.1"))
 
     (doseq [k #{:id :resourceURI :created :updated :acl :service :instance}]
-      (stu/is-invalid ::cfg-tpl/session-mitreid-token (dissoc root k)))
+      (stu/is-invalid ::cts-mitreid-token/schema (dissoc root k)))
 
     (doseq [k #{:clientIPs}]
-      (stu/is-valid ::cfg-tpl/session-mitreid-token (dissoc root k)))))
+      (stu/is-valid ::cts-mitreid-token/schema (dissoc root k)))))

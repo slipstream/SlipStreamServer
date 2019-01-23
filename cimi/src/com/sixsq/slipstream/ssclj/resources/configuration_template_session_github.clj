@@ -2,13 +2,16 @@
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-github :as ct-github]))
+    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-github :as cts-github]))
+
 
 (def ^:const service "session-github")
+
 
 ;;
 ;; resource
 ;;
+
 (def ^:const resource
   {:service      service
    :name         "GitHub Authentication Configuration"
@@ -21,6 +24,7 @@
 ;;
 ;; description
 ;;
+
 (def ^:const desc
   (merge p/ConfigurationTemplateDescription
          {:clientID     {:displayName "Client ID"
@@ -36,18 +40,21 @@
                          :readOnly    false
                          :order       21}}))
 
-;;
-;; initialization: register this Configuration template
-;;
-(defn initialize
-  []
-  (p/register resource desc))
 
 ;;
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn ::ct-github/session-github))
+(def validate-fn (u/create-spec-validation-fn ::cts-github/schema))
 (defmethod p/validate-subtype service
   [resource]
   (validate-fn resource))
+
+
+;;
+;; initialization: register this Configuration template
+;;
+
+(defn initialize
+  []
+  (p/register resource desc))

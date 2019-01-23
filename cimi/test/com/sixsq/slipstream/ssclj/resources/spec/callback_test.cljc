@@ -27,13 +27,13 @@
                   :data           {:some    "value"
                                    :another "value"}}]
 
-    (stu/is-valid ::callback/callback callback)
-    (stu/is-valid ::callback/callback (assoc callback :state "SUCCEEDED"))
-    (stu/is-valid ::callback/callback (assoc callback :state "FAILED"))
-    (stu/is-invalid ::callback/callback (assoc callback :state "UNKNOWN"))
+    (stu/is-valid ::callback/schema callback)
+    (stu/is-valid ::callback/schema (assoc callback :state "SUCCEEDED"))
+    (stu/is-valid ::callback/schema (assoc callback :state "FAILED"))
+    (stu/is-invalid ::callback/schema (assoc callback :state "UNKNOWN"))
 
     (doseq [attr #{:id :resourceURI :created :updated :acl :action :state}]
-      (stu/is-invalid ::callback/callback (dissoc callback attr)))
+      (stu/is-invalid ::callback/schema (dissoc callback attr)))
 
     (doseq [attr #{:targetResource :expires :data}]
-      (stu/is-valid ::callback/callback (dissoc callback attr)))))
+      (stu/is-valid ::callback/schema (dissoc callback attr)))))

@@ -1,5 +1,6 @@
 (ns com.sixsq.slipstream.ssclj.util.metadata
   (:require
+    [clojure.string :as str]
     [clojure.tools.logging :as log]
     [com.sixsq.slipstream.ssclj.resources.resource-metadata :as resource-metadata]
     [spec-tools.json-schema :as jsc])
@@ -48,6 +49,7 @@
 
 
 (defn get-doc
+  "Extracts the namespace documentation provided in the namespace declaration."
   [resource-ns]
   (-> resource-ns meta :doc))
 
@@ -112,6 +114,22 @@
       (string? ns) (find-ns (symbol ns)))))
 
 
+(defn ns->typeURI
+  "Uses the last term of the resource's namespace as the typeURI. For a normal
+   resource this is the same as the 'resource-url' value. This will be
+   different for resources with subtypes. The argument can be any value that
+   can be converted to a namespace with 'as-namespace'."
+  [ns]
+  (-> ns as-namespace str (str/split #"\.") last))
+
+
+(defn ns->resource-metadata-id
+  "Returns the resource id for the metadata associated with the given namespace."
+  [ns]
+  (when ns
+    (str "resource-metadata/" (ns->typeURI ns))))
+
+
 (defn generate-metadata
   "Generate the ResourceMetadata from the provided namespace"
   ([parent-ns spec]
@@ -121,11 +139,10 @@
      (let [child-ns (as-namespace child-ns)
 
            resource-name (cond-> (get-resource-name parent-ns)
-                                 child-ns (str " -- " (get-resource-name child-ns)))
+                                 child-ns (str " \u2014 " (get-resource-name child-ns)))
 
            doc (get-doc (or child-ns parent-ns))
-           type-uri (cond-> (get-type-uri parent-ns)
-                            child-ns (str "-" (get-type-uri child-ns)))
+           type-uri (ns->typeURI (or child-ns parent-ns))
 
            common {:id          "resource-metadata/dummy-id"
                    :created     "1964-08-25T10:00:00.0Z"

@@ -29,10 +29,10 @@
              :username    "user"
              :password    "pass"}]
 
-    (stu/is-valid ::session-tpl/internal cfg)
+    (stu/is-valid ::session-tpl/schema cfg)
 
     (doseq [attr #{:id :resourceURI :created :updated :acl :method :instance :username :password}]
-      (stu/is-invalid ::session-tpl/internal (dissoc cfg attr)))
+      (stu/is-invalid ::session-tpl/schema (dissoc cfg attr)))
 
     (doseq [attr #{:group :redirectURI}]
-      (stu/is-valid ::session-tpl/internal (dissoc cfg attr)))))
+      (stu/is-valid ::session-tpl/schema (dissoc cfg attr)))))

@@ -2,7 +2,7 @@
   (:require
     [clojure.test :refer [deftest is]]
     [com.sixsq.slipstream.ssclj.resources.spec.spec-test-utils :as stu]
-    [com.sixsq.slipstream.ssclj.resources.spec.user-template-oidc :as user-template-oidc]
+    [com.sixsq.slipstream.ssclj.resources.spec.user-template-oidc :as ut-oidc]
     [com.sixsq.slipstream.ssclj.resources.user-template :as st]))
 
 
@@ -35,21 +35,21 @@
                     :userTemplate (dissoc tpl :id)}]
 
     ;; check the registration schema (without href)
-    (stu/is-valid ::user-template-oidc/oidc-registration tpl)
+    (stu/is-valid ::ut-oidc/schema tpl)
 
     (doseq [attr #{:id :resourceURI :created :updated :acl :method}]
-      (stu/is-invalid ::user-template-oidc/oidc-registration (dissoc tpl attr)))
+      (stu/is-invalid ::ut-oidc/schema (dissoc tpl attr)))
 
     (doseq [attr #{:name :description :properties}]
-      (stu/is-valid ::user-template-oidc/oidc-registration (dissoc tpl attr)))
+      (stu/is-valid ::ut-oidc/schema (dissoc tpl attr)))
 
     ;; check the create template schema (with href)
-    (stu/is-valid ::user-template-oidc/oidc-registration-create create-tpl)
-    (stu/is-valid ::user-template-oidc/oidc-registration-create (assoc-in create-tpl [:userTemplate :href] "user-template/abc"))
-    (stu/is-invalid ::user-template-oidc/oidc-registration-create (assoc-in create-tpl [:userTemplate :href] "bad-reference/abc"))
+    (stu/is-valid ::ut-oidc/schema-create create-tpl)
+    (stu/is-valid ::ut-oidc/schema-create (assoc-in create-tpl [:userTemplate :href] "user-template/abc"))
+    (stu/is-invalid ::ut-oidc/schema-create (assoc-in create-tpl [:userTemplate :href] "bad-reference/abc"))
 
     (doseq [attr #{:resourceURI :userTemplate}]
-      (stu/is-invalid ::user-template-oidc/oidc-registration-create (dissoc create-tpl attr)))
+      (stu/is-invalid ::ut-oidc/schema-create (dissoc create-tpl attr)))
 
     (doseq [attr #{:name :description :properties}]
-      (stu/is-valid ::user-template-oidc/oidc-registration-create (dissoc create-tpl attr)))))
+      (stu/is-valid ::ut-oidc/schema-create (dissoc create-tpl attr)))))

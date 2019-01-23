@@ -2,7 +2,7 @@
   (:require
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.configuration-template :as p]
-    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-mitreid-token :as ct-oidc-token]))
+    [com.sixsq.slipstream.ssclj.resources.spec.configuration-template-session-mitreid-token :as cts-mitreid-token]))
 
 
 (def ^:const service "session-mitreid-token")
@@ -11,6 +11,7 @@
 ;;
 ;; resource
 ;;
+
 (def ^:const resource
   {:service     service
    :name        "OIDC Token Authentication Configuration"
@@ -22,6 +23,7 @@
 ;;
 ;; description
 ;;
+
 (def ^:const desc
   (merge p/ConfigurationTemplateDescription
          {:clientIPs {:displayName "Authorized Client IPs"
@@ -33,18 +35,19 @@
 
 
 ;;
-;; initialization: register this Configuration template
-;;
-(defn initialize
-  []
-  (p/register resource desc))
-
-
-;;
 ;; multimethods for validation
 ;;
 
-(def validate-fn (u/create-spec-validation-fn ::ct-oidc-token/session-mitreid-token))
+(def validate-fn (u/create-spec-validation-fn ::cts-mitreid-token/schema))
 (defmethod p/validate-subtype service
   [resource]
   (validate-fn resource))
+
+
+;;
+;; initialization: register this Configuration template
+;;
+
+(defn initialize
+  []
+  (p/register resource desc))

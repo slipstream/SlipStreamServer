@@ -96,6 +96,7 @@ address. When the callback is triggered, the `validated` flag is set to true.
 ;;
 ;; available operations; disallows editing of resource, adds validate action for unvalidated emails
 ;;
+
 (defmethod crud/set-operations resource-uri
   [{:keys [validated] :as resource} request]
   (try
@@ -113,7 +114,9 @@ address. When the callback is triggered, the `validated` flag is set to true.
 ;;
 ;; collection
 ;;
+
 (def query-impl (std-crud/query-fn resource-name collection-acl collection-uri resource-tag))
+
 (defmethod crud/query resource-name
   [request]
   (query-impl request))
@@ -122,6 +125,7 @@ address. When the callback is triggered, the `validated` flag is set to true.
 ;;
 ;; actions
 ;;
+
 (defmethod crud/do-action [resource-url "validate"]
   [{{uuid :uuid} :params baseURI :baseURI}]
   (let [id (str resource-url "/" uuid)]
@@ -139,6 +143,7 @@ address. When the callback is triggered, the `validated` flag is set to true.
 ;;
 ;; initialization
 ;;
+
 (defn initialize
   []
   (std-crud/initialize resource-url ::email/schema)

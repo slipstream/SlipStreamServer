@@ -7,7 +7,7 @@
     [spec-tools.core :as st]))
 
 
-(s/def :cimi.credential-template.ssh-key-pair/size
+(s/def ::size
   (-> (st/spec pos-int?)
       (assoc :name "size"
              :json-schema/name "size"
@@ -28,7 +28,7 @@
              :json-schema/sensitive false)))
 
 
-(s/def :cimi.credential-template.ssh-key-pair/algorithm
+(s/def ::algorithm
   (-> (st/spec #{"rsa" "dsa"})
       (assoc :name "algorithm"
              :json-schema/name "algorithm"
@@ -50,24 +50,24 @@
 
 
 (def credential-template-keys-spec
-  {:opt-un [:cimi.credential-template.ssh-key-pair/size
-            :cimi.credential-template.ssh-key-pair/algorithm]})
+  {:opt-un [::size
+            ::algorithm]})
 
 (def credential-template-create-keys-spec
-  {:opt-un [:cimi.credential-template.ssh-key-pair/size
-            :cimi.credential-template.ssh-key-pair/algorithm]})
+  {:opt-un [::size
+            ::algorithm]})
 
 ;; Defines the contents of the ssh-key-pair CredentialTemplate resource itself.
-(s/def :cimi/credential-template.ssh-key-pair
+(s/def ::schema
   (su/only-keys-maps ps/resource-keys-spec
                      credential-template-keys-spec))
 
 ;; Defines the contents of the ssh-key-pair template used in a create resource.
 ;; NOTE: The name must match the key defined by the resource, :credentialTemplate here.
-(s/def :cimi.credential-template.ssh-key-pair/credentialTemplate
+(s/def ::credentialTemplate
   (su/only-keys-maps ps/template-keys-spec
                      credential-template-create-keys-spec))
 
-(s/def :cimi/credential-template.ssh-key-pair-create
+(s/def ::schema-create
   (su/only-keys-maps ps/create-keys-spec
-                     {:req-un [:cimi.credential-template.ssh-key-pair/credentialTemplate]}))
+                     {:req-un [::credentialTemplate]}))

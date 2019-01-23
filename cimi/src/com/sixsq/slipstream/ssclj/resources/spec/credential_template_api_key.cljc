@@ -7,7 +7,7 @@
     [spec-tools.core :as st]))
 
 
-(s/def :cimi.credential-template.api-key/ttl
+(s/def ::ttl
   (-> (st/spec nat-int?)
       (assoc :name "ttl"
              :json-schema/name "ttl"
@@ -29,22 +29,22 @@
 
 
 (def credential-template-keys-spec
-  {:opt-un [:cimi.credential-template.api-key/ttl]})
+  {:opt-un [::ttl]})
 
 (def credential-template-create-keys-spec
-  {:opt-un [:cimi.credential-template.api-key/ttl]})
+  {:opt-un [::ttl]})
 
 ;; Defines the contents of the api-key CredentialTemplate resource itself.
-(s/def :cimi/credential-template.api-key
+(s/def ::schema
   (su/only-keys-maps ps/resource-keys-spec
                      credential-template-keys-spec))
 
 ;; Defines the contents of the api-key template used in a create resource.
 ;; NOTE: The name must match the key defined by the resource, :credentialTemplate here.
-(s/def :cimi.credential-template.api-key/credentialTemplate
+(s/def ::credentialTemplate
   (su/only-keys-maps ps/template-keys-spec
                      credential-template-create-keys-spec))
 
-(s/def :cimi/credential-template.api-key-create
+(s/def ::schema-create
   (su/only-keys-maps ps/create-keys-spec
-                     {:req-un [:cimi.credential-template.api-key/credentialTemplate]}))
+                     {:req-un [::credentialTemplate]}))
