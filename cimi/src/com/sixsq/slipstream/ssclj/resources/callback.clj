@@ -26,7 +26,9 @@ appropriate users.
     [com.sixsq.slipstream.ssclj.resources.common.utils :as u]
     [com.sixsq.slipstream.ssclj.resources.spec.callback :as callback]
     [com.sixsq.slipstream.ssclj.util.log :as log-util]
-    [com.sixsq.slipstream.util.response :as r]))
+    [com.sixsq.slipstream.util.response :as r]
+    [com.sixsq.slipstream.ssclj.util.metadata :as gen-md]
+    [com.sixsq.slipstream.ssclj.resources.resource-metadata :as md]))
 
 (def ^:const resource-tag :callbacks)
 
@@ -187,4 +189,5 @@ appropriate users.
 ;;
 (defn initialize
   []
-  (std-crud/initialize resource-url ::callback/schema))
+  (std-crud/initialize resource-url ::callback/schema)
+  (md/register (gen-md/generate-metadata ::ns ::callback/schema)))
