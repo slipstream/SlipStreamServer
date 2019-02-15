@@ -1,6 +1,6 @@
-(def +version+ "3.69-SNAPSHOT")
+(def +version+ "3.69")
 
-(defproject com.sixsq.slipstream/SlipStreamServerPRSlib-jar "3.69-SNAPSHOT"
+(defproject com.sixsq.slipstream/SlipStreamServerPRSlib-jar "3.69"
 
   :description "Placement and Ranking Service"
 
