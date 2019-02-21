@@ -56,9 +56,9 @@
         credentials (AWSStaticCredentialsProvider. (BasicAWSCredentials. key secret))]
     (-> (AmazonS3ClientBuilder/standard)
         (.withEndpointConfiguration endpoint)
+        (.withPathStyleAccessEnabled true)
         (.withCredentials credentials)
         .build)))
-
 
 (defn generate-url
   [obj-store-conf bucket obj-name verb & [{:keys [ttl content-type]}]]
