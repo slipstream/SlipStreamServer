@@ -80,3 +80,21 @@
     (catch Exception e
       (let [error-msg "server configuration for SMTP is missing"]
         (throw (ex-info error-msg (r/map-response error-msg 500)))))))
+
+
+(defn send-email
+  [subject body addresses]
+  (try
+    (let [{:keys [user t-and-c-url] :as smtp} (smtp-cfg)]
+      (let [msg {:from    user
+                 :to      addresses
+                 :subject subject
+                 :body    body}
+            resp (postal/send-message smtp msg)]
+        (if-not (= :SUCCESS (:error resp))
+          (let [msg (str "cannot send email: " (:message resp))]
+            (throw (r/ex-bad-request msg))))))
+    (catch Exception e
+      (let [error-msg "server configuration for SMTP is missing"]
+        (throw (ex-info error-msg (r/map-response error-msg 500)))))))
+
